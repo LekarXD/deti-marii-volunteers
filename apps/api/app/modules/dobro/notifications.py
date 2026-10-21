@@ -5,7 +5,7 @@ from app.core.auth import load_background_staff_authorization, assert_background
 from app.core.errors import ApiError
 from app.modules.messaging.registry import register_notice_source
 from .models import DobroSettings
-from .service import transfer_period
+from .service import transfer_period, foundation_lock
 from .jobs import capable, actionable
 
 async def lock_subjects(db, outbox, source):
@@ -20,10 +20,15 @@ async def resolve_reminder(db, outbox, source):
     except (ValueError, KeyError, TypeError): return 'suppressed_dobro_source'
     try: assert_background_authorizations_locked(db, outbox.foundation_id, [owner_id])
     except ApiError: return 'suppressed_dobro_authorization'
-    settings = await db.scalar(select(DobroSettings).where(DobroSettings.foundation_id == outbox.foundation_id))
-    if not settings or not settings.reminders_enabled or settings.reminder_owner_user_id != owner_id: return 'suppressed_dobro_disabled'
     actor = await load_background_staff_authorization(db, outbox.foundation_id, owner_id)
     if not capable(actor): return 'suppressed_dobro_revoked'
+    # Hold the same domain fence as manual attestations through the actual message
+    # insert. A different coordinator must not settle hours between projection and
+    # delivery, otherwise an already-completed transfer would be announced as due.
+    # This path never acquires minute-ledger subject locks while holding the fence.
+    await foundation_lock(db, actor)
+    settings = await db.scalar(select(DobroSettings).where(DobroSettings.foundation_id == outbox.foundation_id).execution_options(populate_existing=True))
+    if not settings or not settings.reminders_enabled or settings.reminder_owner_user_id != owner_id: return 'suppressed_dobro_disabled'
     try: view = await transfer_period(db, actor, period)
     except ApiError: return 'suppressed_dobro_source'
     rows = actionable(view, activity_id)
