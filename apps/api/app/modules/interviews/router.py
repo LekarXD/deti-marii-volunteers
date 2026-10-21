@@ -20,6 +20,9 @@ staff_dep=require_permission("interviews.manage")
 async def command(db,p,operation,key,payload,action):
     try:
         await authz_guard(db,p)
+        if operation.startswith("interviews.complete:") or operation.startswith("interviews.missed:"):
+            from app.core.contact_policy import contact_guard
+            await contact_guard(db,p.foundation_id)
         if operation.startswith("interviews.availability.") or operation.startswith("interviews.complete:") or operation.startswith("interviews.missed:"):
             if not p.has_permission("interviews.manage"): raise ApiError(403,"permission_denied","Недостаточно прав.")
         replay=await begin_command(db,p,operation,key,payload)
