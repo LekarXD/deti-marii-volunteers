@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import {it,expect,vi,afterEach} from 'vitest';
 import {render,screen,fireEvent,within,cleanup} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {MemoryRouter} from 'react-router-dom';
 import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
 import {WebinarsPage} from './WebinarsPage';
@@ -19,3 +20,5 @@ it('opens current published summaries from an enrolled ended webinar without sta
  const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});render(<QueryClientProvider client={client}><MemoryRouter><WebinarsPage/></MemoryRouter></QueryClientProvider>);
  fireEvent.click(await screen.findByRole('button',{name:'Итоги занятия'}));expect(await within(screen.getByRole('dialog')).findByText('Следующий шаг — подготовить материалы.')).toBeTruthy();expect(screen.queryByRole('button',{name:'Отменить запись'})).toBeNull();expect(screen.queryByRole('link',{name:'Войти в занятие'})).toBeNull();client.clear();
 });
+
+it('blocks invalid raw webinar time and creates the draft only after compact input is corrected',async()=>{const user=userEvent.setup();vi.mocked(api).mockImplementation(async(path,options)=>{if(path==='/webinars'&&!options?.method)return [] as never;if(path==='/webinars'&&options?.method==='POST')return {id:'new',state:'draft'} as never;throw Error(path);});const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});render(<QueryClientProvider client={client}><MemoryRouter><WebinarsPage staff/></MemoryRouter></QueryClientProvider>);await user.click(screen.getByRole('button',{name:'Создать занятие'}));const dialog=screen.getByRole('dialog',{name:'Новое онлайн-занятие'});await user.type(within(dialog).getByLabelText('Название'),'Тестовая встреча');await user.click(within(dialog).getByRole('button',{name:'Дата'}));const calendar=screen.getByRole('dialog',{name:'Дата'});await user.click(within(calendar).getAllByRole('button').find(button=>button.classList.contains('calendar-day'))!);const time=within(dialog).getByRole('textbox',{name:'Начало, МСК'});await user.clear(time);await user.type(time,'2575');await user.click(within(dialog).getByRole('button',{name:'Создать черновик'}));expect(vi.mocked(api).mock.calls.some(([,options])=>options?.method==='POST')).toBe(false);await user.clear(time);await user.type(time,'1500');await user.click(within(dialog).getByRole('button',{name:'Создать черновик'}));expect(vi.mocked(api).mock.calls.find(([,options])=>options?.method==='POST')?.[1]?.body).toEqual(expect.objectContaining({starts_at:expect.stringContaining('T15:00:00+03:00')}));client.clear();});

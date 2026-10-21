@@ -1,4 +1,4 @@
-import {useEffect,useId,useState,type KeyboardEvent} from 'react';
+import {useEffect,useId,useRef,useState,type KeyboardEvent} from 'react';
 import {Button,Combobox,Input} from './controls';
 import {Dialog} from './overlays';
 import {Icon} from './Icon';
@@ -24,9 +24,9 @@ export function normalizeTime(value:string){
  return h<24&&m<60?`${pad(h)}:${pad(m)}`:null;
 }
 export function TimePicker({label,value,onChange,min,max,disabled,id,error,className,onDraftChange}:PickerProps&{onDraftChange?:(value:string)=>void}){
- const auto=useId(),own=id??auto;const [text,setText]=useState(value),[touched,setTouched]=useState(false);useEffect(()=>setText(value),[value]);
- const normalized=normalizeTime(text);const invalid=!!text&&(!normalized||!!min&&normalized<min||!!max&&normalized>max);
- const invalidMessage='Укажите время от 00:00 до 23:59'+(min?`, не раньше ${min}`:'')+(max?`, не позже ${max}`:'')+'.';const message=error??(touched&&invalid?invalidMessage:undefined);
+ const auto=useId(),own=id??auto,input=useRef<HTMLInputElement>(null);const [text,setText]=useState(normalizeTime(value)??value),[touched,setTouched]=useState(false);useEffect(()=>setText(/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(value)?value.slice(0,5):value),[value]);
+ const normalized=normalizeTime(text);const lower=normalizeTime(min??''),upper=normalizeTime(max??'');const invalid=!normalized||!!lower&&normalized<lower||!!upper&&normalized>upper;
+ const invalidMessage='Укажите время от 00:00 до 23:59'+(min?`, не раньше ${min}`:'')+(max?`, не позже ${max}`:'')+'.';const message=error??(touched&&invalid?invalidMessage:undefined);useEffect(()=>{input.current?.setCustomValidity(error??(invalid?invalidMessage:''));},[invalid,invalidMessage,error]);
  function commit(input:HTMLInputElement){setTouched(true);input.setCustomValidity(invalid?invalidMessage:'');if(normalized&&!invalid){setText(normalized);onChange(normalized);}}
- return <div className={`field ${className??''}`}><label className="label" htmlFor={own}>{label}</label><div className="time-text-field"><Input id={own} disabled={disabled} inputMode="numeric" placeholder="15:00" value={text} aria-invalid={!!message} aria-describedby={message?`${own}-error`:undefined} onChange={e=>{setText(e.target.value);onDraftChange?.(e.target.value);e.target.setCustomValidity('');}} onInvalid={()=>setTouched(true)} onBlur={e=>commit(e.currentTarget)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();commit(e.currentTarget);}}}/><Icon name="clock"/></div>{message&&<span id={`${own}-error`} className="err" role="alert">{message}</span>}</div>;
+ return <div className={`field ${className??''}`}><label className="label" htmlFor={own}>{label}</label><div className="time-text-field"><Input ref={input} id={own} disabled={disabled} inputMode="numeric" placeholder="15:00" value={text} aria-invalid={!!message} aria-describedby={message?`${own}-error`:undefined} onChange={e=>{setText(e.target.value);onDraftChange?.(e.target.value);e.target.setCustomValidity('');}} onInvalid={()=>setTouched(true)} onBlur={e=>commit(e.currentTarget)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();commit(e.currentTarget);}}}/><Icon name="clock"/></div>{message&&<span id={`${own}-error`} className="err" role="alert">{message}</span>}</div>;
 }
