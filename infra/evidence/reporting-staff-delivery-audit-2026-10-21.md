@@ -18,6 +18,11 @@ Results:
   resources, verifies no forbidden report row was inserted, exercises concurrent
   section CAS with exactly one winner, and denies an old receipt after write
   permission is revoked while preserving authorized read access.
+- Changed-delivery regression (`test_notifications.py` plus
+  `test_worker_extensions.py`): **7 passed, zero skips, 6.30s**, including actual
+  loopback SMTP acceptance, ambiguous SMTP outcome handling, signed webhook
+  replay, notification preferences/quiet deferral and worker lease fencing.
+  The synthetic SMTP server bound loopback; no external mail service was called.
 - Core migration upgraded the disposable main test DB to
   **`84fc8b53ac5d` (head)**; `alembic check` found no new upgrade operations.
   Only the existing informational computed-tsvector comparison warning appeared.
@@ -27,6 +32,7 @@ Commands (using the owned database URLs and the API virtualenv):
 ```sh
 python -m pytest -p infra.pytest_gate -c apps/api/pyproject.toml apps/api/app/modules/staff/tests apps/api/app/modules/reporting/tests apps/api/tests/test_delivery.py apps/api/tests/test_delivery_extensions.py -q --tb=short
 python -m pytest -p infra.pytest_gate -c apps/api/pyproject.toml /private/tmp/opora-qa/tests/contract/test_reporting_boundary.py -q --tb=short
+python -m pytest -p infra.pytest_gate -c apps/api/pyproject.toml apps/api/tests/test_notifications.py apps/api/tests/test_worker_extensions.py -q --tb=short
 ```
 
 The independent test source lives in QA's `tests/contract`; both commands used
