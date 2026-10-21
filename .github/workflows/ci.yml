@@ -32,7 +32,8 @@ jobs:
         with: {node-version: '26'}
       - run: corepack enable && corepack prepare pnpm@11.3.0 --activate
       - run: pnpm install --frozen-lockfile
-      - run: python -m pip install -e 'apps/api[test]'
+      - run: python -m pip install -r apps/api/requirements.lock
+      - run: python -m pip install --no-deps -e 'apps/api[test]'
       - name: Empty database migration and one Alembic head
         working-directory: apps/api
         run: |

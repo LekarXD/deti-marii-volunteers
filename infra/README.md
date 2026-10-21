@@ -12,7 +12,7 @@ Install Node 26, pnpm 11.3, Python 3.12 and Docker Compose. From the repository 
 cp infra/.env.example infra/.env
 # Replace the local password in infra/.env.
 docker compose --env-file infra/.env -f infra/compose.yaml up --build -d
-curl --fail http://127.0.0.1:8001/health/ready
+curl --fail http://127.0.0.1:8001/ready
 ```
 
 Open http://127.0.0.1:8080. PostgreSQL, API, web and optional dev inbox ports bind
@@ -39,7 +39,7 @@ python -m pip install -e 'apps/api[test]'
 corepack enable
 corepack prepare pnpm@11.3.0 --activate
 pnpm install --frozen-lockfile
-export OPORA_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55432/opora_test'
+export OPORA_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_test'
 export OPORA_ENVIRONMENT=development
 export OPORA_TRUSTED_ORIGINS='["http://127.0.0.1:5174","http://localhost:5174"]'
 sh infra/scripts/verify.sh
@@ -61,7 +61,7 @@ Before any staging rollout, record the commit SHA and clean working-tree state,
 image identifiers, migration head and successful CI. Use a separate staging
 PostgreSQL/database, encryption secret, private asset root, secure cookies,
 exact HTTPS origins and `OPORA_DEV_INBOX=false`. Never reuse local demo sessions
-or staging data in production. Runtime `/version` must equal the release SHA.
+or staging data in production. Runtime `/version.json` must equal the release SHA.
 
 1. Back up staging PostgreSQL and private assets; restore to an isolated database
    and compare schema head plus representative row counts/attachment references.

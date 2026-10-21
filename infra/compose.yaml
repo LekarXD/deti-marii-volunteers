@@ -6,7 +6,7 @@ services:
       POSTGRES_DB: opora
       POSTGRES_USER: opora
       POSTGRES_PASSWORD: ${OPORA_POSTGRES_PASSWORD:?set OPORA_POSTGRES_PASSWORD in infra/.env}
-    ports: ["127.0.0.1:55432:5432"]
+    ports: ["127.0.0.1:${OPORA_PG_PORT:-55647}:5432"]
     volumes: ["postgres-data:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U opora -d opora"]
@@ -34,7 +34,7 @@ services:
     depends_on:
       migrate: {condition: service_completed_successfully}
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health/ready',timeout=2)"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/ready',timeout=2)"]
       interval: 5s
       timeout: 3s
       retries: 20
