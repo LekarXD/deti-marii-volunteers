@@ -17,6 +17,8 @@ router = APIRouter(prefix="/api/v1", tags=["applications"])
 
 async def run_command(db, principal, operation, key, command, action, *, permission=None):
     await authz_guard(db, principal)
+    if operation in ("application.draft", "application.submit", "application.revise"):
+        await service.verified_questionnaire_email(db, principal)
     if permission and not principal.has_permission(permission):
         raise ApiError(403, "permission_denied", "Недостаточно прав")
     payload = command.model_dump(mode="json")

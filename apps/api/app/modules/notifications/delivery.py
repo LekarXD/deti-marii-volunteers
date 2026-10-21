@@ -29,6 +29,9 @@ async def new_attempt(db,delivery,state):
     return attempt
 
 async def check_email(db,outbox,payload):
+    if payload.get('purpose') in ('register','password_reset'):
+        from app.modules.auth.password_delivery import check_password_email
+        return await check_password_email(db,outbox,payload)
     if payload.get('purpose') in ('login','contact_change'):
         try:identity=UUID(payload.get('challenge_id',''))
         except ValueError:return 'suppressed_stale_auth'
@@ -72,7 +75,7 @@ async def check_email(db,outbox,payload):
     return None
 
 async def email_quiet_until(db,outbox,payload,delivery):
-    if payload.get('purpose') in ('login','contact_change'):return None
+    if payload.get('purpose') in ('login','contact_change','register','password_reset'):return None
     uid=payload.get('recipient_id')
     if uid is None:
         contact=await db.scalar(select(ContactChannel).where(ContactChannel.type=='email',ContactChannel.normalized_value==payload.get('to')))
@@ -82,7 +85,7 @@ async def email_quiet_until(db,outbox,payload,delivery):
     return await quiet_until(db,outbox.foundation_id,uid)
 
 async def process_email(db,job,outbox,payload):
-    if payload.get('purpose') not in ('login','contact_change'):await contact_guard(db,outbox.foundation_id)
+    if payload.get('purpose') not in ('login','contact_change','register','password_reset'):await contact_guard(db,outbox.foundation_id)
     delivery=await journal(db,outbox,payload)
     latest=await db.scalar(select(DeliveryAttempt).where(DeliveryAttempt.delivery_id==delivery.id).order_by(DeliveryAttempt.attempt_number.desc()).limit(1))
     if delivery.state in ('delivered','bounced'):
@@ -121,9 +124,9 @@ async def process_email(db,job,outbox,payload):
     delivery.state=outbox.state='calling'
     # A crash after this point is uncertain. A retry never blindly calls SMTP again.
     await db.commit()
-    if payload.get('purpose') not in ('login','contact_change'):await contact_guard(db,outbox.foundation_id)
+    if payload.get('purpose') not in ('login','contact_change','register','password_reset'):await contact_guard(db,outbox.foundation_id)
     blocked=await check_email(db,outbox,payload)
-    if not blocked and payload.get('purpose') not in ('login','contact_change'):
+    if not blocked and payload.get('purpose') not in ('login','contact_change','register','password_reset'):
         outbox.defer_until=await email_quiet_until(db,outbox,payload,delivery)
         if outbox.defer_until:blocked='deferred_quiet'
     result=DeliveryOutcome(blocked) if blocked else await deliver_email({**payload,'message_id':delivery.provider_message_id})

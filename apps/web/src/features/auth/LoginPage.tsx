@@ -1,11 +1,12 @@
 import {appRoute} from '../../basePath';
 import {useEffect, useState, type FormEvent} from 'react';
-import {useNavigate, useSearchParams} from 'react-router-dom';
+import {Link, useNavigate, useSearchParams} from 'react-router-dom';
 import {api} from '../../api/transport';
 import type {components} from '../../api/generated/schema';
 import {useSession} from '../../app/layouts';
 import {Button, Card, ErrorState, Field, Input, Segmented} from '../../ui';
 import './auth.css';
+import {PasswordField} from './AuthFields';
 
 type AuthSession = components['schemas']['AuthSessionView'];
 type Challenge = components['schemas']['ChallengeView'];
@@ -16,7 +17,8 @@ export function safeReturnPath(value: string | null, fallback = '/application'):
   if (!value || !value.startsWith('/') || value.startsWith('//') || /[\\\u0000-\u0020\u007f]/.test(value)) return fallback;
   try {
     const parsed = new URL(appRoute(value), 'https://opora.invalid');
-    if (parsed.origin !== 'https://opora.invalid' || parsed.pathname === '/login' || parsed.pathname.startsWith('/api/')) return fallback;
+    const pathname=decodeURIComponent(parsed.pathname).replace(/\/+$/,'')||'/';
+    if (parsed.origin !== 'https://opora.invalid' || ['/login','/register','/forgot-password'].includes(pathname) || pathname==='/api' || pathname.startsWith('/api/')) return fallback;
     // Reject encoded delimiters as well: server/proxy normalization must not change origin.
     if (/%(?:2f|5c|00|0a|0d)/i.test(value)) return fallback;
     return `${parsed.pathname}${parsed.search}${parsed.hash}`;
@@ -34,7 +36,7 @@ export function LoginPage() {
   const [params]=useSearchParams();
   // Link proof is kept in memory only. A GET never verifies or consumes the challenge.
   const [link,setLink]=useState(()=>readLink(params));
-  const next=safeReturnPath(params.get('next'),session?.is_staff || Boolean(session && 'mfa_required' in session && session.mfa_required)?'/fund':'/application');
+  const next=safeReturnPath(params.get('next'),session?.is_staff || Boolean(session && 'mfa_required' in session && session.mfa_required)?'/fund':'/');
   const navigate=useNavigate();
   useEffect(()=>{
     if (!params.has('token') && !params.has('challenge_id')) return;
@@ -44,15 +46,20 @@ export function LoginPage() {
   // Session refresh can replace the principal. A fresh form derives its next stage from
   // the actual server session; no in-flight local stage survives that identity change.
   const principalKey=`${session?.foundation_id}:${session?.user_id??session?.registration_id}:${Boolean(session && 'mfa_required' in session && session.mfa_required)}`;
-  return <div className="auth-page"><div className="auth-intro"><p className="eyebrow">Рады видеть вас в Опоре</p><h1 className="h1">Войти в личный кабинет</h1><p className="lead">Ваши встречи, занятия и команда — в одном месте.</p></div><AuthForm key={principalKey} link={link} next={next} onProofConsumed={()=>setLink(null)}/></div>;
+  return <div className="auth-page"><AuthForm key={principalKey} link={link} legacy={params.get('legacy')==='1'} next={next} onProofConsumed={()=>setLink(null)}/></div>;
 }
 
-function AuthForm({link,next,onProofConsumed}:{link:LinkProof|null;next:string;onProofConsumed:()=>void}) {
+function AuthForm({link,next,legacy,onProofConsumed}:{link:LinkProof|null;next:string;legacy:boolean;onProofConsumed:()=>void}) {
   const {session,refresh,logout}=useSession();
   const navigate=useNavigate();
-  const [email,setEmail]=useState(''),[challenge,setChallenge]=useState<Challenge|null>(null),[proof,setProof]=useState<LinkProof|null>(link),[token,setToken]=useState(''),[code,setCode]=useState(''),[method,setMethod]=useState('totp'),[busy,setBusy]=useState(false),[error,setError]=useState<unknown>(null);
+  const [email,setEmail]=useState(''),[password,setPassword]=useState(''),[challenge,setChallenge]=useState<Challenge|null>(null),[proof,setProof]=useState<LinkProof|null>(link),[token,setToken]=useState(''),[code,setCode]=useState(''),[method,setMethod]=useState('totp'),[busy,setBusy]=useState(false),[error,setError]=useState<unknown>(null);
   const mfaRequired=Boolean(session && 'mfa_required' in session && session.mfa_required);
   const signedIn=Boolean(session?.user_id && !mfaRequired);
+  async function login(event:FormEvent) {
+    event.preventDefault();setBusy(true);setError(null);
+    try{await api<AuthSession>('/auth/login',{method:'POST',body:{email:email.trim(),password},retainSessionOnUnauthorized:true});setPassword('');const current=await refresh();if(!current.mfa_required)navigate(next,{replace:true});}
+    catch(value){setError(value);}finally{setBusy(false);}
+  }
   async function requestChallenge(event:FormEvent) {
     event.preventDefault();setBusy(true);setError(null);
     try {const value=await api<Challenge>('/auth/challenges',{method:'POST',body:{email:email.trim(),purpose:'login'}});setChallenge(value);setProof(null);setToken('');}
@@ -70,5 +77,5 @@ function AuthForm({link,next,onProofConsumed}:{link:LinkProof|null;next:string;o
     catch(e){setCode('');setError(e);}finally{setBusy(false);}
   }
   async function signOut() {setBusy(true);setError(null);try{await logout();}catch(e){setError(e);}finally{setBusy(false);}}
-  return <Card className="auth-card">{mfaRequired ? <><span className="auth-mark" aria-hidden="true">2</span><h2 className="h2">Подтвердите вход</h2><p>Почта подтверждена. Для доступа к работе фонда нужен второй шаг.</p><Segmented label="Способ подтверждения" value={method} onChange={value=>{setMethod(value);setCode('');setError(null);}} options={[{value:'totp',label:'Приложение'},{value:'recovery',label:'Код восстановления'}]}/><form onSubmit={verifyMfa} className="auth-form"><Field label={method==='totp'?'Код из приложения':'Одноразовый код восстановления'} hint={method==='totp'?'Введите текущий шестизначный код из вашего приложения для входа.':'Используйте один из кодов, сохранённых при настройке защиты.'}><Input value={code} onChange={e=>setCode(e.target.value)} type={method==='totp'?'text':'password'} inputMode={method==='totp'?'numeric':'text'} autoComplete="one-time-code" minLength={6} maxLength={100} pattern={method==='totp'?'[0-9]{6}':undefined} required autoFocus disabled={busy}/></Field>{error ? <ErrorState error={error}/> : null}<Button type="submit" loading={busy}>Подтвердить вход</Button></form><p className="auth-help">Если доступа к приложению и кодам нет, обратитесь к администратору фонда.</p><Button variant="ghost" loading={busy} onClick={()=>void signOut()}>Выйти из аккаунта</Button></> : signedIn && !proof ? <><span className="auth-mark" aria-hidden="true">✓</span><h2 className="h2">Вы вошли в аккаунт</h2><p>Можно продолжить работу в личном кабинете.</p>{error ? <ErrorState error={error}/> : null}<div className="auth-actions"><Button onClick={()=>navigate(next,{replace:true})}>Продолжить</Button><Button variant="ghost" loading={busy} onClick={()=>void signOut()}>Войти с другой почтой</Button></div></> : proof || challenge ? <><span className="auth-mark" aria-hidden="true">→</span><h2 className="h2">{proof?'Подтвердите вход по ссылке':'Подтвердите почту'}</h2>{proof ? <p>Нажмите кнопку, чтобы подтвердить вход в этом браузере.</p> : <><p role="status">Запрос на вход поставлен в очередь.</p><p className="auth-help">{challenge?.delivery==='dev_inbox'?'В тестовой установке письмо не отправляется. Получите ссылку для входа у администратора.':'Письмо ожидает отправки. Когда оно придёт, откройте ссылку или вставьте код подтверждения ниже.'}</p></>}<form onSubmit={verify} className="auth-form">{!proof && <Field label="Код подтверждения из письма"><Input type="password" value={token} onChange={e=>setToken(e.target.value)} autoComplete="one-time-code" minLength={20} maxLength={200} required disabled={busy}/></Field>}{error ? <ErrorState error={error}/> : null}<Button type="submit" loading={busy}>{proof?'Подтвердить вход':'Войти'}</Button><Button variant="ghost" disabled={busy} onClick={()=>{setChallenge(null);setProof(null);onProofConsumed();setToken('');setError(null);}}>Указать другую почту</Button></form></> : <><span className="auth-mark" aria-hidden="true">→</span><h2 className="h2">Вход по почте</h2><p>Мы подготовим ссылку для входа. Пароль не нужен.</p><form onSubmit={requestChallenge} className="auth-form"><Field label="Электронная почта"><Input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@example.ru" autoComplete="email" required maxLength={320} autoFocus disabled={busy}/></Field>{error ? <ErrorState error={error}/> : null}<Button type="submit" loading={busy}>Получить ссылку для входа</Button></form><p className="auth-help">Вход сотрудника дополнительно защищён кодом из приложения.</p></>}</Card>;
+  return <Card className="auth-card">{mfaRequired ? <><h1 className="h1">Подтвердите вход</h1><p>Почта подтверждена. Для доступа к работе фонда нужен второй шаг.</p><Segmented label="Способ подтверждения" value={method} onChange={value=>{setMethod(value);setCode('');setError(null);}} options={[{value:'totp',label:'Приложение'},{value:'recovery',label:'Код восстановления'}]}/><form onSubmit={verifyMfa} className="auth-form"><Field label={method==='totp'?'Код из приложения':'Одноразовый код восстановления'} hint={method==='totp'?'Введите текущий шестизначный код из вашего приложения для входа.':'Используйте один из кодов, сохранённых при настройке защиты.'}><Input value={code} onChange={e=>setCode(e.target.value)} type={method==='totp'?'text':'password'} inputMode={method==='totp'?'numeric':'text'} autoComplete="one-time-code" minLength={6} maxLength={100} pattern={method==='totp'?'[0-9]{6}':undefined} required autoFocus disabled={busy}/></Field>{error ? <ErrorState error={error}/> : null}<Button type="submit" loading={busy}>Подтвердить вход</Button></form><p className="auth-help">Если доступа к приложению и кодам нет, обратитесь к администратору фонда.</p><Button variant="ghost" loading={busy} onClick={()=>void signOut()}>Выйти из аккаунта</Button></> : signedIn && !proof ? <><h1 className="h1">Вы вошли в аккаунт</h1><p>Можно продолжить работу в личном кабинете.</p>{error ? <ErrorState error={error}/> : null}<div className="auth-actions"><Button onClick={()=>navigate(next,{replace:true})}>Продолжить</Button><Button variant="ghost" loading={busy} onClick={()=>void signOut()}>Войти с другой почтой</Button></div></> : proof || challenge ? <><h1 className="h1">{proof?'Подтвердите вход по ссылке':'Подтвердите почту'}</h1>{proof ? <p>Нажмите кнопку, чтобы подтвердить вход в этом браузере.</p> : <><p role="status">Запрос на вход поставлен в очередь.</p><p className="auth-help">{challenge?.delivery==='dev_inbox'?'В тестовой установке письмо не отправляется. Получите ссылку для входа у администратора.':'Письмо ожидает отправки. Когда оно придёт, откройте ссылку или вставьте код подтверждения ниже.'}</p></>}<form onSubmit={verify} className="auth-form">{!proof && <Field label="Код подтверждения из письма"><Input type="password" value={token} onChange={e=>setToken(e.target.value)} autoComplete="one-time-code" minLength={20} maxLength={200} required disabled={busy}/></Field>}{error ? <ErrorState error={error}/> : null}<Button type="submit" loading={busy}>{proof?'Подтвердить вход':'Войти'}</Button><Button variant="ghost" disabled={busy} onClick={()=>{setChallenge(null);setProof(null);onProofConsumed();setToken('');setError(null);}}>Указать другую почту</Button></form></> : legacy ? <><h1 className="h1">Вход по почте</h1><p>Мы подготовим ссылку для входа. Пароль не нужен.</p><form onSubmit={requestChallenge} className="auth-form"><Field label="Электронная почта"><Input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@example.ru" autoComplete="email" required maxLength={320} autoFocus disabled={busy}/></Field>{error ? <ErrorState error={error}/> : null}<Button type="submit" loading={busy}>Получить ссылку для входа</Button></form><p className="auth-help">Вход сотрудника дополнительно защищён кодом из приложения.</p></> : <><h1 className="h1">Войти</h1><form className="auth-form" onSubmit={login}><Field label="Электронная почта"><Input type="email" value={email} onChange={event=>setEmail(event.target.value)} autoComplete="email" maxLength={320} placeholder="name@example.ru" required autoFocus disabled={busy}/></Field><PasswordField value={password} onChange={setPassword} disabled={busy}/><Link className="auth-forgot" to={`/forgot-password?next=${encodeURIComponent(next)}`}>Забыли пароль?</Link>{error?<ErrorState error={error}/>:null}<Button type="submit" loading={busy}>Войти</Button></form><p className="auth-help">Впервые у нас? <Link to="/register">Стать волонтёром</Link></p></>}</Card>;
 }

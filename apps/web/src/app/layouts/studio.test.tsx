@@ -13,11 +13,11 @@ function show(is_staff:boolean,path='/studio/current-room'){
  render(<MemoryRouter initialEntries={[path]}><AppProviders><Routes><Route element={<StudioLayout/>}><Route path="/studio/:sessionId" element={<h1>Текущее занятие</h1>}/></Route><Route element={<CandidateLayout/>}><Route path="/home" element={<h1>Главная волонтёра</h1>}/></Route></Routes></AppProviders></MemoryRouter>);
 }
 it('keeps a staff member in the coordinator shell when entering a shared studio route',async()=>{
- show(true);await screen.findByRole('heading',{name:'Текущее занятие'});expect(screen.getByRole('navigation',{name:'Разделы фонда'})).toBeTruthy();expect(screen.queryByRole('navigation',{name:'Разделы волонтёра'})).toBeNull();expect(screen.getByRole('link',{name:'Опора — главная'}).getAttribute('href')).toBe('/fund');expect(screen.getByText('команда фонда')).toBeTruthy();
+ show(true);await screen.findByRole('heading',{name:'Текущее занятие'});expect(screen.getByRole('navigation',{name:'Разделы фонда'})).toBeTruthy();expect(screen.queryByRole('navigation',{name:'Разделы волонтёра'})).toBeNull();expect(screen.getByRole('link',{name:'Дети Марии — главная'}).getAttribute('href')).toBe('/fund');expect(screen.getByText('команда фонда')).toBeTruthy();
 });
 it('keeps an ordinary volunteer in the volunteer shell for the same studio route',async()=>{
- show(false);await screen.findByRole('heading',{name:'Текущее занятие'});expect(screen.getByRole('navigation',{name:'Разделы волонтёра'})).toBeTruthy();expect(screen.queryByRole('navigation',{name:'Разделы фонда'})).toBeNull();expect(screen.getByRole('link',{name:'Опора — главная'}).getAttribute('href')).toBe('/home');expect(screen.getByText('волонтёры «Дети Марии»')).toBeTruthy();
+ show(false);await screen.findByRole('heading',{name:'Текущее занятие'});expect(screen.getByRole('navigation',{name:'Разделы волонтёра'})).toBeTruthy();expect(screen.queryByRole('navigation',{name:'Разделы фонда'})).toBeNull();expect(screen.getByRole('link',{name:'Дети Марии — главная'}).getAttribute('href')).toBe('/home');expect(screen.getByText('волонтёры «Дети Марии»')).toBeTruthy();
 });
 it('does not reinterpret the existing home route when a staff principal visits it',async()=>{
- show(true,'/home');await screen.findByRole('heading',{name:'Главная волонтёра'});expect(screen.getByRole('navigation',{name:'Разделы волонтёра'})).toBeTruthy();expect(screen.getByRole('link',{name:'Опора — главная'}).getAttribute('href')).toBe('/home');
+ show(true,'/home');await screen.findByRole('heading',{name:'Главная волонтёра'});expect(screen.getByRole('navigation',{name:'Разделы волонтёра'})).toBeTruthy();expect(screen.getByRole('link',{name:'Дети Марии — главная'}).getAttribute('href')).toBe('/home');
 });

@@ -1,6 +1,7 @@
 """Real PostgreSQL HTTP contract tests. Opt in with a dedicated disposable database."""
 import os
-from uuid import uuid4
+import json
+from uuid import UUID, uuid4
 from datetime import timedelta
 import pytest
 import pytest_asyncio
@@ -10,7 +11,7 @@ from sqlalchemy import select, func, text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from app.core.db import Base, get_db
 from app.core.config import get_settings
-from app.core.models import Foundation, User, StaffMembership, PermissionGrant, Session
+from app.core.models import Foundation, User, StaffMembership, PermissionGrant, Session, OutboxMessage, ContactChannel
 from app.core.auth import issue_session
 from app.core.clock import utcnow
 from app.core.errors import ApiError, install_error_handlers
@@ -54,15 +55,61 @@ async def env():
         async with factory() as db:
             try:yield db
             except Exception:await db.rollback();raise
+    app.state.test_factory = factory
     app.dependency_overrides[get_db]=override_db
     yield app,factory
     await engine.dispose()
 
-async def actor(app):
+async def anonymous_actor(app):
     client=AsyncClient(transport=ASGITransport(app=app),base_url="http://testserver")
     session=(await client.get("/api/v1/auth/session")).json()
     client.headers.update({"Origin":"http://testserver","X-CSRF-Token":session["csrf_token"]})
     return client
+
+async def verify_email(client, factory, email):
+    """Use the normal email challenge HTTP flow, reading only the fixture inbox."""
+    from app.core.crypto import unseal
+    challenge = await post(client, '/auth/challenges', {'email': email})
+    assert challenge.status_code == 200, challenge.text
+    challenge_id = challenge.json()['challenge_id']
+    async with factory() as db:
+        payloads = [json.loads(unseal(row.payload_cipher)) for row in (await db.scalars(select(OutboxMessage))).all()]
+        payload = next(value for value in payloads if value.get('challenge_id') == challenge_id)
+    verified = await post(client, '/auth/challenges/verify', {'challenge_id': challenge_id, 'token': payload['token']})
+    assert verified.status_code == 200, verified.text
+    client.headers['X-CSRF-Token'] = verified.json()['csrf_token']
+    return verified.json()
+
+
+async def actor(app):
+    client = await anonymous_actor(app)
+    await verify_email(client, app.state.test_factory, f'candidate-{uuid4().hex}@fixture.example.test')
+    return client
+
+
+async def seed_legacy_registration_application(client, factory, answers=None):
+    """Persist a historical anonymous submission; current HTTP routes reject this flow.
+
+    Claim migrations still need to preserve records created before email-first
+    registration, so these tests seed the old state rather than bypassing auth.
+    """
+    from app.core.crypto import digest
+    from app.modules.applications.service import current_form
+    async with factory() as db:
+        session = await db.scalar(select(Session).where(Session.token_hash == digest(client.cookies.get('opora_session'))))
+        assert session.registration_id and session.user_id is None
+        form = await current_form(db, session.foundation_id, create=True)
+        application = Application(foundation_id=session.foundation_id, registration_id=session.registration_id)
+        db.add(application)
+        await db.flush()
+        revision = ApplicationRevision(application_id=application.id, form_version_id=form.id, number=1,
+            answers=answers or VALID, author_id=str(session.registration_id))
+        db.add(revision)
+        await db.flush()
+        application.submitted_revision_id = revision.id
+        await db.commit()
+        return {'id': str(application.id), 'revision': {'id': str(revision.id)}}
+
 
 async def post(client,path,payload,key=None):
     return await client.post('/api/v1'+path,json=payload,headers={"Idempotency-Key":key or str(uuid4())})
@@ -100,6 +147,7 @@ async def test_revision_queue_privacy_and_public_responses(env):
         own=(await candidate.get('/api/v1/me/application')).json();assert 'notes' not in own and 'Только внутри команды' not in str(own)
         revised=await post(candidate,'/me/application/revisions',body({**VALID,'email':'new@example.test'},1));assert revised.status_code==200,revised.text
         assert revised.json()['id']==value['id'] and revised.json()['revision']['number']==2
+        assert revised.json()['revision']['answers']['email']==(await candidate.get('/api/v1/auth/session')).json()['verified_email']
         assert (await post(candidate,'/me/application/revisions',body(version=1))).status_code==409
         review=await post(coord,f"/coord/candidates/{value['id']}/review",dict(expected_version=2,state='paused',public_message='Договоримся позже'));assert review.status_code==200,review.text
         reopened=await post(coord,f"/coord/candidates/{value['id']}/reopen",dict(expected_version=3));assert reopened.status_code==200,reopened.text
@@ -137,16 +185,19 @@ async def test_verified_registration_claim_preserves_identity_and_rejects_overwr
     from app.modules.applications.service import claim_registration
     from app.core.models import RegistrationSession
     app,factory=env
-    candidate=await actor(app)
+    candidate=await anonymous_actor(app)
     try:
-        submitted=(await post(candidate,'/applications/submit',body())).json()
+        submitted=await seed_legacy_registration_application(candidate,factory)
         async with factory() as db:
-            application=await db.get(Application,submitted['id'])
-            original_id=application.id;registration_id=application.registration_id
             user=User(foundation_id=get_settings().foundation_id,display_name='Анна');db.add(user);await db.flush()
-            await claim_registration(db,registration_id,user.id);await db.commit()
-            await db.refresh(application)
-            assert application.id==original_id and application.user_id==user.id and application.registration_id is None
+            db.add(ContactChannel(user_id=user.id,normalized_value='legacy-claim@fixture.example.test',verified_at=utcnow()))
+            await db.commit();user_id=user.id
+        verified=await verify_email(candidate,factory,'legacy-claim@fixture.example.test')
+        assert verified['user_id']==str(user_id)
+        async with factory() as db:
+            application=await db.get(Application,UUID(submitted['id']))
+            user=await db.get(User,user_id)
+            assert str(application.id)==submitted['id'] and application.user_id==user.id and application.registration_id is None
             another_registration=RegistrationSession(foundation_id=user.foundation_id,expires_at=utcnow()+timedelta(days=1));db.add(another_registration);await db.flush()
             other_application=Application(foundation_id=user.foundation_id,registration_id=another_registration.id);db.add(other_application);await db.flush()
             with pytest.raises(ApiError) as error:await claim_registration(db,another_registration.id,user.id)
@@ -169,7 +220,7 @@ async def test_recipient_boundary_checks_scope_and_never_returns_contact_match(e
             assert options==[dict(application_id=UUID(submitted['id']),label='Анна Тестовая')]
             assert await learning_recipient_options(db,principal,'%')==[]
             owner=await learning_recipient_owner(db,principal,UUID(submitted['id']))
-            assert owner['user_id'] is None and owner['registration_id'] is not None
+            assert owner['user_id'] is not None and owner['registration_id'] is None
             principal.foundation_id=uuid4()
             assert await learning_recipient_options(db,principal)==[]
             with pytest.raises(ApiError) as error:await learning_recipient_owner(db,principal,UUID(submitted['id']))
@@ -187,12 +238,12 @@ async def test_new_source_form_is_versioned_and_old_draft_edits_keep_identity(en
     from app.modules.applications.service import current_form
     from app.modules.applications.form import FORM_VERSIONS
     app,factory=env;old=await actor(app);fresh=await actor(app)
-    legacy={**VALID,'directions':['Как специалист'],'skills':['IT'],'participation':'Иногда, когда получится','specialExp':'Хочу обсудить на встрече','record':'Да'}
+    legacy={**VALID,'email':(await old.get('/api/v1/auth/session')).json()['verified_email'],'directions':['Как специалист'],'skills':['IT'],'participation':'Иногда, когда получится','specialExp':'Хочу обсудить на встрече','record':'Да'}
     try:
         async with factory() as db:
             session=await db.scalar(select(Session).where(Session.token_hash==digest(old.cookies.get('opora_session'))))
             form=await current_form(db,session.foundation_id,create=True,version=4)
-            draft=ApplicationDraft(foundation_id=session.foundation_id,registration_id=session.registration_id,form_version_id=form.id,answers=legacy,version=1,step=2);db.add(draft);await db.commit()
+            draft=ApplicationDraft(foundation_id=session.foundation_id,user_id=session.user_id,registration_id=session.registration_id,form_version_id=form.id,answers=legacy,version=1,step=2);db.add(draft);await db.commit()
         pinned=(await old.get('/api/v1/registration/draft')).json();assert pinned['form']['version']==4 and pinned['answers']==legacy
         new=(await fresh.get('/api/v1/registration/draft')).json();assert new['form']['version']==5
         fields={field['id']:field for step in new['form']['content']['steps'] for field in step['fields']}

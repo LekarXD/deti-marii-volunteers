@@ -7,8 +7,11 @@ import {useQueryClient} from '@tanstack/react-query';
 import {Answers, FormContent, visible, label} from './form';
 import {FieldRenderer} from './FieldRenderer';
 import './applications.css';
+import {useSession} from '../../app/layouts';
+import {verifiedEmail} from '../auth/AuthFields';
 
 export function ApplyPage() {
+  const email=verifiedEmail(useSession().session);
   const draft=useDraft(), self=useApplication(), [search]=useSearchParams(), edit=useLocation().pathname.endsWith('/edit')||search.has('edit');
   const navigate=useNavigate(), client=useQueryClient();
   const [answers,setAnswers]=useState<Answers>({}),[step,setStep]=useState(0),[errors,setErrors]=useState<Record<string,string>>({}),[saveError,setSaveError]=useState(''),[saveStatus,setSaveStatus]=useState(''),[initialized,setInitialized]=useState(false);
@@ -22,14 +25,14 @@ export function ApplyPage() {
   useEffect(()=>{if(initialized||!draft.data||(edit&&self.isPending))return;
     version.current=draft.data.version;baseVersion.current=self.data?.version||0;
     const prior=edit&&self.data?{...self.data.revision.answers,consentPD:self.data.consents.personal_data,consentNews:self.data.consents.news,...(draft.data.id?draft.data.answers:{})}:draft.data.answers;
-    setAnswers(prior as Answers);setStep(edit?0:draft.data.step);setInitialized(true);
-  },[draft.data,self.data,self.isPending,edit,initialized]);
+    setAnswers({...prior,...(email?{email}:{})} as Answers);setStep(edit?0:draft.data.step);setInitialized(true);
+  },[draft.data,self.data,self.isPending,edit,initialized,email]);
   async function saveLatest() {
     const snapshot=latest.current;
     setSaveStatus('Сохраняем…');setSaveError('');
     chain.current=chain.current.catch(()=>{}).then(async()=>{
       const write=async(snapshotToSave:typeof latest.current)=>{
-        if(!pendingSave.current)pendingSave.current={snapshot:snapshotToSave,body:{expected_version:version.current,...snapshotToSave},key:commandKey()};
+        if(!pendingSave.current)pendingSave.current={snapshot:snapshotToSave,body:{expected_version:version.current,...snapshotToSave,answers:{...snapshotToSave.answers,...(email?{email}:{})}},key:commandKey()};
         const request=pendingSave.current;
         const saved=await api<Draft>('/api/v1/registration/draft',{method:'PUT',body:request.body,idempotencyKey:request.key,retries:0});
         version.current=saved.version;client.setQueryData(applicationKeys.draft(),saved);pendingSave.current=null;
@@ -52,7 +55,7 @@ export function ApplyPage() {
   async function next(){const missing:Record<string,string>={};for(const field of fields)if(visible(field.showIf,answers)&&field.required&&(!answers[field.id]||(Array.isArray(answers[field.id])&&!(answers[field.id] as string[]).length)))missing[field.id]='Заполните поле';
     if(Object.keys(missing).length){setErrors(missing);focusField(Object.keys(missing)[0]);return;}
     if(!last){dirty.current=true;setStep(step+1);window.scrollTo(0,0);return;}
-    try{await chain.current.catch(()=>{});const result=await submit.mutateAsync({body:{expected_version:edit?baseVersion.current:0,answers,consents:{personal_data:answers.consentPD===true,news:answers.consentNews===true,document_version:'4'}}});client.setQueryData(applicationKeys.self(),result);dirty.current=false;navigate('/application'+(edit?'?updated=1':''));}
+    try{await chain.current.catch(()=>{});const result=await submit.mutateAsync({body:{expected_version:edit?baseVersion.current:0,answers:{...answers,...(email?{email}:{})},consents:{personal_data:answers.consentPD===true,news:answers.consentNews===true,document_version:'4'}}});client.setQueryData(applicationKeys.self(),result);dirty.current=false;navigate('/application'+(edit?'?updated=1':''));}
     catch(error){if(error instanceof ApiError){const fieldErrors=error.field_errors as Record<string,string>|undefined;if(fieldErrors){setErrors(fieldErrors);const fieldId=Object.keys(fieldErrors)[0];const target=form!.steps.findIndex(part=>part.fields.some(field=>field.id===fieldId));if(target>=0)setStep(target);focusField(fieldId);}}}
   }
   return <div className="ap-page">
@@ -60,9 +63,9 @@ export function ApplyPage() {
     <div className="head ap-heading"><div><h1 className="h1">{edit?'Моя анкета':form.title}</h1>{(edit||form.intro)&&<p className="lead">{edit?'Измените ответы. Знакомство с фондом и запись на встречу сохранятся.':form.intro}</p>}</div></div>
     <div className="ap-layout"><form className="ap-apply-main" noValidate onSubmit={event=>{event.preventDefault();void next();}}>
       <Card className="ap-form-card"><div className="ap-stephead"><p className="eyebrow">Шаг {step+1} из {form.steps.length}</p><h2 className="h2">{form.steps[step].title}</h2><div className="ap-progress" role="progressbar" aria-label={`Шаг ${step+1} из ${form.steps.length}`} aria-valuenow={step+1} aria-valuemax={form.steps.length}><span style={{width:`${100*(step+1)/form.steps.length}%`}}/></div></div>
-      <fieldset disabled={submit.isPending} className="ap-fields">{fields.map(field=><FieldRenderer key={field.id} field={field} answers={answers} onChange={update} error={errors[field.id]}/>)}</fieldset>
+      <fieldset disabled={submit.isPending} className="ap-fields">{fields.map(field=><FieldRenderer key={field.id} field={field} answers={answers} onChange={update} error={errors[field.id]} readOnly={field.id==='email'&&Boolean(email)}/>)}</fieldset>
       {answers.firstName&&form.shortNames[String(answers.firstName)]&&<p className="ap-hint">Это полное имя? Например, {form.shortNames[String(answers.firstName)]}. Так координатору будет проще найти вас в документах.</p>}
-      {submit.error&&<div role="alert" className="ap-error">{submit.error.message}{edit&&submit.error instanceof ApiError&&submit.error.status===409&&<Button variant="ghost" type="button" onClick={()=>{void Promise.all([self.refetch(),draft.refetch()]).then(([latestApplication,latestDraft])=>{if(!latestApplication.data||!latestDraft.data)return;baseVersion.current=latestApplication.data.version;version.current=latestDraft.data.version;pendingSave.current=null;dirty.current=false;setAnswers({...latestApplication.data.revision.answers,consentPD:latestApplication.data.consents.personal_data,consentNews:latestApplication.data.consents.news} as Answers);submit.reset();});}}>Загрузить актуальные ответы — текущий ввод будет заменён</Button>}</div>}
+      {submit.error&&<div role="alert" className="ap-error">{submit.error.message}{edit&&submit.error instanceof ApiError&&submit.error.status===409&&<Button variant="ghost" type="button" onClick={()=>{void Promise.all([self.refetch(),draft.refetch()]).then(([latestApplication,latestDraft])=>{if(!latestApplication.data||!latestDraft.data)return;baseVersion.current=latestApplication.data.version;version.current=latestDraft.data.version;pendingSave.current=null;dirty.current=false;setAnswers({...latestApplication.data.revision.answers,...(email?{email}:{}),consentPD:latestApplication.data.consents.personal_data,consentNews:latestApplication.data.consents.news} as Answers);submit.reset();});}}>Загрузить актуальные ответы — текущий ввод будет заменён</Button>}</div>}
       {saveError&&<div role="alert" className="ap-error">{saveError} <button type="button" onClick={()=>void saveLatest().catch(()=>{})}>Повторить сохранение</button>{saveError.includes('измен')&&<p>Черновик открыт в другой вкладке. Скопируйте новые ответы перед обновлением.</p>}</div>}
       </Card>
       <div className="ap-form-footer">{step>0&&<Button variant="ghost" size="lg" type="button" disabled={submit.isPending} onClick={()=>{dirty.current=true;setStep(step-1);}}><Icon name="chevron-left"/>Назад</Button>}<span className="ap-save-status" role="status">{saveStatus}</span><Button size="lg" type="submit" disabled={submit.isPending}>{submit.isPending?'Отправляем…':last?(edit?'Сохранить изменения':'Отправить анкету'):'Дальше'}<Icon name="chevron-right"/></Button></div>

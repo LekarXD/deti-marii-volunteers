@@ -5,6 +5,8 @@ from datetime import datetime
 
 class AuthSessionView(BaseModel):
     user_id: UUID | None
+    verified_email: str | None = None
+    demo_email_codes: bool = False
     registration_id: UUID | None
     foundation_id: UUID
     is_staff: bool
@@ -17,6 +19,7 @@ class MfaSessionView(AuthSessionView):
     recovery_codes: list[str]
 
 class ChallengeView(BaseModel):
+    demo_code_allowed: bool = False
     challenge_id: UUID
     status: Literal["queued"]
     delivery: Literal["dev_inbox", "pending"]

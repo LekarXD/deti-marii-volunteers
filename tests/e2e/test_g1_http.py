@@ -10,6 +10,40 @@ import pytest
 PRIVATE_SENTINEL = "G1-PRIVATE-NOTE-NOT-FOR-CANDIDATE"
 
 
+def issued_legacy_proof(email, challenge_id):
+    """Decrypt a real local delivery, never manufacture an authenticated principal."""
+    import json
+    import os
+    from pathlib import Path
+    import subprocess
+    import sys
+    process = subprocess.run(
+        [sys.executable, "-m", "app.cli", "dev-inbox", "--email", email],
+        cwd=os.environ.get("OPORA_G1_API_DIR", str(Path(__file__).resolve().parents[2] / "apps/api")),
+        check=True, capture_output=True, text=True,
+    )
+    return next(row["token"] for row in json.loads(process.stdout) if row["challenge_id"] == challenge_id)
+
+
+@pytest.fixture(autouse=True)
+def verified_questionnaire_owners(request):
+    """G1 starts form work only after each independent owner verifies their email."""
+    for name in ("candidate", "stranger"):
+        if name not in request.fixturenames:
+            continue
+        client = request.getfixturevalue(name)
+        email = f"g1-owner-{uuid4().hex}@example.test"
+        challenge = client.command("POST", "/auth/challenges", {"email": email, "purpose": "login"})
+        client.command("POST", "/auth/challenges/verify", {
+            "challenge_id": challenge["challenge_id"],
+            "token": issued_legacy_proof(email, challenge["challenge_id"]),
+        })
+        session = client.refresh()
+        assert session["user_id"] and session["registration_id"] is None
+        assert session["verified_email"] == email
+        assert session["mfa_required"] is False
+
+
 def answers():
     suffix = uuid4().hex[:10]
     return {
@@ -25,6 +59,7 @@ def answers():
 def submit(client):
     draft = client.read("/registration/draft")
     data = answers()
+    data["email"] = client.session["verified_email"]
     saved = client.command("PUT", "/registration/draft", {
         "expected_version": draft["version"], "step": 1, "answers": data,
     })
@@ -141,6 +176,7 @@ def test_questionnaire_booking_learning_edit_and_coordinator(candidate, stranger
         "consents": {"personal_data": True, "news": False, "document_version": "4"},
     })
     assert revised["id"] == application["id"]
+    assert revised["revision"]["answers"]["email"] == candidate.session["verified_email"]
     assert candidate.read("/me/interviews")[0]["id"] == booking["id"]
     assert candidate.read(f"/assessment-attempts/{attempt['id']}/result")["score"] == 4
     assert_no_private_fields(candidate.read("/me/application"))
@@ -161,6 +197,19 @@ def test_csrf_origin_acl_and_stale_version(candidate, stranger, staff):
     assert stranger.request("GET", "/coord/candidates").status_code == 403
     assert stranger.request("GET", "/coord/interview-availability").status_code == 403
     assert candidate.read("/registration/draft")["answers"]["firstName"] == "Проверка"
+
+
+def test_anonymous_questionnaire_writes_require_verified_account(candidate):
+    candidate.command("POST", "/auth/logout", {})
+    assert candidate.refresh()["user_id"] is None
+    for path, payload in (
+        ("/registration/draft", {"expected_version": 0, "step": 0, "answers": {"firstName": "Без подтверждения"}}),
+        ("/applications/submit", {"expected_version": 0, "answers": answers(),
+         "consents": {"personal_data": True, "news": False, "document_version": "4"}}),
+    ):
+        response = candidate.request("PUT" if path.endswith("draft") else "POST", path, payload)
+        assert response.status_code == 403
+        assert response.json()["code"] == "verified_account_required"
 
 
 def test_booking_race_and_failed_move_preserve_original(candidate, stranger, staff):
@@ -387,12 +436,7 @@ def test_revoke_commits_before_waiting_staff_command_and_receipt(staff, postgres
         })
 
 
-def test_verified_login_claims_only_own_registration_and_keeps_history(candidate, stranger, staff, environment):
-    import json
-    import os
-    from pathlib import Path
-    import subprocess
-    import sys
+def test_verified_owner_relogin_keeps_history_and_form_email_cannot_claim_another_account(candidate, stranger, staff):
     application = submit(candidate)
     preparation = candidate.read("/me/preparation")
     assignment = preparation["assignments"][0]
@@ -405,21 +449,20 @@ def test_verified_login_claims_only_own_registration_and_keeps_history(candidate
         "consents": {"personal_data": True, "news": False, "document_version": "4"},
     })
     assert stranger_application["id"] != application["id"]
+    assert stranger_application["revision"]["answers"]["email"] == stranger.session["verified_email"]
+    assert stranger_application["revision"]["answers"]["email"] != duplicate["email"]
     assert stranger.read("/me/interviews") == []
     old_cookie = candidate.http.cookies.get("opora_session")
-    verified_email = f"verified-owned-{uuid4().hex}@example.test"
-    assert verified_email != duplicate["email"]
+    verified_email = candidate.session["verified_email"]
+    owner_id = candidate.session["user_id"]
+    candidate.command("POST", "/auth/logout", {})
+    assert candidate.refresh()["user_id"] is None
     challenge = candidate.command("POST", "/auth/challenges", {"email": verified_email, "purpose": "login"})
-    process = subprocess.run(
-        [sys.executable, "-m", "app.cli", "dev-inbox", "--email", verified_email],
-        cwd=os.environ.get("OPORA_G1_API_DIR", str(Path(__file__).resolve().parents[2] / "apps/api")),
-        check=True, capture_output=True, text=True,
-    )
-    token = next(row["token"] for row in json.loads(process.stdout) if row["challenge_id"] == challenge["challenge_id"])
+    token = issued_legacy_proof(verified_email, challenge["challenge_id"])
     candidate.command("POST", "/auth/challenges/verify", {"challenge_id": challenge["challenge_id"], "token": token})
     session = candidate.refresh()
-    assert session["user_id"] and session["registration_id"] is None
-    assert candidate.read("/me/profile")["display_name"] == f"{duplicate['firstName']} {duplicate['lastName']}"
+    assert session["user_id"] == owner_id and session["registration_id"] is None
+    assert session["verified_email"] == verified_email
     assert candidate.read("/me/application")["id"] == application["id"]
     assert candidate.read("/me/interviews")[0]["id"] == booking["id"]
     claimed = candidate.read("/me/preparation")["assignments"][0]

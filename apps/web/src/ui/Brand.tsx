@@ -1,2 +1,6 @@
 import {Link} from 'react-router-dom';
-export function Brand({to='/',subtitle='волонтёры «Дети Марии»'}:{to?:string;subtitle?:string}){return <Link className="brand" to={to} aria-label="Опора — главная"><span className="mark" aria-hidden="true"><i/><i/><i/><i/></span><span><b>Опора</b><small>{subtitle}</small></span></Link>;}
+import fundLogo from '../assets/fund/marias-children-logo.svg';
+import './Brand.css';
+export function Brand({to='/',subtitle='волонтёры «Дети Марии»'}:{to?:string;subtitle?:string}){
+ return <Link className="brand brand-fund" to={to} aria-label="Дети Марии — главная" title={subtitle}><img className="brand-fund-logo" src={fundLogo} alt="Дети Марии" width="324" height="64"/><span className="brand-fund-context">{subtitle}</span></Link>;
+}

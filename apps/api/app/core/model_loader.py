@@ -3,6 +3,7 @@ from app.core import models
 
 DOMAIN_MODULES = ("applications", "interviews", "activities", "participants", "learning", "messaging", "crm", "studio", "notifications", "knowledge", "followups", "simulator", "profile", "recordings", "staff", "reporting", "dobro")
 def load_models():
+    importlib.import_module("app.modules.auth.password_models")
     importlib.import_module("app.integrations.ai.models")
     for module in DOMAIN_MODULES:
         name = f"app.modules.{module}.models"

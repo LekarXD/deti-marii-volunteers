@@ -109,7 +109,10 @@ async def verify(body: VerifyInput, response: Response, principal: Principal = D
 async def logout(response: Response, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     await authz_guard(db, principal)
     row = await db.get(Session, principal.session_id)
-    row.revoked_at = utcnow()
+    if principal.user_id:
+        await db.execute(update(Session).where(Session.user_id == principal.user_id, Session.revoked_at.is_(None)).values(revoked_at=utcnow()))
+    else:
+        row.revoked_at = utcnow()
     audit(db, principal, "auth.logout", "session", row.id)
     await db.commit()
     response.delete_cookie("opora_session", path=get_settings().app_mount_prefix or "/", secure=get_settings().cookie_secure, httponly=True, samesite="lax")
@@ -178,3 +181,6 @@ async def mfa_revoke(principal: Principal = Depends(get_principal), db: AsyncSes
 
 from .contact_change import router as contact_change_router
 router.include_router(contact_change_router)
+
+from .password import router as password_router
+router.include_router(password_router)

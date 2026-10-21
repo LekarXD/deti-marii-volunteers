@@ -28,15 +28,21 @@ async def deliver_email(payload):
         return DeliveryOutcome("unavailable","provider_unavailable")
     purpose=payload.get('purpose')
     from app.integrations.delivery.registry import email_purpose
-    policy=email_purpose(purpose) if purpose not in ('login','contact_change','notification') else None
-    if (purpose not in ('login','contact_change','notification') and policy is None) or not payload.get('to') or any(c in payload['to'] for c in ('\r','\n')):
+    policy=email_purpose(purpose) if purpose not in ('login','contact_change','register','password_reset','notification') else None
+    if (purpose not in ('login','contact_change','register','password_reset','notification') and policy is None) or not payload.get('to') or any(c in payload['to'] for c in ('\r','\n')):
         return DeliveryOutcome("unavailable","template_unavailable")
     email=EmailMessage()
     email['From']=settings.smtp_from
     email['To']=payload['to']
     if payload.get('message_id'):
         email['Message-ID']=payload['message_id']
-    if purpose in ('login','contact_change'):
+    if purpose in ('register','password_reset'):
+        code=payload.get('code','')
+        if len(code)!=6 or not code.isascii() or not code.isdigit() or not payload.get('challenge_id'):
+            return DeliveryOutcome('unavailable','template_unavailable')
+        email['Subject']='Опора — подтверждение почты' if purpose=='register' else 'Опора — восстановление пароля'
+        email.set_content(f"Код подтверждения: {code}\n\nКод действует 10 минут. Если вы не запрашивали это действие, проигнорируйте письмо.")
+    elif purpose in ('login','contact_change'):
         if not all(payload.get(k) for k in ('challenge_id','token')):
             return DeliveryOutcome('unavailable','template_unavailable')
         email['Subject']='Опора — подтверждение смены почты' if purpose=='contact_change' else 'Опора — подтверждение входа'

@@ -82,6 +82,14 @@ async def application_view(db, application, *, coordinator=False):
     return ApplicationSelfView(**values)
 
 
+async def verified_questionnaire_email(db, principal):
+    from app.core.models import ContactChannel
+    email = await db.scalar(select(ContactChannel.normalized_value).where(ContactChannel.user_id == principal.user_id, ContactChannel.type == 'email', ContactChannel.verified_at.is_not(None)).order_by(ContactChannel.created_at).limit(1)) if principal.user_id else None
+    if not email:
+        raise ApiError(403, 'verified_account_required', 'Подтвердите почту перед заполнением анкеты')
+    return email
+
+
 async def get_draft(db, principal):
     draft = (await db.execute(select(ApplicationDraft).where(ApplicationDraft.foundation_id == principal.foundation_id, owner_condition(ApplicationDraft, principal)))).scalar_one_or_none()
     if draft:
@@ -91,10 +99,11 @@ async def get_draft(db, principal):
         revision=await db.get(ApplicationRevision,application.submitted_revision_id) if application else None
         form=await db.get(FormVersion,revision.form_version_id) if revision else await current_form(db,principal.foundation_id)
     return DraftView(id=draft.id if draft else None, version=draft.version if draft else 0, step=draft.step if draft else 0,
-        answers=draft.answers if draft else {}, form=FormView(id=form.id, version=form.version, content=form.content))
+        answers={**(draft.answers if draft else {}), **({"email": await verified_questionnaire_email(db, principal)} if principal.user_id else {})}, form=FormView(id=form.id, version=form.version, content=form.content))
 
 
 async def save_draft(db, principal, command):
+    email = await verified_questionnaire_email(db, principal)
     await owner_lock(db, principal)
     draft = (await db.execute(select(ApplicationDraft).where(ApplicationDraft.foundation_id == principal.foundation_id, owner_condition(ApplicationDraft, principal)).with_for_update())).scalar_one_or_none()
     check_version(draft.version if draft else 0, command.expected_version)
@@ -109,7 +118,7 @@ async def save_draft(db, principal, command):
         draft = ApplicationDraft(foundation_id=principal.foundation_id, user_id=principal.user_id,
             registration_id=None if principal.user_id else principal.registration_id, form_version_id=form.id, version=0)
         db.add(draft)
-    draft.answers = command.answers
+    draft.answers = {**command.answers, "email": email}
     draft.step = command.step
     draft.version += 1
     draft.updated_at = now()
@@ -118,6 +127,7 @@ async def save_draft(db, principal, command):
 
 
 async def submit(db, principal, command, *, revision=False):
+    email = await verified_questionnaire_email(db, principal)
     await owner_lock(db, principal)
     application = await own_application(db, principal, lock=True, required=False)
     if revision and not application:
@@ -133,7 +143,7 @@ async def submit(db, principal, command, *, revision=False):
         prior_revision=await db.get(ApplicationRevision,application.submitted_revision_id)
         form=await db.get(FormVersion,prior_revision.form_version_id)
     else:form=await current_form(db,principal.foundation_id,create=True)
-    answers = validate_answers(command.answers, complete=True,form=form.content)
+    answers = validate_answers({**command.answers, "email": email}, complete=True,form=form.content)
     answers.pop("consentPD", None)
     answers.pop("consentNews", None)
     if not command.consents.personal_data:
