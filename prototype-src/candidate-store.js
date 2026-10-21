@@ -107,7 +107,13 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
   });
 }
 
-const freshProgress = () => ({ done: {}, best: null, attempts: 0, meeting: null });
+const freshProgress = () => ({ done: {}, testDone: false, score: null, meeting: null, road: false });
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
-const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', roles: ['Ассистент педагога в мастерской', 'Ведущий мастер-класса'], directions: ['Творческие занятия', 'Помощь на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Постоянно — в одной программе, раз в неделю или чаще', places: ['Студия на Дмитровском переулке (м. Театральная)', 'Загородная мастерская Марии Елисеевой — Арт-субботы'], slots: ['Будни·Утро', 'Суббота·День'], source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Регулярно, каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+
+// Иконки по имени из контента (сборщик подставляет svg через ICONSWITCH)
+const ICON_KEYS = ['palette','book','users','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle'];
+const icoFlags = name => { const o = {}; ICON_KEYS.forEach(k => { o['ic_' + k.replace('-', '_')] = k === name; }); return o; };
+// В прототипе без анкеты показываем всё на демо-кандидате, чтобы ничего не заполнять руками
+const ensureCandidate = () => { const me = loadCandidate(); if (me) return me; demoWrite('candidate', DEMO_CANDIDATE); return DEMO_CANDIDATE; };

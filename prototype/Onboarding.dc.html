@@ -410,76 +410,166 @@ sc-if,sc-for{display:contents}
  .a-pill{width:30px;height:30px;font-size:13px}
 }
 
+/* ===== v3: сайт фонда, бесшовное знакомство, анимации ===== */
+.a-site .brand small{color:var(--mute)}
+.a-sitenote{font-size:14px;color:var(--mute)}
+.a-welcome{margin:0 0 24px}
+.a-road{margin-top:20px}
+.a-link{display:grid;gap:6px;text-decoration:none;color:inherit}
+.a-link:hover{box-shadow:inset 0 0 0 1px var(--line-2);text-decoration:none}
+.a-path.a-path{grid-template-columns:repeat(4,minmax(0,1fr))}
+/* шапка шага: «шаг 2 из 5» и сегменты */
+.a-ohead{display:grid;gap:10px;margin:0 0 20px}
+.a-ohead .eyebrow{margin:0}
+.a-seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;max-width:420px}
+.a-seg i{height:6px;border-radius:999px;background:var(--soft-2)}
+.a-seg i.is-done{background:var(--green)}
+.a-seg i.is-on{background:var(--orange)}
+/* появление при прокрутке */
+.a-reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+.a-reveal.is-in{opacity:1;transform:none}
+.a-icards .a-reveal:nth-child(2),.a-facts .a-reveal:nth-child(2),.a-storyrow .a-reveal:nth-child(2){transition-delay:.08s}
+.a-icards .a-reveal:nth-child(3),.a-facts .a-reveal:nth-child(3),.a-storyrow .a-reveal:nth-child(3){transition-delay:.16s}
+.a-icards .a-reveal:nth-child(4),.a-facts .a-reveal:nth-child(4){transition-delay:.24s}
+.a-icards .a-reveal:nth-child(5){transition-delay:.32s}
+@media (prefers-reduced-motion:reduce){.a-reveal{opacity:1;transform:none;transition:none}}
+/* числа */
+.a-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.a-facts .kpi-num{font-size:44px}
+/* лента истории */
+.a-timeline{position:relative;display:grid;gap:14px;padding-left:28px}
+.a-timeline::before{content:"";position:absolute;left:8px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--orange-tint)}
+.a-tl{position:relative;display:grid;grid-template-columns:84px 1fr;gap:16px;align-items:start}
+.a-dotline{position:absolute;left:-26px;top:16px;width:16px;height:16px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 5px var(--orange-tint)}
+.a-year{font-size:28px;font-weight:600;letter-spacing:-.02em;color:var(--orange-ink);padding-top:6px}
+.a-tlcard{background:var(--paper);border-radius:22px;padding:18px 22px}
+.a-tlcard p{margin:6px 0 0;color:var(--ink-2)}
+.a-tl.a-reveal{transform:translateX(-24px)}
+.a-tl.a-reveal.is-in{transform:none}
+/* карточки с иконками */
+.a-icards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.a-icard{display:grid;gap:8px;align-content:start;padding:22px;border-radius:24px}
+.a-icard p{margin:0;color:var(--ink-2)}
+.a-ico{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:rgba(255,255,255,.75)}
+.a-ico .ic{width:26px;height:26px}
+.a-ic-o{background:var(--orange-tint)}.a-ic-o .a-ico{color:var(--orange-ink)}
+.a-ic-b{background:var(--blue-tint)}.a-ic-b .a-ico{color:var(--blue)}
+.a-ic-g{background:var(--green-tint)}.a-ic-g .a-ico{color:var(--green-ink)}
+.a-ic-v{background:var(--violet-tint)}.a-ic-v .a-ico{color:var(--violet)}
+.a-ic-y{background:var(--yellow-tint)}.a-ic-y .a-ico{color:var(--yellow-ink)}
+/* история */
+.a-story{background:var(--paper);border-radius:28px;padding:28px 32px}
+.a-story h2{margin:0}
+.a-storyintro{margin:6px 0 18px;color:var(--mute)}
+.a-storyrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;counter-reset:st}
+.a-stage{position:relative;display:grid;gap:10px;align-content:start;padding:18px;border-radius:20px;background:var(--soft)}
+.a-stage p{margin:0}
+.a-stage:not(:last-child)::after{content:"→";position:absolute;right:-12px;top:22px;z-index:1;width:24px;height:24px;border-radius:50%;background:var(--paper);display:grid;place-items:center;font-size:14px;color:var(--orange)}
+/* правила */
+.a-rules{display:grid;gap:4px}
+.a-rule{display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.a-rule:first-child{border-top:0}
+.a-rule p{margin:0}
+.a-rn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--orange);color:#fff;font-weight:600}
+/* как говорить */
+.a-phr-head{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 8px;font-size:14px;font-weight:600;color:var(--mute)}
+.a-phr{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.a-yes,.a-no{position:relative;padding:14px 18px 14px 44px;border-radius:20px;font-size:16px}
+.a-yes{background:var(--green-tint);color:var(--green-ink);font-weight:600}
+.a-no{background:var(--red-tint);color:var(--red-ink)}
+.a-yes::before,.a-no::before{position:absolute;left:16px;top:13px;font-weight:700}
+.a-yes::before{content:"✓"}.a-no::before{content:"✕"}
+/* как бы вы поступили */
+.a-quiz{display:grid;gap:14px;margin-bottom:12px}
+.a-q{margin:0;font-size:19px;font-weight:600;color:var(--ink)}
+.a-qopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.a-qopt{text-align:left;padding:16px 18px;border:0;border-radius:18px;background:var(--soft);font-size:16px;color:var(--ink);cursor:pointer;transition:transform .15s}
+.a-qopt:hover:not([disabled]){transform:translateY(-2px);box-shadow:inset 0 0 0 1px var(--line-2)}
+.a-qopt.is-right{background:var(--green);color:#fff}
+.a-qopt.is-wrong{background:var(--red-tint);color:var(--red-ink)}
+.a-qopt[disabled]{cursor:default}
+.a-fb{padding:16px 18px;border-radius:18px;animation:a-pop .35s ease}
+.a-fb p{margin:6px 0 0}
+.a-fb.is-ok{background:var(--green-tint);color:var(--green-ink)}
+.a-fb.is-bad{background:var(--red-tint);color:var(--red-ink)}
+@keyframes a-pop{0%{opacity:0;transform:scale(.96)}100%{opacity:1;transform:none}}
+/* тест: карточка-пояснение поверх экрана */
+.a-tq{margin-bottom:24px}
+.a-sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:center;padding:16px;background:linear-gradient(transparent,rgba(18,20,26,.18));animation:a-up .35s cubic-bezier(.2,.7,.2,1)}
+.a-sheet-card{width:min(720px,100%);display:grid;gap:10px;padding:26px 28px;border-radius:28px;box-shadow:0 18px 50px rgba(18,20,26,.22)}
+.a-sheet-card h3,.a-sheet-card p{margin:0}
+.a-sheet-card.is-ok{background:var(--green-tint);color:var(--green-ink)}
+.a-sheet-card.is-bad{background:var(--red-tint);color:var(--red-ink)}
+.a-sheet-card .btn{margin-top:6px}
+.a-sheet-ico{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:700;color:#fff}
+.is-ok .a-sheet-ico{background:var(--green)}.is-bad .a-sheet-ico{background:var(--red)}
+@keyframes a-up{0%{transform:translateY(100%)}100%{transform:none}}
+.a-answer.is-right{background:var(--green);color:#fff}
+.a-unlocked{animation:a-pop .35s ease}
+@media (prefers-reduced-motion:reduce){.a-sheet,.a-fb,.a-unlocked{animation:none}}
+@media (max-width:720px){
+ .a-path.a-path{grid-template-columns:1fr}
+ .a-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .a-facts .kpi-num{font-size:34px}
+ .a-tl{grid-template-columns:1fr;gap:6px}
+ .a-year{padding-top:0;font-size:24px}
+ .a-storyrow{grid-template-columns:1fr}
+ .a-stage:not(:last-child)::after{content:"↓";right:auto;left:22px;top:auto;bottom:-14px}
+ .a-story{padding:22px 20px}
+ .a-phr-head{display:none}
+ .a-phr{grid-template-columns:1fr;gap:6px;margin-bottom:16px}
+ .a-sitenote{display:none}
+ .a-sheet-card{padding:22px 20px}
+}
+.a-stage .tag{justify-self:start}
+
 </style>
 </helmet>
 <div class="dm"><div class="shell">
 <header class="top">
   <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>волонтёры «Дети Марии»</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a class="is-active" aria-current="page" href="ApplicationStatus.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>Главная</a>
+    <a href="Catalog.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Возможности</a>
+    <a href="Schedule.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Мои смены</a>
+    <a href="Academy.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Академия</a>
+    <a href="Messages.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Сообщения<span class="count">3</span></a>
+    <a href="Hours.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg>Мой путь</a>
+  </nav>
   <div class="top-end">
-    <a class="btn btn-ghost" href="Apply.dc.html">Анкета</a>
-    <a class="btn btn-ghost is-here" aria-current="page" href="Onboarding.dc.html">Знакомство с фондом</a>
-    <a class="btn btn-ghost" href="ApplicationStatus.dc.html">Моя заявка</a>
+    <a class="role" href="CoordHome.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид координатора</a>
+    <div class="pillbox">
+      <a class="iconbtn" href="Mentor.dc.html" aria-label="ИИ-наставник"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></a>
+      <button class="iconbtn" type="button" aria-label="Уведомления, 2 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <a href="Profile.dc.html" class="avatar av-o" aria-label="Профиль: Анна Соколова">АС</a>
+    </div>
   </div>
 </header>
+<div class="a-readbar" aria-hidden="true"><i id="a-readbar"></i></div>
+<div class="a-ohead"><p class="eyebrow">{{stepLabel}}</p><div class="a-seg" aria-hidden="true"><sc-for list="{{segs}}" as="sg"><i class="{{sg.cls}}"></i></sc-for></div></div>
 
-<sc-if value="{{noCandidate}}"><section class="card a-empty"><h1 class="h2">Сначала анкета</h1><p class="lead">Знакомство с фондом открывается после анкеты волонтёра.</p><div class="actions"><a class="btn btn-primary btn-lg" href="Apply.dc.html">Заполнить анкету</a><button type="button" class="btn btn-ghost" onClick="{{fillDemo}}">Продолжить на демо-кандидате</button></div></section></sc-if>
-
-<sc-if value="{{isHub}}"><div class="head"><div><p class="eyebrow">Перед встречей с координатором</p><h1 class="h1">{{hubTitle}}</h1><p class="lead a-intro">{{hubIntro}}</p></div><a class="btn btn-ghost" href="ApplicationStatus.dc.html">Моя заявка</a></div>
-<div class="row a-progress"><div class="bar grow"><i style="{{hubBar}}"></i></div><span class="strong num">{{hubCount}}</span></div>
-<section class="section a-mods"><sc-for list="{{mods}}" as="m"><button type="button" class="{{m.cls}}" onClick="{{m.open}}"><span class="a-num">{{m.mark}}</span><span class="grow a-modtext"><b>{{m.title}}</b><small>{{m.minutes}} мин</small></span><span class="a-chev" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button></sc-for>
-<button type="button" class="{{testCls}}" onClick="{{openTest}}" disabled="{{testLocked}}"><span class="a-num">{{testMark}}</span><span class="grow a-modtext"><b>{{testTitle}}</b><small>{{testSub}}</small></span><span class="a-chev" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button></section>
-</sc-if>
-
-<sc-if value="{{isModule}}"><div class="a-readbar" aria-hidden="true"><i id="a-readbar"></i></div>
-<div class="row a-modnav"><button type="button" class="btn btn-ghost" onClick="{{toHub}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg> Все шаги</button><span class="grow"></span><nav class="a-pills" aria-label="Шаги"><sc-for list="{{pills}}" as="p"><button type="button" class="{{p.cls}}" aria-label="{{p.title}}" onClick="{{p.open}}">{{p.n}}</button></sc-for></nav></div>
-<p class="eyebrow">{{modEyebrow}}</p><h1 class="h1 a-modtitle">{{modTitle}}</h1>
-<sc-if value="{{isForm}}"><p class="lead">{{formIntro}}</p><section class="card a-form a-form-1"><sc-for list="{{fields}}" as="f"><div class="{{f.cls}}">
-<sc-if value="{{f.isConsent}}"><label class="check a-consent"><input type="checkbox" checked="{{f.checked}}" onChange="{{f.toggle}}"><span>{{f.label}}<sc-if value="{{f.req}}"> <b class="a-req">*</b></sc-if></span></label></sc-if>
-<sc-if value="{{f.notConsent}}"><span class="label">{{f.label}}<sc-if value="{{f.req}}"> <b class="a-req">*</b></sc-if><sc-if value="{{f.opt}}"> <span class="a-opt">по желанию</span></sc-if></span></sc-if>
-<sc-if value="{{f.hasWhy}}"><p class="a-why">{{f.why}}</p></sc-if>
-<sc-if value="{{f.isInput}}"><input class="input" type="{{f.inputType}}" value="{{f.value}}" placeholder="{{f.placeholder}}" autocomplete="{{f.autocomplete}}" aria-label="{{f.label}}" onChange="{{f.change}}" onFocus="{{f.focus}}" onBlur="{{f.blur}}"></sc-if>
-<sc-if value="{{f.isTextarea}}"><textarea class="textarea a-textarea" value="{{f.value}}" aria-label="{{f.label}}" onChange="{{f.change}}"></textarea></sc-if>
-<sc-if value="{{f.isSelect}}"><div class="chips a-chips" role="radiogroup" aria-label="{{f.label}}"><sc-for list="{{f.options}}" as="o"><button type="button" class="{{o.cls}}" role="radio" aria-checked="{{o.checked}}" onClick="{{o.toggle}}">{{o.label}}</button></sc-for></div></sc-if>
-<sc-if value="{{f.isChoice}}"><div class="a-lines"><sc-for list="{{f.options}}" as="o"><label class="{{o.lineCls}}"><input type="{{f.choiceType}}" name="{{f.id}}" checked="{{o.checked}}" onChange="{{o.toggle}}"><span>{{o.label}}</span></label></sc-for></div></sc-if>
-<sc-if value="{{f.isGroups}}"><div class="a-groups"><sc-for list="{{f.groups}}" as="g"><div class="a-group"><p class="eyebrow">{{g.title}}</p><sc-if value="{{g.hasNote}}"><p class="a-why">{{g.note}}</p></sc-if><sc-if value="{{g.hasOptions}}"><div class="a-lines"><sc-for list="{{g.options}}" as="o"><label class="{{o.lineCls}}"><input type="checkbox" checked="{{o.checked}}" onChange="{{o.toggle}}"><span>{{o.label}}</span></label></sc-for></div></sc-if></div></sc-for></div></sc-if>
-<sc-if value="{{f.isChips}}"><div class="chips a-chips"><sc-for list="{{f.options}}" as="o"><button type="button" class="{{o.cls}}" aria-pressed="{{o.pressed}}" onClick="{{o.toggle}}">{{o.label}}</button></sc-for></div><sc-if value="{{f.hasOther}}"><input class="input" type="text" value="{{f.other}}" placeholder="Другое — через запятую" aria-label="Другие навыки" onChange="{{f.changeOther}}"></sc-if></sc-if>
-<sc-if value="{{f.isGrid}}"><div class="a-grid"><span></span><sc-for list="{{f.cols}}" as="c"><span class="a-gh">{{c}}</span></sc-for><sc-for list="{{f.rows}}" as="r"><span class="a-gr">{{r.label}}</span><sc-for list="{{r.cells}}" as="c"><button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" aria-label="{{c.aria}}" onClick="{{c.toggle}}">✓</button></sc-for></sc-for></div></sc-if>
-<sc-if value="{{f.isRoles}}"><div class="a-roles"><sc-for list="{{f.rgroups}}" as="g"><div class="{{g.cls}}"><button type="button" class="a-rhead" aria-expanded="{{g.open}}" onClick="{{g.toggle}}"><span class="a-rtitle"><b>{{g.title}}</b><sc-if value="{{g.hasHint}}"><small>{{g.hint}}</small></sc-if></span><span class="{{g.badgeCls}}">{{g.badge}}</span></button><sc-if value="{{g.open}}"><div class="chips a-rchips"><sc-for list="{{g.roles}}" as="o"><button type="button" class="{{o.cls}}" aria-pressed="{{o.pressed}}" onClick="{{o.toggle}}">{{o.label}}</button></sc-for></div></sc-if></div></sc-for><label class="check a-unsure"><input type="checkbox" checked="{{f.unsureOn}}" onChange="{{f.unsureToggle}}"><span>{{f.unsure}}</span></label></div></sc-if>
-<sc-if value="{{f.hasWarn}}"><p class="a-warn">{{f.warn}}</p></sc-if>
-<sc-if value="{{f.hasErr}}"><p class="err">{{f.err}}</p></sc-if>
-</div></sc-for>
-</section></sc-if>
+<sc-if value="{{isModule}}"><h1 class="h1 a-modtitle">{{modTitle}}</h1>
 <div class="a-blocks"><sc-for list="{{blocks}}" as="b">
-<sc-if value="{{b.isLead}}"><p class="a-lead">{{b.text}}</p></sc-if>
-<sc-if value="{{b.isText}}"><div class="a-text"><sc-for list="{{b.paras}}" as="t"><p>{{t}}</p></sc-for></div></sc-if>
-<sc-if value="{{b.isFacts}}"><div class="grid-4 a-facts"><sc-for list="{{b.items}}" as="x"><div class="kpi"><span class="blob blob-y"></span><span class="kpi-num">{{x.n}}</span><span class="kpi-label">{{x.l}}</span></div></sc-for></div></sc-if>
-<sc-if value="{{b.isTimeline}}"><div class="card a-timeline"><sc-for list="{{b.items}}" as="x"><div class="a-tl"><span class="a-year">{{x.y}}</span><div><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></div></sc-for></div></sc-if>
-<sc-if value="{{b.isCards}}"><div class="grid-3 a-cards"><sc-for list="{{b.items}}" as="x"><div class="card-soft"><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></sc-for></div></sc-if>
-<sc-if value="{{b.isList}}"><div class="card"><sc-if value="{{b.hasTitle}}"><h3 class="h3 a-bt">{{b.title}}</h3></sc-if><div class="list"><sc-for list="{{b.items}}" as="x"><div class="li a-li"><sc-if value="{{b.ordered}}"><span class="a-num a-num-o">{{x.n}}</span></sc-if><sc-if value="{{b.bullets}}"><span class="a-dot" aria-hidden="true"></span></sc-if><span class="grow">{{x.t}}</span></div></sc-for></div></div></sc-if>
-<sc-if value="{{b.isSteps}}"><div><sc-if value="{{b.hasTitle}}"><h3 class="h3 a-bt">{{b.title}}</h3></sc-if><div class="a-steps-v"><sc-for list="{{b.items}}" as="x"><div class="card a-step"><span class="a-num">{{x.n}}</span><div><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></div></sc-for></div></div></sc-if>
-<sc-if value="{{b.isPhrases}}"><div class="card"><h3 class="h3 a-bt">{{b.title}}</h3><div class="list"><sc-for list="{{b.items}}" as="x"><div class="li a-phrase"><span class="a-say">✓ {{x.say}}</span><span class="a-avoid">✕ {{x.avoid}}</span><sc-if value="{{x.hasWhy}}"><span class="meta a-pwhy">{{x.why}}</span></sc-if></div></sc-for></div></div></sc-if>
-<sc-if value="{{b.isSituations}}"><div><h3 class="h3 a-bt">Если случилось…</h3><sc-for list="{{b.items}}" as="x"><details class="card a-sit"><summary class="h4">{{x.title}}</summary><div class="grid-2 a-sitbody"><div class="a-do"><b>Что делать</b><sc-for list="{{x.do}}" as="d"><p>{{d}}</p></sc-for></div><div class="a-dont"><b>Чего не делать</b><sc-for list="{{x.dont}}" as="d"><p>{{d}}</p></sc-for></div></div></details></sc-for></div></sc-if>
-<sc-if value="{{b.isPillars}}"><div class="grid-2 a-pillars"><sc-for list="{{b.items}}" as="x"><div class="{{x.cls}}"><h3 class="h3">{{x.title}}</h3><p>{{x.text}}</p><p class="eyebrow">На занятии это значит</p><sc-for list="{{x.items}}" as="i"><p class="a-pi">{{i}}</p></sc-for><p class="meta a-from">Из кодекса: {{x.from}}</p></div></sc-for></div></sc-if>
-<sc-if value="{{b.isCheck}}"><div><h3 class="h3 a-bt">{{b.title}}</h3><p class="meta">{{b.intro}}</p><sc-for list="{{b.items}}" as="x"><details class="card a-sit"><summary class="h4">{{x.q}}</summary><p>{{x.a}}</p><p class="meta">{{x.p}}</p></details></sc-for></div></sc-if>
-<sc-if value="{{b.isVideo}}"><figure class="a-video"><div class="a-vbox"><span class="a-play" aria-hidden="true">▶</span><span>Видео скоро появится</span></div><figcaption><b>{{b.title}}</b> <span class="meta">{{b.duration}}</span></figcaption></figure></sc-if>
+<sc-if value="{{b.isLead}}"><p class="a-lead a-reveal">{{b.text}}</p></sc-if>
+<sc-if value="{{b.isFacts}}"><div class="a-facts"><sc-for list="{{b.items}}" as="x"><div class="kpi a-reveal"><span class="blob blob-y"></span><span class="kpi-num a-count" data-to="{{x.to}}" data-suffix="{{x.suffix}}">{{x.n}}</span><span class="kpi-label">{{x.l}}</span></div></sc-for></div></sc-if>
+<sc-if value="{{b.isTimeline}}"><div class="a-timeline"><sc-for list="{{b.items}}" as="x"><div class="a-tl a-reveal"><span class="a-dotline" aria-hidden="true"></span><span class="a-year">{{x.y}}</span><div class="a-tlcard"><h3 class="h4">{{x.t}}</h3><p>{{x.d}}</p></div></div></sc-for></div></sc-if>
+<sc-if value="{{b.isIcards}}"><section><sc-if value="{{b.hasTitle}}"><h2 class="h3 a-bt">{{b.title}}</h2></sc-if><div class="a-icards"><sc-for list="{{b.items}}" as="x"><div class="{{x.cls}}"><span class="a-ico" aria-hidden="true"><sc-if value="{{x.ic_palette}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></sc-if><sc-if value="{{x.ic_book}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></sc-if><sc-if value="{{x.ic_users}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></sc-if><sc-if value="{{x.ic_heart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></sc-if><sc-if value="{{x.ic_home}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></sc-if><sc-if value="{{x.ic_hand}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></sc-if><sc-if value="{{x.ic_shield}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></sc-if><sc-if value="{{x.ic_smile}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if><sc-if value="{{x.ic_star}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if><sc-if value="{{x.ic_camera}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></sc-if><sc-if value="{{x.ic_calendar}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></sc-if><sc-if value="{{x.ic_pin}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_message}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></sc-if><sc-if value="{{x.ic_mask}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v6a8 8 0 0 1-16 0z"/><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"/></svg></sc-if><sc-if value="{{x.ic_music}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_award}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg></sc-if><sc-if value="{{x.ic_sparkle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></sc-if><sc-if value="{{x.ic_eye}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></sc-if><sc-if value="{{x.ic_clock}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></sc-if><sc-if value="{{x.ic_phone}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></sc-if><sc-if value="{{x.ic_alert}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></sc-if><sc-if value="{{x.ic_check_circle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></sc-if></span><h3 class="h4">{{x.title}}</h3><p>{{x.text}}</p></div></sc-for></div></section></sc-if>
+<sc-if value="{{b.isStory}}"><section class="a-story a-reveal"><h2 class="h3">{{b.title}}</h2><p class="a-storyintro">{{b.intro}}</p><div class="a-storyrow"><sc-for list="{{b.items}}" as="x"><div class="a-stage a-reveal"><span class="tag t-orange">{{x.t}}</span><p>{{x.d}}</p></div></sc-for></div></section></sc-if>
+<sc-if value="{{b.isRules}}"><section class="card a-reveal"><sc-if value="{{b.hasTitle}}"><h2 class="h3 a-bt">{{b.title}}</h2></sc-if><div class="a-rules"><sc-for list="{{b.items}}" as="x"><div class="a-rule"><span class="a-rn">{{x.n}}</span><p>{{x.t}}</p></div></sc-for></div></section></sc-if>
+<sc-if value="{{b.isPhrases}}"><section><h2 class="h3 a-bt">{{b.title}}</h2><div class="a-phr-head" aria-hidden="true"><span>Так говорим</span><span>Так не говорим</span></div><sc-for list="{{b.items}}" as="x"><div class="a-phr a-reveal"><span class="a-yes">{{x.say}}</span><span class="a-no">{{x.avoid}}</span></div></sc-for></section></sc-if>
+<sc-if value="{{b.isQuiz}}"><section><h2 class="h3 a-bt">{{b.title}}</h2><sc-for list="{{b.items}}" as="x"><div class="card a-quiz a-reveal"><p class="a-q">{{x.q}}</p><div class="a-qopts"><sc-for list="{{x.opts}}" as="o"><button type="button" class="{{o.cls}}" disabled="{{o.locked}}" onClick="{{o.pick}}">{{o.text}}</button></sc-for></div><sc-if value="{{x.answered}}"><div class="{{x.fbCls}}" role="status"><b>{{x.fbHead}}</b><p>{{x.e}}</p></div></sc-if></div></sc-for></section></sc-if>
+<sc-if value="{{b.isVideo}}"><figure class="a-video a-reveal"><div class="a-vbox"><span class="a-play" aria-hidden="true">▶</span><span>Видео скоро появится</span></div><figcaption><b>{{b.title}}</b> <span class="meta">{{b.duration}}</span></figcaption></figure></sc-if>
 <sc-if value="{{b.isCallout}}"><p class="{{b.cls}}">{{b.text}}</p></sc-if>
-<sc-if value="{{b.isMore}}"><details class="card-soft a-more"><summary class="h4">{{b.title}}</summary><div class="a-blocks">
-<sc-for list="{{b.blocks}}" as="c">
-<sc-if value="{{c.isList}}"><div class="list"><sc-for list="{{c.items}}" as="x"><div class="li a-li"><span class="a-dot" aria-hidden="true"></span><span class="grow">{{x.t}}</span></div></sc-for></div></sc-if>
-<sc-if value="{{c.isCards}}"><div class="grid-2 a-cards"><sc-for list="{{c.items}}" as="x"><div class="card"><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></sc-for></div></sc-if>
-<sc-if value="{{c.isSteps}}"><div class="list"><sc-for list="{{c.items}}" as="x"><div class="li a-li"><span class="a-num a-num-o">{{x.n}}</span><span class="grow"><b>{{x.t}}.</b> {{x.d}}</span></div></sc-for></div></sc-if>
-<sc-if value="{{c.isPhrases}}"><div class="list"><sc-for list="{{c.items}}" as="x"><div class="li a-phrase"><span class="a-say">✓ {{x.say}}</span><span class="a-avoid">✕ {{x.avoid}}</span><sc-if value="{{x.hasWhy}}"><span class="meta a-pwhy">{{x.why}}</span></sc-if></div></sc-for></div></sc-if>
-</sc-for></div></details></sc-if>
 </sc-for></div>
 <div id="a-read-end"></div>
 <div class="actions a-nav"><sc-if value="{{hasPrev}}"><button type="button" class="btn btn-ghost btn-lg" onClick="{{prev}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg> Назад</button></sc-if><span class="grow"></span><button type="button" class="{{doneCls}}" disabled="{{doneLocked}}" onClick="{{done}}">{{doneLabel}}</button></div>
 </sc-if>
 
-<sc-if value="{{isTest}}"><div class="row a-modnav"><button type="button" class="btn btn-ghost" onClick="{{toHub}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg> Все шаги</button></div>
-<sc-if value="{{testIntro}}"><section class="card-hero"><p class="eyebrow">Последний шаг знакомства</p><h1 class="hero-title">{{testTitle}}</h1><p class="lead">{{testText}}</p><sc-if value="{{hasBest}}"><p class="lead">Лучший результат: <b>{{bestLine}}</b></p></sc-if><div class="actions"><button type="button" class="btn btn-dark btn-lg" onClick="{{start}}">{{startLabel}}</button><sc-if value="{{passed}}"><a class="btn btn-ghost" href="ApplicationStatus.dc.html">К записи на встречу</a></sc-if></div></section></sc-if>
-<sc-if value="{{testQuestion}}"><div class="row a-progress"><span class="eyebrow">Вопрос {{qNum}} из {{qTotal}}</span><div class="bar grow"><i style="{{qBar}}"></i></div></div><section class="card"><h2 class="h2">{{qText}}</h2><div class="a-answers"><sc-for list="{{qOpts}}" as="o"><button type="button" class="{{o.cls}}" disabled="{{o.locked}}" onClick="{{o.pick}}">{{o.text}}</button></sc-for></div><sc-if value="{{answered}}"><p class="{{explCls}}"><b>{{explHead}}</b> {{expl}}</p><div class="actions"><span class="grow"></span><button type="button" class="btn btn-primary btn-lg" onClick="{{nextQ}}">{{nextQLabel}}</button></div></sc-if></section></sc-if>
-<sc-if value="{{testResult}}"><section class="card-hero"><p class="eyebrow">Результат</p><h1 class="hero-title">{{scoreLine}}</h1><p class="lead">{{resultText}}</p><div class="actions"><sc-if value="{{resultPassed}}"><a class="btn btn-dark btn-lg" href="ApplicationStatus.dc.html">Выбрать время встречи</a></sc-if><button type="button" class="btn btn-ghost btn-lg" onClick="{{start}}">Пройти ещё раз</button></div></section>
-<sc-if value="{{hasWrong}}"><section class="section"><div class="section-head"><h2 class="h2">Разбор ошибок</h2></div><sc-for list="{{wrong}}" as="w"><div class="card a-wrong"><h3 class="h4">{{w.q}}</h3><p>Правильно: {{w.a}}</p><p class="meta">{{w.e}}</p></div></sc-for></section></sc-if></sc-if>
+<sc-if value="{{isTest}}"><h1 class="h1 a-modtitle">{{testTitle}}</h1>
+<sc-if value="{{testIntro}}"><section class="card-hero a-reveal"><p class="lead">{{testText}}</p><div class="actions"><button type="button" class="btn btn-dark btn-lg" onClick="{{start}}">Начать</button></div></section></sc-if>
+<sc-if value="{{testQuestion}}"><section class="card a-tq"><p class="eyebrow">Вопрос {{qNum}} из {{qTotal}}</p><h2 class="h2">{{qText}}</h2><div class="a-answers"><sc-for list="{{qOpts}}" as="o"><button type="button" class="{{o.cls}}" disabled="{{o.locked}}" onClick="{{o.pick}}">{{o.text}}</button></sc-for></div></section>
+<sc-if value="{{answered}}"><div class="a-sheet" role="dialog" aria-modal="false" aria-label="Пояснение к ответу"><div class="{{sheetCls}}"><span class="a-sheet-ico" aria-hidden="true">{{sheetMark}}</span><h3 class="h3">{{explHead}}</h3><p>{{expl}}</p><button type="button" class="btn btn-dark btn-lg btn-block" onClick="{{nextQ}}">{{nextQLabel}}</button></div></div></sc-if></sc-if>
+<sc-if value="{{testResult}}"><section class="card-hero a-reveal a-result"><div class="hero-grid"><div class="grow"><p class="eyebrow">Знакомство с фондом пройдено</p><h2 class="hero-title">{{scoreLine}}</h2><p class="lead">Дальше — встреча с координатором. Выбрать время можно в личном кабинете.</p><div class="actions"><a class="btn btn-dark btn-lg" href="ApplicationStatus.dc.html">Перейти в личный кабинет</a></div></div><span class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></span></div></section></sc-if>
 </sc-if>
 
 </div></div>
@@ -503,7 +593,7 @@ const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-
 */
 window.FORM = {
   title: "Анкета волонтёра",
-  intro: "Мы рады, что вы хотите помогать фонду «Дети Марии». Ответы помогут понять, где вам будет интереснее и где вы нужнее всего. Займёт около 10 минут.",
+  intro: "Мы рады, что вы хотите помогать фонду «Дети Марии». Три коротких шага — около 5 минут. Остальное обсудим лично.",
   steps: [
     {
       id: "about",
@@ -517,48 +607,28 @@ window.FORM = {
         { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel",
           placeholder: "+7 (999) 123-45-67" },
         { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email",
-          why: "На почту придёт ссылка в личный кабинет волонтёра." },
+          why: "Ссылку на личный кабинет пришлём на почту и по SMS." },
         { id: "channels", label: "Как с вами удобнее связываться?", type: "checkbox", required: true,
           options: ["Telegram", "WhatsApp", "Max", "Электронная почта", "SMS", "Телефонный звонок"] },
         { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username",
           showIf: { field: "channels", value: "Telegram" } },
         { id: "area", label: "Где вы живёте?", type: "select", required: true,
-          options: ["Центр Москвы", "Север / Северо-Восток", "Восток / Юго-Восток", "Юг / Юго-Запад", "Запад / Северо-Запад", "Новая Москва", "Московская область", "Ярославская область", "Северная Осетия", "Другой город"],
-          why: "Чтобы звать на занятия, до которых вам удобно добираться." }
+          options: ["Центр Москвы", "Север / Северо-Восток", "Восток / Юго-Восток", "Юг / Юго-Запад", "Запад / Северо-Запад", "Новая Москва", "Московская область", "Ярославская область", "Северная Осетия", "Другой город"] }
       ]
     },
     {
       id: "help",
-      title: "Чем хотите помогать",
+      title: "О вас",
       fields: [
-        { id: "roles", label: "Чем вы хотите помогать?", type: "roles", required: true,
-          why: "Откройте направление и отметьте конкретные роли — так координатор сразу поймёт, куда вас позвать. Можно несколько.",
-          unsure: "Пока не знаю — помогите выбрать на встрече",
-          groups: [
-            { title: "Творческие занятия", hint: "регулярно или разово, с детьми и взрослыми",
-              roles: ["Педагог Арт-лаборатории (подростки из ЦССВ, раз в неделю)", "Ведущий мастер-класса", "Театральные занятия", "Активные и развивающие игры"] },
-            { title: "Помощь на занятиях", hint: "рядом с педагогом, опыт не обязателен",
-              roles: ["Ассистент педагога в мастерской"] },
-            { title: "Обучение", hint: "онлайн или очно",
-              roles: ["Репетитор по школьным предметам", "Жизненные навыки: деньги, документы, быт"] },
-            { title: "Помощь специалиста", hint: "нужно профильное образование",
-              roles: ["Психолог", "Логопед", "Нейропсихолог"] },
-            { title: "Фото, видео и контент",
-              roles: ["Предметная съёмка для магазина", "Репортажная съёмка занятий и событий", "Монтаж видео", "Соцсети и тексты", "Графический дизайн: афиши, листовки"] },
-            { title: "Мероприятия и выезды",
-              roles: ["Помощь на мероприятиях: встреча гостей, навигация", "Сопровождение на выездах (арт-резиденция, поездки)"] },
-            { title: "Магазин и ярмарки",
-              roles: ["Продажи на ярмарках и маркетах", "Упаковка и подготовка изделий"] },
-            { title: "Pro bono для фонда", hint: "профессиональная помощь команде",
-              roles: ["Юрист", "Помощь с трудоустройством выпускников", "Маркетинг и продвижение", "Сайт и IT", "Дизайн и бренд"] }
-          ] },
+        { id: "directions", label: "Что вам было бы интересно?", type: "chips", required: true,
+          options: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Фото, видео, соцсети", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Профессиональная помощь фонду: юрист, маркетинг, IT", "Пока не знаю"],
+          exclusive: ["Пока не знаю"],
+          why: "Можно несколько. Это не обязательство — роль обсудим на встрече." },
         { id: "skills", label: "Что вы умеете или любите делать?", type: "chips",
-          options: ["Керамика", "Живопись и рисунок", "Валяние", "Шитьё и вышивка", "Кулинария", "Музыка и вокал", "Театр", "Спорт и подвижные игры", "Фотография", "Видео и монтаж", "Дизайн", "Соцсети", "Педагогика", "Психология", "Школьные предметы", "Английский", "Опыт вожатого", "Жесты или карточки для общения"],
-          allowOther: true,
-          why: "По навыкам мы подбираем мастер-классы и занятия, где вы будете на своём месте." },
+          options: ["Керамика", "Живопись и рисунок", "Валяние", "Шитьё и вышивка", "Кулинария", "Музыка и вокал", "Театр", "Спорт и игры", "Фотография", "Видео и монтаж", "Дизайн", "Соцсети", "Педагогика", "Психология", "Школьные предметы", "Английский"],
+          allowOther: true },
         { id: "sphere", label: "В какой сфере вы работаете или учитесь?", type: "select", optional: true,
-          options: ["Образование и педагогика", "Психология, медицина, соцработа", "Искусство и ремёсла", "Дизайн, фото, медиа", "IT", "Маркетинг и продажи", "Право", "Финансы и бизнес", "Учусь в школе или колледже", "Учусь в вузе", "На пенсии", "Другое"],
-          why: "Иногда фонду нужна профессиональная помощь — так мы узнаем, к кому обратиться." },
+          options: ["Образование и педагогика", "Психология, медицина, соцработа", "Искусство и ремёсла", "Дизайн, фото, медиа", "IT", "Маркетинг и продажи", "Право", "Финансы и бизнес", "Учусь в школе или колледже", "Учусь в вузе", "На пенсии", "Другое"] },
         { id: "volExp", label: "У вас есть опыт волонтёрства?", type: "radio", required: true,
           options: ["Да", "Нет"] },
         { id: "volExpText", label: "Расскажите коротко: где и что делали", type: "textarea",
@@ -570,128 +640,61 @@ window.FORM = {
       ]
     },
     {
-      id: "time",
-      title: "Когда и где",
-      fields: [
-        { id: "participation", label: "Как вы хотите помогать?", type: "radio", required: true,
-          options: ["Постоянно — в одной программе, раз в неделю или чаще", "Регулярно, но реже — пару раз в месяц", "Разово — отдельные мероприятия и задачи", "Пока не знаю — обсудим на встрече"],
-          why: "Участникам важны знакомые лица: доверие строится месяцами. Постоянным волонтёрам подберём группу, разовым — события." },
-        /* Варианты зависят от региона из первого шага (поле area). Площадки — по постам фонда в ВК */
-        { id: "places", label: "Где вам удобно помогать?", type: "checkbox", required: true,
-          why: "Отметьте всё, что подходит. Выезды — для всех: участники и волонтёры едут из разных городов.",
-          groups: [
-            { title: "В Москве",
-              showIf: { field: "area", value: ["Центр Москвы", "Север / Северо-Восток", "Восток / Юго-Восток", "Юг / Юго-Запад", "Запад / Северо-Запад", "Новая Москва", "Московская область"] },
-              options: [
-                "Студия на Дмитровском переулке (м. Театральная)",
-                "Студия на Новинском бульваре",
-                "Инклюзивный центр «Тверская 15»",
-                "Загородная мастерская Марии Елисеевой — Арт-субботы",
-                "Ярмарки и маркеты по Москве"
-              ] },
-            { title: "В Ярославской области",
-              showIf: { field: "area", value: "Ярославская область" },
-              note: "Постоянных площадок в области у фонда нет. Ребята из детских домов Углича, Рыбинска и Ярославля едут в летнюю арт-резиденцию в Учме и на зимнюю неделю — их можно отметить в выездах ниже.",
-              options: [] },
-            { title: "В Северной Осетии",
-              showIf: { field: "area", value: "Северная Осетия" },
-              note: "Фонд приезжает каждый сентябрь и апрель. Многие ребята из Беслана сами стали волонтёрами.",
-              options: [
-                "Беслан, школа № 1 — мастер-классы во время приездов фонда",
-                "Интернат «Надежда», село Дур-Дур"
-              ] },
-            { title: "Выезды с ночёвкой",
-              options: [
-                "Летняя арт-резиденция в Учме на Волге, Ярославская обл. — июль–август",
-                "Зимняя неделя в Сорочанах, Подмосковье — февраль",
-                "Поездки в Беслан, Северная Осетия — сентябрь и апрель"
-              ] },
-            { title: "Удалённо",
-              options: ["Онлайн"] }
-          ] },
-        { id: "slots", label: "Когда вам обычно удобно?", type: "grid", required: true,
-          rows: ["Будни", "Суббота", "Воскресенье"], cols: ["Утро", "День", "Вечер"],
-          why: "Многие занятия проходят по будням утром и днём — если у вас есть это время, обязательно отметьте." }
-      ]
-    },
-    {
       id: "final",
       title: "Последний шаг",
       fields: [
-        { id: "motivation", label: "Почему вы хотите помогать именно нам?", type: "textarea", optional: true,
-          why: "Нам правда интересно." },
+        { id: "participation", label: "Как часто хотели бы помогать?", type: "radio", required: true,
+          options: ["Регулярно, каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"],
+          why: "Участникам важны знакомые лица: доверие строится месяцами." },
+        { id: "online", label: "Могу помогать и онлайн", type: "consent" },
+        { id: "motivation", label: "Почему вы хотите помогать именно нам?", type: "textarea", optional: true },
         { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
           options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья или знакомые", "Был(а) на мероприятии фонда", "Другое"] },
         { id: "record", label: "Для работы с детьми нужна справка об отсутствии судимости. Готовы её получить?", type: "radio", required: true,
           options: ["Да", "Справка уже есть", "Хочу сначала обсудить"],
-          why: "Её можно бесплатно заказать на Госуслугах, приходит за 1–4 недели." },
+          why: "Заказать её можно бесплатно на Госуслугах — это займёт минуту." },
         { id: "consentPD", label: "Я согласен(на) на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
         { id: "consentNews", label: "Хочу получать новости и приглашения фонда", type: "consent" }
       ]
     }
   ],
 
-  /*
-    Шаг онбординга «Профиль для подбора» — заполняется уже на платформе, после модуля «Кому мы помогаем».
-    На входе эти вопросы лишние, а после знакомства с участниками понятно, зачем фонд о них спрашивает.
-  */
-  matching: {
-    title: "Профиль для подбора",
-    intro: "Теперь, когда вы знаете, кто наши участники, расскажите чуть больше о себе. По этим ответам мы будем звать вас на подходящие занятия. Всё по желанию, изменить можно в профиле.",
-    fields: [
-      { id: "physical", label: "Можете помочь физически, если нужно?", type: "checkbox",
-        options: ["Помочь человеку на коляске", "Перенести или собрать оборудование", "Нет, физическая помощь мне не подходит"],
-        exclusive: ["Нет, физическая помощь мне не подходит"],
-        optional: true,
-        why: "Иногда на занятии нужна физическая помощь — так мы позовём тех, кому это по силам. Эти данные видит только координатор." },
-      { id: "portfolio", label: "Ссылка на портфолио или примеры работ", type: "text", optional: true, placeholder: "https://…",
-        showIf: { field: "roles", value: ["Предметная съёмка для магазина", "Репортажная съёмка занятий и событий", "Монтаж видео", "Соцсети и тексты", "Графический дизайн: афиши, листовки", "Дизайн и бренд"] },
-        why: "Координатор посмотрит и подберёт задачу под ваш уровень." },
-      { id: "comfort", label: "Дорога", type: "checkbox",
-        options: ["Нужна помощь с дорогой"],
-        optional: true,
-        why: "Подскажем маршрут, встретим у метро, а на выезды договоримся ехать вместе." }
-    ]
-  },
+  /* Раньше здесь был шаг онбординга «Профиль для подбора». Убран: физическую помощь и график
+     координатор узнает на встрече, а «Когда свободна» и «Как часто» уже есть в профиле на платформе. */
+  matching: { title: "", intro: "", fields: [] },
 
   /* Уменьшительные имена: если человек ввёл такое, мягко просим полное. Не блокирует отправку. */
   shortNames: { "Миша": "Михаил", "Саша": "Александр или Александра", "Маша": "Мария", "Женя": "Евгений или Евгения", "Дима": "Дмитрий", "Катя": "Екатерина", "Настя": "Анастасия", "Лена": "Елена", "Таня": "Татьяна", "Оля": "Ольга", "Аня": "Анна", "Вова": "Владимир", "Петя": "Пётр", "Коля": "Николай", "Серёжа": "Сергей", "Сережа": "Сергей", "Лёша": "Алексей", "Леша": "Алексей", "Паша": "Павел", "Юля": "Юлия", "Света": "Светлана", "Наташа": "Наталья", "Ира": "Ирина", "Даша": "Дарья", "Ваня": "Иван", "Костя": "Константин", "Гриша": "Григорий", "Витя": "Виктор", "Галя": "Галина", "Люба": "Любовь", "Надя": "Надежда", "Соня": "Софья", "Ксюша": "Ксения", "Тёма": "Артём", "Тема": "Артём", "Андрюша": "Андрей", "Жора": "Георгий", "Слава": "Вячеслав или Ярослава" },
 
   done: {
-    title: "Спасибо! Заявка отправлена",
-    text: "Мы отправили ссылку в личный кабинет волонтёра на вашу почту. В кабинете — короткое знакомство с фондом. После него мы позовём вас на встречу с координатором."
+    title: "Заявка отправлена",
+    text: "Ссылку на этот кабинет мы прислали по SMS и на почту — по ней можно вернуться в любой момент."
   }
 };
 
 /*
-  Контент онбординга волонтёра. Это данные, а не код: тексты правятся прямо здесь.
+  Контент знакомства с фондом. Это данные, а не код: тексты правятся прямо здесь,
+  потом пересборка: python3 scripts/build_prototype.py
 
-  У каждого модуля source — откуда взят текст (для команды, в интерфейсе не показывается).
+  Шаги идут подряд, без оглавления: «Понятно, дальше» → следующий шаг → в конце тест → личный кабинет.
+  source — откуда текст (для команды, в интерфейсе не показывается).
 
-  Типы блоков:
-    lead       { text }                                — крупный вводный абзац
-    text       { text }                                — абзацы через пустую строку
-    facts      { items: [[число, подпись], …] }
-    timeline   { items: [[год, заголовок, текст], …] }
-    cards      { items: [[заголовок, текст], …], open } — open: true — текст сразу виден, иначе по нажатию
-    list       { title, items: [строка, …], ordered }      — ordered: true — нумерованный список 1, 2, 3…
-    steps      { title, items: [[заголовок, текст], …] }
-    phrases    { items: [[как сказать, как не говорить, почему], …] }
-    situations { items: [{ title, do: […], dont: […] }, …]  }
-
-  Модуль с form: "matching" вместо блоков показывает поля из FORM.matching (content/form.js),
-  ответы сохраняются в профиль волонтёра.
-    callout    { tone: "info" | "warn", text }
-    pillars    { items: [{ title, from, text, items: […] }, …] } — опоры с «что это значит на занятии»
-    check      { title, intro, items: [{ q, a, p }, …] }    — ситуация, ответ открывается по нажатию
-    more       { title, blocks: […] }                       — раскрывающийся блок с любыми блоками внутри
-    video      { title, duration, src }                     — src: ссылка на VK Видео, Rutube, YouTube или .mp4;
-                                                              без src показывается заглушка «видео скоро появится».
-                                                              Видео необязательны и не влияют на прогресс
+  Блоки (появляются с анимацией при прокрутке):
+    lead     { text }                                  — крупный вводный абзац
+    facts    { items: [[число, подпись], …] }           — числа «набегают» при появлении
+    timeline { items: [[год, заголовок, текст], …] }    — годы появляются по одному
+    icards   { title, items: [{ icon, title, text }] }  — карточки с иконкой
+    story    { title, intro, items: [[заголовок, текст], …] } — история по шагам
+    rules    { title, items: [строка, …] }              — нумерованные правила
+    phrases  { title, items: [[так, не так], …] }       — «Так говорим / Так не говорим»
+    quiz     { title, intro, items: [{ q, o: […], a, e }] } — выбор ответа, сразу зелёная или красная карточка с объяснением
+    video    { title, duration, src }                   — без src — заглушка «Видео скоро появится»
+    callout  { tone: "info" | "warn", text }
+  Иконки: palette, book, users, heart, home, hand, shield, smile, star, camera, calendar, pin, message, mask, music, award, sparkle, eye, clock, phone, alert, check-circle.
 */
 window.ONBOARDING = {
   title: "Знакомство с фондом",
-  intro: "Шесть коротких шагов перед встречей с координатором: кто мы, кому помогаем, как себя вести и как общаться с участниками. В конце — тест.",
+  intro: "Четыре коротких шага и небольшой тест — около 20 минут. Можно прерваться и вернуться.",
 
   modules: [
     {
@@ -701,16 +704,16 @@ window.ONBOARDING = {
       source: "Сайт фонда, материал АСИ к 25-летию (Фёдор), презентация фонда для партнёров 2025",
       blocks: [
         { type: "lead", text: "Всё началось с рисования за столом для пинг-понга." },
-        { type: "facts", items: [["300+", "участников в год"], ["4", "площадки в Москве, занятия вне стен учреждений"], ["7", "дней в неделю идут мастерские"], ["40+", "сотрудников и волонтёров"]] },
+        { type: "facts", items: [["2325+", "участников за всё время"], ["300+", "участников каждый год"], ["7", "дней в неделю идут мастерские"], ["4", "площадки в Москве"]] },
         { type: "timeline", items: [
-          ["1993", "Первый раз в детском доме", "Семья и друзья художницы Марии Елисеевой приходят в московский интернат волонтёрами. Мария начинает рисовать вместе с детьми."],
-          ["1997", "Художественный центр", "Занятия переезжают из интерната в театр-студию «Подвал». Первый грант получают на краски."],
-          ["2020", "Благотворительный фонд", "Художественный центр становится благотворительным фондом «Дети Марии»."],
-          ["2021", "Наставники и сопровождение", "Запускается программа наставничества и сопровождение подростков, которые выходят из детских учреждений."],
+          ["1993", "Первый раз в детском доме", "Семья и друзья художницы Марии Елисеевой приходят в интернат волонтёрами. Мария начинает рисовать вместе с детьми."],
+          ["1997", "Художественный центр", "Занятия переезжают в театр-студию «Подвал». Первый грант получают на краски."],
+          ["2020", "Благотворительный фонд", "Художественный центр становится фондом «Дети Марии»."],
+          ["2021", "Наставники и сопровождение", "Появляются программа наставничества и сопровождение ребят, которые выходят из детских учреждений."],
           ["2026", "Сегодня", "Фонд объединился с АНО «Тверская 15». «Арт-лаборатория» получила Грант Мэра Москвы."]
         ] },
         { type: "video", title: "Как всё начиналось", duration: "2–3 мин" },
-        { type: "callout", tone: "info", text: "Фонд вырос из волонтёрской идеи. Волонтёры здесь с первого дня — поэтому мы так внимательно готовим каждого нового человека." }
+        { type: "callout", tone: "info", text: "Фонд вырос из волонтёрской идеи. Волонтёры здесь с первого дня." }
       ]
     },
 
@@ -720,101 +723,56 @@ window.ONBOARDING = {
       minutes: 4,
       source: "Сайт фонда, презентация фонда для партнёров 2025, книги из библиотеки фонда",
       blocks: [
-        { type: "lead", text: "Дети и взрослые с ментальными особенностями и опытом сиротства." },
-        { type: "list", title: "Кто приходит на занятия", items: [
-          "Ребята из центров содействия семейному воспитанию «Радуга» и «Сколковский» и Угличского детского дома",
-          "Жители социальных домов (бывших ПНИ) «Филимонки», «Нагатино-Садовники», «Егорьевский»",
-          "Выпускники детских домов — уже самостоятельно или с семьями"
+        { type: "lead", text: "Детям и взрослым с ментальными особенностями и опытом сиротства." },
+        { type: "icards", title: "Кто приходит на занятия", items: [
+          { icon: "home", title: "Ребята из детских домов", text: "Центры содействия семейному воспитанию «Радуга», «Сколковский», Угличский детский дом" },
+          { icon: "users", title: "Жители социальных домов", text: "Взрослые из бывших ПНИ: «Филимонки», «Нагатино-Садовники», «Егорьевский»" },
+          { icon: "star", title: "Выпускники", text: "Те, кто уже вышел из детского дома и учится жить самостоятельно" }
         ] },
-        { type: "cards", open: true, items: [
-          ["Творчество", "Арт-лаборатория, мастерские «Я могу больше», Арт-суббота, клуб «Пеликан»"],
-          ["Обучение", "«Хочу больше знать»: школьные предметы и навыки для самостоятельной жизни"],
-          ["Инклюзия", "«Воображариум» и «Разные вместе»: участники и гости работают вместе"],
-          ["Сопровождение", "Куратор и тьютор: документы, город, работа. Тренировочная квартира"],
-          ["Выезды", "Арт-резиденция на Волге, зимняя неделя в Сорочанах, поездки в Беслан"]
+        { type: "icards", title: "Чем занимаемся", items: [
+          { icon: "palette", title: "Творчество", text: "Арт-лаборатория, мастерские «Я могу больше», Арт-суббота" },
+          { icon: "book", title: "Обучение", text: "«Хочу больше знать»: школьные предметы и навыки для жизни" },
+          { icon: "smile", title: "Инклюзия", text: "«Воображариум» и «Разные вместе»: участники и гости вместе" },
+          { icon: "hand", title: "Сопровождение", text: "Куратор и тьютор: документы, город, работа" },
+          { icon: "pin", title: "Выезды", text: "Арт-резиденция на Волге, Сорочаны, Беслан" }
         ] },
-        { type: "steps", title: "История Вовы", items: [
-          ["Так было", "Вова жил в социальном доме и впервые пришёл в фонд на занятия керамикой."],
-          ["Шаг за шагом", "Творчество, математика, логопед, куратор. Каждую неделю, четыре года подряд."],
-          ["Так стало", "Вова живёт в квартире сопровождаемого проживания, работает, завёл кота и учится играть на гитаре."]
+        { type: "story", title: "История Вовы", intro: "Так выглядит регулярная помощь — много маленьких шагов.", items: [
+          ["Было", "Вова жил в социальном доме и впервые пришёл в фонд на занятия керамикой."],
+          ["Четыре года", "Каждую неделю: творчество, математика, логопед, куратор."],
+          ["Стало", "Своя квартира с сопровождением, работа, кот и гитара."]
         ] },
-        { type: "list", title: "Что это значит для вас", items: [
-          "Многие участники выросли без постоянных взрослых рядом. Им важно, чтобы человек приходил снова и снова: доверие строится месяцами.",
-          "Кто-то говорит мало или не говорит совсем, кто-то быстро устаёт от шума. Это не невежливость и не каприз.",
-          "Диагнозы знать не нужно. Педагог расскажет, что важно знать о группе."
-        ] },
-        { type: "more", title: "Самостоятельность, права и дееспособность", blocks: [
-          { type: "list", items: [
-            "Многие участники годами жили там, где всё решали за них. Отсюда «выученная беспомощность» — следствие жизни в учреждении, а не диагноза. Поэтому мы не делаем за человека то, что он может сам.",
-            "Фразу «тебе нельзя, ты недееспособный» не говорим. Работа, учёба, выбор — право человека, а не награда.",
-            "Дееспособность — юридический статус, а не «ум». Меняет его только суд. Даже если человек недееспособен, опекун обязан учитывать его мнение.",
-            "Всегда обращайтесь к самому человеку, а не к тому, кто его сопровождает."
-          ] }
+        { type: "icards", title: "Что важно знать", items: [
+          { icon: "clock", title: "Доверие строится месяцами", text: "Многие росли без постоянных взрослых. Важно приходить снова и снова." },
+          { icon: "heart", title: "Это не каприз", text: "Кто-то мало говорит, кто-то быстро устаёт от шума. Это особенность, а не невежливость." },
+          { icon: "hand", title: "Не делаем за человека", text: "Помогаем ровно настолько, насколько нужно. Остальное человек делает сам." },
+          { icon: "eye", title: "Диагнозы знать не нужно", text: "Педагог расскажет, что важно знать о группе." }
         ] }
       ]
-    },
-
-    {
-      id: "matching",
-      title: "Профиль для подбора",
-      minutes: 2,
-      form: "matching",
-      source: "Поля — в content/form.js → matching"
     },
 
     {
       id: "ethics",
       title: "Кодекс этики",
       minutes: 5,
-      source: "Кодекс этики и стандарты работы БФ «Дети Марии»; формулировка «уважать не жалея…» — сборник «Особенное тьюторство», 2025",
+      source: "Кодекс этики и стандарты работы БФ «Дети Марии»; «уважать не жалея…» — сборник «Особенное тьюторство», 2025",
       blocks: [
-        { type: "lead", text: "В кодексе фонда 10 принципов, и они касаются волонтёров так же, как сотрудников. На занятии всё сводится к четырём опорам." },
-        { type: "pillars", items: [
-          { title: "Уважение", from: "Уважение и достоинство · Инклюзивность · Соучастие и эмпатия",
-            text: "Уважать не жалея, помогать не унижая, учить без снисходительности.",
-            items: ["Спрашиваем, а не решаем за человека", "Ко взрослым участникам обращаемся как ко взрослым", "Не шутим об особенностях — ни при участниках, ни без них"] },
-          { title: "Безопасность и тайна", from: "Безопасность · Конфиденциальность",
-            text: "Участник должен быть в безопасности — физически, эмоционально и в интернете.",
-            items: ["Фото и видео — только с согласия самого человека и через фонд", "Не пересказываем личные истории и не обсуждаем диагнозы", "Тревожное — сразу педагогу"] },
-          { title: "Честность и обещания", from: "Честность и прозрачность · Ответственность · Доверие",
-            text: "Многие участники привыкли, что взрослые исчезают. Мы — нет.",
-            items: ["Приходим, когда обещали; не можем — предупреждаем заранее", "Не обещаем того, что не сделаем", "Признаём свои ошибки"] },
-          { title: "Вместе", from: "Поддержка и вовлечение · Командная работа · Сотрудничество · Профессионализм",
-            text: "Волонтёр — часть команды занятия, а не отдельный помощник.",
-            items: ["Участник делает сам, мы помогаем", "Не уверены — спрашиваем педагога или координатора", "Рассказываем команде, что заметили на занятии"] }
+        { type: "lead", text: "У фонда есть кодекс этики — он касается и волонтёров. На занятии всё сводится к четырём вещам." },
+        { type: "icards", items: [
+          { icon: "heart", title: "Уважение", text: "Уважать не жалея, помогать не унижая. Спрашиваем, а не решаем за человека. Со взрослыми — как со взрослыми." },
+          { icon: "shield", title: "Безопасность и тайна", text: "Фото — только с согласия человека и через фонд. Личные истории не пересказываем. Тревожное — сразу педагогу." },
+          { icon: "check-circle", title: "Честность", text: "Приходим, когда обещали. Не можем — предупреждаем заранее. Не обещаем того, что не сделаем." },
+          { icon: "users", title: "Вместе", text: "Волонтёр — часть команды занятия. Не уверены — спрашиваем педагога или координатора." }
         ] },
-        { type: "check", title: "Как бы вы поступили?", intro: "Подумайте, потом откройте ответ.", items: [
-          { q: "Взрослый участник хочет сам налить себе чай, но у него дрожат руки. Налить за него?",
-            a: "Спросить: «Подержать чашку?» — и дать сделать самому. Самостоятельность важнее скорости, а подстраховать можно рядом.",
-            p: "Уважение и достоинство · Поддержка и вовлечение" },
+        { type: "quiz", title: "Как бы вы поступили?", items: [
+          { q: "Взрослый участник хочет сам налить себе чай, но у него дрожат руки.",
+            o: ["Налить за него, так быстрее", "Спросить: «Подержать чашку?» — и дать сделать самому"], a: 1,
+            e: "Самостоятельность важнее скорости. Подстраховать можно рядом, а налить — пусть сам. Так человек чувствует, что ему доверяют." },
           { q: "Вы опаздываете на занятие на 20 минут. Участники ждут именно вас.",
-            a: "Сразу написать педагогу или координатору: те предупредят ребят. Молча опоздать — значит подвести тех, кто ждёт.",
-            p: "Ответственность · Доверие и честность" },
+            o: ["Сразу написать педагогу или координатору", "Прийти как получится — главное, что пришли"], a: 0,
+            e: "Педагог предупредит ребят, и никто не будет волноваться. Молча опоздать — значит подвести тех, кто ждёт." },
           { q: "Педагог просит не помогать участнику, хотя у него явно не получается.",
-            a: "Довериться педагогу: он знает участника и, возможно, учит его справляться самостоятельно. Вопросы — после занятия.",
-            p: "Индивидуальный подход · Командная работа" }
-        ] },
-        { type: "more", title: "Полный текст: 10 принципов и правила принятия решений", blocks: [
-          { type: "cards", open: true, items: [
-            ["Уважение и достоинство", "Мы признаём уникальность каждого человека, относимся ко всем с уважением и защищаем их достоинство."],
-            ["Честность и прозрачность", "Мы честны во всём и открыто говорим о наших целях, методах и результатах."],
-            ["Соучастие и эмпатия", "Мы слушаем и понимаем потребности участников и поддерживаем их с солидарностью и заботой."],
-            ["Поддержка и вовлечение", "Мы вовлекаем сотрудников и участников в решения, которые касаются их жизни."],
-            ["Профессионализм", "Мы держим высокий уровень и постоянно обновляем знания и навыки."],
-            ["Конфиденциальность", "Мы уважаем право участников на конфиденциальность и не раскрываем личные данные без их согласия."],
-            ["Инклюзивность", "Мы создаём условия для развития всех, независимо от особенностей или прошлого."],
-            ["Сотрудничество", "Мы строим партнёрства с другими организациями и обмениваемся опытом."],
-            ["Ответственность", "Мы отвечаем за свои действия, обещания и результаты перед участниками, коллегами и обществом."],
-            ["Командная работа", "Мы поддерживаем коллег и волонтёров и создаём условия для совместной работы."]
-          ] },
-          { type: "steps", items: [
-            ["Интересы участников прежде всего", "Решения принимаются исходя из интересов детей и взрослых, которым мы помогаем."],
-            ["Индивидуальный подход", "Учитываем потребности, способности и желания каждого."],
-            ["Безопасность", "Физическая, психологическая и информационная."],
-            ["Конфиденциальность", "Личные данные раскрываются только в случаях, предусмотренных законом, и в интересах человека."],
-            ["Доверие и честность", "Выполняем обязательства, не обманываем и не манипулируем."],
-            ["Устойчивость", "Нам важны долгие результаты, а не разовые."]
-          ] }
+            o: ["Всё-таки помочь, пока педагог не видит", "Довериться педагогу, а вопрос задать после занятия"], a: 1,
+            e: "Педагог знает участника и, возможно, учит его справляться самому. Все решения о том, как заниматься, — за педагогом." }
         ] }
       ]
     },
@@ -822,108 +780,73 @@ window.ONBOARDING = {
     {
       id: "talk",
       title: "Как общаться с участниками",
-      minutes: 7,
+      minutes: 6,
       source: "Команда: кодекс этики, книги из библиотеки фонда («Жизнь как жизнь», Е. Заблоцкис, «Особенное тьюторство»), практики NSPCC и National Autistic Society. Заменить правилами коммуникации фонда, когда они будут",
       blocks: [
-        { type: "lead", text: "Главное, на чём спотыкаются новые волонтёры, — не творчество, а общение. Вот что помогает с первого дня." },
-        { type: "list", title: "Пять правил", ordered: true, items: [
-          "Обещайте только то, что точно сделаете. «Я приду в следующую субботу» — это обещание.",
-          "Будьте на виду. Общаемся в группе или там, где рядом другие взрослые.",
-          "Личные контакты не даём и не берём: телефон, соцсети, переписка — только через фонд.",
-          "Сначала чувство, потом задание. Если человек расстроен, сначала помогите успокоиться.",
+        { type: "lead", text: "Главное, на чём спотыкаются новые волонтёры, — не творчество, а общение. Пять правил помогут с первого дня." },
+        { type: "rules", items: [
+          "Обещайте только то, что точно сделаете.",
+          "Будьте на виду: общаемся там, где рядом другие взрослые.",
+          "Личные контакты не даём и не берём — только через фонд.",
+          "Сначала чувство, потом задание: если человек расстроен, сначала помогите успокоиться.",
           "Не справляетесь — зовите педагога. Это не слабость, а правило."
         ] },
-        { type: "phrases", items: [
-          ["«Тебе синий или зелёный?» — и показать оба", "«Что ты хочешь?»", "Выбор из двух посилен, открытый вопрос часто слишком сложен"],
-          ["«Вижу, ты расстроился. Я рядом»", "«Да ладно, ничего страшного»", "Назвать чувство — значит его признать"],
-          ["«Так делать не надо. А ты — молодец, что пришёл»", "«Ты плохо себя ведёшь»", "Оцениваем поступок, а не человека"],
-          ["«Можно я помогу?»", "Молча взять и сделать за человека", "Сохраняем самостоятельность и достоинство"]
+        { type: "phrases", title: "Как говорить", items: [
+          ["«Тебе синий или зелёный?» — и показать оба", "«Что ты хочешь?»"],
+          ["«Вижу, ты расстроился. Я рядом»", "«Да ладно, ничего страшного»"],
+          ["«Так делать не надо. А ты — молодец, что пришёл»", "«Ты плохо себя ведёшь»"],
+          ["«Можно я помогу?»", "Молча сделать за человека"],
+          ["«Человек на коляске», «у него аутизм»", "«Колясочник», «аутист», «страдает»"]
         ] },
-        { type: "list", title: "Если человеку трудно говорить", items: [
-          "Представьтесь и скажите, зачем подошли.",
-          "Говорите медленно и просто, показывайте действие руками.",
-          "Задавайте вопросы, на которые можно ответить «да» или «нет». Меняйте варианты местами: иногда человек повторяет последнее услышанное слово.",
-          "Ждите ответа — до 10 секунд. Жест и взгляд тоже ответ, «не знаю» — тоже."
+        { type: "icards", title: "Если человеку трудно говорить", items: [
+          { icon: "message", title: "Представьтесь", text: "Скажите, кто вы и зачем подошли." },
+          { icon: "hand", title: "Показывайте", text: "Говорите медленно и просто, показывайте действие руками." },
+          { icon: "check-circle", title: "Да или нет", text: "Задавайте вопросы, на которые можно ответить «да» или «нет»." },
+          { icon: "clock", title: "Ждите ответа", text: "До 10 секунд. Жест и взгляд — тоже ответ." }
         ] },
-        { type: "situations", items: [
-          { title: "Участник не хочет заниматься",
-            do: ["Не настаивать. Предложить посидеть рядом или выбрать другое занятие", "Сказать, что можно присоединиться позже"],
-            dont: ["Уговаривать, стыдить, сравнивать с другими"] },
-          { title: "Просит ваш телефон или добавиться в друзья",
-            do: ["Мягко объяснить: «Я не даю свой номер, но мы увидимся здесь в субботу»", "Сказать координатору, что участник хочет общаться"],
-            dont: ["Давать номер «один раз», переписываться в соцсетях"] },
-          { title: "Рассказывает о насилии или о том, что ему плохо",
-            do: ["Спокойно выслушать, не перебивать", "Сказать: «Ты правильно сделал, что рассказал. Ты не виноват»", "Объяснить, что расскажете тому, кто может помочь, и сразу сообщить педагогу или координатору"],
-            dont: ["Обещать сохранить секрет", "Расспрашивать о деталях"] },
-          { title: "Перегрузка: кричит, закрывает уши, раскачивается",
-            do: ["Убрать лишнее: шум, свет, зрителей", "Говорить мало и тихо, дать время", "Позвать педагога"],
-            dont: ["Трогать без разрешения", "Требовать успокоиться"] },
-          { title: "Спрашивает о личном: тело, отношения, болезнь",
-            do: ["Спокойно сказать, что это важный вопрос", "Предложить обсудить его с куратором и сообщить куратору"],
-            dont: ["Вести такой разговор самому", "Смеяться или обрывать"] }
-        ] },
-        { type: "more", title: "Как говорить о людях", blocks: [
-          { type: "phrases", items: [
-            ["человек на коляске", "колясочник", "Сначала человек, потом его особенность"],
-            ["человек с синдромом Дауна, с аутизмом", "даун, аутист", "Диагноз — не имя"],
-            ["у него аутизм", "он болеет, страдает аутизмом", "Это состояние, а не болезнь"],
-            ["человек с инвалидностью", "инвалид", ""]
-          ] }
+        { type: "icards", title: "Если случилось", items: [
+          { icon: "alert", title: "Рассказывает о насилии", text: "Выслушать, сказать «ты не виноват», не обещать секрет и сразу сообщить педагогу." },
+          { icon: "phone", title: "Просит ваш телефон", text: "«Я не даю номер, но мы увидимся здесь в субботу» — и сказать координатору." },
+          { icon: "music", title: "Перегрузка от шума", text: "Убрать шум и зрителей, говорить мало и тихо, позвать педагога." },
+          { icon: "smile", title: "Не хочет заниматься", text: "Не настаивать: можно посидеть рядом или присоединиться позже." }
         ] },
         { type: "callout", tone: "warn", text: "Если есть угроза жизни или здоровью — сразу зовите педагога, при необходимости звоните 112." }
-      ]
-    },
-
-    {
-      id: "shift",
-      title: "Как пройдёт первое занятие",
-      minutes: 2,
-      source: "Фёдор и команда; согласовать с фондом",
-      blocks: [
-        { type: "lead", text: "Первое занятие вы проведёте рядом с педагогом — одного вас не оставят." },
-        { type: "steps", items: [
-          ["До занятия", "Вы знаете дату, место и кто вас встретит. Педагог коротко расскажет о группе."],
-          ["На занятии", "Начинаем с приветственного круга. Вы помогаете участникам, а как заниматься — решает педагог."],
-          ["После", "Пять минут разбора с педагогом. Через пару дней координатор спросит, как всё прошло."],
-          ["Дальше", "Регулярные занятия, другая роль или пауза — решаем вместе. Если решите уйти, скажите заранее, чтобы попрощаться с группой."]
-        ] },
-        { type: "video", title: "Один день в мастерской", duration: "1–2 мин" },
-        { type: "list", title: "Что взять с собой", items: [
-          "Одежду, которую не жалко испачкать, и сменную обувь",
-          "Полчаса запаса по времени"
-        ] }
       ]
     }
   ],
 
   test: {
-    title: "Проверьте себя",
-    intro: "Это не экзамен. После каждого ответа вы увидите пояснение. Чтобы записаться на встречу с координатором, ответьте правильно на 13 вопросов из 16. Пройти можно сколько угодно раз.",
-    pass: 13,
-    source: "Вопросы 1–10 — Фёдор, 11–16 — команда по кодексу и библиотеке фонда",
+    title: "Небольшой тест",
+    intro: "10 вопросов по тому, что вы прочитали. После каждого ответа — пояснение. Это не экзамен.",
+    pass: 0,
+    source: "Вопросы 1–5 — по онбордингу Фёдора, 6–10 — команда по кодексу и библиотеке фонда",
     questions: [
-      { q: "С чего начался фонд «Дети Марии»?", o: ["С большого государственного гранта на строительство центра", "С того, что художница Мария Елисеева стала рисовать вместе с детьми из интерната", "С благотворительного концерта", "С открытия интернет-магазина изделий мастерских"], a: 1, e: "В 1993 году семья и друзья Марии Елисеевой пришли в интернат волонтёрами. Первый грант позже получили на краски." },
-      { q: "Кому помогает фонд?", o: ["Только детям младшего школьного возраста", "Пожилым людям в домах престарелых", "Детям и взрослым с ментальными особенностями и опытом сиротства", "Семьям, которые хотят усыновить ребёнка"], a: 2, e: "Участники — ребята из детских домов, жители социальных домов и выпускники интернатов." },
-      { q: "На кого распространяется кодекс этики?", o: ["Только на руководство фонда", "На штатных сотрудников", "На сотрудников, исполнителей и волонтёров", "Только на ведущих мастерских"], a: 2, e: "Кодекс прямо распространяется на волонтёров, как и на сотрудников и исполнителей." },
-      { q: "На занятии участник рассказал вам о своей семье. Вечером знакомый спрашивает, как прошёл день. Что делать?", o: ["Пересказать историю: знакомый никого из участников не знает", "Рассказать о занятии в общих словах, не передавая личное", "Записать историю, чтобы потом выложить пост", "Пересказать, но изменить имя"], a: 1, e: "Принцип конфиденциальности: личные истории участников не раскрываются без их согласия." },
-      { q: "Вы сделали отличное фото с участниками на мастер-классе. Как поступить?", o: ["Сразу выложить в свои соцсети", "Отправить в общий чат друзей", "Не публиковать самому и спросить координатора: изображения участников публикуются только с их согласия", "Выложить, закрыв лица смайликами"], a: 2, e: "Изображение — тоже личная информация. Решение о публикации принимается с согласия участника и вместе с фондом." },
-      { q: "Участник хочет сделать поделку по-своему, а не так, как показал ведущий. Ваши действия?", o: ["Настоять на образце: так будет красивее", "Поддержать его идею и помочь, если это безопасно", "Сделать работу за него, чтобы успеть", "Отправить его к другому столу"], a: 1, e: "Индивидуальный подход и вовлечение: мы учитываем желания человека и поддерживаем его самостоятельность." },
-      { q: "Вы пообещали прийти в субботу, но планы изменились. Что правильно?", o: ["Просто не прийти: волонтёрство добровольное", "Как можно раньше предупредить координатора", "Написать участнику напрямую и попросить не ждать", "Прислать вместо себя друга без предупреждения"], a: 1, e: "Мы выполняем обязательства, а если не можем — заранее предупреждаем. Участники ждут знакомых людей." },
-      { q: "Во время занятия ситуация кажется вам небезопасной для участника. Что делать?", o: ["Подождать до конца занятия и рассказать потом", "Сразу сказать руководителю занятия или координатору", "Разобраться самостоятельно любым способом", "Ничего не делать: это не ваша зона ответственности"], a: 1, e: "Безопасность — одно из правил принятия решений. Если сомневаетесь, остановитесь и спросите." },
-      { q: "Какое правило стоит первым, когда фонд принимает решения?", o: ["Экономия ресурсов", "Удобство сотрудников", "Приоритет интересов участников", "Скорость"], a: 2, e: "Все решения принимаются исходя из интересов детей и взрослых, которым помогает фонд." },
-      { q: "Другой волонтёр пренебрежительно пошутил про участника. Как поступить?", o: ["Посмеяться, чтобы не портить атмосферу", "Промолчать: это его дело", "Тактично остановить его и, если нужно, сказать руководителю", "Высмеять его в ответ при всех"], a: 2, e: "Кодекс требует избегать унижения и пренебрежения и при этом быть тактичным." },
-      { q: "Подросток просит ваш номер телефона, чтобы писать вам. Что ответить?", o: ["Дать номер: это поможет построить доверие", "«Я не даю свой номер, но мы увидимся здесь в субботу», и сказать координатору", "Добавиться в соцсетях вместо телефона", "Сделать вид, что не услышали"], a: 1, e: "Личные контакты не даём. Объясняем мягко и честно и сообщаем координатору." },
-      { q: "Участник рассказывает, что дома его обижают, и просит никому не говорить. Как поступить?", o: ["Пообещать молчать, чтобы не потерять доверие", "Расспросить подробно, чтобы понять, правда ли это", "Выслушать, сказать, что он не виноват, объяснить, что расскажете тому, кто поможет, и сразу сообщить руководителю", "Сменить тему, чтобы не травмировать"], a: 2, e: "Секрет обещать нельзя. Выслушать, поддержать, не расспрашивать о деталях и сразу передать специалисту." },
-      { q: "Участник закрыл уши, раскачивается и кричит — в комнате шумно. Что делать в первую очередь?", o: ["Попросить его успокоиться", "Убрать раздражители — шум, зрителей — говорить мало и тихо, позвать руководителя", "Обнять, чтобы успокоить", "Не обращать внимания, это пройдёт"], a: 1, e: "Это перегрузка, а не каприз. Сначала убрать раздражители и дать время. Трогать без разрешения нельзя." },
-      { q: "В конце занятия участник спрашивает: «Ты придёшь ещё?» Вы не уверены. Как ответить?", o: ["«Конечно, буду приходить всегда!»", "«Пока не знаю. Если смогу — приду, а если нет, обязательно скажу»", "Промолчать", "«Это зависит от твоего поведения»"], a: 1, e: "Честное обещание лучше большого. Для участников особенно больно, когда взрослые исчезают без объяснений." },
-      { q: "Участница долго выбирает цвет краски и молчит. Как помочь?", o: ["Выбрать за неё, чтобы не терять время", "Спросить «Какой ты хочешь?» ещё несколько раз", "Показать две баночки: «Синий или зелёный?» — и подождать ответа", "Перейти к другому участнику"], a: 2, e: "Выбор из двух настоящих вариантов посилен, а на ответ может понадобиться время. Выбирать за человека — значит отнимать у него самостоятельность." },
-      { q: "Житель социального дома хочет записаться на курсы. Сотрудник рядом говорит: «Ему нельзя, он недееспособный». Что верно?", o: ["Сотрудник прав: недееспособным учиться нельзя", "Учёба и работа — право человека, его мнение важно. Расскажите координатору о желании участника", "Отговорить участника, чтобы не расстраивался", "Записать его самостоятельно, никого не спрашивая"], a: 1, e: "Дееспособность — юридический статус, он не отнимает права на учёбу и работу. Решения принимаются вместе с человеком и фондом." }
+      { q: "С чего начался фонд «Дети Марии»?", o: ["Художница Мария Елисеева стала рисовать с детьми в интернате", "С большого государственного гранта"], a: 0,
+        e: "В 1993 году семья и друзья Марии Елисеевой пришли в интернат волонтёрами. Фонд вырос из волонтёрской идеи — поэтому волонтёрам здесь так рады." },
+      { q: "На кого распространяется кодекс этики фонда?", o: ["Только на сотрудников", "На всех: сотрудников, исполнителей и волонтёров"], a: 1,
+        e: "Кодекс прямо касается волонтёров. Уважение, безопасность, честность и командная работа — общие правила для всех, кто приходит к участникам." },
+      { q: "Участник рассказал вам о своей семье. Вечером знакомый спрашивает, как прошёл день.", o: ["Пересказать историю — знакомый всё равно не знает участника", "Рассказать о занятии в общих словах, без личного"], a: 1,
+        e: "Личные истории участников не выходят за пределы занятия. Человек доверился вам, а не всем вокруг." },
+      { q: "Вы сделали отличное фото с участниками на мастер-классе.", o: ["Не публиковать самому и спросить координатора", "Выложить к себе, закрыв лица"], a: 0,
+        e: "Фото участников публикуются только с их согласия и через фонд. Даже с закрытыми лицами человека могут узнать — решение принимаем вместе с фондом." },
+      { q: "Планы изменились, и вы не успеваете на занятие.", o: ["Просто не прийти — волонтёрство же добровольное", "Как можно раньше предупредить координатора", "Написать участнику напрямую"], a: 1,
+        e: "Участники ждут знакомых людей, и внезапное «не пришёл» ранит. Координатор предупредит группу и, если нужно, найдёт замену." },
+      { q: "Подросток просит ваш номер телефона, чтобы писать вам.", o: ["Мягко отказать: «Я не даю номер, но мы увидимся здесь» — и сказать координатору", "Дать номер — это знак доверия"], a: 0,
+        e: "Личные контакты — только через фонд. Так безопаснее и для подростка, и для вас. А его желание общаться — хороший знак, о нём стоит рассказать координатору." },
+      { q: "Участник рассказывает, что дома его обижают, и просит никому не говорить.", o: ["Пообещать молчать, чтобы не потерять доверие", "Выслушать, сказать, что он не виноват, и сразу сообщить педагогу"], a: 1,
+        e: "Секрет обещать нельзя: помочь могут только специалисты. Расспрашивать о деталях не нужно — достаточно спокойно выслушать, объяснить, что расскажете тому, кто поможет, и сразу передать." },
+      { q: "Участник закрыл уши и раскачивается, в комнате шумно.", o: ["Попросить его успокоиться", "Убрать шум и зрителей, говорить мало и тихо, позвать педагога", "Обнять, чтобы успокоить"], a: 1,
+        e: "Это перегрузка, а не каприз. Сначала убираем раздражители и даём время. Трогать без разрешения нельзя — это может усилить тревогу." },
+      { q: "Участница долго выбирает цвет краски и молчит.", o: ["Показать две баночки: «Синий или зелёный?» — и подождать", "Выбрать за неё, чтобы не терять время"], a: 0,
+        e: "Выбор из двух настоящих вариантов посилен. На ответ может понадобиться до 10 секунд — и это нормально." },
+      { q: "В конце занятия участник спрашивает: «Ты придёшь ещё?» Вы не уверены.", o: ["«Конечно, буду приходить всегда!»", "«Пока не знаю. Если смогу — приду, а если нет, обязательно скажу»"], a: 1,
+        e: "Честное обещание лучше большого. Многие участники привыкли, что взрослые исчезают без объяснений, — мы так не делаем." }
     ]
   },
 
   meeting: {
     title: "Встреча с координатором",
-    text: "Знакомство на 30 минут: расскажем о программах, обсудим, что вам интересно и когда вы свободны, и подберём первую смену.",
+    text: "Знакомство на 30 минут: расскажем о программах и вместе решим, с чего вам начать.",
     coordinator: "Алевтина, координатор волонтёров",
     slots: [
       { day: "Чт, 23 октября", time: "18:30", where: "Онлайн, Яндекс Телемост" },
@@ -1043,70 +966,70 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
   });
 }
 
-const freshProgress = () => ({ done: {}, best: null, attempts: 0, meeting: null });
+const freshProgress = () => ({ done: {}, testDone: false, score: null, meeting: null, road: false });
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
-const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', roles: ['Ассистент педагога в мастерской', 'Ведущий мастер-класса'], directions: ['Творческие занятия', 'Помощь на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Постоянно — в одной программе, раз в неделю или чаще', places: ['Студия на Дмитровском переулке (м. Театральная)', 'Загородная мастерская Марии Елисеевой — Арт-субботы'], slots: ['Будни·Утро', 'Суббота·День'], source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Регулярно, каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
 
-const BLOCK_FLAGS = ['isLead','isText','isFacts','isTimeline','isCards','isList','isSteps','isPhrases','isSituations','isPillars','isCheck','isVideo','isCallout','isMore'];
-const PILLAR_COLORS = ['a-pillar a-p-o','a-pillar a-p-b','a-pillar a-p-g','a-pillar a-p-v'];
-function blockView(b){
- const v={};BLOCK_FLAGS.forEach(k=>v[k]=false);
- const key='is'+b.type[0].toUpperCase()+b.type.slice(1);v[key]=true;
- v.text=b.text||'';v.title=b.title||'';v.hasTitle=!!b.title;v.intro=b.intro||'';v.duration=b.duration||'';
- v.ordered=!!b.ordered;v.bullets=!b.ordered;v.cls=b.tone==='warn'?'error':'hint';
- v.paras=String(b.text||'').split(/\n\s*\n/);
- const it=b.items||[];
- if(b.type==='facts')v.items=it.map(([n,l])=>({n,l}));
- else if(b.type==='timeline')v.items=it.map(([y,t,d])=>({y,t,d}));
- else if(b.type==='cards')v.items=it.map(([t,d])=>({t,d}));
- else if(b.type==='list')v.items=it.map((t,i)=>({t,n:i+1}));
- else if(b.type==='steps')v.items=it.map(([t,d],i)=>({t,d,n:i+1}));
- else if(b.type==='phrases'){v.title=b.title||'Как говорить';v.items=it.map(([say,avoid,why])=>({say,avoid,why:why||'',hasWhy:!!why}));}
- else if(b.type==='situations')v.items=it.map(x=>({title:x.title,do:x.do,dont:x.dont}));
- else if(b.type==='pillars')v.items=it.map((x,i)=>({...x,cls:PILLAR_COLORS[i%4]}));
- else if(b.type==='check')v.items=it;
- else v.items=[];
- v.blocks=b.type==='more'?b.blocks.map(blockView):[];
- return v;
-}
+// Иконки по имени из контента (сборщик подставляет svg через ICONSWITCH)
+const ICON_KEYS = ['palette','book','users','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle'];
+const icoFlags = name => { const o = {}; ICON_KEYS.forEach(k => { o['ic_' + k.replace('-', '_')] = k === name; }); return o; };
+// В прототипе без анкеты показываем всё на демо-кандидате, чтобы ничего не заполнять руками
+const ensureCandidate = () => { const me = loadCandidate(); if (me) return me; demoWrite('candidate', DEMO_CANDIDATE); return DEMO_CANDIDATE; };
+
+const BLOCK_FLAGS = ['isLead','isFacts','isTimeline','isIcards','isStory','isRules','isPhrases','isQuiz','isVideo','isCallout'];
+const CARD_TINTS = ['a-ic-o','a-ic-b','a-ic-g','a-ic-v','a-ic-y'];
 class Component extends DCLogic {
- constructor(p){super(p);const q=new URLSearchParams(location.search);this.state={me:loadCandidate(),pr:loadProgress(),view:q.get('view')==='test'?'test':'hub',read:{},run:null,ui:{}};this.onScroll=this.onScroll.bind(this);}
- componentDidMount(){window.addEventListener('scroll',this.onScroll,{passive:true});window.addEventListener('resize',this.onScroll);this.onScroll();}
- componentDidUpdate(){this.onScroll();}
- componentWillUnmount(){window.removeEventListener('scroll',this.onScroll);window.removeEventListener('resize',this.onScroll);}
- // Как с пользовательским соглашением: «дальше» открывается, когда модуль долистан до конца
- onScroll(){const bar=document.getElementById('a-readbar');if(!bar)return;const h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?Math.min(100,100*h.scrollTop/max):100)+'%';
-  const id=this.state.view,end=document.getElementById('a-read-end');if(!end||this.state.read[id]||this.state.pr.done[id])return;if(end.getBoundingClientRect().top<=window.innerHeight)this.setState({read:{...this.state.read,[id]:true}});}
+ constructor(p){super(p);this.state={me:ensureCandidate(),pr:loadProgress(),view:null,read:{},quiz:{},run:null};this.onScroll=this.onScroll.bind(this);}
+ componentDidMount(){window.addEventListener('scroll',this.onScroll,{passive:true});window.addEventListener('resize',this.onScroll);this.after();}
+ componentDidUpdate(){this.after();}
+ componentWillUnmount(){window.removeEventListener('scroll',this.onScroll);window.removeEventListener('resize',this.onScroll);if(this.io)this.io.disconnect();}
+ after(){this.reveal();this.onScroll();}
+ // Блоки появляются при прокрутке, числа «набегают». Всё, что уже выше края экрана, показываем сразу —
+ // даже если пролистали очень быстро.
+ showEl(el){if(el.classList.contains('is-in'))return;el.classList.add('is-in');if(this.io)this.io.unobserve(el);const c=el.querySelector('.a-count');if(!c||c.dataset.done)return;c.dataset.done='1';const to=+c.dataset.to,suf=c.dataset.suffix||'';if(this.reduce||!to)return;const t0=performance.now(),dur=1200;const f=t=>{const k=Math.min(1,(t-t0)/dur);c.textContent=Math.round(to*(1-Math.pow(1-k,3)))+suf;if(k<1)requestAnimationFrame(f);};c.textContent='0'+suf;requestAnimationFrame(f);}
+ reveal(){this.reduce=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if(!this.io)this.io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)this.showEl(e.target);}),{threshold:.15,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.a-reveal:not(.is-in)').forEach(el=>{if(this.reduce)el.classList.add('is-in');else this.io.observe(el);});this.catchUp();}
+ catchUp(){document.querySelectorAll('.a-reveal:not(.is-in)').forEach(el=>{if(el.getBoundingClientRect().top<window.innerHeight*.92)this.showEl(el);});}
+ // Как с пользовательским соглашением: «дальше» открывается, когда шаг долистан до конца
+ onScroll(){this.catchUp();const bar=document.getElementById('a-readbar');if(bar){const h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?Math.min(100,100*h.scrollTop/max):100)+'%';}
+  const id=this.current().id,end=document.getElementById('a-read-end');if(!end||!id||this.state.read[id]||this.state.pr.done[id])return;if(end.getBoundingClientRect().top<=window.innerHeight)this.setState({read:{...this.state.read,[id]:true}});}
+ // Без оглавления: открываем первый непройденный шаг, потом тест
+ current(){const s=this.state,mods=ONB.modules;if(s.view==='test')return{test:true};if(s.view!=null)return{id:s.view,i:mods.findIndex(m=>m.id===s.view)};const i=mods.findIndex(m=>!s.pr.done[m.id]);return i<0?{test:true}:{id:mods[i].id,i};}
  save(pr){demoWrite('onboarding',pr);this.setState({pr});}
- open(view){this.setState({view,run:view==='test'?this.state.run:null});window.scrollTo(0,0);}
- setMe(me){demoWrite('candidate',me);this.setState({me});}
- renderVals(){const s=this.state,pr=s.pr,me=s.me,mods=ONB.modules,T=ONB.test,N=T.questions.length,nDone=mods.filter(m=>pr.done[m.id]).length,allDone=nDone===mods.length,passed=pr.best!=null&&pr.best>=T.pass;
-  const i=mods.findIndex(m=>m.id===s.view),m=mods[i],isModule=!!me&&i>=0,isTest=!!me&&s.view==='test'&&allDone,isHub=!!me&&!isModule&&!isTest;
-  const unlocked=isModule&&(pr.done[m.id]||s.read[m.id]),nxt=isModule?mods[i+1]:null;
-  const run=s.run,inQ=!!run&&run.i<N,showRes=!!run&&run.i>=N,q=inQ?T.questions[run.i]:null,ans=inQ?run.answers[run.i]:null,answered=ans!=null;
-  const score=run?run.answers.filter((a,k)=>a===T.questions[k].a).length:0;
-  const v={noCandidate:!me,isHub,isModule,isTest,fillDemo:()=>this.setMe(DEMO_CANDIDATE),toHub:()=>this.open('hub'),
-   hubTitle:ONB.title,hubIntro:ONB.intro,hubBar:'width:'+Math.round(100*nDone/mods.length)+'%',hubCount:nDone+' из '+mods.length,
-   mods:mods.map((x,k)=>({title:x.title,minutes:x.minutes,mark:pr.done[x.id]?'✓':String(k+1),cls:pr.done[x.id]?'a-mod is-done':'a-mod',open:()=>this.open(x.id)})),
-   testCls:'a-mod'+(passed?' is-done':'')+(allDone?'':' is-locked'),testMark:passed?'✓':String(mods.length+1),testTitle:T.title,testSub:N+' вопросов'+(allDone?'':' · откроется после всех шагов'),testLocked:!allDone,openTest:()=>this.open('test'),
-   pills:mods.map((x,k)=>({n:k+1,title:x.title,cls:'a-pill'+(k===i?' is-on':(pr.done[x.id]?' is-done':'')),open:()=>this.open(x.id)})),
-   modEyebrow:isModule?'Шаг '+(i+1)+' из '+mods.length+' · '+m.minutes+' мин':'',modTitle:isModule?m.title:'',
-   isForm:isModule&&!!m.form,formIntro:FORM.matching.intro,
-   fields:isModule&&m.form&&me?fieldViews(FORM.matching.fields,me,{},(id,val)=>this.setMe({...this.state.me,[id]:val}),s.ui,key=>this.setState({ui:{...this.state.ui,[key]:!this.state.ui[key]}})):[],
-   blocks:isModule&&m.blocks?m.blocks.map(blockView):[],
-   hasPrev:isModule&&i>0,prev:()=>this.open(mods[i-1].id),
-   doneLocked:isModule&&!unlocked,doneCls:'btn btn-lg '+(unlocked?'btn-primary':'btn-subtle'),doneLabel:!isModule?'':(unlocked?(nxt?'Понятно, дальше':'Понятно, к тесту'):'Дочитайте до конца ↓'),
-   done:()=>{if(!isModule)return;this.save({...pr,done:{...pr.done,[m.id]:true}});this.open(nxt?nxt.id:'test');},
-   testIntro:isTest&&!run,testTitle:T.title,testText:T.intro,hasBest:pr.best!=null,bestLine:pr.best==null?'':pr.best+' из '+N+(passed?' — пройден':''),passed,startLabel:pr.attempts?'Пройти ещё раз':'Начать тест',
-   start:()=>{this.setState({run:{i:0,answers:[]}});window.scrollTo(0,0);},
-   testQuestion:isTest&&inQ,qNum:inQ?run.i+1:0,qTotal:N,qBar:'width:'+(inQ?Math.round(100*run.i/N):0)+'%',qText:q?q.q:'',
-   qOpts:q?q.o.map((o,j)=>({text:o,locked:answered,cls:'a-answer'+(answered&&j===q.a?' is-right':'')+(answered&&j===ans&&ans!==q.a?' is-wrong':''),pick:()=>{const answers=[...run.answers];answers[run.i]=j;this.setState({run:{...run,answers}});}})):[],
-   answered,explCls:answered&&ans===q.a?'hint':'error',explHead:answered&&ans===q.a?'Верно.':'Не совсем.',expl:q?q.e:'',nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Посмотреть результат',
-   nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;this.save({...pr,attempts:pr.attempts+1,best:Math.max(pr.best==null?0:pr.best,sc)});}this.setState({run:r});window.scrollTo(0,0);},
-   testResult:isTest&&showRes,scoreLine:score+' из '+N,resultPassed:score>=T.pass,resultText:score>=T.pass?'Отлично, знакомство пройдено! Теперь можно выбрать время встречи с координатором.':'Нужно '+T.pass+' правильных ответов. Посмотрите разбор ниже и попробуйте ещё раз.',
-   wrong:showRes?T.questions.map((x,k)=>({q:x.q,a:x.o[x.a],e:x.e,ok:run.answers[k]===x.a})).filter(x=>!x.ok):[]};
-  v.hasWrong=v.wrong.length>0;return v;}
+ open(view){this.setState({view});window.scrollTo(0,0);}
+ blockView(b,mi){const v={};BLOCK_FLAGS.forEach(k=>v[k]=false);v['is'+b.type[0].toUpperCase()+b.type.slice(1)]=true;
+  v.text=b.text||'';v.title=b.title||'';v.hasTitle=!!b.title;v.intro=b.intro||'';v.duration=b.duration||'';v.cls=(b.tone==='warn'?'error':'hint')+' a-reveal';
+  const it=b.items||[];
+  if(b.type==='facts')v.items=it.map(([n,l])=>({n,l,to:parseInt(n,10)||0,suffix:String(n).replace(/^\d+/,'')}));
+  else if(b.type==='timeline')v.items=it.map(([y,t,d])=>({y,t,d}));
+  else if(b.type==='icards')v.items=it.map((x,k)=>({...x,...icoFlags(x.icon),cls:'a-icard a-reveal '+CARD_TINTS[k%CARD_TINTS.length]}));
+  else if(b.type==='story')v.items=it.map(([t,d])=>({t,d}));
+  else if(b.type==='rules')v.items=it.map((t,k)=>({t,n:k+1}));
+  else if(b.type==='phrases')v.items=it.map(([say,avoid])=>({say,avoid}));
+  else if(b.type==='quiz')v.items=it.map((x,k)=>{const key=mi+'-'+k,ans=this.state.quiz[key],answered=ans!=null,ok=ans===x.a;
+   return {q:x.q,e:x.e,answered,fbCls:'a-fb '+(ok?'is-ok':'is-bad'),fbHead:ok?'Верно':'Не совсем',
+    opts:x.o.map((o,j)=>({text:o,locked:answered,cls:'a-qopt'+(answered&&j===x.a?' is-right':'')+(answered&&j===ans&&!ok?' is-wrong':''),pick:()=>this.setState({quiz:{...this.state.quiz,[key]:j}})}))};});
+  else v.items=[];
+  return v;}
+ renderVals(){const s=this.state,pr=s.pr,mods=ONB.modules,T=ONB.test,N=T.questions.length,cur=this.current(),total=mods.length+1;
+  const m=cur.test?null:mods[cur.i],stepN=cur.test?total:cur.i+1,unlocked=!!m&&(pr.done[m.id]||s.read[m.id]),nxt=m?mods[cur.i+1]:null;
+  const run=s.run,inQ=!!run&&run.i<N,showRes=cur.test&&(pr.testDone||(!!run&&run.i>=N)),q=inQ?T.questions[run.i]:null,ans=inQ?run.answers[run.i]:null,answered=ans!=null,ok=answered&&ans===q.a;
+  const score=pr.testDone?pr.score:(run?run.answers.filter((a,k)=>a===T.questions[k].a).length:0);
+  return {stepLabel:'Знакомство с фондом · шаг '+stepN+' из '+total,
+   segs:Array.from({length:total},(_,k)=>({cls:k<stepN-1?'is-done':(k===stepN-1?'is-on':'')})),
+   isModule:!!m,isTest:!!cur.test,modTitle:m?m.title:'',blocks:m?m.blocks.map(b=>this.blockView(b,cur.i)):[],
+   hasPrev:!!m&&cur.i>0,prev:()=>this.open(mods[cur.i-1].id),
+   doneLocked:!!m&&!unlocked,doneCls:'btn btn-lg '+(unlocked?'btn-primary a-unlocked':'btn-subtle'),doneLabel:!m?'':(unlocked?(nxt?'Понятно, дальше':'Понятно, к тесту'):'Дочитайте до конца ↓'),
+   done:()=>{if(!m)return;this.save({...pr,done:{...pr.done,[m.id]:true}});this.open(nxt?nxt.id:'test');},
+   testTitle:T.title,testText:T.intro,testIntro:!!cur.test&&!run&&!pr.testDone,start:()=>this.setState({run:{i:0,answers:[]}}),
+   testQuestion:!!cur.test&&inQ,qNum:inQ?run.i+1:0,qTotal:N,qText:q?q.q:'',
+   qOpts:q?q.o.map((o,j)=>({text:o,locked:answered,cls:'a-answer'+(answered&&j===q.a?' is-right':'')+(answered&&j===ans&&!ok?' is-wrong':''),pick:()=>{const answers=[...run.answers];answers[run.i]=j;this.setState({run:{...run,answers}});}})):[],
+   answered,sheetCls:'a-sheet-card '+(ok?'is-ok':'is-bad'),sheetMark:ok?'✓':'✕',explHead:ok?'Верно!':'Не совсем',expl:q?q.e:'',
+   nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Завершить',
+   nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;this.save({...pr,testDone:true,score:sc});}this.setState({run:r});window.scrollTo(0,0);},
+   testResult:showRes,scoreLine:'Правильных ответов: '+score+' из '+N};}
 }
 
 </script></body></html>

@@ -1,5 +1,5 @@
 <div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button onClick="{{fillDemo}}">Заполнить примером</button><button onClick="{{clear}}">Очистить</button></div>
-<sc-if value="{{isForm}}"><div class="head"><div><p class="eyebrow">{{eyebrow}}</p><h1 class="h1">{{title}}</h1><p class="lead a-intro">{{intro}}</p></div></div>
+<div class="head"><div><p class="eyebrow">{{eyebrow}}</p><h1 class="h1">{{title}}</h1><p class="lead a-intro">{{intro}}</p></div></div>
 <nav class="chips a-steps" aria-label="Шаги анкеты"><sc-for list="{{steps}}" as="s"><span class="{{s.cls}}">{{s.label}}</span></sc-for></nav>
 <div class="bar a-bar" role="progressbar" aria-label="{{progressLabel}}"><i style="{{barStyle}}"></i></div>
 <section class="card a-form">
@@ -7,7 +7,3 @@
 </section>
 <div class="actions a-nav"><sc-if value="{{canBack}}"><button class="btn btn-ghost btn-lg" onClick="{{back}}">ICON_LEFT Назад</button></sc-if><span class="grow"></span><button class="btn btn-primary btn-lg" onClick="{{next}}">{{nextLabel}}</button></div>
 <sc-if value="{{hasErrors}}"><p class="error" role="alert">Проверьте отмеченные поля.</p></sc-if>
-</sc-if>
-<sc-if value="{{isDone}}"><section class="card-hero"><div class="hero-grid"><div class="grow"><p class="eyebrow">Заявка отправлена</p><h1 class="hero-title">{{doneTitle}}</h1><p class="lead">{{doneText}}</p></div><span class="hero-art" aria-hidden="true">ICON_CALENDAR</span></div></section>
-<section class="section"><div class="card a-letter"><p class="eyebrow">Письмо на {{email}}</p><h2 class="h3">{{greeting}}</h2><p>Мы получили вашу анкету. Следующий шаг — короткое знакомство с фондом, около 25 минут. После него вы выберете время встречи с координатором.</p><div class="actions"><a class="btn btn-primary btn-lg" href="ApplicationStatus.dc.html">Открыть «Моя заявка»</a><a class="btn btn-ghost" href="Onboarding.dc.html">Сразу к знакомству с фондом</a></div></div></section>
-</sc-if>
