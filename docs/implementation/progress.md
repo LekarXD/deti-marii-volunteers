@@ -14,10 +14,10 @@ Reference: `7d07222`, 43 boards plus `Event.html`. Этот commit опубли�
 | P07–P09 | Роли, возможности, повторы, календарь, участие и attendance подключены | 16 PostgreSQL тестов; CUA: подтверждение/reload, счётчики координатора, отмена, attendance и корректировка; ledger P13 ещё не подключён |
 | P10A/B | Участники/группы/фото и памятка подтверждённого назначения подключены | PostgreSQL scope/revoke/compound FK; JSON и фото закрываются при отмене/отзыве; private note не входит в памятку |
 | P11 | CRM, резерв, импорт и единые follow-up подключены | 8 PostgreSQL тестов; frontend проверен типами/компонентным тестом, общий браузерный проход ещё не принят |
-| P12 | В работе A6 | Рефлексия, первый выход, помощь и отдельные restricted Signals; текст не зависит от ASR |
+| P12 | Текстовый контур подключён | 11 PostgreSQL + 3 UI проверки; подготовка/рефлексия/restricted Signals, ASR явно недоступен; общий браузерный проход ещё нужен |
 | P13 | В работе A3 | Профиль, ledger/коррекции, справки и workflows собственных данных |
 | P14 | Ручной Builder и Academy подключены | версии/review/publish, private attachments, progress и задания проверены PostgreSQL; 2 компонентных проверки |
-| P15 | Backend Knowledge и AI gateway интегрируются, UI в работе A7 | published-only FTS/citations, durable provider outcomes, 3 PostgreSQL теста; реальный внешний AI не вызван |
+| P15 | Knowledge/Mentor/Builder AI подключены | published-only FTS/citations, durable provider outcomes, 5 PostgreSQL + 2 UI проверки; реальный внешний AI не вызван |
 | P16 | В работе A5 | Редактор/версии сценариев; AI команды ждут проверенный P15 seam |
 | P17A | Внутренние сообщения и outbox подключены | серверные ACL/receipt tests и 3 компонентных теста; двухсессионная браузерная приёмка ещё нужна |
 | P17B | В работе A1 | Настройки, templates, audience preview и SMTP outcome journal; внешние сообщения не отправлялись |
@@ -29,10 +29,10 @@ Reference: `7d07222`, 43 boards plus `Event.html`. Этот commit опубли�
 
 ## Проверено на объединённом коде
 
-- Последняя завершённая frontend серия: 65 tests, typecheck и production build. После следующих модулей проверка повторяется по изменённому составу.
+- Последняя завершённая frontend серия: 93 tests, typecheck и production build. После следующих модулей проверка повторяется по изменённому составу.
 - Расширенная серверная серия: 73 passed, zero skips после CRM/assignments/Studio. Независимая QA нашла два attendance edge case; владелец исправил их с 7 focused PostgreSQL проверками. Это не доказательство полного P20.
 - G1: 14 HTTP сценариев на реальном API/PostgreSQL; дополнительные 12 ACL/revoke/receipt сценариев приняты отдельно.
-- Native PostgreSQL16 используется в отдельных dev/test кластерах, существующие сервисы и SSH tunnel не изменяются. Миграции dev БД по head10 и `alembic check` прошли.
+- Native PostgreSQL16 используется в отдельных dev/test кластерах, существующие сервисы и SSH tunnel не изменяются. Миграции dev БД по head12 и `alembic check` прошли.
 - Восстановление БД и приватного PNG проверено в отдельном QA кластере; детали и ограничения в `infra/evidence/`. Docker compose config проверен, сами образы/контейнеры не запускались из-за недоступного Docker daemon.
 - CUA screenshots общей сцены сохранены в `infra/evidence/screenshots/`. Камера выключена, все имена/материалы вымышлены.
 

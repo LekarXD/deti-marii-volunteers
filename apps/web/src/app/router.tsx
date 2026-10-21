@@ -9,6 +9,8 @@ const interview=(name:string)=>page(()=>import('../features/interviews'),name);
 const learning=(name:string)=>page(()=>import('../features/learning'),name);
 const activity=(name:string)=>page(()=>import('../features/activities'),name);
 const participant=(name:string)=>page(()=>import('../features/participants'),name);
+const knowledge=(name:string)=>page(()=>import('../features/knowledge'),name);
+const followup=(name:string)=>page(()=>import('../features/followups'),name);
 const crm=(name:string)=>page(()=>import('../features/crm'),name);
 const messages=(name:string)=>page(()=>import('../features/messaging'),name);
 function StaffBoundary(){const {session}=useSession();const location=useLocation();return session?.is_staff?<Outlet/>:<Navigate to={'/login?next='+encodeURIComponent(location.pathname+location.search)} replace/>;}
@@ -28,12 +30,15 @@ export const router=createBrowserRouter([{
    {path:'interviews',lazy:interview('CandidateInterviewsPage')},
    {path:'academy',lazy:learning('AcademyPage')},
    {path:'academy/lessons/:id',lazy:learning('LessonPage')},
+   {path:'mentor',lazy:knowledge('MentorPage')},
    {path:'messages',lazy:messages('CandidateMessagesPage')},
    {path:'studio-preview',lazy:page(()=>import('../ui/studio'),'StudioPreviewFixture')},
    {path:'opportunities',lazy:activity('OpportunitiesPage')},
    {path:'opportunities/:id',lazy:activity('OpportunityPage')},
    {path:'my/assignments',lazy:activity('MyAssignmentsPage')},
    {path:'my/assignments/:id',lazy:activity('AssignmentPage')},
+   {path:'my/assignments/:id/preparation',lazy:followup('FirstShiftPage')},
+   {path:'my/assignments/:id/reflection',lazy:followup('ReflectionPage')},
    {path:'me/group',lazy:participant('GroupPage')},
    {path:'ui',lazy:page(()=>import('../ui/FoundationPreview'),'FoundationPreview')},
   ]},
@@ -52,6 +57,8 @@ export const router=createBrowserRouter([{
    {path:'schedule',lazy:activity('CalendarPage')},
    {path:'events/:id',lazy:activity('EventPage')},
    {path:'messages',lazy:messages('CoordinatorMessagesPage')},
+   {path:'signals',lazy:followup('SignalsPage')},
+   {path:'knowledge',lazy:knowledge('KnowledgePage')},
    {path:'learning',lazy:learning('BuilderPage')},
    {path:'learning/lessons/:id',lazy:learning('BuilderLessonPage')},
    {path:'opportunities',lazy:activity('StaffOpportunitiesPage')},

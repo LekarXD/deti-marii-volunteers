@@ -16,6 +16,9 @@ from app.modules.learning.router import router as learning
 from app.modules.messaging.router import router as messaging
 from app.modules.crm.router import router as crm
 from app.modules.knowledge.router import router as knowledge
+from app.modules.followups.router import router as followups
+from app.modules.notifications.router import router as notifications
+from app.modules.studio.router import router as studio
 from app.modules.participants.access import get_assignment_access
 from app.modules.activities.assignment_service import ActivityAssignmentAccess
 
@@ -39,7 +42,7 @@ def create_app() -> FastAPI:
                   responses={status: {"model": ErrorView} for status in (400, 401, 403, 404, 409, 422, 429, 503)})
     install_platform(app)
     app.dependency_overrides[get_assignment_access] = lambda: ActivityAssignmentAccess()
-    for router in (auth, staff, assets, applications, interviews, participants, learning, messaging, crm, knowledge):
+    for router in (auth, staff, assets, applications, interviews, participants, learning, messaging, crm, knowledge, followups, notifications, studio):
         app.include_router(router)
     app.include_router(activities, prefix="/api/v1")
     return app
