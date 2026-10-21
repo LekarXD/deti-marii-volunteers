@@ -1,7 +1,8 @@
 """Private test-only synthetic publisher isolation over a protected Unix socket.
 
 Serve in a separately capped owned fixture container sharing the proof container's
-network namespace and a private UID-owned socket volume. No Docker socket needed.
+network namespace and a private UID-owned socket volume. Use --init for both
+containers to reap Chrome descendants. No Docker socket needed.
 Both modes keep one-use synthetic RTC tokens solely in inherited stdin/socket.
 """
 import asyncio
