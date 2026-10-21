@@ -31,6 +31,7 @@ pytestmark=pytest.mark.skipif(not URL, reason='Set an isolated PostgreSQL OPORA_
 
 @pytest_asyncio.fixture
 async def context():
+    if not URL:pytest.skip('Set an isolated PostgreSQL OPORA_TEST_DATABASE_URL')
     assert URL.rsplit('/',1)[-1].endswith('_test'), 'Refusing non-test database'
     engine=create_async_engine(URL)
     async with engine.begin() as connection:

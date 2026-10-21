@@ -27,7 +27,7 @@ async def opportunity_view(db, opportunity, staff=False):
     fields = {name: getattr(opportunity, name) for name in OpportunityCreate.model_fields if name != 'role_ids'}
     return OpportunityView(**fields, role_ids=role_ids, id=opportunity.id, version=opportunity.version,
         state=opportunity.state, matching=explain_match(opportunity),
-        allowed_actions=(['update', 'history'] + [a for a, state in [('publish', 'published'), ('pause', 'paused'), ('close', 'closed')] if state != opportunity.state]) if staff else [])
+        allowed_actions=(['update', 'history'] + {'draft':['publish'], 'published':['pause','close'], 'paused':['publish','close'], 'closed':['reopen']}[opportunity.state]) if staff else [])
 
 
 async def find_role(db: AsyncSession, principal: Principal, role_id: UUID, lock=False):
@@ -158,7 +158,7 @@ async def update_opportunity(db, principal, opportunity_id, body):
 async def change_opportunity_state(db, principal, opportunity_id, body, state):
     opportunity = await find_opportunity(db, principal, opportunity_id, True, True)
     check_version(opportunity, body.expected_version)
-    if state == opportunity.state:
+    if state not in {'draft':{'published'}, 'published':{'paused','closed'}, 'paused':{'published','closed'}, 'closed':{'draft'}}[opportunity.state]:
         raise ApiError(409, 'opportunity_state_conflict', 'Состояние уже изменилось.', current_version=opportunity.version)
     if state == 'published' and not all([opportunity.title, opportunity.program, opportunity.task, opportunity.audience, opportunity.location, opportunity.schedule]):
         raise ApiError(422, 'publication_incomplete', 'Укажите программу, аудиторию, задачи, место и расписание.')

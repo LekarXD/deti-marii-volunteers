@@ -22,7 +22,7 @@ async def command(db, principal, operation, key, body, action, request):
     payload = body.model_dump(mode='json')
     try:
         await authz_guard(db, principal)
-        permission = 'roles.manage' if operation.startswith('roles.') else 'opportunities.manage'
+        permission = 'roles.manage' if operation.startswith('roles.') else 'schedule.manage' if operation.startswith('calendar.') else 'opportunities.manage'
         if not principal.has_permission(permission):
             raise ApiError(403, 'permission_denied', 'Недостаточно прав.')
         replay = await begin_command(db, principal, operation, key, payload)
@@ -31,7 +31,7 @@ async def command(db, principal, operation, key, body, action, request):
             return replay
         result = await action()
         result_json = result.model_dump(mode='json')
-        audit(db, principal, operation, 'role' if 'role' in operation else 'opportunity', result.id,
+        audit(db, principal, operation, 'role' if operation.startswith('roles.') else 'event' if operation.startswith('calendar.') else 'opportunity', result.id,
               fields=[name for name in payload if name != 'expected_version'], request_id=getattr(request.state, 'request_id', None))
         await finish_command(db, principal, operation, key, result_json)
         await db.commit()
@@ -157,8 +157,17 @@ async def close_opportunity(opportunity_id: UUID, body: VersionCommand, request:
     return await command(db, principal, f'opportunities.close:{opportunity_id}', key, body, lambda: service.change_opportunity_state(db, principal, opportunity_id, body, 'closed'), request)
 
 
+
+@router.post('/coord/opportunities/{opportunity_id}/reopen', response_model=OpportunityView, operation_id='reopenOpportunity')
+async def reopen_opportunity(opportunity_id: UUID, body: VersionCommand, request: Request, key: str=Header(alias='Idempotency-Key'), principal: Principal=Depends(opportunities_staff), db: AsyncSession=Depends(get_db)):
+    return await command(db, principal, f'opportunities.reopen:{opportunity_id}', key, body, lambda: service.change_opportunity_state(db, principal, opportunity_id, body, 'draft'), request)
+
 @router.get('/coord/opportunities/{opportunity_id}/history', response_model=list[ActivityRevisionView], operation_id='getOpportunityHistory')
 async def opportunity_history(opportunity_id: UUID, principal: Principal=Depends(opportunities_staff), db: AsyncSession=Depends(get_db)):
     await service.find_opportunity(db, principal, opportunity_id, True)
     rows = (await db.scalars(select(OpportunityVersion).where(OpportunityVersion.opportunity_id == opportunity_id).order_by(OpportunityVersion.version.desc()).limit(100))).all()
     return [ActivityRevisionView(version=r.version, snapshot=r.snapshot, created_at=r.created_at) for r in rows]
+
+# One module export; calendar keeps the same API root and shared command boundary.
+from .calendar_router import router as calendar_router
+router.include_router(calendar_router)

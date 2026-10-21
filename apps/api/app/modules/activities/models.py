@@ -100,3 +100,6 @@ class OpportunityVersion(Base):
     actor_id: Mapped[str] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     __table_args__ = (UniqueConstraint("opportunity_id", "version"),)
+
+# Imported here for the shared model loader and Alembic registry.
+from .calendar_models import EventSeries, EventSeriesNeedTemplate, EventOccurrence, OccurrenceOverride, StaffingNeed, EventRevision  # noqa: E402,F401
