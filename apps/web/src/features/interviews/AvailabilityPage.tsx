@@ -1,4 +1,4 @@
-const windowCount=(count:number)=>`${count} ${{one:'окно',few:'окна',many:'окон',other:'окна'}[new Intl.PluralRules('ru').select(count)]}`;
+const windowCount=(count:number)=>`${count} ${{zero:'окон',one:'окно',two:'окна',few:'окна',many:'окон',other:'окна'}[new Intl.PluralRules('ru').select(count)]}`;
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import {Button,Card,DatePicker,TimePicker,Combobox,Dialog,Field,Input,LoadingState} from '../../ui';
