@@ -11,7 +11,7 @@ from app.core.errors import ApiError
 from app.core.idempotency import begin_command,finish_command
 from . import service
 from .models import RecordingProject,RecordingTake,RecordingRendererGrant,RecordingRenderVersion,RecordingReview
-from .schemas import RecordingProjectInput,RecordingProjectUpdate,RecordingVersionCommand,RecordingTakeInput,RecordingProjectView,RecordingTakeView,RecordingRenderView,RecordingReviewCommand,RecordingProjectPage,RecordingTakePage,RecordingPolicyCommand,RecordingRenderPage
+from .schemas import RecordingProjectInput,RecordingProjectUpdate,RecordingVersionCommand,RecordingTakeInput,RecordingProjectView,RecordingTakeView,RecordingRenderView,RecordingReviewCommand,RecordingProjectPage,RecordingTakePage,RecordingPolicyCommand,RecordingRenderPage,LiveRecordingProjectInput
 from .renderer import router as renderer_router
 router=APIRouter(prefix='/api/v1',tags=['recordings'])
 
@@ -22,6 +22,19 @@ async def finish(db,p,request,operation,value):
     result=await finish_command(db,p,operation,request.headers.get('Idempotency-Key'),jsonable_encoder(value))
     await db.commit()
     return result
+
+
+@router.post('/webinars/{id}/recording-project',operation_id='webinar_recording_project_ensure',response_model=RecordingProjectView)
+async def ensure_live_project(id:UUID,body:LiveRecordingProjectInput,request:Request,p:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    from .live import ensure_project,active_webinar
+    await authz_guard(db,p)
+    await active_webinar(db,p,id)
+    operation=f'recordings.live:{id}'
+    replay=await command(db,p,request,operation,body)
+    if replay is not None:return replay
+    row=await ensure_project(db,p,id,body.studio_session_id,body.expected_scene_revision)
+    audit(db,p,'recording.live.bind','recording_project',row.id,('live_event_id','studio_session_id'))
+    return await finish(db,p,request,operation,await service.project_view(db,row))
 
 @router.get('/recording-projects',operation_id='recording_project_list',response_model=RecordingProjectPage)
 async def listing(cursor:UUID|None=None,limit:int=Query(20,ge=1,le=50),p:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):

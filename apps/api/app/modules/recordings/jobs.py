@@ -41,7 +41,9 @@ async def checked_take(db,context):
     if owner.foundation_id!=context.foundation_id or owner.state=='archived':raise CaptureFailure('capture_superseded')
     studio=await db.get(StudioSession,capture.studio_session_id,populate_existing=True)
     if not studio or studio.generation!=row.generation or studio.state in ('closing','closed','failed') or studio.scene.get('take_id')!=str(row.id):raise CaptureFailure('capture_authority_revoked')
-    try:await service.authorize(db,principal,owner)
+    try:
+        await service.authorize(db,principal,owner)
+        await service.authorize_capture_session(db,principal,owner,studio)
     except ApiError:raise CaptureFailure('capture_authority_revoked') from None
     if owner.privacy_state!='approved' or row.projection['capture_plan']['privacy_state']!='approved':raise CaptureFailure('capture_privacy_unapproved')
     return row,owner

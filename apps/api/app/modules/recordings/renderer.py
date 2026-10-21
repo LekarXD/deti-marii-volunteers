@@ -53,6 +53,8 @@ async def renderer_scope(request:Request,authorization:str|None=Header(None),db:
     if grant.revoked_at or grant.expires_at<=utcnow() or grant.generation!=take.generation or (grant.purpose=='bootstrap' and grant.consumed_at) or owner.state=='archived' or take.state in ('failed','discarded','captured') or owner.owner_user_id!=principal.user_id:rejected()
     session=await db.get(StudioSession,capture.studio_session_id,populate_existing=True)
     if not session or session.generation!=take.generation or session.scene.get('take_id')!=str(take.id) or session.recording_policy_id!=owner.recording_policy_id or session.state in ('closing','closed','failed'):rejected()
+    try:await service.authorize_capture_session(db,principal,owner,session)
+    except ApiError:rejected()
     plan=take.projection.get('capture_plan',{})
     # Studio scene changes invalidate readiness until the authoritative policy snapshot is refreshed.
     if session.scene_revision!=plan.get('scene_revision'):
@@ -61,7 +63,7 @@ async def renderer_scope(request:Request,authorization:str|None=Header(None),db:
     return db,grant,take,owner,session
 
 async def state_view(db,grant,take,owner,session,*,with_provider=False):
-    value={'foundation_id':owner.foundation_id,'project_id':owner.id,'take_id':take.id,'session_id':session.id,'generation':take.generation,'renderer_state_version':take.renderer_state_version,'projection_hash':take.projection_hash,**take.projection,'provider_grant':None,'invalidated':take.projection['capture_plan']['privacy_state']!='approved','scene_transition':service.scene_transition(take)}
+    value={'resource_kind':session.resource_kind,'resource_id':session.resource_id,'foundation_id':owner.foundation_id,'project_id':owner.id,'take_id':take.id,'session_id':session.id,'generation':take.generation,'renderer_state_version':take.renderer_state_version,'projection_hash':take.projection_hash,**take.projection,'provider_grant':None,'invalidated':take.projection['capture_plan']['privacy_state']!='approved','scene_transition':service.scene_transition(take)}
     settings=RtcSettings.from_env()
     if with_provider and settings.capabilities().configured and not value['invalidated']:
         hidden_identity='opora-renderer-'+grant.id.hex

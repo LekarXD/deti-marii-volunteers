@@ -47,7 +47,7 @@ def capabilities():
 async def project_view(db,row):
     capture=await db.scalar(select(StudioCaptureSession).where(StudioCaptureSession.project_id==row.id).order_by(StudioCaptureSession.generation.desc()).limit(1))
     takes=(await db.scalars(select(RecordingTake).where(RecordingTake.project_id==row.id).order_by(RecordingTake.number.desc()).limit(51))).all()
-    return {k:getattr(row,k) for k in ('id','owner_user_id','title','mode','target_lesson_id','state','privacy_state','version')}|{'studio_session_id':capture.studio_session_id if capture else None,'takes':[t.id for t in takes[:50]],'takes_next_cursor':takes[49].number if len(takes)>50 else None,'capabilities':capabilities()}
+    return {k:getattr(row,k) for k in ('id','owner_user_id','title','mode','live_event_id','target_lesson_id','state','privacy_state','version')}|{'studio_session_id':capture.studio_session_id if capture else None,'takes':[t.id for t in takes[:50]],'takes_next_cursor':takes[49].number if len(takes)>50 else None,'capabilities':capabilities()}
 def readiness_current(row,now=None):
     if row.readiness_state!='ready' or not row.readiness or row.readiness.get('renderer_state_version')!=row.renderer_state_version or row.readiness.get('projection_hash')!=row.projection_hash:return False
     try:expiry=datetime.fromisoformat(row.readiness.get('valid_until',''))
@@ -63,7 +63,11 @@ def take_view(row):
     return value
 async def prepare(db,p,row):
     if row.state=='archived':raise ApiError(409,'recording_archived','Проект закрыт')
-    session,_=await studio.create_session(db,p,'lesson_recording_project',row.id,resource_authorizer=resource_authorizer)
+    if row.mode=='live':
+        capture=await db.scalar(select(StudioCaptureSession).where(StudioCaptureSession.project_id==row.id).order_by(StudioCaptureSession.generation.desc()).limit(1))
+        session=await db.get(StudioSession,capture.studio_session_id,populate_existing=True) if capture else None
+        await authorize_capture_session(db,p,row,session)
+    else:session,_=await studio.create_session(db,p,'lesson_recording_project',row.id,resource_authorizer=resource_authorizer)
     capture=await db.scalar(select(StudioCaptureSession).where(StudioCaptureSession.studio_session_id==session.id))
     if capture is None:
         capture=StudioCaptureSession(project_id=row.id,studio_session_id=session.id,host_auth_session_id=p.session_id,generation=session.generation)
@@ -75,13 +79,15 @@ async def prepare(db,p,row):
 async def bind_authorizer(db,p,session,take_id):
     row,owner=await take(db,p,take_id)
     capture=await db.get(StudioCaptureSession,row.capture_session_id)
-    if capture.studio_session_id!=session.id or row.generation!=session.generation or owner.id!=session.resource_id:deny()
+    if capture.studio_session_id!=session.id or row.generation!=session.generation:deny()
+    await authorize_capture_session(db,p,owner,session)
 async def create_take(db,p,owner,expected_scene_revision):
     capture=await db.scalar(select(StudioCaptureSession).where(StudioCaptureSession.project_id==owner.id).order_by(StudioCaptureSession.generation.desc()).limit(1))
     if capture is None:raise ApiError(409,'recording_not_prepared','Сначала подготовьте студию')
     if await db.scalar(select(RecordingTake.id).where(RecordingTake.project_id==owner.id,RecordingTake.state.in_(('created','starting','capturing','stopping')))):
         raise ApiError(409,'recording_take_active','Завершите или отмените текущий дубль')
     session=await db.get(StudioSession,capture.studio_session_id)
+    await authorize_capture_session(db,p,owner,session)
     if session.scene_revision!=expected_scene_revision:raise ApiError(409,'scene_revision_conflict','Кадр изменился',current_version=session.scene_revision)
     number=(await db.scalar(select(func.max(RecordingTake.number)).where(RecordingTake.project_id==owner.id)) or 0)+1
     row=RecordingTake(id=uuid4(),project_id=owner.id,capture_session_id=capture.id,number=number,generation=session.generation,projection={},projection_hash='0'*64)
@@ -94,7 +100,7 @@ async def create_take(db,p,owner,expected_scene_revision):
     return row
 async def snapshot(db,owner,row,session,*,privacy_state,allowed_tracks,media_time_ms=None):
     """Internal policy adapter only. Any pixel, asset or allowlist change increments the fence."""
-    plan=validate_capture_plan(dict(schema_version=1,foundation_id=str(owner.foundation_id),resource_id=str(owner.id),session_id=str(session.id),take_id=str(row.id),generation=row.generation,scene_revision=session.scene_revision,render_profile_version='opora-stage/1',recording_policy_id=str(owner.recording_policy_id),privacy_state=privacy_state,raw_fallback='forbidden',allowed_tracks=allowed_tracks))
+    plan=validate_capture_plan(dict(schema_version=1,foundation_id=str(owner.foundation_id),resource_id=str(session.resource_id),session_id=str(session.id),take_id=str(row.id),generation=row.generation,scene_revision=session.scene_revision,render_profile_version='opora-stage/1',recording_policy_id=str(owner.recording_policy_id),privacy_state=privacy_state,raw_fallback='forbidden',allowed_tracks=allowed_tracks))
     projection={'scene':session.scene,'capture_plan':plan,'resolved_assets':[session.scene['content_asset']] if session.scene['content_asset'] else []}
     digest=stable_hash(projection)
     if row.projection_hash!=digest:
@@ -130,3 +136,14 @@ def capture_ready(row):
     if not transition:return False
     reasons=(row.readiness or {}).get('reasons',[])
     return row.readiness_state=='waiting' or (row.readiness_state=='blocked' and set(reasons)<=set(['visual_frame_unready']))
+
+async def authorize_capture_session(db,p,owner,session):
+    """Current host authority and canonical resource scope, independently of project ownership."""
+    kind='live_event' if owner.mode=='live' else 'lesson_recording_project'
+    resource_id=owner.live_event_id if owner.mode=='live' else owner.id
+    if not session or session.foundation_id!=owner.foundation_id or session.resource_kind!=kind or session.resource_id!=resource_id or session.host_user_id!=owner.owner_user_id or session.recording_policy_id!=owner.recording_policy_id:deny()
+    if owner.mode=='live':
+        from .live import active_webinar
+        await active_webinar(db,p,resource_id)
+        if session.state!='live':raise ApiError(409,'recording_live_session_inactive','Запись доступна в текущем открытом эфире')
+    return session

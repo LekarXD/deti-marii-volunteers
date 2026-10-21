@@ -53,7 +53,8 @@ async def approve_policy(db,p,row,owner,body):
     capture=await db.get(StudioCaptureSession,row.capture_session_id)
     session=await db.get(StudioSession,capture.studio_session_id,populate_existing=True)
     if not session or session.generation!=row.generation or session.scene_revision!=body.expected_scene_revision:raise ApiError(409,'scene_revision_conflict','Кадр изменился',current_version=session.scene_revision if session else None)
-    if owner.mode!='solo' or session.scene['presenter_identity']!=identity(p.user_id):raise ApiError(409,'recording_policy_unavailable','Для этой студии требуется отдельное согласование участников')
+    if body.approved:await service.authorize_capture_session(db,p,owner,session)
+    if session.scene['presenter_identity']!=identity(p.user_id):raise ApiError(409,'recording_policy_unavailable','Для этой студии требуется отдельное согласование участников')
     tracks=[item.model_dump() for item in body.tracks]
     keys={(t['identity'],t['track_id'],t['source'],t['kind']) for t in tracks}
     if len(keys)!=len(tracks) or any(t['identity']!=identity(p.user_id) for t in tracks):raise ApiError(422,'recording_policy_tracks_invalid','Выберите только собственные источники записи')
@@ -68,6 +69,8 @@ async def approve_policy(db,p,row,owner,body):
                 from .renderer import internal_participant_authorizer
                 if await internal_participant_authorizer(db,session,participant):continue
                 raise ApiError(409,'recording_unknown_participant','Неизвестный участник записи')
+            from .live import audience_excluded
+            if owner.mode=='live' and await audience_excluded(db,session,participant):continue
             if participant.get('identity')!=identity(p.user_id):raise ApiError(409,'recording_unknown_participant','В комнате появился другой участник; проверьте приватность')
             for track in participant.get('tracks',[]):
                 source=source_map.get(track.get('source'))
@@ -125,6 +128,8 @@ async def verify_provider_scope(db,row,owner):
         if participant.get('identity','').startswith('opora-renderer-'):
             if await internal_participant_authorizer(db,studio,participant):continue
             raise ValueError('capture_unknown_participant')
+        from .live import audience_excluded
+        if owner.mode=='live' and await audience_excluded(db,studio,participant):continue
         if participant.get('identity')!=identity(owner.owner_user_id):raise ValueError('capture_unknown_participant')
         for track in participant.get('tracks',[]):
             source=source_map.get(track.get('source'))

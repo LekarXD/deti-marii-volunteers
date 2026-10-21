@@ -9,6 +9,9 @@ class RecordingProjectInput(BaseModel):
     title:str=Field(min_length=1,max_length=300)
     target_lesson_id:UUID|None=None
     mode:Literal['solo']='solo'
+class LiveRecordingProjectInput(BaseModel):
+    studio_session_id:UUID
+    expected_scene_revision:int=Field(ge=0)
 class RecordingVersionCommand(BaseModel):
     expected_version:int=Field(ge=1)
 class RecordingProjectUpdate(RecordingVersionCommand):
@@ -26,6 +29,7 @@ class RecordingProjectView(BaseModel):
     owner_user_id:UUID
     title:str
     mode:str
+    live_event_id:UUID|None
     target_lesson_id:UUID|None
     state:str
     privacy_state:str
@@ -87,6 +91,8 @@ class RendererSceneTransition(BaseModel):
     from_projection_hash:str
     expires_at:datetime
 class RendererStateView(BaseModel):
+    resource_kind:Literal['live_event','lesson_recording_project']
+    resource_id:UUID
     foundation_id:UUID
     project_id:UUID
     take_id:UUID
