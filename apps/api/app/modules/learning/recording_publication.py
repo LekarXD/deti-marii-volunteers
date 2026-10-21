@@ -63,3 +63,11 @@ async def validate_recording_assets(db,principal,lesson_id,draft_version,blocks,
         claim=claims.get(publication_key(asset.id,lesson_id,draft_version))
         if claim is None:raise ApiError(409,'recording_approval_required','Сначала согласуйте именно эту запись для урока')
         await recording_module().validate_recording_claim(db,claim,asset_id=asset.id,target_lesson_id=lesson_id,expected_draft_version=draft_version)
+
+
+async def record_recording_assets(db,principal,lesson_id,draft_version,lesson_version_id,claims):
+    owned=[claim for (asset,target,version),claim in claims.items() if target==str(lesson_id) and version==draft_version]
+    if not owned:return
+    record=getattr(recording_module(),'record_recording_publications',None)
+    if record is None:raise ApiError(503,'recording_publication_unavailable','Публикация записи пока недоступна')
+    await record(db,claims=owned,lesson_version_id=lesson_version_id,actor_user_id=principal.user_id)

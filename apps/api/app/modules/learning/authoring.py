@@ -288,7 +288,7 @@ async def review_assessment(db, principal, track_id, expected_version):
 async def publish_lesson_version(db, principal, lesson_id, expected_draft_version, expected_publication_revision, *, recording_claims=None):
     """P18E extension: exact draft + pointer CAS; called inside release transaction."""
     permission(principal, "learning.publish")
-    from .recording_publication import prepare_recording_assets, validate_recording_assets
+    from .recording_publication import prepare_recording_assets, validate_recording_assets, record_recording_assets
     if recording_claims is None:
         recording_claims = await prepare_recording_assets(db, principal, [lesson_id], {lesson_id: expected_draft_version})
     value = await lesson(db, principal, lesson_id, lock=True)
@@ -308,6 +308,8 @@ async def publish_lesson_version(db, principal, lesson_id, expected_draft_versio
     await db.flush()
     for position, block in enumerate(draft.blocks):
         db.add(LessonBlock(lesson_version_id=version.id, position=position, content=deepcopy(block)))
+    await db.flush()
+    await record_recording_assets(db, principal, lesson_id, draft.version, version.id, recording_claims)
     value.current_version_id = version.id
     value.publication_revision += 1
     draft.status = "published"
