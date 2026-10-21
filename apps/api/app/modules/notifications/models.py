@@ -95,3 +95,6 @@ class NotificationWebhookReceipt(Base):
     provider_message_id:Mapped[str]=mapped_column(String(200))
     state:Mapped[str]=mapped_column(String(30))
     received_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+
+# Explicitly load the optional proof tables through the canonical model loader.
+from .telegram_models import TelegramBinding,TelegramLinkToken
