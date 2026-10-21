@@ -66,3 +66,12 @@ describe('authentication stages',()=>{
     expect(state.api).toHaveBeenCalledExactlyOnceWith('/auth/mfa/verify',{method:'POST',body:{code:'abcdef1234567890'}});
   });
 });
+
+it('logs out through the session service and returns to the email stage after principal change',async()=>{
+  const user=userEvent.setup();state.session={...state.session,user_id:'staff-user',is_staff:true};
+  const ui=tree();const view=render(ui);
+  state.logout.mockImplementation(async()=>{state.session={...state.session,user_id:null,registration_id:'fresh-registration',is_staff:false};view.rerender(ui);});
+  await user.click(screen.getByRole('button',{name:'Войти с другой почтой'}));
+  await screen.findByLabelText('Электронная почта');
+  expect(state.logout).toHaveBeenCalledTimes(1);
+});
