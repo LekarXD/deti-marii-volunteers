@@ -33,8 +33,8 @@ async def ingest_pdf(db,context):
         return {'state':'stale'}
     asset=await db.scalar(select(MediaAsset).where(MediaAsset.id==source.asset_id,MediaAsset.foundation_id==context.foundation_id,MediaAsset.state=='ready',MediaAsset.content_type=='application/pdf'))
     if asset is None:
-        source.index_state,source.index_error='failed','asset_unavailable'
-        return {'state':'failed','error_code':source.index_error}
+        source.ingest_state,source.ingest_error='failed','asset_unavailable'
+        return {'state':'failed','error_code':source.ingest_error}
     def extract():
         from pypdf import PdfReader
         reader=PdfReader(asset_path(asset))
@@ -44,17 +44,17 @@ async def ingest_pdf(db,context):
         text=await asyncio.wait_for(asyncio.to_thread(extract),timeout=30)
         await context.fence(db)
         if len(text.strip())<10:
-            source.index_state,source.index_error='failed','pdf_without_text'
+            source.ingest_state,source.ingest_error='failed','pdf_without_text'
         else:
             source.draft_body=text
             source.draft_version+=1
             source.reviewed_version=None
-            source.index_state,source.index_error='unpublished',None
+            source.ingest_state,source.ingest_error='ready',None
     except asyncio.CancelledError:raise
     except Exception:
         await context.fence(db)
-        source.index_state,source.index_error='failed','pdf_ingestion_failed'
-    return {'state':source.index_state,'error_code':source.index_error}
+        source.ingest_state,source.ingest_error='failed','pdf_ingestion_failed'
+    return {'state':source.ingest_state,'error_code':source.ingest_error}
 
 async def generate_ai(db,context):
     result=await execute_run(db,context)

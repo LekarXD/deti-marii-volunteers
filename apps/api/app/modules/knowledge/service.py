@@ -35,7 +35,7 @@ def can_edit(principal,value):
     return principal.has_permission('knowledge.manage') or principal.has_permission('knowledge.write') and principal.user_id==value.owner_user_id
 
 def source_view(principal,value):
-    return dict(id=value.id,title=value.title,kind=value.kind,body=value.draft_body,visibility=value.draft_visibility,version=value.draft_version,reviewed_version=value.reviewed_version,current_version_id=value.current_version_id,archived=value.archived,index_state=value.index_state,index_error=value.index_error,can_edit=can_edit(principal,value))
+    return dict(id=value.id,title=value.title,kind=value.kind,body=value.draft_body,visibility=value.draft_visibility,version=value.draft_version,reviewed_version=value.reviewed_version,current_version_id=value.current_version_id,archived=value.archived,index_state=value.index_state,index_error=value.index_error,ingest_state=value.ingest_state,ingest_error=value.ingest_error,can_edit=can_edit(principal,value))
 
 async def source_list(db,principal):
     permission(principal,'knowledge.read')
@@ -77,7 +77,8 @@ async def create_source(db,principal,body):
     db.add(value)
     await db.flush()
     if body.asset_id:
-        value.index_state='ingesting'
+        value.ingest_state='queued'
+        value.ingest_error=None
         enqueue_job(db,principal.foundation_id,'knowledge.ingest',{'source_id':str(value.id),'draft_version':value.draft_version,'asset_id':str(value.asset_id)})
     return source_view(principal,value)
 
@@ -92,6 +93,8 @@ async def save_source(db,principal,source_id,body):
         asset=await require_asset(db,principal,body.asset_id)
         if asset.content_type!='application/pdf':raise ApiError(422,'unsupported_source','Нужен PDF с текстом')
     content=await imported_lesson(db,principal,body.lesson_version_id) if body.lesson_version_id else body.body
+    if content!=value.draft_body and not (body.asset_id and body.asset_id!=value.asset_id):
+        value.ingest_state,value.ingest_error=None,None
     value.title,value.draft_body,value.draft_visibility=body.title.strip(),content,body.visibility
     value.reviewed_version=None
     value.draft_version+=1
@@ -99,7 +102,8 @@ async def save_source(db,principal,source_id,body):
     if body.asset_id and body.asset_id!=value.asset_id:
         value.asset_id=body.asset_id
         value.kind='pdf'
-        value.index_state='ingesting'
+        value.ingest_state='queued'
+        value.ingest_error=None
         enqueue_job(db,principal.foundation_id,'knowledge.ingest',{'source_id':str(value.id),'draft_version':value.draft_version,'asset_id':str(value.asset_id)})
     return source_view(principal,value)
 
@@ -107,7 +111,7 @@ async def review_source(db,principal,source_id,expected_version):
     permission(principal,'knowledge.publish')
     value=await source(db,principal,source_id,True)
     check_version(value.draft_version,expected_version)
-    if len(value.draft_body.strip())<10 or value.index_state=='ingesting':
+    if len(value.draft_body.strip())<10 or value.ingest_state in {'queued','running'}:
         raise ApiError(422,'source_incomplete','Добавьте текст источника или дождитесь импорта')
     value.reviewed_version=value.draft_version
     return source_view(principal,value)
@@ -273,7 +277,7 @@ async def question_list(db,principal):
     result=[]
     for item in items:
         answer=await db.scalar(select(ApprovedAnswer).where(ApprovedAnswer.question_id==item.id))
-        result.append(dict(id=item.id,text=item.text,kind=item.kind,state=item.state,version=item.version,answer=(dict(id=str(answer.id),body=answer.body,version=answer.version,reviewed_version=answer.reviewed_version,published_source_id=str(answer.published_source_id) if answer.published_source_id else None,citation_ids=answer.citations) if answer else None)))
+        result.append(dict(id=item.id,text=item.text,kind=item.kind,state=item.state,version=item.version,answer=(dict(id=str(answer.id),body=answer.body,version=answer.version,reviewed_version=answer.reviewed_version,published_source_id=str(answer.published_source_id) if answer.published_source_id else None,citation_ids=answer.citations,can_edit=bool(principal.has_permission('knowledge.write') and (answer.author_user_id==principal.user_id or principal.has_permission('knowledge.manage')))) if answer else None)))
     return result
 
 async def question(db,principal,question_id,lock=False):

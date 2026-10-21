@@ -24,6 +24,9 @@ async def command(db,principal,request,key,operation,payload,action,permissions=
         if operation=='mentor.ask':previous=jsonable_encoder(await service.mentor_view(db,principal,UUID(previous['id'])))
         await db.commit()
         return previous
+    if operation in {'mentor.ask','mentor.report'}:
+        from app.core.rate_limit import rate_limit
+        await rate_limit(db,principal.actor_id,operation,limit=20,seconds=3600)
     result=jsonable_encoder(await action())
     audit(db,principal,operation,'knowledge',payload.get('id','self'),fields=tuple(payload),request_id=getattr(request.state,'request_id',None))
     await finish_command(db,principal,operation,key,result)

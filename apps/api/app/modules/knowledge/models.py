@@ -22,6 +22,8 @@ class KnowledgeSource(Base):
     index_generation: Mapped[int] = mapped_column(BigInteger, default=0)
     index_state: Mapped[str] = mapped_column(String(30), default='unpublished')
     index_error: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    ingest_state: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    ingest_error: Mapped[str | None] = mapped_column(String(100), nullable=True)
     asset_id: Mapped[UUID | None] = mapped_column(ForeignKey('media_assets.id'), nullable=True)
     lesson_version_id: Mapped[UUID | None] = mapped_column(ForeignKey('lesson_versions.id'), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

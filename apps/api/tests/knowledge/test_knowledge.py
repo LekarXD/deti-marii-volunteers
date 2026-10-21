@@ -243,3 +243,47 @@ async def test_invalid_provider_json_circuit_prompt_gate_and_private_run_replay(
     client.cookies.set('opora_session','one'+str(foundation))
     replayed=await post(client,'/mentor/runs',{'question':'Личные контакты?'},key='source-bound-replay')
     assert replayed.json()['fragments']==[] and replayed.json()['answer'] is None
+
+@pytest.mark.asyncio
+async def test_pdf_draft_failure_preserves_published_search_and_profile_contract(setup):
+    from io import BytesIO
+    import hashlib
+    from pypdf import PdfWriter
+    from app.core.models import MediaAsset
+    from app.modules.assets.service import asset_path
+    from app.modules.knowledge.jobs import ingest_pdf
+    from app.integrations.ai.profile import enqueue_profile_suggestion,suggestion_payload
+    from app.core.errors import ApiError
+    client,factory,foundation=setup
+    published=await publish(client,factory,foundation)
+    buffer=BytesIO();writer=PdfWriter();writer.add_blank_page(width=100,height=100);writer.write(buffer);data=buffer.getvalue()
+    async with factory() as db:
+        session=await db.scalar(select(Session).where(Session.token_hash==digest('staff'+str(foundation))))
+        principal=await resolve_principal(db,session)
+        asset=MediaAsset(foundation_id=foundation,owner_user_id=principal.user_id,storage_key=uuid4().hex,content_type='application/pdf',expected_size=len(data),received_size=len(data),checksum=hashlib.sha256(data).hexdigest(),state='ready')
+        db.add(asset);await db.commit()
+        path=asset_path(asset);path.parent.mkdir(exist_ok=True,parents=True);path.write_bytes(data)
+        snapshot={'user_id':principal.user_id,'version':3,'fields':{'about':'Люблю керамику','interests':['керамика'],'skills':['рисование'],'contacts':'private@example.test','private_notes':'NEVER SEND'}}
+        suggestion=await enqueue_profile_suggestion(db,principal,snapshot)
+        assert set(suggestion.input_data['fields'])=={'about','interests','skills'}
+        suggestion.state='succeeded';suggestion.output={'about':'Мне интересна керамика.','interests':['керамика'],'skills':['рисование']}
+        payload=suggestion_payload(suggestion,snapshot)
+        assert payload['expected_profile_version']==3 and set(payload['patch'])=={'about'}
+        assert set(payload['producer'])=={'model','prompt_version','run_id'}
+        with pytest.raises(ApiError):suggestion_payload(suggestion,{**snapshot,'version':4})
+        await db.commit()
+    response=await client.put(f"/api/v1/coord/knowledge/sources/{published['id']}",json={'title':published['title'],'body':published['body'],'visibility':'all','asset_id':str(asset.id),'expected_version':published['version']},headers={'Idempotency-Key':str(uuid4())})
+    assert response.status_code==200,response.text
+    assert response.json()['ingest_state']=='queued' and response.json()['index_state']=='ready'
+    client.cookies.set('opora_session','one'+str(foundation))
+    assert (await client.get('/api/v1/knowledge/search',params={'q':'личные контакты'})).json()
+    async with factory() as db:
+        job=await db.scalar(select(Job).where(Job.foundation_id==foundation,Job.kind=='knowledge.ingest').with_for_update())
+        job.state='running';job.claim_token=uuid4();job.lease_until=utcnow()+timedelta(minutes=2)
+        await db.commit();context=JobContext(job.id,job.claim_token,foundation,job.payload)
+        result=await ingest_pdf(db,context);await complete(db,job.id,job.claim_token,result);await db.commit()
+        source=await db.get(KnowledgeSource,UUID(published['id']))
+        assert source.ingest_state=='failed' and source.ingest_error=='pdf_without_text' and source.index_state=='ready'
+        assert source.current_version_id==UUID(published['current_version_id'])
+    assert (await client.get('/api/v1/knowledge/search',params={'q':'личные контакты'})).json()
+    path.unlink()

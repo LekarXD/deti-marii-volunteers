@@ -33,6 +33,8 @@ class SourceView(BaseModel):
     archived:bool
     index_state:str
     index_error:str|None
+    ingest_state:str|None
+    ingest_error:str|None
     can_edit:bool
 class FragmentView(BaseModel):
     id:UUID
