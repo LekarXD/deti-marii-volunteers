@@ -1,7 +1,7 @@
 import importlib
 from app.core import models
 
-DOMAIN_MODULES = ("applications", "interviews", "activities", "participants", "learning", "messaging")
+DOMAIN_MODULES = ("applications", "interviews", "activities", "participants", "learning", "messaging", "crm")
 def load_models():
     for module in DOMAIN_MODULES:
         name = f"app.modules.{module}.models"

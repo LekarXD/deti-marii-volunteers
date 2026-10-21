@@ -29,11 +29,11 @@ def register_asset_purpose(name,*,content_types,max_bytes,authorize,validate,pro
     PURPOSES[name]=AssetPurpose(frozenset(content_types),max_bytes,authorize,validate,processor_kind)
 
 def load_asset_extensions():
-    for name in ("app.modules.webinars.assets",):
+    for name in ("app.modules.studio.assets",):
         try:
             importlib.import_module(name)
         except ModuleNotFoundError as exc:
-            if exc.name not in (name,"app.modules.webinars"):
+            if exc.name not in (name,"app.modules.studio"):
                 raise
 
 def purpose_for(name):

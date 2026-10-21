@@ -12,7 +12,7 @@ from app.core.db import SessionLocal
 from app.core.model_loader import load_models
 from app.core.models import Foundation, User, ContactChannel, StaffMembership, PermissionGrant, MfaFactor, OutboxMessage
 
-PERMISSIONS = ("staff.manage", "messaging.manage", "integrations.manage", "assets.manage", "candidates.read", "candidates.review", "candidates.notes", "interviews.manage", "interviews.read", "roles.manage", "opportunities.manage", "events.manage", "schedule.read", "schedule.manage", "assignments.manage", "participants.read", "participants.write", "participants.private_notes", "groups.read", "groups.write", "learning.manage", "reports.read")
+PERMISSIONS = ("staff.manage", "messaging.manage", "integrations.manage", "assets.manage", "candidates.read", "candidates.review", "candidates.notes", "interviews.manage", "interviews.read", "roles.manage", "opportunities.manage", "events.manage", "schedule.read", "schedule.manage", "crm.read", "crm.write", "contacts.review", "studio.manage", "assignments.manage", "participants.read", "participants.write", "participants.private_notes", "groups.read", "groups.write", "learning.manage", "reports.read")
 
 async def fixtures():
     if get_settings().environment != "development":
