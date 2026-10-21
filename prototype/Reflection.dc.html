@@ -208,6 +208,83 @@ sc-if,sc-for{display:contents}
 .und .strong{color:var(--ink-2)}
 @media (max-width:720px){.hero-art{display:none}.card-alarm{padding:28px 22px;border-radius:26px}.hero-title{font-size:38px}.und{grid-template-columns:minmax(0,1fr)}}
 .subnav{margin:0 0 32px}.dm .grid-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-copy{flex:1 1 560px;min-width:0}
+.hero-title{margin:10px 0 0;font-size:52px;font-weight:600;line-height:1.05;letter-spacing:-.035em;text-wrap:balance}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:24px}
+.subnav{margin:-16px 0 32px;gap:8px}
+.card-link{display:flex;flex-direction:column;gap:18px;color:var(--ink);text-decoration:none}
+.card-link:hover{text-decoration:none}.card-link:hover .h3{color:var(--blue)}
+.card-foot{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.field-wide{grid-column:1/-1}.filters{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:24px}
+.filters .input{flex:1 1 260px}.section-head .input{max-width:320px}
+.row-button{width:100%;padding:18px 0;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;display:flex;align-items:center;gap:16px}
+.row-button:first-child{border-top:0}.row-button:hover .li-title{color:var(--blue)}
+.card.row-button{background:var(--paper)}
+.profile-photo{width:84px;height:84px;flex:0 0 84px;border-radius:24px;object-fit:cover;background:var(--yellow-tint)}
+.profile-photo-lg{width:168px;height:168px;flex-basis:168px;border-radius:28px;font-size:52px}
+.profile-photo:not(img){display:grid;place-items:center;font-size:28px;font-weight:600}
+.profile-photo-lg:not(img){font-size:52px}.hint{padding:18px 22px;border-radius:22px;background:var(--green-tint);color:var(--green-ink);margin:20px 0 0;font-size:16px}
+.profile-photo.av-o{background:var(--orange-tint)}.profile-photo.av-v{background:var(--violet-tint)}.profile-photo.av-b{background:var(--blue-tint)}.profile-photo.av-g{background:var(--green-tint)}
+.error{padding:16px 20px;border-radius:18px;background:var(--red-tint);color:var(--red-ink);margin:16px 0}
+.count-big{font-size:44px;line-height:1;letter-spacing:-.03em;font-weight:600;font-variant-numeric:tabular-nums}
+.metric-row{display:flex;flex-wrap:wrap;gap:24px 44px;margin:24px 0}.metric-row div{display:flex;flex-direction:column;gap:8px}
+.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:24px}
+.day{min-height:96px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;border:0;border-radius:20px;background:var(--paper);padding:16px;font-size:16px}
+.day.is-on{background:var(--ink);color:#fff}.day.has-event{box-shadow:inset 0 0 0 2px var(--orange)}
+.day.is-on .strong,.day.is-on .meta{color:#fff}
+.calendar-cap{font-size:15px;color:var(--mute);text-align:center}
+.checkline{display:flex;gap:16px;align-items:center;padding:20px 0;border-top:1px solid var(--line)}.checkline:first-child{border-top:0}
+.checkline input{width:24px;height:24px;accent-color:var(--ink);flex:0 0 24px}
+.timeline{border-left:2px solid var(--line-2);padding-left:24px}.timeline .li{align-items:flex-start}
+.steps{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:24px}.step{display:flex;align-items:center;gap:10px;color:var(--mute)}
+.step.is-on{color:var(--ink);font-weight:600}.num-dot{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:var(--soft-2);flex:0 0 32px}
+.step.is-on .num-dot{background:var(--ink);color:#fff}.note-text{white-space:pre-line}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.group-card{display:flex;gap:20px;align-items:flex-start}.group-card .grow{min-width:0}
+.dm .grid-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}.dm .grid-3{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.dm .textarea{min-height:120px}.dm .chips a:hover{text-decoration:none}.dm .btn,.dm .chip,.dm .seg button{max-width:100%}
+.dm .hero-title,.dm .li-title,.dm .h3{overflow-wrap:anywhere}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:720px){.hero-title{font-size:36px}.hero-art{width:112px;height:112px;flex-basis:112px}.hero-art .ic{width:48px;height:48px}.field-grid{grid-template-columns:minmax(0,1fr)}.calendar{gap:5px}.day{min-height:64px;padding:8px;border-radius:14px}.day .meta{display:none}.profile-photo-lg{width:112px;height:112px;flex-basis:112px}.group-card{gap:14px}.group-card .profile-photo{width:60px;height:60px;flex-basis:60px}.demo{border-radius:24px}.hero-copy{flex-basis:100%}.row-button,.li{flex-wrap:wrap}.subnav .chip{height:40px;padding:0 14px}.metric-row{gap:22px}.btn{white-space:normal;text-align:center;line-height:1.25}}
+/* Schedule: calendar first, editing in a separate panel. */
+.p-heading{margin-bottom:28px}.p-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.p-month{font-size:28px;text-transform:capitalize;min-width:180px}.p-arrow{background:var(--paper);width:40px;height:40px}
+.p-filters{display:grid;grid-template-columns:minmax(0,1fr) 220px 190px;gap:12px;margin-bottom:20px}
+.p-filters .input,.p-filters .select{height:48px;min-height:48px;padding:10px 16px}
+.p-attention{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 22px;border-radius:20px;background:var(--yellow);margin-bottom:24px}
+.p-workspace{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}.p-calendar-col{min-width:0}
+.p-calendar.card{padding:14px 12px 12px;border-radius:28px}.p-calendar-head{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding:0 0 12px}
+.p-calendar-head span{font-size:15px;color:var(--mute);text-align:center}.p-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.p-day{position:relative;min-height:116px;padding:7px 4px;border-top:1px solid var(--line);border-left:1px solid var(--line);min-width:0}
+.p-day:nth-child(7n+1){border-left:0}.p-day.is-outside{background:var(--soft)}.p-day.is-selected{background:var(--yellow-tint);border-radius:12px}
+.p-date{width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;font-size:16px;font-weight:600;margin:0 0 6px 3px}
+.is-selected .p-date{background:var(--ink);color:#fff}.is-today:not(.is-selected) .p-date{background:var(--orange-tint);color:var(--orange-ink)}.is-outside .p-date{color:var(--mute)}
+.p-day-events{display:flex;flex-direction:column;gap:5px}.p-event{display:flex;flex-direction:column;gap:2px;width:100%;padding:7px 6px;border:0;border-radius:8px;text-align:left;background:var(--blue-tint);color:var(--blue);font-size:15px;line-height:1.25;overflow:hidden}
+.p-event span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.p-event.is-full{background:var(--green-tint);color:var(--green-ink)}.p-event.is-cancelled{background:var(--soft-2);color:var(--mute);text-decoration:line-through}
+.p-event:hover{box-shadow:inset 0 0 0 1px currentColor}.p-more{background:transparent;border:0;text-align:left;font-size:15px;color:var(--blue);padding:4px 6px}
+.p-mobile-count{display:none}.p-month-grid.is-week .p-day{min-height:260px}.p-agenda .section-head{margin:0 0 14px}.p-agenda-card.card,.p-selected.card{padding:22px 24px}
+.p-agenda-item{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;border:0;background:transparent;padding:16px 0;text-align:left;border-bottom:1px solid var(--line)}
+.p-agenda-item:first-child{padding-top:0}.p-agenda-item:last-child{border:0;padding-bottom:0}.p-agenda-item.is-on .h3{color:var(--blue)}.p-selected{margin-top:0}.p-agenda-card+.p-selected{margin-top:20px}.p-selected .li{padding:12px 0;gap:12px}.p-selected .section-head{gap:12px}
+.p-list-date{width:54px;flex:0 0 54px;text-align:center;display:flex;flex-direction:column;line-height:1.3}.p-list-date b{font-size:28px;letter-spacing:-.02em}.p-list-date span{font-size:15px;color:var(--mute)}
+.p-list-item .dot{max-width:180px}.p-overlay{position:fixed;inset:0;z-index:1000;background:rgba(18,20,26,.32);display:flex;justify-content:flex-end;overflow:hidden}
+.p-editor{display:flex;flex-direction:column;width:620px;max-width:100%;height:100%;background:var(--page);box-shadow:-8px 0 40px rgba(18,20,26,.12)}
+.p-editor-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;border-bottom:1px solid var(--line-2)}.p-editor-head .meta{margin:0 0 4px}
+.p-editor-body{padding:24px 28px;overflow-y:auto;min-height:0;flex:1}.p-editor-body .card{padding:24px}.p-editor-body .field-grid{gap:20px}.p-editor-body .p-scope{margin-bottom:24px}
+.p-editor-foot{display:flex;gap:12px;padding:20px 28px;border-top:1px solid var(--line-2);background:var(--paper)}.p-confirm{width:480px;max-width:calc(100% - 32px);margin:auto}
+.p-notice{position:fixed;z-index:1100;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:8px 12px 8px 24px;border-radius:999px;background:var(--ink);color:#fff;box-shadow:var(--shadow);max-width:calc(100% - 32px)}.p-notice .iconbtn{color:#fff;flex:0 0 44px}
+@media(max-width:1100px){.p-workspace{grid-template-columns:minmax(0,1fr)}.p-agenda{display:grid;grid-template-columns:1fr 1fr;gap:16px}.p-agenda>.section-head{grid-column:1/-1;margin-bottom:0}.p-selected{margin-top:0}}
+@media(max-width:720px){.p-toolbar .toolbar{gap:8px}.p-month{font-size:24px;min-width:150px}.p-toolbar .seg{width:100%;justify-content:center}.p-toolbar .seg button{flex:1}.p-filters{grid-template-columns:1fr 1fr}.p-filters>.field:first-child{grid-column:1/-1}.p-filters .input,.p-filters .select{font-size:15px;padding:10px 12px}.p-attention{align-items:flex-start;flex-direction:column;gap:4px;padding:16px 18px}.p-attention .btn{padding:0}.p-calendar.card{padding:14px 7px 7px;border-radius:24px}.p-day{min-height:70px;padding:7px 2px}.p-date{width:30px;height:30px;margin:0 auto 4px}.p-day-events{display:none}.p-mobile-count{display:block;text-align:center;font-size:15px;color:var(--blue)}.p-agenda{grid-template-columns:minmax(0,1fr)}.p-month-grid.is-week .p-day{min-height:90px}.p-calendar-head span{font-size:15px}.p-editor-head,.p-editor-body{padding:20px}.p-editor-body .card{padding:20px}.p-editor-head .h2{font-size:24px}.p-editor-body .field-grid{grid-template-columns:minmax(0,1fr)}.p-editor-foot{padding:16px 20px}.p-editor-body .p-scope{width:100%;display:flex}.p-scope button{padding:0 12px!important;flex:1}.p-list-item .dot{max-width:none}.p-notice{border-radius:20px;font-size:15px;bottom:12px}.p-heading{align-items:center}.p-heading .btn{height:44px;padding:0 18px;font-size:15px}}
+/* Built-in selection controls share the original surfaces and focus treatment. */
+.c-trigger{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;text-align:left;cursor:pointer;background:var(--paper);color:var(--ink);font-weight:400;line-height:1.35;height:auto;min-height:56px}.c-trigger span:first-child{min-width:0;overflow-wrap:anywhere}.c-trigger .ic{flex:0 0 22px;width:22px;height:22px}.c-chevron{width:9px;height:9px;border-right:1.5px solid;border-bottom:1.5px solid;transform:rotate(45deg);margin:0 4px 5px;flex:0 0 9px}.c-select{position:relative;min-width:0}
+.c-menu,.c-role-menu{background:var(--paper);border:1px solid var(--line-2);border-radius:20px;padding:8px;margin-top:8px;box-shadow:0 8px 24px rgba(18,20,26,.06)}.p-filters .c-menu{position:absolute;top:100%;left:0;right:0;z-index:10;margin-top:6px}.c-options{max-height:248px;overflow-y:auto;margin-top:8px;overscroll-behavior:contain}.c-option{display:block;position:relative;width:100%;padding:13px 38px 13px 14px;background:transparent;border:0;border-radius:12px;text-align:left;color:var(--ink);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere}.c-option:hover{background:var(--soft)}.c-option.is-on{background:var(--yellow-tint)}.c-option.is-on:after{content:'✓';position:absolute;right:14px;top:13px}.c-role-menu>.input{min-height:48px;height:48px;padding:12px 14px}.c-menu-foot{border-top:1px solid var(--line);margin-top:8px;padding:12px 6px 4px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;font-size:15px}.c-menu-foot .btn{padding:0;height:36px;gap:6px}.c-empty{padding:12px}.c-quick{background:var(--soft);padding:16px;border-radius:14px;margin-top:12px;display:flex;flex-direction:column;gap:16px}.c-quick .actions{margin-top:0}.c-quick .textarea{min-height:90px}
+.c-date-overlay{position:fixed;inset:0;z-index:1200;background:rgba(18,20,26,.32);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}.c-date-dialog.card{width:396px;max-width:100%;padding:24px;box-shadow:var(--shadow);border-radius:28px}.c-date-dialog .section-head{margin-bottom:18px;gap:8px}.c-date-dialog .section-head .h3{font-size:22px}.c-date-toolbar{display:flex;align-items:center;gap:4px;margin-bottom:18px}.c-date-toolbar .iconbtn{width:34px;height:40px;flex:0 0 34px}.c-month-label{border:0;background:transparent;text-transform:capitalize;font-size:18px;font-weight:600;flex:1;text-align:left;padding:8px 2px}.c-year.input{width:86px;min-height:44px;height:44px;padding:8px 10px;font-size:17px;border-radius:12px}.c-date-week,.c-date-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.c-date-week{margin-bottom:8px;text-align:center;color:var(--mute);font-size:15px}.c-date{border:0;background:transparent;border-radius:50%;height:42px;width:100%;font-size:16px;color:var(--ink);display:grid;place-items:center}.c-date:hover{background:var(--yellow-tint)}.c-date.is-outside{color:var(--mute)}.c-date.is-today{box-shadow:inset 0 0 0 1px var(--orange)}.c-date.is-on{background:var(--ink);color:#fff;box-shadow:none}.c-date-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:16px;margin-top:16px}.c-date-foot .btn{padding:0 12px;font-size:15px}.c-month-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.c-month{border:0;border-radius:12px;background:var(--soft);padding:14px 6px;text-transform:capitalize;font-size:16px}.c-month.is-on{background:var(--ink);color:#fff}
+.r-tools{display:flex;justify-content:space-between;gap:24px;margin:0 0 24px;align-items:center}.r-tools .field{max-width:520px;flex:1}.r-workspace{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);gap:24px;align-items:start}.r-list.card{padding:12px 24px}.r-role.row-button{gap:16px;padding:20px 0;border-radius:0}.r-role.is-on .h3{color:var(--blue)}.r-role-note{display:block;margin-top:8px;line-height:1.45}.r-detail>.field{margin-top:22px}.r-detail>.checkline{margin-top:20px}.r-detail .actions{gap:10px}.r-usage{margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}.r-usage .p{font-size:16px;margin-bottom:12px}
+@media(max-width:720px){.c-date-dialog.card{padding:20px;border-radius:24px}.c-date{height:38px}.c-month-label{font-size:17px}.c-date-toolbar .iconbtn{width:28px;flex-basis:28px}.c-year.input{width:78px;font-size:16px}.c-trigger{font-size:16px}.c-menu-foot{align-items:flex-start;flex-direction:column}.r-workspace{grid-template-columns:minmax(0,1fr)}.r-tools{flex-direction:column;align-items:stretch;gap:16px}.r-tools .field{max-width:none}.r-tools .seg{align-self:flex-start}.r-detail.card{padding:24px}.c-date-overlay{align-items:center}}
+
+.r-back{display:none}@media(max-width:720px){.r-workspace:not(.is-detail) .r-detail,.r-workspace.is-detail .r-list,.r-tools.is-detail{display:none}.r-back{display:inline-flex;padding:0;margin-bottom:20px}.r-role.row-button{flex-wrap:nowrap}.r-role .grow{min-width:0}.r-role .ic{flex:0 0 22px}}
+
 </style>
 </helmet>
 <div class="dm"><div class="shell">
@@ -257,7 +334,7 @@ sc-if,sc-for{display:contents}
     </div>
     <label for="r-text" style="position:absolute;left:-9999px">Расскажи своими словами</label>
     <textarea id="r-text" class="textarea say" placeholder="Что получилось, что было трудно, что нужно" value="{{text}}" onChange="{{typeText}}"></textarea>
-    <details class="card" style="margin-top:24px"><summary class="h3">После первого выхода</summary><div class="field" style="margin-top:24px"><label class="label" for="unexpected">Что оказалось неожиданным?</label><textarea class="textarea" id="unexpected" value="{{unexpected}}" onChange="{{changeUnexpected}}"></textarea></div><div class="grid-2" style="margin-top:24px"><div class="field"><label class="label" for="help-choice">Нужна ли помощь?</label><select class="select" id="help-choice" value="{{helpChoice}}" onChange="{{changeHelp}}"><option value="later">Пока не знаю</option><option value="yes">Хочу поговорить</option><option value="no">Сейчас справляюсь</option></select></div><div class="field"><label class="label" for="continuation">Хочешь продолжать?</label><select class="select" id="continuation" value="{{continuation}}" onChange="{{changeContinuation}}"><option value="discuss">Сначала обсудить</option><option value="yes">Да, в этой группе</option><option value="other">Хочу другую роль</option><option value="pause">Нужна пауза</option><option value="finish">Не планирую продолжать</option></select></div></div></details>
+    <details class="card" style="margin-top:24px"><summary class="h3">После первого выхода</summary><div class="field" style="margin-top:24px"><label class="label" for="unexpected">Что оказалось неожиданным?</label><textarea class="textarea" id="unexpected" value="{{unexpected}}" onChange="{{changeUnexpected}}"></textarea></div><div class="grid-2" style="margin-top:24px"><div class="field"><label class="label" for="help-choice">Нужна ли помощь?</label><div class="ui-choice" onKeyDown="{{ui_help_choice.key}}" onBlur="{{ui_help_choice.blur}}"><button type="button" class="input c-trigger" id="help-choice" aria-haspopup="listbox" aria-expanded="{{ui_help_choice.expanded}}" aria-controls="help-choice-options" onClick="{{ui_help_choice.toggle}}"><span>{{ui_help_choice.title}}</span><span class="c-chevron"></span></button><sc-if value="{{ui_help_choice.open}}"><div class="c-menu" id="help-choice-options" role="listbox" aria-label="Нужна ли помощь?"><sc-for list="{{ui_help_choice.options}}" as="o"><button type="button" class="{{o.cls}}" role="option" aria-selected="{{o.selected}}" onClick="{{o.pick}}">{{o.title}}</button></sc-for></div></sc-if></div></div><div class="field"><label class="label" for="continuation">Хочешь продолжать?</label><div class="ui-choice" onKeyDown="{{ui_continuation.key}}" onBlur="{{ui_continuation.blur}}"><button type="button" class="input c-trigger" id="continuation" aria-haspopup="listbox" aria-expanded="{{ui_continuation.expanded}}" aria-controls="continuation-options" onClick="{{ui_continuation.toggle}}"><span>{{ui_continuation.title}}</span><span class="c-chevron"></span></button><sc-if value="{{ui_continuation.open}}"><div class="c-menu" id="continuation-options" role="listbox" aria-label="Хочешь продолжать?"><sc-for list="{{ui_continuation.options}}" as="o"><button type="button" class="{{o.cls}}" role="option" aria-selected="{{o.selected}}" onClick="{{o.pick}}">{{o.title}}</button></sc-for></div></sc-if></div></div></div></details>
 <div class="row wrap" style="margin-top:20px">
       <button type="button" class="btn btn-primary btn-lg" onClick="{{send}}">Отправить</button>
       <sc-if value="{{voiceIdle}}" hint-placeholder-val="{{true}}">
@@ -372,12 +449,132 @@ sc-if,sc-for{display:contents}
 
 </div></div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":915}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":915}}'>const scheduleDate = value => new Date(value + 'T12:00:00Z');
+const scheduleISO = date => date.toISOString().slice(0, 10);
+const scheduleAdd = (value, days) => {const date=scheduleDate(value);date.setUTCDate(date.getUTCDate()+days);return scheduleISO(date);};
+const scheduleMonday = value => scheduleAdd(value,-((scheduleDate(value).getUTCDay()+6)%7));
+const scheduleLabel = (value, options={day:'numeric',month:'long'}) => scheduleDate(value).toLocaleDateString('ru-RU',{...options,timeZone:'UTC'});
+const scheduleValid = value => /^\d{4}-\d{2}-\d{2}$/.test(value||'') && !Number.isNaN(scheduleDate(value).getTime()) && scheduleISO(scheduleDate(value))===value;
+const UI_FIELDS = [{"key": "ui_help_choice", "id": "help-choice", "label": "Нужна ли помощь?", "value": "helpChoice", "change": "changeHelp", "options": [{"id": "later", "title": "Пока не знаю"}, {"id": "yes", "title": "Хочу поговорить"}, {"id": "no", "title": "Сейчас справляюсь"}], "kind": "select"}, {"key": "ui_continuation", "id": "continuation", "label": "Хочешь продолжать?", "value": "continuation", "change": "changeContinuation", "options": [{"id": "discuss", "title": "Сначала обсудить"}, {"id": "yes", "title": "Да, в этой группе"}, {"id": "other", "title": "Хочу другую роль"}, {"id": "pause", "title": "Нужна пауза"}, {"id": "finish", "title": "Не планирую продолжать"}], "kind": "select"}];
+// Shared select/date behavior. Screen handlers remain the source of form values.
+class FormControls extends DCLogic {
+  uiPatch(patch) {
+    this.setState({_ui: {...(this.state._ui || {}), ...patch}});
+  }
+  uiFocus(id) {
+    if (typeof document !== 'undefined') document.getElementById(id)?.focus();
+  }
+  uiDispatch(field, value) {
+    const values = this.screenVals();
+    const handler = field.change.split('.').reduce((value, key) => value?.[key], values);
+    handler({target: {value}});
+  }
+  uiSelectKey(event, field) {
+    const box = event.currentTarget;
+    const options = Array.from(box.querySelectorAll('[role=option]'));
+    const key = event.key;
+    if (key === 'Escape') {
+      event.preventDefault(); event.stopPropagation();
+      this.uiPatch({choice: ''}); this.uiFocus(field.id);
+      return;
+    }
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) return;
+    event.preventDefault();
+    if (!options.length) {
+      this.uiPatch({choice: field.id});
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => {
+        const items = Array.from(box.querySelectorAll('[role=option]'));
+        const selected = items.find(o => o.getAttribute('aria-selected') === 'true');
+        (selected || items[key === 'ArrowUp' || key === 'End' ? items.length - 1 : 0])?.focus();
+      });
+      return;
+    }
+    const i = options.indexOf(event.target);
+    const next = key === 'Home' ? 0 : key === 'End' ? options.length - 1 : i < 0 ? (key === 'ArrowDown' ? 0 : options.length - 1) : (i + (key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+    options[next].focus();
+  }
+  uiOpenDate(field, value) {
+    const date = scheduleValid(value) ? value : '2026-10-21';
+    this.uiPatch({date: field.id, month: date.slice(0, 7) + '-01', year: date.slice(0, 4), months: false, error: '', choice: ''});
+  }
+  uiChooseDate(value) {
+    const ui = this.state._ui || {};
+    if (ui.error) return;
+    const field = UI_FIELDS.find(f => f.id === ui.date);
+    this.uiDispatch(field, value);
+    this.uiPatch({date: ''});
+    this.uiFocus(field.id);
+  }
+  uiDateValues(values) {
+    const ui = this.state._ui || {};
+    const field = UI_FIELDS.find(f => f.id === ui.date);
+    if (!field) return {open: false};
+    const current = field ? field.value.split('.').reduce((v, k) => v?.[k], values) : '';
+    const date = scheduleValid(ui.month) ? ui.month : '2026-10-01';
+    const month = scheduleDate(date), from = scheduleMonday(date);
+    const close = () => {this.uiPatch({date: ''}); if (field) this.uiFocus(field.id);};
+    const move = delta => () => {
+      const next = scheduleISO(new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + delta, 1, 12)));
+      this.uiPatch({month: next, year: next.slice(0, 4), error: ''});
+    };
+    return {
+      open: !!field, pickerTitle: field?.label || '', pickerLabel: scheduleLabel(date, {month: 'long'}), pickerYear: ui.year ?? '2026',
+      pickerDayView: !ui.months, pickerMonthView: !!ui.months, pickerPrevious: move(-1), pickerNext: move(1), pickerMonths: () => this.uiPatch({months: !ui.months}),
+      changePickerYear: event => {
+        const text = event.target.value, year = Number(text);
+        const valid = /^\d{4}$/.test(text) && year >= 1900 && year <= 9999;
+        this.uiPatch({year: text, ...(valid ? {month: text + date.slice(4)} : {}), error: valid ? '' : 'Год: от 1900 до 9999.'});
+      },
+      pickerWeekdays: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(label => ({label})),
+      pickerDays: Array.from({length: 42}, (_, i) => {
+        const value = scheduleAdd(from, i);
+        return {label: scheduleDate(value).getUTCDate(), aria: scheduleLabel(value, {day:'numeric',month:'long',year:'numeric'}), cls: 'c-date' + (value === current ? ' is-on' : '') + (value.slice(0,7) !== date.slice(0,7) ? ' is-outside' : '') + (value === '2026-10-21' ? ' is-today' : ''), pressed: value === current ? 'true' : 'false', pick: () => this.uiChooseDate(value)};
+      }),
+      pickerMonthOptions: Array.from({length: 12}, (_, i) => {
+        const value = scheduleISO(new Date(Date.UTC(month.getUTCFullYear(), i, 1, 12)));
+        return {label: scheduleLabel(value, {month:'short'}).replace('.',''), cls: 'c-month' + (i === month.getUTCMonth() ? ' is-on' : ''), pick: () => this.uiPatch({month: value, months: false})};
+      }),
+      pickerError: ui.error || '', closeDatePicker: close, clearDateAllowed: false, clearDate: () => this.uiChooseDate(''), pickerToday: () => this.uiChooseDate('2026-10-21'),
+      key: event => {
+        if (event.key === 'Escape') {event.preventDefault(); event.stopPropagation(); close(); return;}
+        if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key) && event.target.classList.contains('c-date')) {
+          const days = Array.from(event.currentTarget.querySelectorAll('.c-date')), i = days.indexOf(event.target), step = {ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7}[event.key];
+          event.preventDefault(); days[Math.max(0,Math.min(days.length-1,i+step))].focus();
+        }
+        if (event.key === 'Tab') {
+          const items = Array.from(event.currentTarget.querySelectorAll('button,input')).filter(x => !x.disabled && x.getClientRects().length);
+          if (event.shiftKey && event.target === items[0]) {event.preventDefault(); items[items.length-1].focus();}
+          else if (!event.shiftKey && event.target === items[items.length-1]) {event.preventDefault(); items[0].focus();}
+        }
+      }
+    };
+  }
+  renderVals() {
+    const values = this.screenVals(), ui = this.state._ui || {};
+    for (const field of UI_FIELDS) {
+      const value = field.value.split('.').reduce((v, k) => v?.[k], values);
+      if (field.kind === 'date') {
+        values[field.key] = {title: scheduleValid(value) ? scheduleLabel(value, {day:'numeric',month:'long',year:'numeric'}) : 'Выбрать дату', open: () => this.uiOpenDate(field, value)};
+        continue;
+      }
+      values[field.key] = {
+        title: field.options.find(o => o.id === value)?.title || 'Выбрать', open: ui.choice === field.id, expanded: ui.choice === field.id ? 'true' : 'false',
+        toggle: () => this.uiPatch({choice: ui.choice === field.id ? '' : field.id}), key: event => this.uiSelectKey(event, field),
+        blur: event => {if (!event.currentTarget.contains(event.relatedTarget)) this.uiPatch({choice: ''});},
+        options: field.options.map(o => ({...o, cls:'c-option' + (o.id === value ? ' is-on' : ''), selected: o.id === value ? 'true' : 'false', pick: () => {this.uiDispatch(field,o.id); this.uiPatch({choice:''}); this.uiFocus(field.id);}}))
+      };
+    }
+    values.uiDate = this.uiDateValues(values);
+    return values;
+  }
+}
+
+
 // Browser-only demo data. No uploads or messages are sent to external services.
 const demoRead = (key, fallback) => {try {const raw = sessionStorage.getItem('opora-prototype-v1:'+key);return raw ? JSON.parse(raw) : fallback;} catch (_) {return fallback;}};
 const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-v1:'+key,JSON.stringify(value));} catch (_) {}};
 
-class Component extends DCLogic {
+class Component extends FormControls {
   constructor(props) {
     super(props);
     this.state = this.preset('normal');
@@ -394,7 +591,7 @@ class Component extends DCLogic {
     }
     return Object.assign(base, { mood: '', text: '' });
   }
-  renderVals() {
+  screenVals() {
     const s = this.state;
     const TRANSCRIPT = 'Рисовали осенние деревья акварелью. Миша, 9 лет, сначала отказывался, а включился, когда ему дали самому выбрать краски. Старшим малы фартуки.';
     const moodDefs = [

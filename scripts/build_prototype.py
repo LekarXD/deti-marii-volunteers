@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import re
+from prototype_controls import enhance_controls
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / 'prototype-src'
@@ -86,10 +87,14 @@ for name,(title,role,height) in SCREENS.items():
     active = 'Shifts' if name == 'Planning' else ('Volunteers' if name in ['VolunteerRecord','Reserve'] else ('Catalog' if name in ['FundCatalog','Participation'] else 'Home'))
     head = head.replace(f'<a href="{active}.dc.html"', f'<a class="is-active" aria-current="page" href="{active}.dc.html"')
     body = re.sub(r'<button(?![^>]*\btype=)', '<button type="button"', (SRC/f'{name}.body.html').read_text())
+    body, screen_logic = enhance_controls(body, (SRC/f'{name}.js').read_text(), SRC)
+    if 'UI_DATE_PICKER' in body:
+        calendar = re.sub(r'\{\{uiDate\.([\w.]+)\}\}', lambda m: '{{'+{'open':'datePicker','key':'dateKey'}.get(m[1],m[1])+'}}', (SRC/'date-picker.html').read_text())
+        body = body.replace('UI_DATE_PICKER', calendar)
     icons = dict(re.findall(r'^([\w-]+):\s*(<svg[^\n]+)', (ROOT/'materials/04-дизайн/прототип-до-фактуры/kit/icons.html').read_text(), re.M))
     for token,key in [('USERS','users'),('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('PLUS','plus'),('X','x')]:
         body = body.replace('ICON_'+token, icons[key])
-    logic = (SRC/'demo-store.js').read_text() + '\nconst ROLES = demoRead("roles", ' + (SRC/'roles.json').read_text().strip() + ');\nconst PEOPLE = demoRead("people", ' + (SRC/'participants.json').read_text().strip() + ');\n' + (SRC/'role-directory.js').read_text() + '\n' + ((SRC/'Planning.controls.js').read_text() + '\n' if name=='Planning' else '') + (SRC/f'{name}.js').read_text()
+    logic = (SRC/'date-utils.js').read_text() + '\n' + (SRC/'demo-store.js').read_text() + '\nconst ROLES = demoRead("roles", ' + (SRC/'roles.json').read_text().strip() + ');\nconst PEOPLE = demoRead("people", ' + (SRC/'participants.json').read_text().strip() + ');\n' + (SRC/'role-directory.js').read_text() + '\n' + ((SRC/'Planning.controls.js').read_text() + '\n' if name=='Planning' else '') + screen_logic
     h = helmet.replace('</style>',css+'\n</style>')
     doc = f'''<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{title} — Опора</title><script src="./support.js"></script></head><body>
@@ -135,7 +140,13 @@ t=t.replace('text: s.text,', "unexpected: s.unexpected, changeUnexpected: (e) =>
 t=t.replace('<h2 class="h2" id="und-title">Мы поняли так</h2>', '<h2 class="h2" id="und-title">Мы поняли так</h2>')
 t=t.replace('und: (undBy[flow] || undBy.done).map', "und: (undBy[flow] || undBy.done).concat(s.unexpected ? [{label:'Неожиданное',value:s.unexpected}] : []).concat([{label:'Поддержка',value:({yes:'Хочу поговорить',no:'Сейчас справляюсь',later:'Пока не знаю'})[s.help]},{label:'Продолжение',value:({discuss:'Сначала обсудить',yes:'Да, в этой группе',other:'Хочу другую роль',pause:'Нужна пауза',finish:'Не планирую продолжать'})[s.continuation]}]).map")
 t = t.replace("send: () => this.setState({ sent: true, confirmed: false, voice: 'idle' }),", "send: () => {demoWrite('reflection',{unexpected:s.unexpected,help:s.help,continuation:s.continuation,text:s.text});this.setState({sent:true,confirmed:false,voice:'idle'});},")
-p.write_text(t)
+match = re.search(r'(<script type="text/x-dc"[^>]*>)(.*?)(</script>)', t, re.S)
+markup, reflection_logic = enhance_controls(t[:match.start()], match[2], SRC)
+icons = dict(re.findall(r'^([\w-]+):\s*(<svg[^\n]+)', (ROOT/'materials/04-дизайн/прототип-до-фактуры/kit/icons.html').read_text(), re.M))
+for token,key in [('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('X','x')]:
+    markup = markup.replace('ICON_'+token, icons[key])
+markup = markup.replace('</style>', css+'\n</style>')
+p.write_text(markup + match[1] + (SRC/'date-utils.js').read_text() + reflection_logic + match[3] + t[match.end():])
 
 c=json.loads((BASE/'canvas.json').read_text())
 c['title']='Платформа волонтёров — прототип с дополнениями'

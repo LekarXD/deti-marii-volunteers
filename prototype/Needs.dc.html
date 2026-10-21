@@ -299,13 +299,20 @@ sc-if,sc-for{display:contents}
 <sc-if value="{{isList}}"><section class="card-hero"><div class="hero-grid"><div class="hero-copy"><p class="eyebrow">Нужно в команду</p><h2 class="hero-title">{{selected.title}}</h2><p class="lead">{{selected.schedule}}, {{selected.where}}</p><div class="actions"><button type="button" class="btn btn-primary btn-lg" onClick="{{editSelected}}">Условия и подготовка</button><a class="btn btn-ghost" href="Planning.dc.html">Планировать смены</a></div></div><span class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></span></div></section>
 <section class="section"><div class="section-head"><h2 class="h2">Направления</h2><a href="FundCatalog.dc.html">Как видит волонтёр</a></div><div class="filters"><label class="sr-only" for="role-search">Найти возможность</label><input class="input" id="role-search" placeholder="Найти по роли или программе" value="{{query}}" onChange="{{search}}"><div class="chips"><sc-for list="{{filters}}" as="f"><button type="button" class="{{f.cls}}" onClick="{{f.pick}}">{{f.title}}</button></sc-for></div></div><div class="card"><sc-for list="{{roles}}" as="r"><button type="button" class="row-button" onClick="{{r.pick}}"><span class="{{r.art}}" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></span><span class="grow"><span class="h3">{{r.title}}</span><span class="meta" style="display:block">{{r.program}}, {{r.regularity}}</span></span><span>Открыть</span></button></sc-for><sc-if value="{{empty}}"><div class="empty"><h3 class="h3">Ничего не нашлось</h3><button type="button" class="btn btn-secondary" onClick="{{reset}}">Сбросить фильтры</button></div></sc-if><sc-if value="{{hasMore}}"><button type="button" class="btn btn-ghost" onClick="{{showAll}}">Все направления</button></sc-if></div></section></sc-if>
 <sc-if value="{{isEdit}}"><section class="card-hero"><p class="eyebrow">{{editorLabel}}</p><h2 class="hero-title">{{draft.title}}</h2><div class="actions"><button type="button" class="btn btn-primary btn-lg" onClick="{{save}}">Сохранить возможность</button><button type="button" class="btn btn-ghost" onClick="{{cancel}}">Отмена</button></div></section><sc-if value="{{hasError}}"><p class="error" role="alert">{{error}}</p></sc-if>
-<section class="section"><div class="section-head"><h2 class="h2">Условия участия</h2></div><div class="card field-grid"><div class="field field-wide c-select"><label class="label" for="need-role">Роль волонтёра</label><button type="button" class="input c-trigger" id="need-role" aria-haspopup="listbox" aria-expanded="{{roleExpanded}}" onClick="{{toggleRoles}}"><span>{{roleName}}</span><span class="c-chevron"></span></button><sc-if value="{{roleOpen}}"><div class="c-role-menu"><label class="sr-only" for="need-role-search">Поиск роли</label><input class="input" id="need-role-search" placeholder="Найти роль" value="{{roleQuery}}" onChange="{{searchRole}}"><div class="c-options" role="listbox" aria-label="Роли волонтёров"><sc-for list="{{roleOptions}}" as="r"><button type="button" class="{{r.cls}}" role="option" aria-selected="{{r.selected}}" onClick="{{r.pick}}">{{r.title}}</button></sc-for></div><div class="c-menu-foot"><a href="Roles.dc.html">Добавить или изменить роль</a></div></div></sc-if></div><sc-for list="{{fields}}" as="f"><div class="{{f.cls}}"><label class="label" for="{{f.id}}">{{f.label}}</label><input class="input" id="{{f.id}}" value="{{f.value}}" type="{{f.type}}" onChange="{{f.change}}"></div></sc-for><div class="field field-wide"><label class="label" for="role-task">Что предстоит делать</label><textarea class="textarea" id="role-task" value="{{draft.task}}" onChange="{{changeTask}}"></textarea></div><div class="field"><label class="label" for="role-regularity">Регулярность</label><select class="select" id="role-regularity" value="{{draft.regularity}}" onChange="{{changeRegularity}}"><option>Регулярно</option><option>Периодически</option><option>Разово</option><option>По задачам</option></select></div><div class="field"><label class="label" for="role-status">Статус набора</label><select class="select" id="role-status" value="{{draft.status}}" onChange="{{changeStatus}}"><option>Черновик</option><option>На уточнении</option><option>Опубликовано</option><option>Закрыто</option></select></div></div></section>
+<section class="section"><div class="section-head"><h2 class="h2">Условия участия</h2></div><div class="card field-grid"><div class="field field-wide c-select" onKeyDown="{{roleKeys}}" onBlur="{{roleBlur}}"><label class="label" for="need-role">Роль волонтёра</label><button type="button" class="input c-trigger" id="need-role" aria-haspopup="listbox" aria-expanded="{{roleExpanded}}" onClick="{{toggleRoles}}"><span>{{roleName}}</span><span class="c-chevron"></span></button><sc-if value="{{roleOpen}}"><div class="c-role-menu"><label class="sr-only" for="need-role-search">Поиск роли</label><input class="input" id="need-role-search" placeholder="Найти роль" value="{{roleQuery}}" onChange="{{searchRole}}"><div class="c-options" role="listbox" aria-label="Роли волонтёров"><sc-for list="{{roleOptions}}" as="r"><button type="button" class="{{r.cls}}" role="option" aria-selected="{{r.selected}}" onClick="{{r.pick}}">{{r.title}}</button></sc-for></div><div class="c-menu-foot"><a href="Roles.dc.html">Добавить или изменить роль</a></div></div></sc-if></div><sc-for list="{{fields}}" as="f"><div class="{{f.cls}}"><label class="label" for="{{f.id}}">{{f.label}}</label><input class="input" id="{{f.id}}" value="{{f.value}}" type="{{f.type}}" onChange="{{f.change}}"></div></sc-for><div class="field field-wide"><label class="label" for="role-task">Что предстоит делать</label><textarea class="textarea" id="role-task" value="{{draft.task}}" onChange="{{changeTask}}"></textarea></div><div class="field"><label class="label" for="role-regularity">Регулярность</label><div class="ui-choice" onKeyDown="{{ui_role_regularity.key}}" onBlur="{{ui_role_regularity.blur}}"><button type="button" class="input c-trigger" id="role-regularity" aria-haspopup="listbox" aria-expanded="{{ui_role_regularity.expanded}}" aria-controls="role-regularity-options" onClick="{{ui_role_regularity.toggle}}"><span>{{ui_role_regularity.title}}</span><span class="c-chevron"></span></button><sc-if value="{{ui_role_regularity.open}}"><div class="c-menu" id="role-regularity-options" role="listbox" aria-label="Регулярность"><sc-for list="{{ui_role_regularity.options}}" as="o"><button type="button" class="{{o.cls}}" role="option" aria-selected="{{o.selected}}" onClick="{{o.pick}}">{{o.title}}</button></sc-for></div></sc-if></div></div><div class="field"><label class="label" for="role-status">Статус набора</label><div class="ui-choice" onKeyDown="{{ui_role_status.key}}" onBlur="{{ui_role_status.blur}}"><button type="button" class="input c-trigger" id="role-status" aria-haspopup="listbox" aria-expanded="{{ui_role_status.expanded}}" aria-controls="role-status-options" onClick="{{ui_role_status.toggle}}"><span>{{ui_role_status.title}}</span><span class="c-chevron"></span></button><sc-if value="{{ui_role_status.open}}"><div class="c-menu" id="role-status-options" role="listbox" aria-label="Статус набора"><sc-for list="{{ui_role_status.options}}" as="o"><button type="button" class="{{o.cls}}" role="option" aria-selected="{{o.selected}}" onClick="{{o.pick}}">{{o.title}}</button></sc-for></div></sc-if></div></div></div></section>
 <section class="section"><div class="section-head"><h2 class="h2">Подготовка к этой роли</h2></div><div class="card"><div class="field"><label class="label" for="role-prep">Материалы и договорённости</label><textarea class="textarea" id="role-prep" value="{{draft.prep}}" onChange="{{changePrep}}"></textarea></div><div style="margin-top:24px"><sc-for list="{{requirements}}" as="r"><label class="checkline"><input type="checkbox" checked="{{r.checked}}" onChange="{{r.toggle}}"><span>{{r.label}}</span></label></sc-for></div></div></section></sc-if>
 <sc-if value="{{saved}}"><p class="hint" role="status">Изменения сохранены в прототипе</p></sc-if>
 
 </div></div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1480}}'>
+const scheduleDate = value => new Date(value + 'T12:00:00Z');
+const scheduleISO = date => date.toISOString().slice(0, 10);
+const scheduleAdd = (value, days) => {const date=scheduleDate(value);date.setUTCDate(date.getUTCDate()+days);return scheduleISO(date);};
+const scheduleMonday = value => scheduleAdd(value,-((scheduleDate(value).getUTCDay()+6)%7));
+const scheduleLabel = (value, options={day:'numeric',month:'long'}) => scheduleDate(value).toLocaleDateString('ru-RU',{...options,timeZone:'UTC'});
+const scheduleValid = value => /^\d{4}-\d{2}-\d{2}$/.test(value||'') && !Number.isNaN(scheduleDate(value).getTime()) && scheduleISO(scheduleDate(value))===value;
+
 // Browser-only demo data. No uploads or messages are sent to external services.
 const demoRead = (key, fallback) => {try {const raw = sessionStorage.getItem('opora-prototype-v1:'+key);return raw ? JSON.parse(raw) : fallback;} catch (_) {return fallback;}};
 const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-v1:'+key,JSON.stringify(value));} catch (_) {}};
@@ -331,15 +338,129 @@ const readRoleDirectory = () => demoRead('role-directory', ROLES.map(r=>({id:r.i
 const writeRoleDirectory = roles => demoWrite('role-directory',roles);
 const roleDuplicate = (roles,title,id='') => roles.some(r=>r.id!==id&&r.title.trim().toLocaleLowerCase('ru')===title.trim().toLocaleLowerCase('ru'));
 
-class Component extends DCLogic {
+const UI_FIELDS = [{"key": "ui_role_regularity", "id": "role-regularity", "label": "Регулярность", "value": "draft.regularity", "change": "changeRegularity", "options": [{"id": "Регулярно", "title": "Регулярно"}, {"id": "Периодически", "title": "Периодически"}, {"id": "Разово", "title": "Разово"}, {"id": "По задачам", "title": "По задачам"}], "kind": "select"}, {"key": "ui_role_status", "id": "role-status", "label": "Статус набора", "value": "draft.status", "change": "changeStatus", "options": [{"id": "Черновик", "title": "Черновик"}, {"id": "На уточнении", "title": "На уточнении"}, {"id": "Опубликовано", "title": "Опубликовано"}, {"id": "Закрыто", "title": "Закрыто"}], "kind": "select"}];
+// Shared select/date behavior. Screen handlers remain the source of form values.
+class FormControls extends DCLogic {
+  uiPatch(patch) {
+    this.setState({_ui: {...(this.state._ui || {}), ...patch}});
+  }
+  uiFocus(id) {
+    if (typeof document !== 'undefined') document.getElementById(id)?.focus();
+  }
+  uiDispatch(field, value) {
+    const values = this.screenVals();
+    const handler = field.change.split('.').reduce((value, key) => value?.[key], values);
+    handler({target: {value}});
+  }
+  uiSelectKey(event, field) {
+    const box = event.currentTarget;
+    const options = Array.from(box.querySelectorAll('[role=option]'));
+    const key = event.key;
+    if (key === 'Escape') {
+      event.preventDefault(); event.stopPropagation();
+      this.uiPatch({choice: ''}); this.uiFocus(field.id);
+      return;
+    }
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) return;
+    event.preventDefault();
+    if (!options.length) {
+      this.uiPatch({choice: field.id});
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => {
+        const items = Array.from(box.querySelectorAll('[role=option]'));
+        const selected = items.find(o => o.getAttribute('aria-selected') === 'true');
+        (selected || items[key === 'ArrowUp' || key === 'End' ? items.length - 1 : 0])?.focus();
+      });
+      return;
+    }
+    const i = options.indexOf(event.target);
+    const next = key === 'Home' ? 0 : key === 'End' ? options.length - 1 : i < 0 ? (key === 'ArrowDown' ? 0 : options.length - 1) : (i + (key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+    options[next].focus();
+  }
+  uiOpenDate(field, value) {
+    const date = scheduleValid(value) ? value : '2026-10-21';
+    this.uiPatch({date: field.id, month: date.slice(0, 7) + '-01', year: date.slice(0, 4), months: false, error: '', choice: ''});
+  }
+  uiChooseDate(value) {
+    const ui = this.state._ui || {};
+    if (ui.error) return;
+    const field = UI_FIELDS.find(f => f.id === ui.date);
+    this.uiDispatch(field, value);
+    this.uiPatch({date: ''});
+    this.uiFocus(field.id);
+  }
+  uiDateValues(values) {
+    const ui = this.state._ui || {};
+    const field = UI_FIELDS.find(f => f.id === ui.date);
+    if (!field) return {open: false};
+    const current = field ? field.value.split('.').reduce((v, k) => v?.[k], values) : '';
+    const date = scheduleValid(ui.month) ? ui.month : '2026-10-01';
+    const month = scheduleDate(date), from = scheduleMonday(date);
+    const close = () => {this.uiPatch({date: ''}); if (field) this.uiFocus(field.id);};
+    const move = delta => () => {
+      const next = scheduleISO(new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + delta, 1, 12)));
+      this.uiPatch({month: next, year: next.slice(0, 4), error: ''});
+    };
+    return {
+      open: !!field, pickerTitle: field?.label || '', pickerLabel: scheduleLabel(date, {month: 'long'}), pickerYear: ui.year ?? '2026',
+      pickerDayView: !ui.months, pickerMonthView: !!ui.months, pickerPrevious: move(-1), pickerNext: move(1), pickerMonths: () => this.uiPatch({months: !ui.months}),
+      changePickerYear: event => {
+        const text = event.target.value, year = Number(text);
+        const valid = /^\d{4}$/.test(text) && year >= 1900 && year <= 9999;
+        this.uiPatch({year: text, ...(valid ? {month: text + date.slice(4)} : {}), error: valid ? '' : 'Год: от 1900 до 9999.'});
+      },
+      pickerWeekdays: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(label => ({label})),
+      pickerDays: Array.from({length: 42}, (_, i) => {
+        const value = scheduleAdd(from, i);
+        return {label: scheduleDate(value).getUTCDate(), aria: scheduleLabel(value, {day:'numeric',month:'long',year:'numeric'}), cls: 'c-date' + (value === current ? ' is-on' : '') + (value.slice(0,7) !== date.slice(0,7) ? ' is-outside' : '') + (value === '2026-10-21' ? ' is-today' : ''), pressed: value === current ? 'true' : 'false', pick: () => this.uiChooseDate(value)};
+      }),
+      pickerMonthOptions: Array.from({length: 12}, (_, i) => {
+        const value = scheduleISO(new Date(Date.UTC(month.getUTCFullYear(), i, 1, 12)));
+        return {label: scheduleLabel(value, {month:'short'}).replace('.',''), cls: 'c-month' + (i === month.getUTCMonth() ? ' is-on' : ''), pick: () => this.uiPatch({month: value, months: false})};
+      }),
+      pickerError: ui.error || '', closeDatePicker: close, clearDateAllowed: false, clearDate: () => this.uiChooseDate(''), pickerToday: () => this.uiChooseDate('2026-10-21'),
+      key: event => {
+        if (event.key === 'Escape') {event.preventDefault(); event.stopPropagation(); close(); return;}
+        if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key) && event.target.classList.contains('c-date')) {
+          const days = Array.from(event.currentTarget.querySelectorAll('.c-date')), i = days.indexOf(event.target), step = {ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7}[event.key];
+          event.preventDefault(); days[Math.max(0,Math.min(days.length-1,i+step))].focus();
+        }
+        if (event.key === 'Tab') {
+          const items = Array.from(event.currentTarget.querySelectorAll('button,input')).filter(x => !x.disabled && x.getClientRects().length);
+          if (event.shiftKey && event.target === items[0]) {event.preventDefault(); items[items.length-1].focus();}
+          else if (!event.shiftKey && event.target === items[items.length-1]) {event.preventDefault(); items[0].focus();}
+        }
+      }
+    };
+  }
+  renderVals() {
+    const values = this.screenVals(), ui = this.state._ui || {};
+    for (const field of UI_FIELDS) {
+      const value = field.value.split('.').reduce((v, k) => v?.[k], values);
+      if (field.kind === 'date') {
+        values[field.key] = {title: scheduleValid(value) ? scheduleLabel(value, {day:'numeric',month:'long',year:'numeric'}) : 'Выбрать дату', open: () => this.uiOpenDate(field, value)};
+        continue;
+      }
+      values[field.key] = {
+        title: field.options.find(o => o.id === value)?.title || 'Выбрать', open: ui.choice === field.id, expanded: ui.choice === field.id ? 'true' : 'false',
+        toggle: () => this.uiPatch({choice: ui.choice === field.id ? '' : field.id}), key: event => this.uiSelectKey(event, field),
+        blur: event => {if (!event.currentTarget.contains(event.relatedTarget)) this.uiPatch({choice: ''});},
+        options: field.options.map(o => ({...o, cls:'c-option' + (o.id === value ? ' is-on' : ''), selected: o.id === value ? 'true' : 'false', pick: () => {this.uiDispatch(field,o.id); this.uiPatch({choice:''}); this.uiFocus(field.id);}}))
+      };
+    }
+    values.uiDate = this.uiDateValues(values);
+    return values;
+  }
+}
+
+class Component extends FormControls {
  constructor(p){super(p);this.state={directory:readRoleDirectory(),roleOpen:false,roleQuery:'',roles:ROLES.map(x=>({...x})),sel:'assistant',edit:false,isNew:false,draft:{},query:'',filter:'all',all:false,saved:false,error:''};}
  editRole(r){this.setState({sel:r.id,edit:true,isNew:false,draft:{...r,roleId:r.roleId||r.id},roleOpen:false,saved:false,error:''});}
- renderVals(){const s=this.state,r=s.roles.find(x=>x.id===s.sel)||s.roles[0],d=s.draft;const change=k=>e=>this.setState({draft:{...this.state.draft,[k]:e.target.value}});const filtered=s.roles.filter(x=>(s.filter==='all'||x.status===s.filter)&&(`${x.title} ${x.program}`).toLowerCase().includes(s.query.toLowerCase()));return {
+ screenVals(){const s=this.state,r=s.roles.find(x=>x.id===s.sel)||s.roles[0],d=s.draft;const change=k=>e=>this.setState({draft:{...this.state.draft,[k]:e.target.value}});const filtered=s.roles.filter(x=>(s.filter==='all'||x.status===s.filter)&&(`${x.title} ${x.program}`).toLowerCase().includes(s.query.toLowerCase()));return {
  isList:!s.edit,isEdit:s.edit,listDemo:s.edit?'':'is-on',editDemo:s.edit?'is-on':'',showList:()=>this.setState({edit:false,error:''}),selected:r,editSelected:()=>this.editRole(r),query:s.query,search:e=>this.setState({query:e.target.value,all:false}),
  filters:[['all','Все'],['Опубликовано','Открыт набор'],['На уточнении','На уточнении']].map(([id,title])=>({title,cls:'chip'+(s.filter===id?' is-on':''),pick:()=>this.setState({filter:id,all:false})})),
  roles:(s.all?filtered:filtered.slice(0,4)).map((x,i)=>({...x,art:'art '+['art-o','art-b','art-y','art-v'][i%4],pick:()=>this.editRole(x)})),hasMore:!s.all&&filtered.length>4,empty:!filtered.length,showAll:()=>this.setState({all:true}),reset:()=>this.setState({query:'',filter:'all'}),
  create:()=>this.setState({edit:true,isNew:true,saved:false,error:'',roleOpen:false,draft:{roleId:'',id:'new-'+Date.now(),title:'Новая возможность',program:'',audience:'',where:'',schedule:'',task:'',prep:'',format:'Очно',regularity:'Регулярно',need:1,status:'Черновик',certificate:false,discussion:true,approval:true}}),
- draft:d,roleName:(s.directory.find(r=>r.id===d.roleId)||{}).title||'Выберите роль',roleOpen:s.roleOpen,roleExpanded:s.roleOpen?'true':'false',toggleRoles:()=>this.setState({roleOpen:!s.roleOpen,roleQuery:''}),roleQuery:s.roleQuery,searchRole:e=>this.setState({roleQuery:e.target.value}),roleOptions:s.directory.filter(r=>!r.archived&&r.title.toLowerCase().includes(s.roleQuery.toLowerCase())).map(r=>({...r,selected:d.roleId===r.id?'true':'false',cls:'c-option'+(d.roleId===r.id?' is-on':''),pick:()=>this.setState({roleOpen:false,draft:{...this.state.draft,roleId:r.id,task:r.task,prep:r.prep,certificate:r.certificate,approval:r.approval}})})),editorLabel:s.isNew?'Новая возможность':'Редактирование',fields:[['title','Название возможности','text'],['program','Программа','text'],['audience','Кому помогаем','text'],['where','Место или онлайн','text'],['schedule','Дата или расписание','text'],['need','Сколько волонтёров нужно','number']].map(([k,label,type])=>({id:'role-'+k,label,type,value:d[k]||'',cls:'field',change:change(k)})),
+ draft:d,roleName:(s.directory.find(r=>r.id===d.roleId)||{}).title||'Выберите роль',roleKeys:e=>{const box=e.currentTarget;if(e.key==='Escape'){e.preventDefault();this.setState({roleOpen:false});box.querySelector('.c-trigger').focus();return;}if(!['ArrowDown','ArrowUp','Home','End'].includes(e.key)||e.target.tagName==='INPUT')return;e.preventDefault();const move=()=>{const items=Array.from(box.querySelectorAll('[role=option]'));if(!items.length)return;const i=items.indexOf(e.target),n=e.key==='Home'?0:e.key==='End'?items.length-1:i<0?(e.key==='ArrowUp'?items.length-1:0):(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length;items[n].focus();};if(!s.roleOpen){this.setState({roleOpen:true});if(typeof requestAnimationFrame==='function')requestAnimationFrame(move);}else move();},roleBlur:e=>{if(!e.currentTarget.contains(e.relatedTarget))this.setState({roleOpen:false});},roleOpen:s.roleOpen,roleExpanded:s.roleOpen?'true':'false',toggleRoles:()=>this.setState({roleOpen:!s.roleOpen,roleQuery:''}),roleQuery:s.roleQuery,searchRole:e=>this.setState({roleQuery:e.target.value}),roleOptions:s.directory.filter(r=>!r.archived&&r.title.toLowerCase().includes(s.roleQuery.toLowerCase())).map(r=>({...r,selected:d.roleId===r.id?'true':'false',cls:'c-option'+(d.roleId===r.id?' is-on':''),pick:e=>{if(e)e.currentTarget.closest('.c-select')?.querySelector('.c-trigger')?.focus();this.setState({roleOpen:false,draft:{...this.state.draft,roleId:r.id,task:r.task,prep:r.prep,certificate:r.certificate,approval:r.approval}});}})),editorLabel:s.isNew?'Новая возможность':'Редактирование',fields:[['title','Название возможности','text'],['program','Программа','text'],['audience','Кому помогаем','text'],['where','Место или онлайн','text'],['schedule','Дата или расписание','text'],['need','Сколько волонтёров нужно','number']].map(([k,label,type])=>({id:'role-'+k,label,type,value:d[k]||'',cls:'field',change:change(k)})),
  changeTask:change('task'),changePrep:change('prep'),changeRegularity:change('regularity'),changeStatus:change('status'),requirements:[['certificate','Запросить справку о несудимости'],['discussion','Обсудить готовность с координатором'],['approval','Участие согласует координатор']].map(([k,label])=>({label,checked:!!d[k],toggle:()=>this.setState({draft:{...this.state.draft,[k]:!this.state.draft[k]}})})),
  save:()=>{const x=this.state.draft;if(!s.directory.some(r=>r.id===x.roleId)){this.setState({error:'Выберите роль из справочника.'});return;}if(!x.title.trim()||!x.program.trim()||!x.where.trim()||!x.schedule.trim()||!x.task.trim()||!Number.isInteger(Number(x.need))||Number(x.need)<1){this.setState({error:'Укажите название, программу, место, расписание, задачу и число волонтёров от 1.'});return;}const role={...x,need:Number(x.need)};demoWrite('roles',s.isNew?[role,...s.roles]:s.roles.map(v=>v.id===x.id?role:v));this.setState({roles:s.isNew?[role,...s.roles]:s.roles.map(v=>v.id===x.id?role:v),sel:x.id,edit:false,saved:true,error:''});},cancel:()=>this.setState({edit:false,error:''}),saved:s.saved,hasError:!!s.error,error:s.error};}
 }

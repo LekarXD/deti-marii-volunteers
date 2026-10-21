@@ -23,3 +23,11 @@ for p in files:
  assert result.returncode==0,(p.name,result.stderr)
 c=json.loads((P/'canvas.json').read_text());assert set(c['boards'])==set(p.name for p in files)
 print('PASS:',len(files),'artboards: balanced tags, links, holes, JS syntax, canvas membership.')
+
+# Working additions must not fall back to OS selects or date/time popups.
+new_names=[p.stem.replace('.body','') for p in (ROOT/'prototype-src').glob('*.body.html')]+['Reflection']
+for name in new_names:
+ text=(P/(name+'.dc.html')).read_text()
+ assert not re.search(r'<select\b|<input\b[^>]*type="(?:date|time|month|datetime-local)"',text),(name,'native control')
+ assert not re.search(r'\{\{uiDate\.[dwm]\.',text),(name,'loop scope in calendar')
+print('PASS: all additions use styled selection and calendar controls.')

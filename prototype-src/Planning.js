@@ -1,9 +1,3 @@
-const scheduleDate = value => new Date(value + 'T12:00:00Z');
-const scheduleISO = date => date.toISOString().slice(0, 10);
-const scheduleAdd = (value, days) => {const date=scheduleDate(value);date.setUTCDate(date.getUTCDate()+days);return scheduleISO(date);};
-const scheduleMonday = value => scheduleAdd(value,-((scheduleDate(value).getUTCDay()+6)%7));
-const scheduleLabel = (value, options={day:'numeric',month:'long'}) => scheduleDate(value).toLocaleDateString('ru-RU',{...options,timeZone:'UTC'});
-const scheduleValid = value => /^\d{4}-\d{2}-\d{2}$/.test(value||'') && !Number.isNaN(scheduleDate(value).getTime()) && scheduleISO(scheduleDate(value))===value;
 const scheduleDefaults = [
  {id:'art',title:'Арт-субботы',program:'Творческие занятия',group:'Арт-субботы',role:'assistant',startDate:'2026-10-03',time:'14:00',endTime:'18:00',where:'Загородная мастерская, Грибаново',need:3,repeat:'weekly',weekdays:[6],until:'',exceptions:[],overrides:{},cancelled:false},
  {id:'pack',title:'Подготовка продукции',program:'Магазин фонда',group:'Без группы',role:'packing',startDate:'2026-10-02',time:'15:00',endTime:'18:00',where:'Студия фонда',need:2,repeat:'weekly',weekdays:[5],until:'',exceptions:[],overrides:{},cancelled:false},

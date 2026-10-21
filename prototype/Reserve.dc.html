@@ -296,11 +296,18 @@ sc-if,sc-for{display:contents}
 <nav class="chips subnav" aria-label="Работа фонда"><a class="chip" href="Needs.dc.html">Возможности</a><a class="chip" href="Planning.dc.html">Расписание</a><a class="chip" href="Roles.dc.html">Роли</a><a class="chip" href="Participants.dc.html">Участники</a><a class="chip" href="Groups.dc.html">Группы</a><a class="chip is-on" href="Reserve.dc.html">Резерв</a></nav>
 <div class="head"><h1 class="h1">Контакты для проверки</h1><a href="Volunteers.dc.html">База волонтёров</a></div><section class="card-hero"><div class="hero-grid"><div class="hero-copy"><p class="eyebrow">Историческая база</p><h2 class="hero-title">Сначала — восстановить связь</h2><p class="lead">Уточни, хочет ли человек помогать и когда ему удобно.</p><div class="actions"><button type="button" class="btn btn-primary btn-lg" onClick="{{openNext}}">Следующий контакт</button></div></div><span class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></span></div></section>
 <section class="section"><div class="section-head"><h2 class="h2">{{listTitle}}</h2></div><div class="filters"><input class="input" aria-label="Поиск контакта" placeholder="Поиск по имени" value="{{query}}" onChange="{{search}}"><div class="chips"><sc-for list="{{filters}}" as="f"><button type="button" class="{{f.cls}}" onClick="{{f.pick}}">{{f.title}}</button></sc-for></div></div><div class="card"><sc-for list="{{people}}" as="p"><button type="button" class="row-button" onClick="{{p.pick}}"><span class="{{p.avatar}}">{{p.ini}}</span><span class="grow"><span class="h3">{{p.name}}</span><span class="meta" style="display:block">{{p.status}}</span></span><span>Проверить</span></button></sc-for><sc-if value="{{empty}}"><div class="empty"><h3 class="h3">В этой очереди никого нет</h3><button type="button" class="btn btn-secondary" onClick="{{reset}}">Показать все контакты</button></div></sc-if></div></section>
-<sc-if value="{{hasSelected}}"><section class="section"><div class="section-head"><h2 class="h2">{{person.name}}</h2><button type="button" class="btn btn-ghost" onClick="{{close}}">Закрыть</button></div><div class="card"><p class="lead" style="margin-top:0">{{person.context}}</p><div class="field-grid" style="margin-top:24px"><div class="field"><label class="label" for="reserve-result">Результат связи</label><select class="select" id="reserve-result" value="{{result}}" onChange="{{changeResult}}"><option>Актуальность не проверена</option><option>Ждём ответа</option><option>Готов помогать</option><option>Сейчас на паузе</option><option>Не хочет получать приглашения</option></select></div><div class="field"><label class="label" for="reserve-time">Доступность</label><input class="input" id="reserve-time" value="{{availability}}" onChange="{{changeAvailability}}" placeholder="Когда и как может помогать"></div><div class="field field-wide"><label class="label" for="reserve-note">Заметка по разговору</label><textarea class="textarea" id="reserve-note" value="{{note}}" onChange="{{changeNote}}"></textarea></div></div><div class="actions"><button type="button" class="btn btn-secondary" onClick="{{save}}">Сохранить результат</button></div><sc-if value="{{hasError}}"><p class="error" role="alert">{{error}}</p></sc-if><sc-if value="{{saved}}"><p class="hint" role="status">Результат сохранён. Приглашения автоматически не отправляются.</p></sc-if></div></section></sc-if>
+<sc-if value="{{hasSelected}}"><section class="section"><div class="section-head"><h2 class="h2">{{person.name}}</h2><button type="button" class="btn btn-ghost" onClick="{{close}}">Закрыть</button></div><div class="card"><p class="lead" style="margin-top:0">{{person.context}}</p><div class="field-grid" style="margin-top:24px"><div class="field"><label class="label" for="reserve-result">Результат связи</label><div class="ui-choice" onKeyDown="{{ui_reserve_result.key}}" onBlur="{{ui_reserve_result.blur}}"><button type="button" class="input c-trigger" id="reserve-result" aria-haspopup="listbox" aria-expanded="{{ui_reserve_result.expanded}}" aria-controls="reserve-result-options" onClick="{{ui_reserve_result.toggle}}"><span>{{ui_reserve_result.title}}</span><span class="c-chevron"></span></button><sc-if value="{{ui_reserve_result.open}}"><div class="c-menu" id="reserve-result-options" role="listbox" aria-label="Результат связи"><sc-for list="{{ui_reserve_result.options}}" as="o"><button type="button" class="{{o.cls}}" role="option" aria-selected="{{o.selected}}" onClick="{{o.pick}}">{{o.title}}</button></sc-for></div></sc-if></div></div><div class="field"><label class="label" for="reserve-time">Доступность</label><input class="input" id="reserve-time" value="{{availability}}" onChange="{{changeAvailability}}" placeholder="Когда и как может помогать"></div><div class="field field-wide"><label class="label" for="reserve-note">Заметка по разговору</label><textarea class="textarea" id="reserve-note" value="{{note}}" onChange="{{changeNote}}"></textarea></div></div><div class="actions"><button type="button" class="btn btn-secondary" onClick="{{save}}">Сохранить результат</button></div><sc-if value="{{hasError}}"><p class="error" role="alert">{{error}}</p></sc-if><sc-if value="{{saved}}"><p class="hint" role="status">Результат сохранён. Приглашения автоматически не отправляются.</p></sc-if></div></section></sc-if>
 
 </div></div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1140}}'>
+const scheduleDate = value => new Date(value + 'T12:00:00Z');
+const scheduleISO = date => date.toISOString().slice(0, 10);
+const scheduleAdd = (value, days) => {const date=scheduleDate(value);date.setUTCDate(date.getUTCDate()+days);return scheduleISO(date);};
+const scheduleMonday = value => scheduleAdd(value,-((scheduleDate(value).getUTCDay()+6)%7));
+const scheduleLabel = (value, options={day:'numeric',month:'long'}) => scheduleDate(value).toLocaleDateString('ru-RU',{...options,timeZone:'UTC'});
+const scheduleValid = value => /^\d{4}-\d{2}-\d{2}$/.test(value||'') && !Number.isNaN(scheduleDate(value).getTime()) && scheduleISO(scheduleDate(value))===value;
+
 // Browser-only demo data. No uploads or messages are sent to external services.
 const demoRead = (key, fallback) => {try {const raw = sessionStorage.getItem('opora-prototype-v1:'+key);return raw ? JSON.parse(raw) : fallback;} catch (_) {return fallback;}};
 const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-v1:'+key,JSON.stringify(value));} catch (_) {}};
@@ -326,10 +333,124 @@ const readRoleDirectory = () => demoRead('role-directory', ROLES.map(r=>({id:r.i
 const writeRoleDirectory = roles => demoWrite('role-directory',roles);
 const roleDuplicate = (roles,title,id='') => roles.some(r=>r.id!==id&&r.title.trim().toLocaleLowerCase('ru')===title.trim().toLocaleLowerCase('ru'));
 
-class Component extends DCLogic {
+const UI_FIELDS = [{"key": "ui_reserve_result", "id": "reserve-result", "label": "Результат связи", "value": "result", "change": "changeResult", "options": [{"id": "Актуальность не проверена", "title": "Актуальность не проверена"}, {"id": "Ждём ответа", "title": "Ждём ответа"}, {"id": "Готов помогать", "title": "Готов помогать"}, {"id": "Сейчас на паузе", "title": "Сейчас на паузе"}, {"id": "Не хочет получать приглашения", "title": "Не хочет получать приглашения"}], "kind": "select"}];
+// Shared select/date behavior. Screen handlers remain the source of form values.
+class FormControls extends DCLogic {
+  uiPatch(patch) {
+    this.setState({_ui: {...(this.state._ui || {}), ...patch}});
+  }
+  uiFocus(id) {
+    if (typeof document !== 'undefined') document.getElementById(id)?.focus();
+  }
+  uiDispatch(field, value) {
+    const values = this.screenVals();
+    const handler = field.change.split('.').reduce((value, key) => value?.[key], values);
+    handler({target: {value}});
+  }
+  uiSelectKey(event, field) {
+    const box = event.currentTarget;
+    const options = Array.from(box.querySelectorAll('[role=option]'));
+    const key = event.key;
+    if (key === 'Escape') {
+      event.preventDefault(); event.stopPropagation();
+      this.uiPatch({choice: ''}); this.uiFocus(field.id);
+      return;
+    }
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) return;
+    event.preventDefault();
+    if (!options.length) {
+      this.uiPatch({choice: field.id});
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => {
+        const items = Array.from(box.querySelectorAll('[role=option]'));
+        const selected = items.find(o => o.getAttribute('aria-selected') === 'true');
+        (selected || items[key === 'ArrowUp' || key === 'End' ? items.length - 1 : 0])?.focus();
+      });
+      return;
+    }
+    const i = options.indexOf(event.target);
+    const next = key === 'Home' ? 0 : key === 'End' ? options.length - 1 : i < 0 ? (key === 'ArrowDown' ? 0 : options.length - 1) : (i + (key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+    options[next].focus();
+  }
+  uiOpenDate(field, value) {
+    const date = scheduleValid(value) ? value : '2026-10-21';
+    this.uiPatch({date: field.id, month: date.slice(0, 7) + '-01', year: date.slice(0, 4), months: false, error: '', choice: ''});
+  }
+  uiChooseDate(value) {
+    const ui = this.state._ui || {};
+    if (ui.error) return;
+    const field = UI_FIELDS.find(f => f.id === ui.date);
+    this.uiDispatch(field, value);
+    this.uiPatch({date: ''});
+    this.uiFocus(field.id);
+  }
+  uiDateValues(values) {
+    const ui = this.state._ui || {};
+    const field = UI_FIELDS.find(f => f.id === ui.date);
+    if (!field) return {open: false};
+    const current = field ? field.value.split('.').reduce((v, k) => v?.[k], values) : '';
+    const date = scheduleValid(ui.month) ? ui.month : '2026-10-01';
+    const month = scheduleDate(date), from = scheduleMonday(date);
+    const close = () => {this.uiPatch({date: ''}); if (field) this.uiFocus(field.id);};
+    const move = delta => () => {
+      const next = scheduleISO(new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + delta, 1, 12)));
+      this.uiPatch({month: next, year: next.slice(0, 4), error: ''});
+    };
+    return {
+      open: !!field, pickerTitle: field?.label || '', pickerLabel: scheduleLabel(date, {month: 'long'}), pickerYear: ui.year ?? '2026',
+      pickerDayView: !ui.months, pickerMonthView: !!ui.months, pickerPrevious: move(-1), pickerNext: move(1), pickerMonths: () => this.uiPatch({months: !ui.months}),
+      changePickerYear: event => {
+        const text = event.target.value, year = Number(text);
+        const valid = /^\d{4}$/.test(text) && year >= 1900 && year <= 9999;
+        this.uiPatch({year: text, ...(valid ? {month: text + date.slice(4)} : {}), error: valid ? '' : 'Год: от 1900 до 9999.'});
+      },
+      pickerWeekdays: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(label => ({label})),
+      pickerDays: Array.from({length: 42}, (_, i) => {
+        const value = scheduleAdd(from, i);
+        return {label: scheduleDate(value).getUTCDate(), aria: scheduleLabel(value, {day:'numeric',month:'long',year:'numeric'}), cls: 'c-date' + (value === current ? ' is-on' : '') + (value.slice(0,7) !== date.slice(0,7) ? ' is-outside' : '') + (value === '2026-10-21' ? ' is-today' : ''), pressed: value === current ? 'true' : 'false', pick: () => this.uiChooseDate(value)};
+      }),
+      pickerMonthOptions: Array.from({length: 12}, (_, i) => {
+        const value = scheduleISO(new Date(Date.UTC(month.getUTCFullYear(), i, 1, 12)));
+        return {label: scheduleLabel(value, {month:'short'}).replace('.',''), cls: 'c-month' + (i === month.getUTCMonth() ? ' is-on' : ''), pick: () => this.uiPatch({month: value, months: false})};
+      }),
+      pickerError: ui.error || '', closeDatePicker: close, clearDateAllowed: false, clearDate: () => this.uiChooseDate(''), pickerToday: () => this.uiChooseDate('2026-10-21'),
+      key: event => {
+        if (event.key === 'Escape') {event.preventDefault(); event.stopPropagation(); close(); return;}
+        if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key) && event.target.classList.contains('c-date')) {
+          const days = Array.from(event.currentTarget.querySelectorAll('.c-date')), i = days.indexOf(event.target), step = {ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7}[event.key];
+          event.preventDefault(); days[Math.max(0,Math.min(days.length-1,i+step))].focus();
+        }
+        if (event.key === 'Tab') {
+          const items = Array.from(event.currentTarget.querySelectorAll('button,input')).filter(x => !x.disabled && x.getClientRects().length);
+          if (event.shiftKey && event.target === items[0]) {event.preventDefault(); items[items.length-1].focus();}
+          else if (!event.shiftKey && event.target === items[items.length-1]) {event.preventDefault(); items[0].focus();}
+        }
+      }
+    };
+  }
+  renderVals() {
+    const values = this.screenVals(), ui = this.state._ui || {};
+    for (const field of UI_FIELDS) {
+      const value = field.value.split('.').reduce((v, k) => v?.[k], values);
+      if (field.kind === 'date') {
+        values[field.key] = {title: scheduleValid(value) ? scheduleLabel(value, {day:'numeric',month:'long',year:'numeric'}) : 'Выбрать дату', open: () => this.uiOpenDate(field, value)};
+        continue;
+      }
+      values[field.key] = {
+        title: field.options.find(o => o.id === value)?.title || 'Выбрать', open: ui.choice === field.id, expanded: ui.choice === field.id ? 'true' : 'false',
+        toggle: () => this.uiPatch({choice: ui.choice === field.id ? '' : field.id}), key: event => this.uiSelectKey(event, field),
+        blur: event => {if (!event.currentTarget.contains(event.relatedTarget)) this.uiPatch({choice: ''});},
+        options: field.options.map(o => ({...o, cls:'c-option' + (o.id === value ? ' is-on' : ''), selected: o.id === value ? 'true' : 'false', pick: () => {this.uiDispatch(field,o.id); this.uiPatch({choice:''}); this.uiFocus(field.id);}}))
+      };
+    }
+    values.uiDate = this.uiDateValues(values);
+    return values;
+  }
+}
+
+class Component extends FormControls {
  constructor(p){super(p);this.state={people:[{id:'timur',name:'Тимур Ахмедов',ini:'ТА',color:'av-b',status:'Актуальность не проверена',context:'Раньше помогал с перевозкой материалов.',availability:'',note:''},{id:'vera',name:'Вера Новикова',ini:'ВН',color:'av-o',status:'Актуальность не проверена',context:'Помогала с фотографиями мероприятий.',availability:'',note:''},{id:'ksenia',name:'Ксения Рябова',ini:'КР',color:'av-v',status:'Сейчас на паузе',context:'Договорились вернуться к обсуждению участия в декабре.',availability:'После декабря',note:''}],query:'',filter:'Актуальность не проверена',sel:'',result:'Актуальность не проверена',availability:'',note:'',saved:false,error:''};}
  open(p){this.setState({sel:p.id,result:p.status,availability:p.availability,note:p.note,saved:false,error:''});}
- renderVals(){const s=this.state,person=s.people.find(p=>p.id===s.sel)||s.people[0];const filtered=s.people.filter(p=>(s.filter==='all'||p.status===s.filter)&&p.name.toLowerCase().includes(s.query.toLowerCase()));const change=k=>e=>this.setState({[k]:e.target.value,saved:false,error:''});return {query:s.query,search:change('query'),filters:[['Актуальность не проверена','Проверить'],['Ждём ответа','Ждём ответа'],['all','Все']].map(([id,title])=>({title,cls:'chip'+(id===s.filter?' is-on':''),pick:()=>this.setState({filter:id})})),people:filtered.map(p=>({...p,avatar:'avatar '+p.color,pick:()=>this.open(p)})),empty:!filtered.length,listTitle:'Проверить по одному',openNext:()=>{const p=s.people.find(p=>p.status==='Актуальность не проверена');if(p)this.open(p);else this.setState({filter:'all',sel:'',query:''});},reset:()=>this.setState({filter:'all',query:''}),hasSelected:!!s.sel,person,result:s.result,availability:s.availability,note:s.note,changeResult:change('result'),changeAvailability:change('availability'),changeNote:change('note'),close:()=>this.setState({sel:''}),save:()=>{if(s.result==='Готов помогать'&&!s.availability.trim()){this.setState({error:'Уточните доступность, прежде чем добавлять человека в резерв.'});return;}this.setState({people:s.people.map(p=>p.id===s.sel?{...p,status:s.result,availability:s.availability,note:s.note}:p),saved:true,error:''});},saved:s.saved,hasError:!!s.error,error:s.error};}
+ screenVals(){const s=this.state,person=s.people.find(p=>p.id===s.sel)||s.people[0];const filtered=s.people.filter(p=>(s.filter==='all'||p.status===s.filter)&&p.name.toLowerCase().includes(s.query.toLowerCase()));const change=k=>e=>this.setState({[k]:e.target.value,saved:false,error:''});return {query:s.query,search:change('query'),filters:[['Актуальность не проверена','Проверить'],['Ждём ответа','Ждём ответа'],['all','Все']].map(([id,title])=>({title,cls:'chip'+(id===s.filter?' is-on':''),pick:()=>this.setState({filter:id})})),people:filtered.map(p=>({...p,avatar:'avatar '+p.color,pick:()=>this.open(p)})),empty:!filtered.length,listTitle:'Проверить по одному',openNext:()=>{const p=s.people.find(p=>p.status==='Актуальность не проверена');if(p)this.open(p);else this.setState({filter:'all',sel:'',query:''});},reset:()=>this.setState({filter:'all',query:''}),hasSelected:!!s.sel,person,result:s.result,availability:s.availability,note:s.note,changeResult:change('result'),changeAvailability:change('availability'),changeNote:change('note'),close:()=>this.setState({sel:''}),save:()=>{if(s.result==='Готов помогать'&&!s.availability.trim()){this.setState({error:'Уточните доступность, прежде чем добавлять человека в резерв.'});return;}this.setState({people:s.people.map(p=>p.id===s.sel?{...p,status:s.result,availability:s.availability,note:s.note}:p),saved:true,error:''});},saved:s.saved,hasError:!!s.error,error:s.error};}
 }
 
 </script></body></html>
