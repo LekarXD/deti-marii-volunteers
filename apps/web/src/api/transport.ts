@@ -62,6 +62,10 @@ export async function initializeSession(force = false): Promise<Session> {
       const value = await response.json() as Session;
       if (epoch !== generation) throw new ApiError(0, 'principal_changed', 'Сессия изменилась. Обновите страницу.');
       session = value; listeners.forEach(fn => fn()); return value;
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      if (epoch !== generation) throw new ApiError(0, 'principal_changed', 'Сессия изменилась. Обновите страницу.');
+      throw new ApiError(0, controller.signal.aborted ? 'timeout' : 'network', 'Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.', {}, undefined, true);
     } finally { clearTimeout(timer); active.delete(controller); if (epoch === generation) bootstrap = null; }
   })();
   bootstrap = pending; return pending;
