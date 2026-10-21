@@ -50,5 +50,6 @@ class Component extends DCLogic {
    answered,sheetCls:'a-sheet-card '+(ok?'is-ok':'is-bad'),sheetMark:ok?'✓':'✕',explHead:ok?'Верно!':'Не совсем',expl:q?q.e:'',
    nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Завершить',
    nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;this.save({...pr,testDone:true,score:sc});}this.setState({run:r});window.scrollTo(0,0);},
+   resultNext:(()=>{const mt=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));return mt?.status==='booked'?'Ждём вас на встрече с координатором: '+interviewDay(mt.date)+', '+mt.start+'.':'Дальше — встреча с координатором. Выбрать время можно в личном кабинете.';})(),
    testResult:showRes,scoreLine:'Правильных ответов: '+score+' из '+N};}
 }

@@ -74,7 +74,8 @@ function interviewSlots(data,from,to,excludeBooking='',includeClosed=false){
 }
 function interviewBook(candidateId,slotId,bookingId='',actor='Кандидат'){
   const data=interviewRead(),profile=data.profiles.find(p=>p.id===candidateId);
-  if(!interviewReady(profile))return {error:'Сначала нужно пройти знакомство с фондом и тест.'};
+  // Записаться можно параллельно со знакомством с фондом.
+  if(!profile)return {error:'Сначала заполните анкету волонтёра.'};
   const old=bookingId?data.bookings.find(b=>b.id===bookingId&&b.candidateId===candidateId&&b.status==='booked'):null;
   if(bookingId&&!old)return {error:'Запись уже изменилась. Обновите список встреч.'};
   if(!bookingId&&data.bookings.some(b=>b.candidateId===candidateId&&b.status==='booked'))return {error:'У кандидата уже есть назначенная встреча.'};

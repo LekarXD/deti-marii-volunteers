@@ -561,6 +561,36 @@ sc-if,sc-for{display:contents}
 .opt-where{display:inline-flex;align-items:center;gap:6px;font-size:15px}
 .a-road{margin-top:22px}
 @media (max-width:720px){.opts{grid-template-columns:1fr 1fr}.opt-time{font-size:28px}}
+/* закрытые разделы платформы, пока анкета на проверке */
+.dm .nav .is-locked{display:inline-flex;align-items:center;gap:8px;color:var(--quiet);opacity:.55;cursor:not-allowed}
+.dm .iconbtn.is-locked{opacity:.4;cursor:not-allowed}
+.dm .nav .is-locked{height:44px;padding:0 16px;border-radius:999px;font-size:15px;font-weight:500;white-space:nowrap}
+/* кабинет кандидата: анкета на проверке, две возможности параллельно, Telegram */
+.a-review{display:flex;gap:18px;align-items:flex-start;margin:0 0 24px;background:var(--green-tint)}
+.a-review h2{margin:0;color:var(--green-ink)}
+.a-review p{margin:6px 0 0;color:var(--green-ink)}
+.a-review-ico{width:48px;height:48px;flex:0 0 48px;border-radius:16px;display:grid;place-items:center;background:var(--paper);color:var(--green-ink)}
+.a-review-ico .ic{width:24px;height:24px}
+.a-nudge{margin:0 0 24px}
+.a-two{gap:16px;align-items:start}
+.a-two-card{display:grid;gap:12px;align-content:start}
+.a-two-card h2,.a-two-card p{margin:0}
+.a-two-card .actions{margin-top:8px}
+.a-two-card.is-done{box-shadow:inset 0 0 0 2px var(--green-tint)}
+.a-two-head{display:flex;justify-content:space-between;align-items:center}
+.a-ico-b{background:var(--blue-tint);color:var(--blue)}.a-ico-y{background:var(--yellow-tint);color:var(--yellow-ink)}.a-ico-g{background:var(--green-tint);color:var(--green-ink)}
+.a-two-card .opts{margin-top:4px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.a-two-card .opt{background:var(--soft)}
+.a-two-card .opt.is-on{background:var(--ink);color:#fff}
+.a-two-card .opt-time{font-size:28px}
+.a-when{font-size:30px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
+.a-tg{display:flex;gap:18px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.a-tg h2,.a-tg p{margin:0}
+.a-tg p{margin-top:4px;color:var(--ink-2)}
+@media (max-width:720px){.a-two{grid-template-columns:1fr}.a-tg .btn{width:100%}}
+.a-two-card.is-nudge{background:var(--yellow)}
+.a-two-card.is-nudge .a-ico{background:rgba(255,255,255,.7)}
+.a-nudge-e{margin:0;color:var(--ink)}
 
 </style>
 </helmet>
@@ -569,18 +599,18 @@ sc-if,sc-for{display:contents}
   <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>волонтёры «Дети Марии»</small></span></a>
   <nav class="nav" aria-label="Разделы">
     <a class="is-active" aria-current="page" href="ApplicationStatus.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>Главная</a>
-    <a href="Catalog.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Возможности</a>
-    <a href="Schedule.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Мои смены</a>
-    <a href="Academy.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Академия</a>
-    <a href="Messages.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Сообщения<span class="count">3</span></a>
-    <a href="Hours.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg>Мой путь</a>
+    <span class="is-locked" aria-disabled="true" title="Откроется после встречи с координатором"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Возможности</span>
+    <span class="is-locked" aria-disabled="true" title="Откроется после встречи с координатором"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Мои смены</span>
+    <span class="is-locked" aria-disabled="true" title="Откроется после встречи с координатором"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Академия</span>
+    <span class="is-locked" aria-disabled="true" title="Откроется после встречи с координатором"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Сообщения</span>
+    <span class="is-locked" aria-disabled="true" title="Откроется после встречи с координатором"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg>Мой путь</span>
   </nav>
   <div class="top-end">
     <a class="role" href="CoordHome.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид координатора</a>
     <div class="pillbox">
-      <a class="iconbtn" href="Mentor.dc.html" aria-label="ИИ-наставник"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></a>
-      <button class="iconbtn" type="button" aria-label="Уведомления, 2 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
-      <a href="Profile.dc.html" class="avatar av-o" aria-label="Профиль: Анна Соколова">АС</a>
+      <span class="iconbtn is-locked" aria-disabled="true" aria-label="ИИ-наставник откроется после встречи" title="Откроется после встречи с координатором"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></span>
+      <button class="iconbtn" type="button" aria-label="Уведомления"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></button>
+      <span class="avatar av-o" aria-label="Анна Соколова">АС</span>
     </div>
   </div>
 </header>
@@ -608,7 +638,7 @@ sc-if,sc-for{display:contents}
 <sc-if value="{{testIntro}}"><section class="card-hero a-reveal"><p class="lead">{{testText}}</p><div class="actions"><button type="button" class="btn btn-dark btn-lg" onClick="{{start}}">Начать</button></div></section></sc-if>
 <sc-if value="{{testQuestion}}"><section class="card a-tq"><p class="eyebrow">Вопрос {{qNum}} из {{qTotal}}</p><h2 class="h2">{{qText}}</h2><div class="a-answers"><sc-for list="{{qOpts}}" as="o"><button type="button" class="{{o.cls}}" disabled="{{o.locked}}" onClick="{{o.pick}}">{{o.text}}</button></sc-for></div></section>
 <sc-if value="{{answered}}"><div class="a-sheet" role="dialog" aria-modal="false" aria-label="Пояснение к ответу"><div class="{{sheetCls}}"><span class="a-sheet-ico" aria-hidden="true">{{sheetMark}}</span><h3 class="h3">{{explHead}}</h3><p>{{expl}}</p><button type="button" class="btn btn-dark btn-lg btn-block" onClick="{{nextQ}}">{{nextQLabel}}</button></div></div></sc-if></sc-if>
-<sc-if value="{{testResult}}"><section class="card-hero a-reveal a-result"><div class="hero-grid"><div class="grow"><p class="eyebrow">Знакомство с фондом пройдено</p><h2 class="hero-title">{{scoreLine}}</h2><p class="lead">Дальше — встреча с координатором. Выбрать время можно в личном кабинете.</p><div class="actions"><a class="btn btn-dark btn-lg" href="ApplicationStatus.dc.html">Перейти в личный кабинет</a></div></div><span class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></span></div></section></sc-if>
+<sc-if value="{{testResult}}"><section class="card-hero a-reveal a-result"><div class="hero-grid"><div class="grow"><p class="eyebrow">Знакомство с фондом пройдено</p><h2 class="hero-title">{{scoreLine}}</h2><p class="lead">{{resultNext}}</p><div class="actions"><a class="btn btn-dark btn-lg" href="ApplicationStatus.dc.html">Перейти в личный кабинет</a></div></div><span class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></span></div></section></sc-if>
 </sc-if>
 
 </div></div>
@@ -653,7 +683,7 @@ window.FORM = {
         { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel",
           placeholder: "+7 (999) 123-45-67" },
         { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email",
-          why: "Ссылку на личный кабинет пришлём на почту и по SMS." },
+          why: "Пришлём ссылку на личный кабинет." },
         { id: "channels", label: "Как с вами удобнее связываться?", type: "checkbox", required: true,
           options: ["Telegram", "WhatsApp", "Max", "Электронная почта", "SMS", "Телефонный звонок"] },
         { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username",
@@ -713,8 +743,8 @@ window.FORM = {
   shortNames: { "Миша": "Михаил", "Саша": "Александр или Александра", "Маша": "Мария", "Женя": "Евгений или Евгения", "Дима": "Дмитрий", "Катя": "Екатерина", "Настя": "Анастасия", "Лена": "Елена", "Таня": "Татьяна", "Оля": "Ольга", "Аня": "Анна", "Вова": "Владимир", "Петя": "Пётр", "Коля": "Николай", "Серёжа": "Сергей", "Сережа": "Сергей", "Лёша": "Алексей", "Леша": "Алексей", "Паша": "Павел", "Юля": "Юлия", "Света": "Светлана", "Наташа": "Наталья", "Ира": "Ирина", "Даша": "Дарья", "Ваня": "Иван", "Костя": "Константин", "Гриша": "Григорий", "Витя": "Виктор", "Галя": "Галина", "Люба": "Любовь", "Надя": "Надежда", "Соня": "Софья", "Ксюша": "Ксения", "Тёма": "Артём", "Тема": "Артём", "Андрюша": "Андрей", "Жора": "Георгий", "Слава": "Вячеслав или Ярослава" },
 
   done: {
-    title: "Заявка отправлена",
-    text: "Ссылку на этот кабинет мы прислали по SMS и на почту — по ней можно вернуться в любой момент."
+    title: "Спасибо! Ваша анкета проверяется",
+    text: "Пока она на проверке, можно записаться на встречу с координатором и познакомиться с фондом."
   }
 };
 
@@ -1015,7 +1045,7 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
   });
 }
 
-const freshProgress = () => ({ done: {}, testDone: false, score: null, meeting: null, road: false });
+const freshProgress = () => ({ done: {}, testDone: false, score: null, road: false, tg: false });
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
 const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Регулярно, каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
@@ -1102,7 +1132,8 @@ function interviewSlots(data,from,to,excludeBooking='',includeClosed=false){
 }
 function interviewBook(candidateId,slotId,bookingId='',actor='Кандидат'){
   const data=interviewRead(),profile=data.profiles.find(p=>p.id===candidateId);
-  if(!interviewReady(profile))return {error:'Сначала нужно пройти знакомство с фондом и тест.'};
+  // Записаться можно параллельно со знакомством с фондом.
+  if(!profile)return {error:'Сначала заполните анкету волонтёра.'};
   const old=bookingId?data.bookings.find(b=>b.id===bookingId&&b.candidateId===candidateId&&b.status==='booked'):null;
   if(bookingId&&!old)return {error:'Запись уже изменилась. Обновите список встреч.'};
   if(!bookingId&&data.bookings.some(b=>b.candidateId===candidateId&&b.status==='booked'))return {error:'У кандидата уже есть назначенная встреча.'};
@@ -1203,6 +1234,7 @@ class Component extends DCLogic {
    answered,sheetCls:'a-sheet-card '+(ok?'is-ok':'is-bad'),sheetMark:ok?'✓':'✕',explHead:ok?'Верно!':'Не совсем',expl:q?q.e:'',
    nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Завершить',
    nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;this.save({...pr,testDone:true,score:sc});}this.setState({run:r});window.scrollTo(0,0);},
+   resultNext:(()=>{const mt=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));return mt?.status==='booked'?'Ждём вас на встрече с координатором: '+interviewDay(mt.date)+', '+mt.start+'.':'Дальше — встреча с координатором. Выбрать время можно в личном кабинете.';})(),
    testResult:showRes,scoreLine:'Правильных ответов: '+score+' из '+N};}
 }
 

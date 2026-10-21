@@ -5,9 +5,9 @@ class Component extends DCLogic {
  go(step){this.setState({step,errs:{}});this.persist({step,data:this.state.data});window.scrollTo(0,0);}
  next(){const s=this.state,step=FORM.steps[s.step],data={...s.data};const errs=validateFields(step.fields,data);if(Object.keys(errs).length){this.setState({errs,data});return;}
   if(s.step<FORM.steps.length-1){this.setState({data});this.go(s.step+1);return;}
-  // Отправка: сразу в личный кабинет на платформе, ссылка дублируется по SMS и на почту
+  // Отправка: сразу в личный кабинет на платформе
   const me={...data,name:[data.firstName,data.lastName].filter(Boolean).join(' '),submittedAt:new Date().toISOString()};
-  demoWrite('candidate',me);demoWrite('onboarding',freshProgress());demoWrite('apply-draft',{step:0,data:{}});location.href='ApplicationStatus.dc.html?welcome=1';}
+  demoWrite('candidate',me);demoWrite('onboarding',freshProgress());demoWrite('apply-draft',{step:0,data:{}});location.href='ApplicationStatus.dc.html';}
  renderVals(){const s=this.state,step=FORM.steps[s.step],last=s.step===FORM.steps.length-1;
   return {eyebrow:'Стать волонтёром',title:FORM.title,intro:FORM.intro,
    steps:FORM.steps.map((x,i)=>({label:(i+1)+'. '+x.title,cls:i===s.step?'chip is-on':(i<s.step?'chip a-done':'chip')})),

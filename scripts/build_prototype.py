@@ -72,6 +72,12 @@ for name,(title,role,height) in SCREENS.items():
             # личный кабинет кандидата — та же шапка платформы, «Главная» ведёт в кабинет
             head = (SRC/'volunteer-header.html').read_text().replace('{{meAvCls}}', 'avatar av-o').replace('{{meInitials}}', 'АС').replace('{{meLabel}}', 'Анна Соколова, кандидат')
             head = head.replace('class="is-active" aria-current="page" ', '').replace('<a href="Home.dc.html">', '<a class="is-active" aria-current="page" href="ApplicationStatus.dc.html">', 1)
+            # Пока анкета проверяется, остальные разделы платформы закрыты
+            locked = ' class="is-locked" aria-disabled="true" title="Откроется после встречи с координатором"'
+            head = re.sub(r'<a href="(Catalog|Schedule|Academy|Messages|Hours)\.dc\.html">(.*?)</a>', lambda m: f'<span{locked}>' + re.sub(r'<span class="count">\d+</span>', '', m.group(2)) + '</span>', head)
+            head = re.sub(r'<a class="iconbtn" href="Mentor\.dc\.html" aria-label="ИИ-наставник">(.*?)</a>', lambda m: f'<span class="iconbtn is-locked" aria-disabled="true" aria-label="ИИ-наставник откроется после встречи" title="Откроется после встречи с координатором">{m.group(1)}</span>', head)
+            head = re.sub(r'<a href="Profile\.dc\.html" class="avatar av-o" aria-label="Профиль: Анна Соколова">АС</a>', '<span class="avatar av-o" aria-label="Анна Соколова">АС</span>', head)
+            head = head.replace('aria-label="Уведомления, 2 новых"', 'aria-label="Уведомления"').replace('<span class="pip"></span>', '')
         body = (SRC/f'{name}.body.html').read_text().replace('<!--FIELDS-->', (SRC/'form-fields.html').read_text())
         icons = dict(re.findall(r'^([\w-]+):\s*(<svg[^\n]+)', (ROOT/'materials/04-дизайн/прототип-до-фактуры/kit/icons.html').read_text(), re.M))
         # ICONSWITCH(x) — иконка по имени из данных: x.ic_palette, x.ic_check_circle …
@@ -81,7 +87,7 @@ for name,(title,role,height) in SCREENS.items():
         body = re.sub(r'ICONSWITCH\((\w+)\)', iconswitch, body)
         body = re.sub(r'<button(?![^>]*\btype=)', '<button type="button"', body)
         body, candidate_logic = enhance_controls(body, (SRC/f'{name}.js').read_text(), SRC)
-        for token,key in [('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('CHECK','check-circle'),('SPARKLE','sparkle'),('X','x')]:
+        for token,key in [('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('CHECK','check-circle'),('SPARKLE','sparkle'),('CLOCKICO','clock'),('BOOKICO','book'),('MESSAGEICO','message'),('X','x')]:
             body = body.replace('ICON_'+token, icons[key])
         logic = (SRC/'date-utils.js').read_text() + '\n' + (SRC/'demo-store.js').read_text() + '\n' + (CONTENT/'form.js').read_text() + '\n' + (CONTENT/'onboarding.js').read_text() + '\n' + (SRC/'candidate-store.js').read_text() + '\n' + (SRC/'interview-store.js').read_text() + '\n' + candidate_logic
         h = helmet.replace('</style>', css + '\n' + (SRC/'candidate.css').read_text() + '\n</style>')

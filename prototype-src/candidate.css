@@ -277,3 +277,33 @@
 .opt-where{display:inline-flex;align-items:center;gap:6px;font-size:15px}
 .a-road{margin-top:22px}
 @media (max-width:720px){.opts{grid-template-columns:1fr 1fr}.opt-time{font-size:28px}}
+/* закрытые разделы платформы, пока анкета на проверке */
+.dm .nav .is-locked{display:inline-flex;align-items:center;gap:8px;color:var(--quiet);opacity:.55;cursor:not-allowed}
+.dm .iconbtn.is-locked{opacity:.4;cursor:not-allowed}
+.dm .nav .is-locked{height:44px;padding:0 16px;border-radius:999px;font-size:15px;font-weight:500;white-space:nowrap}
+/* кабинет кандидата: анкета на проверке, две возможности параллельно, Telegram */
+.a-review{display:flex;gap:18px;align-items:flex-start;margin:0 0 24px;background:var(--green-tint)}
+.a-review h2{margin:0;color:var(--green-ink)}
+.a-review p{margin:6px 0 0;color:var(--green-ink)}
+.a-review-ico{width:48px;height:48px;flex:0 0 48px;border-radius:16px;display:grid;place-items:center;background:var(--paper);color:var(--green-ink)}
+.a-review-ico .ic{width:24px;height:24px}
+.a-nudge{margin:0 0 24px}
+.a-two{gap:16px;align-items:start}
+.a-two-card{display:grid;gap:12px;align-content:start}
+.a-two-card h2,.a-two-card p{margin:0}
+.a-two-card .actions{margin-top:8px}
+.a-two-card.is-done{box-shadow:inset 0 0 0 2px var(--green-tint)}
+.a-two-head{display:flex;justify-content:space-between;align-items:center}
+.a-ico-b{background:var(--blue-tint);color:var(--blue)}.a-ico-y{background:var(--yellow-tint);color:var(--yellow-ink)}.a-ico-g{background:var(--green-tint);color:var(--green-ink)}
+.a-two-card .opts{margin-top:4px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.a-two-card .opt{background:var(--soft)}
+.a-two-card .opt.is-on{background:var(--ink);color:#fff}
+.a-two-card .opt-time{font-size:28px}
+.a-when{font-size:30px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
+.a-tg{display:flex;gap:18px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.a-tg h2,.a-tg p{margin:0}
+.a-tg p{margin-top:4px;color:var(--ink-2)}
+@media (max-width:720px){.a-two{grid-template-columns:1fr}.a-tg .btn{width:100%}}
+.a-two-card.is-nudge{background:var(--yellow)}
+.a-two-card.is-nudge .a-ico{background:rgba(255,255,255,.7)}
+.a-nudge-e{margin:0;color:var(--ink)}
