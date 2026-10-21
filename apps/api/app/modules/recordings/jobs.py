@@ -9,14 +9,15 @@ from datetime import datetime,timedelta,timezone
 from pathlib import Path
 from uuid import UUID,uuid4
 from sqlalchemy import select,update
-from app.core.auth import resolve_principal
+from app.core.auth import resolve_principal,authz_guard
 from app.core.clock import utcnow
+from app.core.errors import ApiError
 from app.core.models import Session,MediaAsset
 from app.modules.assets.service import asset_path
 from app.modules.studio.models import StudioSession
 from app.worker.registry import register_handler
 from . import service
-from .capture import CaptureSettings,encode_and_validate
+from .capture import CaptureSettings,encode_and_validate,verify_provider_scope
 from .models import RecordingTake,RecordingProject,StudioCaptureSession,RecordingRendererGrant,RecordingStageEvent,RecordingSourceFile,RecordingRenderVersion
 from .renderer import issue_renderer_ticket
 
@@ -27,15 +28,21 @@ async def checked_take(db,context):
     await context.fence(db)
     row=await db.get(RecordingTake,UUID(context.payload['take_id']),populate_existing=True)
     if not row or row.capture_job_id!=context.job_id or row.generation!=context.payload['generation']:raise CaptureFailure('capture_superseded')
+    capture=await db.get(StudioCaptureSession,row.capture_session_id)
+    host=await db.get(Session,capture.host_auth_session_id,populate_existing=True)
+    if not host or host.revoked_at or host.expires_at<=utcnow():raise CaptureFailure('capture_authority_revoked')
+    try:
+        principal=await resolve_principal(db,host)
+        # Match interactive/renderer ordering: auth advisory key before project/take.
+        await authz_guard(db,principal)
+    except ApiError:raise CaptureFailure('capture_authority_revoked') from None
     owner=await db.scalar(select(RecordingProject).where(RecordingProject.id==row.project_id).with_for_update().execution_options(populate_existing=True))
     row=await db.scalar(select(RecordingTake).where(RecordingTake.id==row.id).with_for_update().execution_options(populate_existing=True))
     if owner.foundation_id!=context.foundation_id or owner.state=='archived':raise CaptureFailure('capture_superseded')
-    capture=await db.get(StudioCaptureSession,row.capture_session_id)
-    host=await db.get(Session,capture.host_auth_session_id,populate_existing=True)
     studio=await db.get(StudioSession,capture.studio_session_id,populate_existing=True)
-    if not host or host.revoked_at or host.expires_at<=utcnow() or not studio or studio.generation!=row.generation or studio.state in ('closing','closed','failed') or studio.scene.get('take_id')!=str(row.id):raise CaptureFailure('capture_authority_revoked')
-    try:await service.authorize(db,await resolve_principal(db,host),owner)
-    except Exception:raise CaptureFailure('capture_authority_revoked') from None
+    if not studio or studio.generation!=row.generation or studio.state in ('closing','closed','failed') or studio.scene.get('take_id')!=str(row.id):raise CaptureFailure('capture_authority_revoked')
+    try:await service.authorize(db,principal,owner)
+    except ApiError:raise CaptureFailure('capture_authority_revoked') from None
     if owner.privacy_state!='approved' or row.projection['capture_plan']['privacy_state']!='approved':raise CaptureFailure('capture_privacy_unapproved')
     return row,owner
 
@@ -50,14 +57,14 @@ async def read_event(process,timeout=30):
     if not line or len(line)>8192:raise CaptureFailure('capture_process_lost')
     try:value=json.loads(line)
     except ValueError:raise CaptureFailure('capture_protocol_invalid') from None
-    if value.get('event')=='failed':raise CaptureFailure('capture_browser_failed')
+    if value.get('event')=='failed':raise CaptureFailure(value['code'] if value.get('code') in ('capture_audio_source_unavailable','capture_audio_scope_invalid','capture_surface_mismatch','capture_tab_timeout','capture_viewport_mismatch','capture_budget_invalid') else 'capture_browser_failed')
     return value
 
 async def send(process,**message):
     process.stdin.write((json.dumps(message)+'\n').encode());await process.stdin.drain()
 
 async def capture_take(db,context):
-    settings=CaptureSettings.configured();process=None;row=None
+    settings=CaptureSettings.configured(require_executables=True);process=None;row=None
     try:
         if settings is None:raise CaptureFailure('capture_unavailable')
         row,owner=await checked_take(db,context)
@@ -76,13 +83,16 @@ async def capture_take(db,context):
             process=await asyncio.create_subprocess_exec(settings.node,str(script),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,env=environment,start_new_session=True,limit=16384)
             from app.integrations.rtc.livekit import RtcSettings
             rtc=RtcSettings.from_env();provider_url=(rtc.public_url or rtc.url).replace('https://','wss://',1).replace('http://','ws://',1)
-            await send(process,command='initialize',url=settings.url,chrome=settings.chrome,provider_url=provider_url,ticket=ticket,spool=str(source),development=settings.development,max_milliseconds=20*60*1000,max_bytes=500*1024*1024);ticket=None
+            await send(process,command='initialize',url=settings.url,chrome=settings.chrome,provider_url=provider_url,ticket=ticket,spool=str(source),audio_track_ids=[track['track_id'] for track in row.projection['capture_plan']['allowed_tracks'] if track['kind']=='audio'],development=settings.development,max_milliseconds=20*60*1000,max_bytes=500*1024*1024);ticket=None
             if (await read_event(process))['event']!='loaded':raise CaptureFailure('capture_protocol_invalid')
             deadline=asyncio.get_running_loop().time()+30
             while True:
                 row,owner=await checked_take(db,context)
                 if row.state=='stopping':raise CaptureFailure('capture_stopped_before_start')
                 ready=service.readiness_current(row)
+                if ready:
+                    try:await verify_provider_scope(db,row,owner)
+                    except Exception:raise CaptureFailure('capture_provider_scope_invalid') from None
                 await db.commit()
                 if ready:break
                 if asyncio.get_running_loop().time()>deadline:raise CaptureFailure('capture_renderer_unready')
@@ -91,6 +101,8 @@ async def capture_take(db,context):
             started=await read_event(process,15)
             if started.get('event')!='started' or (started.get('width'),started.get('height'),started.get('display_surface'),started.get('audio_tracks'))!=(1920,1080,'browser',1):raise CaptureFailure('capture_profile_invalid')
             row,owner=await checked_take(db,context)
+            expected_audio=sorted(track['track_id'] for track in row.projection['capture_plan']['allowed_tracks'] if track['kind']=='audio')
+            if started.get('audio_source')!='approved_rtc_webaudio' or sorted(started.get('audio_track_ids',[]))!=expected_audio:raise CaptureFailure('capture_audio_scope_invalid')
             if not service.capture_ready(row):raise CaptureFailure('capture_readiness_lost')
             row.started_at=datetime.fromtimestamp(started['media_started_at_ms']/1000,tz=timezone.utc)
             if abs((utcnow()-row.started_at).total_seconds())>15:raise CaptureFailure('capture_clock_invalid')
@@ -98,11 +110,18 @@ async def capture_take(db,context):
             row.capture_phase='capturing';row.version+=1
             row.capture_checkpoint={**row.capture_checkpoint,'phase':'capturing','start':started,'projection_hash':row.projection_hash}
             await db.commit()
+            next_scope_check=0
             while True:
                 await asyncio.sleep(.25)
                 if process.returncode is not None:raise CaptureFailure('capture_process_lost')
                 row,owner=await checked_take(db,context)
                 if not service.capture_ready(row):raise CaptureFailure('capture_readiness_lost')
+                if asyncio.get_running_loop().time()>=next_scope_check:
+                    try:await verify_provider_scope(db,row,owner)
+                    except Exception:raise CaptureFailure('capture_provider_scope_invalid') from None
+                    next_scope_check=asyncio.get_running_loop().time()+1
+                if row.state=='capturing' and (utcnow()-row.started_at).total_seconds()>=1190:
+                    row.state='stopping';row.capture_phase='stopping';row.version+=1
                 stopped=row.state=='stopping'
                 if row.state not in ('capturing','stopping'):raise CaptureFailure('capture_superseded')
                 await db.commit()

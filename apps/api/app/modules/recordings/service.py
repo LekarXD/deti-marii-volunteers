@@ -21,7 +21,7 @@ async def authorize(db,p,project):
 async def project(db,p,id,lock=False):
     await authz_guard(db,p)
     query=select(RecordingProject).where(RecordingProject.id==id,RecordingProject.foundation_id==p.foundation_id)
-    row=await db.scalar(query.with_for_update() if lock else query)
+    row=await db.scalar(query.with_for_update().execution_options(populate_existing=True) if lock else query)
     if row is None:deny()
     return await authorize(db,p,row)
 async def target(db,p,id):
@@ -37,13 +37,13 @@ async def take(db,p,id,lock=False):
     row=await db.get(RecordingTake,id)
     if row is None:deny()
     owner=await project(db,p,row.project_id,lock)
-    if lock:row=await db.scalar(select(RecordingTake).where(RecordingTake.id==id).with_for_update())
+    if lock:row=await db.scalar(select(RecordingTake).where(RecordingTake.id==id).with_for_update().execution_options(populate_existing=True))
     return row,owner
 
 def capabilities():
     from .capture import CaptureSettings
     available=CaptureSettings.configured() is not None
-    return {'capture_available':available,'capture_reason':'Захват готов' if available else 'Захват медиа не настроен','private_renderer_available':True,'raw_fallback':'forbidden'}
+    return {'capture_available':available,'capture_reason':'Запись выполняется медиа-обработчиком' if available else 'Захват медиа не настроен','private_renderer_available':True,'raw_fallback':'forbidden'}
 async def project_view(db,row):
     capture=await db.scalar(select(StudioCaptureSession).where(StudioCaptureSession.project_id==row.id).order_by(StudioCaptureSession.generation.desc()).limit(1))
     takes=(await db.scalars(select(RecordingTake).where(RecordingTake.project_id==row.id).order_by(RecordingTake.number.desc()).limit(51))).all()
@@ -55,6 +55,8 @@ def readiness_current(row,now=None):
     return expiry>(now or utcnow())
 def take_view(row):
     value={k:getattr(row,k) for k in ('id','project_id','number','generation','state','version','renderer_state_version','projection_hash','readiness_state','capture_job_id','capture_phase','started_at','stopped_at','error_code')}
+    plan=row.projection['capture_plan']
+    value.update(privacy_state=plan['privacy_state'],policy_scene_revision=plan['scene_revision'],policy_tracks=plan['allowed_tracks'])
     if value['readiness_state']=='ready' and not readiness_current(row):value['readiness_state']='expired'
     return value
 async def prepare(db,p,row):
@@ -97,11 +99,12 @@ async def snapshot(db,owner,row,session,*,privacy_state,allowed_tracks,media_tim
         previous=row.projection.get('capture_plan',{})
         transition=bool(row.state=='capturing' and readiness_current(row) and privacy_state=='approved' and previous.get('privacy_state')=='approved' and previous.get('allowed_tracks')==allowed_tracks and previous.get('recording_policy_id')==plan['recording_policy_id'] and previous.get('scene_revision')!=plan['scene_revision'])
         old_version,old_hash=row.renderer_state_version,row.projection_hash
+        previous_assets=row.projection.get('resolved_assets',[])
         row.renderer_state_version=(row.renderer_state_version or 0)+1
         row.projection=projection;row.projection_hash=digest;row.readiness_state='waiting';row.readiness=None
         if row.capture_checkpoint is not None:
             row.capture_checkpoint={key:value for key,value in row.capture_checkpoint.items() if key!='scene_transition'}
-            if transition:row.capture_checkpoint={**row.capture_checkpoint,'scene_transition':{'from_renderer_state_version':old_version,'from_projection_hash':old_hash,'expires_at':(utcnow()+timedelta(seconds=5)).isoformat(),'to_renderer_state_version':row.renderer_state_version}}
+            if transition:row.capture_checkpoint={**row.capture_checkpoint,'scene_transition':{'from_renderer_state_version':old_version,'from_projection_hash':old_hash,'expires_at':(utcnow()+timedelta(seconds=5)).isoformat(),'to_renderer_state_version':row.renderer_state_version,'from_resolved_assets':previous_assets}}
         sequence=(await db.scalar(select(func.max(RecordingStageEvent.sequence)).where(RecordingStageEvent.take_id==row.id)) or 0)+1
         db.add(RecordingStageEvent(take_id=row.id,sequence=sequence,renderer_state_version=row.renderer_state_version,projection_hash=digest,projection=projection,media_time_ms=media_time_ms))
     await db.flush()

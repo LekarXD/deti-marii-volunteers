@@ -20,11 +20,11 @@ const send=value=>process.stdout.write(JSON.stringify(value)+'\n');
   dispose=await installBootstrapBinding(instance.context,instance.page,target,config.ticket);config.ticket='';
   await instance.page.goto(target.href,{waitUntil:'domcontentloaded',timeout:20000});send({event:'loaded'});
   const start=await next();if(!start||start.command!=='capture')throw Error();
-  capture=await captureOwnTab(instance.page,config.spool,{maxMilliseconds:config.max_milliseconds,maxBytes:config.max_bytes});
+  capture=await captureOwnTab(instance.page,config.spool,{maxMilliseconds:config.max_milliseconds,maxBytes:config.max_bytes,audioTrackIds:config.audio_track_ids});
   send({event:'started',...capture.started});
   const stop=await next();if(!stop||stop.command!=='stop')throw Error();
   send({event:'finalized',...await capture.stop()});capture=null;
   const close=await next();if(!close||close.command!=='close')throw Error();
- }catch{send({event:'failed',code:'capture_browser_failed'});process.exitCode=1;}
+ }catch(error){const allowed=['capture_audio_source_unavailable','capture_audio_scope_invalid','capture_surface_mismatch','capture_tab_timeout','capture_viewport_mismatch','capture_budget_invalid'];const code=allowed.find(value=>String(error.message).includes(value))||'capture_browser_failed';send({event:'failed',code});process.exitCode=1;}
  finally{dispose?.();if(browser)await browser.close();input.close();}
 })();

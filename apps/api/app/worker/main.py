@@ -53,7 +53,9 @@ async def run_once(kinds=None):
                     await retry(db,job.id,job.claim_token,"channel_unavailable",job.attempts,job.max_attempts)
             elif job.kind in HANDLERS:
                 result=await run_handler(db,job,HANDLERS[job.kind])
-                await complete(db,job.id,job.claim_token,result)
+                # A handler may rollback a failed media transaction, expiring the ORM job.
+                # Immutable claim values were copied before entering the handler.
+                await complete(db,job_id,token,result)
             else:
                 await retry(db, job.id, job.claim_token, "handler_unavailable", job.attempts, job.max_attempts)
             await db.commit()

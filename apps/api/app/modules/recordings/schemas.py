@@ -37,7 +37,17 @@ class RecordingProjectPage(BaseModel):
     next_cursor:UUID|None
 class RecordingTakeInput(RecordingVersionCommand):
     expected_scene_revision:int=Field(ge=0)
+class RecordingPolicyTrack(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    identity:str=Field(min_length=1,max_length=128)
+    track_id:str=Field(min_length=1,max_length=128)
+    source:Literal['camera','screen','microphone','screen_audio']
+    kind:Literal['video','audio']
+    required:bool=True
 class RecordingTakeView(BaseModel):
+    privacy_state:Literal['unknown','approved','blocked']
+    policy_scene_revision:int
+    policy_tracks:list[RecordingPolicyTrack]
     id:UUID
     project_id:UUID
     number:int
@@ -138,13 +148,6 @@ class RecordingRenderView(BaseModel):
     error_code:str|None
     approval_state:str
 
-class RecordingPolicyTrack(BaseModel):
-    model_config=ConfigDict(extra='forbid')
-    identity:str=Field(min_length=1,max_length=128)
-    track_id:str=Field(min_length=1,max_length=128)
-    source:Literal['camera','screen','microphone','screen_audio']
-    kind:Literal['video','audio']
-    required:bool=True
 class RecordingPolicyCommand(RecordingVersionCommand):
     expected_scene_revision:int=Field(ge=0)
     approved:bool

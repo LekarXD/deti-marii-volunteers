@@ -25,8 +25,8 @@ async def issue_renderer_ticket(db,take,*,context):
     await context.fence(db)
     owner=await db.get(RecordingProject,take.project_id)
     if context.foundation_id!=owner.foundation_id or context.payload.get('take_id')!=str(take.id) or take.state not in ('created','starting'):rejected()
-    await db.scalar(select(RecordingProject).where(RecordingProject.id==take.project_id).with_for_update())
-    take=await db.scalar(select(RecordingTake).where(RecordingTake.id==take.id).with_for_update())
+    await db.scalar(select(RecordingProject).where(RecordingProject.id==take.project_id).with_for_update().execution_options(populate_existing=True))
+    take=await db.scalar(select(RecordingTake).where(RecordingTake.id==take.id).with_for_update().execution_options(populate_existing=True))
     await db.execute(update(RecordingRendererGrant).where(RecordingRendererGrant.take_id==take.id,RecordingRendererGrant.revoked_at.is_(None)).values(revoked_at=utcnow()))
     take.readiness_state='waiting';take.readiness=None
     raw=secrets.token_urlsafe(48)
@@ -48,8 +48,8 @@ async def renderer_scope(request:Request,authorization:str|None=Header(None),db:
     except ApiError:rejected()
     await authz_guard(db,principal)
     owner=await service.project(db,principal,take.project_id,lock=True)
-    take=await db.scalar(select(RecordingTake).where(RecordingTake.id==take.id).with_for_update())
-    grant=await db.scalar(select(RecordingRendererGrant).where(RecordingRendererGrant.id==grant.id).with_for_update())
+    take=await db.scalar(select(RecordingTake).where(RecordingTake.id==take.id).with_for_update().execution_options(populate_existing=True))
+    grant=await db.scalar(select(RecordingRendererGrant).where(RecordingRendererGrant.id==grant.id).with_for_update().execution_options(populate_existing=True))
     if grant.revoked_at or grant.expires_at<=utcnow() or grant.generation!=take.generation or (grant.purpose=='bootstrap' and grant.consumed_at) or owner.state=='archived' or take.state in ('failed','discarded','captured') or owner.owner_user_id!=principal.user_id:rejected()
     session=await db.get(StudioSession,capture.studio_session_id,populate_existing=True)
     if not session or session.generation!=take.generation or session.scene.get('take_id')!=str(take.id) or session.recording_policy_id!=owner.recording_policy_id or session.state in ('closing','closed','failed'):rejected()
@@ -131,7 +131,10 @@ async def readiness(body:RendererReadinessInput,scope=Depends(active_renderer)):
         if track['required'] and (key not in seen or seen[key].state!='ready'):reasons.append('required_track_unavailable')
     wanted={str(x['asset_id']):x['sha256'] for x in take.projection['resolved_assets']}
     proofs={str(x.asset_id):x.sha256 for x in body.asset_proofs}
-    if len(proofs)!=len(body.asset_proofs) or proofs!=wanted:reasons.append('asset_checksum_mismatch')
+    transition=service.scene_transition(take)
+    prior={str(asset['asset_id']):asset['sha256'] for asset in (take.capture_checkpoint or {}).get('scene_transition',{}).get('from_resolved_assets',[])}
+    prior_authorized=transition is not None and not body.visual_ready and proofs==prior
+    if len(proofs)!=len(body.asset_proofs) or (proofs!=wanted and not prior_authorized):reasons.append('asset_checksum_mismatch')
     valid_until=utcnow()+timedelta(seconds=10) if not reasons else None
     if not reasons and take.state in ('capturing','stopping') and take.started_at:
         from .models import RecordingStageEvent

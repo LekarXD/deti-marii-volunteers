@@ -36,7 +36,7 @@ async def prepared(client):
 
 @pytest.mark.asyncio
 async def test_policy_authority_exact_tracks_and_start_stop_receipts(app,monkeypatch):
-    monkeypatch.setattr(CaptureSettings,'configured',classmethod(lambda cls:object()))
+    monkeypatch.setattr(CaptureSettings,'configured',classmethod(lambda cls,**kwargs:object()))
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as client:
         me,headers,post,take=await prepared(client);path=f"/recording-takes/{take['id']}"
         assert (await post(path+'/start',{'expected_version':1})).status_code==409
@@ -64,12 +64,12 @@ async def test_policy_authority_exact_tracks_and_start_stop_receipts(app,monkeyp
 
 @pytest.mark.asyncio
 async def test_restart_unknown_capture_outcome_and_stale_lease_never_publish(app,monkeypatch):
-    monkeypatch.setattr(CaptureSettings,'configured',classmethod(lambda cls:object()))
+    monkeypatch.setattr(CaptureSettings,'configured',classmethod(lambda cls,**kwargs:object()))
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as client:
         me,headers,post,take=await prepared(client);path=f"/recording-takes/{take['id']}"
         async with SessionLocal() as db:
             row=await db.get(RecordingTake,UUID(take['id']));owner=await db.get(RecordingProject,row.project_id)
-            owner.privacy_state='approved';row.projection={**row.projection,'capture_plan':{**row.projection['capture_plan'],'privacy_state':'approved'}}
+            owner.privacy_state='approved';row.projection={**row.projection,'capture_plan':{**row.projection['capture_plan'],'privacy_state':'approved','allowed_tracks':[{'identity':identity(UUID(me['user_id'])),'track_id':'TR_restart_audio','source':'microphone','kind':'audio','required':True}]}}
             await db.commit()
         started=await post(path+'/start',{'expected_version':1});assert started.status_code==200
         async with SessionLocal() as db:
@@ -121,3 +121,34 @@ async def test_closed_asset_cannot_resurrect_processing(app):
         assert response.status_code==409 and response.json()['code']=='upload_closed'
         async with SessionLocal() as db:
             asset=await db.get(MediaAsset,aid);assert asset.state=='rejected' and asset.processing_job_id is None
+
+@pytest.mark.asyncio
+async def test_worker_completes_safe_failure_after_handler_rollback():
+    from app.core.config import get_settings
+    from app.worker.queue import enqueue_job
+    from app.worker.registry import register_handler
+    from app.worker.main import run_once
+    await fixtures();kind='rollback.fixture.'+uuid4().hex
+    async def safe_failure(db,context):
+        await db.rollback()
+        return {'state':'failed','error_code':'synthetic_interrupted'}
+    register_handler(kind,safe_failure,lease_seconds=30,heartbeat_seconds=5,timeout_seconds=10)
+    async with SessionLocal() as db:
+        job=enqueue_job(db,get_settings().foundation_id,kind,{});await db.commit();jid=job.id
+    assert await run_once([kind])
+    async with SessionLocal() as db:
+        job=await db.get(Job,jid)
+        assert job.state=='succeeded' and job.result=={'state':'failed','error_code':'synthetic_interrupted'}
+
+def test_api_admission_does_not_require_media_worker_binaries(monkeypatch):
+    monkeypatch.setenv('OPORA_CAPTURE_ENABLED','true')
+    monkeypatch.setenv('OPORA_CAPTURE_RENDERER_URL','http://127.0.0.1:5174/recorder.html')
+    monkeypatch.setenv('OPORA_RTC_URL','http://127.0.0.1:7880')
+    monkeypatch.setenv('OPORA_RTC_API_KEY','synthetic-key')
+    monkeypatch.setenv('OPORA_RTC_API_SECRET','synthetic-secret-not-a-real-provider-credential')
+    monkeypatch.setenv('OPORA_CAPTURE_CHROME_PATH','/missing/dedicated-worker/chrome')
+    monkeypatch.setattr('app.modules.recordings.capture.shutil.which',lambda name:None)
+    assert CaptureSettings.configured() is not None
+    assert CaptureSettings.configured(require_executables=True) is None
+    monkeypatch.setenv('OPORA_CAPTURE_RENDERER_URL','https:///recorder.html')
+    assert CaptureSettings.configured() is None

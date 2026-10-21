@@ -1,10 +1,11 @@
 'use strict';
 // Test-only synthetic publisher. Fresh profile; canvas+oscillator, never devices.
 const {chromium}=require('playwright');
+let activeBrowser;process.once('SIGTERM',()=>{setTimeout(()=>process.exit(1),4000);Promise.resolve(activeBrowser?.close()).finally(()=>process.exit(0));});
 let input='';process.stdin.setEncoding('utf8');process.stdin.on('data',chunk=>{input+=chunk;if(input.includes('\n')){const line=input.slice(0,input.indexOf('\n'));input='';void run(JSON.parse(line));}});
 async function run(config){let browser,step="launch";try{
  browser=await chromium.launch({headless:true,chromiumSandbox:true,executablePath:config.chrome,args:['--autoplay-policy=no-user-gesture-required']});
- const context=await browser.newContext({serviceWorkers:'block'});const page=await context.newPage();
+ activeBrowser=browser;const context=await browser.newContext({serviceWorkers:'block'});const page=await context.newPage();
  await context.addInitScript(()=>Object.defineProperty(navigator.mediaDevices,'getUserMedia',{value:()=>Promise.reject(new DOMException('Synthetic fixture only','NotAllowedError'))}));
  step="navigate";await page.goto(config.url);await page.addScriptTag({url:config.url+'livekit.js'});
  step="publish";const tracks=await page.evaluate(async config=>{

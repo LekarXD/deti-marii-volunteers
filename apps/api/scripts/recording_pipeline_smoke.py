@@ -12,6 +12,8 @@ os.environ.setdefault('OPORA_ASSET_ROOT',str(Path(tempfile.gettempdir())/'opora-
 os.environ['OPORA_CAPTURE_ENABLED']='true'
 if not os.environ.get('OPORA_CAPTURE_CHROME_PATH'):raise RuntimeError('Official Chrome path required')
 DIST=Path(os.environ['OPORA_RECORDING_SMOKE_DIST']).resolve()
+SCENARIO=os.getenv('OPORA_RECORDING_SMOKE_SCENARIO','success')
+if SCENARIO not in ('success','presentation','privacy-revoke','auth-revoke','unknown-participant'):raise ValueError('Unknown smoke scenario')
 def port():
  s=socket.socket();s.bind(('127.0.0.1',0));p=s.getsockname()[1];s.close();return p
 async def main():
@@ -62,7 +64,21 @@ async def main():
     async with SessionLocal() as db:
      take=await db.get(RecordingTake,UUID(tid['id']));capture=await db.get(StudioCaptureSession,take.capture_session_id);studio=await db.get(StudioSession,capture.studio_session_id)
      room=studio.room_name;auth_id=capture.host_auth_session_id
-     scene={**studio.scene,'revision':studio.scene_revision+1,'presenter_camera':True};studio.scene=validate_scene(scene);studio.scene_revision+=1;await db.commit();revision=studio.scene_revision
+     scene={**studio.scene,'revision':studio.scene_revision+1,'presenter_camera':True}
+     slides=[]
+     if SCENARIO=='presentation':
+      from PIL import Image,ImageDraw,ImageFont
+      from app.core.models import MediaAsset
+      from app.modules.assets.service import asset_path
+      import io,hashlib
+      for label,color in [('A','#fff1ca'),('B','#dbeaff')]:
+       image=Image.new('RGB',(1280,720),color);draw=ImageDraw.Draw(image)
+       draw.rectangle((80,90,1200,620),outline='#153a96',width=8);draw.text((140,180),'SLIDE '+label,fill='#153a96',font=ImageFont.truetype(str(ROOT/'apps/api/app/assets/fonts/DejaVuSans.ttf'),100));draw.text((140,380),'Synthetic presentation',fill='#153a96',font=ImageFont.truetype(str(ROOT/'apps/api/app/assets/fonts/DejaVuSans.ttf'),54))
+       buffer=io.BytesIO();image.save(buffer,format='PNG');data=buffer.getvalue();digest=hashlib.sha256(data).hexdigest()
+       asset=MediaAsset(id=uuid4(),foundation_id=UUID(me['foundation_id']),owner_user_id=UUID(me['user_id']),storage_key=uuid4().hex,content_type='image/png',expected_size=len(data),received_size=len(data),checksum=digest,state='ready');db.add(asset);await db.flush();target=asset_path(asset);target.parent.mkdir(parents=True,exist_ok=True,mode=0o700);target.write_bytes(data);target.chmod(0o600)
+       slides.append({'asset_id':str(asset.id),'sha256':digest,'width':1280,'height':720})
+      scene.update(content_kind='slides',layout='side',content_asset=slides[0],content_ratio=16/9,deck_version_id=str(uuid4()),slide_id=str(uuid4()))
+     studio.scene=validate_scene(scene);studio.scene_revision+=1;await db.commit();revision=studio.scene_revision
     grant=join_token(RtcSettings.from_env(),room=room,participant_identity=identity(UUID(me['user_id'])),name='Synthetic presenter',host=True,policy=RevocationPolicy(),auth_session_id=auth_id)
     publisher=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(ROOT/'apps/api/scripts/recording_synthetic_publisher.cjs'),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True);processes.append(publisher)
     publisher.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant})+'\n').encode());await publisher.stdin.drain();grant=None
@@ -84,6 +100,32 @@ async def main():
      if current['state']=='capturing':break
      if current['state']=='failed' or asyncio.get_running_loop().time()>deadline:raise RuntimeError('capture start '+json.dumps(current))
     await asyncio.sleep(3)
+    if SCENARIO=='presentation':
+     async with SessionLocal() as db:
+      capture=await db.get(StudioCaptureSession,take.capture_session_id);studio=await db.get(StudioSession,capture.studio_session_id)
+      studio.scene_revision+=1;studio.scene=validate_scene({**studio.scene,'revision':studio.scene_revision,'content_asset':slides[1],'slide_id':str(uuid4()),'layout':'overlay'});await db.commit()
+     await asyncio.sleep(3)
+     current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json();assert current['state']=='capturing',current
+    if SCENARIO not in ('success','presentation'):
+     if SCENARIO=='privacy-revoke':
+      await post(f"/recording-takes/{tid['id']}/policy",{'expected_version':current['version'],'expected_scene_revision':revision,'approved':False,'tracks':[]})
+     elif SCENARIO=='auth-revoke':
+      from app.core.models import Session
+      from app.core.clock import utcnow
+      async with SessionLocal() as db:
+       host=await db.get(Session,auth_id);host.revoked_at=utcnow();await db.commit()
+     else:
+      grant=join_token(RtcSettings.from_env(),room=room,participant_identity='synthetic-outsider-'+uuid4().hex,name='Synthetic unapproved participant',host=True,policy=RevocationPolicy())
+      outsider=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(ROOT/'apps/api/scripts/recording_synthetic_publisher.cjs'),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True);processes.append(outsider)
+      outsider.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant})+'\n').encode());await outsider.stdin.drain();grant=None
+      # Revocation may terminate renderer before outsider has published all tracks.
+      await asyncio.wait_for(outsider.stdout.readline(),30)
+     await asyncio.wait_for(work,40)
+     async with SessionLocal() as db:
+      row=await db.get(RecordingTake,UUID(tid['id']));assert row.state=='failed',(SCENARIO,row.state,row.error_code)
+      assert not await db.scalar(select(RecordingRenderVersion.id).where(RecordingRenderVersion.take_id==row.id))
+      print(json.dumps({'state':'actual_capture_revocation_passed','scenario':SCENARIO,'capture_started':bool(row.started_at),'take_state':row.state,'error_code':row.error_code,'render_created':False}))
+     return
     current=await post(f"/recording-takes/{tid['id']}/stop",{'expected_version':current['version']});assert current['state']=='stopping'
     await asyncio.wait_for(work,60)
     current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json()
@@ -96,9 +138,23 @@ async def main():
      manifest=render.manifest
      subprocess.run([__import__('shutil').which('ffmpeg'),'-nostdin','-v','error','-ss','1','-i',str(path),'-frames:v','1','-y',str(Path(os.environ['OPORA_ASSET_ROOT'])/'shared-stage-proof.png')],check=True)
      audio=subprocess.run([__import__('shutil').which('ffmpeg'),'-nostdin','-v','info','-i',str(path),'-vn','-af','volumedetect','-f','null','-'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=True).stderr.decode()
+     audio_proof=None
+     if SCENARIO=='presentation':
+      for name,second in [('slide-a',1),('slide-b',max(1,manifest['media']['duration_ms']/1000-1))]:
+       subprocess.run([__import__('shutil').which('ffmpeg'),'-nostdin','-v','error','-ss',str(second),'-i',str(path),'-frames:v','1','-y',str(Path(os.environ['OPORA_ASSET_ROOT'])/(name+'.png'))],check=True)
+      import array,math
+      pcm=subprocess.run([__import__('shutil').which('ffmpeg'),'-nostdin','-v','error','-i',str(path),'-vn','-ac','1','-ar','16000','-f','s16le','-'],stdout=subprocess.PIPE,check=True).stdout
+      samples=array.array('h');samples.frombytes(pcm)
+      windows=[math.sqrt(sum(float(x)*x for x in samples[start:start+1600])/1600)/32768 for start in range(4800,len(samples)-4800-1600,1600)]
+      assert windows and min(windows)>.005,('audio_drop',min(windows) if windows else None)
+      segment=samples[16000:32000]
+      powers={frequency:abs(sum(value*complex(math.cos(2*math.pi*frequency*index/16000),-math.sin(2*math.pi*frequency*index/16000)) for index,value in enumerate(segment))) for frequency in range(400,481)}
+      peak=max(powers,key=powers.get);assert abs(peak-440)<=1,('audio_frequency_mismatch',peak)
+      audio_proof={'peak_hz':peak,'windows_100ms':len(windows),'min_rms':round(min(windows),5),'continuous':True}
+      assert len(manifest['stage_events'])>=3 and any(event['media_time_ms']>0 for event in manifest['stage_events'])
      import re
      mean=re.search(r'mean_volume: ([^\n]+)',audio).group(1)
-     print(json.dumps({'state':'actual_shared_stage_pipeline_passed','take_id':tid['id'],'render_id':str(render.id),'asset_id':str(asset.id),'artifact':str(path),'media':manifest['media'],'audio_mean_volume':mean,'journal_events':len(manifest['stage_events']),'source_sha256':manifest['source_sha256'],'output_sha256':manifest['output_sha256']}))
+     print(json.dumps({'state':'actual_shared_stage_pipeline_passed','scenario':SCENARIO,'take_id':tid['id'],'render_id':str(render.id),'asset_id':str(asset.id),'artifact':str(path),'media':manifest['media'],'audio_mean_volume':mean,'audio_proof':audio_proof,'journal_events':len(manifest['stage_events']),'source_sha256':manifest['source_sha256'],'output_sha256':manifest['output_sha256']}))
   finally:
    if server:server.should_exit=True;await serving
    for process in reversed(processes):

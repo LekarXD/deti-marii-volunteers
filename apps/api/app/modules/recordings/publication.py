@@ -36,15 +36,15 @@ async def prepare_recording_publications(db,principal,*,requests):
     for id in sorted({item[2] for item in resolved},key=str):owners[id]=await service.project(db,principal,id,True)
     renders={}
     for id in sorted({item[1] for item in resolved},key=str):
-        renders[id]=await db.scalar(select(RecordingRenderVersion).where(RecordingRenderVersion.id==id).with_for_update())
+        renders[id]=await db.scalar(select(RecordingRenderVersion).where(RecordingRenderVersion.id==id).with_for_update().execution_options(populate_existing=True))
     assets={}
     for id in sorted({UUID(str(item[0]['asset_id'])) for item in resolved},key=str):
-        assets[id]=await db.scalar(select(MediaAsset).where(MediaAsset.id==id).with_for_update())
+        assets[id]=await db.scalar(select(MediaAsset).where(MediaAsset.id==id).with_for_update().execution_options(populate_existing=True))
     claims=[]
     for request,rid,pid in resolved:
         owner=owners[pid];render=renders[rid];asset=assets[UUID(str(request['asset_id']))]
         target=UUID(str(request['target_lesson_id']))
-        take=await db.get(RecordingTake,render.take_id)
+        take=await db.get(RecordingTake,render.take_id,populate_existing=True)
         review=await db.scalar(select(RecordingReview).where(RecordingReview.render_id==rid).order_by(RecordingReview.created_at.desc(),RecordingReview.id.desc()).limit(1))
         if not asset or asset.foundation_id!=principal.foundation_id or asset.state!='ready' or asset.purpose!='recording.output' or asset.resource_id!=render.id or asset.checksum!=render.content_hash or owner.target_lesson_id!=target or owner.state=='archived' or owner.privacy_state!='approved' or render.state not in ('preview_ready','degraded') or take.state!='captured' or take.generation!=render.generation or not review or review.decision!='approved' or review.render_hash!=render.render_hash or review.content_hash!=render.content_hash:invalid()
         claims.append(RecordingPublicationClaim(asset.id,pid,target,request['expected_draft_version'],rid,render.render_hash,render.content_hash,render.generation,review.id,db.sync_session.get_transaction()))

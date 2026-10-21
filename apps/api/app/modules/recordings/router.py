@@ -168,7 +168,7 @@ async def review(db,p,id,body,request,decision):
     if row is None:service.deny()
     owner=await service.project(db,p,row.project_id,True)
     if not p.has_permission('recordings.review'):raise ApiError(403,'permission_denied','Недостаточно прав для проверки записи')
-    row=await db.scalar(select(RecordingRenderVersion).where(RecordingRenderVersion.id==id).with_for_update())
+    row=await db.scalar(select(RecordingRenderVersion).where(RecordingRenderVersion.id==id).with_for_update().execution_options(populate_existing=True))
     operation=f'recordings.{decision}:{id}'
     replay=await command(db,p,request,operation,body)
     if replay is not None:return replay
