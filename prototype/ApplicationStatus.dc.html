@@ -541,6 +541,16 @@ sc-if,sc-for{display:contents}
 .a-stage.a-ic-b .a-ico{color:var(--blue)}.a-stage.a-ic-y .a-ico{color:var(--yellow-ink)}.a-stage.a-ic-g .a-ico{color:var(--green-ink)}
 .a-stage.a-ic-b,.a-stage.a-ic-y,.a-stage.a-ic-g{background:var(--soft)}
 .a-stage:not(:last-child)::after{color:var(--ink-2)}
+/* слоты встречи — стиль из исходного экрана «Опоры» (там он был в стилях самого экрана) */
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:28px;max-width:880px}
+.opt{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:18px 22px;border-radius:22px;border:0;background:rgba(255,255,255,.6);text-align:left;color:var(--ink);min-width:0;cursor:pointer;font:inherit}
+.opt:hover{background:rgba(255,255,255,.88)}
+.opt.is-on{background:var(--ink);color:#fff}
+.opt-day{font-weight:600}
+.opt-time{font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums}
+.opt-where{display:inline-flex;align-items:center;gap:6px;font-size:15px}
+.a-road{margin-top:22px}
+@media (max-width:720px){.opts{grid-template-columns:1fr 1fr}.opt-time{font-size:28px}}
 
 </style>
 </helmet>
