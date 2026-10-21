@@ -94,3 +94,23 @@ def test_provider_configuration_reaches_api_io_and_media_without_enabling_defaul
     assert base['api']['environment']['OPORA_TELEGRAM_BOT_USERNAME'] == '${OPORA_TELEGRAM_BOT_USERNAME:-}'
     assert base['api']['environment']['OPORA_TELEGRAM_WEBHOOK_SECRET'] == '${OPORA_TELEGRAM_WEBHOOK_SECRET:-}'
     assert not telegram_fields & set(overlay['media-worker']['environment'])
+
+
+def test_every_declared_notice_source_loads_in_a_clean_delivery_process():
+    # A domain test may import its resolver directly and mask a missing lazy
+    # delivery import. Exercise the exact registry entry point in a fresh process.
+    probe = subprocess.run([
+        sys.executable, '-c',
+        'import json; from app.modules.messaging.registry import SOURCES,notice_source; '
+        'notice_source("unregistered-contract-probe"); print(json.dumps(sorted(SOURCES)))',
+    ], capture_output=True, text=True, check=True, timeout=20)
+    import app
+    declared = set()
+    for source in Path(app.__file__).parent.rglob('*.py'):
+        if 'tests' in source.parts or 'sidecar' in source.parts or source.name.startswith('test_'):
+            continue
+        for node in ast.walk(ast.parse(source.read_text(), filename=str(source))):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'register_notice_source':
+                assert node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str), f'Notice kind must be source-controlled: {source}'
+                declared.add(node.args[0].value)
+    assert set(json.loads(probe.stdout)) == declared
