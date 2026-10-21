@@ -59,7 +59,16 @@ async def track_view(db, principal, track_id):
     lessons = (await db.scalars(select(Lesson).where(Lesson.track_id == value.id).order_by(Lesson.key))).all()
     assessment = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == value.id))
     releases = (await db.scalars(select(LearningRelease).where(LearningRelease.track_id == value.id).order_by(LearningRelease.number.desc()))).all()
-    return dict(id=value.id, key=value.key, title=value.title, version=value.version, archived=value.archived, current_release_id=value.current_release_id, lessons=[await author_lesson(db, principal, item.id) for item in lessons], assessment=(dict(id=str(assessment.id), title=assessment.title, intro=assessment.intro, questions=assessment.questions, version=assessment.version, status=assessment.status) if assessment else None), releases=[dict(id=str(r.id), number=r.number, published_at=r.published_at.isoformat(), lesson_version_ids=r.lesson_version_ids) for r in releases])
+    assessment_snapshot = None
+    if assessment:
+        assessment_snapshot = dict(id=str(assessment.id), title=assessment.title, intro=assessment.intro, questions=assessment.questions, version=assessment.version, status=assessment.status)
+    elif value.current_release_id:
+        current = await db.get(LearningRelease, value.current_release_id)
+        if current and current.assessment_version_id:
+            published_assessment = await db.get(AssessmentVersion, current.assessment_version_id)
+            published_questions = (await db.scalars(select(AssessmentQuestion).where(AssessmentQuestion.assessment_version_id == published_assessment.id).order_by(AssessmentQuestion.position))).all()
+            assessment_snapshot = dict(id=str(published_assessment.id), title=published_assessment.title, intro=published_assessment.intro, questions=[dict(q=q.prompt, o=q.options, a=q.correct_option, e=q.explanation) for q in published_questions], version=0, status="published")
+    return dict(id=value.id, key=value.key, title=value.title, version=value.version, archived=value.archived, current_release_id=value.current_release_id, lessons=[await author_lesson(db, principal, item.id) for item in lessons], assessment=assessment_snapshot, releases=[dict(id=str(r.id), number=r.number, intro=r.intro, published_at=r.published_at.isoformat(), lesson_version_ids=r.lesson_version_ids) for r in releases])
 
 
 async def tracks(db, principal):

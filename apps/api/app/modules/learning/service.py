@@ -237,3 +237,17 @@ async def submit_task(db, principal, version_id, block_id, body):
         value.answer_text, value.version = body.answer_text.strip(), value.version + 1
     await db.flush()
     return dict(block_id=value.block_id, answer_text=value.answer_text, version=value.version)
+
+
+async def requirement_status(db: AsyncSession, foundation_id: UUID, user_id: UUID, key: str):
+    """P09 seam: only explicitly version-bound evidence; no inferred waivers."""
+    kind, separator, raw_id = key.partition(":")
+    if kind not in {"learning_release", "policy_ack"} or not separator:
+        return None
+    try:
+        release_id = UUID(raw_id)
+    except ValueError:
+        return dict(status="pending", evidence=None)
+    item = await db.scalar(select(LearningAssignment).where(LearningAssignment.foundation_id == foundation_id, LearningAssignment.user_id == user_id, LearningAssignment.release_id == release_id))
+    timestamp = (item.completed_at if kind == "learning_release" else item.acknowledged_at) if item else None
+    return dict(status="fulfilled" if timestamp else "pending", evidence=(dict(assignment_id=str(item.id), release_id=str(release_id), at=timestamp.isoformat()) if timestamp else None))

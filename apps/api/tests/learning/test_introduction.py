@@ -186,6 +186,9 @@ async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
         db.add(Session(foundation_id=foundation_id, user_id=user.id, token_hash=digest('staff'+str(foundation_id)), csrf_hash=digest('csrf'), csrf_cipher='fixture', expires_at=datetime.now(timezone.utc)+timedelta(days=1), mfa_at=datetime.now(timezone.utc)))
         await db.commit()
     client.cookies.set('opora_session','staff'+str(foundation_id))
+    source_track = next(item for item in (await client.get('/api/v1/coord/learning/tracks')).json() if item['key']=='introduction')
+    assert len(source_track['assessment']['questions']) == 10 and source_track['assessment']['version'] == 0
+    assert source_track['assessment']['questions'][0]['a'] == 0
     track = (await post(client, '/coord/learning/tracks', {'key':'fixture-academy','title':'Fixture track'})).json()
     lesson_response = await post(client, '/coord/learning/lessons', {'track_id':track['id'],'key':'module','title':'Fixture lesson'})
     assert lesson_response.status_code == 200, lesson_response.text
