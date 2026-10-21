@@ -7,3 +7,19 @@ it('does not resend commands after an uncertain network outcome',async()=>{const
 it('rejects stale private data after close and cannot reuse cleared credentials',async()=>{let resolve:(value:Response)=>void=()=>{};vi.stubGlobal('fetch',vi.fn().mockImplementation(()=>new Promise(done=>{resolve=done;})));const client=createRendererTransport('fictional-purpose-ticket');const pending=client.request('state',{afterRevision:3});client.close();resolve(json({scene:'private'}));await expect(pending).rejects.toMatchObject({code:'renderer_closed'});await expect(client.request('state')).rejects.toMatchObject({code:'renderer_closed'});});
 it('invalidates authorization on rejection without exposing provider/error details',async()=>{vi.stubGlobal('fetch',vi.fn().mockResolvedValueOnce(json({code:'ticket_expired',message:'fictional sensitive server data'},403)));const client=createRendererTransport('fictional-purpose-ticket');await expect(client.request('bootstrap')).rejects.toMatchObject({code:'ticket_expired',message:'Доступ к записи истёк.'});await expect(client.request('bootstrap')).rejects.toMatchObject({code:'renderer_closed'});});
 it('bounds response JSON and rejects unknown operations before sending',async()=>{const fetch=vi.fn().mockResolvedValueOnce(new Response('x'.repeat(1048577)));vi.stubGlobal('fetch',fetch);const client=createRendererTransport('fictional-purpose-ticket');await expect(client.request('state')).rejects.toMatchObject({code:'renderer_response_invalid'});await expect(client.request('not-recorder' as 'state')).rejects.toMatchObject({code:'renderer_operation_invalid'});expect(fetch).toHaveBeenCalledTimes(1);client.close();});
+it('downloads only a fixed private asset endpoint with access headers and bounds streamed bytes',async()=>{
+ const id='10000000-0000-4000-8000-000000000006';
+ const fetch=vi.fn().mockResolvedValueOnce(new Response(new Uint8Array([137,80,78,71]),{headers:{'Content-Type':'image/png'}})).mockResolvedValueOnce(new Response(new Uint8Array(5)));
+ vi.stubGlobal('fetch',fetch);const client=createRendererTransport('fictional-renderer-access');
+ const blob=await client.asset(id,{maxBytes:4});expect(blob.type).toBe('image/png');expect([...new Uint8Array(await blob.arrayBuffer())]).toEqual([137,80,78,71]);
+ const [url,options]=fetch.mock.calls[0];expect(url).toBe(`/api/v1/recording-renderer/assets/${id}`);expect(options.credentials).toBe('omit');expect(options.redirect).toBe('error');expect(options.headers.get('Authorization')).toBe('Bearer fictional-renderer-access');
+ await expect(client.asset(id,{maxBytes:4})).rejects.toMatchObject({code:'renderer_asset_size'});
+ await expect(client.asset('https://foreign.test/secret')).rejects.toMatchObject({code:'renderer_asset_descriptor'});expect(fetch).toHaveBeenCalledTimes(2);client.close();
+});
+it('uses a separate renderer access credential for provider renewal after consuming bootstrap',async()=>{
+ const fetch=vi.fn().mockResolvedValueOnce(json({access_token:'fictional-access'})).mockResolvedValueOnce(json({provider_grant:null,invalidated:true}));vi.stubGlobal('fetch',fetch);
+ const bootstrap=createRendererTransport('fictional-one-use-ticket');const result=await bootstrap.request<{access_token:string}>('bootstrap');bootstrap.close();
+ const access=createRendererTransport(result.access_token);await access.request('provider-grant',{idempotencyKey:'renewal-1'});
+ expect(fetch.mock.calls[1][0]).toBe('/api/v1/recording-renderer/provider-grant');expect(fetch.mock.calls[1][1].method).toBe('POST');expect(fetch.mock.calls[1][1].headers.get('Authorization')).toBe('Bearer fictional-access');
+ await expect(bootstrap.request('state')).rejects.toMatchObject({code:'renderer_closed'});access.close();
+});
