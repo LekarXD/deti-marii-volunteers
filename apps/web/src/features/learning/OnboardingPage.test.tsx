@@ -9,7 +9,7 @@ import {api} from '../../api/transport';
 
 vi.mock('../../api/transport',()=>({api:vi.fn(),getPrincipalKey:()=> 'fixture-owner'}));
 afterEach(()=>{cleanup();vi.clearAllMocks();});
-const assignment={id:'assignment',release_id:'release',release_number:1,title:'Fixture',intro:'Fixture',lessons:[{id:'lesson',lesson_id:'stable',key:'history',title:'Fixture module',minutes:1,completed:true}],assessment_version_id:'assessment',completed:true,acknowledged:true,latest_attempt_id:'old',latest_attempt_state:'submitted',reacknowledgement_required:false};
+const assignment={track_key:'introduction',track_id:'track',id:'assignment',release_id:'release',release_number:1,title:'Fixture',intro:'Fixture',lessons:[{id:'lesson',lesson_id:'stable',key:'history',title:'Fixture module',minutes:1,completed:true}],assessment_version_id:'assessment',completed:true,acknowledged:true,latest_attempt_id:'old',latest_attempt_state:'submitted',reacknowledgement_required:false};
 const old={id:'old',assignment_id:'assignment',assessment_version_id:'assessment',state:'submitted',questions:[{id:'question',prompt:'Fixture question',options:['First','Second']}],answers:[{question_id:'question',selected_option:0,correct:true,explanation:'Feedback'}],score:1,total:1};
 function mount(){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});return render(<QueryClientProvider client={client}><MemoryRouter><OnboardingPage/></MemoryRouter></QueryClientProvider>);}
 describe('persistent introduction',()=>{

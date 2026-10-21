@@ -21,6 +21,6 @@ export function useAttempt(id?: string | null) {
 export function useLearningCommand() {
   const client = useQueryClient();
   return useMutation({mutationFn: ({path, body}: {path:string;body:unknown}) => api<unknown>(`/api/v1${path}`, {method:'POST', body, idempotencyKey: crypto.randomUUID()}), onSuccess: async () => {
-    await Promise.all([client.invalidateQueries({queryKey: keys.all('learning')}), client.invalidateQueries({queryKey: keys.all('learning-attempt')})]);
+    await Promise.all([client.invalidateQueries({queryKey: keys.all('learning')}), client.invalidateQueries({queryKey: keys.all('learning-attempt')}),client.invalidateQueries({queryKey: keys.all('learning-tasks')})]);
   }});
 }
