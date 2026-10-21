@@ -140,7 +140,6 @@
 .a-site .brand small{color:var(--mute)}
 .a-sitenote{font-size:14px;color:var(--mute)}
 .a-welcome{margin:0 0 24px}
-.a-road{margin-top:20px}
 .a-link{display:grid;gap:6px;text-decoration:none;color:inherit}
 .a-link:hover{box-shadow:inset 0 0 0 1px var(--line-2);text-decoration:none}
 .a-path.a-path{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -273,7 +272,6 @@
 .opt-day{font-weight:600}
 .opt-time{font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums}
 .opt-where{display:inline-flex;align-items:center;gap:6px;font-size:15px}
-.a-road{margin-top:22px}
 @media (max-width:720px){.opts{grid-template-columns:1fr 1fr}.opt-time{font-size:28px}}
 /* закрытые разделы платформы, пока анкета на проверке */
 .dm .nav .is-locked{display:inline-flex;align-items:center;gap:8px;color:var(--quiet);opacity:.55;cursor:not-allowed}
