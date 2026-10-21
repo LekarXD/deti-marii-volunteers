@@ -1,0 +1,14 @@
+import {useState} from 'react';
+import {useQuery} from '@tanstack/react-query';
+import type {components} from '../../api/generated/schema';
+import {Button,Card,ErrorState,Field,Input,LoadingState} from '../../ui';
+import {api} from '../../api/transport';
+import {keys} from '../../api/keys';
+import {useKnowledgeCommand} from './api';
+type Settings=components['schemas']['AISettingsView'];
+function Editor({value}:{value:Settings}){
+ const command=useKnowledgeCommand(),[draft,setDraft]=useState(value),[saved,setSaved]=useState(false);
+ async function save(){try{const result=await command.mutateAsync({path:'/coord/ai/settings',method:'PUT',body:{expected_version:draft.version,enabled:draft.enabled,daily_tokens:draft.daily_tokens,daily_requests:draft.daily_requests,max_concurrent:draft.max_concurrent,timeout_seconds:draft.timeout_seconds}}) as Settings;setDraft(result);setSaved(true);}catch{}}
+ return <Card><h2>ИИ-наставник и генерация черновиков</h2><p>{draft.configured?'Провайдер подключён.':'Провайдер пока не подключён. Модель и ключ задаются на сервере.'}</p>{draft.model&&<p className="meta">Модель: {draft.model}</p>}<label className="checkline"><input type="checkbox" checked={draft.enabled} onChange={e=>{setDraft({...draft,enabled:e.target.checked});setSaved(false);}}/>Разрешить запросы к ИИ в пределах лимитов</label><div className="ai-settings-fields">{([['daily_tokens','Лимит токенов в день'],['daily_requests','Лимит запросов в день'],['max_concurrent','Одновременные запросы'],['timeout_seconds','Ожидание ответа, секунд']] as const).map(([key,label])=><Field label={label} key={key}><Input type="number" min={key==='timeout_seconds'?5:1} value={draft[key]} onChange={e=>{setDraft({...draft,[key]:Number(e.target.value)});setSaved(false);}}/></Field>)}</div><div className="ai-usage"><span>Учтено токенов сегодня<b>{draft.charged_tokens}</b></span><span>Зарезервировано на запросы<b>{draft.reserved_tokens}</b></span><span>Запросов сегодня<b>{draft.requests}</b></span></div><p className="meta">Дневной лимит обновляется в 00:00 UTC. При неизвестном исходе запроса резерв учитывается до проверки, повторный запрос автоматически не отправляется.</p>{draft.circuit_open&&<p role="status">После ошибок провайдера действует короткая пауза перед следующими запросами.</p>}<Button disabled={command.isPending} onClick={()=>void save()}>Сохранить лимиты</Button>{saved&&<p role="status">Настройки сохранены.</p>}{command.error&&<ErrorState error={command.error}/>}</Card>;
+}
+export function AISettingsPanel(){const query=useQuery({queryKey:keys.self('ai-settings'),queryFn:({signal})=>api<Settings>('/coord/ai/settings',{signal})});return query.isPending?<LoadingState/>:query.error?<ErrorState error={query.error} retry={()=>void query.refetch()}/>:query.data?<Editor value={query.data}/>:null;}
