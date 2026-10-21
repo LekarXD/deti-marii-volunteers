@@ -115,7 +115,8 @@ async def resend_invitation(id:UUID,body:StaffVersionCommand,principal:Principal
     async def action(row):
         if row.version!=body.expected_version:raise ApiError(409,'version_conflict','Приглашение изменилось.',current_version=row.version)
         if row.state!='pending':raise ApiError(409,'invitation_not_pending','Это приглашение нельзя отправить повторно.')
-        token=secrets.token_urlsafe(32);row.token_hash=digest(token);row.expires_at=utcnow()+timedelta(hours=72);row.version+=1;row.outbox_id=None
+        await s.selections(db,principal.foundation_id,row.grants)
+        token=secrets.token_urlsafe(32);row.token_hash=digest(token);row.expires_at=utcnow()+timedelta(hours=72);row.version+=1;row.outbox_id=None;row.invited_by_user_id=principal.user_id
         await s.queue_invitation(db,principal,row,token);audit(db,principal,'staff.invite.resend','staff_invitation',id,('version','expires_at'));return await s.invitation_view(db,row)
     return await command(db,principal,'staff.invite.resend:'+str(id),key,body.model_dump(),lambda:managed_invitation(db,principal,id),action)
 
