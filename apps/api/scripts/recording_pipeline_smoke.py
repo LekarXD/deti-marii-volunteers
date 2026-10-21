@@ -6,18 +6,26 @@ Native LiveKit/ffmpeg/ffprobe/node and pinned playwright must be installed.
 import asyncio,json,os,sys,socket,tempfile,subprocess,signal
 from pathlib import Path
 from uuid import UUID,uuid4
-ROOT=Path(__file__).resolve().parents[3];sys.path[:0]=[str(ROOT/'apps/api'),str(ROOT/'apps/api/tests')]
+SCRIPT=Path(__file__).resolve();ROOT=SCRIPT.parents[3] if len(SCRIPT.parents)>3 else SCRIPT.parent
+sys.path.insert(0,str(ROOT/'apps/api'))
 if not os.environ.get('OPORA_DATABASE_URL','').rsplit('/',1)[-1].endswith('_proof'):raise RuntimeError('An isolated *_proof PostgreSQL database is required')
 os.environ.setdefault('OPORA_ASSET_ROOT',str(Path(tempfile.gettempdir())/'opora-recording-proof-assets'))
+# Private localhost proof only; never mutate the public staging process environment.
+os.environ.update(OPORA_ENVIRONMENT='development',OPORA_DEV_INBOX='true',OPORA_COOKIE_SECURE='false',OPORA_TRUSTED_ORIGINS='["http://testserver"]')
 os.environ['OPORA_CAPTURE_ENABLED']='true'
+from app.core.paths import normalize_mount_prefix
+MOUNT=normalize_mount_prefix(os.environ.get('OPORA_APP_MOUNT_PREFIX',''))
 if not os.environ.get('OPORA_CAPTURE_CHROME_PATH'):raise RuntimeError('Official Chrome path required')
 DIST=Path(os.environ['OPORA_RECORDING_SMOKE_DIST']).resolve()
 SCENARIO=os.getenv('OPORA_RECORDING_SMOKE_SCENARIO','success')
-if SCENARIO not in ('success','presentation','privacy-revoke','auth-revoke','unknown-participant','lease-restart','auto-stop','live-presentation','live-unknown','live-host-revoke','live-enrollment-revoke','live-encode-restart'):raise ValueError('Unknown smoke scenario')
+if SCENARIO not in ('success','presentation','privacy-revoke','auth-revoke','unknown-participant','lease-restart','auto-stop','live-presentation','live-unknown','live-host-revoke','live-enrollment-revoke','live-encode-restart','live-duration-limit'):raise ValueError('Unknown smoke scenario')
 LIVE=SCENARIO.startswith('live-')
-PRESENTATION=SCENARIO in ('presentation','live-presentation','live-encode-restart')
+PRESENTATION=SCENARIO in ('presentation','live-presentation','live-encode-restart','live-duration-limit')
+AUTO_STOP=SCENARIO in ('auto-stop','live-duration-limit')
+ALLOW_LONG=os.getenv('OPORA_RECORDING_SMOKE_ALLOW_LONG')=='true'
+if SCENARIO=='live-duration-limit' and not ALLOW_LONG:raise ValueError('Explicit long proof opt-in required')
 SMOKE_SECONDS=int(os.getenv('OPORA_RECORDING_SMOKE_SECONDS','6'))
-if not 3<=SMOKE_SECONDS<=120:raise ValueError('Smoke duration must be 3..120 seconds')
+if not 3<=SMOKE_SECONDS<=(1180 if ALLOW_LONG else 120):raise ValueError('Smoke duration must be3..120, or at most1180 with explicit long proof opt-in')
 def port():
  s=socket.socket();s.bind(('127.0.0.1',0));p=s.getsockname()[1];s.close();return p
 async def main():
@@ -35,15 +43,46 @@ async def main():
  from app.modules.studio.scene import validate_scene
  from app.integrations.rtc.livekit import RtcSettings,join_token,identity,RevocationPolicy
  from app.worker.main import run_once
- from test_messaging import actor
  from sqlalchemy import select
+ import app as app_package
+ async def synthetic_actor(client,email):
+  from app.core.models import OutboxMessage,MfaFactor
+  from app.core.crypto import unseal
+  import pyotp
+  session=(await client.get('/api/v1/auth/session')).json()
+  headers={'Origin':'http://testserver','X-CSRF-Token':session['csrf_token'],'Idempotency-Key':uuid4().hex}
+  response=await client.post('/api/v1/auth/challenges',json={'email':email},headers=headers);assert response.status_code==200,response.text
+  challenge_id=response.json()['challenge_id']
+  async with SessionLocal() as db:
+   rows=(await db.scalars(select(OutboxMessage).where(OutboxMessage.channel=='email').order_by(OutboxMessage.created_at.desc()).limit(100))).all()
+   payload=next(value for value in (json.loads(unseal(row.payload_cipher)) for row in rows) if value.get('challenge_id')==challenge_id and value.get('to')==email and value.get('purpose')=='login')
+  response=await client.post('/api/v1/auth/challenges/verify',json={'challenge_id':challenge_id,'token':payload['token']},headers=headers);payload=None;assert response.status_code==200,response.text
+  session=response.json();headers['X-CSRF-Token']=session['csrf_token']
+  async with SessionLocal() as db:
+   factor=await db.scalar(select(MfaFactor).where(MfaFactor.user_id==UUID(session['user_id'])))
+   secret=unseal(factor.secret_cipher)
+  response=await client.post('/api/v1/auth/mfa/verify',json={'code':pyotp.TOTP(secret).now()},headers=headers);secret=None;assert response.status_code==200,response.text
+  session=response.json();headers['X-CSRF-Token']=session['csrf_token']
+  return session,headers
  http_port,rtc_port,rtc_tcp,rtc_udp=[port() for _ in range(4)]
- key='proof'+uuid4().hex;secret=uuid4().hex+uuid4().hex
- os.environ.update(OPORA_RTC_URL=f'http://127.0.0.1:{rtc_port}',OPORA_RTC_PUBLIC_URL=f'ws://127.0.0.1:{rtc_port}',OPORA_RTC_API_KEY=key,OPORA_RTC_API_SECRET=secret,OPORA_CAPTURE_RENDERER_URL=f'http://127.0.0.1:{http_port}/recorder.html')
- processes=[];server=None;publisher=None
+ configured_rtc=os.getenv('OPORA_RECORDING_SMOKE_USE_CONFIGURED_RTC')=='true'
+ if configured_rtc:
+  from urllib.parse import urlsplit
+  rtc_settings=RtcSettings.from_env();parsed=urlsplit(rtc_settings.url)
+  owned_host=os.getenv('OPORA_RECORDING_SMOKE_OWNED_RTC_HOST','')
+  if not owned_host or parsed.hostname!=owned_host or parsed.scheme not in ('http','https') or parsed.username or parsed.password or parsed.query or parsed.fragment or not rtc_settings.capabilities().configured:raise RuntimeError('An explicitly named owned RTC fixture and valid private config are required')
+  os.environ['OPORA_RTC_PUBLIC_URL']=rtc_settings.url.replace('https://','wss://',1).replace('http://','ws://',1)
+ else:
+  key='proof'+uuid4().hex;secret=uuid4().hex+uuid4().hex
+  os.environ.update(OPORA_RTC_URL=f'http://127.0.0.1:{rtc_port}',OPORA_RTC_PUBLIC_URL=f'ws://127.0.0.1:{rtc_port}',OPORA_RTC_API_KEY=key,OPORA_RTC_API_SECRET=secret)
+ os.environ['OPORA_CAPTURE_RENDERER_URL']=f'http://127.0.0.1:{http_port}{MOUNT}/recorder.html'
+ # This process serves only a loopback *_proof fixture. Public staging stays unchanged.
+ os.environ.update(OPORA_ENVIRONMENT='development',OPORA_DEV_INBOX='true',OPORA_COOKIE_SECURE='false',OPORA_TRUSTED_ORIGINS='["http://testserver"]')
+ processes=[];server=None;publisher=None;room=None
  with tempfile.TemporaryDirectory(prefix='opora-pipeline-proof-') as directory:
-  config=Path(directory)/'livekit.yaml';config.write_text(f'port: {rtc_port}\nbind_addresses: [127.0.0.1]\nrtc:\n  tcp_port: {rtc_tcp}\n  udp_port: {rtc_udp}\n  use_external_ip: false\n  node_ip: 127.0.0.1\n  enable_loopback_candidate: true\nkeys:\n  {key}: {secret}\n');config.chmod(0o600)
-  rtc=await asyncio.create_subprocess_exec(__import__('shutil').which('livekit-server'),'--config',str(config),stdout=asyncio.subprocess.DEVNULL,stderr=asyncio.subprocess.DEVNULL,start_new_session=True);processes.append(rtc)
+  if not configured_rtc:
+   config=Path(directory)/'livekit.yaml';config.write_text(f'port: {rtc_port}\nbind_addresses: [127.0.0.1]\nrtc:\n  tcp_port: {rtc_tcp}\n  udp_port: {rtc_udp}\n  use_external_ip: false\n  node_ip: 127.0.0.1\n  enable_loopback_candidate: true\nkeys:\n  {key}: {secret}\n');config.chmod(0o600)
+   rtc=await asyncio.create_subprocess_exec(__import__('shutil').which('livekit-server'),'--config',str(config),stdout=asyncio.subprocess.DEVNULL,stderr=asyncio.subprocess.DEVNULL,start_new_session=True);processes.append(rtc)
   try:
    app=FastAPI();install_platform(app);app.include_router(auth);app.include_router(recording)
    renderer_requests={}
@@ -57,10 +96,21 @@ async def main():
    @app.get('/recorder.html')
    async def entry():return FileResponse(DIST/'recorder.html')
    @app.get('/livekit.js')
-   async def sdk():return FileResponse(ROOT/'apps/web/node_modules/livekit-client/dist/livekit-client.umd.js')
+   async def sdk():return FileResponse(Path(os.getenv('OPORA_RECORDING_SMOKE_LIVEKIT_UMD',str(ROOT/'apps/web/node_modules/livekit-client/dist/livekit-client.umd.js'))))
    @app.get('/')
    async def synthetic():return HTMLResponse('<!doctype html><title>Synthetic isolated publisher</title>')
-   server=uvicorn.Server(uvicorn.Config(app,host='127.0.0.1',port=http_port,log_level='critical',access_log=False));serving=asyncio.create_task(server.serve())
+   class StripMountGateway:
+    async def __call__(self,scope,receive,send):
+     if scope['type'] in ('http','websocket') and MOUNT:
+      if not scope['path'].startswith(MOUNT+'/'):
+       if scope['type']=='http':
+        await send({'type':'http.response.start','status':404,'headers':[]});await send({'type':'http.response.body','body':b''})
+       else:await send({'type':'websocket.close'})
+       return
+      scope={**scope,'path':scope['path'][len(MOUNT):],'raw_path':scope['path'][len(MOUNT):].encode()}
+     await app(scope,receive,send)
+   gateway=StripMountGateway()
+   server=uvicorn.Server(uvicorn.Config(gateway,root_path=MOUNT,host='127.0.0.1',port=http_port,log_level='critical',access_log=False));serving=asyncio.create_task(server.serve())
    while not server.started:await asyncio.sleep(.1)
    await asyncio.sleep(.7);await fixtures()
    # Unique synthetic host and test client isolate real auth rate limits between runs.
@@ -79,8 +129,12 @@ async def main():
     for permission in permissions:db.add(PermissionGrant(membership_id=membership.id,permission=permission.permission,scope_type=permission.scope_type,scope_id=permission.scope_id))
     db.add(MfaFactor(user_id=host.id,secret_cipher=seal(pyotp.random_base32()),confirmed_at=utcnow()));await db.commit()
    client_ip='127.20.'+str(int(uuid4().hex[:2],16))+'.'+str(int(uuid4().hex[:2],16))
-   async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app,client=(client_ip,12345)),base_url='http://testserver') as client:
-    me,headers=await actor(client,email,True)
+   class ScopedClient(httpx.AsyncClient):
+    async def request(self,method,url,**options):
+     if MOUNT and isinstance(url,str) and url.startswith('/') and not url.startswith(MOUNT+'/'):url=MOUNT+url
+     return await super().request(method,url,**options)
+   async with ScopedClient(transport=httpx.ASGITransport(app=gateway,client=(client_ip,12345)),base_url='http://testserver') as client:
+    me,headers=await synthetic_actor(client,email)
     async def post(path,body):
      headers['Idempotency-Key']=uuid4().hex;r=await client.post('/api/v1'+path,json=body,headers=headers)
      if r.status_code!=200:raise RuntimeError(f'{path} {r.status_code} {r.text}')
@@ -116,15 +170,17 @@ async def main():
       import io,hashlib
       for label,color in [('A','#fff1ca'),('B','#dbeaff')]:
        image=Image.new('RGB',(1280,720),color);draw=ImageDraw.Draw(image)
-       draw.rectangle((80,90,1200,620),outline='#153a96',width=8);draw.text((140,180),'SLIDE '+label,fill='#153a96',font=ImageFont.truetype(str(ROOT/'apps/api/app/assets/fonts/DejaVuSans.ttf'),100));draw.text((140,380),'Synthetic presentation',fill='#153a96',font=ImageFont.truetype(str(ROOT/'apps/api/app/assets/fonts/DejaVuSans.ttf'),54))
+       draw.rectangle((80,90,1200,620),outline='#153a96',width=8);draw.text((140,180),'SLIDE '+label,fill='#153a96',font=ImageFont.truetype(str(Path(app_package.__file__).parent/'assets/fonts/DejaVuSans.ttf'),100));draw.text((140,380),'Synthetic presentation',fill='#153a96',font=ImageFont.truetype(str(Path(app_package.__file__).parent/'assets/fonts/DejaVuSans.ttf'),54))
        buffer=io.BytesIO();image.save(buffer,format='PNG');data=buffer.getvalue();digest=hashlib.sha256(data).hexdigest()
        asset=MediaAsset(id=uuid4(),foundation_id=UUID(me['foundation_id']),owner_user_id=UUID(me['user_id']),storage_key=uuid4().hex,content_type='image/png',expected_size=len(data),received_size=len(data),checksum=digest,state='ready');db.add(asset);await db.flush();target=asset_path(asset);target.parent.mkdir(parents=True,exist_ok=True,mode=0o700);target.write_bytes(data);target.chmod(0o600)
        slides.append({'asset_id':str(asset.id),'sha256':digest,'width':1280,'height':720})
       scene.update(content_kind='slides',layout='side',content_asset=slides[0],content_ratio=16/9,deck_version_id=str(uuid4()),slide_id=str(uuid4()))
      studio.scene=validate_scene(scene);studio.scene_revision+=1;await db.commit();revision=studio.scene_revision
     grant=join_token(RtcSettings.from_env(),room=room,participant_identity=identity(UUID(me['user_id'])),name='Synthetic presenter',host=True,policy=RevocationPolicy(),auth_session_id=auth_id)
-    publisher=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(ROOT/'apps/api/scripts/recording_synthetic_publisher.cjs'),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True);processes.append(publisher)
-    publisher.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant})+'\n').encode());await publisher.stdin.drain();grant=None
+    from app.modules.recordings.jobs import browser_environment
+    publisher_environment=browser_environment()
+    publisher=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(SCRIPT.with_name('recording_synthetic_publisher.cjs')),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True,env=publisher_environment);processes.append(publisher)
+    publisher.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}{MOUNT}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant})+'\n').encode());await publisher.stdin.drain();grant=None
     pub=json.loads(await asyncio.wait_for(publisher.stdout.readline(),30));assert pub['state']=='published',pub
     from app.integrations.rtc.livekit import LiveKitAdapter
     parts=await LiveKitAdapter().participants(room);await asyncio.sleep(.4)
@@ -134,8 +190,8 @@ async def main():
       viewer_login=Session(foundation_id=viewer.foundation_id,user_id=viewer.id,token_hash=uuid4().hex*2,csrf_hash='x'*64,csrf_cipher='synthetic',expires_at=utcnow()+timedelta(hours=1));db.add(viewer_login);await db.flush()
       enrollment=WebinarEnrollment(foundation_id=viewer.foundation_id,webinar_id=webinar_id,user_id=viewer.id);db.add(enrollment);await db.commit();viewer_id=viewer.id;viewer_session_id=viewer_login.id;enrollment_id=enrollment.id
      grant=join_token(RtcSettings.from_env(),room=room,participant_identity=identity(viewer_id),name='Synthetic enrolled subscriber',host=False,policy=RevocationPolicy(),auth_session_id=viewer_session_id)
-     spectator=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(ROOT/'apps/api/scripts/recording_synthetic_publisher.cjs'),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True);processes.append(spectator)
-     spectator.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant,'publish':False})+'\n').encode());await spectator.stdin.drain();grant=None
+     spectator=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(SCRIPT.with_name('recording_synthetic_publisher.cjs')),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True,env=publisher_environment);processes.append(spectator)
+     spectator.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}{MOUNT}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant,'publish':False})+'\n').encode());await spectator.stdin.drain();grant=None
      spectator_receipt=json.loads(await asyncio.wait_for(spectator.stdout.readline(),30));assert spectator_receipt=={'state':'published','tracks':[]}
      provider_participants=await LiveKitAdapter().participants(room)
      assert any(participant['identity']==identity(viewer_id) and not participant.get('tracks') for participant in provider_participants)
@@ -179,7 +235,11 @@ async def main():
      await asyncio.sleep(.25)
      r=await client.get('/api/v1/recording-takes/'+tid['id']);current=r.json()
      if current['state']=='capturing':break
-     if current['state']=='failed' or asyncio.get_running_loop().time()>deadline:raise RuntimeError('capture start '+json.dumps(current))
+     if current['state']=='failed' or asyncio.get_running_loop().time()>deadline:
+      async with SessionLocal() as diagnostic_db:
+       diagnostic_take=await diagnostic_db.get(RecordingTake,UUID(tid['id']))
+       print(json.dumps({'event':'capture_start_diagnostic','renderer_requests':renderer_requests,'readiness':diagnostic_take.readiness}),flush=True)
+      raise RuntimeError('capture start '+json.dumps(current))
     began=asyncio.get_running_loop().time();print(json.dumps({'event':'capture_started','requested_seconds':SMOKE_SECONDS}),flush=True)
     await asyncio.sleep(3)
     if PRESENTATION:
@@ -191,7 +251,7 @@ async def main():
        studio.scene_revision+=1;studio.scene=validate_scene({**studio.scene,'revision':studio.scene_revision,'content_asset':slides[asset_index],'slide_id':str(uuid4()),'layout':'overlay' if asset_index else 'side'});await db.commit();expected_revision=studio.scene_revision
       confirmed=asyncio.get_running_loop().time()+5
       while True:
-       current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json();assert current['state']=='capturing',current
+       current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json();assert current['state'] in (('capturing','stopping','captured') if AUTO_STOP else ('capturing',)),current
        if current['policy_scene_revision']==expected_revision and current['readiness_state']=='ready':break
        if asyncio.get_running_loop().time()>=confirmed:
         print(json.dumps({'event':'transition_timeout','requested_scene_revision':expected_revision,'take_scene_revision':current['policy_scene_revision'],'take_readiness':current['readiness_state'],'renderer_request_counts':renderer_requests}),flush=True)
@@ -199,9 +259,9 @@ async def main():
        await asyncio.sleep(.1)
       print(json.dumps({'event':'scene_confirmed','scene_revision':expected_revision,'elapsed_seconds':round(asyncio.get_running_loop().time()-began,1)}),flush=True)
      await asyncio.sleep(max(0,began+SMOKE_SECONDS-asyncio.get_running_loop().time()))
-     current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json();assert current['state']=='capturing',current
+     current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json();assert current['state'] in (('capturing','stopping','captured') if AUTO_STOP else ('capturing',)),current
     if SCENARIO=='success' and SMOKE_SECONDS>6:await asyncio.sleep(max(0,began+SMOKE_SECONDS-asyncio.get_running_loop().time()))
-    if SCENARIO not in ('success','presentation','live-presentation','live-encode-restart','auto-stop'):
+    if SCENARIO not in ('success','presentation','live-presentation','live-encode-restart','live-duration-limit','auto-stop'):
      if SCENARIO=='lease-restart':
       from app.core.clock import utcnow
       from datetime import timedelta
@@ -229,8 +289,8 @@ async def main():
        host=await db.get(Session,auth_id);host.revoked_at=utcnow();await db.commit()
      else:
       grant=join_token(RtcSettings.from_env(),room=room,participant_identity='synthetic-outsider-'+uuid4().hex,name='Synthetic unapproved participant',host=True,policy=RevocationPolicy())
-      outsider=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(ROOT/'apps/api/scripts/recording_synthetic_publisher.cjs'),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True);processes.append(outsider)
-      outsider.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant})+'\n').encode());await outsider.stdin.drain();grant=None
+      outsider=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(SCRIPT.with_name('recording_synthetic_publisher.cjs')),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True,env=publisher_environment);processes.append(outsider)
+      outsider.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}{MOUNT}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant})+'\n').encode());await outsider.stdin.drain();grant=None
       # Revocation may terminate renderer before outsider has published all tracks.
       await asyncio.wait_for(outsider.stdout.readline(),30)
      await asyncio.wait_for(work,40)
@@ -239,7 +299,7 @@ async def main():
       assert not await db.scalar(select(RecordingRenderVersion.id).where(RecordingRenderVersion.take_id==row.id))
       print(json.dumps({'state':'actual_capture_revocation_passed','scenario':SCENARIO,'capture_started':bool(row.started_at),'take_state':row.state,'error_code':row.error_code,'render_created':False,'capture_child_exited':all(child.returncode is not None for child in capture_children)}))
      return
-    if SCENARIO!='auto-stop':
+    if not AUTO_STOP:
      current=await post(f"/recording-takes/{tid['id']}/stop",{'expected_version':current['version']});assert current['state']=='stopping'
     if SCENARIO=='live-encode-restart':
      try:await asyncio.wait_for(work,60)
@@ -256,7 +316,7 @@ async def main():
      print(json.dumps({'event':'completed_source_reused','new_browser_launched':False,'original_capture_children':len(capture_children)}),flush=True)
     else:await asyncio.wait_for(work,max(60,SMOKE_SECONDS*2))
     current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json()
-    if SCENARIO=='auto-stop':assert current['stop_reason']=='duration_limit',current
+    if AUTO_STOP:assert current['stop_reason']=='duration_limit',current
     if current['state']!='captured':raise RuntimeError('capture final '+json.dumps(current))
     async with SessionLocal() as db:
      render=await db.scalar(select(RecordingRenderVersion).where(RecordingRenderVersion.take_id==UUID(tid['id'])))
@@ -284,7 +344,7 @@ async def main():
       assert len(manifest['stage_events'])>=3 and any(event['media_time_ms']>0 for event in manifest['stage_events'])
      import re
      mean=re.search(r'mean_volume: ([^\n]+)',audio).group(1)
-     print(json.dumps({'state':'actual_shared_stage_pipeline_passed','scenario':SCENARIO,'reused_live_room':LIVE,'audience_publications_captured':0 if LIVE else None,'take_id':tid['id'],'render_id':str(render.id),'asset_id':str(asset.id),'artifact':str(path),'media':manifest['media'],'audio_mean_volume':mean,'audio_proof':audio_proof,'journal_events':len(manifest['stage_events']),'source_sha256':manifest['source_sha256'],'output_sha256':manifest['output_sha256']}))
+     print(json.dumps({'state':'actual_shared_stage_pipeline_passed','scenario':SCENARIO,'app_mount_prefix':MOUNT,'stop_reason':current['stop_reason'],'reused_live_room':LIVE,'audience_publications_captured':0 if LIVE else None,'take_id':tid['id'],'render_id':str(render.id),'asset_id':str(asset.id),'artifact':str(path),'media':manifest['media'],'audio_mean_volume':mean,'audio_proof':audio_proof,'journal_events':len(manifest['stage_events']),'source_sha256':manifest['source_sha256'],'output_sha256':manifest['output_sha256']}))
   finally:
    if server:server.should_exit=True;await serving
    for process in reversed(processes):
@@ -293,4 +353,8 @@ async def main():
      except ProcessLookupError:pass
      try:await asyncio.wait_for(process.wait(),5)
      except TimeoutError:os.killpg(process.pid,signal.SIGKILL);await process.wait()
+   if configured_rtc and room:
+    from app.integrations.rtc.livekit import LiveKitAdapter,ProviderError
+    try:await LiveKitAdapter().close_room(room)
+    except ProviderError:print(json.dumps({'event':'proof_room_cleanup_pending'}),flush=True)
 asyncio.run(main())
