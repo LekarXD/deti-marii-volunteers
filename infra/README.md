@@ -50,7 +50,8 @@ export OPORA_KNOWLEDGE_TEST_DATABASE_URL='postgresql+psycopg://opora:local-passw
 export OPORA_STUDIO_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_studio_test'
 export OPORA_PROFILE_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_profile_test'
 export OPORA_SIMULATOR_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_simulator_test'
-# Only for a fresh local PostgreSQL instance, creates/migrates the nine domain DBs:
+export OPORA_REPORTING_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_reporting_test'
+# Only for a fresh local PostgreSQL instance, creates/migrates the ten domain DBs:
 python infra/scripts/prepare-test-dbs.py
 export OPORA_ASSET_ROOT="${TMPDIR:-/tmp}/opora-private-test-assets"
 export OPORA_ENVIRONMENT=development
@@ -103,13 +104,13 @@ The runner defaults to port 8001; set `OPORA_G1_BASE_URL=http://127.0.0.1:8002`
 for a separate QA port. Stop any previous API on the chosen port first.
 
 Domain test fixtures deliberately drop/recreate their model tables. Keep their
-nine domain URLs separate from development/staging and the external G1 database. Their
+ten domain URLs separate from development/staging and the external G1 database. Their
 exact database names are asserted by the domain suites. The CI pytest plugin
 rejects skipped checks; an unset URL is a gate failure, never a passing test run.
 `prepare-test-dbs.py` refuses existing databases and never drops one.
 
 For repeated integration checks on the specifically assigned QA cluster, the
-explicit command below resets only the ten allowlisted disposable fixture schemas
+explicit command below resets only the eleven allowlisted disposable fixture schemas
 and migrates them from empty. It fixes test-only `create_all`/Alembic stamp drift
 after new models arrive. The script pins loopback port 56148, verifies the exact
 QA data directory and database names, and cannot target proof/restore/G1 databases.
@@ -118,6 +119,10 @@ It is unnecessary in fresh CI and must not be used for development or staging da
 ```sh
 python infra/scripts/reset-qa-test-schemas.py --reset-disposable-test-schemas --api-source "$PWD/apps/api"
 ```
+
+The dedicated opt-in media image, sandbox settings and acceptance commands are in
+[media-runtime.md](media-runtime.md). Capture is disabled by default; Compose
+syntax validation does not prove a container build or media acceptance.
 
 ## Separate board runtime gate
 
