@@ -192,3 +192,21 @@ async def test_merged_follow_up_remains_actionable_without_rewriting_identity(en
         assert completed.status_code==200,completed.text
         assert completed.json()['volunteer_id']==source and completed.json()['state']=='done'
     finally:await coord.aclose()
+
+@pytest.mark.asyncio
+async def test_user_follow_up_reuses_shared_store_without_application(env):
+    from app.modules.crm.service import schedule_user_follow_up
+    app,factory=env;coord=await coordinator(app,factory)
+    try:
+        owner=UUID((await coord.get('/api/v1/auth/session')).json()['user_id'])
+        async with factory() as db:
+            user=User(foundation_id=get_settings().foundation_id,display_name='Участник без анкеты');db.add(user);await db.flush()
+            source=uuid4();first=await schedule_user_follow_up(db,get_settings().foundation_id,user.id,owner,today(),'assignment',source,1,'fixture')
+            replay=await schedule_user_follow_up(db,get_settings().foundation_id,user.id,owner,today(),'assignment',source,1,'fixture')
+            assert first.id==replay.id and first.application_id is None
+            await db.commit()
+            assert await db.scalar(select(func.count()).select_from(FollowUpTask))==1
+            assert await db.scalar(select(func.count()).select_from(FollowUpSource))==1
+            with pytest.raises(ApiError) as error:await schedule_user_follow_up(db,uuid4(),user.id,owner,today(),'assignment',uuid4(),1,'fixture')
+            assert error.value.status_code==404
+    finally:await coord.aclose()

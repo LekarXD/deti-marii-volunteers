@@ -253,11 +253,11 @@ async def update_task(db,principal,task_id,command):
     await db.flush();return task_view(task)
 
 
-async def schedule_follow_up(db,foundation_id,application_id,assigned_user_id,due_on,source_type,source_id,source_revision,actor_id,title='Связаться с волонтёром'):
+async def schedule_follow_up(db,foundation_id,application_id,assigned_user_id,due_on,source_type,source_id,source_revision,actor_id,title='Связаться с волонтёром',*,user_id=None):
     """P06 integration boundary, in caller's transaction; never sends a message."""
     await db.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'follow-up:{foundation_id}:{source_type}:{source_id}'})
     from app.core.idempotency import payload_hash
-    fingerprint=payload_hash(dict(application_id=application_id,assigned_user_id=assigned_user_id,due_on=due_on,title=title))
+    fingerprint=payload_hash(dict(application_id=application_id,user_id=user_id,assigned_user_id=assigned_user_id,due_on=due_on,title=title))
     source=await db.scalar(select(FollowUpSource).where(FollowUpSource.foundation_id==foundation_id,FollowUpSource.source_type==source_type,FollowUpSource.source_id==source_id).with_for_update())
     if source:
         if source.current_revision>source_revision:raise ApiError(409,'stale_follow_up_source','Итог встречи уже изменился')
@@ -267,10 +267,15 @@ async def schedule_follow_up(db,foundation_id,application_id,assigned_user_id,du
             return task_view(old_task) if old_task else None
     else:
         source=FollowUpSource(foundation_id=foundation_id,source_type=source_type,source_id=source_id,current_revision=source_revision,payload_hash=fingerprint)
-        db.add(source)
     source.current_revision=source_revision;source.payload_hash=fingerprint;source.task_id=None
-    volunteer=await ensure_volunteer(db,foundation_id,application_id)
+    if application_id:
+        volunteer=await ensure_volunteer(db,foundation_id,application_id)
+    elif user_id:
+        volunteer=await ensure_user_volunteer(db,foundation_id,user_id)
+    else:
+        raise ApiError(422,'follow_up_subject_required','Не указан получатель следующего действия')
     volunteer=await scoped_volunteer(db,foundation_id,volunteer.id,lock=True)
+    db.add(source)
     tasks=(await db.scalars(select(FollowUpTask).where(FollowUpTask.foundation_id==foundation_id,FollowUpTask.source_type==source_type,
         FollowUpTask.source_id==source_id).with_for_update())).all()
     if any(task.source_revision>source_revision for task in tasks):raise ApiError(409,'stale_follow_up_source','Итог встречи уже изменился')
@@ -281,7 +286,7 @@ async def schedule_follow_up(db,foundation_id,application_id,assigned_user_id,du
     if due_on is None or volunteer.no_contact:
         await db.flush();return None
     await valid_owner(db,foundation_id,assigned_user_id)
-    task=FollowUpTask(foundation_id=foundation_id,volunteer_id=volunteer.id,application_id=application_id,assigned_user_id=assigned_user_id,
+    task=FollowUpTask(foundation_id=foundation_id,volunteer_id=volunteer.id,application_id=volunteer.application_id,assigned_user_id=assigned_user_id,
         due_on=due_on,title=nonempty(title),source_type=source_type,source_id=source_id,source_revision=source_revision)
     db.add(task);touch(volunteer);await db.flush();source.task_id=task.id
     db.add(FollowUpTaskEvent(task_id=task.id,kind='created',reason='Следующий контакт после встречи',after=task_view(task).model_dump(mode='json'),author_id=actor_id))
@@ -393,3 +398,22 @@ async def first_visit_outcome(db,principal,volunteer_id,command):
         db.add(task);await db.flush()
         db.add(FollowUpTaskEvent(task_id=task.id,kind='created',reason=note,after=task_view(task).model_dump(mode='json'),author_id=principal.actor_id))
     touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True)
+
+
+async def ensure_user_volunteer(db,foundation_id,user_id):
+    await db.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'crm-create:{foundation_id}'})
+    user=await db.scalar(select(User).where(User.foundation_id==foundation_id,User.id==user_id,User.account_state=='active'))
+    if not user:raise ApiError(404,'user_not_found','Волонтёр не найден в фонде')
+    current=await db.scalar(select(CrmVolunteer).where(CrmVolunteer.foundation_id==foundation_id,CrmVolunteer.user_id==user_id,CrmVolunteer.merged_into_id.is_(None)))
+    if current:return current
+    application=await db.scalar(select(Application).where(Application.foundation_id==foundation_id,Application.user_id==user_id))
+    if application:return await ensure_volunteer(db,foundation_id,application.id)
+    from app.core.models import ContactChannel
+    verified=(await db.scalars(select(ContactChannel).where(ContactChannel.user_id==user_id))).all()
+    contacts={channel.type:channel.normalized_value for channel in verified if channel.type in ('email','phone','telegram') and channel.verified_at}
+    volunteer=CrmVolunteer(foundation_id=foundation_id,user_id=user_id,display_name=user.display_name,contacts=contacts,context='Пользователь платформы',relationship_state='unverified')
+    db.add(volunteer);await db.flush();return volunteer
+
+
+async def schedule_user_follow_up(db,foundation_id,user_id,assigned_user_id,due_on,source_type,source_id,source_revision,actor_id,title='Связаться с волонтёром'):
+    return await schedule_follow_up(db,foundation_id,None,assigned_user_id,due_on,source_type,source_id,source_revision,actor_id,title,user_id=user_id)
