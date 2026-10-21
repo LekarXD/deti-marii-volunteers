@@ -1,7 +1,7 @@
 import importlib
 from app.core import models
 
-DOMAIN_MODULES = ("applications", "interviews", "activities", "participants", "learning", "messaging", "crm", "studio", "notifications", "knowledge", "followups", "simulator")
+DOMAIN_MODULES = ("applications", "interviews", "activities", "participants", "learning", "messaging", "crm", "studio", "notifications", "knowledge", "followups", "simulator", "profile")
 def load_models():
     importlib.import_module("app.integrations.ai.models")
     for module in DOMAIN_MODULES:
