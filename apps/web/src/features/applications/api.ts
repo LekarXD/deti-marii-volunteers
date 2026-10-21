@@ -10,7 +10,6 @@ export type CandidateList = components['schemas']['CandidateListView'];
 export type CandidateRequest = components['schemas']['RequestView'];
 export type Note = components['schemas']['NoteView'];
 export type Submission = components['schemas']['SubmissionCommand'];
-export type Review = components['schemas']['ReviewCommand'];
 export const applicationKeys = {all:()=>keys.all('application'), self:()=>keys.self('application'), draft:()=>keys.self('application-draft'),
   candidates:(query='')=>keys.list('application',{query}), candidate:(id:string)=>keys.detail('application',id),
   requests:(coord=false)=>keys.list('application',{requests:true,coord}), notes:(id:string)=>keys.detail('application-notes',id)};
