@@ -1,0 +1,108 @@
+import {afterEach,beforeEach,it,expect,vi} from 'vitest';
+import {canonicalSerialize} from '../../../../../../packages/studio-core';
+import type {components} from '../../../api/generated/schema';
+import {fictionPlan,fictionScene} from '../../../ui/studio/fixtures';
+import type {RendererViewProps} from './RendererView';
+import type {MediaOptions} from '../../studio/live/RoomController';
+vi.mock('../../studio/live/HiddenCaptureController',()=>({HiddenCaptureController:class {}}));
+import {createRendererRuntime} from './runtime';
+type Bootstrap=components['schemas']['RendererBootstrapView'];
+type State=components['schemas']['RendererStateView'];
+type Input=components['schemas']['RendererReadinessInput'];
+const json=(value:unknown)=>new Response(JSON.stringify(value));
+async function hash(scene:State['scene'],capture_plan:State['capture_plan']) {
+ const bytes=new TextEncoder().encode(canonicalSerialize({scene,capture_plan,resolved_assets:[]}));
+ return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),value=>value.toString(16).padStart(2,'0')).join('');
+}
+async function fixture():Promise<Bootstrap>{
+ const scene=fictionScene('lesson_recording_project',{content_kind:'camera',layout:'camera_only',content_asset:null,deck_version_id:null,slide_id:null});
+ const plan=fictionPlan(scene),capture_plan={...plan,allowed_tracks:[...plan.allowed_tracks]};
+ return {scene,capture_plan,foundation_id:scene.foundation_id,project_id:scene.resource_id,take_id:plan.take_id,session_id:scene.session_id,generation:1,
+  renderer_state_version:1,projection_hash:await hash(scene,capture_plan),resolved_assets:[],invalidated:false,
+  access_token:'fictional-access',expires_at:new Date(Date.now()+60_000).toISOString(),
+  provider_grant:{provider:'livekit',url:'wss://fictional-provider.invalid',token:'fictional-room-token',identity:'fictional-renderer',session_id:scene.session_id,generation:1,expires_in:60},
+ };
+}
+beforeEach(()=>{vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-21T12:00:00Z'));vi.stubGlobal('window',{innerWidth:1920,innerHeight:1080,devicePixelRatio:1});});
+afterEach(()=>{vi.unstubAllGlobals();vi.useRealTimers();});
+async function harness(initial?:Bootstrap){
+ const boot=initial??await fixture();let state:State=boot;let mediaOptions:MediaOptions|undefined;
+ const reports:Input[]=[];const views:RendererViewProps[]=[];
+ let heldReady:((response:Response)=>void)|undefined;let holdReady=false;
+ const fetch=vi.fn(async(path:string,options?:RequestInit):Promise<Response>=>{
+  if(path.endsWith('/bootstrap'))return json(boot);
+  if(path.includes('/state?'))return json(state);
+  if(path.endsWith('/provider-grant'))return json({...state,provider_grant:{...boot.provider_grant,token:'fresh-fictional-room-token'}});
+  if(path.endsWith('/readiness')){
+   const input=JSON.parse(String(options?.body)) as Input;reports.push(input);
+   const ack={ready:input.visual_ready,reasons:input.visual_ready?[]:['visual_frame_unready'],renderer_state_version:input.renderer_state_version,projection_hash:input.projection_hash,
+    readiness_sequence:input.readiness_sequence,capture_state:'created',valid_until:input.visual_ready?new Date(Date.now()+10_000).toISOString():null};
+   if(holdReady&&input.visual_ready)return new Promise(resolve=>{heldReady=resolve;});
+   return json(ack);
+  }
+  throw new Error('Unexpected private renderer endpoint');
+ });vi.stubGlobal('fetch',fetch);
+ const connect=vi.fn(async()=>{mediaOptions!.onChange({status:'connected',tracks:[],error:null,cameraOn:false,microphoneOn:false,screenOn:false});});
+ const disconnect=vi.fn(async()=>{});
+ const runtime=createRendererRuntime({render:props=>views.push(props),mediaFactory:options=>{mediaOptions=options;return {connect,disconnect};}});
+ return {runtime,boot,views,reports,fetch,connect,disconnect,
+  setState(value:State){state=value;},refresh(){mediaOptions!.onRefreshRequired?.();},
+  hold(){holdReady=true;},release(){const input=reports.filter(report=>report.visual_ready).at(-1)!;heldReady?.(json({ready:true,reasons:[],renderer_state_version:input.renderer_state_version,projection_hash:input.projection_hash,readiness_sequence:input.readiness_sequence,capture_state:'created',valid_until:new Date(Date.now()+10_000).toISOString()}));},
+  observe(ready:boolean){const view=views.at(-1)!;view.onFrameReadiness!(view.frame!.stamp,{ready,visual_ready:ready,reasons:[]});},
+ };
+}
+it('consumes a one-use ticket, uses only the separate access credential, and reports actual visual preflight without capture commands',async()=>{
+ const h=await harness();await h.runtime.start('fictional-one-use-ticket');
+ expect(h.views.at(-1)?.phase).toBe('active');expect(h.connect).toHaveBeenCalledTimes(1);
+ h.observe(true);await vi.waitFor(()=>expect(h.reports.some(report=>report.visual_ready)).toBe(true));
+ expect(h.reports.at(-1)).toMatchObject({renderer_state_version:1,viewport_width:1920,viewport_height:1080,device_pixel_ratio:1,asset_proofs:[],observed_tracks:[]});
+ expect(h.fetch.mock.calls[0][1]?.headers instanceof Headers&&h.fetch.mock.calls[0][1].headers.get('Authorization')).toBe('Bearer fictional-one-use-ticket');
+ expect(h.fetch.mock.calls.slice(1).every(([,options])=>options?.headers instanceof Headers&&options.headers.get('Authorization')==='Bearer fictional-access')).toBe(true);
+ expect(h.fetch.mock.calls.every(([path,options])=>!path.includes('fictional-')&&options?.credentials==='omit')).toBe(true);
+ h.runtime.close();expect(h.views.at(-1)?.phase).toBe('stopped');expect(h.reports.at(-1)?.visual_ready).toBe(false);
+});
+it('revokes with a greater sequence and cannot reopen pixels after a delayed ready ACK arrives after close',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');await vi.waitFor(()=>expect(h.reports.length).toBeGreaterThan(0));
+ h.hold();h.observe(true);await vi.waitFor(()=>expect(h.reports.at(-1)?.visual_ready).toBe(true));
+ const readySequence=h.reports.at(-1)!.readiness_sequence;h.runtime.close();
+ expect(h.reports.at(-1)!.readiness_sequence).toBeGreaterThan(readySequence);expect(h.reports.at(-1)!.visual_ready).toBe(false);
+ h.release();await Promise.resolve();expect(h.views.at(-1)?.phase).toBe('stopped');expect(h.views.at(-1)?.frame).toBeUndefined();
+});
+it('blocks an integrity failure before any media subscription',async()=>{
+ const initial=await fixture();const h=await harness({...initial,projection_hash:'0'.repeat(64)});await h.runtime.start('fictional-ticket');
+ expect(h.connect).not.toHaveBeenCalled();expect(h.views.at(-1)?.phase).toBe('failed');expect(h.reports.some(report=>report.visual_ready)).toBe(false);
+});
+it('clears the frame when policy is revoked at a greater state version and rejects stale restoration',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');h.observe(true);
+ const revoked={...h.boot,renderer_state_version:2,invalidated:true,capture_plan:{...h.boot.capture_plan,privacy_state:'blocked' as const}};
+ h.setState(revoked);await vi.advanceTimersByTimeAsync(1000);
+ expect(h.views.at(-1)?.phase).toBe('failed');expect(h.views.at(-1)?.frame).toBeUndefined();
+ h.setState(h.boot);await vi.advanceTimersByTimeAsync(3000);expect(h.connect).toHaveBeenCalledTimes(1);expect(h.views.at(-1)?.phase).toBe('failed');
+});
+it('renews the provider grant through the purpose API and does not create a second media adapter',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');h.refresh();
+ await vi.waitFor(()=>expect(h.connect).toHaveBeenCalledTimes(2));
+ expect(h.fetch.mock.calls.some(([path])=>path==='/api/v1/recording-renderer/provider-grant')).toBe(true);
+ expect(h.views.at(-1)?.phase).toBe('active');h.runtime.close();
+});
+it('never reports visual readiness at a different capture viewport',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');vi.stubGlobal('window',{innerWidth:390,innerHeight:844,devicePixelRatio:2});h.observe(true);
+ await vi.advanceTimersByTimeAsync(3000);expect(h.reports.every(report=>!report.visual_ready)).toBe(true);h.runtime.close();
+});
+it('revalidates an advanced scene before reconnecting and ignores the old frame readiness callback',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');const old=h.views.at(-1)!;
+ const scene={...h.boot.scene,revision:2,presenter_size:29},capture_plan={...h.boot.capture_plan,scene_revision:2};
+ const next={...h.boot,scene,capture_plan,renderer_state_version:2,projection_hash:await hash(scene,capture_plan)};
+ h.setState(next);await vi.advanceTimersByTimeAsync(1000);
+ await vi.waitFor(()=>expect(h.connect).toHaveBeenCalledTimes(2));
+ expect(h.views.at(-1)?.frame?.stateVersion).toBe(2);expect(h.views.at(-1)?.phase).toBe('active');
+ const before=h.reports.length;old.onFrameReadiness!(old.frame!.stamp,{ready:true,visual_ready:true,reasons:[]});
+ expect(h.reports.length).toBe(before);
+ h.observe(true);await vi.waitFor(()=>expect(h.reports.at(-1)).toMatchObject({renderer_state_version:2,projection_hash:next.projection_hash,visual_ready:true}));h.runtime.close();
+});
+it('renews bounded visual receipts with increasing observation sequences every three seconds',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');h.observe(true);
+ await vi.waitFor(()=>expect(h.reports.at(-1)?.visual_ready).toBe(true));const first=h.reports.at(-1)!.readiness_sequence;
+ await vi.advanceTimersByTimeAsync(3000);expect(h.reports.at(-1)?.visual_ready).toBe(true);expect(h.reports.at(-1)!.readiness_sequence).toBeGreaterThan(first);
+ h.observe(false);await vi.waitFor(()=>expect(h.reports.at(-1)?.visual_ready).toBe(false));h.runtime.close();
+});
