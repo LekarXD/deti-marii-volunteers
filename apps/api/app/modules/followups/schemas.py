@@ -110,6 +110,26 @@ class OwnReflectionView(BaseModel):
     voice_available:bool=False
     voice_unavailable_reason:str='Голосовой ввод пока недоступен. Можно написать текст.'
 
+class ReflectionAudioIntent(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    content_type:Literal['audio/webm','audio/ogg','audio/mp4','audio/wav']
+    expected_size:int=Field(gt=0,le=10*1024*1024)
+    checksum:str=Field(pattern='^[a-f0-9]{64}$')
+
+class ReflectionAudioView(BaseModel):
+    asset_id:UUID
+    version:int
+    state:str
+    asset_state:str
+    upload_url:str
+    received_size:int
+    expected_size:int
+    content_type:str
+    duration_seconds:int|None
+    transcript:str|None
+    error_code:str|None
+    can_retry:bool
+
 class StaffReflectionView(OwnReflectionView):
     group_id:UUID|None
     user_id:UUID

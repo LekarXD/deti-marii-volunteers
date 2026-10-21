@@ -124,7 +124,7 @@ async def test_missing_specialist_keeps_draft_and_audio_is_truthfully_unavailabl
     assert response.status_code==503 and response.json()['code']=='support_team_unconfigured'
     own=(await x.first.get(x.root+'/reflection')).json()
     assert own['text']=='Сложно вести занятие' and own['submitted_at'] is None and own['voice_available'] is False
-    unavailable=await x.first.post(x.root+'/reflection/audio-intent')
+    unavailable=await mutate(x.first,x.root+'/reflection/audio-intent',{'content_type':'audio/wav','expected_size':100,'checksum':'a'*64})
     assert unavailable.status_code==503 and unavailable.json()['code']=='transcription_unconfigured'
     async with x.sessions() as db:
         assert await db.scalar(select(func.count()).select_from(SupportSignal))==0

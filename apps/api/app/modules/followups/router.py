@@ -9,9 +9,10 @@ from app.core.contact_policy import contact_guard
 from app.core.db import get_db
 from app.core.errors import ApiError
 from app.core.idempotency import begin_command,finish_command
-from . import service
+from . import service,audio
 from .models import AssignmentQuestion,Reflection,ReflectionReview,ReflectionReviewNote,SupportSignal
 from .schemas import AssignmentPreparationView,AssignmentQuestionInput,AssignmentQuestionView,ChecklistCommand,FollowupCommand,FollowupStaffOptions,OwnReflectionView,QuestionAnswerCommand,ReflectionDraftCommand,ReflectionPrivateNoteView,ReflectionReviewCommand,ReflectionStaffPage,SignalActionCommand,StaffReflectionView,SupportSignalPage,SupportSignalView
+from .schemas import ReflectionAudioIntent,ReflectionAudioView
 
 
 def private_response(response:Response):response.headers['Cache-Control']='private, no-store'
@@ -57,10 +58,33 @@ async def save_reflection(assignment_id:UUID,body:ReflectionDraftCommand,db:Asyn
 async def submit_reflection(assignment_id:UUID,body:FollowupCommand,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal),key:str|None=Header(default=None,alias='Idempotency-Key')):
     return await command(db,principal,f'followups.reflection.submit:{assignment_id}',key,body,lambda:authorize_own(db,principal,assignment_id,True),lambda:service.submit_reflection(db,principal,assignment_id,body),'assignment',assignment_id,['reflection_submitted'])
 
-@router.post('/me/assignments/{assignment_id}/reflection/audio-intent')
-async def audio_unavailable(assignment_id:UUID,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal)):
-    await authorize_own(db,principal,assignment_id,True)
-    raise ApiError(503,'transcription_unconfigured','Голосовой ввод пока недоступен. Можно написать текст.',retryable=False)
+@router.post('/me/assignments/{assignment_id}/reflection/audio-intent',response_model=ReflectionAudioView)
+async def audio_intent(assignment_id:UUID,body:ReflectionAudioIntent,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal),key:str|None=Header(default=None,alias='Idempotency-Key')):
+    return await command(db,principal,f'followups.audio.intent:{assignment_id}',key,body,lambda:audio.authorize_audio_assignment(db,principal,audio.RESOURCE,assignment_id),lambda:audio.intent(db,principal,assignment_id,body),'assignment',assignment_id,['audio_intent'])
+
+@router.get('/me/assignments/{assignment_id}/reflection/audio',response_model=ReflectionAudioView|None)
+async def latest_audio(assignment_id:UUID,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal)):
+    from .models import ReflectionAudioUpload
+    await audio.authorize_audio_assignment(db,principal,audio.RESOURCE,assignment_id)
+    row=await db.scalar(select(ReflectionAudioUpload).where(ReflectionAudioUpload.assignment_id==assignment_id,ReflectionAudioUpload.foundation_id==principal.foundation_id,ReflectionAudioUpload.user_id==principal.user_id).order_by(ReflectionAudioUpload.created_at.desc(),ReflectionAudioUpload.asset_id.desc()).limit(1))
+    if row is None:return None
+    row,asset=await audio.own_audio(db,principal,assignment_id,row.asset_id)
+    return await audio.view(db,row,asset)
+
+@router.get('/me/assignments/{assignment_id}/reflection/audio/{asset_id}',response_model=ReflectionAudioView)
+async def audio_status(assignment_id:UUID,asset_id:UUID,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal)):
+    row,asset=await audio.own_audio(db,principal,assignment_id,asset_id)
+    return await audio.view(db,row,asset)
+
+async def authorize_audio(db,principal,assignment_id,asset_id):await audio.own_audio(db,principal,assignment_id,asset_id)
+
+@router.post('/me/assignments/{assignment_id}/reflection/audio/{asset_id}/cancel',response_model=ReflectionAudioView)
+async def audio_cancel(assignment_id:UUID,asset_id:UUID,body:FollowupCommand,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal),key:str|None=Header(default=None,alias='Idempotency-Key')):
+    return await command(db,principal,f'followups.audio.cancel:{asset_id}',key,body,lambda:authorize_audio(db,principal,assignment_id,asset_id),lambda:audio.cancel(db,principal,assignment_id,asset_id,body),'asset',asset_id,['audio_cancelled'])
+
+@router.post('/me/assignments/{assignment_id}/reflection/audio/{asset_id}/retry',response_model=ReflectionAudioView)
+async def audio_retry(assignment_id:UUID,asset_id:UUID,body:FollowupCommand,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal),key:str|None=Header(default=None,alias='Idempotency-Key')):
+    return await command(db,principal,f'followups.audio.retry:{asset_id}',key,body,lambda:authorize_audio(db,principal,assignment_id,asset_id),lambda:audio.retry(db,principal,assignment_id,asset_id,body),'asset',asset_id,['audio_retry'])
 
 @router.get('/coord/reflections',response_model=ReflectionStaffPage)
 async def reflections(limit:int=Query(100,ge=1,le=200),db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal)):

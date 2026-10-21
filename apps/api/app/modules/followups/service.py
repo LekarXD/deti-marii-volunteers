@@ -140,7 +140,9 @@ async def reflection_view(db,principal,id,staff_row=None):
     if staff_row:
         user=await db.get(User,row.user_id)
         return StaffReflectionView(**values,group_id=row.group_id,user_id=row.user_id,display_name=user.display_name,signal_id=signal.id if signal else None,can_review=has(principal,'followups.manage',row.group_id),private_notes_available=has(principal,'followups.private_notes',row.group_id))
-    return OwnReflectionView(**values)
+    from .audio import readiness
+    voice=await readiness(db,principal.foundation_id)
+    return OwnReflectionView(**values,voice_available=bool(values['can_submit'] and voice['available']),voice_unavailable_reason='' if voice['available'] else voice['reason'])
 
 async def save_reflection(db,principal,id,body):
     item,event=await own_assignment(db,principal,id,True)
