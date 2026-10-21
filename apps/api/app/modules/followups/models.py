@@ -119,3 +119,23 @@ class SupportSignalEvent(Base):
     author_id:Mapped[str]=mapped_column(String(100))
     created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
     __table_args__=(UniqueConstraint('signal_id','revision'),)
+
+
+class ReflectionAudioUpload(Base):
+    """Private source intent; processing and transcript use the shared Job/AIRun stores."""
+    __tablename__='reflection_audio_uploads'
+    asset_id:Mapped[UUID]=mapped_column(primary_key=True)
+    foundation_id:Mapped[UUID]=mapped_column(ForeignKey('foundations.id'))
+    assignment_id:Mapped[UUID]
+    user_id:Mapped[UUID]
+    request_session_id:Mapped[UUID]=mapped_column(ForeignKey('sessions.id'))
+    run_id:Mapped[UUID|None]=mapped_column(ForeignKey('ai_runs.id'),unique=True)
+    duration_seconds:Mapped[int|None]
+    cancelled_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True))
+    version:Mapped[int]=mapped_column(BigInteger,default=1)
+    created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+    __table_args__=(ForeignKeyConstraint(['asset_id','foundation_id'],['media_assets.id','media_assets.foundation_id']),
+        ForeignKeyConstraint(['assignment_id','foundation_id'],['assignments.id','assignments.foundation_id']),
+        ForeignKeyConstraint(['user_id','foundation_id'],['users.id','users.foundation_id']),
+        CheckConstraint('version > 0 AND (duration_seconds IS NULL OR (duration_seconds > 0 AND duration_seconds <= 180))'),
+        Index('ix_reflection_audio_owner','foundation_id','user_id','assignment_id','created_at'))
