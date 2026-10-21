@@ -14,6 +14,7 @@ DATABASES = (
     "opora_knowledge_test", "opora_studio_test", "opora_profile_test",
     "opora_simulator_test",
     "opora_reporting_test",
+    "opora_admin_test",
 )
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--reset-disposable-test-schemas", action="store_true", required=True)

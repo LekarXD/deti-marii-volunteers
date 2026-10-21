@@ -67,7 +67,8 @@ export OPORA_STUDIO_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password
 export OPORA_PROFILE_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_profile_test'
 export OPORA_SIMULATOR_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_simulator_test'
 export OPORA_REPORTING_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_reporting_test'
-# Only for a fresh local PostgreSQL instance, creates/migrates the ten domain DBs:
+export OPORA_ADMIN_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_admin_test'
+# Only for a fresh local PostgreSQL instance, creates/migrates the eleven domain DBs:
 python infra/scripts/prepare-test-dbs.py
 export OPORA_ASSET_ROOT="${TMPDIR:-/tmp}/opora-private-test-assets"
 export OPORA_ENVIRONMENT=development
@@ -78,6 +79,20 @@ sh infra/scripts/verify.sh
 (cd apps/api && python -m app.worker.main)
 pnpm dev
 ```
+
+The command above starts only the outbox process. In another terminal with the
+same private database, asset root and encryption/provider configuration, start
+the bounded I/O process to consume domain jobs:
+
+```sh
+(cd apps/api && python -m app.worker.main --kind studio.close --kind studio.revoke --kind studio.reconcile_participant --kind knowledge.index --kind knowledge.ingest --kind ai.generate --kind reporting.digest)
+```
+
+Media jobs require the separate tested toolchain and opt-in configuration from
+`infra/media-runtime.md`; their explicit native command is
+`python -m app.worker.main --kind slides.convert --kind recording.capture --kind followups.audio`.
+Do not add these kinds to either API-image worker or infer provider readiness
+from a running process. Each process admits one job at a time.
 
 The CLI creates invented fixture identities and staff grants. It is the only way
 to bootstrap staff; no public role switch is allowed. Keep session-cookie fixture
@@ -120,13 +135,13 @@ The runner defaults to port 8001; set `OPORA_G1_BASE_URL=http://127.0.0.1:8002`
 for a separate QA port. Stop any previous API on the chosen port first.
 
 Domain test fixtures deliberately drop/recreate their model tables. Keep their
-ten domain URLs separate from development/staging and the external G1 database. Their
+eleven domain URLs separate from development/staging and the external G1 database. Their
 exact database names are asserted by the domain suites. The CI pytest plugin
 rejects skipped checks; an unset URL is a gate failure, never a passing test run.
 `prepare-test-dbs.py` refuses existing databases and never drops one.
 
 For repeated integration checks on the specifically assigned QA cluster, the
-explicit command below resets only the eleven allowlisted disposable fixture schemas
+explicit command below resets only the twelve allowlisted disposable fixture schemas
 and migrates them from empty. It fixes test-only `create_all`/Alembic stamp drift
 after new models arrive. The script pins loopback port 56148, verifies the exact
 QA data directory and database names, and cannot target proof/restore/G1 databases.
