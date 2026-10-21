@@ -34,6 +34,43 @@
   }
   function go(hash) { if (location.hash === hash) render(); else location.hash = hash; }
 
+  // ---------- маски ввода ----------
+  const cap = w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w;
+  const MASK = {
+    // пока печатают: только заглавная первая буква; при выходе из поля — полная нормализация
+    name: v => v.replace(/[^A-Za-zА-Яа-яЁё\- ']/g, "").replace(/\s+/g, " ").replace(/^[\s-]+/, "").replace(/(^|[\s-])([a-zа-яё])/g, (m, a, b) => a + b.toUpperCase()),
+    phone: v => {
+      let d = v.replace(/\D/g, "");
+      if (d[0] === "8") d = "7" + d.slice(1);
+      if (d[0] !== "7") d = "7" + d;
+      if (d.length > 11 && d[1] === "8") d = d[0] + d.slice(2); // набрали 8… после подставленного +7
+      const p = d.slice(1, 11);
+      let out = "+7";
+      if (p.length) out += " (" + p.slice(0, 3);
+      if (p.length > 3) out += ") " + p.slice(3, 6);
+      if (p.length > 6) out += "-" + p.slice(6, 8);
+      if (p.length > 8) out += "-" + p.slice(8, 10);
+      return out;
+    },
+    telegram: v => "@" + v.trim().replace(/^@+/, "").replace(/^(https?:\/\/)?(www\.)?(t\.me|telegram\.me)\//i, "").replace(/[^A-Za-z0-9_]/g, "").slice(0, 32)
+  };
+  const FINAL = {
+    name: v => MASK.name(v).trim().replace(/-+$/, "").split(/([\s-])/).map(w => /[\s-]/.test(w) ? w : cap(w)).join(""),
+    phone: v => MASK.phone(v),
+    telegram: v => v === "@" ? "" : MASK.telegram(v)
+  };
+  const shortHint = (f, v) => {
+    if (f.mask !== "name" || f.id !== "firstName") return "";
+    const full = (FORM.shortNames || {})[cap(String(v || "").trim())];
+    return full ? `Это полное имя? Например, ${full}. Так координатору будет проще найти вас в документах.` : "";
+  };
+  const roleGroups = roles => {
+    const f = FORM.steps.flatMap(s => s.fields).find(x => x.type === "roles");
+    return f ? f.groups.filter(g => g.roles.some(r => arr(roles).includes(r))).map(g => g.title) : [];
+  };
+  const fullName = c => c.name || [c.firstName, c.lastName].filter(Boolean).join(" ");
+  const openGroups = new Set();
+
   // ---------- шапка ----------
   function chrome(active, ribbon) {
     const tab = (h, l, k) => `<a href="${h}" class="${active === k ? "on" : ""}">${l}</a>`;
@@ -67,7 +104,7 @@
     let input = "";
     switch (f.type) {
       case "text": case "email": case "tel": case "date":
-        input = `<input id="${name}" type="${f.type}" data-f="${f.id}" value="${esc(v || "")}" ${f.placeholder ? `placeholder="${esc(f.placeholder)}"` : ""} autocomplete="${{ name: "name", phone: "tel", email: "email" }[f.id] || "off"}">`;
+        input = `<input id="${name}" type="${f.type}" data-f="${f.id}" value="${esc(v || "")}" ${f.placeholder ? `placeholder="${esc(f.placeholder)}"` : ""} ${f.mask ? `data-mask="${f.mask}"` : ""} ${f.mask === "phone" ? 'inputmode="tel"' : ""} autocomplete="${f.autocomplete || "off"}">`;
         break;
       case "textarea":
         input = `<textarea id="${name}" data-f="${f.id}">${esc(v || "")}</textarea>`;
@@ -92,14 +129,28 @@
             return `<button type="button" class="chip" data-chip="${f.id}" data-v="${esc(k)}" aria-pressed="${arr(v).includes(k)}" aria-label="${esc(r + ", " + c)}">✓</button>`;
           }).join("")}`).join("")}</div>`;
         break;
+      case "roles": {
+        const sel = arr(v);
+        input = `<div class="roles">${f.groups.map((g, gi) => {
+          const n = g.roles.filter(r => sel.includes(r)).length, key = f.id + gi, open = n > 0 || openGroups.has(key);
+          return `<div class="rgroup ${open ? "open" : ""}">
+            <button type="button" class="rhead" data-rgroup="${key}" aria-expanded="${open}"><span><b>${esc(g.title)}</b>${g.hint ? `<small>${esc(g.hint)}</small>` : ""}</span><span class="badge ${n ? "hot" : ""}">${n ? `выбрано: ${n}` : open ? "свернуть" : "открыть"}</span></button>
+            ${open ? `<div class="chips">${g.roles.map(r => `<button type="button" class="chip" data-chip="${f.id}" data-v="${esc(r)}" data-redraw aria-pressed="${sel.includes(r)}">${esc(r)}</button>`).join("")}</div>` : ""}
+          </div>`;
+        }).join("")}
+        ${f.unsure ? `<label class="opt-line"><input type="checkbox" data-f="${f.id}" value="${esc(f.unsure)}" ${sel.includes(f.unsure) ? "checked" : ""}><span>${esc(f.unsure)}</span></label>` : ""}</div>`;
+        break;
+      }
       case "consent":
         return `<div class="field ${err ? "bad" : ""}"><label class="opt-line"><input type="checkbox" data-f="${f.id}" data-consent ${v ? "checked" : ""}><span>${label}</span></label>${err ? `<p class="err">${esc(err)}</p>` : ""}</div>`;
     }
-    const isGroup = ["radio", "checkbox", "chips", "grid"].includes(f.type);
-    return `<div class="field ${err ? "bad" : ""}">
+    const isGroup = ["radio", "checkbox", "chips", "grid", "roles"].includes(f.type);
+    const hint = shortHint(f, v);
+    return `<div class="field ${err ? "bad" : ""} ${f.half ? "half" : ""}">
       ${isGroup ? `<span class="lbl">${label}</span>` : `<label for="${name}">${label}</label>`}
       ${f.why ? `<p class="why">${esc(f.why)}</p>` : ""}
       ${input}
+      ${f.mask === "name" ? `<p class="warn" data-warn="${f.id}" ${hint ? "" : "hidden"}>${esc(hint)}</p>` : ""}
       ${err ? `<p class="err">${esc(err)}</p>` : ""}
     </div>`;
   }
@@ -109,10 +160,12 @@
     fields.filter(f => visible(f, data)).forEach(f => {
       const v = data[f.id];
       const empty = v == null || v === "" || v === false || (Array.isArray(v) && v.length === 0);
-      if (f.required && empty) errs[f.id] = f.type === "consent" ? "Без согласия мы не сможем обработать заявку" : "Заполните, пожалуйста";
+      if (f.required && empty) errs[f.id] = f.type === "consent" ? "Без согласия мы не сможем обработать заявку" : f.type === "roles" ? "Выберите хотя бы одну роль или «Пока не знаю»" : "Заполните, пожалуйста";
       else if (!empty && f.type === "email" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) errs[f.id] = "Проверьте адрес почты";
-      else if (!empty && f.type === "tel" && String(v).replace(/\D/g, "").length < 10) errs[f.id] = "Проверьте номер телефона";
-      else if (!empty && f.id === "birthdate") { const a = age(v); if (a == null || a < 18) errs[f.id] = "Волонтёром можно стать с 18 лет"; else if (a > 110) errs[f.id] = "Проверьте дату"; }
+      else if (!empty && f.mask === "phone" && String(v).replace(/\D/g, "").length !== 11) errs[f.id] = "Номер должен быть из 10 цифр после +7";
+      else if (!empty && f.mask === "telegram" && v !== "@" && !/^@[A-Za-z0-9_]{5,32}$/.test(v)) errs[f.id] = "Ник — от 5 символов: латиница, цифры и _";
+      else if (!empty && f.mask === "name" && !/^[А-ЯЁA-Z][а-яёa-z']+([\s-][А-ЯЁA-Z][а-яёa-z']+)*$/.test(v)) errs[f.id] = "Проверьте написание: только буквы, без сокращений";
+      else if (!empty && f.id === "birthdate") { const a = age(v); if (a == null || a < 16) errs[f.id] = "Волонтёром можно стать с 16 лет"; else if (a > 110) errs[f.id] = "Проверьте дату"; }
     });
     return errs;
   }
@@ -132,6 +185,7 @@
         <h1>${S.editing ? "Изменить ответы" : esc(FORM.title)}</h1>
         <p class="muted" style="margin-top:10px;max-width:60ch">${esc(FORM.intro)}</p>
         <div class="form-steps">${FORM.steps.map((s, i) => `<span class="${i === S.formStep ? "on" : i < S.formStep ? "done" : ""}">${i + 1}. ${esc(s.title)}</span>`).join("")}</div>
+        <div class="progress form-bar" aria-label="Шаг ${S.formStep + 1} из ${FORM.steps.length}"><i style="width:${100 * (S.formStep + 1) / FORM.steps.length}%"></i></div>
         <form class="card" id="form" novalidate>
           ${step.fields.filter(f => visible(f, S.draft)).map(f => fieldHtml(f, S.draft, formErrs[f.id])).join("")}
         </form>
@@ -139,7 +193,7 @@
           ${S.formStep > 0 ? `<button class="btn sec" data-act="prev">← Назад</button>` : "<span></span>"}
           <button class="btn" data-act="${last ? "submit" : "next"}">${last ? (S.editing ? "Сохранить" : "Отправить заявку") : "Далее →"}</button>
         </div>
-        ${S.editing ? `<p style="margin-top:14px"><button class="ghost" data-act="cancelEdit">Отменить изменения</button></p>` : S.me ? `<p class="muted" style="margin-top:18px;font-size:.85rem">Заявка от ${esc(S.me.name)} уже отправлена. Новая анкета заменит её в демо.</p>` : ""}
+        ${S.editing ? `<p style="margin-top:14px"><button class="ghost" data-act="cancelEdit">Отменить изменения</button></p>` : S.me ? `<p class="muted" style="margin-top:18px;font-size:.85rem">Заявка от ${esc(fullName(S.me))} уже отправлена. Новая анкета заменит её в демо.</p>` : ""}
       </div></main>`;
   }
 
@@ -151,6 +205,23 @@
     form.addEventListener("input", e => {
       const el = e.target, id = el.dataset.f;
       if (!id || el.type === "radio" || el.type === "checkbox") return;
+      if (el.dataset.mask) {
+        const nv = MASK[el.dataset.mask](el.value);
+        if (nv !== el.value) el.value = nv;
+        const w = form.querySelector(`[data-warn="${id}"]`);
+        if (w) { const f = FORM.steps.flatMap(s => s.fields).find(x => x.id === id); const h = shortHint(f, nv); w.textContent = h; w.hidden = !h; }
+      }
+      tgt()[id] = el.value; save();
+    });
+    form.addEventListener("focusin", e => {
+      const el = e.target;
+      if (el.dataset.mask === "phone" && !el.value) el.value = "+7 (";
+      if (el.dataset.mask === "telegram" && !el.value) el.value = "@";
+    });
+    form.addEventListener("focusout", e => {
+      const el = e.target, id = el.dataset.f;
+      if (!el.dataset.mask || !id) return;
+      el.value = el.dataset.mask === "phone" && el.value.replace(/\D/g, "").length <= 1 ? "" : FINAL[el.dataset.mask](el.value);
       tgt()[id] = el.value; save();
     });
     form.addEventListener("change", e => {
@@ -169,12 +240,15 @@
       if (el.type === "radio" || el.type === "checkbox" || el.tagName === "SELECT") rerender();
     });
     form.addEventListener("click", e => {
+      const g = e.target.closest("[data-rgroup]");
+      if (g) { const k = g.dataset.rgroup; openGroups.has(k) ? openGroups.delete(k) : openGroups.add(k); rerender(); return; }
       const b = e.target.closest("[data-chip]");
       if (!b) return;
       const id = b.dataset.chip, T = tgt(), set = new Set(arr(T[id]));
       set.has(b.dataset.v) ? set.delete(b.dataset.v) : set.add(b.dataset.v);
       T[id] = [...set]; save();
       b.setAttribute("aria-pressed", set.has(b.dataset.v));
+      if (b.hasAttribute("data-redraw")) rerender();
     });
   }
 
@@ -201,7 +275,7 @@
         </div>
         <div class="card stack" style="border-style:dashed">
           <p class="eyebrow">Письмо на ${esc(S.me.email)}</p>
-          <h3>${esc(first(S.me.name))}, добро пожаловать в «Дети Марии»!</h3>
+          <h3>${esc(first(fullName(S.me)))}, добро пожаловать в «Дети Марии»!</h3>
           <p>Мы получили вашу анкету. Следующий шаг — короткое знакомство с фондом в личном кабинете, около 25 минут. После него вы сможете выбрать время встречи с координатором.</p>
           <div><a class="btn" href="#/home">Открыть личный кабинет →</a></div>
         </div>
@@ -236,7 +310,7 @@
       <main><div class="wrap stack" style="gap:28px">
         <div class="stack" style="gap:8px">
           <p class="eyebrow">Личный кабинет</p>
-          <h1>Здравствуйте, ${esc(first(S.me.name))}!</h1>
+          <h1>Здравствуйте, ${esc(first(fullName(S.me)))}!</h1>
           <p class="muted">${esc(ONB.intro)}</p>
         </div>
         <ol class="path">${st.map((s, i) => `<li class="${s.done ? "done" : i === nowI ? "now" : ""}"><span class="n">${s.done ? "✓" : i + 1}</span><b>${esc(s.t)}</b><small>${esc(s.s)}</small></li>`).join("")}</ol>
@@ -257,7 +331,7 @@
         </section>
         <section class="card stack" style="gap:10px">
           <div class="row" style="justify-content:space-between"><h3>Ваш профиль</h3><a href="#/profile" class="btn sec small">Открыть</a></div>
-          <p class="muted">${esc(arr(S.me.directions).join(" · ") || "Направления не выбраны")}</p>
+          <p class="muted">${esc(arr(S.me.roles).join(" · ") || "Роли не выбраны")}</p>
           <p class="muted" style="font-size:.85rem">После встречи с координатором здесь появятся занятия и смены, подобранные под ваши навыки и время.</p>
         </section>
       </div></main>`;
@@ -386,7 +460,7 @@
     if (!S.me) return viewHome();
     return chrome("vol", "Платформа волонтёров · профиль") + `<main><div class="wrap stack" style="gap:20px">
       <a href="#/home" class="muted" style="text-decoration:none">← Кабинет</a>
-      <div class="row" style="justify-content:space-between"><h1>${esc(S.me.name)}</h1><button class="btn sec small" data-act="edit">Изменить ответы</button></div>
+      <div class="row" style="justify-content:space-between"><h1>${esc(fullName(S.me))}</h1><button class="btn sec small" data-act="edit">Изменить ответы</button></div>
       <p class="muted">Это ответы из анкеты. Их видите вы и координатор — по ним мы подбираем занятия.</p>
       <div class="card stack" style="gap:24px">${answersHtml(S.me)}</div>
     </div></main>`;
@@ -416,13 +490,15 @@
     const flags = c => {
       const out = [];
       if (arr(c.physical).some(x => !/^Нет/.test(x))) out.push('<span class="badge">💪 физ. помощь</span>');
-      if (c.horizon === "От полугода") out.push('<span class="badge ok">от полугода</span>');
+      if (/^Постоянно/.test(c.participation || "")) out.push('<span class="badge ok">постоянно</span>');
+      if (/^Разово/.test(c.participation || "")) out.push('<span class="badge">разово</span>');
+      if (age(c.birthdate) != null && age(c.birthdate) < 18) out.push('<span class="badge draft">16–17 лет</span>');
       if (arr(c.comfort).length) out.push('<span class="badge wait">доступность</span>');
       if (c.record === "Хочу сначала обсудить") out.push('<span class="badge draft">справка?</span>');
       return out.join("");
     };
     const detail = sel ? `<aside class="card stack" style="gap:16px">
-        <div class="row" style="justify-content:space-between"><h2>${esc(sel.name)}</h2><a href="#/coord" class="ghost" style="text-decoration:none">Закрыть</a></div>
+        <div class="row" style="justify-content:space-between"><h2>${esc(fullName(sel))}</h2><a href="#/coord" class="ghost" style="text-decoration:none">Закрыть</a></div>
         <div class="row"><span class="badge ${statusOf(sel)[1]}">${esc(statusOf(sel)[0])}</span>${flags(sel)}</div>
         <dl class="answers">
           <dt>Онбординг</dt><dd>${sel.progress.modules} из ${ONB.modules.length} шагов</dd>
@@ -444,11 +520,11 @@
         <div class="filters">${f("all", "Все")}${f("new", "Новые заявки")}${f("learn", "Учатся")}${f("ready", "Ждут записи")}${f("meet", "Записаны")}</div>
         <div class="cols">
           <div class="tablewrap"><table class="table">
-            <thead><tr><th>Кандидат</th><th>Направления</th><th>Когда</th><th>Статус</th></tr></thead>
+            <thead><tr><th>Кандидат</th><th>Роли</th><th>Когда</th><th>Статус</th></tr></thead>
             <tbody>${shown.map(c => `<tr data-go="#/coord/${c.id}" ${c.id === id ? 'style="background:var(--heart-soft)"' : ""}>
-              <td><b>${esc(c.name)}</b>${c.you ? ' <span class="badge hot you">ваша анкета</span>' : ""}<br><span class="muted" style="font-size:.8rem">${esc(c.area || "")} · ${fmtDate(c.submittedAt)}</span></td>
-              <td>${esc(arr(c.directions).map(d => d.split(":")[0]).join(", "))}<div class="flags" style="margin-top:4px">${flags(c)}</div></td>
-              <td>${esc(arr(c.slots).join(", ").replace(/·/g, " "))}<br><span class="muted" style="font-size:.8rem">${esc(c.regularity || "")}</span></td>
+              <td><b>${esc(fullName(c))}</b>${c.you ? ' <span class="badge hot you">ваша анкета</span>' : ""}<br><span class="muted" style="font-size:.8rem">${esc(c.area || "")} · ${fmtDate(c.submittedAt)}</span></td>
+              <td>${esc(arr(c.roles).slice(0, 2).join(", "))}${arr(c.roles).length > 2 ? ` <span class="muted">+${arr(c.roles).length - 2}</span>` : ""}<div class="flags" style="margin-top:4px">${flags(c)}</div></td>
+              <td>${esc(arr(c.slots).join(", ").replace(/·/g, " "))}</td>
               <td><span class="badge ${statusOf(c)[1]}">${esc(statusOf(c)[0])}</span></td></tr>`).join("") || `<tr><td colspan="4" class="muted">Никого в этом статусе</td></tr>`}</tbody>
           </table></div>
           ${detail}
@@ -488,16 +564,17 @@
     else if (act === "submit") {
       e.preventDefault();
       if (!stepCheck()) return;
+      const derived = { name: fullName(Object.assign({}, S.draft, { name: "" })), directions: roleGroups(S.draft.roles) };
       if (S.editing) {
-        S.me = Object.assign({}, S.draft, { submittedAt: S.me.submittedAt });
+        S.me = Object.assign({}, S.draft, derived, { submittedAt: S.me.submittedAt });
         S.draft = {}; S.formStep = 0; S.editing = false;
         save(); go("#/profile"); toast("Ответы обновлены"); return;
       }
-      S.me = Object.assign({}, S.draft, { submittedAt: new Date().toISOString() });
+      S.me = Object.assign({}, S.draft, derived, { submittedAt: new Date().toISOString() });
       S.draft = {}; S.formStep = 0; S.done = {}; S.test = { best: null, attempts: 0 }; S.run = null; S.meeting = null; S.sent = {};
       save(); go("#/sent"); scrollTo(0, 0);
     }
-    else if (act === "quick") { S.me = Object.assign({}, DEMO[0], { id: undefined, progress: undefined, name: "Анна Соколова", email: "anna@example.com", submittedAt: new Date().toISOString() }); save(); render(); }
+    else if (act === "quick") { S.me = Object.assign({}, DEMO[0], { id: undefined, progress: undefined, firstName: "Анна", lastName: "Соколова", name: "Анна Соколова", email: "anna@example.com", submittedAt: new Date().toISOString() }); save(); render(); }
     else if (act === "done") {
       S.done[b.dataset.id] = true; save();
       const i = ONB.modules.findIndex(m => m.id === b.dataset.id), nxt = ONB.modules[i + 1];
