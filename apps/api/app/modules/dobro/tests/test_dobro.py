@@ -176,12 +176,15 @@ async def test_carry_applied_approval_concurrency_idempotency_and_negative_corre
 @pytest.mark.asyncio
 async def test_states_link_overlap_url_validation_scope_and_current_revoke(world):
     opportunity, activity = await link_fixture(world)
-    _, _, series = await fact_fixture(world, opportunity, '2026-08-04', 120)
+    assignment, _, series = await fact_fixture(world, opportunity, '2026-08-04', 120)
     own = world[3]
     assert (await post(own, f"/me/dobro-enrollments/{activity['id']}", {'state':'approved','expected_version':0})).status_code == 409
     state = await enroll(world, activity, 'not_needed')
     view = await period(world)
     assert view['groups'][0]['rows'][0]['state'] == 'not_needed' and view['total_hours_due'] == 0
+    async with world[1]() as db:
+        assert (await db.get(Assignment, assignment.id)).status == 'confirmed'
+        assert await db.scalar(select(func.sum(ServiceTimeEntry.delta_minutes))) == 120
     state = await enroll(world, activity, 'none', state['version'])
     await enroll(world, activity, expected=state['version'])
     overlap = await post(world[2], f'/fund/opportunities/{opportunity.id}/dobro', {'title':'Пересечение','url':'https://dobro.ru/event/3','kind':'long_term','valid_from':'2026-12-31','valid_until':'2027-01-01'})
@@ -288,6 +291,7 @@ async def test_opt_in_reminders_real_worker_source_replay_and_revocation(world):
         await complete(db, job.id, job.claim_token, {'state':state})
         await db.commit()
         assert await db.scalar(select(func.count()).select_from(Message)) == 1
+
     # Already queued source resolution checks current grants again, not the grant
     # snapshot that was present when the scheduler ran.
     async with world[1]() as db:
@@ -304,3 +308,30 @@ async def test_opt_in_reminders_real_worker_source_replay_and_revocation(world):
         await complete(db, job.id, job.claim_token, {'state':suppressed})
         await db.commit()
         assert await db.scalar(select(func.count()).select_from(Message)) == 1
+
+@pytest.mark.asyncio
+async def test_own_export_is_scoped_and_excludes_staff_notes_and_snapshots(world):
+    import json
+    from app.modules.dobro.data_export import own_export_section
+    from app.modules.dobro.models import DobroProfile
+    opportunity, activity = await link_fixture(world)
+    await fact_fixture(world, opportunity, '2026-08-07', 125)
+    await enroll(world, activity)
+    view = await period(world)
+    body = mark_body(view, view['groups'][0]['rows'][0], activity['id'], note='PRIVATE_COORDINATOR_NOTE_NOT_FOR_EXPORT')
+    assert (await post(world[2], '/fund/integrations/dobro/transfers/mark-entered', body)).status_code == 200
+    async with world[1]() as db:
+        stranger = User(foundation_id=world[4].foundation_id, display_name='STRANGER_DISPLAY_NAME')
+        db.add(stranger)
+        await db.flush()
+        db.add(DobroProfile(user_id=stranger.id, foundation_id=world[4].foundation_id, profile_url='https://dobro.ru/volunteers/999999', updated_by=world[4].actor_id))
+        await db.commit()
+    async with world[1]() as db:
+        exported = await own_export_section(db, world[5])
+    encoded = json.dumps(exported, ensure_ascii=False)
+    assert exported['current']['total_minutes'] == 125
+    assert exported['current']['entered_hours'] == 2
+    assert len(exported['transfers']) == 1 and exported['transfers'][0]['hours_delta'] == 2
+    assert 'PRIVATE_COORDINATOR_NOTE_NOT_FOR_EXPORT' not in encoded
+    assert 'STRANGER_DISPLAY_NAME' not in encoded and '/volunteers/999999' not in encoded
+    assert 'snapshot_hash' not in encoded and 'actor_id' not in encoded

@@ -10,7 +10,7 @@ from .service import own_view, user
 async def own_export_section(db, principal):
     own = await user(db, principal)
     current = await own_view(db, principal)
-    rows = (await db.scalars(select(DobroEnrollment).where(DobroEnrollment.foundation_id == principal.foundation_id, DobroEnrollment.user_id == own.id).order_by(DobroEnrollment.created_at if hasattr(DobroEnrollment, 'created_at') else DobroEnrollment.updated_at, DobroEnrollment.id))).all()
+    rows = (await db.scalars(select(DobroEnrollment).where(DobroEnrollment.foundation_id == principal.foundation_id, DobroEnrollment.user_id == own.id).order_by(DobroEnrollment.updated_at, DobroEnrollment.id))).all()
     enrollment_ids = [row.id for row in rows]
     events = (await db.scalars(select(DobroEnrollmentEvent).where(DobroEnrollmentEvent.enrollment_id.in_(enrollment_ids)).order_by(DobroEnrollmentEvent.created_at, DobroEnrollmentEvent.version))).all() if enrollment_ids else []
     transfers = (await db.scalars(select(DobroTransfer).where(DobroTransfer.foundation_id == principal.foundation_id, DobroTransfer.user_id == own.id).order_by(DobroTransfer.entered_at, DobroTransfer.id))).all()
