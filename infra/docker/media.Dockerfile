@@ -29,4 +29,4 @@ RUN pip install -r requirements.lock && pip install --no-deps . \
     && chmod 0700 /var/lib/opora/assets
 USER 10001:10001
 # Source-controlled kinds only. Ordinary outbox/AI jobs run in other workers.
-CMD ["python", "-m", "app.worker.main", "--kind", "slides.convert", "--kind", "recording.capture"]
+CMD ["python", "-m", "app.worker.main", "--kind", "slides.convert", "--kind", "recording.capture", "--kind", "followups.audio"]

@@ -21,13 +21,29 @@ configured runtime release. PostgreSQL, API, web and optional dev inbox ports bi
 loopback. The one-shot migration service must succeed before API/worker start.
 Do not add fixtures to migrations. The default development inbox is a database
 outbox sink; `dev_inbox` proves only local capture. Optional Mailpit can be started
-with `--profile delivery-dev` for a later SMTP adapter. Mailpit does not configure
+with `--profile delivery-dev` for the local SMTP adapter. Mailpit does not configure
 or prove email delivery by itself. AI/RTC/external delivery remain unavailable
 until adapters and credentials are configured and tested.
 
-`docker compose --env-file infra/.env -f infra/compose.yaml logs migrate api worker`
+`docker compose --env-file infra/.env -f infra/compose.yaml logs migrate api worker io-worker`
 shows startup issues without HTTP payload/access logs. `down` preserves the
 PostgreSQL and private-asset volumes. `down -v` destroys local data and is not part of validation.
+
+The supplied workers use explicit bounded job lists. `worker` handles only
+`outbox.deliver`; `io-worker` handles `studio.close`, `studio.revoke`,
+`studio.reconcile_participant`, `knowledge.index`, `knowledge.ingest`,
+`ai.generate` and `reporting.digest`. The opt-in media overlay handles
+`slides.convert`, `recording.capture` and `followups.audio`. Its media tools and
+acceptance gates are documented in [media-runtime.md](media-runtime.md).
+
+Provider settings are passed from the same private environment to API and the
+workers that need them: `OPORA_AI_BASE_URL/API_KEY/MODEL/TRANSCRIPTION_MODEL`,
+`OPORA_AI_ENABLED`, the `OPORA_RTC_*` settings, and the shared
+`OPORA_SECRET_KEY`. The API and media worker receive capture opt-in/origin;
+only the media image has the executable Chrome path. SMTP settings are passed to
+the outbox worker. Defaults keep AI/capture disabled, RTC unconfigured and email
+in the explicit development inbox. Setting a URL alone is not provider
+acceptance. Do not print expanded environment/configuration with credentials.
 
 ## Native PostgreSQL (Docker unavailable)
 

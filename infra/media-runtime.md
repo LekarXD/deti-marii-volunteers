@@ -23,8 +23,9 @@ older kernel deliberately returns unavailable.
   capture/encode and slide-conversion processes. Canonical `packages/studio-core`
   schemas accompany the API source. The web image must separately copy/build
   `apps/web/recorder.html`, including its canonical Stage assets, as a Vite entry.
-- Only `slides.convert` and `recording.capture` are claimed. The default worker
-  retains `outbox.deliver`; no media kind is added to its environment.
+- Only `slides.convert`, `recording.capture` and `followups.audio` are claimed.
+  The default worker retains `outbox.deliver`; the separate I/O worker receives
+  only registered I/O kinds. No media kind joins either API-image worker.
 - UID/GID 10001 matches private-asset ownership in the API image. Assets share the
   existing private volume; the read-only root filesystem has bounded private
   temporary/home mounts, 1GiB shared memory and explicit CPU/memory/PID limits.

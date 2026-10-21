@@ -23,12 +23,21 @@ services:
       OPORA_DATABASE_URL: postgresql+psycopg://opora:${OPORA_POSTGRES_PASSWORD}@postgres:5432/opora
       OPORA_RELEASE: ${OPORA_RELEASE:-development}
       OPORA_ASSET_ROOT: /var/lib/opora/assets
+      OPORA_SECRET_KEY: ${OPORA_SECRET_KEY:-development-only-set-OPORA_SECRET_KEY}
+      OPORA_AI_BASE_URL: ${OPORA_AI_BASE_URL:-}
+      OPORA_AI_API_KEY: ${OPORA_AI_API_KEY:-}
+      OPORA_AI_MODEL: ${OPORA_AI_MODEL:-}
+      OPORA_AI_TRANSCRIPTION_MODEL: ${OPORA_AI_TRANSCRIPTION_MODEL:-}
+      OPORA_AI_ENABLED: ${OPORA_AI_ENABLED:-false}
       OPORA_CAPTURE_ENABLED: ${OPORA_CAPTURE_ENABLED:-false}
       OPORA_CAPTURE_RENDERER_URL: ${OPORA_CAPTURE_RENDERER_URL:-}
       OPORA_RTC_URL: ${OPORA_RTC_URL:-}
       OPORA_RTC_PUBLIC_URL: ${OPORA_RTC_PUBLIC_URL:-}
       OPORA_RTC_API_KEY: ${OPORA_RTC_API_KEY:-}
       OPORA_RTC_API_SECRET: ${OPORA_RTC_API_SECRET:-}
+      OPORA_RTC_DEPLOYMENT: ${OPORA_RTC_DEPLOYMENT:-self_hosted}
+      OPORA_RTC_BOARD_URL: ${OPORA_RTC_BOARD_URL:-}
+      OPORA_RTC_BOARD_SECRET: ${OPORA_RTC_BOARD_SECRET:-}
     volumes: ["asset-data:/var/lib/opora/assets"]
     depends_on:
       migrate: {condition: service_completed_successfully}
