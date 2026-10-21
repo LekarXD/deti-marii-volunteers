@@ -3,6 +3,9 @@
 set -eu
 cd "$(dirname "$0")/../.."
 : "${OPORA_DATABASE_URL:?point OPORA_DATABASE_URL at a disposable local or CI PostgreSQL DB}"
+: "${OPORA_TEST_DATABASE_URL:?set a separate disposable domain DB URL with a name ending _test}"
+: "${OPORA_LEARNING_TEST_DATABASE_URL:?set the dedicated opora_learning_test database URL}"
+: "${OPORA_PARTICIPANTS_TEST_DATABASE_URL:?set the dedicated opora_participants_test database URL}"
 case "$OPORA_DATABASE_URL" in postgresql+psycopg://*) ;; *) echo 'A real PostgreSQL database is required' >&2; exit 2 ;; esac
 export PYTHONPATH="$PWD/apps/api${PYTHONPATH:+:$PYTHONPATH}"
 (
@@ -14,5 +17,5 @@ export PYTHONPATH="$PWD/apps/api${PYTHONPATH:+:$PYTHONPATH}"
 pnpm typecheck
 pnpm build
 pnpm test
-python3 -m pytest -c apps/api/pyproject.toml apps/api/tests tests/contract -q
+python3 -m pytest -p infra.pytest_gate -c apps/api/pyproject.toml apps/api/tests tests/contract -q
 sh infra/scripts/check-openapi.sh

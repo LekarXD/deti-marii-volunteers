@@ -420,3 +420,26 @@ def test_verified_login_claims_only_own_registration_and_keeps_history(candidate
     assert stranger.read("/me/interviews") == []
     revoked = candidate.http.get("/api/v1/me/application", headers={"Cookie": f"opora_session={old_cookie}"})
     assert revoked.status_code == 401
+
+
+def test_migrated_global_reservation_blocks_interview_without_partial_booking(candidate, staff, postgres):
+    submit(candidate)
+    selected = slots(staff, candidate)[0]
+    reservation = str(uuid4())
+    session = candidate.session
+    owner_key = f"user:{session['user_id']}" if session["user_id"] else f"registration:{session['registration_id']}"
+    try:
+        with postgres.cursor() as cursor:
+            cursor.execute("""INSERT INTO resource_reservations
+                (id,created_at,foundation_id,user_id,registration_id,owner_key,source_type,source_id,starts_at,busy_until,active)
+                VALUES (%s,now(),%s,%s,%s,%s,'assignment',%s,%s,%s,true)""",
+                (reservation, session["foundation_id"], session["user_id"], session["registration_id"],
+                 owner_key, str(uuid4()), selected["starts_at"], selected["ends_at"]))
+        denied = candidate.request("POST", "/interviews", {"slot_id": selected["id"], "slot_version": selected["version"]})
+        assert denied.status_code == 409
+        assert candidate.read("/me/interviews") == []
+        with postgres.cursor() as cursor:
+            cursor.execute("SELECT count(*) FROM resource_reservations WHERE owner_key=%s AND source_type='interview_candidate'", (owner_key,))
+            assert cursor.fetchone()[0] == 0
+    finally:
+        postgres.execute("DELETE FROM resource_reservations WHERE id=%s", (reservation,))
