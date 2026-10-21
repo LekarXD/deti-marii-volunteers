@@ -68,3 +68,25 @@ async def test_due_digest_is_idempotent_and_delivery_rechecks_revocation(env):
             await db.rollback()
     finally:
         for client in (owner,recipient):await client.aclose()
+
+@pytest.mark.asyncio
+async def test_delivery_rebuilds_real_metrics_without_cached_numbers(env):
+    from app.modules.reporting.tests.test_reporting import fixture_facts
+    app,factory=env;facts=await fixture_facts(app,factory);owner=facts['coord'];recipient=await staff(app,factory,('reports.read',));op=await principal(owner,factory);rp=await principal(recipient,factory)
+    try:
+        await factor(factory,op.user_id);await factor(factory,rp.user_id)
+        response=await save(owner,dict(expected_version=0,enabled=True,recipient_ids=[str(rp.user_id)],weekday=0,minute_of_day=540,timezone='Europe/Moscow'));assert response.status_code==200,response.text
+        due=utcnow()-timedelta(seconds=1)
+        async def fence(db):pass
+        context=SimpleNamespace(foundation_id=op.foundation_id,payload=dict(schedule_id=response.json()['id'],version=1,scheduled_for=due.isoformat()),fence=fence)
+        async with factory() as db:
+            schedule=await db.get(ReportDigestSchedule,UUID(response.json()['id']));schedule.next_run_at=due;await db.commit()
+            assert (await run_digest(db,context))['queued']==1;await db.commit()
+            outbox=await db.scalar(select(OutboxMessage));payload=json.loads(unseal(outbox.payload_cipher));payload['text']='Cached invented 99999 minutes';payload['subject']='Invented'
+            assert await deliver_internal(db,outbox,payload)=='delivered';await db.flush()
+            message=await db.scalar(select(Message).where(Message.source_outbox_id==outbox.id));assert '225 минут' in message.text and '99999' not in message.text and 'Волонтёров: 2' in message.text
+            assert await deliver_internal(db,outbox,payload)=='delivered'
+            assert await db.scalar(select(func.count()).select_from(Message).where(Message.source_outbox_id==outbox.id))==1
+            await db.rollback()
+    finally:
+        for client in (facts['first'],facts['second'],owner,recipient):await client.aclose()
