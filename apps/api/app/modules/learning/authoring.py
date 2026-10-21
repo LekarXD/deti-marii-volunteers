@@ -49,7 +49,8 @@ async def author_lesson(db, principal, lesson_id):
     permission(principal, "learning.read")
     value = await lesson(db, principal, lesson_id)
     draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == value.id))
-    return dict(id=value.id, track_id=value.track_id, key=value.key, current_version_id=value.current_version_id, publication_revision=value.publication_revision, archived=value.archived, draft=draft_view(draft))
+    published = await db.get(LessonVersion, value.current_version_id) if value.current_version_id else None
+    return dict(id=value.id, title=draft.title if draft else published.title if published else value.key, track_id=value.track_id, key=value.key, current_version_id=value.current_version_id, publication_revision=value.publication_revision, archived=value.archived, draft=draft_view(draft))
 
 
 async def track_view(db, principal, track_id):
@@ -415,3 +416,15 @@ async def preview_quiz(db, principal, lesson_id, block_position, question_index,
     if selected_option >= len(question.get("o", [])):
         raise ApiError(422, "invalid_option", "Выберите вариант ответа")
     return dict(correct=selected_option == question.get("a"), explanation=question.get("e", ""))
+
+
+async def archive_lesson(db, principal, lesson_id, expected_revision):
+    permission(principal, "learning.publish")
+    current = await lesson(db, principal, lesson_id)
+    parent = await track(db, principal, current.track_id, lock=True)
+    current = await lesson(db, principal, lesson_id, lock=True)
+    check_version(current.publication_revision, expected_revision)
+    current.archived = True
+    current.publication_revision += 1
+    parent.version += 1
+    return await author_lesson(db, principal, current.id)

@@ -164,6 +164,7 @@ class AssessmentDraftView(BaseModel):
 
 class AuthorLessonView(BaseModel):
     id: UUID
+    title: str
     track_id: UUID
     key: str
     current_version_id: UUID | None
