@@ -1,0 +1,21 @@
+{
+  "commit": "16f885025046201d15673e774066c2bda1b0d282",
+  "branch": "codex/interview-journey-ux",
+  "date": "2026-10-21",
+  "purpose": "Current visual and interaction reference explicitly supplied by user. Prototype data storage is not a backend implementation.",
+  "supersedes": "Older screenshots and interim layout reports for navigation, calendar, shift editor and event card.",
+  "review_status": "Source screenshot and interaction specification inspected. React implementation and common CUA acceptance in progress in separate design agent.",
+  "files": {
+    "prototype/Planning.dc.html": "f04bd53a0c733d39a91b43e589db1d6b52f221dace67d5c62c50a7ac0b470ecc",
+    "prototype-src/Planning.body.html": "b8b1a7b9c972a24edb76d4224b3be383f6af40ccc201a8e738b72ed23678811b",
+    "prototype-src/Planning.css": "c277cca306dce6170eb99f2b3928290e829a09158499451cfb91cb83d3ea7da5",
+    "prototype-src/Planning.js": "d5e8b1489de8b54bd36aeebd2b342b47d7768e27231bec8c34b2d5b2a9afe25d",
+    "prototype-src/Planning.controls.js": "56c51d4e02ba7b2be8e6c9c22d095f8b4b244d750f6bc9627bccec3241b2f017",
+    "prototype-src/extensions.css": "f843ed0a07c0b74ad537d3af7d5d32b628cc398beabbdc892c1a010034695cae",
+    "prototype-src/Event.html": "279a94377a45bd7459e179ac90edd9587a37c7807b5fd70cac5869e8058c7895",
+    "prototype-src/coordinator-nav.js": "4d0f0acf3f80565ae2b8a3aec099fbdc32bac157a17977cca3dbd013203dc4ad",
+    "scripts/coordinator_layout.py": "41f39fdcf0af151b28a760f2ad39ae68106e540c4aaa91a03900ac621d34b2f2",
+    "prototype/qa/planning-weekly/README.md": "862d41bd19ad32a792e8cb9fd19969520337446b69a8329b4f4ead01409f0a4c",
+    "prototype/qa/planning-weekly/desktop-final.png": "7283d9fac1d5cf94b29e98a980420003abad9aba4a6189907bab75e30152c9da"
+  }
+}

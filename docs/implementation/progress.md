@@ -24,16 +24,16 @@
 | P18A | Shared stage подключён | 26 тестов geometry/readiness; CUA desktop и 390px, переключение live/solo и custom layout; это не запись видео |
 | P18B | API и UI подключены | PostgreSQL, реальные PDF/PPTX→JPEG, Yjs/WebSocket и LiveKit signaling проверены; настоящее A/V и браузерная приёмка ещё нужны |
 | P18C/D/E | В работе A1/A2/A7 | Private renderer kernel и approval/publication guard подключены; реальный короткий SharedStage→RTC→private capture→H264/AAC MP4 получен; кабинет solo подключён; смена материалов/recovery/сквозной UI ещё проверяются |
-| P19 | API и экраны отчётов/администрации подключены | PDF/DOCX реально отрендерены и осмотрены; weekly digests, staff scopes и UI проверки; общая CUA приёмка новых экранов ещё нужна; child attendance unknown без отдельного факта |
+| P19 | API и экраны отчётов/администрации подключены | PDF/DOCX реально отрендерены и осмотрены; weekly digests, staff scopes и UI проверки; CUA: черновик → review разделов → подтверждение → реальный PDF download; compact settings desktop/mobile390 и журнал проверяются; child attendance unknown без отдельного факта |
 | P20 | Независимая QA идёт с начала; общий гейт открыт | Полная карта экранов, обе роли, внешние providers/media/staging и точный release SHA ещё не приняты |
 
 ## Проверено на объединённом коде
 
-- Последняя завершённая frontend серия: 173 tests, typecheck и production build. После следующих модулей проверка повторяется по изменённому составу.
-- Расширенная серверная серия на c6e3543: 140 passed, zero skips. Последующие voice/AI/reporting изменения проходят focused PG проверки; полная серия на итоговом SHA ещё нужна. Независимая QA нашла два attendance edge case; владелец исправил их с 7 focused PostgreSQL проверками. Это не доказательство полного P20.
+- Последняя завершённая frontend серия: 211 tests, typecheck и production build. После следующих модулей проверка повторяется по изменённому составу.
+- Расширенная серверная серия на 64f4f88: 183 passed, zero skips; после неё focused gate c5f4b92: 32 passed (capture/worker/publication/digests/summary), audit35ccedf: 6 passed. Последующие voice/AI/reporting изменения проходят focused PG проверки; полная серия на итоговом SHA ещё нужна. Независимая QA нашла два attendance edge case; владелец исправил их с 7 focused PostgreSQL проверками. Это не доказательство полного P20.
 - Дополнительная объединённая серия voice/AI/learning/followups/recordings: 41 passed, zero skips на 978997a; один pytest process с canonical extensions и запретом внешней сети. Физический микрофон и внешний ASR не использовались. Подробности: infra/evidence/voice-ai-learning-integration-2026-10-21.json.
 - G1: 26 обычных HTTP сценариев на API/PostgreSQL (29f5048), без тестовых обходов аутентификации. CUA: вымышленная анкета → запись на 22 октября до знакомства → 4 модуля и тест → координатор видит завершённое знакомство и прежнюю встречу.
-- Native PostgreSQL16 используется в отдельных dev/test кластерах, существующие сервисы и SSH tunnel не изменяются. Миграции dev БД по head18 и `alembic check` прошли.
+- Native PostgreSQL16 используется в отдельных dev/test кластерах, существующие сервисы и SSH tunnel не изменяются. Миграции dev БД по head19 и `alembic check` прошли.
 - Восстановление БД и приватного PNG проверено в отдельном QA кластере; детали и ограничения в `infra/evidence/`. Docker compose config проверен, сами образы/контейнеры не запускались ; выделенный media image готовится отдельно, launch/sandbox proof ещё не получен.
 - CUA screenshots общей сцены сохранены в `infra/evidence/screenshots/`. Камера выключена, все имена/материалы вымышлены.
 
@@ -46,3 +46,9 @@
 ## Оставшиеся контрольные пакеты
 
 Открыты P18C (capture/recovery), P18D (полная приёмка кабинета записи), P18E (сквозная запись → review → publish), P19 (общая браузерная приёмка отчётов/администрации), P20 (финальная сквозная и визуальная приёмка). Наличие реализации не равнозначно приёмке. Voice и AI producer уже интегрированы; их общий регрессионный прогон продолжается.
+
+## Обновление дизайна `16f8850`
+
+По прямому уточнению пользователя текущий интерактивный прототип в `codex/interview-journey-ux` — визуальный эталон. Отдельный агент переносит новую недельную компоновку, редактор, карточку события и общие controls/navigation. Технические агенты продолжают capture/длительную запись, связки и проверки. Старая frontend серия211PASS предшествует этому обновлению; новая визуальная приёмка ещё не заявляется.
+
+CUA: email claim сохранил заявку/встречу/4 завершённых модуля; приватное generated MP4 preview → explicit add to Builder → review → publish прошло. Это синтетический fixture публикации, отдельно от native capture proof. Итоги вымышленного вебинара edit → review → publish → audience preview → send доставлены второму тестовому пользователю через настоящий P17 worker, результат delivered и реальный Message.

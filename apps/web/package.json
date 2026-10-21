@@ -7,7 +7,7 @@
     "dev": "node scripts/sync-studio-assets.mjs && vite --host 127.0.0.1 --port 5174",
     "build": "node scripts/sync-studio-assets.mjs && tsc -b && vite build",
     "typecheck": "tsc -b",
-    "test": "vitest run",
+    "test": "vitest run --maxWorkers=2",
     "storybook": "node scripts/sync-studio-assets.mjs && storybook dev -p 6006 --host 127.0.0.1",
     "build-storybook": "node scripts/sync-studio-assets.mjs && storybook build",
     "assets:studio": "node scripts/sync-studio-assets.mjs"
