@@ -32,6 +32,8 @@ async def run(path):
         # Crucial self-hosted boundary: the PREVIOUS token remains accepted after removal.
         reconnect=await websockets.connect(url(viewer_token),proxy=None,open_timeout=5);sockets.append(reconnect)
         if not await asyncio.wait_for(reconnect.recv(),5):raise RuntimeError('Missing reconnect acknowledgement')
+        participants=await adapter.participants(room)
+        if {p['identity'] for p in participants}!={host,viewer}:raise RuntimeError('Reconnected participant was not acknowledged by provider room state')
         evidence['previously_issued_token_reconnect_accepted']=True
         evidence['strict_revocation_capability']=settings.capabilities().strict_token_revocation
         evidence['provider_version']='1.13.9'
