@@ -146,22 +146,24 @@
   function bindForm() {
     const form = document.getElementById("form");
     if (!form) return;
+    const tgt = () => form.dataset.target === "me" ? S.me : S.draft;
     const rerender = () => { formErrs = {}; render(); };
     form.addEventListener("input", e => {
       const el = e.target, id = el.dataset.f;
       if (!id || el.type === "radio" || el.type === "checkbox") return;
-      S.draft[id] = el.value; save();
+      tgt()[id] = el.value; save();
     });
     form.addEventListener("change", e => {
       const el = e.target, id = el.dataset.f;
       if (!id) return;
-      if (el.hasAttribute("data-consent")) S.draft[id] = el.checked;
-      else if (el.type === "radio") S.draft[id] = el.value;
+      const T = tgt();
+      if (el.hasAttribute("data-consent")) T[id] = el.checked;
+      else if (el.type === "radio") T[id] = el.value;
       else if (el.type === "checkbox") {
-        const set = new Set(arr(S.draft[id]));
+        const set = new Set(arr(T[id]));
         el.checked ? set.add(el.value) : set.delete(el.value);
-        S.draft[id] = [...set];
-      } else if (el.tagName === "SELECT") S.draft[id] = el.value;
+        T[id] = [...set];
+      } else if (el.tagName === "SELECT") T[id] = el.value;
       else return;
       save();
       if (el.type === "radio" || el.type === "checkbox" || el.tagName === "SELECT") rerender();
@@ -169,9 +171,9 @@
     form.addEventListener("click", e => {
       const b = e.target.closest("[data-chip]");
       if (!b) return;
-      const id = b.dataset.chip, set = new Set(arr(S.draft[id]));
+      const id = b.dataset.chip, T = tgt(), set = new Set(arr(T[id]));
       set.has(b.dataset.v) ? set.delete(b.dataset.v) : set.add(b.dataset.v);
-      S.draft[id] = [...set]; save();
+      T[id] = [...set]; save();
       b.setAttribute("aria-pressed", set.has(b.dataset.v));
     });
   }
@@ -296,12 +298,20 @@
           <h1>${esc(m.title)}</h1>
           ${m.draft ? `<p class="draft-note"><b>Черновик.</b> ${esc(m.source)}</p>` : `<p class="muted" style="font-size:.85rem">Источник: ${esc(m.source)}</p>`}
         </div>
-        <div class="blocks">${m.blocks.map(blockHtml).join("")}</div>
+        ${m.form ? matchingHtml() : `<div class="blocks">${m.blocks.map(blockHtml).join("")}</div>`}
         <div class="mod-foot">
           ${i > 0 ? `<a class="btn sec" href="#/learn/${ONB.modules[i - 1].id}">← Назад</a>` : "<span></span>"}
           <button class="btn" data-act="done" data-id="${m.id}">${nxt ? "Понятно, дальше →" : "Понятно, к тесту →"}</button>
         </div>
       </div></main>`;
+  }
+
+  function matchingHtml() {
+    const M = FORM.matching;
+    return `<p class="lead">${esc(M.intro)}</p>
+      <form class="card" id="form" data-target="me" novalidate style="margin-top:20px">
+        ${M.fields.filter(f => visible(f, S.me)).map(f => fieldHtml(f, S.me)).join("")}
+      </form>`;
   }
 
   // ---------- тест ----------
@@ -360,7 +370,7 @@
 
   // ---------- профиль ----------
   function answersHtml(c) {
-    return FORM.steps.map(s => {
+    return FORM.steps.concat(FORM.matching).map(s => {
       const rows = s.fields.filter(f => f.type !== "consent" && visible(f, c)).map(f => {
         let v = c[f.id];
         if (f.type === "chips" && c[f.id + "Other"]) v = arr(v).concat(c[f.id + "Other"]);
