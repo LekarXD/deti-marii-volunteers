@@ -55,6 +55,8 @@ class RtcSettings:
                 raise ApiError(503,"rtc_invalid_configuration","Проверьте конфигурацию видеосвязи.")
         if not 30<=self.join_ttl_seconds<=300:raise ApiError(503,"rtc_invalid_configuration","Проверьте срок действия медиадоступа.")
 
+_SAFE_PROVIDER_CODES=frozenset({'canceled','unknown','invalid_argument','malformed','deadline_exceeded','not_found','bad_route','already_exists','permission_denied','unauthenticated','resource_exhausted','failed_precondition','aborted','out_of_range','unimplemented','internal','unavailable','data_loss'})
+
 class ProviderError(Exception):
     def __init__(self,method,status=None,code="unavailable"):
         self.method,self.status,self.code=method,status,code
@@ -125,7 +127,7 @@ class LiveKitAdapter:
             except ValueError:raise ProviderError(method,response.status_code,"bad_json") from None
             if response.status_code>=400:
                 code=result.get("code") if isinstance(result,dict) else None
-                raise ProviderError(method,response.status_code,code if isinstance(code,str) and len(code)<50 else "provider_failed")
+                raise ProviderError(method,response.status_code,code if isinstance(code,str) and code in _SAFE_PROVIDER_CODES else "provider_failed")
             if not isinstance(result,dict):raise ProviderError(method,response.status_code,"bad_shape")
             return result
         except httpx.HTTPError:raise ProviderError(method,None,"network_error") from None

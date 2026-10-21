@@ -65,3 +65,11 @@ def test_renderer_factory_is_hidden_subscribe_only_and_exact_capture_scope():
     assert json.loads(claims['metadata'])=={'role':'recording_renderer','capture_grant_id':str(grant),'take_id':str(take),'generation':3}
     assert claims['video']=={'room':'opora-private-room','roomJoin':True,'canSubscribe':True,'canPublish':False,'canPublishData':False,'canUpdateOwnMetadata':False,'hidden':True}
     with pytest.raises(ApiError):renderer_token(settings,room='opora-private-room',participant_identity='renderer',capture_grant_id=grant,take_id=take,generation=3,policy=RevocationPolicy(True))
+
+@pytest.mark.asyncio
+async def test_provider_error_cannot_echo_raw_secret_or_url_into_logs():
+    def handler(request):return httpx.Response(503,json={'code':'wss://secret-pass@rtc/private','message':'opaque-secret-token'})
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        with pytest.raises(ProviderError) as failure:await LiveKitAdapter(configured(),client).participants('room')
+        assert failure.value.code=='provider_failed'
+        assert 'secret' not in str(failure.value) and 'rtc/private' not in str(failure.value)
