@@ -23,7 +23,7 @@ function Test({assignment}:{assignment:Assignment}) {
   async function start() {
     // Clear the previous result immediately; the active attempt is server-owned.
     setStarting(true);setQuestionIndex(0);
-    try { const result=await command.mutateAsync({path:`/assessments/${assignment.assessment_version_id}/attempts`,body:{}}) as Attempt;setLocalId(result.id); }
+    try { const result=await command.mutateAsync({path:`/assessments/${assignment.assessment_version_id}/attempts`,body:{assignment_id:assignment.id}}) as Attempt;setLocalId(result.id); }
     finally {setStarting(false);}
   }
   async function pick(selected:number) {

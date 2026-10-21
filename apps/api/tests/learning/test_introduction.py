@@ -256,3 +256,11 @@ async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
     assert rolled.status_code == 200 and rolled.json()['current_release_id']==release_id
     archived = await post(client, f"/coord/learning/tracks/{track['id']}/archive", {'expected_version':rolled.json()['version']})
     assert archived.status_code == 200 and archived.json()['archived'] is True
+    # Even a previously successful receipt must not reveal draft data after revoke.
+    from sqlalchemy import delete
+    async with factory() as db:
+        await db.execute(delete(PermissionGrant).where(PermissionGrant.membership_id == membership.id, PermissionGrant.permission == 'learning.read'))
+        await db.commit()
+    revoked_replay = await post(client, f"/coord/learning/tracks/{track['id']}/publish", publish, key='publish-fixture')
+    assert revoked_replay.status_code == 403
+

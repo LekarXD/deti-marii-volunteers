@@ -359,6 +359,14 @@ async def rollback_release(db, principal, track_id, release_id, expected_version
         stable = await lesson(db, principal, version.lesson_id, lock=True)
         stable.current_version_id = version.id
         stable.publication_revision += 1
+        draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == stable.id).with_for_update())
+        if draft:
+            draft.status, draft.reviewed_by = "draft", None
+            draft.version += 1
+    assessment = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == parent.id).with_for_update())
+    if assessment:
+        assessment.status, assessment.reviewed_by = "draft", None
+        assessment.version += 1
     return await track_view(db, principal, track_id)
 
 

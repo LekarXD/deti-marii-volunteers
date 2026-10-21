@@ -21,6 +21,10 @@ class AcknowledgeInput(Command):
     assignment_id: UUID
 
 
+class StartAttemptInput(Command):
+    assignment_id: UUID | None = None
+
+
 class EmptyCommand(Command):
     pass
 

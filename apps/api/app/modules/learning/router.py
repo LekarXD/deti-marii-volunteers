@@ -8,13 +8,27 @@ from app.core.audit import audit
 from app.core.db import get_db
 from app.core.idempotency import begin_command, finish_command
 from . import service
-from .schemas import AcknowledgeInput, AnswerInput, AssignmentView, AttemptView, EmptyCommand, FeedbackView, LessonView, MiniQuizInput, PreparationView, ProgressInput
+from .schemas import AcknowledgeInput, StartAttemptInput, AnswerInput, AssignmentView, AttemptView, EmptyCommand, FeedbackView, LessonView, MiniQuizInput, PreparationView, ProgressInput
 
 router = APIRouter(prefix="/api/v1", tags=["learning"])
 
 
 async def command(db, principal, request, key, operation, payload, action):
     await authz_guard(db, principal)
+    # Replayed receipts must pass fresh permissions too: authoring results contain
+    # private draft content and answer keys, so never short-circuit revoked reads.
+    author_actions = {
+        "learning.create_track": "learning.write", "learning.create_lesson": "learning.write",
+        "learning.begin_edit": "learning.write", "learning.save_draft": "learning.write",
+        "learning.review": "learning.write", "learning.save_assessment": "learning.write",
+        "learning.review_assessment": "learning.write", "learning.assign": "learning.write",
+        "learning.validate": "learning.read", "learning.preview_quiz": "learning.read",
+        "learning.publish": "learning.publish", "learning.rollback": "learning.publish",
+        "learning.archive": "learning.publish", "learning.archive_lesson": "learning.publish",
+    }
+    if operation in author_actions:
+        authoring.permission(principal, "learning.read")
+        authoring.permission(principal, author_actions[operation])
     previous = await begin_command(db, principal, operation, key, payload)
     if previous is not None:
         await db.commit()
@@ -60,8 +74,8 @@ async def acknowledge(body: AcknowledgeInput, request: Request, principal: Princ
 
 
 @router.post("/assessments/{version_id}/attempts", response_model=AttemptView)
-async def start_attempt(version_id: UUID, body: EmptyCommand, request: Request, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db), key: str | None = Header(None, alias="Idempotency-Key")):
-    return await command(db, principal, request, key, "learning.start_attempt", {"id": str(version_id)}, lambda: service.start_attempt(db, principal, version_id))
+async def start_attempt(version_id: UUID, body: StartAttemptInput, request: Request, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db), key: str | None = Header(None, alias="Idempotency-Key")):
+    return await command(db, principal, request, key, "learning.start_attempt", {"id": str(version_id), **body.model_dump(mode="json")}, lambda: service.start_attempt(db, principal, version_id, body.assignment_id))
 
 
 @router.post("/assessment-attempts/{attempt_id}/answers", response_model=FeedbackView)

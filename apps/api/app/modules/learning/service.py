@@ -135,8 +135,11 @@ async def attempt_view(db: AsyncSession, principal: Principal, attempt_id: UUID,
     return item, dict(id=item.id, title=assessment.title, intro=assessment.intro, assignment_id=item.assignment_id, assessment_version_id=item.assessment_version_id, state="submitted" if item.submitted_at else "active", questions=[dict(id=q.id, prompt=q.prompt, options=q.options) for q in qs], answers=[dict(question_id=a.question_id, selected_option=a.selected_option, correct=a.selected_option == by_id[a.question_id].correct_option, explanation=by_id[a.question_id].explanation) for a in answers], score=item.score if item.submitted_at else None, total=len(qs))
 
 
-async def start_attempt(db: AsyncSession, principal: Principal, version_id: UUID):
-    item = await db.scalar(select(LearningAssignment).join(LearningRelease).where(LearningAssignment.foundation_id == principal.foundation_id, owner_scope(principal), LearningRelease.assessment_version_id == version_id).order_by(LearningAssignment.assigned_at.desc(), LearningAssignment.id.desc()).limit(1).with_for_update(of=LearningAssignment))
+async def start_attempt(db: AsyncSession, principal: Principal, version_id: UUID, assignment_id: UUID | None = None):
+    query = select(LearningAssignment).join(LearningRelease).where(LearningAssignment.foundation_id == principal.foundation_id, owner_scope(principal), LearningRelease.assessment_version_id == version_id).order_by(LearningAssignment.assigned_at.desc(), LearningAssignment.id.desc()).limit(1).with_for_update(of=LearningAssignment)
+    if assignment_id is not None:
+        query = query.where(LearningAssignment.id == assignment_id)
+    item = await db.scalar(query)
     if item is None:
         raise ApiError(404, "assessment_not_found", "Тест не найден")
     active = await db.scalar(select(AssessmentAttempt).where(AssessmentAttempt.assignment_id == item.id, AssessmentAttempt.submitted_at.is_(None)))
