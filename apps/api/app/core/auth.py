@@ -87,7 +87,7 @@ async def issue_session(db, response, *, user_id=None, registration_id=None, mfa
     session = Session(foundation_id=settings.foundation_id, token_hash=digest(token), csrf_hash=digest(csrf), csrf_cipher=seal(csrf), user_id=user_id, registration_id=registration_id, expires_at=utcnow()+timedelta(hours=settings.session_hours), mfa_at=mfa_at)
     db.add(session)
     await db.flush()
-    response.set_cookie("opora_session", token, httponly=True, secure=settings.cookie_secure, samesite="lax", max_age=settings.session_hours*3600, path="/")
+    response.set_cookie("opora_session", token, httponly=True, secure=settings.cookie_secure, samesite="lax", max_age=settings.session_hours*3600, path=settings.app_mount_prefix or "/")
     return session, csrf
 
 async def session_view(db, session):

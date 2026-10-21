@@ -14,9 +14,9 @@ const send=value=>process.stdout.write(JSON.stringify(value)+'\n');
  let browser,instance,dispose,capture;
  try{
   let config=await next();if(!config||config.command!=='initialize'||typeof config.ticket!=='string')throw Error();
-  const target=trustedRendererUrl(config.url,{development:config.development===true});
+  const target=trustedRendererUrl(config.url,{development:config.development===true,mountPrefix:config.mount_prefix||''});
   instance=await launchIsolated(chromium,config.chrome);browser=instance.browser;activeBrowser=browser;activeServer=instance.server;
-  await installRequestBoundary(instance.context,instance.page,target.href,config.provider_url);
+  await installRequestBoundary(instance.context,instance.page,target.href,config.provider_url,{development:config.development===true,mountPrefix:config.mount_prefix||''});
   dispose=await installBootstrapBinding(instance.context,instance.page,target,config.ticket);config.ticket='';
   await instance.page.goto(target.href,{waitUntil:'domcontentloaded',timeout:20000});send({event:'loaded'});
   const start=await next();if(!start||start.command!=='capture')throw Error();

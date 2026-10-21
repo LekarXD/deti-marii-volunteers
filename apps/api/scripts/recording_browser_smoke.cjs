@@ -5,15 +5,16 @@ const {chromium}=require(process.env.OPORA_CAPTURE_PLAYWRIGHT_MODULE||'playwrigh
 const {trustedRendererUrl,installBootstrapBinding,launchIsolated,closeIsolated,installRequestBoundary,captureOwnTab}=require('../app/modules/recordings/browser_capture.cjs');
 (async()=>{
  const fixtureTicket='synthetic-fixture-ticket-'+require('node:crypto').randomBytes(32).toString('base64url');
+ const mountPrefix=process.env.OPORA_CAPTURE_SMOKE_MOUNT_PREFIX||'';
  let authRequests=0,thirdPartyRequests=0;
  const thirdParty=http.createServer((request,response)=>{thirdPartyRequests++;response.end('denied fixture');});await new Promise(resolve=>thirdParty.listen(0,'127.0.0.1',resolve));
- const server=http.createServer((request,response)=>{if(request.url.startsWith('/api/'))authRequests++;response.setHeader('Content-Type','text/html');response.end('<!doctype html><title>Кадр записи — Опора</title><body style="margin:0;overflow:hidden;background:#f6f3eb"><canvas width="1920" height="1080"></canvas><script>const canvas=document.querySelector("canvas"),ctx=canvas.getContext("2d");let n=0;setInterval(()=>{ctx.fillStyle="#f6f3eb";ctx.fillRect(0,0,1920,1080);ctx.fillStyle="#496352";ctx.font="72px sans-serif";ctx.fillText("Synthetic private tab "+n++,120,300)},40);const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.frequency.value=440;g.gain.value=.05;const dst=a.createMediaStreamDestination();o.connect(g).connect(dst);o.start();const audio=document.createElement("audio");audio.dataset.trackId="synthetic-audio";audio.srcObject=dst.stream;audio.autoplay=true;document.body.append(audio);</script>');});
+ const server=http.createServer((request,response)=>{if(request.url.includes('/api/'))authRequests++;response.setHeader('Content-Type','text/html');response.end('<!doctype html><title>Кадр записи — Опора</title><body style="margin:0;overflow:hidden;background:#f6f3eb"><canvas width="1920" height="1080"></canvas><script>const canvas=document.querySelector("canvas"),ctx=canvas.getContext("2d");let n=0;setInterval(()=>{ctx.fillStyle="#f6f3eb";ctx.fillRect(0,0,1920,1080);ctx.fillStyle="#496352";ctx.font="72px sans-serif";ctx.fillText("Synthetic private tab "+n++,120,300)},40);const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.frequency.value=440;g.gain.value=.05;const dst=a.createMediaStreamDestination();o.connect(g).connect(dst);o.start();const audio=document.createElement("audio");audio.dataset.trackId="synthetic-audio";audio.srcObject=dst.stream;audio.autoplay=true;document.body.append(audio);</script>');});
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  let browser,instance,dispose;
  try{
   instance=await launchIsolated(chromium,process.env.OPORA_CAPTURE_CHROME_PATH);browser=instance.browser;
   const {context,page}=instance;
-  const url=trustedRendererUrl(`http://127.0.0.1:${server.address().port}/recorder.html`,{development:true});
+  const url=trustedRendererUrl(`http://127.0.0.1:${server.address().port}${mountPrefix}/recorder.html`,{development:true,mountPrefix});
   dispose=await installBootstrapBinding(context,page,url,fixtureTicket);
   await page.goto(url.href);
   const ordinary=await context.newPage();await ordinary.goto(url.href);
@@ -25,9 +26,11 @@ const {trustedRendererUrl,installBootstrapBinding,launchIsolated,closeIsolated,i
   assert.equal(accepted,fixtureTicket.length);
   await assert.rejects(()=>page.evaluate(()=>window.__oporaTakeRendererBootstrap({protocol_version:1,phase:'consume',nonce:'wrong'})));
   await ordinary.close();
-  await installRequestBoundary(context,page,url.href);
+  await installRequestBoundary(context,page,url.href,null,{mountPrefix});
   assert.equal(await page.evaluate(()=>fetch('/api/v1/auth/session').then(()=>false,()=>true)),true);
   assert.equal(await page.evaluate(url=>fetch(url).then(()=>false,()=>true),`http://127.0.0.1:${thirdParty.address().port}/fixture`),true);
+  assert.equal(await page.evaluate(path=>fetch(path).then(()=>false,()=>true),mountPrefix+'/api/v1/auth/session'),true);
+  assert.equal(await page.evaluate(()=>fetch('/other-app/private').then(()=>false,()=>true)),true);
   assert.equal(authRequests,0);assert.equal(thirdPartyRequests,0);
   assert.equal(await page.evaluate(()=>navigator.mediaDevices.getUserMedia({audio:true,video:true}).then(()=>false,()=>true)),true);
   const filename=path.resolve(process.env.OPORA_CAPTURE_SMOKE_OUTPUT||'/private/tmp/opora-private-tab-smoke.webm');

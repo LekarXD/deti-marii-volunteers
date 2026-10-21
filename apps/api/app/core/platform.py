@@ -6,6 +6,8 @@ from app.core.db import SessionLocal
 from app.core.errors import ApiError, install_error_handlers
 
 def install_platform(app: FastAPI):
+    # The trusted gateway strips this path before forwarding. Never trust X-Forwarded-Prefix.
+    app.root_path = get_settings().app_mount_prefix
     install_error_handlers(app)
     @app.middleware("http")
     async def request_metadata(request: Request, call_next):

@@ -29,15 +29,18 @@ class CaptureSettings:
     ffmpeg:str
     ffprobe:str
     development:bool
+    mount_prefix:str=""
     @classmethod
     def configured(cls,*,require_executables=False):
         if os.getenv('OPORA_CAPTURE_ENABLED')!='true':return None
+        from app.core.paths import public_path
+        from app.core.config import get_settings
         url=os.getenv('OPORA_CAPTURE_RENDERER_URL','')
         try:
             parts=urlsplit(url);parts.port
         except ValueError:return None
         development=os.getenv('OPORA_ENVIRONMENT','development')=='development'
-        if not parts.hostname or parts.username or parts.password or parts.query or parts.fragment or parts.path!='/recorder.html' or (parts.scheme!='https' and not (development and parts.scheme=='http' and parts.hostname in ('localhost','127.0.0.1','::1'))):return None
+        if not parts.hostname or parts.username or parts.password or parts.query or parts.fragment or parts.path!=public_path('/recorder.html') or (parts.scheme!='https' and not (development and parts.scheme=='http' and parts.hostname in ('localhost','127.0.0.1','::1'))):return None
         paths=[os.getenv('OPORA_CAPTURE_CHROME_PATH',''),shutil.which('node') or 'node',shutil.which('ffmpeg') or 'ffmpeg',shutil.which('ffprobe') or 'ffprobe']
         rtc=RtcSettings.from_env()
         if not rtc.capabilities().configured:return None
@@ -46,7 +49,10 @@ class CaptureSettings:
         try:rtc.assert_policy(RevocationPolicy())
         except ApiError:return None
         if not development and any(urlsplit(value).scheme not in ('https','wss') for value in (rtc.url,rtc.public_url or rtc.url)):return None
-        return cls(url,*paths,development)
+        public=urlsplit(rtc.public_url or rtc.url)
+        public_scheme={'wss':'https','ws':'http'}.get(public.scheme,public.scheme)
+        if (public_scheme,public.hostname,public.port or (443 if public_scheme=='https' else 80))==(parts.scheme,parts.hostname,parts.port or (443 if parts.scheme=='https' else 80)) and public.path in ('','/'):return None
+        return cls(url,*paths,development,get_settings().app_mount_prefix)
 
 async def approve_policy(db,p,row,owner,body):
     if (body.approved and row.state!='created') or (not body.approved and row.state not in ('created','starting','capturing','stopping')):raise ApiError(409,'recording_policy_locked','Политику можно согласовать до начала дубля')

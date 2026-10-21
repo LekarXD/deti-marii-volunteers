@@ -11,6 +11,7 @@ from app.core.auth import Principal, get_principal, authz_guard
 from app.core.audit import audit
 from app.core.db import get_db
 from app.core.config import get_settings
+from app.core.paths import public_path
 from app.core.errors import ApiError
 from app.core.models import MediaAsset
 from app.modules.assets.service import require_asset, asset_path, asset_content
@@ -54,7 +55,7 @@ class AssetView(BaseModel):
     upload_url: str
 
 def view(asset):
-    return {"id": str(asset.id), "state": asset.state, "received_size": asset.received_size, "expected_size": asset.expected_size, "content_type": asset.content_type, "upload_url": f"/api/v1/assets/{asset.id}/upload"}
+    return {"id": str(asset.id), "state": asset.state, "received_size": asset.received_size, "expected_size": asset.expected_size, "content_type": asset.content_type, "upload_url": public_path(f"/api/v1/assets/{asset.id}/upload")}
 
 @router.post("/upload-intents", operation_id="asset_upload_intent", response_model=AssetView)
 async def intent(body: UploadIntent, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):

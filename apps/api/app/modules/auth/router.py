@@ -112,7 +112,7 @@ async def logout(response: Response, principal: Principal = Depends(get_principa
     row.revoked_at = utcnow()
     audit(db, principal, "auth.logout", "session", row.id)
     await db.commit()
-    response.delete_cookie("opora_session", path="/")
+    response.delete_cookie("opora_session", path=get_settings().app_mount_prefix or "/", secure=get_settings().cookie_secure, httponly=True, samesite="lax")
     return {"status": "logged_out"}
 
 @router.post("/mfa/enroll", operation_id="auth_mfa_enroll", response_model=MfaEnrollmentView)

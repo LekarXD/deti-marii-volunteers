@@ -4,9 +4,16 @@ const crypto=require('node:crypto');
 const fs=require('node:fs');
 const path=require('node:path');
 const fail=code=>{throw new Error(code);};
-function trustedRendererUrl(value,{development=false}={}){
+function trustedMountPrefix(value=''){
+ if(value===''||value==='/')return '';
+ if(typeof value!=='string'||value.length>200)fail('renderer_origin_invalid');
+ value=value.replace(/\/$/,'');
+ if(!/^\/[A-Za-z0-9][A-Za-z0-9_-]{0,63}(?:\/[A-Za-z0-9][A-Za-z0-9_-]{0,63})*$/.test(value))fail('renderer_origin_invalid');
+ return value;
+}
+function trustedRendererUrl(value,{development=false,mountPrefix=''}={}){
  const url=new URL(value);
- if(url.username||url.password||url.search||url.hash||url.pathname!=='/recorder.html')fail('renderer_origin_invalid');
+ if(url.username||url.password||url.search||url.hash||url.pathname!==trustedMountPrefix(mountPrefix)+'/recorder.html')fail('renderer_origin_invalid');
  if(url.protocol!=='https:'&&!(development&&url.protocol==='http:'&&['127.0.0.1','localhost','[::1]'].includes(url.hostname)))fail('renderer_tls_required');
  return url;
 }
@@ -55,8 +62,10 @@ async function closeIsolated(instance){
  if(child.exitCode===null&&child.signalCode===null)throw new Error('browser_close_timeout');
  return {browser_process_exited:true};
 }
-async function installRequestBoundary(context,page,targetUrl,providerUrl=null){
+async function installRequestBoundary(context,page,targetUrl,providerUrl=null,{development=false,mountPrefix=''}={}){
  const target=new URL(targetUrl),provider=providerUrl?new URL(providerUrl):null;
+ const prefix=trustedMountPrefix(mountPrefix);
+ if(target.pathname!==prefix+'/recorder.html')fail('renderer_origin_invalid');
  const permissions=await context.newCDPSession(page);
  try{
   const {targetInfo}=await permissions.send('Target.getTargetInfo');
@@ -64,17 +73,21 @@ async function installRequestBoundary(context,page,targetUrl,providerUrl=null){
  }finally{await permissions.detach();}
  if(provider&&(provider.username||provider.password||provider.search||provider.hash||!['ws:','wss:'].includes(provider.protocol)))fail('capture_provider_origin_invalid');
  const providerHttp=provider?provider.origin.replace(/^ws/,'http'):null;
+ const providerPath=provider?provider.pathname.replace(/\/$/,''):'';
+ if(provider&&providerHttp===target.origin&&!providerPath)fail('capture_provider_origin_invalid');
+ const isProvider=url=>provider&&url.origin===providerHttp&&(!providerPath||url.pathname===providerPath||url.pathname.startsWith(providerPath+'/'));
+ const isStatic=pathname=>pathname.startsWith(prefix+'/assets/')||(development&&['/src/','/node_modules/','/@vite/','/@fs/','/@react-refresh'].some(path=>pathname.startsWith(prefix+path)));
  await context.route('**/*',async route=>{
   const request=route.request();let url;
   try{url=new URL(request.url());}catch{return route.abort();}
   if(request.isNavigationRequest()&&(request.frame()!==page.mainFrame()||url.href!==target.href))return route.abort();
-  if(url.origin===target.origin){if(url.pathname.startsWith('/api/')&&!url.pathname.startsWith('/api/v1/recording-renderer/'))return route.abort();return route.continue();}
-  if(providerHttp&&url.origin===providerHttp)return route.continue();
+  if(isProvider(url))return route.continue();
+  if(url.origin===target.origin&&(url.href===target.href||url.pathname.startsWith(prefix+'/api/v1/recording-renderer/')||isStatic(url.pathname)))return route.continue();
   return route.abort();
  });
  await context.routeWebSocket('**/*',socket=>{
   let url;try{url=new URL(socket.url());}catch{return socket.close();}
-  if(!provider||url.origin!==provider.origin)return socket.close();
+  if(!provider||url.origin!==provider.origin||(providerPath&&url.pathname!==providerPath&&!url.pathname.startsWith(providerPath+'/')))return socket.close();
   socket.connectToServer();
  });
 }

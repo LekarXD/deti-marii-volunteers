@@ -107,7 +107,7 @@ async def capture_take(db,context):
             process=await asyncio.create_subprocess_exec(settings.node,str(script),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,env=environment,start_new_session=True,limit=16384)
             from app.integrations.rtc.livekit import RtcSettings
             rtc=RtcSettings.from_env();provider_url=(rtc.public_url or rtc.url).replace('https://','wss://',1).replace('http://','ws://',1)
-            await send(process,command='initialize',url=settings.url,chrome=settings.chrome,provider_url=provider_url,ticket=ticket,spool=str(source),audio_track_ids=[track['track_id'] for track in row.projection['capture_plan']['allowed_tracks'] if track['kind']=='audio'],development=settings.development,max_milliseconds=20*60*1000,max_bytes=500*1024*1024);ticket=None
+            await send(process,command='initialize',url=settings.url,chrome=settings.chrome,provider_url=provider_url,ticket=ticket,spool=str(source),audio_track_ids=[track['track_id'] for track in row.projection['capture_plan']['allowed_tracks'] if track['kind']=='audio'],development=settings.development,mount_prefix=settings.mount_prefix,max_milliseconds=20*60*1000,max_bytes=500*1024*1024);ticket=None
             if (await read_event(process))['event']!='loaded':raise CaptureFailure('capture_protocol_invalid')
             deadline=asyncio.get_running_loop().time()+30
             while True:

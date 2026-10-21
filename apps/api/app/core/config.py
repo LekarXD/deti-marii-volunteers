@@ -1,6 +1,8 @@
 from functools import lru_cache
 from uuid import UUID
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
+from app.core.paths import normalize_mount_prefix
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="OPORA_", env_file=".env", extra="ignore")
@@ -8,6 +10,10 @@ class Settings(BaseSettings):
     environment: str = "development"
     foundation_id: UUID = UUID("00000000-0000-0000-0000-000000000001")
     trusted_origins: list[str] = ["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:5174", "http://localhost:5174", "http://testserver"]
+    app_mount_prefix: str = ""
+    @field_validator("app_mount_prefix", mode="before")
+    @classmethod
+    def valid_mount_prefix(cls,value):return normalize_mount_prefix(value)
     cookie_secure: bool = False
     secret_key: str = "development-only-set-OPORA_SECRET_KEY"
     release: str = "development"
