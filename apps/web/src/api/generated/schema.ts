@@ -601,6 +601,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/coord/admin/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Audit Events */
+        get: operations["admin_audit_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/coord/ai/settings": {
         parameters: {
             query?: never;
@@ -6048,6 +6065,45 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** AdminAuditEventView */
+        AdminAuditEventView: {
+            /** Actor Id */
+            actor_id: string | null;
+            /** Actor Label */
+            actor_label: string;
+            /** Changed Fields */
+            changed_fields: string[];
+            /** Command */
+            command: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Entity Id */
+            entity_id: string | null;
+            /** Entity Type */
+            entity_type: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Request Id */
+            request_id: string | null;
+        };
+        /** AdminAuditPageView */
+        AdminAuditPageView: {
+            /** Items */
+            items: components["schemas"]["AdminAuditEventView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+            /**
+             * Snapshot At
+             * Format: date-time
+             */
+            snapshot_at: string;
+        };
         /** AgreementCommand */
         AgreementCommand: {
             /** Expected Version */
@@ -10048,6 +10104,15 @@ export interface components {
             id: string;
             /** Number */
             number: number;
+            /** Policy Scene Revision */
+            policy_scene_revision: number;
+            /** Policy Tracks */
+            policy_tracks: components["schemas"]["RecordingPolicyTrack"][];
+            /**
+             * Privacy State
+             * @enum {string}
+             */
+            privacy_state: "unknown" | "approved" | "blocked";
             /**
              * Project Id
              * Format: uuid
@@ -13003,6 +13068,11 @@ export interface components {
              */
             can_host: boolean;
             /**
+             * Can Manage Summary
+             * @default false
+             */
+            can_manage_summary: boolean;
+            /**
              * Description
              * @default
              */
@@ -13040,6 +13110,11 @@ export interface components {
             starts_at: string;
             /** State */
             state: string;
+            /**
+             * Summary Available
+             * @default false
+             */
+            summary_available: boolean;
             /** Title */
             title: string;
             /** Version */
@@ -16768,6 +16843,105 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConversationSyncView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+        };
+    };
+    admin_audit_list: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string | null;
+                from_at?: string | null;
+                until_at?: string | null;
+                command?: string | null;
+                foundation_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAuditPageView"];
                 };
             };
             /** @description Bad Request */
