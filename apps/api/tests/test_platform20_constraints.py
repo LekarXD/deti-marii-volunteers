@@ -3,7 +3,7 @@ from datetime import date,datetime,timedelta,timezone,time
 from uuid import uuid4
 import pytest
 import pytest_asyncio
-from sqlalchemy import MetaData,insert,update,delete
+from sqlalchemy import MetaData,insert,update,delete,text
 from sqlalchemy.exc import IntegrityError
 from app.core.db import SessionLocal
 from app.core.models import Foundation,User,Session
@@ -21,7 +21,7 @@ async def scope():
         login=Session(foundation_id=f.id,user_id=user.id,token_hash=uuid4().hex*2,csrf_hash='x'*64,csrf_cipher='synthetic',expires_at=datetime.now(timezone.utc)+timedelta(hours=1));db.add(login)
         opp=Opportunity(foundation_id=f.id,title='Synthetic migration scope',updated_by='fixture');db.add(opp);await db.flush()
         metadata=MetaData()
-        tables=['dobro_activity_links','dobro_transfers','dobro_profiles','dobro_enrollments','dobro_enrollment_events','dobro_series_opportunities','signal_rule_settings','telegram_link_tokens','telegram_bindings']
+        tables=['dobro_settings','dobro_activity_links','dobro_transfers','dobro_profiles','dobro_enrollments','dobro_enrollment_events','dobro_series_opportunities','signal_rule_settings','telegram_link_tokens','telegram_bindings']
         connection=await db.connection();await connection.run_sync(lambda conn:metadata.reflect(conn,only=tables))
         yield db,metadata.tables,f,user,other,outsider,login,opp
         await db.rollback()
@@ -35,7 +35,7 @@ def link(f,opp,start=date(2026,10,1),end=date(2026,10,31)):
     return dict(id=uuid4(),foundation_id=f.id,opportunity_id=opp.id,url='https://dobro.ru/event/1',kind='one_off',title='Synthetic link',valid_from=start,valid_until=end,version=1,actor_id='fixture',created_at=datetime.now(timezone.utc))
 
 @pytest.mark.asyncio
-async def test_dobro_periods_are_inclusive_nonoverlapping_and_links_immutable(scope):
+async def test_dobro_periods_are_inclusive_nonoverlapping_and_links_protected(scope):
     db,t,f,user,other,outsider,login,opp=scope;table=t['dobro_activity_links'];first=link(f,opp)
     await db.execute(insert(table).values(**first))
     await denied(db,insert(table).values(**link(f,opp,date(2026,10,31),date(2026,11,30))),'23P01')
@@ -49,10 +49,10 @@ async def test_dobro_transfer_and_enrollment_history_are_scoped_append_only(scop
     transfer=dict(id=uuid4(),foundation_id=f.id,user_id=outsider.id,activity_id=activity['id'],period=date(2026,10,1),minutes_due_snapshot=60,hours_delta=1,snapshot_hash='a'*64,snapshot={},actor_id='fixture',note='',entered_at=datetime.now(timezone.utc))
     await denied(db,insert(t['dobro_transfers']).values(**transfer),'23503')
     transfer['user_id']=user.id;await db.execute(insert(t['dobro_transfers']).values(**transfer))
-    await denied(db,update(t['dobro_transfers']).values(hours_delta=2),'23514')
+    await denied(db,update(t['dobro_transfers']).where(t['dobro_transfers'].c.id==transfer['id']).values(hours_delta=2),'23514')
     enrollment=uuid4();await db.execute(insert(t['dobro_enrollments']).values(id=enrollment,foundation_id=f.id,user_id=user.id,activity_id=activity['id'],state='applied',version=1,updated_at=datetime.now(timezone.utc)))
     await db.execute(insert(t['dobro_enrollment_events']).values(id=uuid4(),enrollment_id=enrollment,version=1,state='applied',actor_id='fixture',reason='',created_at=datetime.now(timezone.utc)))
-    await denied(db,delete(t['dobro_enrollment_events']),'23514')
+    await denied(db,delete(t['dobro_enrollment_events']).where(t['dobro_enrollment_events'].c.enrollment_id==enrollment),'23514')
 
 @pytest.mark.asyncio
 async def test_telegram_token_binds_same_session_owner_and_private_active_identity(scope):
@@ -63,7 +63,7 @@ async def test_telegram_token_binds_same_session_owner_and_private_active_identi
     binding=dict(id=uuid4(),foundation_id=f.id,user_id=user.id,telegram_user_id=123456,chat_id=123456,version=1,verified_at=datetime.now(timezone.utc))
     await db.execute(insert(t['telegram_bindings']).values(**binding))
     await denied(db,insert(t['telegram_bindings']).values(**{**binding,'id':uuid4()}),'23505')
-    await denied(db,update(t['telegram_bindings']).values(chat_id=-123),'23514')
+    await denied(db,update(t['telegram_bindings']).where(t['telegram_bindings'].c.id==binding['id']).values(chat_id=-123),'23514')
 
 @pytest.mark.asyncio
 async def test_signal_rule_owner_cannot_cross_foundation(scope):
@@ -86,3 +86,30 @@ async def test_series_mapping_cannot_change_after_real_attendance_ledger_fact(sc
     db.add(AttendanceEvent(foundation_id=f.id,attendance_id=attendance.id,assignment_id=assignment.id,user_id=user.id,version=1,old_minutes=0,new_minutes=60,reason='Synthetic fact',actor_id='fixture'));await db.flush()
     await denied(db,update(mapping).where(mapping.c.series_id==series.id).values(version=2),'23514')
     await denied(db,delete(mapping).where(mapping.c.series_id==series.id),'23514')
+    # The ledger trigger takes the same foundation key as editable-link commands.
+    async with SessionLocal() as observer:
+        available=await observer.scalar(text('SELECT pg_try_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'dobro:{f.id}'})
+        assert available is False
+        await observer.rollback()
+    activity=link(f,opp,now.date()-timedelta(days=1),now.date()+timedelta(days=2))
+    await db.execute(insert(t['dobro_activity_links']).values(**activity))
+    await denied(db,update(t['dobro_activity_links']).where(t['dobro_activity_links'].c.id==activity['id']).values(version=2,url='https://dobro.ru/event/2'),'23514')
+
+
+@pytest.mark.asyncio
+async def test_unused_link_edits_require_version_then_lock_after_enrollment(scope):
+    db,t,f,user,other,outsider,login,opp=scope;table=t['dobro_activity_links'];activity=link(f,opp)
+    await db.execute(insert(table).values(**activity))
+    await db.execute(update(table).where(table.c.id==activity['id']).values(version=2,url='https://dobro.ru/event/2'))
+    await db.execute(insert(t['dobro_enrollments']).values(id=uuid4(),foundation_id=f.id,user_id=user.id,activity_id=activity['id'],state='applied',version=1,updated_at=datetime.now(timezone.utc)))
+    await denied(db,update(table).where(table.c.id==activity['id']).values(version=3,url='https://dobro.ru/event/3'),'23514')
+    await denied(db,delete(table).where(table.c.id==activity['id']),'23514')
+
+@pytest.mark.asyncio
+async def test_enabled_dobro_reminders_require_same_foundation_owner(scope):
+    db,t,f,user,other,outsider,login,opp=scope;table=t['dobro_settings']
+    values=dict(foundation_id=f.id,organization_url='',registration_url='',verified=False,monthly_day=5,hard_deadline_days=60,risk_days=7,whole_hours=True,rules_confirmed=False,reminder_template='Synthetic template',version=1,updated_by='fixture')
+    await db.execute(insert(table).values(**values))
+    await denied(db,update(table).where(table.c.foundation_id==f.id).values(reminders_enabled=True),'23514')
+    await denied(db,update(table).where(table.c.foundation_id==f.id).values(reminders_enabled=True,reminder_owner_user_id=outsider.id),'23503')
+    await db.execute(update(table).where(table.c.foundation_id==f.id).values(reminders_enabled=True,reminder_owner_user_id=user.id))
