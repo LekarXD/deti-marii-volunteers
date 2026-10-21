@@ -68,3 +68,14 @@ async def export_list(id:UUID,principal:Principal=Depends(get_principal),db:Asyn
 @router.get('/coord/reports/{id}/dobro-preview',response_model=dto.DobroPreviewView)
 async def dobro_preview(id:UUID,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     return await exports.dobro_preview(db,principal,id)
+
+from . import digests
+@router.get('/coord/report-digests/recipient-options',response_model=list[dto.ReportDigestRecipientView])
+async def digest_recipients(scope_type:str='foundation',scope_id:UUID|None=None,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    return await digests.recipient_options(db,principal,scope_type,scope_id)
+@router.get('/coord/report-digests',response_model=dto.ReportDigestView)
+async def digest(scope_type:str='foundation',scope_id:UUID|None=None,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    return await digests.digest_view(db,principal,scope_type,scope_id)
+@router.put('/coord/report-digests',response_model=dto.ReportDigestView)
+async def save_digest(body:dto.ReportDigestCommand,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    return await command(db,principal,'report.digest.save',idempotency_key,body,lambda:digests.save_schedule(db,principal,body))
