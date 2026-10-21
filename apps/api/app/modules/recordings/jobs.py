@@ -130,13 +130,16 @@ async def capture_take(db,context):
             if final.get('event')!='finalized' or process.returncode not in (None,0) or source.stat().st_size!=final.get('size') or await asyncio.to_thread(hash_path,source)!=final.get('sha256'):raise CaptureFailure('capture_source_invalid')
             row,owner=await checked_take(db,context)
             if not service.capture_ready(row):raise CaptureFailure('capture_readiness_lost')
-            row.stopped_at=row.started_at+timedelta(milliseconds=final['duration_ms']);row.capture_phase='encoding'
-            row.capture_checkpoint={**row.capture_checkpoint,'phase':'encoding','source_sha256':final['sha256'],'duration_ms':final['duration_ms']}
+            row.stopped_at=row.started_at+timedelta(milliseconds=final['duration_ms']);row.capture_phase='closing_browser'
+            row.capture_checkpoint={**row.capture_checkpoint,'phase':'closing_browser','source_sha256':final['sha256'],'duration_ms':final['duration_ms']}
             # Revoke only after final frame; closing the browser correctly withdraws its
             # readiness and cannot be interpreted as a failure during MP4 encoding.
             await db.execute(update(RecordingRendererGrant).where(RecordingRendererGrant.take_id==row.id,RecordingRendererGrant.revoked_at.is_(None)).values(revoked_at=utcnow()))
             await db.commit()
-            await send(process,command='close');await asyncio.wait_for(process.wait(),10)
+            await send(process,command='close')
+            try:await asyncio.wait_for(process.wait(),10)
+            except TimeoutError:raise CaptureFailure('capture_browser_close_timeout') from None
+            row,owner=await checked_take(db,context);row.capture_phase='encoding';row.capture_checkpoint={**row.capture_checkpoint,'phase':'encoding'};await db.commit()
             profile=await encode_and_validate(settings,source,output,final['duration_ms'])
             row,owner=await checked_take(db,context)
             events=(await db.scalars(select(RecordingStageEvent).where(RecordingStageEvent.take_id==row.id).order_by(RecordingStageEvent.sequence))).all()
@@ -169,6 +172,7 @@ async def capture_take(db,context):
         code=getattr(exc,'code','capture_media_failed')
         if row and row.capture_job_id==context.job_id and row.generation==context.payload['generation'] and row.state not in ('captured','discarded'):
             row.state='failed';row.capture_phase='failed';row.error_code=code;row.version+=1;row.readiness_state='blocked'
+            if getattr(exc,'diagnostics',None):row.capture_checkpoint={**(row.capture_checkpoint or {}),'media_validation':exc.diagnostics}
             await db.execute(update(RecordingRendererGrant).where(RecordingRendererGrant.take_id==row.id,RecordingRendererGrant.revoked_at.is_(None)).values(revoked_at=utcnow()))
         return {'state':'failed','error_code':code}
     finally:

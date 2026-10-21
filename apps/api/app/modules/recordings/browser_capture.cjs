@@ -37,12 +37,19 @@ async function exactViewport(page){
  }finally{await cdp.detach();}
 }
 async function launchIsolated(chromium,executablePath){
- const browser=await chromium.launch({headless:true,chromiumSandbox:true,executablePath,args:['--window-size=1920,1167','--auto-select-tab-capture-source-by-title=Кадр записи — Опора','--allow-http-screen-capture','--use-fake-ui-for-media-stream','--autoplay-policy=no-user-gesture-required'],timeout:20000});
+ const server=await chromium.launchServer({host:'127.0.0.1',headless:true,chromiumSandbox:true,executablePath,args:['--window-size=1920,1167','--auto-select-tab-capture-source-by-title=Кадр записи — Опора','--allow-http-screen-capture','--use-fake-ui-for-media-stream','--autoplay-policy=no-user-gesture-required'],timeout:20000});
+ let browser;
+ try{browser=await chromium.connect(server.wsEndpoint());}catch(error){await server.kill();throw error;}
  const context=await browser.newContext({viewport:null,acceptDownloads:false,serviceWorkers:'block',ignoreHTTPSErrors:false});
  const page=await context.newPage();
  await context.addInitScript(()=>{if(navigator.mediaDevices)Object.defineProperty(navigator.mediaDevices,'getUserMedia',{configurable:false,value:()=>Promise.reject(new DOMException('Private renderer never opens devices','NotAllowedError'))});});
  await exactViewport(page);
- return {browser,context,page};
+ return {browser,server,context,page};
+}
+async function closeIsolated(instance){
+ let timer;try{await Promise.race([instance.server.close(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('browser_close_timeout')),3000);})]);}
+ catch{await instance.server.kill();}
+ finally{clearTimeout(timer);}
 }
 async function installRequestBoundary(context,page,targetUrl,providerUrl=null){
  const target=new URL(targetUrl),provider=providerUrl?new URL(providerUrl):null;
@@ -120,4 +127,4 @@ async function captureOwnTab(page,spoolPath,{maxBytes=500*1024*1024,maxMilliseco
  }catch(error){closed=true;fs.closeSync(descriptor);if(handle)await handle.dispose();throw error;}
 }
 async function hashFile(filename){const hash=crypto.createHash('sha256');for await(const chunk of fs.createReadStream(filename))hash.update(chunk);return hash.digest('hex');}
-module.exports={trustedRendererUrl,installBootstrapBinding,exactViewport,launchIsolated,installRequestBoundary,captureOwnTab,hashFile};
+module.exports={trustedRendererUrl,installBootstrapBinding,exactViewport,launchIsolated,closeIsolated,installRequestBoundary,captureOwnTab,hashFile};

@@ -15,6 +15,10 @@ from app.worker.queue import enqueue_job
 from .models import StudioCaptureSession
 from . import service
 
+class MediaValidationError(ValueError):
+    def __init__(self,code,diagnostics=None):
+        super().__init__(code);self.code=code;self.diagnostics=diagnostics
+
 @dataclass(frozen=True)
 class CaptureSettings:
     url:str
@@ -91,8 +95,9 @@ async def media_command(*arguments,timeout=90):
     process=await asyncio.create_subprocess_exec(*arguments,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL)
     try:
         output,_=await asyncio.wait_for(process.communicate(),timeout)
-        if process.returncode or len(output)>1024*1024:raise ValueError('media_validation_failed')
+        if process.returncode or len(output)>1024*1024:raise MediaValidationError('media_command_failed')
         return output
+    except TimeoutError:raise MediaValidationError('media_command_timeout') from None
     finally:
         if process.returncode is None:process.kill();await process.wait()
 
@@ -101,7 +106,7 @@ async def encode_and_validate(settings,source,output,expected_duration_ms):
     probe=json.loads(await media_command(settings.ffprobe,'-v','error','-show_streams','-show_format','-of','json',str(output)))
     streams=probe.get('streams',[]);video=[s for s in streams if s.get('codec_type')=='video'];audio=[s for s in streams if s.get('codec_type')=='audio']
     duration=round(float(probe.get('format',{}).get('duration','0'))*1000)
-    if len(video)!=1 or len(audio)!=1 or video[0].get('codec_name')!='h264' or (video[0].get('width'),video[0].get('height'))!=(1920,1080) or audio[0].get('codec_name')!='aac' or not 300<=duration<=1202000 or abs(duration-expected_duration_ms)>2000:raise ValueError('media_profile_mismatch')
+    if len(video)!=1 or len(audio)!=1 or video[0].get('codec_name')!='h264' or (video[0].get('width'),video[0].get('height'))!=(1920,1080) or audio[0].get('codec_name')!='aac' or not 300<=duration<=1202000 or abs(duration-expected_duration_ms)>2000:raise MediaValidationError('media_profile_mismatch',{'duration_ms':duration,'expected_duration_ms':expected_duration_ms,'video':[{'codec':stream.get('codec_name'),'width':stream.get('width'),'height':stream.get('height')} for stream in video],'audio':[{'codec':stream.get('codec_name')} for stream in audio]})
     await media_command(settings.ffmpeg,'-nostdin','-v','error','-xerror','-i',str(output),'-f','null','-',timeout=120)
     return {'profile':'opora-stage/1','width':1920,'height':1080,'video_codec':'h264','audio_codec':'aac','duration_ms':duration,'full_decode':True}
 

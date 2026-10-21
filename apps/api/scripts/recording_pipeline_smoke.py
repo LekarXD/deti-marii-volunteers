@@ -14,6 +14,8 @@ if not os.environ.get('OPORA_CAPTURE_CHROME_PATH'):raise RuntimeError('Official 
 DIST=Path(os.environ['OPORA_RECORDING_SMOKE_DIST']).resolve()
 SCENARIO=os.getenv('OPORA_RECORDING_SMOKE_SCENARIO','success')
 if SCENARIO not in ('success','presentation','privacy-revoke','auth-revoke','unknown-participant'):raise ValueError('Unknown smoke scenario')
+SMOKE_SECONDS=int(os.getenv('OPORA_RECORDING_SMOKE_SECONDS','6'))
+if not 3<=SMOKE_SECONDS<=120:raise ValueError('Smoke duration must be 3..120 seconds')
 def port():
  s=socket.socket();s.bind(('127.0.0.1',0));p=s.getsockname()[1];s.close();return p
 async def main():
@@ -42,6 +44,13 @@ async def main():
   rtc=await asyncio.create_subprocess_exec(__import__('shutil').which('livekit-server'),'--config',str(config),stdout=asyncio.subprocess.DEVNULL,stderr=asyncio.subprocess.DEVNULL,start_new_session=True);processes.append(rtc)
   try:
    app=FastAPI();install_platform(app);app.include_router(auth);app.include_router(recording)
+   renderer_requests={}
+   @app.middleware('http')
+   async def safe_renderer_diagnostics(request,call_next):
+    response=await call_next(request)
+    if request.url.path.startswith('/api/v1/recording-renderer/'):
+     key=request.url.path.rsplit('/',1)[-1]+'_'+str(response.status_code);renderer_requests[key]=renderer_requests.get(key,0)+1
+    return response
    app.mount('/assets',StaticFiles(directory=DIST/'assets'),name='assets')
    @app.get('/recorder.html')
    async def entry():return FileResponse(DIST/'recorder.html')
@@ -87,6 +96,16 @@ async def main():
     parts=await LiveKitAdapter().participants(room);await asyncio.sleep(.4)
     tid=await post(f"/recording-takes/{tid['id']}/policy",{'expected_version':tid['version'],'expected_scene_revision':revision,'approved':True,'tracks':pub['tracks']})
     tid=await post(f"/recording-takes/{tid['id']}/start",{'expected_version':tid['version']});assert tid['state']=='starting'
+    if SMOKE_SECONDS>=30:
+     import app.modules.recordings.jobs as recording_jobs
+     import shutil
+     original_encoder=recording_jobs.encode_and_validate
+     async def inspect_long_media(settings,source,output,expected):
+      shutil.copy2(source,Path(os.environ['OPORA_ASSET_ROOT'])/'long-source.webm')
+      try:return await original_encoder(settings,source,output,expected)
+      finally:
+       if output.exists():shutil.copy2(output,Path(os.environ['OPORA_ASSET_ROOT'])/'long-output.mp4')
+     recording_jobs.encode_and_validate=inspect_long_media
     from app.worker.registry import HANDLERS,load_extensions
     from app.core.models import Job
     load_extensions();proof_kind='recording.proof.'+uuid4().hex;HANDLERS[proof_kind]=HANDLERS['recording.capture']
@@ -99,13 +118,27 @@ async def main():
      r=await client.get('/api/v1/recording-takes/'+tid['id']);current=r.json()
      if current['state']=='capturing':break
      if current['state']=='failed' or asyncio.get_running_loop().time()>deadline:raise RuntimeError('capture start '+json.dumps(current))
+    began=asyncio.get_running_loop().time();print(json.dumps({'event':'capture_started','requested_seconds':SMOKE_SECONDS}),flush=True)
     await asyncio.sleep(3)
     if SCENARIO=='presentation':
-     async with SessionLocal() as db:
-      capture=await db.get(StudioCaptureSession,take.capture_session_id);studio=await db.get(StudioSession,capture.studio_session_id)
-      studio.scene_revision+=1;studio.scene=validate_scene({**studio.scene,'revision':studio.scene_revision,'content_asset':slides[1],'slide_id':str(uuid4()),'layout':'overlay'});await db.commit()
-     await asyncio.sleep(3)
+     changes=[(3,1)] if SMOKE_SECONDS<30 else [(SMOKE_SECONDS*fraction,index%2) for fraction,index in ((.25,1),(.5,0),(.75,1))]
+     for scheduled,asset_index in changes:
+      await asyncio.sleep(max(0,began+scheduled-asyncio.get_running_loop().time()))
+      async with SessionLocal() as db:
+       capture=await db.get(StudioCaptureSession,take.capture_session_id);studio=await db.get(StudioSession,capture.studio_session_id)
+       studio.scene_revision+=1;studio.scene=validate_scene({**studio.scene,'revision':studio.scene_revision,'content_asset':slides[asset_index],'slide_id':str(uuid4()),'layout':'overlay' if asset_index else 'side'});await db.commit();expected_revision=studio.scene_revision
+      confirmed=asyncio.get_running_loop().time()+5
+      while True:
+       current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json();assert current['state']=='capturing',current
+       if current['policy_scene_revision']==expected_revision and current['readiness_state']=='ready':break
+       if asyncio.get_running_loop().time()>=confirmed:
+        print(json.dumps({'event':'transition_timeout','requested_scene_revision':expected_revision,'take_scene_revision':current['policy_scene_revision'],'take_readiness':current['readiness_state'],'renderer_request_counts':renderer_requests}),flush=True)
+        raise RuntimeError('Scene transition was not confirmed')
+       await asyncio.sleep(.1)
+      print(json.dumps({'event':'scene_confirmed','scene_revision':expected_revision,'elapsed_seconds':round(asyncio.get_running_loop().time()-began,1)}),flush=True)
+     await asyncio.sleep(max(0,began+SMOKE_SECONDS-asyncio.get_running_loop().time()))
      current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json();assert current['state']=='capturing',current
+    if SCENARIO=='success' and SMOKE_SECONDS>6:await asyncio.sleep(max(0,began+SMOKE_SECONDS-asyncio.get_running_loop().time()))
     if SCENARIO not in ('success','presentation'):
      if SCENARIO=='privacy-revoke':
       await post(f"/recording-takes/{tid['id']}/policy",{'expected_version':current['version'],'expected_scene_revision':revision,'approved':False,'tracks':[]})
@@ -127,7 +160,7 @@ async def main():
       print(json.dumps({'state':'actual_capture_revocation_passed','scenario':SCENARIO,'capture_started':bool(row.started_at),'take_state':row.state,'error_code':row.error_code,'render_created':False}))
      return
     current=await post(f"/recording-takes/{tid['id']}/stop",{'expected_version':current['version']});assert current['state']=='stopping'
-    await asyncio.wait_for(work,60)
+    await asyncio.wait_for(work,max(60,SMOKE_SECONDS*2))
     current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json()
     if current['state']!='captured':raise RuntimeError('capture final '+json.dumps(current))
     async with SessionLocal() as db:
@@ -147,10 +180,12 @@ async def main():
       samples=array.array('h');samples.frombytes(pcm)
       windows=[math.sqrt(sum(float(x)*x for x in samples[start:start+1600])/1600)/32768 for start in range(4800,len(samples)-4800-1600,1600)]
       assert windows and min(windows)>.005,('audio_drop',min(windows) if windows else None)
-      segment=samples[16000:32000]
-      powers={frequency:abs(sum(value*complex(math.cos(2*math.pi*frequency*index/16000),-math.sin(2*math.pi*frequency*index/16000)) for index,value in enumerate(segment))) for frequency in range(400,481)}
-      peak=max(powers,key=powers.get);assert abs(peak-440)<=1,('audio_frequency_mismatch',peak)
-      audio_proof={'peak_hz':peak,'windows_100ms':len(windows),'min_rms':round(min(windows),5),'continuous':True}
+      peaks=[]
+      for second in sorted({1,int(len(samples)/16000/2),max(1,int(len(samples)/16000)-2)}):
+       segment=samples[16000*second:16000*(second+1)]
+       powers={frequency:abs(sum(value*complex(math.cos(2*math.pi*frequency*index/16000),-math.sin(2*math.pi*frequency*index/16000)) for index,value in enumerate(segment))) for frequency in range(400,481)}
+       peak=max(powers,key=powers.get);assert abs(peak-440)<=1,('audio_frequency_mismatch',second,peak);peaks.append({'second':second,'peak_hz':peak})
+      audio_proof={'tone_samples':peaks,'windows_100ms':len(windows),'min_rms':round(min(windows),5),'continuous':True}
       assert len(manifest['stage_events'])>=3 and any(event['media_time_ms']>0 for event in manifest['stage_events'])
      import re
      mean=re.search(r'mean_volume: ([^\n]+)',audio).group(1)
