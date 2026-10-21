@@ -1,6 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
 import {Link, useNavigate, useSearchParams, useLocation} from 'react-router-dom';
-import {ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, PenLine} from 'lucide-react';
 import {Button, Card, ErrorState, LoadingState, Icon} from '../../ui';
 import {api, ApiError} from '../../api/transport';
 import {Application, Draft, useApplication, useCommand, useDraft, applicationKeys, commandKey} from './api';
@@ -57,7 +56,7 @@ export function ApplyPage() {
     catch(error){if(error instanceof ApiError){const fieldErrors=error.field_errors as Record<string,string>|undefined;if(fieldErrors){setErrors(fieldErrors);const fieldId=Object.keys(fieldErrors)[0];const target=form!.steps.findIndex(part=>part.fields.some(field=>field.id===fieldId));if(target>=0)setStep(target);focusField(fieldId);}}}
   }
   return <div className="ap-page">
-    {edit&&<Link className="ap-back" to="/application"><ArrowLeft size={18}/>Вернуться в личный кабинет</Link>}
+    {edit&&<Link className="ap-back" to="/application"><Icon name="chevron-left"/>Вернуться в личный кабинет</Link>}
     <div className="head ap-heading"><div><h1 className="h1">{edit?'Моя анкета':form.title}</h1><p className="lead">{edit?'Измените ответы. Знакомство с фондом и запись на встречу сохранятся.':form.intro}</p></div></div>
     <div className="ap-layout"><form className="ap-apply-main" noValidate onSubmit={event=>{event.preventDefault();void next();}}>
       <Card className="ap-form-card"><div className="ap-stephead"><p className="eyebrow">Шаг {step+1} из {form.steps.length}</p><h2 className="h2">{form.steps[step].title}</h2><div className="ap-progress" role="progressbar" aria-label={`Шаг ${step+1} из ${form.steps.length}`} aria-valuenow={step+1} aria-valuemax={form.steps.length}><span style={{width:`${100*(step+1)/form.steps.length}%`}}/></div></div>
@@ -66,7 +65,7 @@ export function ApplyPage() {
       {submit.error&&<div role="alert" className="ap-error">{submit.error.message}{edit&&submit.error instanceof ApiError&&submit.error.status===409&&<Button variant="ghost" type="button" onClick={()=>{void Promise.all([self.refetch(),draft.refetch()]).then(([latestApplication,latestDraft])=>{if(!latestApplication.data||!latestDraft.data)return;baseVersion.current=latestApplication.data.version;version.current=latestDraft.data.version;pendingSave.current=null;dirty.current=false;setAnswers({...latestApplication.data.revision.answers,consentPD:latestApplication.data.consents.personal_data,consentNews:latestApplication.data.consents.news} as Answers);submit.reset();});}}>Загрузить актуальные ответы — текущий ввод будет заменён</Button>}</div>}
       {saveError&&<div role="alert" className="ap-error">{saveError} <button type="button" onClick={()=>void saveLatest().catch(()=>{})}>Повторить сохранение</button>{saveError.includes('измен')&&<p>Черновик открыт в другой вкладке. Скопируйте новые ответы перед обновлением.</p>}</div>}
       </Card>
-      <div className="ap-form-footer">{step>0&&<Button variant="ghost" size="lg" type="button" disabled={submit.isPending} onClick={()=>{dirty.current=true;setStep(step-1);}}><ArrowLeft size={18}/>Назад</Button>}<span className="ap-save-status" role="status">{saveStatus}</span><Button size="lg" type="submit" disabled={submit.isPending}>{submit.isPending?'Отправляем…':last?(edit?'Сохранить изменения':'Отправить анкету'):'Дальше'}<ArrowRight size={18}/></Button></div>
+      <div className="ap-form-footer">{step>0&&<Button variant="ghost" size="lg" type="button" disabled={submit.isPending} onClick={()=>{dirty.current=true;setStep(step-1);}}><Icon name="chevron-left"/>Назад</Button>}<span className="ap-save-status" role="status">{saveStatus}</span><Button size="lg" type="submit" disabled={submit.isPending}>{submit.isPending?'Отправляем…':last?(edit?'Сохранить изменения':'Отправить анкету'):'Дальше'}<Icon name="chevron-right"/></Button></div>
     </form><aside className="ap-path-card"><Card><h2 className="h3">Как стать волонтёром</h2><ol className="ap-pathlist">{form.path.map((item,index)=>{const pathIcon=(['edit','book','calendar'] as const)[index]||'edit';return <li className={index===0?'is-now':''} key={item.title}><span className="ap-path-icon"><Icon name={pathIcon}/></span><span><b>{item.title}</b><small>{item.meta}</small></span></li>;})}</ol><p className="meta">{form.pathNote}</p></Card></aside></div>
   </div>;
 }
