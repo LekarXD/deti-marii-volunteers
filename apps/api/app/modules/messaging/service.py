@@ -78,7 +78,7 @@ async def create_direct(db,principal,recipient_id,key):
     if principal.user_id is None or recipient_id==principal.user_id:
         raise ApiError(422,"invalid_recipient","Выберите собеседника")
     await validate_users(db,principal,{principal.user_id,recipient_id})
-    if not principal.is_staff:
+    if not principal.has_permission("messaging.manage"):
         active_staff=await db.scalar(select(StaffMembership.id).where(StaffMembership.user_id==recipient_id,StaffMembership.foundation_id==principal.foundation_id,StaffMembership.revoked_at.is_(None)))
         if not active_staff:
             raise ApiError(404,"recipient_not_found","Собеседник недоступен")

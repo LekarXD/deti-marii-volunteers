@@ -78,3 +78,11 @@ class DeliveryReadinessView(BaseModel):
     channel: str
     state: Literal["available", "unavailable", "development_only"]
     reason: str
+
+class ContactView(BaseModel):
+    user_id: UUID
+    display_name: str
+    is_coordinator: bool
+class ContactPage(BaseModel):
+    items: list[ContactView]
+    next_cursor: UUID | None

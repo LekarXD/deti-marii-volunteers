@@ -9,7 +9,7 @@ from app.core.models import MediaAsset
 from app.modules.assets.service import asset_content
 from . import service
 from .models import ConversationMember, Message, MessageAsset
-from .schemas import ConversationCreate, ConversationPage, ConversationSyncView, ConversationView, DirectCreate, MemberCommand, MembershipView, MessageCreate, MessagePage, MessageView, ReadCommand, ReadCursorView, DeliveryReadinessView
+from .schemas import ConversationCreate, ConversationPage, ConversationSyncView, ConversationView, DirectCreate, MemberCommand, MembershipView, MessageCreate, MessagePage, MessageView, ReadCommand, ReadCursorView, DeliveryReadinessView, ContactPage
 router=APIRouter(prefix="/api/v1/conversations",tags=["messaging"])
 
 @router.get("",operation_id="conversation_list",response_model=ConversationPage)
@@ -35,6 +35,23 @@ async def attachment(asset_id:UUID,principal:Principal=Depends(get_principal),db
         raise ApiError(404,"asset_not_found","Файл не найден")
     await service.conversation_access(db,principal,linked[1])
     return await asset_content(db,linked[0])
+
+@router.get("/contacts",operation_id="messaging_contacts",response_model=ContactPage)
+async def contacts(query:str=Query("",max_length=200),cursor:UUID|None=None,limit:int=Query(30,ge=1,le=50),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    from app.core.models import User,StaffMembership
+    if principal.user_id is None:
+        return {"items":[],"next_cursor":None}
+    staff_ids=select(StaffMembership.user_id).where(StaffMembership.foundation_id==principal.foundation_id,StaffMembership.revoked_at.is_(None))
+    statement=select(User).where(User.foundation_id==principal.foundation_id,User.account_state=="active",User.id!=principal.user_id)
+    if not principal.has_permission("messaging.manage"):
+        statement=statement.where(User.id.in_(staff_ids))
+    if query:
+        statement=statement.where(User.display_name.ilike("%"+query.replace("%","\\%").replace("_","\\_")+"%"))
+    if cursor:
+        statement=statement.where(User.id>cursor)
+    rows=(await db.scalars(statement.order_by(User.id).limit(limit+1))).all()
+    coordinators=set((await db.scalars(staff_ids)).all())
+    return {"items":[{"user_id":u.id,"display_name":u.display_name,"is_coordinator":u.id in coordinators} for u in rows[:limit]],"next_cursor":rows[limit-1].id if len(rows)>limit else None}
 
 @router.get("/{conversation_id}",operation_id="conversation_get",response_model=ConversationView)
 async def detail(conversation_id:UUID,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):

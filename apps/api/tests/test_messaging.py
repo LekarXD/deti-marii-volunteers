@@ -122,3 +122,43 @@ async def test_internal_outbox_consumer_is_atomic_deduplicated_and_readonly(app)
         inbox=next(c for c in page['items'] if c['kind']=='system')
         assert inbox['allowed_actions']==[] and inbox['external_delivery']=='unavailable'
         assert (await client.post(f"/api/v1/conversations/{inbox['id']}/messages",json={'text':'reply'},headers=headers)).status_code==403
+
+@pytest.mark.asyncio
+async def test_cancelled_or_replaced_booking_version_never_delivers_stale_notice():
+    from datetime import timedelta
+    from app.modules.applications.models import Application
+    from app.modules.interviews.models import AvailabilitySeries,InterviewSlot,InterviewBooking
+    from app.worker.queue import enqueue_outbox
+    seed=await fixtures()
+    foundation=UUID(seed['foundation_id'])
+    user=UUID(seed['identities']['candidate-one@example.test']['user_id'])
+    coordinator=UUID(seed['identities']['coordinator@example.test']['user_id'])
+    now=utcnow()+timedelta(days=90)
+    async with SessionLocal() as db:
+        application=await db.scalar(select(Application).where(Application.user_id==user))
+        if application is None:
+            application=Application(foundation_id=foundation,user_id=user)
+            db.add(application)
+            await db.flush()
+        series=AvailabilitySeries(foundation_id=foundation,coordinator_id=coordinator,local_start_date=now.date(),start_minute=600,end_minute=660,venue='Учебная площадка')
+        db.add(series)
+        await db.flush()
+        slot=InterviewSlot(foundation_id=foundation,series_id=series.id,coordinator_id=coordinator,origin_date=now.date(),origin_minute=600,starts_at=now,ends_at=now+timedelta(minutes=30),busy_until=now+timedelta(minutes=40))
+        db.add(slot)
+        await db.flush()
+        booking=InterviewBooking(foundation_id=foundation,application_id=application.id,user_id=user,candidate_key='user:'+str(user),slot_id=slot.id,coordinator_id=coordinator,starts_at=now,ends_at=slot.ends_at,busy_until=slot.busy_until,venue='Учебная площадка',status='cancelled',version=2)
+        db.add(booking)
+        await db.flush()
+        stale={'event':'interview.booked','booking_id':str(booking.id),'booking_version':1,'user_id':str(user)}
+        outbox=enqueue_outbox(db,foundation,'internal',stale)
+        await db.flush()
+        assert await deliver_internal(db,outbox,stale)=='suppressed_stale'
+        assert await db.scalar(select(func.count()).select_from(Message).where(Message.source_outbox_id==outbox.id))==0
+        latest={'event':'interview.cancelled','booking_id':str(booking.id),'booking_version':2,'user_id':str(coordinator)}
+        # The envelope owner can be stale; current booking identity is authoritative.
+        assert await deliver_internal(db,outbox,latest)=='delivered'
+        message=await db.scalar(select(Message).where(Message.source_outbox_id==outbox.id))
+        from app.modules.messaging.models import ConversationMember
+        recipient=await db.scalar(select(ConversationMember.user_id).where(ConversationMember.conversation_id==message.conversation_id))
+        assert recipient==user
+        await db.rollback()
