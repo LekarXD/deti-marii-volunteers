@@ -6,12 +6,13 @@ import {ApiError} from '../../api/transport';
 import {Button,Card,ErrorState,Field,Input,LoadingState,TimePicker,useToast,normalizeTime} from '../../ui';
 import {minuteTime,readPreferences,savePreferences,timeMinute,topics,type Preferences} from './api';
 import './notifications.css';
+import {TelegramBindingPanel} from './TelegramBindingPanel';
 
 export function PreferencesPanel(){
  const value=useQuery({queryKey:keys.self('notification-preferences'),queryFn:({signal})=>readPreferences(signal),staleTime:0});
  if(value.isPending)return <LoadingState label="Загружаем настройки уведомлений…"/>;
  if(value.error)return <ErrorState error={value.error} retry={()=>value.refetch()}/>;
- return <PreferencesEditor key={value.data.version} value={value.data}/>;
+ return <><PreferencesEditor key={value.data.version} value={value.data}/><TelegramBindingPanel/></>;
 }
 function PreferencesEditor({value}:{value:Preferences}){
  const client=useQueryClient(),{toast}=useToast();

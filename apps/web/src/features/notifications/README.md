@@ -32,3 +32,7 @@ Validation: eight UI transition tests use fictional fixtures and a mocked API
 boundary; no external delivery occurs. Scoped TypeScript passes against the
 actual final backend P17B schemas. A1 owns the real PostgreSQL/local SMTP tests;
 these UI tests do not claim external provider delivery or webhook configuration.
+
+Telegram proof is a separate `TelegramBindingPanel` below preferences. It uses the generated Telegram DTOs and current-principal query key, explicitly issues a one-use bot URL, waits for the real server status, supports pending cancellation/linked disconnect with versions, and preserves unresolved retry receipts. The raw link is held only in component state, is never stored in browser storage, and disappears after confirmation/cancel/expiry. The card never enables topics/news consent or claims Telegram delivery. Disabled server configuration displays unavailable with no invented URL.
+
+Four focused Telegram UI tests cover unavailable, issue→pending→confirmed status reads, stable network retry/pending cancellation, and versioned disconnect. Existing eight preference/template/delivery tests isolate that sibling proof component and remain green. Actual Telegram proof persistence and privacy have eleven separate local PostgreSQL/HTTP tests; no real bot was configured or contacted.

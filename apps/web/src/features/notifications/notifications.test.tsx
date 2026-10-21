@@ -14,6 +14,8 @@ import {NotificationAdminPage} from './NotificationAdminPage';
 import {PreferencesPanel} from './PreferencesPanel';
 import type {Audience,Preferences,Readiness,Template} from './api';
 const mocks=vi.hoisted(()=>({preferences:vi.fn(),savePreferences:vi.fn(),templates:vi.fn(),readiness:vi.fn(),recipients:vi.fn(),deliveries:vi.fn(),attempts:vi.fn(),command:vi.fn()}));
+// Telegram proof has its own API/consent boundary tests; these isolate preferences/templates.
+vi.mock('./TelegramBindingPanel',()=>({TelegramBindingPanel:()=>null}));
 vi.mock('./api',async(importOriginal)=>({...await importOriginal<typeof import('./api')>(),readPreferences:mocks.preferences,savePreferences:mocks.savePreferences,readTemplates:mocks.templates,readReadiness:mocks.readiness,readRecipients:mocks.recipients,readDeliveries:mocks.deliveries,readAttempts:mocks.attempts,command:mocks.command}));
 const preference:Preferences={version:3,no_contact:false,effective_no_contact:true,email_enabled:false,in_app_enabled:true,email_provider_state:'unavailable',topics:{assignments:true,learning:true,messages:true,news:false},quiet_enabled:false,quiet_from:1320,quiet_to:540,timezone:'Europe/Moscow',news_consent:false};
 const readiness:Readiness={channel:'email',state:'unavailable',reason:'Провайдер не настроен',external_send_enabled:false,webhook_state:'unavailable',channels:[{channel:'in_app',state:'available',reason:'Внутренние уведомления сохраняются в платформе'},{channel:'email',state:'unavailable',reason:'Провайдер не настроен'}]};
