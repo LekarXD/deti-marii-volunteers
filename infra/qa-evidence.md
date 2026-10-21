@@ -77,6 +77,41 @@ failure in the five requested domains. They do not certify unrelated commands.
    skipped, in 7.62 seconds on the separate QA cluster. This includes nested
    candidate tests, calendar, messaging and delivery tests present at that point.
 
+## Private asset backup and restore drill
+
+The real database-plus-private-files drill passed on the separate QA cluster at
+56148. Frozen API source: integration commit
+`c7c58c0fa3f2ef1481ab07c855dc7891dc60bcaa`, with API working-tree changes, copied
+into a private immutable test directory. Its complete API file manifest hashes to
+`f30461c549e5bb2143b1557f4241c979ac79e8f967965eca677d7712c421fc9b`.
+Both source and restored API `/version.json` returned the corresponding
+commit/tree release label. This remains working-tree snapshot proof, not final
+immutable-release certification.
+
+A real CLI-seeded coordinator completed HTTP email challenge verification and
+TOTP, created an image upload intent, uploaded a generated 227-byte PNG, completed
+validation and bound it to a participant through the actual API. A separately
+verified ordinary principal received 404 for both the participant photo and raw
+asset endpoint. The source API was stopped before taking its database dump and
+private-file snapshot; no worker was running.
+
+Restoring into a new database and new private storage root preserved all 69
+public-table counts, head `3006f3293ffc` and the file manifest. Both authorized
+image endpoints returned the original checksum
+`61523728612559eed72614bd2aa44ce6d4d3c9eba90ab02e23055e8f862d74b9`.
+The stranger still received 404 on both endpoints. After committing a staff
+membership revocation only in the restored fixture database, the original
+uploader also received 404 on both endpoints. This proves upload ownership does
+not bypass the participant permission after revocation. The source membership
+remained active and unchanged.
+
+Revocation uses an explicit isolated test-fixture `staff_memberships` transaction;
+there is no public membership-revoke endpoint. All files, DBs and APIs were
+isolated from the shared browser profile, the default asset root and production.
+Both temporary API processes stopped cleanly. Evidence is checked in at
+`infra/evidence/private-asset-restore-2026-10-21.json`; private dumps, encryption
+key, fixture credentials and full source manifest remain mode 0600 outside Git.
+
 ## Proof boundaries
 
 Actual two-context browser and visual acceptance belongs to the integrator's CUA
@@ -89,6 +124,8 @@ Docker images and the container stack have not been built or started here. The
 socket access. No Docker context or existing service was changed. Native
 PostgreSQL/API evidence is available, and Compose configuration was validated.
 
-The recovery drill proves database contents only. Private-asset restoration,
-provider-backed email/AI/RTC outcomes, all later domain packages, full P20 and a
-staging deployment require their own evidence. No production system was accessed.
+The initial recovery drill proved database contents only; the later isolated
+private-image drill above additionally proves one real participant image and its
+access boundary survive DB/files restoration. Large/multiple file sets, provider-
+backed email/AI/RTC outcomes, media staging, all later domain packages, full P20
+and a staging deployment still require their own evidence. No production system was accessed.

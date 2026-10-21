@@ -101,3 +101,28 @@ four URLs separate from development/staging and the external G1 database. Their
 exact database names are asserted by the domain suites. The CI pytest plugin
 rejects skipped checks; an unset URL is a gate failure, never a passing test run.
 `prepare-test-dbs.py` refuses existing databases and never drops one.
+
+## Isolated private-image restore drill (P20 subset)
+
+With the assigned QA PostgreSQL running at loopback 56148 and data directory
+`/private/tmp/opora-qa-pg-data`, run:
+
+```sh
+python infra/scripts/private-asset-restore.py --api-source "$PWD/apps/api"
+```
+
+The script refuses any other cluster. It creates fresh uniquely named source and
+restore databases and fresh asset roots under
+`/private/tmp/opora-qa-restore-assets/<run>/`. It never drops or restores over an
+existing DB/directory, and never uses the default asset root. It freezes and hashes
+API source, migrates/seeds, performs genuine staff HTTP login/MFA and image upload,
+binds a participant photo, checks an unrelated principal, stops source writes,
+snapshots DB/files, restores both, verifies content hashes and current access, then
+revokes only the restored test membership and rechecks denial. Its two API
+processes stop automatically. Dumps, encryption key and credentials remain private
+outside Git; the summary report contains no auth tokens. Ports 8002/8003 must be
+free. Supply `--pg-bin` if PostgreSQL tools are installed elsewhere.
+
+A frozen working-tree source is labelled with commit plus tree hash. A final
+immutable-release rerun remains required; this bounded drill does not complete
+full P20 or deploy anything.

@@ -1,0 +1,38 @@
+{
+  "cluster_port": 56148,
+  "image_bytes": 227,
+  "image_sha256": "61523728612559eed72614bd2aa44ce6d4d3c9eba90ab02e23055e8f862d74b9",
+  "migration_head": "3006f3293ffc",
+  "outcome": "passed",
+  "private_files": {
+    "4b4689155ffa435f94733dc686e31b84": {
+      "sha256": "61523728612559eed72614bd2aa44ce6d4d3c9eba90ab02e23055e8f862d74b9",
+      "size": 227
+    }
+  },
+  "proof_limit": "Frozen working-tree API snapshot; final immutable release rerun and broader P20 still required",
+  "restored_asset_root": "/private/tmp/opora-qa-restore-assets/e131584a65/restored-assets",
+  "restored_database": "opora_qa_assets_e131584a65_restore",
+  "restored_revoked_member_denials": [
+    404,
+    404
+  ],
+  "restored_stranger_denials": [
+    404,
+    404
+  ],
+  "revocation_mechanism": "isolated restored staff_memberships fixture UPDATE; no public membership revoke endpoint",
+  "runtime_release": "c7c58c0fa3f2ef1481ab07c855dc7891dc60bcaa-qa-tree-f30461c549e5",
+  "runtime_version_readback": "source and restored matched",
+  "source_api_dirty": true,
+  "source_asset_root": "/private/tmp/opora-qa-restore-assets/e131584a65/source-assets",
+  "source_commit": "c7c58c0fa3f2ef1481ab07c855dc7891dc60bcaa",
+  "source_database": "opora_qa_assets_e131584a65_source",
+  "source_membership_unchanged": true,
+  "source_stranger_denials": [
+    404,
+    404
+  ],
+  "source_tree_sha256": "f30461c549e5bb2143b1557f4241c979ac79e8f967965eca677d7712c421fc9b",
+  "table_count": 69
+}
