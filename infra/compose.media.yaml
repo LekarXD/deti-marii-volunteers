@@ -16,7 +16,7 @@ services:
     read_only: true
     security_opt:
       - no-new-privileges:true
-      - seccomp=./docker/media-seccomp.json
+      - seccomp=./docker/media-seccomp-sandbox.json
     cap_drop: [ALL]
     shm_size: 1gb
     tmpfs:

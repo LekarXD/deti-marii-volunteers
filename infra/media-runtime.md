@@ -96,3 +96,24 @@ revoke/privacy/lease-loss/timeout behavior, private file read denial, and explic
 human review before publication. Record the exact source SHA, image digest,
 migration head, safe tool versions, sandbox proof and outcomes. No test here
 authorizes real participants, external delivery, retention deletion or production.
+
+## Native amd64 sandbox correction, 2026-10-22
+
+The original upstream profile above remains unchanged as a pinned reference.
+With `cap_drop: [ALL]`, its conditional `chroot` allowance is excluded before
+Chrome creates its user namespace; the real native-host probe failed at
+`sys_chroot("/proc/self/fdinfo/")`. The active overlay now uses
+`media-seccomp-sandbox.json`, derived by removing only that capability condition.
+All other upstream rules remain byte-for-byte equivalent after JSON parsing; the
+contract test enforces this. No capability is added. The kernel still enforces
+chroot privilege inside the process's user namespace, and UID10001, read-only root,
+no-new-privileges, AppArmor, seccomp and resource limits remain in force.
+
+A new networkless capped container on the authorised native amd64 host ran Chrome
+for Testing145.0.7632.6 from pinned image digest
+`sha256:6446946a1d9fd62d9ae501312a2d76a43ee688542b21622056a372959b65d63d`
+and dumped `about:blank` successfully with the sandbox enabled. The original
+profile's failure and minimal derivation's success were observed independently.
+No host AppArmor/sysctl/binfmt changes, privileged mode, SYS_ADMIN or
+`--no-sandbox` were used. This is a browser launch gate, not a completed application
+image build, twenty-minute capture, load acceptance or production deployment.

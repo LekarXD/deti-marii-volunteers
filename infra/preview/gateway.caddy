@@ -1,0 +1,17 @@
+# Insert only inside the existing www.odschool.ru block. Persist the unchanged
+# already-live Ertad route too: it is absent from the old mounted Caddyfile.
+@opora_preview_prefix path /deti-marii /deti-marii/*
+handle @opora_preview_prefix {
+    route {
+        redir /deti-marii /deti-marii/ 308
+        uri strip_prefix /deti-marii
+        reverse_proxy opora-preview-web:8080 {
+            header_up X-Forwarded-Prefix /deti-marii
+            header_up X-Envoy-External-Address {remote_host}
+        }
+    }
+}
+@ertad_preview_persist path /ertad /ertad/*
+handle @ertad_preview_persist {
+    reverse_proxy ertad-preview-edge:8080
+}
