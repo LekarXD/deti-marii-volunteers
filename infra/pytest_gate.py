@@ -2,6 +2,13 @@
 import pytest
 
 
+def pytest_configure(config):
+    # Destructive isolated fixtures must see the exact model set used by Alembic.
+    # Otherwise a migrated late module's FK can outlive the incomplete drop_all.
+    from app.core.model_loader import load_models
+    load_models()
+
+
 def pytest_sessionfinish(session, exitstatus):
     reporter = session.config.pluginmanager.getplugin("terminalreporter")
     skipped = reporter.stats.get("skipped", []) if reporter else []
