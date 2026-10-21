@@ -3,6 +3,8 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from app.core.auth import resolve_principal
+from app.core.clock import utcnow
+from app.core.errors import ApiError
 from app.core.models import MediaAsset, Session
 from app.integrations.ai.models import AIRun
 from app.integrations.ai.service import execute_run
@@ -59,15 +61,22 @@ async def generate_ai(db,context):
     run=await db.get(AIRun,UUID(context.payload['run_id']))
     if run is None:return result
     from app.integrations.ai.contracts import TASKS
-    hook=TASKS[run.task].on_complete
+    spec=TASKS.get(run.task)
+    hook=spec.on_complete if spec else None
     if hook is not None and run.state not in {'queued','calling'}:
         await context.fence(db)
         await hook(db,run,context)
     if run.task!='mentor':return result
     items=(await db.scalars(select(MentorRun).where(MentorRun.ai_run_id==run.id).with_for_update())).all()
     session=await db.get(Session,run.request_session_id)
-    if session is None:return result
-    principal=await resolve_principal(db,session)
+    if session is None or session.revoked_at or session.expires_at<=utcnow():
+        for item in items:item.state='cancelled'
+        return result
+    try:
+        principal=await resolve_principal(db,session)
+    except ApiError:
+        for item in items:item.state='cancelled'
+        return result
     from .service import create_question,fragments_by_id
     await context.fence(db)
     for item in items:

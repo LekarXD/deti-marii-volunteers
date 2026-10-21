@@ -206,3 +206,40 @@ async def test_budget_circuit_and_crash_never_replay_ambiguous_provider_call(set
     budget_run=await process_ai(factory,foundation,httpx.MockTransport(must_not_call))
     async with factory() as db:assert (await db.get(AIRun,budget_run)).state=='budget_exceeded'
     assert no_calls==[]
+
+@pytest.mark.asyncio
+async def test_invalid_provider_json_circuit_prompt_gate_and_private_run_replay(setup,monkeypatch):
+    client,factory,foundation=setup;configured(monkeypatch)
+    source=await publish(client,factory,foundation)
+    client.cookies.set('opora_session','one'+str(foundation))
+    calls=[]
+    def broken(request):
+        calls.append(1)
+        return httpx.Response(200,json={'choices':[{'message':{'content':'not json'}}]})
+    for index in range(3):
+        asked=await post(client,'/mentor/runs',{'question':f'Личные контакты — вопрос {index}?'})
+        assert asked.status_code==200
+        await process_ai(factory,foundation,httpx.MockTransport(broken))
+    await post(client,'/mentor/runs',{'question':'Личные контакты — четвёртый вопрос?'})
+    circuit=await process_ai(factory,foundation,httpx.MockTransport(broken))
+    async with factory() as db:
+        run=await db.get(AIRun,circuit)
+        assert run.state=='unavailable' and run.error_code=='circuit_open'
+        policy=await db.get(AISettings,foundation);policy.circuit_open_until=None;policy.failure_count=0
+        await db.commit()
+    assert len(calls)==3
+    await post(client,'/mentor/runs',{'question':'Личные контакты — старая версия prompt?'})
+    async with factory() as db:
+        run=await db.scalar(select(AIRun).where(AIRun.foundation_id==foundation,AIRun.state=='queued'))
+        run.prompt_version='retired.v0';await db.commit()
+    retired=await process_ai(factory,foundation,httpx.MockTransport(broken))
+    async with factory() as db:assert (await db.get(AIRun,retired)).error_code=='prompt_version_unavailable'
+    assert len(calls)==3
+    # An earlier successful command receipt cannot disclose a now-withdrawn source.
+    replayed=await post(client,'/mentor/runs',{'question':'Личные контакты?'},key='source-bound-replay')
+    assert replayed.json()['fragments']
+    client.cookies.set('opora_session','staff'+str(foundation))
+    await post(client,f"/coord/knowledge/sources/{source['id']}/archive",{'expected_version':source['version']})
+    client.cookies.set('opora_session','one'+str(foundation))
+    replayed=await post(client,'/mentor/runs',{'question':'Личные контакты?'},key='source-bound-replay')
+    assert replayed.json()['fragments']==[] and replayed.json()['answer'] is None

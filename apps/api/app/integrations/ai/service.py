@@ -35,7 +35,14 @@ async def run_view(db,principal,run_id):
     value=await db.scalar(select(AIRun).where(AIRun.id==run_id,AIRun.foundation_id==principal.foundation_id,AIRun.actor_id==principal.actor_id))
     if value is None:
         raise ApiError(404,'ai_run_not_found','Обработка не найдена')
-    return {'id':str(value.id),'state':value.state,'error_code':value.error_code,'task':value.task,'model':value.model,'prompt_version':value.prompt_version,'output':value.output,'charged_tokens':value.charged_tokens}
+    state,error_code,output=value.state,value.error_code,value.output
+    if value.task in {'mentor','builder.draft'}:
+        from app.modules.knowledge.service import fragments_by_id
+        visible=await fragments_by_id(db,principal,value.source_refs)
+        if len(visible)!=len(value.source_refs):state,error_code,output='sources_unavailable','sources_unavailable',None
+        elif output and not set(output.get('citation_ids',[])).issubset(set(value.source_refs)):
+            state,error_code,output='failed','citation_invalid',None
+    return {'id':str(value.id),'state':state,'error_code':error_code,'task':value.task,'model':value.model,'prompt_version':value.prompt_version,'output':output,'charged_tokens':value.charged_tokens}
 
 async def settle(db,run,result):
     policy=await settings(db,run.foundation_id,lock=True)
@@ -91,6 +98,9 @@ async def execute_run(db,context,transport=None):
     policy=await settings(db,run.foundation_id,lock=True)
     config=ProviderConfig()
     now=utcnow()
+    if config.model!=run.model:
+        run.state,run.error_code='unavailable','model_version_unavailable'
+        return {'state':run.state}
     if not policy.enabled or not config.configured():
         run.state,run.error_code='unavailable','provider_unconfigured'
         return {'state':run.state}
@@ -104,7 +114,8 @@ async def execute_run(db,context,transport=None):
     day=now.date()
     await db.execute(insert(AIDailyUsage).values(foundation_id=run.foundation_id,day=day).on_conflict_do_nothing())
     daily=await db.scalar(select(AIDailyUsage).where(AIDailyUsage.foundation_id==run.foundation_id,AIDailyUsage.day==day).with_for_update())
-    reserved=len(json.dumps(run.input_data,ensure_ascii=False).encode())+run.max_output_tokens+2000
+    spec=TASKS[run.task]
+    reserved=len(json.dumps(run.input_data,ensure_ascii=False).encode())+len((spec.system_prompt+json.dumps(spec.output_model.model_json_schema())).encode())+run.max_output_tokens
     if daily.requests>=policy.daily_requests or daily.charged_tokens+daily.reserved_tokens+reserved>policy.daily_tokens:
         run.state,run.error_code='budget_exceeded','daily_budget_exceeded'
         return {'state':run.state}
