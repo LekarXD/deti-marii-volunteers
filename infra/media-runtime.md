@@ -60,8 +60,11 @@ docker-compose --env-file infra/.env -f infra/compose.yaml -f infra/compose.medi
 
 An existing deployment may use `docker compose` when the Compose plugin is
 installed. Do not print expanded Compose config with credentials to evidence.
-The native syntax check above has passed; Docker was unavailable in this QA run,
-so the build and binary checks are instructions awaiting actual execution.
+The native syntax check above has passed. An actual frozen-source build reached
+the official base image, then failed before dependency installation because the
+available ARM daemon could not execute amd64. See the exact
+[build-attempt evidence](evidence/media-container-build-attempt-2026-10-21.md).
+The binary and sandbox checks remain an open gate on a supported host.
 
 ## Enable only after runtime acceptance
 
