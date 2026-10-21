@@ -9911,8 +9911,12 @@ export interface components {
         RecordingCapabilities: {
             /** Capture Available */
             capture_available: boolean;
+            /** Capture Limit Reason */
+            capture_limit_reason: string;
             /** Capture Reason */
             capture_reason: string;
+            /** Max Duration Seconds */
+            max_duration_seconds: number;
             /** Private Renderer Available */
             private_renderer_available: boolean;
             /**
@@ -10102,6 +10106,8 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** Max Duration Seconds */
+            max_duration_seconds: number;
             /** Number */
             number: number;
             /** Policy Scene Revision */
@@ -10128,6 +10134,8 @@ export interface components {
             started_at: string | null;
             /** State */
             state: string;
+            /** Stop Reason */
+            stop_reason: ("owner_requested" | "duration_limit") | null;
             /** Stopped At */
             stopped_at: string | null;
             /** Version */

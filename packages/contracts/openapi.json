@@ -9632,9 +9632,17 @@
             "title": "Capture Available",
             "type": "boolean"
           },
+          "capture_limit_reason": {
+            "title": "Capture Limit Reason",
+            "type": "string"
+          },
           "capture_reason": {
             "title": "Capture Reason",
             "type": "string"
+          },
+          "max_duration_seconds": {
+            "title": "Max Duration Seconds",
+            "type": "integer"
           },
           "private_renderer_available": {
             "title": "Private Renderer Available",
@@ -9648,6 +9656,8 @@
           }
         },
         "required": [
+          "max_duration_seconds",
+          "capture_limit_reason",
           "capture_available",
           "capture_reason",
           "private_renderer_available"
@@ -10187,6 +10197,10 @@
             "title": "Id",
             "type": "string"
           },
+          "max_duration_seconds": {
+            "title": "Max Duration Seconds",
+            "type": "integer"
+          },
           "number": {
             "title": "Number",
             "type": "integer"
@@ -10244,6 +10258,21 @@
             "title": "State",
             "type": "string"
           },
+          "stop_reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "owner_requested",
+                  "duration_limit"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stop Reason"
+          },
           "stopped_at": {
             "anyOf": [
               {
@@ -10262,6 +10291,8 @@
           }
         },
         "required": [
+          "max_duration_seconds",
+          "stop_reason",
           "privacy_state",
           "policy_scene_revision",
           "policy_tracks",
