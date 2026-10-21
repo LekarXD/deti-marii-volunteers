@@ -111,8 +111,8 @@ async def reconcile_participant(db,context):
             if not auth_session or auth_session.revoked_at or auth_session.expires_at<=datetime.now(timezone.utc):raise ValueError()
             principal=await resolve_principal(db,auth_session);await authz_guard(db,principal)
             if principal.foundation_id!=row.foundation_id or not principal.user_id or identity(principal.user_id)!=participant_identity:raise ValueError()
-            context=await studio.authorize_resource(db,principal,row.resource_kind,row.resource_id)
-            allowed=(context.can_host and row.state in ('opening','live')) or (not context.can_host and row.state=='live')
+            resource=await studio.authorize_resource(db,principal,row.resource_kind,row.resource_id)
+            allowed=(resource.can_host and row.state in ('opening','live')) or (not resource.can_host and row.state=='live')
         except (ValueError,KeyError,TypeError):allowed=False
         except Exception as exc:
             from app.core.errors import ApiError

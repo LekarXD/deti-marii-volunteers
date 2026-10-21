@@ -148,3 +148,38 @@ async def test_board_signed_token_introspection_rechecks_current_auth_session(wo
     async with w.factory() as db:
         with pytest.raises(ApiError) as revoked:await routes.authorize_board(request(),db)
         assert revoked.value.status_code==403
+
+@pytest.mark.asyncio
+async def test_terminal_converter_failure_is_visible_retry_cas_and_old_lease_fenced(world):
+    w=world;event=await webinar(w);stream=io.BytesIO();Image.new('RGB',(20,10),'white').save(stream,'PNG');data=stream.getvalue()
+    body=SlideUploadInput(resource_kind='live_event',resource_id=event['id'],title='Retry slides',content_type='image/png',expected_size=len(data),checksum=hashlib.sha256(data).hexdigest())
+    async with w.factory() as db:deck=await routes.slide_intent(body,db,w.host,uuid4().hex)
+    async with w.factory() as db:
+        asset=await db.get(MediaAsset,UUID(deck['upload']['id']));path=asset_path(asset);path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data);asset.received_size=len(data);await db.commit()
+    async with w.factory() as db:await complete_upload(asset.id,w.host,db)
+    async with w.factory() as db:
+        asset=await db.get(MediaAsset,asset.id);old=await db.get(Job,asset.processing_job_id);old.state='dead';old.error_code='worker_timeout';old.claim_token=uuid4();await db.commit();old_context=JobContext(old.id,old.claim_token,w.foundation.id,dict(old.payload))
+    async with w.factory() as db:
+        failed=await routes.slide_status(UUID(deck['id']),db,w.host);assert failed['state']=='failed' and failed['error_code']=='conversion_worker_failed'
+    async def retry(key):
+        async with w.factory() as db:return await routes.slide_retry(UUID(deck['id']),StudioVersionCommand(expected_version=failed['version']),db,w.host,key)
+    values=await asyncio.gather(retry('retry-one'),retry('retry-two'),return_exceptions=True)
+    assert sum(isinstance(value,dict) for value in values)==1
+    assert next(value for value in values if isinstance(value,ApiError)).code=='version_conflict'
+    async with w.factory() as db:
+        assert (await jobs.convert_slides(db,old_context))['state']=='superseded'
+        assert await db.scalar(select(func.count()).select_from(SlidePage))==0
+
+@pytest.mark.asyncio
+async def test_reconcile_authorized_participant_preserves_worker_fence(world,monkeypatch):
+    w=world;event=await webinar(w);prepared=await prepare(w,event)
+    async with w.factory() as db:
+        row=await db.get(StudioSession,UUID(prepared['id']));row.state='opening';await db.commit()
+    class Provider:
+        async def participants(self,room):return [{'identity':'opora-u'+w.host.user_id.hex,'metadata':__import__('json').dumps({'auth_session_id':str(w.host.session_id)})}]
+    monkeypatch.setattr(jobs,'LiveKitAdapter',Provider)
+    fenced=[]
+    async def fence(db):fenced.append(True)
+    context=SimpleNamespace(foundation_id=w.foundation.id,payload={'session_id':prepared['id'],'generation':1,'identity':'opora-u'+w.host.user_id.hex},fence=fence)
+    async with w.factory() as db:assert (await jobs.reconcile_participant(db,context))['state']=='authorized'
+    assert fenced==[True]

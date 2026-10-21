@@ -262,15 +262,17 @@ async def slide_content(id:UUID,db:AsyncSession=Depends(get_db),p:Principal=Depe
 
 @router.post('/slide-decks/{id}/retry',response_model=SlideDeckView)
 async def slide_retry(id:UUID,body:StudioVersionCommand,db:AsyncSession=Depends(get_db),p:Principal=Depends(get_principal),key:str|None=Header(default=None,alias='Idempotency-Key')):
-    from app.core.models import MediaAsset
+    from app.core.models import MediaAsset,Job
     async def action(scope):
         deck,_=scope;s.version(deck,body.expected_version)
-        if deck.state!='failed':raise ApiError(409,'slides_not_failed','Обработка презентации уже идёт или завершена.')
-        asset=await db.get(MediaAsset,deck.source_asset_id)
+        asset=await db.get(MediaAsset,deck.source_asset_id,with_for_update=True)
+        previous=await db.get(Job,asset.processing_job_id) if asset and asset.processing_job_id else None
+        if deck.state!='failed' and not (previous and previous.state=='dead' and deck.state!='ready'):raise ApiError(409,'slides_not_failed','Обработка презентации уже идёт или завершена.')
+        if not asset:raise ApiError(409,'slides_source_unavailable','Исходный файл недоступен. Загрузите презентацию заново.')
         job=enqueue_job(db,p.foundation_id,'slides.convert',{'asset_id':str(asset.id),'resource_type':'slide_deck','resource_id':str(deck.id),'source_checksum':asset.checksum})
         asset.state='processing';asset.processing_job_id=job.id;deck.state='converting';deck.error_code=None;deck.version+=1
         audit(db,p,'studio.slides.retry','slide_deck',id,('state',));return await s.deck_view(db,p,deck)
-    return await execute(db,p,'studio.slides.retry:'+str(id),key,body.model_dump(mode='json'),lambda:s.deck_context(db,p,id,True),action)
+    return await execute(db,p,'studio.slides.retry:'+str(id),key,body.model_dump(mode='json'),lambda:s.deck_context(db,p,id,True,True),action)
 
 @router.post('/studio-sessions/{id}/board-snapshots')
 async def board_snapshot(id:UUID,body:StudioBoardSnapshotInput,db:AsyncSession=Depends(get_db),p:Principal=Depends(get_principal),key:str|None=Header(default=None,alias='Idempotency-Key')):

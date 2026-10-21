@@ -117,8 +117,9 @@ async def board_rights(db,p,row,context):
     grant=await db.scalar(select(StudioBoardGrant).where(StudioBoardGrant.session_id==row.id,StudioBoardGrant.user_id==p.user_id))
     return bool(grant and grant.can_draw)
 
-async def deck_context(db,p,id,need_host=False):
-    row=await db.scalar(select(SlideDeck).where(SlideDeck.id==id,SlideDeck.foundation_id==p.foundation_id))
+async def deck_context(db,p,id,need_host=False,lock=False):
+    query=select(SlideDeck).where(SlideDeck.id==id,SlideDeck.foundation_id==p.foundation_id)
+    row=await db.scalar(query.with_for_update() if lock else query)
     if not row:deny()
     context=await authorize_resource(db,p,row.resource_kind,row.resource_id,need_host)
     return row,context
@@ -128,7 +129,10 @@ async def deck_view(db,p,row):
     deck_version=await db.scalar(select(SlideDeckVersion).where(SlideDeckVersion.deck_id==row.id).order_by(SlideDeckVersion.number.desc()))
     pages=(await db.scalars(select(SlidePage).where(SlidePage.deck_version_id==deck_version.id).order_by(SlidePage.ordinal))).all() if deck_version else []
     asset=await db.get(MediaAsset,row.source_asset_id) if row.source_asset_id else None
-    return {'id':row.id,'title':row.title,'state':'converting' if asset and asset.state=='processing' and row.state=='uploading' else row.state,'error_code':row.error_code,'version':row.version,'deck_version_id':deck_version.id if deck_version else None,'pages':[{'id':page.id,'ordinal':page.ordinal,'asset_id':page.asset_id,'sha256':page.sha256,'width':page.width,'height':page.height,'content_url':f'/api/v1/slide-pages/{page.id}/content'} for page in pages],'upload':asset_view(asset) if asset and asset.owner_user_id==p.user_id and asset.state in ('uploading','processing') else None}
+    from app.core.models import Job
+    job=await db.get(Job,asset.processing_job_id) if asset and asset.processing_job_id else None
+    terminal_failure=bool(job and job.state=='dead' and row.state not in ('ready','failed'))
+    return {'id':row.id,'title':row.title,'state':'failed' if terminal_failure else 'converting' if asset and asset.state=='processing' and row.state=='uploading' else row.state,'error_code':('conversion_worker_failed' if terminal_failure else row.error_code),'version':row.version,'deck_version_id':deck_version.id if deck_version else None,'pages':[{'id':page.id,'ordinal':page.ordinal,'asset_id':page.asset_id,'sha256':page.sha256,'width':page.width,'height':page.height,'content_url':f'/api/v1/slide-pages/{page.id}/content'} for page in pages],'upload':asset_view(asset) if asset and asset.owner_user_id==p.user_id and asset.state in ('uploading','processing') else None}
 
 _internal_participant_authorizers=[]
 def register_internal_participant_authorizer(authorizer):
