@@ -263,3 +263,14 @@ async def test_exhausted_dead_capture_reconciles_and_allows_explicit_retake(app,
         retake=await post('/recording-projects/'+take['project_id']+'/takes',{'expected_version':project['version'],'expected_scene_revision':revision})
         assert retake.status_code==200,retake.text
         assert retake.json()['state']=='created' and retake.json()['number']==2 and retake.json()['privacy_state']=='unknown'
+
+
+def test_browser_runtime_keeps_dependency_path_without_provider_secrets(monkeypatch):
+    from app.modules.recordings.jobs import browser_environment
+    monkeypatch.setenv('NODE_PATH','/opt/opora-media/node_modules')
+    monkeypatch.setenv('OPORA_RTC_API_SECRET','synthetic-provider-secret')
+    monkeypatch.setenv('OPORA_DATABASE_URL','synthetic-database-secret')
+    monkeypatch.setenv('NODE_OPTIONS','--require /untrusted/injection.js')
+    environment=browser_environment()
+    assert environment['NODE_PATH']=='/opt/opora-media/node_modules'
+    assert set(environment)=={'PATH','LANG','NODE_PATH'}

@@ -66,6 +66,13 @@ async def read_event(process,timeout=30):
 async def send(process,**message):
     process.stdin.write((json.dumps(message)+'\n').encode());await process.stdin.drain()
 
+def browser_environment():
+    # NODE_PATH is a trusted runtime dependency path in the dedicated media image.
+    # Do not inherit application/provider secrets or arbitrary Node injection flags.
+    environment={'PATH':os.environ.get('PATH','/usr/bin:/bin'),'LANG':'C.UTF-8'}
+    if os.environ.get('NODE_PATH'):environment['NODE_PATH']=os.environ['NODE_PATH']
+    return environment
+
 async def capture_take(db,context):
     settings=CaptureSettings.configured(require_executables=True);process=None;row=None
     try:
@@ -103,7 +110,7 @@ async def capture_take(db,context):
         with CompletedCapture(owner,row,context) as checkpoint:
             source=checkpoint.source;output=checkpoint.output
             script=Path(__file__).with_name('capture_runner.cjs')
-            environment={'PATH':os.environ.get('PATH','/usr/bin:/bin'),'LANG':'C.UTF-8'}
+            environment=browser_environment()
             process=await asyncio.create_subprocess_exec(settings.node,str(script),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,env=environment,start_new_session=True,limit=16384)
             from app.integrations.rtc.livekit import RtcSettings
             rtc=RtcSettings.from_env();provider_url=(rtc.public_url or rtc.url).replace('https://','wss://',1).replace('http://','ws://',1)
