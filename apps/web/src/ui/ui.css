@@ -6,3 +6,5 @@
 /* Portal roots carry .dm for tokens; override its page canvas explicitly. */
 .dm.modal-backdrop{min-height:0;background:rgba(18,20,26,.35)}.dm.toast-region{min-height:0;background:transparent}
 .upload-drop{display:grid;justify-items:start;gap:16px;border:1px dashed var(--line-2);border-radius:24px;padding:24px;background:var(--soft)}.upload-drop.is-over{border-color:var(--blue);background:var(--blue-tint)}.upload-progress{display:flex;align-items:center;gap:12px;width:100%}.upload-progress progress{height:10px;flex:1;accent-color:var(--orange);min-width:0}.upload-drop .job-state{padding:0}
+
+.time-text-field{position:relative}.time-text-field .input{padding-right:46px}.time-text-field>.ic{position:absolute;right:15px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--mute)}.choice-list>.input{margin:0 0 8px;min-height:44px}.choice-footer{padding:10px 4px 2px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}.choice-footer .btn{font-size:15px}.choice-footer a{font-size:15px;padding:10px 8px}.calendar-day.is-selected{background:var(--yellow);color:var(--ink)}

@@ -1,6 +1,6 @@
 import {expect,it,vi} from 'vitest';
 vi.mock('./featureAvailability',()=>({enabledDestinations:new Set(['/home','/application','/onboarding','/opportunities','/my/assignments','/academy','/messages','/mentor','/simulator','/fund/notifications','/fund/simulator/review'])}));
-import {candidateNavigation,coordinatorNavigation,getCandidateNavigation} from './navigation';
+import {candidateNavigation,coordinatorNavigation,getCandidateNavigation,volunteerNavigation} from './navigation';
 it('swaps the registration cabinet entry for Home only for verified users, keeping three desktop links',()=>{
  const verified=getCandidateNavigation(true),registration=getCandidateNavigation(false);
  expect(verified.primary.map(link=>link.to)).toEqual(['/home','/onboarding','/opportunities']);
@@ -13,3 +13,5 @@ it('puts enabled mentor/simulator under More and hides webinars until its route 
  expect(candidateNavigation.some(link=>link.to==='/webinars')).toBe(false);
  expect(coordinatorNavigation.find(group=>group.label==='Ещё')?.links.map(link=>link.to)).toEqual(['/fund/notifications','/fund/simulator/review']);
 });
+
+it('groups verified volunteer destinations by the current prototype without inventing a detail context',()=>{expect(volunteerNavigation.map(group=>group.label)).toEqual(['Возможности','Академия','Ещё']);expect(volunteerNavigation.flatMap(group=>group.links).some(link=>link.to==='/me/group')).toBe(false);expect(volunteerNavigation.find(group=>group.label==='Возможности')?.links.map(link=>link.to)).toEqual(['/opportunities','/my/assignments']);});

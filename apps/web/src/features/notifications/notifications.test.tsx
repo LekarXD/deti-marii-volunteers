@@ -27,7 +27,7 @@ describe('notification preferences',()=>{
   const user=userEvent.setup();mocks.savePreferences.mockImplementation(async(body)=>({...preference,...body,version:4}));render(page(<PreferencesPanel/>));
   const news=await screen.findByRole('switch',{name:'Новости фонда'});expect((news as HTMLButtonElement).disabled).toBe(true);expect(screen.getByRole('link',{name:'согласие на новости'}).getAttribute('href')).toBe('/profile?tab=privacy#profile-consents');
   await user.click(screen.getByRole('button',{name:'Электронная почта'}));await user.click(screen.getByRole('switch',{name:'Обучение'}));await user.click(screen.getByRole('switch',{name:'Тихие часы'}));
-  await user.click(screen.getByRole('button',{name:'Начало тихих часов'}));await user.click(screen.getByRole('combobox',{name:'Часы'}));await user.click(screen.getByRole('option',{name:'21'}));await user.click(screen.getByRole('button',{name:'Выбрать 21:00'}));
+  await user.clear(screen.getByRole('textbox',{name:'Начало тихих часов'}));await user.type(screen.getByRole('textbox',{name:'Начало тихих часов'}),'2100');await user.tab();
   await user.click(screen.getByRole('button',{name:'Сохранить настройки'}));await waitFor(()=>expect(mocks.savePreferences).toHaveBeenCalledWith({expected_version:3,no_contact:false,email_enabled:true,in_app_enabled:true,topics:{assignments:true,learning:false,messages:true,news:false},quiet_enabled:true,quiet_from:1260,quiet_to:540,timezone:'Europe/Moscow'},expect.any(String)));
   expect(screen.getByText(/Команда уже зафиксировала просьбу/)).toBeTruthy();
  });
