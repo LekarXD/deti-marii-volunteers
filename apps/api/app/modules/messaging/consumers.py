@@ -8,7 +8,7 @@ from app.core.models import User, RegistrationSession
 from app.worker.queue import enqueue_outbox
 from .models import Conversation, ConversationMember, Message
 
-LABELS={"interview.booked":"Встреча назначена", "interview.rescheduled":"Встреча перенесена", "interview.cancelled":"Встреча отменена", "interview.completed":"Встреча завершена", "interview.missed":"Не удалось встретиться"}
+LABELS={"interview.booked":"Встреча назначена", "interview.rescheduled":"Встреча перенесена", "interview.cancelled":"Встреча отменена", "interview.completed":"Встреча завершена", "interview.missed":"Не удалось встретиться", "interview.result_updated":"Итог встречи обновлён"}
 
 def enqueue_notice(db,foundation_id,recipient_id,subject,body):
     """For authoritative, already-authorized non-scheduled system events only.
@@ -30,8 +30,8 @@ async def deliver_internal(db,outbox,payload):
         event=payload["event"]
         if event not in LABELS:
             return "unavailable"
-        expected={"interview.booked":"booked","interview.rescheduled":"booked","interview.cancelled":"cancelled","interview.completed":"completed","interview.missed":"missed"}[event]
-        if booking.status!=expected:
+        expected={"interview.booked":"booked","interview.rescheduled":"booked","interview.cancelled":"cancelled","interview.completed":"completed","interview.missed":"missed","interview.result_updated":booking.status}[event]
+        if booking.status!=expected or (event=="interview.result_updated" and booking.status not in ("completed","missed")):
             return "suppressed_stale"
         recipient=booking.user_id
         if recipient is None:
