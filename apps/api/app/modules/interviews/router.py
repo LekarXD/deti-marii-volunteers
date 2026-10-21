@@ -20,6 +20,8 @@ staff_dep=require_permission("interviews.manage")
 async def command(db,p,operation,key,payload,action):
     try:
         await authz_guard(db,p)
+        if operation.startswith("interviews.availability.") or operation.startswith("interviews.complete:") or operation.startswith("interviews.missed:"):
+            if not p.has_permission("interviews.manage"): raise ApiError(403,"permission_denied","Недостаточно прав.")
         replay=await begin_command(db,p,operation,key,payload)
         if replay is not None:
             await db.commit()
@@ -43,8 +45,8 @@ async def slots(from_:date=Query(alias="from"),to:date=Query(),timezone_:str=Que
     from zoneinfo import ZoneInfo,ZoneInfoNotFoundError
     try: ZoneInfo(timezone_)
     except (ValueError,ZoneInfoNotFoundError): raise ApiError(422,"invalid_timezone","Неизвестный часовой пояс")
-    # Query dates are the availability's local origin dates; responses carry UTC instants and IANA timezone.
-    result=await s.materialize(db,p,from_,to)
+    # Query dates are interpreted in the viewer timezone; responses retain UTC instants.
+    result=await s.materialize(db,p,from_,to,timezone_)
     await db.commit()
     return result
 
@@ -67,7 +69,7 @@ async def create_window(body:WindowInput,db:AsyncSession=Depends(get_db),p:Princ
         db.add(row)
         await db.flush()
         await s.validate_windows(db,row)
-        audit(db,p,"interviews.availability.create","interview_availability",row.id,fields=body.model_fields.keys())
+        audit(db,p,"interviews.availability.create","interview_availability",row.id,fields=type(body).model_fields.keys())
         return await s.window_view(db,row)
     return await command(db,p,"interviews.availability.create",key,body.model_dump(mode="json"),action)
 
@@ -81,7 +83,7 @@ async def apply_window(db,p,id,body,preview=False):
     if not preview:
         row.version+=1
         await db.execute(update(InterviewSlot).where(InterviewSlot.series_id==id).values(available=False))
-        audit(db,p,"interviews.availability.update","interview_availability",id,fields=body.model_fields.keys())
+        audit(db,p,"interviews.availability.update","interview_availability",id,fields=type(body).model_fields.keys())
         await db.flush()
     return await s.window_view(db,row)
 

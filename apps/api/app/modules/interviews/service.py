@@ -100,7 +100,7 @@ async def assert_bookings_preserved(db, row):
     if affected:
         raise ApiError(409,"affected_bookings","Сначала перенесите назначенные встречи.",field_errors={"booking_ids":affected})
 
-async def materialize(db, p, start, end):
+async def materialize(db, p, start, end, view_timezone="Europe/Moscow"):
     if end<start or (end-start).days>92: fail("range_too_large","Выберите период до 93 дней; можно перейти к любой дате.",422)
     series=(await db.scalars(select(AvailabilitySeries).where(AvailabilitySeries.foundation_id==p.foundation_id,AvailabilitySeries.active.is_(True)).order_by(AvailabilitySeries.coordinator_id,AvailabilitySeries.id))).all()
     for row in series:
@@ -109,9 +109,12 @@ async def materialize(db, p, start, end):
         await db.refresh(row)
         if not row.active: continue
         excs=(await db.scalars(select(AvailabilityException).where(AvailabilityException.series_id==row.id))).all()
-        for day,minute,a,b,busy in expand(row,start,end,excs):
+        for day,minute,a,b,busy in expand(row,start-timedelta(days=2),end+timedelta(days=2),excs):
             await db.execute(insert(InterviewSlot).values(foundation_id=p.foundation_id,series_id=row.id,coordinator_id=row.coordinator_id,origin_date=day,origin_minute=minute,starts_at=a,ends_at=b,busy_until=busy,available=True,version=row.version).on_conflict_do_update(index_elements=[InterviewSlot.series_id,InterviewSlot.origin_date,InterviewSlot.origin_minute],set_={"starts_at":a,"ends_at":b,"busy_until":busy,"available":True,"version":row.version}))
-    q=select(InterviewSlot,AvailabilitySeries).join(AvailabilitySeries,InterviewSlot.series_id==AvailabilitySeries.id).where(InterviewSlot.foundation_id==p.foundation_id,AvailabilitySeries.active.is_(True),InterviewSlot.available.is_(True),InterviewSlot.origin_date>=start,InterviewSlot.origin_date<=end,InterviewSlot.starts_at>datetime.now(UTC)).order_by(InterviewSlot.starts_at)
+    first_instant=local_instant(start,0,view_timezone)
+    last_instant=local_instant(end+timedelta(days=1),0,view_timezone)
+    if first_instant is None or last_instant is None: fail("invalid_local_boundary","Выберите другой диапазон дат.",422)
+    q=select(InterviewSlot,AvailabilitySeries).join(AvailabilitySeries,InterviewSlot.series_id==AvailabilitySeries.id).where(InterviewSlot.foundation_id==p.foundation_id,AvailabilitySeries.active.is_(True),InterviewSlot.available.is_(True),InterviewSlot.starts_at>=first_instant,InterviewSlot.starts_at<last_instant,InterviewSlot.starts_at>datetime.now(UTC)).order_by(InterviewSlot.starts_at)
     result=[]
     for slot,row in (await db.execute(q)).all():
         busy=await db.scalar(select(InterviewBooking.id).where(InterviewBooking.status=="booked",InterviewBooking.coordinator_id==slot.coordinator_id,InterviewBooking.starts_at<slot.busy_until,InterviewBooking.busy_until>slot.starts_at).limit(1))
@@ -161,4 +164,15 @@ async def reserve(db,row,active=True):
             db.add(reservation)
         else:
             reservation.starts_at=row.starts_at;reservation.busy_until=row.busy_until;reservation.active=active
+    await db.flush()
+
+async def claim_registration(db, registration_id, user_id):
+    """Adopt facts atomically with verification; constraints reject a busy target."""
+    from app.core.models import ResourceReservation
+    rows=(await db.scalars(select(InterviewBooking).where(InterviewBooking.registration_id==registration_id).with_for_update())).all()
+    for row in rows:
+        row.registration_id=None;row.user_id=user_id;row.candidate_key="user:"+str(user_id)
+    reservations=(await db.scalars(select(ResourceReservation).where(ResourceReservation.registration_id==registration_id,ResourceReservation.source_type=="interview_candidate").with_for_update())).all()
+    for reservation in reservations:
+        reservation.registration_id=None;reservation.user_id=user_id;reservation.owner_key="user:"+str(user_id)
     await db.flush()

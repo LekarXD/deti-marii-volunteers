@@ -1,0 +1,50 @@
+import {useState} from 'react';
+import {Link} from 'react-router-dom';
+import {useQuery} from '@tanstack/react-query';
+import {api} from '../../api/transport';
+import {keys} from '../../api/keys';
+import type {components} from '../../api/generated/schema';
+import {Button,Card,Dialog,Field,Textarea,DatePicker,Combobox,Segmented,LoadingState} from '../../ui';
+import {Booking,StaffBooking,useInterviews,useInterviewCommand} from './api';
+import {BookingPicker} from './BookingPicker';
+import {dateLabel,timeLabel} from './date';
+import './interviews.css';
+const status:Record<string,string>={booked:'Назначена',completed:'Состоялась',cancelled:'Отменена',missed:'Не пришёл'};
+export function InterviewDetails({booking,staff=false,onClose}:{booking:Booking|StaffBooking;staff?:boolean;onClose:()=>void}){
+ const [action,setAction]=useState(''),[reason,setReason]=useState(''),[outcome,setOutcome]=useState('Подобрать первое занятие'),[publicNote,setPublicNote]=useState(''),[privateNote,setPrivateNote]=useState(''),[next,setNext]=useState('');
+ const command=useInterviewCommand();
+ const send=(path:string,body:unknown)=>command.mutate({path:`/interviews/${booking.id}/${path}`,body},{onSuccess:onClose});
+ return <Dialog open onClose={onClose} title="Встреча с координатором"><div className="iv-details"><p className="iv-kicker">{status[booking.status]}</p><h3>{dateLabel(booking.starts_at)}, {timeLabel(booking.starts_at)}–{timeLabel(booking.ends_at)}</h3><p>{booking.venue}</p>{booking.join_url&&<a className="btn btn-secondary" href={booking.join_url} target="_blank" rel="noreferrer">Открыть встречу</a>}
+ {booking.cancel_reason&&<p>Причина отмены: {booking.cancel_reason}</p>}
+ {booking.result&&<Card tone="soft"><h3>{booking.result.outcome as string}</h3><p>{booking.result.public_agreement as string}</p>{booking.result.next_contact_date!=null&&<p>Следующий контакт: {String(booking.result.next_contact_date)}</p>}</Card>}
+ {staff&&'private_note' in booking&&booking.private_note&&<details><summary>Внутренняя заметка</summary><p>{booking.private_note}</p></details>}
+ {booking.status==='booked'&&!action&&<div className="iv-actions">{staff&&<Button onClick={()=>setAction('finish')}>Записать итог</Button>}<Button variant="secondary" onClick={()=>setAction('move')}>Перенести</Button><Button variant="ghost" onClick={()=>setAction('cancel')}>Отменить встречу</Button></div>}
+ {action==='move'&&<BookingPicker booking={booking} applicationId={booking.application_id} onBooked={onClose} onClose={()=>setAction('')}/>}
+ {action==='cancel'&&<><Field label="Причина отмены"><Textarea value={reason} onChange={e=>setReason(e.target.value)}/></Field><div className="iv-actions"><Button variant="danger" disabled={!reason.trim()||command.isPending} onClick={()=>send('cancel',{expected_version:booking.version,reason})}>Да, отменить запись</Button><Button variant="ghost" onClick={()=>setAction('')}>Оставить встречу</Button></div></>}
+ {action==='finish'&&<div className="iv-form"><Combobox label="Следующий шаг" value={outcome} onChange={setOutcome} options={['Подобрать первое занятие','Обсудить подходящую роль','Вернуться к разговору позже','Не пришёл'].map(v=>({value:v,label:v}))}/><Field label="Договорённость для волонтёра"><Textarea value={publicNote} onChange={e=>setPublicNote(e.target.value)}/></Field><Field label="Внутренняя заметка" hint="Волонтёр её не увидит"><Textarea value={privateNote} onChange={e=>setPrivateNote(e.target.value)}/></Field><DatePicker label="Следующий контакт (необязательно)" value={next} onChange={setNext}/><div className="iv-actions"><Button disabled={!publicNote.trim()||command.isPending} onClick={()=>send(outcome==='Не пришёл'?'mark-missed':'complete',{expected_version:booking.version,outcome,public_agreement:publicNote,private_note:privateNote,next_contact_date:next||null})}>Сохранить итог</Button><Button variant="ghost" onClick={()=>setAction('')}>Назад</Button></div></div>}
+ {command.error&&<p role="alert" className="iv-error">{command.error.message}</p>}
+ <details><summary>История встречи</summary>{(booking.events||[]).map((e,i)=><p key={i}>{({booked:'Встреча назначена',rescheduled:'Встреча перенесена',cancelled:'Встреча отменена',completed:'Встреча состоялась',missed:'Не пришёл'} as Record<string,string>)[String(e.kind)]||String(e.kind)} · {dateLabel(String(e.created_at))}</p>)}</details>
+ </div></Dialog>;
+}
+export function InterviewsPage(){
+ const query=useInterviews(true),[history,setHistory]=useState('upcoming'),[selected,setSelected]=useState<string|null>(null);
+ const candidates=useQuery({queryKey:keys.list('candidates',{interviewNames:true}),queryFn:({signal})=>api<components['schemas']['CandidateListView']>('/api/v1/coord/candidates?limit=100',{signal})});
+ const name=(id:string)=>{const c=candidates.data?.items.find(c=>c.id===id);const a=c?.revision.answers as Record<string,unknown>|undefined;return a?[a.firstName,a.lastName].filter(Boolean).join(' ')||'Кандидат':'Кандидат';};
+ const bookings=query.data||[],upcoming=bookings.filter(b=>b.status==='booked'),featured=upcoming.find(b=>new Date(b.starts_at)>new Date()),shown=bookings.filter(b=>history==='upcoming'?b.status==='booked':b.status!=='booked'),current=bookings.find(b=>b.id===selected);
+ return <div className="iv-page"><div className="iv-heading"><h1>Собеседования</h1><Link className="btn btn-secondary" to="/coord/interviews/availability">Моя доступность</Link></div>
+ <Card tone="hero" className="iv-hero"><div><p className="iv-kicker">{featured?'Ближайшая встреча':'Собеседования'}</p><h2>{featured?`${dateLabel(featured.starts_at)}, ${timeLabel(featured.starts_at)}`:'Откройте время для встреч'}</h2><p>{featured?`${name(featured.application_id)} · ${featured.venue}`:'Кандидаты выберут удобный день в своём кабинете.'}</p>{featured?<Button size="lg" onClick={()=>setSelected(featured.id)}>Открыть встречу</Button>:<Link className="btn btn-primary btn-lg" to="/coord/interviews/availability">Настроить доступность</Link>}</div><div className="iv-calendar-art" aria-hidden="true"><span>◷</span></div></Card>
+ <section><div className="iv-heading"><h2>Встречи</h2><Segmented label="Список встреч" value={history} onChange={setHistory} options={[{value:'upcoming',label:'Предстоящие'},{value:'history',label:'История'}]}/></div>
+ <Card>{query.isLoading?<LoadingState/>:query.error?<p role="alert">{query.error.message}<Button onClick={()=>void query.refetch()}>Повторить</Button></p>:!shown.length?<div className="iv-empty"><h3>{history==='history'?'Прошедших встреч пока нет':'Встреч пока нет'}</h3><p>{history==='history'?'Здесь будут завершённые и отменённые встречи.':'Здесь появятся записи кандидатов.'}</p></div>:shown.map(b=><button className="iv-booking" key={b.id} onClick={()=>setSelected(b.id)}><span className="iv-date-tile"><b>{new Date(b.starts_at).getDate()}</b><span>{new Intl.DateTimeFormat('ru-RU',{month:'short',timeZone:'Europe/Moscow'}).format(new Date(b.starts_at))}</span></span><span className="iv-grow"><strong>{name(b.application_id)}</strong><span>{timeLabel(b.starts_at)}–{timeLabel(b.ends_at)} · {b.venue}</span></span><span className="iv-badge">{status[b.status]}</span><span aria-hidden="true">→</span></button>)}</Card></section><p className="iv-meta">Московское время · изменения обновляются автоматически</p>
+ {current&&<InterviewDetails key={current.id+current.version} booking={current} staff onClose={()=>setSelected(null)}/>}</div>;
+}
+export function CandidateInterviewsPage(){
+ const query=useInterviews(),[picker,setPicker]=useState(false),[selected,setSelected]=useState<string|null>(null);
+ const bookings=query.data||[],active=bookings.find(b=>b.status==='booked'),current=bookings.find(b=>b.id===selected);
+ return <div className="iv-page"><h1>Встреча с координатором</h1>{query.isLoading?<LoadingState/>:query.error?<p role="alert">{query.error.message}</p>:<>
+ <Card tone="hero" className="iv-hero"><div><p className="iv-kicker">Следующий шаг</p><h2>{active?`${dateLabel(active.starts_at)}, ${timeLabel(active.starts_at)}`:'Давайте познакомимся'}</h2><p>{active?active.venue:'Выберите удобное время для разговора. На встрече можно обсудить вопросы о волонтёрстве.'}</p><Button size="lg" onClick={()=>active?setSelected(active.id):setPicker(true)}>{active?'Открыть встречу':'Выбрать время'}</Button></div><div className="iv-calendar-art" aria-hidden="true">◷</div></Card>
+ {picker&&!active&&<BookingPicker onBooked={()=>setPicker(false)} onClose={()=>setPicker(false)}/>}
+ <Card tone="soft"><h2>Познакомиться с фондом</h2><p>Знакомство и запись на встречу доступны параллельно.</p><Link className="btn btn-secondary" to="/onboarding">Открыть знакомство</Link></Card>
+ {bookings.some(b=>b.status!=='booked')&&<section><h2>История встреч</h2>{bookings.filter(b=>b.status!=='booked').map(b=><button className="iv-booking" key={b.id} onClick={()=>setSelected(b.id)}><span className="iv-grow">{dateLabel(b.starts_at)}, {timeLabel(b.starts_at)}</span><span>{status[b.status]}</span></button>)}</section>}
+ {current&&<InterviewDetails key={current.id+current.version} booking={current} onClose={()=>setSelected(null)}/>}</>}
+ </div>;
+}
