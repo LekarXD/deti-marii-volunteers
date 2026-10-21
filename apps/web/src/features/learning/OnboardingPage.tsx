@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Link,Navigate} from 'react-router-dom';
+import {Link,Navigate,useSearchParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../../api/transport';
 import {keys} from '../../api/keys';
@@ -53,12 +53,20 @@ export function AssessmentPlayer({assignment}:{assignment:Assignment}) {
     {run?.state==='active'&&question&&<><Card><p className="eyebrow">Вопрос {Math.max(0,index)+1} из {run.total}</p><h2 className="h2">{question.prompt}</h2><div className="a-answers">{question.options.map((option,i)=><button key={i} className={`a-answer ${feedback?.selected_option===i?(feedback.correct?'is-right':'is-wrong'):''}`} disabled={command.isPending||Boolean(feedback)} onClick={()=>void pick(i).catch(()=>undefined)}>{option}</button>)}</div></Card>{feedback&&<div className={`a-fb ${feedback.correct?'is-ok':'is-bad'}`} role="status"><h3>{feedback.correct?'Верно!':'Не совсем'}</h3><p>{feedback.explanation}</p><Button size="lg" disabled={command.isPending} onClick={()=>void next().catch(()=>undefined)}>{index+1<run.total?'Следующий вопрос':'Завершить'}</Button></div>}</>}
   </section>;
 }
-function Journey({assignment,earlierCompleted}:{assignment:Assignment;earlierCompleted:boolean}) {
-  const [selection,setSelection]=useState<string|null>(null),[card,setCard]=useState(0);
+function Journey({assignment,earlierCompleted,hasEarlier}:{assignment:Assignment;earlierCompleted:boolean;hasEarlier:boolean}) {
+  const [params,setParams]=useSearchParams();
   const command=useLearningCommand();
   const end=useRef<HTMLDivElement>(null),[read,setRead]=useState<string[]>([]);
   const fallback=assignment.lessons.find(item=>!item.completed)?.id??'test';
-  const current=selection??fallback;
+  const firstIncomplete=assignment.lessons.findIndex(item=>!item.completed);
+  const requested=params.get('assignment')===assignment.id?params.get('lesson'):null;
+  const requestedIndex=assignment.lessons.findIndex(item=>item.id===requested);
+  const allowed=requested==='test'?firstIncomplete<0:requestedIndex>=0&&(firstIncomplete<0||requestedIndex<=firstIncomplete);
+  const current=allowed&&requested?requested:fallback;
+  const requestedCard=Number(params.get('card')??1);
+  const card=params.get('assignment')===assignment.id&&current===requested&&Number.isSafeInteger(requestedCard)&&requestedCard>0?requestedCard-1:0;
+  function checkpoint(id:string,index=0){setParams({assignment:assignment.id,lesson:id,card:String(index+1)},{replace:true});}
+  function setCard(index:number){checkpoint(current,index);}
   const summary=assignment.lessons.find(item=>item.id===current);
   const layout=summary?.mode==='cards'?'cards':'longread';
   const lesson=useLesson(summary?.id);
@@ -72,14 +80,15 @@ function Journey({assignment,earlierCompleted}:{assignment:Assignment;earlierCom
     check();window.addEventListener('scroll',check,{passive:true});window.addEventListener('resize',check);
     return()=>{window.removeEventListener('scroll',check);window.removeEventListener('resize',check);};
   },[current,layout,lesson.data]);
-  function go(id:string,last=false){setSelection(id);setCard(last?Number.MAX_SAFE_INTEGER:0);requestAnimationFrame(()=>document.querySelector('.a-ohead')?.scrollIntoView({block:'start'}));}
+  useEffect(()=>{if(summary&&lesson.data&&(card!==visibleCard||params.get('assignment')!==assignment.id||params.get('lesson')!==current))checkpoint(current,visibleCard);},[current,card,visibleCard,lesson.data,summary]);
+  function go(id:string,last=false){checkpoint(id,last?Number.MAX_SAFE_INTEGER-1:0);requestAnimationFrame(()=>document.querySelector('.a-ohead')?.scrollIntoView({block:'start'}));}
   async function complete(){
     if(!summary)return;
     await command.mutateAsync({path:`/learning/progress/${summary.id}/complete`,body:{assignment_id:assignment.id}});
     if(step===assignment.lessons.length-1)await command.mutateAsync({path:'/policy-acknowledgements',body:{assignment_id:assignment.id}});
     go(assignment.lessons[step+1]?.id??'test');
   }
-  return <div className={`learning-page learning-${layout}`}>{assignment.change_note&&<Card tone="soft"><p>{assignment.change_note}</p>{earlierCompleted&&<p>Ранее вы уже завершили знакомство. Этот результат сохранён; повторное подтверждение не требуется.</p>}<Link to="/application">Перейти в личный кабинет</Link></Card>}<div className="a-ohead"><p className="eyebrow">Шаг {step+1} из {assignment.lessons.length+1}</p><div className="a-seg" aria-hidden="true">{[...assignment.lessons.map(l=>({id:l.id,done:l.completed})),{id:'test',done:assignment.completed}].map((item,i)=><i key={item.id} className={`${item.done?'is-done':''} ${i===step?'is-on':''}`}/>)}</div></div>
+  return <div className={`learning-page learning-${layout}`}>{assignment.change_note&&hasEarlier&&<Card tone="soft"><p>Материалы знакомства обновлены.</p>{earlierCompleted&&<p>Ранее вы уже завершили знакомство. Этот результат сохранён; повторное подтверждение не требуется.</p>}<Link to="/application">Перейти в личный кабинет</Link></Card>}<div className="a-ohead"><p className="eyebrow">Шаг {step+1} из {assignment.lessons.length+1}</p><div className="a-seg" aria-hidden="true">{[...assignment.lessons.map(l=>({id:l.id,done:l.completed})),{id:'test',done:assignment.completed}].map((item,i)=><i key={item.id} className={`${item.done?'is-done':''} ${i===step?'is-on':''}`}/>)}</div></div>
     {command.error&&<ErrorState error={command.error}/>}
     {current==='test'?<AssessmentPlayer assignment={assignment}/>:<>{lesson.isPending?<LoadingState label="Загружаем материалы…"/>:lesson.error?<ErrorState error={lesson.error} retry={()=>void lesson.refetch()}/>:lesson.data&&<><div className="learning-module-title"><h1>{lesson.data.title}</h1>{layout==='cards'&&<span>{visibleCard+1} / {blocks.length}</span>}</div>
       <div className="a-blocks">{layout==='cards'?<Card><ContentBlock key={blocks[visibleCard]?.id} block={blocks[visibleCard]} lessonId={lesson.data.id}/></Card>:blocks.map(block=><ContentBlock key={block.id} block={block} lessonId={lesson.data!.id}/>)}</div>
@@ -92,8 +101,9 @@ function Introduction() {
  if(preparation.isPending)return <LoadingState label="Загружаем знакомство с фондом…"/>;
  if(preparation.error)return <ErrorState error={preparation.error} retry={()=>void preparation.refetch()}/>;
  const assignment=preparation.data?.assignments.find(item=>item.track_key==='introduction');
+ const hasEarlier=preparation.data?.assignments.some(item=>item.track_key==='introduction'&&item.id!==assignment?.id)??false;
  const earlierCompleted=preparation.data?.assignments.some(item=>item.track_key==='introduction'&&item.id!==assignment?.id&&item.completed)??false;
- return assignment?<Journey key={assignment.id} assignment={assignment} earlierCompleted={earlierCompleted}/>:<p>Материалы ещё не опубликованы.</p>;
+ return assignment?<Journey key={assignment.id} assignment={assignment} earlierCompleted={earlierCompleted} hasEarlier={hasEarlier}/>:<p>Материалы ещё не опубликованы.</p>;
 }
 export function OnboardingPage(){return <Introduction/>;}
 export function OnboardingCardsPage(){return <Navigate to="/onboarding" replace/>;}

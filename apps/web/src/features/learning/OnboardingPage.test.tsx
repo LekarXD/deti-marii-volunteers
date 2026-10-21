@@ -12,7 +12,7 @@ vi.mock('../../api/transport',()=>({api:vi.fn(),getPrincipalKey:()=> 'fixture-ow
 afterEach(()=>{cleanup();vi.clearAllMocks();vi.restoreAllMocks();});
 const assignment={track_key:'introduction',track_id:'track',id:'assignment',release_id:'release',release_number:1,title:'Fixture',intro:'Fixture',lessons:[{id:'lesson',lesson_id:'stable',key:'history',title:'Fixture module',minutes:1,completed:true}],assessment_version_id:'assessment',completed:true,acknowledged:true,latest_attempt_id:'old',latest_attempt_state:'submitted',reacknowledgement_required:false};
 const old={id:'old',assignment_id:'assignment',assessment_version_id:'assessment',state:'submitted',questions:[{id:'question',prompt:'Fixture question',options:['First','Second']}],answers:[{question_id:'question',selected_option:0,correct:true,explanation:'Feedback'}],score:1,total:1};
-function mount(view=<OnboardingPage/>){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});return render(<QueryClientProvider client={client}><MemoryRouter>{view}</MemoryRouter></QueryClientProvider>);}
+function mount(view=<OnboardingPage/>,entry='/'){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[entry]}>{view}</MemoryRouter></QueryClientProvider>);}
 describe('persistent introduction',()=>{
  it('hides the old result immediately when repeating and loads the new server attempt',async()=>{
   let release:((value:unknown)=>void)|undefined;
@@ -71,6 +71,27 @@ describe('persistent introduction',()=>{
   expect((screen.getByRole('button',{name:/Дочитайте до конца/}) as HTMLButtonElement).disabled).toBe(true);
   top=0;fireEvent.scroll(window);
   await waitFor(()=>expect((screen.getByRole('button',{name:/Понятно, к тесту/}) as HTMLButtonElement).disabled).toBe(false));
+ });
+ it.each([['assignment','Second actual block'],['another-account-assignment','First actual block']])('restores a valid scoped card URL and ignores another assignment (%s)',async(owner,expected)=>{
+  vi.mocked(api).mockImplementation(async(path)=>{
+   if(path==='/api/v1/me/preparation')return {assignments:[{...assignment,completed:false,latest_attempt_id:null,lessons:[{...assignment.lessons[0],completed:false,mode:'cards'}]}],introduction_completed:false} as never;
+   if(path==='/api/v1/learning/lessons/lesson')return {id:'lesson',title:'Fixture module',mode:'cards',minutes:1,blocks:[{id:'one',type:'text',text:'First actual block'},{id:'two',type:'text',text:'Second actual block'}]} as never;
+   throw new Error(`Unexpected ${path}`);
+  });
+  mount(<OnboardingPage/>,`/?assignment=${owner}&lesson=lesson&card=2`);
+  await screen.findByText(expected);
+ });
+ it.each([null,false,true])('announces earlier completion only when it exists (%s)',async(previous)=>{
+  vi.mocked(api).mockImplementation(async(path)=>{
+   if(path==='/api/v1/me/preparation')return {assignments:[{...assignment,change_note:'Материалы знакомства обновлены. Ранее завершённое знакомство сохранено в истории.'},...(previous===null?[]:[{...assignment,id:'previous',completed:previous}])],introduction_completed:previous===true} as never;
+   if(path==='/api/v1/assessment-attempts/old/result')return old as never;
+   if(path==='/api/v1/me/interviews')return [] as never;
+   throw new Error(`Unexpected ${path}`);
+  });
+  mount();await screen.findByText('1 из 1 — отлично!');
+  expect(Boolean(screen.queryByText('Материалы знакомства обновлены.'))).toBe(previous!==null);
+  expect(Boolean(screen.queryByText(/Ранее вы уже завершили знакомство/))).toBe(previous===true);
+  expect(screen.queryByText(/Ранее завершённое знакомство сохранено в истории/)).toBeNull();
  });
  it.each([OnboardingCardsPage,OnboardingListPage])('redirects a legacy presentation route to the canonical route',(Legacy)=>{
   mount(<Routes><Route path="/" element={<Legacy/>}/><Route path="/onboarding" element={<p>Canonical introduction</p>}/></Routes>);
