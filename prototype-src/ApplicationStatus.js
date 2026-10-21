@@ -28,6 +28,7 @@ class Component extends DCLogic {
   return {first:firstName(me),
    modes:[['fresh','Только что отправил анкету',()=>this.demo(freshProgress(),false)],['booked','Записался, но не знаком с фондом',()=>this.demo({...freshProgress(),tg:true},true)],['all','Всё сделано',()=>this.demo({...freshProgress(),done:allDone,testDone:true,score:9,tg:true},true)]].map(([id,label,pick])=>({label,pick,cls:mode===id?'is-on':'',pressed:mode===id?'true':'false'})),
    statusText:completed?'Встреча состоялась':FORM.done.title,statusCls:'dot '+(completed?'dot-green':'dot-yellow'),
+   needMore:!!me.quick&&!me.moreDone,moreHint:FORM.quick.moreHint,
    heroInvite:!meeting,meetWhenBig:big.charAt(0).toUpperCase()+big.slice(1),meetDay,
    showNudge,meetWhen,onboarded,
    onbHead:active?'До встречи':'Пока анкета проверяется',

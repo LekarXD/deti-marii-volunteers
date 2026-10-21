@@ -29,7 +29,7 @@
       "is_interactive": true
     },
     "ApplicationStatus.dc.html": {
-      "x": 0,
+      "x": 4560,
       "y": 20200,
       "w": 1440,
       "h": 1700,
@@ -369,9 +369,36 @@
       "expand": "fill",
       "is_interactive": true
     },
-    "Onboarding.dc.html": {
+    "ApplyFlow.dc.html": {
       "x": 6080,
       "y": 17900,
+      "w": 1440,
+      "h": 1100,
+      "title": "Кандидат: анкета по одному вопросу",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "ApplyQuick.dc.html": {
+      "x": 0,
+      "y": 20200,
+      "w": 1440,
+      "h": 1300,
+      "title": "Кандидат: короткая анкета",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "CandidateMore.dc.html": {
+      "x": 1520,
+      "y": 20200,
+      "w": 1440,
+      "h": 2600,
+      "title": "Кандидат: расскажите о себе подробнее",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Onboarding.dc.html": {
+      "x": 3040,
+      "y": 20200,
       "w": 1440,
       "h": 2400,
       "title": "Кандидат: знакомство с фондом",
@@ -420,6 +447,9 @@
     "Group.dc.html",
     "FirstShift.dc.html",
     "Participation.dc.html",
+    "ApplyFlow.dc.html",
+    "ApplyQuick.dc.html",
+    "CandidateMore.dc.html",
     "Onboarding.dc.html"
   ],
   "notes": {
