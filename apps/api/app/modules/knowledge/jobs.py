@@ -74,6 +74,9 @@ async def generate_ai(db,context):
     if hook is not None and run.state not in {'queued','calling'}:
         await context.fence(db)
         await hook(db,run,context)
+    if run.task=='profile.suggest':
+        from app.integrations.ai.profile import materialize_profile_suggestion
+        await materialize_profile_suggestion(db,run,context)
     if run.task!='mentor':return result
     items=(await db.scalars(select(MentorRun).where(MentorRun.ai_run_id==run.id).with_for_update())).all()
     session=await db.get(Session,run.request_session_id)

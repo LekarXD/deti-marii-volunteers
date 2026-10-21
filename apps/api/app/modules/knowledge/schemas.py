@@ -96,3 +96,15 @@ class AISettingsView(BaseModel):
     charged_tokens:int
     reserved_tokens:int
     requests:int
+
+
+class ProfileAIInput(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    expected_profile_version: int = Field(ge=0)
+
+class ProfileAIRunView(BaseModel):
+    id: UUID
+    state: str
+    error_code: str | None = None
+    profile_version: int
+    suggestion_id: UUID | None = None

@@ -22,6 +22,9 @@ async def command(db,principal,request,key,operation,payload,action,permissions=
     previous=await begin_command(db,principal,operation,key,payload)
     if previous is not None:
         if operation=='mentor.ask':previous=jsonable_encoder(await service.mentor_view(db,principal,UUID(previous['id'])))
+        if operation=='profile.ai_request':
+            from app.integrations.ai.profile import profile_run_view
+            previous=jsonable_encoder(await profile_run_view(db,principal,UUID(previous['id'])))
         await db.commit()
         return previous
     if operation in {'mentor.ask','mentor.report'}:
@@ -133,3 +136,19 @@ async def put_ai_settings(body:AISettingsInput,request:Request,principal:Princip
         value.version+=1
         return await settings_view(db,principal)
     return await command(db,principal,request,key,'ai.settings',body.model_dump(mode='json'),action,('ai.manage',))
+
+
+from .schemas import ProfileAIInput,ProfileAIRunView
+
+@router.post('/me/profile/ai-runs',response_model=ProfileAIRunView)
+async def request_profile_ai(body:ProfileAIInput,request:Request,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db),key:str|None=Header(None,alias='Idempotency-Key')):
+    from app.integrations.ai.profile import enqueue_profile_suggestion,profile_run_view
+    async def action():
+        run=await enqueue_profile_suggestion(db,principal,expected_profile_version=body.expected_profile_version)
+        return await profile_run_view(db,principal,run.id)
+    return await command(db,principal,request,key,'profile.ai_request',body.model_dump(mode='json'),action)
+
+@router.get('/me/profile/ai-runs/{run_id}',response_model=ProfileAIRunView)
+async def profile_ai_status(run_id:UUID,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    from app.integrations.ai.profile import profile_run_view
+    return await profile_run_view(db,principal,run_id)

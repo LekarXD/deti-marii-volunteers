@@ -14,7 +14,7 @@ async def settings(db,foundation_id,lock=False):
     config=ProviderConfig()
     await db.execute(insert(AISettings).values(foundation_id=foundation_id,enabled=config.enabled).on_conflict_do_nothing())
     query=select(AISettings).where(AISettings.foundation_id==foundation_id)
-    return await db.scalar(query.with_for_update() if lock else query)
+    return await db.scalar((query.with_for_update() if lock else query).execution_options(populate_existing=True))
 
 async def enqueue_ai_run(db,principal,task,input_data,source_refs=None,max_output_tokens=1200):
     spec=TASKS.get(task)
@@ -42,6 +42,10 @@ async def run_view(db,principal,run_id):
         if len(visible)!=len(value.source_refs):state,error_code,output='sources_unavailable','sources_unavailable',None
         elif output and not set(output.get('citation_ids',[])).issubset(set(value.source_refs)):
             state,error_code,output='failed','citation_invalid',None
+    if value.task=='profile.suggest':
+        from .profile import profile_run_view
+        profile=await profile_run_view(db,principal,value.id)
+        state,error_code,output=profile['state'],profile['error_code'],None
     return {'id':str(value.id),'state':state,'error_code':error_code,'task':value.task,'model':value.model,'prompt_version':value.prompt_version,'output':output,'charged_tokens':value.charged_tokens}
 
 async def settle(db,run,result):
@@ -92,6 +96,12 @@ async def execute_run(db,context,transport=None):
         if len(visible)!=len(run.source_refs):
             run.state,run.error_code='sources_unavailable','sources_unavailable'
             return {'state':run.state}
+    if run.task=='profile.suggest':
+        from .profile import validate_profile_source
+        try:await validate_profile_source(db,principal,run)
+        except ApiError as error:
+            run.state,run.error_code='sources_changed',error.code
+            return {'state':run.state}
     if run.task=='builder.draft' and not principal.has_permission('learning.write'):
         run.state,run.error_code='cancelled','permission_denied'
         return {'state':run.state}
@@ -130,7 +140,10 @@ async def execute_run(db,context,transport=None):
     await db.commit()
     result=await request_json(spec,data,config,max_tokens,timeout,transport)
     await context.fence(db)
-    run=await db.scalar(select(AIRun).where(AIRun.id==run.id).with_for_update())
+    run=await db.scalar(select(AIRun).where(AIRun.id==run.id).with_for_update().execution_options(populate_existing=True))
+    current_policy=await settings(db,run.foundation_id,lock=True)
+    if not current_policy.enabled:
+        result=ProviderResult('cancelled','ai_disabled',tokens=result.tokens,request_id=result.request_id)
     await settle(db,run,result)
     await db.flush()
     return {'state':run.state,'run_id':str(run.id)}
