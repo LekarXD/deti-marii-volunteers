@@ -389,3 +389,10 @@ async def test_updated_source_is_append_only_preserves_completion_and_disables_n
     # Historical policy remains intact even after the new source is current.
     legacy_repeat=await post(client,f"/assessments/{old['assessment_version_id']}/attempts",{'assignment_id':old['id']})
     assert legacy_repeat.status_code==200 and legacy_repeat.json()['score'] is None
+    async with factory() as db:
+        track=await db.get(LearningTrack,fixture_id(foundation_id,'track'))
+        track.current_release_id=UUID(old['release_id']) # explicit coordinator rollback
+        track.version+=1
+        await seed_introduction(db,foundation_id)
+        assert track.current_release_id==UUID(old['release_id'])
+        await db.commit()

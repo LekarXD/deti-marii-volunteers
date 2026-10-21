@@ -37,7 +37,7 @@ async def import_source_version(db,foundation_id,source_version):
     promote=track.current_release_id in (None,fixture_id(foundation_id,'release',1))
     existing=await db.get(LearningRelease,release_id)
     if existing:
-        if promote:track.current_release_id=existing.id
+        # A rerun must preserve a coordinator rollback as well as custom releases.
         return track_id
     versions=[]
     for module in content['modules']:

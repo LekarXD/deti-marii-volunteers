@@ -1,18 +1,18 @@
 // @vitest-environment jsdom
-import {act, render, screen, waitFor} from '@testing-library/react';
+import {act,fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import {MemoryRouter} from 'react-router-dom';
+import {MemoryRouter,Route,Routes} from 'react-router-dom';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {cleanup} from '@testing-library/react';
-import {OnboardingPage} from './OnboardingPage';
+import {AssessmentPlayer,OnboardingPage,OnboardingCardsPage,OnboardingListPage} from './OnboardingPage';
 import {api} from '../../api/transport';
 
 vi.mock('../../api/transport',()=>({api:vi.fn(),getPrincipalKey:()=> 'fixture-owner'}));
-afterEach(()=>{cleanup();vi.clearAllMocks();});
+afterEach(()=>{cleanup();vi.clearAllMocks();vi.restoreAllMocks();});
 const assignment={track_key:'introduction',track_id:'track',id:'assignment',release_id:'release',release_number:1,title:'Fixture',intro:'Fixture',lessons:[{id:'lesson',lesson_id:'stable',key:'history',title:'Fixture module',minutes:1,completed:true}],assessment_version_id:'assessment',completed:true,acknowledged:true,latest_attempt_id:'old',latest_attempt_state:'submitted',reacknowledgement_required:false};
 const old={id:'old',assignment_id:'assignment',assessment_version_id:'assessment',state:'submitted',questions:[{id:'question',prompt:'Fixture question',options:['First','Second']}],answers:[{question_id:'question',selected_option:0,correct:true,explanation:'Feedback'}],score:1,total:1};
-function mount(){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});return render(<QueryClientProvider client={client}><MemoryRouter><OnboardingPage/></MemoryRouter></QueryClientProvider>);}
+function mount(view=<OnboardingPage/>){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});return render(<QueryClientProvider client={client}><MemoryRouter>{view}</MemoryRouter></QueryClientProvider>);}
 describe('persistent introduction',()=>{
  it('hides the old result immediately when repeating and loads the new server attempt',async()=>{
   let release:((value:unknown)=>void)|undefined;
@@ -24,7 +24,7 @@ describe('persistent introduction',()=>{
    if(path==='/api/v1/assessments/assessment/attempts')return await new Promise<unknown>(resolve=>{release=resolve;}) as never;
    throw new Error(`Unexpected ${path}`);
   });
-  mount();
+  mount(<AssessmentPlayer assignment={{...assignment,track_key:'academy'} as never}/>);
   await screen.findByText('Правильных ответов: 1 из 1');
   await userEvent.click(screen.getByRole('button',{name:'Пройти тест ещё раз'}));
   expect(screen.queryByText('Правильных ответов: 1 из 1')).toBeNull();
@@ -33,5 +33,47 @@ describe('persistent introduction',()=>{
   await screen.findByText('Fixture question');
   expect(screen.queryByText('Правильных ответов: 1 из 1')).toBeNull();
   expect(screen.getByRole('button',{name:'First'})).toBeDefined();
+ });
+ it('uses the canonical introduction result without offering a repeat',async()=>{
+  vi.mocked(api).mockImplementation(async(path)=>{
+   if(path==='/api/v1/me/preparation')return {assignments:[assignment],introduction_completed:true,booking_requires_introduction:false} as never;
+   if(path==='/api/v1/assessment-attempts/old/result')return {...old,total:10,score:7} as never;
+   if(path==='/api/v1/me/interviews')return [] as never;
+   throw new Error(`Unexpected ${path}`);
+  });
+  mount();
+  await screen.findByText('7 из 10 — хорошо!');
+  await screen.findByText('Остальному научим. Осталось выбрать время встречи');
+  expect(screen.queryByRole('button',{name:'Пройти тест ещё раз'})).toBeNull();
+ });
+ it('reads each module presentation from the same versioned API content',async()=>{
+  vi.mocked(api).mockImplementation(async(path)=>{
+   if(path==='/api/v1/me/preparation')return {assignments:[{...assignment,completed:false,latest_attempt_id:null,lessons:[{...assignment.lessons[0],completed:false,mode:'cards'}]}],introduction_completed:false} as never;
+   if(path==='/api/v1/learning/lessons/lesson')return {id:'lesson',title:'Fixture module',mode:'cards',minutes:1,blocks:[{id:'one',type:'text',text:'First actual block'},{id:'two',type:'text',text:'Second actual block'}]} as never;
+   throw new Error(`Unexpected ${path}`);
+  });
+  mount();
+  await screen.findByText('First actual block');
+  expect(screen.queryByText('Second actual block')).toBeNull();
+  await userEvent.click(screen.getByRole('button',{name:'Дальше'}));
+  await screen.findByText('Second actual block');
+  expect(screen.queryByText('First actual block')).toBeNull();
+ });
+ it('unlocks the feed continuation only after its end reaches the viewport',async()=>{
+  let top=10000;
+  vi.spyOn(Element.prototype,'getBoundingClientRect').mockImplementation(()=>({top,bottom:top,left:0,right:0,width:0,height:0,x:0,y:top,toJSON:()=>({})}));
+  vi.mocked(api).mockImplementation(async(path)=>{
+   if(path==='/api/v1/me/preparation')return {assignments:[{...assignment,completed:false,latest_attempt_id:null,lessons:[{...assignment.lessons[0],completed:false,mode:'feed'}]}],introduction_completed:false} as never;
+   if(path==='/api/v1/learning/lessons/lesson')return {id:'lesson',title:'Fixture module',mode:'feed',minutes:1,blocks:[{id:'one',type:'text',text:'Full feed content'}]} as never;
+   throw new Error(`Unexpected ${path}`);
+  });
+  mount();await screen.findByText('Full feed content');
+  expect((screen.getByRole('button',{name:/Дочитайте до конца/}) as HTMLButtonElement).disabled).toBe(true);
+  top=0;fireEvent.scroll(window);
+  await waitFor(()=>expect((screen.getByRole('button',{name:/Понятно, к тесту/}) as HTMLButtonElement).disabled).toBe(false));
+ });
+ it.each([OnboardingCardsPage,OnboardingListPage])('redirects a legacy presentation route to the canonical route',(Legacy)=>{
+  mount(<Routes><Route path="/" element={<Legacy/>}/><Route path="/onboarding" element={<p>Canonical introduction</p>}/></Routes>);
+  expect(screen.getByText('Canonical introduction')).toBeDefined();
  });
 });
