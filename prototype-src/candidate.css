@@ -66,8 +66,6 @@
 .a-mod.is-done .a-num{background:var(--green);color:#fff}
 .a-num-o{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:var(--orange);color:#fff}
 .a-chev .ic{width:20px;height:20px}
-.a-readbar{position:fixed;top:0;left:0;right:0;height:5px;z-index:50}
-.a-readbar i{display:block;height:100%;width:0;background:var(--orange);transition:width .1s linear}
 .a-modnav{margin:0 0 20px;gap:12px}
 .a-pills{display:flex;gap:6px;flex-wrap:wrap}
 .a-pill{width:36px;height:36px;border:0;border-radius:50%;background:var(--paper);font-weight:600;color:var(--ink-2)}
@@ -437,8 +435,7 @@
  .a-yes::before,.a-no::before{left:2px;top:0}
  .a-no::before{color:var(--red-ink)}
 }
-/* Знакомство, вариант 2 «Карточки»: один блок на экран */
-.c-wrap,.l-wrap{max-width:760px;margin:0 auto}
+/* Знакомство: шаги-карточки (история, кодекс) — один блок на экран */
 .c-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:8px 0 14px}
 .c-mod{margin:0;font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
 .c-card.card{min-height:360px;padding:28px}
@@ -448,28 +445,55 @@
 .c-nav{display:flex;gap:10px;margin-top:16px}
 .c-next{flex:1}
 @media (max-width:720px){.c-mod{font-size:24px}.c-card.card{min-height:58vh;padding:20px 18px}.c-card .a-icards{display:block;background:transparent;padding:0}.c-card .a-lead{font-size:20px}.c-nav{position:sticky;bottom:12px}}
-/* Знакомство, вариант 3 «Темы списком»: аккордеон, по одной теме */
-.l-list.card{padding:4px 24px;margin-top:20px}
-.l-item{border-top:1px solid var(--line)}
-.l-item:first-child{border-top:0}
-.l-head{width:100%;display:flex;align-items:center;gap:14px;min-height:64px;padding:12px 0;border:0;background:transparent;text-align:left;font-size:17px;font-weight:600;color:var(--ink)}
-.l-mark{flex:0 0 32px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-size:14px;color:var(--ink-2)}
-.l-item.is-seen .l-mark{background:var(--green);color:#fff}
-.l-title{flex:1}
-.l-chev .ic{transition:transform .2s}
-.l-item.is-open .l-chev .ic{transform:rotate(180deg)}
-.l-body{padding:0 0 22px 46px}
-.l-body .a-blocks{gap:16px}
-.l-body .a-icards{display:block;background:transparent;padding:0}
-.dm .l-body .a-icards .a-icard{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;padding:12px 0;border-radius:0;background:transparent;border-top:1px solid var(--line)}
-.l-body .a-icards .a-icard:first-child{border-top:0}
-.l-body .a-icard .a-ico{grid-row:span 2;width:40px;height:40px;border-radius:12px}
-.l-ok{margin-top:16px}
-@media (max-width:720px){.l-list.card{padding:2px 16px}.l-body{padding-left:0}.l-head{font-size:16px}}
-/* Переключатель вариантов знакомства в полосе прототипа */
-.a-var-cap{margin-left:8px}
-.a-var{height:34px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:14px;font-weight:500;color:var(--ink-2);text-decoration:none}
-.a-var:hover{text-decoration:none;background:rgba(255,255,255,.5)}
-.a-var.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
 .c-card.card{min-height:280px;display:flex;flex-direction:column;justify-content:center}
 @media (max-width:720px){.c-card.card{min-height:52vh}}
+/* Шаги-ленты на телефоне: наборы карточек — горизонтальной лентой (видна одна, следующая выглядывает) */
+@media (max-width:720px){
+ .dm .a-feed .a-icards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;background:transparent;padding:2px 16px 8px;margin:0 -16px;scrollbar-width:none}
+ .a-feed .a-icards::-webkit-scrollbar{display:none}
+ .dm .a-feed .a-icards .a-icard{flex:0 0 78%;display:grid;grid-template-columns:none;align-content:start;gap:8px;padding:18px;border-radius:20px;border-top:0;scroll-snap-align:start}
+ .dm .a-feed .a-icards .a-icard.a-ic-o{background:var(--orange-tint)}.dm .a-feed .a-icards .a-icard.a-ic-b{background:var(--blue-tint)}.dm .a-feed .a-icards .a-icard.a-ic-g{background:var(--green-tint)}.dm .a-feed .a-icards .a-icard.a-ic-v{background:var(--violet-tint)}.dm .a-feed .a-icards .a-icard.a-ic-y{background:var(--yellow-tint)}
+ .a-feed .a-icard .a-ico{grid-row:auto;background:rgba(255,255,255,.75)}
+ .a-feed .a-icards::after{content:"";flex:0 0 6px}
+}
+/* Лента карточек не должна раздвигать страницу по ширине */
+.a-feed,.a-feed .a-blocks,.a-feed .a-blocks>*,.a-feed section{min-width:0;max-width:100%}
+@media (max-width:720px){.dm .a-feed .a-icards{max-width:none;width:calc(100% + 32px)}}
+@media (max-width:720px){.dm .a-feed .a-icards{width:100%;margin:0;padding:2px 0 8px}.a-feed .a-icards::after{display:none}}
+/* Запись на встречу внутри главной карточки (как в исходном экране «Моя заявка») */
+.a-meet .a-days{margin:28px 0 0}
+.a-meet .a-day{background:rgba(255,255,255,.6);min-width:68px;padding:10px 12px}
+.a-meet .a-day:hover{background:rgba(255,255,255,.88)}
+.a-meet .a-day.is-on{background:var(--ink);color:#fff}
+.a-meet .a-day.is-on .a-day-wd{color:rgba(255,255,255,.75)}
+.a-meet .a-day-wd{color:var(--ink-2)}
+.a-hero-slots.opts{margin-top:12px}
+.a-hero-checks{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:24px}
+.a-hero-checks .check{color:var(--ink)}
+/* Иллюстрация в главной карточке на телефоне — небольшим кругом в правом верхнем углу, а не под текстом */
+@media (max-width:720px){
+ .dm .card-hero{position:relative}
+ .dm .card-hero .hero-art{display:grid;position:absolute;top:22px;right:20px;width:60px;height:60px;flex:none}
+ .dm .card-hero .hero-art .ic{width:28px;height:28px;stroke-width:1.6}
+ .dm .card-hero .hero-grid>.grow>.eyebrow,.dm .card-hero .hero-title,.dm .card-hero .hero-when{padding-right:68px}
+ .dm .card-hero .hero-when{font-size:36px}
+ .a-meet .a-days{margin-top:22px}
+ .a-hero-actions .btn{flex:1 1 100%}
+}
+.a-fmt.seg{margin-top:28px;background:rgba(255,255,255,.6)}
+.a-fmt-where{margin:10px 0 0;font-size:16px;color:var(--ink)}
+.a-meet .a-days{margin-top:16px}
+.a-hero-slots .opt{padding:14px 18px}
+.a-hero-slots .opt-time{font-size:28px}
+@media (max-width:720px){
+ .dm .card-hero .hero-art{top:18px;right:18px;width:46px;height:46px}
+ .dm .card-hero .hero-art .ic{width:22px;height:22px}
+ .dm .card-hero .hero-title,.dm .card-hero .hero-when{padding-right:0;margin-top:14px}
+ .dm .card-hero .hero-grid>.grow>.eyebrow{padding-right:56px;min-height:24px}
+ .dm .card-hero .hero-title{font-size:32px;line-height:1.1}
+}
+.a-record{margin-top:12px}
+/* Всплывашка после записи: приглашение познакомиться с фондом с заметной кнопкой */
+.p-notice .a-notice-go{background:#fff;color:var(--ink);flex:0 0 auto}
+.p-notice .a-notice-go:hover{background:var(--soft)}
+@media (max-width:720px){.p-notice{width:calc(100% - 24px);justify-content:space-between;padding:10px 8px 10px 18px;gap:10px}}

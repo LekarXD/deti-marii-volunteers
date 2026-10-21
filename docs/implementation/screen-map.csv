@@ -39,6 +39,4 @@ Groups.dc.html,surface,/fund/groups; /fund/groups/:id,groups,P10A P10B,"Усло
 Group.dc.html,surface,/my/groups/:id,groups,P10B,"Только назначенная группа и разрешённые поля/фото, нет hardcoded art"
 FirstShift.dc.html,surface,/my/assignments/:id/preparation,participation; groups,P12,"Место/встречающий/задачи/checklist/вопрос/отмена, состав группы из API"
 Participation.dc.html,surface,/opportunities/:id; /my/assignments/:id,participation,P09,"Отклик, staff approve, own confirm, attendance и часы отдельными фактами"
-Onboarding.dc.html,surface,/onboarding/:step; /onboarding/test,learning,P04,"Версии материалов и server score, завершение без самовольного проходного процента"
-OnboardingCards.dc.html,variant,/onboarding/:step; /onboarding/test,learning,P04,Карточки по одному блоку; общий progress/test/identity с основным знакомством; P00 фиксирует основной вариант
-OnboardingList.dc.html,variant,/onboarding/:step; /onboarding/test,learning,P04,Темы списком; общий progress/test/identity с основным знакомством; P00 фиксирует основной вариант
+Onboarding.dc.html,surface,/onboarding/:step; /onboarding/test,learning,P04,"Подача шага задаётся mode (cards/feed); версии материалов и server score, завершение без самовольного проходного процента"
