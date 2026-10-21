@@ -150,3 +150,28 @@ async def test_verified_registration_claim_preserves_identity_and_rejects_overwr
             assert error.value.code=='registration_application_conflict'
             await db.rollback()
     finally:await candidate.aclose()
+
+@pytest.mark.asyncio
+async def test_recipient_boundary_checks_scope_and_never_returns_contact_match(env):
+    from app.modules.applications.service import learning_recipient_options, learning_recipient_owner
+    from app.core.auth import Principal
+    from uuid import UUID
+    app,factory=env
+    candidate=await actor(app)
+    try:
+        submitted=(await post(candidate,'/applications/submit',body())).json()
+        async with factory() as db:
+            principal=Principal(uuid4(),None,get_settings().foundation_id,uuid4(),True,'staff',grants=(("candidates.read","foundation",None),))
+            options=await learning_recipient_options(db,principal,'Анна')
+            assert options==[dict(application_id=UUID(submitted['id']),label='Анна Тестовая')]
+            assert await learning_recipient_options(db,principal,'%')==[]
+            owner=await learning_recipient_owner(db,principal,UUID(submitted['id']))
+            assert owner['user_id'] is None and owner['registration_id'] is not None
+            principal.foundation_id=uuid4()
+            assert await learning_recipient_options(db,principal)==[]
+            with pytest.raises(ApiError) as error:await learning_recipient_owner(db,principal,UUID(submitted['id']))
+            assert error.value.status_code==404
+            principal.grants=()
+            with pytest.raises(ApiError) as error:await learning_recipient_options(db,principal)
+            assert error.value.status_code==403
+    finally:await candidate.aclose()

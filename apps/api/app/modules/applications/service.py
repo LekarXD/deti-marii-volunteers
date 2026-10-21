@@ -283,3 +283,31 @@ async def candidate_progress(db, application):
     else:
         interview = await interview_progress(db, application.foundation_id, application.id)
     return dict(introduction=introduction, interview=interview)
+
+
+async def learning_recipient_options(db, principal, search=""):
+    """Internal boundary for a permission-protected learner recipient picker."""
+    if not principal.has_permission("candidates.read"):
+        raise ApiError(403, "permission_denied", "Недостаточно прав для выбора кандидата")
+    query = select(Application, ApplicationRevision).join(ApplicationRevision,
+        Application.submitted_revision_id == ApplicationRevision.id).where(
+        Application.foundation_id == principal.foundation_id, Application.submission_state == "submitted")
+    if search.strip():
+        from sqlalchemy import or_
+        needle = "%" + search.strip()[:200].replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+        query = query.where(or_(ApplicationRevision.answers["firstName"].astext.ilike(needle, escape="\\"),
+            ApplicationRevision.answers["lastName"].astext.ilike(needle, escape="\\")))
+    rows = (await db.execute(query.order_by(Application.submitted_at.desc(), Application.id).limit(50))).all()
+    return [{"application_id": application.id, "label": " ".join(str(revision.answers.get(key, "")) for key in ("firstName", "lastName")).strip()}
+        for application, revision in rows]
+
+
+async def learning_recipient_owner(db, principal, application_id):
+    """Resolve a stable application ID internally; identity axes never go to the picker."""
+    if not principal.has_permission("candidates.read"):
+        raise ApiError(403, "permission_denied", "Недостаточно прав для выбора кандидата")
+    application = await coordinator_application(db, principal, application_id)
+    if application.submission_state != "submitted":
+        raise ApiError(409, "application_withdrawn", "Анкета отозвана")
+    return dict(user_id=application.user_id, registration_id=application.registration_id,
+        foundation_id=application.foundation_id)
