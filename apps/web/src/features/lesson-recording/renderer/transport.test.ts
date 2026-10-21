@@ -23,3 +23,7 @@ it('uses a separate renderer access credential for provider renewal after consum
  expect(fetch.mock.calls[1][0]).toBe('/api/v1/recording-renderer/provider-grant');expect(fetch.mock.calls[1][1].method).toBe('POST');expect(fetch.mock.calls[1][1].headers.get('Authorization')).toBe('Bearer fictional-access');
  await expect(bootstrap.request('state')).rejects.toMatchObject({code:'renderer_closed'});access.close();
 });
+it('keeps purpose credentials on the configured same-origin mount only',async()=>{
+ vi.stubEnv('VITE_APP_BASE_PATH','/deti-marii');const fetch=vi.fn().mockResolvedValue(new Response(JSON.stringify({ok:true}),{headers:{'Content-Type':'application/json'}}));vi.stubGlobal('fetch',fetch);
+ const client=createRendererTransport('fictional-purpose-credential');try{await client.request('state',{afterRevision:1});expect(fetch.mock.calls[0][0]).toBe('/deti-marii/api/v1/recording-renderer/state?after_revision=1');expect(fetch.mock.calls[0][1]).toMatchObject({credentials:'omit',redirect:'error'});}finally{client.close();vi.unstubAllEnvs();}
+});

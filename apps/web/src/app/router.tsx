@@ -1,3 +1,4 @@
+import {getAppBasePath} from '../basePath';
 import type {ComponentType} from 'react';
 import {createBrowserRouter,Navigate,Outlet,useLocation,Link} from 'react-router-dom';
 import {AppProviders,CandidateLayout,CoordinatorLayout,useSession} from './layouts';
@@ -95,4 +96,4 @@ export const router=createBrowserRouter([{
   {path:'coord/interviews/availability',element:<Navigate to="/fund/interviews/availability" replace/>},
   {path:'coord/candidates',element:<Navigate to="/fund/candidates" replace/>},
   {path:'*',element:<PublicLayout/>,children:[{path:'*',element:<NotFound/>}]},
- ]}]);
+ ]}],{basename:getAppBasePath()||'/'});

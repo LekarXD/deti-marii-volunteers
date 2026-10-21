@@ -1,3 +1,4 @@
+import {appPath} from '../../../basePath';
 import {mountPrivateRenderer} from './mount';
 import {mountRendererView} from './RendererView';
 
@@ -30,7 +31,7 @@ export async function startPrivateRendererEntry(root:HTMLElement|null=document.g
  window.addEventListener('pagehide',close,{once:true});
  try{
   // Guard only the route/frame shape. Never extract a credential from location.
-  if(window.top!==window||location.pathname!=='/recorder.html'||location.search!==''||location.hash!=='')throw unavailable();
+  if(window.top!==window||location.pathname!==appPath('/recorder.html')||location.search!==''||location.hash!=='')throw unavailable();
   const bridge=window.__oporaTakeRendererBootstrap;
   if(typeof bridge!=='function')throw unavailable();
   mounted=mountPrivateRenderer(root);

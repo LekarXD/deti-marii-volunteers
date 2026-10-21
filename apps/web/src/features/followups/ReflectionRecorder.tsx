@@ -1,3 +1,4 @@
+import {appPath} from '../../basePath';
 import {useEffect,useRef,useState} from 'react';
 import {useQuery,useQueryClient} from '@tanstack/react-query';
 import {keys} from '../../api/keys';
@@ -74,7 +75,7 @@ export function ReflectionRecorder({id,text,onApply,disabled=false,available=tru
  const active=['requesting','recording','uploading','processing'].includes(phase);
  return <section className="reflection-recorder" aria-label="Голосовая заметка"><div className="followup-actions">{!row&&!active&&<Button variant="secondary" disabled={disabled||blocked||latest.isPending||!available} onClick={()=>void record()}><Icon name="mic"/>Записать голосом</Button>}{phase==='recording'&&<><span className="reflection-recording" role="status">Запись {clock(elapsed)} / 3:00</span><Button variant="secondary" onClick={stop}>Остановить запись</Button></>}{phase==='requesting'&&<p role="status">Ожидаем разрешение на микрофон…</p>}{(active||row||file)&&<Button variant="ghost" loading={cancelling} onClick={()=>void cancel()}>Отменить запись</Button>}</div>
  <p className="meta">До 3 минут и 10 МБ. Запись начнётся по нажатию. После распознавания проверьте текст перед добавлением в рефлексию.</p>
- {(url||(row?.state==='ready'))&&<audio aria-label="Прослушать свою запись" controls preload="none" src={url||`/api/v1/assets/${row!.asset_id}/content`}/>}
+ {(url||(row?.state==='ready'))&&<audio aria-label="Прослушать свою запись" controls preload="none" src={url||appPath(`/api/v1/assets/${row!.asset_id}/content`)}/>}
  {phase==='recorded'&&file&&<Button variant="secondary" disabled={disabled||!available} onClick={()=>void upload()}>Распознать запись</Button>}
  {phase==='recorded'&&!file&&<p className="meta">Предыдущая загрузка не завершена. Отмените её, чтобы записать заново.</p>}
  {phase==='uploading'&&<p role="status">Загружаем запись…{row?` ${Math.floor(row.received_size/row.expected_size*100)}%`:''}</p>}

@@ -13,3 +13,7 @@ describe('sole cookie transport',()=>{
  it('normalizes bootstrap offline failure without clearing it as logout',async()=>{vi.stubGlobal('fetch',vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));await expect(initializeSession()).rejects.toMatchObject({code:'network',status:0,retryable:true});});
  it('sends binary upload data unchanged and preserves content type',async()=>{const fetch=vi.fn().mockResolvedValueOnce(json(initial)).mockResolvedValueOnce(json({offset:4}));vi.stubGlobal('fetch',fetch);const data=new Uint8Array([1,2,3,4]);await api('/assets/a/upload',{method:'PATCH',body:data,headers:{'Content-Type':'image/png','X-Upload-Offset':'0'}});const options=fetch.mock.calls[1][1];expect(options.body).toBe(data);expect(options.headers.get('Content-Type')).toBe('image/png');});
 });
+it('uses the configured mount for cookie bootstrap, uploads and explicit legacy API paths',async()=>{
+ vi.stubEnv('VITE_APP_BASE_PATH','/deti-marii');const fetch=vi.fn().mockResolvedValueOnce(json(initial)).mockResolvedValueOnce(json({ok:true})).mockResolvedValueOnce(json({ok:true}));vi.stubGlobal('fetch',fetch);
+ try{await api('/assets/id/upload',{method:'PATCH',body:new Uint8Array([1])});await api('/api/v1/me/application');expect(fetch.mock.calls.map(([url])=>url)).toEqual(['/deti-marii/api/v1/auth/session','/deti-marii/api/v1/assets/id/upload','/deti-marii/api/v1/me/application']);expect(fetch.mock.calls.every(([,options])=>options.credentials==='same-origin')).toBe(true);}finally{vi.unstubAllEnvs();}
+});

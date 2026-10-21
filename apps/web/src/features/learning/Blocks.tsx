@@ -1,3 +1,4 @@
+import {appPath} from '../../basePath';
 import {useRef,useState} from 'react';
 import {AlertCircle, BookOpen, Calendar, CheckCircle, Clock, Eye, Hand, Heart, Home, MapPin, MessageCircle, Music, Palette, Phone, Shield, Smile, Sparkles, Star, Users} from 'lucide-react';
 import {Button,Field,Textarea} from '../../ui';
@@ -25,7 +26,7 @@ export function ContentBlock({block:b,lessonId,preview=false}:{block:Block;lesso
   switch(b.type) {
     case 'text':return <section>{head}<p style={{whiteSpace:'pre-wrap'}}>{b.text}</p></section>;
     case 'task':return <section className="card">{head}<p>{b.text}</p>{b.required&&<p className="tag">Обязательное задание</p>}{preview&&<><Field label="Ваш ответ"><Textarea disabled placeholder="Здесь волонтёр отвечает на задание"/></Field><Button disabled>Сохранить ответ</Button></>}</section>;
-    case 'file':return <section className="card">{head}{b.asset_id?<a href={preview?`/api/v1/coord/learning/lessons/${lessonId}/assets/${b.asset_id}`:`/api/v1/learning/lessons/${lessonId}/assets/${b.asset_id}`} target="_blank" rel="noreferrer">Открыть материал</a>:<p>Материал ещё не загружен.</p>}</section>;
+    case 'file':return <section className="card">{head}{b.asset_id?<a href={appPath(preview?`/api/v1/coord/learning/lessons/${lessonId}/assets/${b.asset_id}`:`/api/v1/learning/lessons/${lessonId}/assets/${b.asset_id}`)} target="_blank" rel="noreferrer">Открыть материал</a>:<p>Материал ещё не загружен.</p>}</section>;
     case 'lead':return <p className="a-lead">{b.text}</p>;
     case 'facts':return <div className="a-facts">{(items as string[][]).map(([n,label],i)=><div className="kpi" key={i}><span className="kpi-num">{n}</span><span className="kpi-label">{label}</span></div>)}</div>;
     case 'timeline':return <div className="a-timeline">{(items as string[][]).map(([year,title,text],i)=><div className="a-tl" key={i}><span className="a-dotline"/><span className="a-year">{year}</span><div className="a-tlcard"><h3>{title}</h3><p>{text}</p></div></div>)}</div>;
@@ -34,7 +35,7 @@ export function ContentBlock({block:b,lessonId,preview=false}:{block:Block;lesso
     case 'rules':return <section className="card">{head}<ol className="a-rules">{(items as string[]).map((text,i)=><li className="a-rule" key={i}><span className="a-rn" aria-hidden="true">{i+1}</span><p>{text}</p></li>)}</ol></section>;
     case 'phrases':return <section>{head}<div className="a-phr-head"><span>Так говорим</span><span>Так не говорим</span></div>{(items as string[][]).map(([say,avoid],i)=><div className="a-phr" key={i}><span className="a-yes">{say}</span><span className="a-no">{avoid}</span></div>)}</section>;
     case 'quiz':return <section>{head}{(items as Item[]).map((item,i)=><MiniQuiz key={i} item={item} index={i} block={b} lessonId={lessonId} preview={preview}/>)}</section>;
-    case 'video':return <figure className="a-video">{b.asset_id?<MediaVideo src={preview?`/api/v1/coord/learning/lessons/${lessonId}/assets/${b.asset_id}`:`/api/v1/learning/lessons/${lessonId}/assets/${b.asset_id}`}/>:<div className="a-vbox"><span aria-hidden="true">▶</span><span>Видео скоро появится</span></div>}<figcaption><b>{b.title}</b> <span>{b.duration}</span></figcaption></figure>;
+    case 'video':return <figure className="a-video">{b.asset_id?<MediaVideo src={appPath(preview?`/api/v1/coord/learning/lessons/${lessonId}/assets/${b.asset_id}`:`/api/v1/learning/lessons/${lessonId}/assets/${b.asset_id}`)}/>:<div className="a-vbox"><span aria-hidden="true">▶</span><span>Видео скоро появится</span></div>}<figcaption><b>{b.title}</b> <span>{b.duration}</span></figcaption></figure>;
     case 'callout':return <p className={`learning-callout ${b.tone==='warn'?'is-warning':''}`}><AlertCircle size={22} aria-hidden="true"/>{b.text}</p>;
     default:return <p role="alert">Этот блок пока не поддерживается.</p>;
   }

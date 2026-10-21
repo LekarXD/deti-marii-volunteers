@@ -1,3 +1,4 @@
+import {apiPath} from '../basePath';
 /** Cookie transport adapted from OD client.js principal pinning/retry mechanics.
  * Server remains the authority for Origin, CSRF, permissions and receipts. */
 import type {components} from './generated/schema';
@@ -28,10 +29,6 @@ export function clearSession(broadcast = true) {
 }
 const channel = typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('opora-session') : null;
 channel?.addEventListener('message', () => clearSession(false));
-function route(path: string) {
-  if (!path.startsWith('/') || path.startsWith('//') || path.includes('://')) throw new Error('API path must be same-origin');
-  return (path === '/api/v1' || path.startsWith('/api/v1/')) ? path : `/api/v1${path}`;
-}
 const failure=readApiError;
 
 export async function initializeSession(force = false): Promise<Session> {
@@ -42,7 +39,7 @@ export async function initializeSession(force = false): Promise<Session> {
   const timer = setTimeout(() => controller.abort(), 12000);
   const pending = (async () => {
     try {
-      const response = await fetch('/api/v1/auth/session', {credentials:'same-origin', cache:'no-store', signal:controller.signal, headers:{Accept:'application/json'}});
+      const response = await fetch(apiPath('/auth/session'), {credentials:'same-origin', cache:'no-store', signal:controller.signal, headers:{Accept:'application/json'}});
       if (!response.ok) throw await failure(response);
       const value = await response.json() as Session;
       if (epoch !== generation) throw new ApiError(0, 'principal_changed', 'Сессия изменилась. Обновите страницу.');
@@ -56,7 +53,7 @@ export async function initializeSession(force = false): Promise<Session> {
   bootstrap = pending; return pending;
 }
 export async function api<T>(path: string, options: ApiOptions = {}): Promise<T> {
-  const url = route(path); const method = (options.method ?? 'GET').toUpperCase();
+  const url = apiPath(path); const method = (options.method ?? 'GET').toUpperCase();
   const safe = ['GET','HEAD','OPTIONS'].includes(method);
   await initializeSession();
   const epoch = generation; const principal = getPrincipalKey();

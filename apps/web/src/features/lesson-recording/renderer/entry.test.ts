@@ -39,3 +39,7 @@ it('bounds a silent bridge without making an API request or accepting its later 
  vi.useFakeTimers();window.__oporaTakeRendererBootstrap=vi.fn(()=>new Promise(()=>{}));const pending=startPrivateRendererEntry(root);
  await vi.advanceTimersByTimeAsync(12000);const entry=await pending;expect(mocks.idle).toHaveBeenCalled();expect(mocks.start).not.toHaveBeenCalled();expect(fetch).not.toHaveBeenCalled();entry?.close();
 });
+it('requires the exact prefixed private document and keeps zero auth requests without a bridge',async()=>{
+ vi.stubEnv('VITE_APP_BASE_PATH','/deti-marii');const bridge=vi.fn(async request=>request.phase==='challenge'?{protocol_version:1,nonce}:{protocol_version:1,ticket});window.__oporaTakeRendererBootstrap=bridge;
+ try{history.replaceState(null,'','/recorder.html');await startPrivateRendererEntry(root);expect(bridge).not.toHaveBeenCalled();history.replaceState(null,'','/deti-marii/recorder.html');const entry=await startPrivateRendererEntry(root);expect(mocks.start).toHaveBeenCalledWith(ticket);expect(fetch).not.toHaveBeenCalled();entry?.close();}finally{vi.unstubAllEnvs();}
+});

@@ -1,3 +1,4 @@
+import {appRoute} from '../../basePath';
 import {useEffect, useState, type FormEvent} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {api} from '../../api/transport';
@@ -14,7 +15,7 @@ type MfaSession = components['schemas']['MfaSessionView'];
 export function safeReturnPath(value: string | null, fallback = '/application'): string {
   if (!value || !value.startsWith('/') || value.startsWith('//') || /[\\\u0000-\u0020\u007f]/.test(value)) return fallback;
   try {
-    const parsed = new URL(value, 'https://opora.invalid');
+    const parsed = new URL(appRoute(value), 'https://opora.invalid');
     if (parsed.origin !== 'https://opora.invalid' || parsed.pathname === '/login' || parsed.pathname.startsWith('/api/')) return fallback;
     // Reject encoded delimiters as well: server/proxy normalization must not change origin.
     if (/%(?:2f|5c|00|0a|0d)/i.test(value)) return fallback;

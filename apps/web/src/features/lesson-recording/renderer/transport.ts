@@ -1,3 +1,4 @@
+import {appPath} from '../../../basePath';
 import {ApiError,readApiError} from '../../../api/errors';
 export type RendererOperation='bootstrap'|'state'|'readiness'|'provider-grant';
 export interface RendererRequest {body?:unknown;signal?:AbortSignal;afterRevision?:number;idempotencyKey?:string;timeoutMs?:number;}
@@ -18,7 +19,7 @@ export function createRendererTransport(bearerCredential:string){
   try{
    const headers=new Headers({Authorization:`Bearer ${credential}`,Accept:binaryLimit?'image/png, image/jpeg, image/webp':'application/json'});
    if(method==='POST'){headers.set('Content-Type','application/json');headers.set('Idempotency-Key',options.idempotencyKey??crypto.randomUUID());}
-   const response=await fetch(path,{method,headers,body:method==='POST'?JSON.stringify(options.body??{}):undefined,credentials:'omit',cache:'no-store',redirect:'error',referrerPolicy:'no-referrer',signal:controller.signal});
+   const response=await fetch(appPath(path),{method,headers,body:method==='POST'?JSON.stringify(options.body??{}):undefined,credentials:'omit',cache:'no-store',redirect:'error',referrerPolicy:'no-referrer',signal:controller.signal});
    if(epoch!==generation||!credential)throw new ApiError(0,'renderer_closed','Доступ к записи завершён.');
    if(!response.ok){const error=await readApiError(response);if(response.status===401||response.status===403)close();
     const code=/^[a-z0-9_]{1,80}$/.test(error.code)?error.code:'renderer_failed';

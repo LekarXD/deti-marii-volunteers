@@ -1,3 +1,4 @@
+import {appResourceUrl} from '../../basePath';
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import {Button,Card,Dialog,Field,Textarea,DatePicker,Combobox,Segmented,LoadingState,Icon} from '../../ui';
@@ -10,7 +11,7 @@ export function InterviewDetails({booking,staff=false,onClose}:{booking:Booking|
  const [action,setAction]=useState(''),[reason,setReason]=useState(''),[outcome,setOutcome]=useState(String(booking.result?.outcome||'Подобрать первое занятие')),[publicNote,setPublicNote]=useState(String(booking.result?.public_agreement||'')),[privateNote,setPrivateNote]=useState('private_note' in booking?booking.private_note||'':''),[next,setNext]=useState(String(booking.result?.next_contact_date||''));
  const command=useInterviewCommand();
  const send=(path:string,body:unknown)=>command.mutate({path:`/interviews/${booking.id}/${path}`,body},{onSuccess:onClose});
- return <Dialog open onClose={onClose} title="Встреча с координатором"><div className="iv-details"><p className="iv-kicker">{status[booking.status]}</p>{staff&&'candidate_name' in booking&&<><h2>{booking.candidate_name}</h2><Link className="btn btn-secondary" to={`/fund/candidates/${booking.application_id}`} onClick={onClose}>Открыть анкету кандидата</Link></>}<h3>{dateLabel(booking.starts_at)}, {timeLabel(booking.starts_at)}–{timeLabel(booking.ends_at)}</h3><p>{booking.venue}</p>{booking.join_url&&<a className="btn btn-secondary" href={booking.join_url} target="_blank" rel="noreferrer">Открыть встречу</a>}
+ return <Dialog open onClose={onClose} title="Встреча с координатором"><div className="iv-details"><p className="iv-kicker">{status[booking.status]}</p>{staff&&'candidate_name' in booking&&<><h2>{booking.candidate_name}</h2><Link className="btn btn-secondary" to={`/fund/candidates/${booking.application_id}`} onClick={onClose}>Открыть анкету кандидата</Link></>}<h3>{dateLabel(booking.starts_at)}, {timeLabel(booking.starts_at)}–{timeLabel(booking.ends_at)}</h3><p>{booking.venue}</p>{booking.join_url&&<a className="btn btn-secondary" href={appResourceUrl(booking.join_url)} target="_blank" rel="noreferrer">Открыть встречу</a>}
  {booking.cancel_reason&&<p>Причина отмены: {booking.cancel_reason}</p>}
  {booking.result&&<Card tone="soft"><h3>{booking.result.outcome as string}</h3><p>{booking.result.public_agreement as string}</p>{booking.result.next_contact_date!=null&&<p>Следующий контакт: {String(booking.result.next_contact_date)}</p>}</Card>}
  {staff&&'private_note' in booking&&booking.private_note&&<details><summary>Внутренняя заметка</summary><p>{booking.private_note}</p></details>}

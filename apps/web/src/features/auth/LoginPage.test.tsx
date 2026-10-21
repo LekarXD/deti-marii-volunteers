@@ -75,3 +75,6 @@ it('logs out through the session service and returns to the email stage after pr
   await screen.findByLabelText('Электронная почта');
   expect(state.logout).toHaveBeenCalledTimes(1);
 });
+it('normalizes a prefixed login return route without allowing an API or login loop',()=>{
+ vi.stubEnv('VITE_APP_BASE_PATH','/deti-marii');try{expect(safeReturnPath('/deti-marii/fund/groups?tab=current#members')).toBe('/fund/groups?tab=current#members');expect(safeReturnPath('/deti-marii/login?next=/fund')).toBe('/application');expect(safeReturnPath('/deti-marii/api/v1/auth/session')).toBe('/application');}finally{vi.unstubAllEnvs();}
+});
