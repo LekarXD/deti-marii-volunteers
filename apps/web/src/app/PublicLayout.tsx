@@ -1,4 +1,6 @@
-import {Link,Outlet,useLocation} from 'react-router-dom';
+import {Outlet} from 'react-router-dom';
 import {Brand} from '../ui';
+import {useSession} from './layouts';
+import {AccountControl} from './layouts/AccountControl';
 import './public.css';
-export function PublicLayout(){const application=useLocation().pathname==='/apply';return <div className="dm public-app"><header className="opora-header">{application?<Link className="brand" to="/"><span className="mark" aria-hidden="true"><i/><i/><i/><i/></span><span><b>Дети Марии</b><small>благотворительный фонд</small></span></Link>:<Brand to="/"/>}<span className="public-note">{application?'mariaschildren.ru · Стать волонтёром':''}</span></header><main id="main-content"><Outlet/></main></div>;}
+export function PublicLayout(){const {session}=useSession();const signedIn=Boolean(session?.user_id);return <div className="dm public-app"><header className="opora-header"><Brand to={signedIn?(session?.is_staff?'/fund':'/application'):'/'} subtitle="Благотворительный фонд «Дети Марии»"/>{signedIn&&<div className="public-account"><AccountControl/></div>}</header><main id="main-content"><Outlet/></main></div>;}
