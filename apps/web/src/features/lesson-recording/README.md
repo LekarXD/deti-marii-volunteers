@@ -51,3 +51,12 @@ lesson selection/versions, unavailable capture, zero automatic device/start call
 explicit denied-camera recovery, versioned discard, scoped source approval/withdrawal,
 stale-consent rejection and stored-interval semantics.
 Screenshots and actual browser media acceptance remain separate integration gates.
+
+Live host recording reuses the connected `LiveRoomPage` controller and stage.
+`LiveRecordingControls` makes no request for viewers and binds a recording project
+only after the host's explicit action. Take approval/start/stop use the same API and
+own-source checks as solo recording; guests and chat are excluded. Active capture
+locks local publication changes and room exit/close controls. Live project detail
+is a review surface with a link back to the existing room, never another RTC client.
+The private renderer pins resource kind/id separately from the recording project;
+solo still requires project and resource IDs to coincide.
