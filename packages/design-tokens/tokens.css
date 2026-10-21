@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url("./fonts.css");
 
 body{margin:0;background:#F0ECE3}
 .dm{--page:#F0ECE3;--paper:#FFFFFF;--soft:#F6F3EE;--soft-2:#E8E3D8;--line:#E9E4DA;--line-2:#D6D0C3;--ink:#12141A;--ink-2:#3B3E46;--mute:#5E5A52;--quiet:#8C877C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFE9DC;--yellow:#FFB93F;--yellow-ink:#7A4E00;--yellow-tint:#FFF1D2;--blue:#0F3DA7;--blue-tint:#E7ECF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DDF0E2;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE5E1;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE4ED;--shadow:0 4px 14px rgba(18,20,26,.06);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}

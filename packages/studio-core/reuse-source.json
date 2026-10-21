@@ -26,7 +26,7 @@
       "sha256": "dca1c8d4bd450ce8c12ea7ed523403a88d424aad9412789ed9f83ad06964514a"
     }
   ],
-  "ported": "Pure side/overlay fit, margin, presenter size and pip functions; screen/board/slides priority. School arch, theme and audience rendering excluded. Camera-only rect matches source RecordingStage. Canonical virtual 1920x1080 scene scales uniformly for preview; no mobile reflow affects captured composition. No SDK/provider imports.",
+  "ported": "Pure side/overlay fit, margin, presenter size and pip functions; screen/board/slides priority. School arch, theme and audience rendering excluded. Camera-only rect reuses source RecordingStage proportions inside profile margins. Canonical virtual 1920x1080 scene scales uniformly for preview; no mobile reflow affects captured composition. No SDK/provider imports.",
   "dependencies": [],
   "tests": "Pinned source golden geometry matrix; immutable schema/serialization; explicit track/audio allowlist and scope readiness; one renderer fixture for live and solo."
 }

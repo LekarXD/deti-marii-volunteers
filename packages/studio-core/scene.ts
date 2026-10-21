@@ -4,7 +4,7 @@ export class SceneContractError extends Error {readonly name='SceneContractError
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const hash=/^[0-9a-f]{64}$/;
 function fail(code:string):never{throw new SceneContractError(code);}
-function object(value:unknown,keys:readonly string[]):Record<string,unknown>{if(!value||typeof value!=='object'||Array.isArray(value))return fail('object_required');const data=value as Record<string,unknown>;if(Object.keys(data).some(key=>!keys.includes(key)))fail('unknown_field');if(keys.some(key=>!(key in data)))fail('missing_field');return data;}
+function object(value:unknown,keys:readonly string[]):Record<string,unknown>{if(!value||typeof value!=='object'||Array.isArray(value))return fail('object_required');const data=value as Record<string,unknown>;if(Object.keys(data).some(key=>!keys.includes(key)))fail('unknown_field');if(keys.some(key=>!Object.hasOwn(data,key)))fail('missing_field');return data;}
 function text(value:unknown,max=128):asserts value is string{if(typeof value!=='string'||!value.trim()||value.length>max||/[\u0000-\u001f]/.test(value))fail('invalid_text');}
 function id(value:unknown):asserts value is string{if(typeof value!=='string'||!uuid.test(value))fail('invalid_id');}
 function optionalId(value:unknown){if(value!==null)id(value);}

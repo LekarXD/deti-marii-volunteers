@@ -1,0 +1,29 @@
+{
+  "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052",
+  "source": "apps/web/public/assets/fonts and packages/shared/src/theme/fonts.css",
+  "upstream": "https://github.com/rsms/inter",
+  "license": "SIL Open Font License 1.1",
+  "verification": "fontTools name table copyright matches Inter Project Authors; fvar wght100..900; original binary SHA256 unchanged",
+  "files": [
+    {
+      "file": "inter-400-800-cyrillic-ext.fccca918.woff2",
+      "sha256": "fccca918fea40089dacadc7045861314d1a6bc91f1f323cc1eeb22ebcdb321b5"
+    },
+    {
+      "file": "inter-400-800-cyrillic.aebf2ab4.woff2",
+      "sha256": "aebf2ab4a4ce6810d73c1ac7be7cafb4e5ec4cee2d6db5fb3e09691747ec4bd6"
+    },
+    {
+      "file": "inter-400-800-greek.46dd4cdc.woff2",
+      "sha256": "46dd4cdca58c26ae87cc6927657bf83b2e8abfc39ffd0ab176e301a8d28d22bf"
+    },
+    {
+      "file": "inter-400-800-latin-ext.a28eb6d3.woff2",
+      "sha256": "a28eb6d3ccb534ae0c94ca999371df024aab60b08c3c8a5720ee9e32fa0faaa2"
+    },
+    {
+      "file": "inter-400-800-latin.c9407645.woff2",
+      "sha256": "c940764593d0fe5d596be327ca7558855e018039fb78509aa21921fd3644c3e4"
+    }
+  ]
+}
