@@ -153,3 +153,28 @@ def test_api_admission_does_not_require_media_worker_binaries(monkeypatch):
     assert CaptureSettings.configured(require_executables=True) is None
     monkeypatch.setenv('OPORA_CAPTURE_RENDERER_URL','https:///recorder.html')
     assert CaptureSettings.configured() is None
+
+@pytest.mark.asyncio
+async def test_failure_cleanup_removes_only_fenced_exact_private_identity(app,monkeypatch):
+    from app.modules.recordings.jobs import remove_private_participants
+    from app.modules.recordings.models import RecordingRendererGrant
+    from app.core.crypto import digest
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as client:
+        me,headers,post,take=await prepared(client)
+        removed=[];fences=[]
+        async def remove(self,room,participant_identity,**options):removed.append(participant_identity)
+        monkeypatch.setattr(LiveKitAdapter,'remove_participant',remove)
+        class Context:
+            async def fence(self,db):fences.append(True)
+        async with SessionLocal() as db:
+            row=await db.get(RecordingTake,UUID(take['id']))
+            renderer=RecordingRendererGrant(take_id=row.id,generation=row.generation,token_hash=digest(uuid4().hex),purpose='renderer',expires_at=utcnow()+timedelta(minutes=1),revoked_at=utcnow())
+            bootstrap=RecordingRendererGrant(take_id=row.id,generation=row.generation,token_hash=digest(uuid4().hex),purpose='bootstrap',expires_at=utcnow()+timedelta(minutes=1),revoked_at=utcnow())
+            db.add_all([renderer,bootstrap]);await db.flush()
+            await remove_private_participants(db,Context(),row)
+            assert removed==['opora-renderer-'+renderer.id.hex] and len(fences)==2
+            class Stale:
+                async def fence(self,db):raise LeaseLost()
+            with pytest.raises(LeaseLost):await remove_private_participants(db,Stale(),row)
+            assert len(removed)==1
+            await db.rollback()

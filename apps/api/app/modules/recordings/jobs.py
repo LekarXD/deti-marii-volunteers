@@ -180,6 +180,9 @@ async def capture_take(db,context):
             row.state='failed';row.capture_phase='failed';row.error_code=code;row.version+=1;row.readiness_state='blocked'
             if getattr(exc,'diagnostics',None):row.capture_checkpoint={**(row.capture_checkpoint or {}),'media_validation':exc.diagnostics}
             await db.execute(update(RecordingRendererGrant).where(RecordingRendererGrant.take_id==row.id,RecordingRendererGrant.revoked_at.is_(None)).values(revoked_at=utcnow()))
+            # A fresh lease recovering an interrupted capture also removes its exact
+            # hidden provider identities; transport loss has a provider grace period.
+            await remove_private_participants(db,context,row)
         return {'state':'failed','error_code':code}
     finally:
         if process and process.returncode is None:
@@ -195,5 +198,18 @@ async def capture_take(db,context):
                     try:os.killpg(process.pid,signal.SIGKILL)
                     except ProcessLookupError:pass
                     await process.wait()
+
+async def remove_private_participants(db,context,row):
+    from app.integrations.rtc.livekit import LiveKitAdapter,RevocationPolicy,ProviderError
+    await context.fence(db)
+    capture=await db.get(StudioCaptureSession,row.capture_session_id)
+    studio=await db.get(StudioSession,capture.studio_session_id)
+    grants=(await db.scalars(select(RecordingRendererGrant).where(RecordingRendererGrant.take_id==row.id,RecordingRendererGrant.generation==row.generation,RecordingRendererGrant.purpose=='renderer',RecordingRendererGrant.revoked_at.is_not(None)))).all()
+    for grant in grants:
+        await context.fence(db)
+        try:await LiveKitAdapter().remove_participant(studio.room_name,'opora-renderer-'+grant.id.hex,revoked_at=int(utcnow().timestamp()),policy=RevocationPolicy(studio.require_strict_revocation))
+        except (ProviderError,ApiError):
+            row.capture_checkpoint={**(row.capture_checkpoint or {}),'renderer_cleanup_pending':True}
+            break
 
 register_handler('recording.capture',capture_take,lease_seconds=120,heartbeat_seconds=10,timeout_seconds=1600,workload='media')
