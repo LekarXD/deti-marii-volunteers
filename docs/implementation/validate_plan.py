@@ -61,10 +61,20 @@ check({r['board'] for r in rows} == boards, 'Board map differs from canvas')
 counts = dict(Counter(r['kind'] for r in rows))
 check(counts == {'surface': 35, 'legacy': 4, 'service': 2}, 'Unexpected board kinds')
 mechanics = list(csv.DictReader((docs / 'new-mechanics.csv').open()))
-check({r['mechanic'] for r in mechanics} == {
+recording_mechanics = {
     'solo_recording_project', 'recording_preflight', 'recording_take',
-    'recording_review', 'recording_publication'}, 'Missing/duplicate recording mechanics')
-check(len(mechanics) == 5, 'Expected 5 new mechanics')
+    'recording_review', 'recording_publication'}
+dobro_mechanics = {
+    'dobro_activity_link', 'dobro_enrollment', 'dobro_transfer', 'dobro_volunteer_status'}
+check({r['mechanic'] for r in mechanics} == recording_mechanics | dobro_mechanics,
+      'Missing/unexpected recording or manual Dobro mechanics')
+check(len(mechanics) == 9, 'Expected 5 recording and 4 manual Dobro mechanics')
+# New React surfaces are mechanics, never fabricated historical canvas boards.
+dobro_transfer = next((r for r in mechanics if r['mechanic'] == 'dobro_transfer'), {})
+check('/fund/integrations/dobro/transfers' in dobro_transfer.get('target_route', '').split('; '),
+      'Missing canonical manual Dobro transfer React route')
+check(set(dobro_transfer.get('work_packages', '').split()) == {'P13', 'P19'},
+      'Manual Dobro transfer must retain P13/P19 ownership')
 for row in rows + mechanics:
     check(set(row['work_packages'].split()) <= set(tasks), f'Unknown mapped package: {row}')
     check(bool(row['acceptance'].strip()), f'Missing acceptance: {row}')

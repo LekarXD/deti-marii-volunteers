@@ -119,6 +119,24 @@
 
 Публикуемые памятки и частные заметки физически разделены. Нельзя считать приватным поле, которое сервер отправил и frontend просто не нарисовал. Фото хранится как asset, не base64; менять ссылку только после успешной обработки нового файла.
 
+### Добро.рф: ручная копия подтверждённых часов
+
+Дополнение от 22 октября описывает фактические модели `apps/api/app/modules/dobro/models.py` (интеграционный срез `88fc82e`), а не generic `external_*` из исходного продуктового дополнения. Identity, attendance, ledger, jobs и receipts остаются общими. Добро не пишет в `service_time_entries`, не начисляет минуты и не даёт допуск к занятиям.
+
+| Модель / таблица | Поля и ограничения |
+|---|---|
+| `DobroActivityLink` / `dobro_activity_links` | `id`, `foundation_id`, `opportunity_id`, `url`, `kind=long_term/one_off`, `title`, `valid_from/until`, `version`, `actor_id`, `created_at`; scope FK к возможности, непересекающиеся включительные периоды одной возможности через GiST exclusion. Ссылка принадлежит возможности, не роли |
+| `DobroSeriesOpportunity` / `dobro_series_opportunities` | `series_id` PK, `foundation_id`, `opportunity_id`, `version`, `actor_id`; scoped FK к серии и возможности. Явная атрибуция ledger-фактов; смена возможности после появления фактов запрещена |
+| `DobroProfile` / `dobro_profiles` | `user_id` PK, `foundation_id`, `profile_url`, `version`, `updated_by/at`; scoped FK к User. Свой профиль меняет волонтёр, профиль связанного CRM-пользователя — уполномоченный координатор |
+| `DobroEnrollment` / `dobro_enrollments` | `id`, `foundation_id`, `user_id`, `activity_id`, `state=none/applied/approved/not_needed`, `version`, `updated_at`; UNIQUE `(activity_id,user_id)`, scoped FK к User и activity |
+| `DobroEnrollmentEvent` / `dobro_enrollment_events` | `id`, `enrollment_id`, `version`, `state`, `actor_id`, `reason`, `created_at`; UNIQUE `(enrollment_id,version)`, append-only история переходов |
+| `DobroTransfer` / `dobro_transfers` | `id`, `foundation_id`, `user_id`, `activity_id`, `period` (первое число месяца), `minutes_due_snapshot`, ненулевой signed `hours_delta`, `snapshot_hash`, `snapshot` JSONB, `actor_id`, `note`, `entered_at`; scoped FK, append-only запись ручного подтверждения. Несколько частичных внесений/коррекций за период допустимы; идемпотентность через общие mutation receipts, а не UNIQUE на период |
+| `DobroSettings` / `dobro_settings` | `foundation_id` PK, `organization_url`, `registration_url`, `verified`, `monthly_day` (1–28, default5), `hard_deadline_days` (1–365, default60), `risk_days` (1–60, default7), `whole_hours` (хранимая policy, расчёт сейчас целочасовой), `rules_confirmed`, `reminders_enabled`, `reminder_owner_user_id`, `reminder_template`, `version`, `updated_by`; включённые напоминания требуют владельца того же фонда |
+
+Расчёт читает завершённые attendance-источники общего ledger и их signed corrections, привязывает их к возможности через серию и периоду ссылки. В `Europe/Moscow` минуты ограничиваются длительностью занятия, пересечения исключаются детерминированно (start, затем assignment UUID), бюджет по связанным добрым делам — 480 минут на человека в сутки. По activity/user накапливаются допустимые минуты до конца выбранного месяца: целевой итог `floor(minutes/60)`, остаток `%60`, к переносу — целевой итог минус сумма всех `hours_delta`. Уменьшение ledger даёт отрицательную коррекцию; история более позднего переноса делает старый период только читаемым. Непривязанные и ручные ledger-факты автоматически в Добро не включаются.
+
+`mark-entered` после fresh authz берёт foundation lock и общие ledger subject locks, заново вычисляет snapshot и проверяет его hash. При изменении источников —409 с повторной сверкой. Команда подтверждает только выполненную вручную работу, сохраняет signed delta и при `applied` атомарно записывает `approved` + событие. Исправление требует новой записи, отрицательное — причины; update/delete истории запрещены DB-trigger. Неиспользованную ссылку можно менять с CAS; после ledger/enrollment/transfer её атрибуция защищена. Подробные команды и граница внешних правил — в [API](api-and-frontend.md#доброрф-ручной-перенос-часов).
+
 ### Коммуникации, знания, AI и эксплуатация
 
 | Группа таблиц | Назначение |

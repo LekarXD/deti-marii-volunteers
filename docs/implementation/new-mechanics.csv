@@ -4,3 +4,7 @@ recording_preflight,new user request,/fund/recordings/:id/studio,P18A P18D,"Ус
 recording_take,new user request,/fund/recordings/:id/studio,P18C P18D,"Start/stop/retake, generation и восстановление без дублей"
 recording_review,new user request,/fund/recordings/:id/takes/:take_id,P18C P18D P18E,"Private player, проверка композиции/звука и выбор дубля"
 recording_publication,new user request,/fund/recordings/:id/publish,P18E,"Metadata/audience, конкретный render hash/lesson version, explicit publish/replace/rollback"
+dobro_activity_link,new Dobro manual-transfer product supplement,/fund/opportunities; /fund/events/:id,P07,"Ссылка принадлежит возможности; явная атрибуция серии, непересекающиеся периоды и запрет смены использованной ссылки"
+dobro_enrollment,new Dobro manual-transfer product supplement,/my/assignments/:id; /fund/events/:id; /fund/volunteers/:id,P09 P11,"Own applied/not_needed отдельно от staff approved; CAS и история; не блокирует участие, напоминание только копируется"
+dobro_transfer,React apps/web/src/features/dobro-transfer/DobroTransferPage.tsx,/fund/integrations/dobro/transfers; /fund/admin,P13 P19,"Read-only ledger, 480 минут/сутки, остатки/коррекции; snapshot-bound идемпотентная ручная отметка и append-only история; source-bound in-app reminders, нет external delivery"
+dobro_volunteer_status,new Dobro manual-transfer product supplement,/my/hours; /profile,P13,"Свои минуты Опоры / вручную отмечено / к переносу из actual API; profile/enrollment отдельно, внешняя верификация не обещана"

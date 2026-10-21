@@ -170,7 +170,31 @@ PDF/CSV/DOCX и справки — server export jobs с permission-aware datase
 
 Предложения AI к профилю — отдельные `profile_change_suggestions` с reviewable diff, источником и состояниями proposed/accepted/rejected/reverted. API: `GET /me/profile/suggestions`, `POST /me/profile/suggestions/{id}/accept|reject|revert`. Принятие требует expected_version, создаёт ревизию профиля; отмена не перезаписывает последующие ручные изменения без проверки конфликта. P13 создаёт основу UI/ревизий, AI producer относится к P15; окончательная cross-package интеграция принимается в P20 после P13+P15.
 
-Добро.ру: отдельный export/integration adapter, preview периода/подтверждённых минут, mapping и журнал результата. Формат/API/учётная запись запрашиваются у владельца интеграции; не предполагать существование публичного API и не имитировать передачу успешным toast. До согласования provider contract показывать unavailable. Реальная выгрузка/передача и отрицательные ответы — обязательная приёмка этого состояния Hours/Admin в P19.
+### Добро.рф: ручной перенос часов
+
+Согласованное исходное дополнение: `materials/05-продукт/Добро.рф — ручной перенос часов — исходное дополнение.txt`. Реализация `modules/dobro` и `features/dobro*` в срезе `88fc82e` заменяет прежнее ожидание export/API-adapter. Канонический новый React route — `/fund/integrations/dobro/transfers`, компонент `DobroTransferPage`; это новая механика из `new-mechanics.csv`, а не существующий `DobroTransfer.dc.html`. Канонический прототип и его 41 исходный артборд не меняются. Hours/«Мой путь», профиль/CRM, команда и подготовка события, обзор координатора и Admin/Интеграции используют один домен.
+
+Все пути ниже относительно `/api/v1`; unsafe-команды требуют текущую сессию/CSRF, `Idempotency-Key` и повторную авторизацию до выдачи receipt. Изменяемые сущности передают `expected_version` (0 при отсутствии), а перенос — hash вычисленного snapshot.
+
+| API | Назначение / право |
+|---|---|
+| `GET /fund/integrations/dobro/transfers?period=YYYY-MM` | `DobroTransferPeriodView`: месячная сводка, группы, расчёт/остатки/коррекции, deadlines, snapshot hash и история; `hours.review` |
+| `POST /fund/integrations/dobro/transfers/mark-entered` | `DobroMarkCommand`: `confirmed=true`, `note`, 1–200 уникальных строк одного месяца (`id`, `user_id`, `activity_id`, `period`, `snapshot_hash`, signed integer `hours_delta`); `hours.review`. Ответ — авторитетная обновлённая сводка |
+| `GET/PUT /fund/integrations/dobro/settings` | CAS настроек/ссылок/шаблона/сроков/подтверждения правил/opt-in внутренних напоминаний; `integrations.manage` |
+| `GET/POST /fund/opportunities/{opportunity_id}/dobro`, `PUT /fund/opportunities/{opportunity_id}/dobro/{activity_id}` | список/создание/редактирование неиспользованной ссылки на доброе дело; `opportunities.manage`; сервер отдаёт `can_edit` |
+| `GET/PUT /fund/event-series/{series_id}/dobro-opportunity` | явная связь серии с возможностью, `version/locked`; `opportunities.manage` |
+| `GET /fund/events/{occurrence_id}/dobro-team` | второй независимый badge отклика, шаблон для копирования и one-off preparation; `assignments.manage` |
+| `PUT /fund/integrations/dobro/enrollments/{activity_id}/{user_id}` | координаторский переход отклика с CAS; `hours.review` |
+| `GET/PUT /fund/volunteers/{user_id}/external-profiles/dobro` | профиль через проверенную CRM identity; `hours.review` |
+| `GET /me/dobro`, `PUT /me/external-profiles/dobro`, `POST /me/dobro-enrollments/{activity_id}` | свои минуты/внесено/к переносу, профиль и `applied/not_needed/none` с CAS; `approved` собственным API запрещён |
+
+Ссылки допускают только HTTPS и точные hosts `dobro.ru`/`добро.рф`, без credentials/port/fragment; профиль — `/volunteers/<positive id>` без query. Сервер не открывает ссылки и не хранит пароли внешней CRM. Отклик в Добро отделён от участия Опоры: `none → applied` — волонтёр; `none/applied → approved` — координатор; `not_needed` скрыт в свёрнутой группе, возврат в `none` явный. Никакой переход не блокирует подтверждение занятия и не меняет минуты.
+
+UI позволяет сверить реальные строки, скопировать TSV или шаблон напоминания и подтвердить уже выполненное ручное внесение. `applied` при отметке атомарно становится `approved`. Частичное внесение допустимо в пределах signed due; отрицательная коррекция требует причины и новой append-only записи. При `dobro_snapshot_changed`409 суммы/заметка сохраняются, новый расчёт читается явным действием и требует нового подтверждения. Один bulk command ограничен200 строками, без скрытых фоновых партий. «Внесено» означает только свидетельство координатора в Опоре, не ответ/успех Добро.рф; `verified` — настройка фонда, не проверка внешним API.
+
+Job `dobro.reminders.scan` после отдельного opt-in планирует месячный/риск-срока notice только внутрь Опоры и владельцу настройки с актуальными `integrations.manage` + `hours.review`. Durable receipt исключает дубли. Source `dobro_reminder` при доставке заново проверяет владельца/доступ/настройки/ledger и подавляет завершённое, отозванное или устаревшее. Внешних отправок нет. Для `one_off` подготовка показывает рекомендуемую публикацию за21 день и внесение к `valid_until + hard_deadline_days`; регулярное дело закрывается месячным переносом.
+
+Границы внешних правил зафиксированы владельцем в [README домена Добро](../../apps/api/app/modules/dobro/README.md) (коммит `ffee6f6`, проверка источников 22 октября): материалы Добро.Медиа с ответами команды подтверждают 8 часов/сутки и сроки 30 дней на одобрение / 60 дней на часы. Приём целых/дробных и накопительных сумм длительного дела, реферальные контакты, отсутствие публичного API, верификация конкретного фонда и универсальная модерация7–14 дней внешним испытанием не подтверждены. Опора использует целочасовой расчёт с остатком и настраиваемые defaults5/60/7; `rules_confirmed` — ручное подтверждение владельца, не независимая проверка CRM. Детали UI — [README экрана переноса](../../apps/web/src/features/dobro-transfer/README.md). Реальный CRM trial не выполнен; ни публичный API, ни внешняя доставка этим планом не заявляются.
 
 После вебинара Studio поддерживает команды `edit summary draft → review/publish → send enrolled audience` через P17, с версиями и preview получателей. Итоги и запись — разные сущности; публикация итогов не публикует закрытую запись автоматически.
 
