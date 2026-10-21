@@ -182,3 +182,21 @@ async def test_two_concurrent_outbox_consumers_persist_one_message():
     assert await asyncio.gather(consume(),consume())==['delivered','delivered']
     async with SessionLocal() as db:
         assert await db.scalar(select(func.count()).select_from(Message).where(Message.source_outbox_id==oid))==1
+
+@pytest.mark.asyncio
+async def test_no_contact_prevents_even_queued_in_app_notice():
+    from app.modules.crm.models import CrmVolunteer
+    seed=await fixtures()
+    recipient=UUID(seed['identities']['candidate-two@example.test']['user_id'])
+    async with SessionLocal() as db:
+        record=await db.scalar(select(CrmVolunteer).where(CrmVolunteer.user_id==recipient,CrmVolunteer.merged_into_id.is_(None)))
+        if record is None:
+            record=CrmVolunteer(foundation_id=UUID(seed['foundation_id']),user_id=recipient,display_name='Opt-out fixture',no_contact=True)
+            db.add(record)
+        else:
+            record.no_contact=True
+        outbox=enqueue_notice(db,UUID(seed['foundation_id']),recipient,'Старое приглашение','Не должно появиться')
+        await db.flush()
+        assert await deliver_internal(db,outbox,{'recipient_id':str(recipient),'subject':'Старое приглашение','text':'Не должно появиться'})=='suppressed_no_contact'
+        assert await db.scalar(select(func.count()).select_from(Message).where(Message.source_outbox_id==outbox.id))==0
+        await db.rollback()

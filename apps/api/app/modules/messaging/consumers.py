@@ -17,6 +17,8 @@ def enqueue_notice(db,foundation_id,recipient_id,subject,body):
     return enqueue_outbox(db,foundation_id,"in_app",{"recipient_id":str(recipient_id),"subject":subject,"text":body})
 
 async def deliver_internal(db,outbox,payload):
+    from app.core.contact_policy import contact_guard
+    await contact_guard(db,outbox.foundation_id)
     existing=await db.scalar(select(Message.id).where(Message.source_outbox_id==outbox.id))
     if existing:
         return "delivered"
@@ -39,6 +41,25 @@ async def deliver_internal(db,outbox,payload):
             return "waiting_identity"
         time=booking.starts_at.astimezone(ZoneInfo("Europe/Moscow")).strftime("%d.%m.%Y в %H:%M МСК")
         content=f"{LABELS[event]}. {time}. {booking.venue}"
+    elif payload.get("event","").startswith("assignment."):
+        from app.modules.activities.assignment_models import Assignment
+        from app.modules.activities.calendar_models import EventOccurrence
+        assignment=await db.scalar(select(Assignment).where(Assignment.id==UUID(payload['assignment_id']),Assignment.foundation_id==outbox.foundation_id).with_for_update())
+        if assignment is None or assignment.version!=payload.get('assignment_version'):
+            return "suppressed_stale"
+        event=payload['event']
+        labels={"assignment.invited":"Приглашение на занятие","assignment.approved":"Участие согласовано координатором","assignment.confirmed":"Участие подтверждено","assignment.declined":"Отказ от участия сохранён","assignment.cancelled":"Участие отменено"}
+        expected={"assignment.invited":"invited","assignment.approved":"invited","assignment.confirmed":"confirmed","assignment.declined":"declined","assignment.cancelled":"cancelled"}
+        if event not in labels:
+            return "unavailable"
+        if assignment.status!=expected[event] or (event=='assignment.approved' and assignment.approved_at is None):
+            return "suppressed_stale"
+        occurrence=await db.scalar(select(EventOccurrence).where(EventOccurrence.id==assignment.occurrence_id,EventOccurrence.foundation_id==outbox.foundation_id))
+        if occurrence is None or (assignment.status in ('invited','confirmed') and occurrence.status!='scheduled'):
+            return "suppressed_stale"
+        recipient=assignment.user_id
+        when=occurrence.starts_at.astimezone(ZoneInfo('Europe/Moscow')).strftime('%d.%m.%Y в %H:%M МСК')
+        content=f"{labels[event]}. {occurrence.title}. {when}. {occurrence.location}"
     else:
         # General notices are internal persisted events, not a broadcast interface.
         if outbox.channel!="in_app" or not payload.get("recipient_id"):
@@ -47,6 +68,9 @@ async def deliver_internal(db,outbox,payload):
         content=f"{payload.get('subject','Уведомление фонда')}\n{payload.get('text','')}".strip()
         if len(content)>8000:
             return "unavailable"
+    from app.modules.crm.service import contact_preference
+    if (await contact_preference(db,outbox.foundation_id,user_id=recipient))["no_contact"]:
+        return "suppressed_no_contact"
     user=await db.get(User,recipient)
     if user is None or user.foundation_id!=outbox.foundation_id or user.account_state!="active":
         return "suppressed_recipient"
