@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: шапка «Опоры», слева лента событий на горизонте, справа карточка события с блоками модели. Палитра и шрифт взяты из прототипа «Опора». */
+/* Только светлая тема, как весь прототип «Опора». Layout: шапка «Опоры», слева лента событий на горизонте, справа карточка события с блоками модели. Палитра и шрифт взяты из прототипа «Опора». */
 :root{
   --page:#F0ECE3;--paper:#FFFFFF;--soft:#F6F3EE;--soft-2:#E8E3D8;--line:#E9E4DA;--line-2:#D6D0C3;
   --ink:#12141A;--ink-2:#3B3E46;--mute:#5E5A52;--quiet:#8C877C;
@@ -17,27 +17,8 @@
   --violet:#5B3FB0;--violet-tint:#EFEAFB;
   --on-ink:#FFFFFF;--shadow:0 4px 14px rgba(18,20,26,.06);--focus:0 0 0 3px rgba(15,61,167,.32);
   --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --page:#15161A;--paper:#1F2126;--soft:#262930;--soft-2:#30333B;--line:#2C2F36;--line-2:#3B3F48;
-  --ink:#F2EFE8;--ink-2:#CFCBC2;--mute:#A39E93;--quiet:#7F7A70;
-  --orange:#FF7A3D;--orange-ink:#FFA77C;--orange-tint:#3A2216;
-  --yellow:#E8A532;--yellow-ink:#F4CB7A;--yellow-tint:#3A2E15;
-  --blue:#8FA9EC;--blue-tint:#1C2640;
-  --green:#4CC17E;--green-ink:#7FD6A3;--green-tint:#16301F;
-  --red:#FF6B61;--red-ink:#FF968E;--red-tint:#3A1A18;
-  --violet:#B7A3F0;--violet-tint:#2A2342;
-  --on-ink:#15161A;--shadow:0 4px 14px rgba(0,0,0,.35);--focus:0 0 0 3px rgba(143,169,236,.45);color-scheme:dark}}
-:root[data-theme="dark"]{
-  --page:#15161A;--paper:#1F2126;--soft:#262930;--soft-2:#30333B;--line:#2C2F36;--line-2:#3B3F48;
-  --ink:#F2EFE8;--ink-2:#CFCBC2;--mute:#A39E93;--quiet:#7F7A70;
-  --orange:#FF7A3D;--orange-ink:#FFA77C;--orange-tint:#3A2216;
-  --yellow:#E8A532;--yellow-ink:#F4CB7A;--yellow-tint:#3A2E15;
-  --blue:#8FA9EC;--blue-tint:#1C2640;
-  --green:#4CC17E;--green-ink:#7FD6A3;--green-tint:#16301F;
-  --red:#FF6B61;--red-ink:#FF968E;--red-tint:#3A1A18;
-  --violet:#B7A3F0;--violet-tint:#2A2342;
-  --on-ink:#15161A;--shadow:0 4px 14px rgba(0,0,0,.35);--focus:0 0 0 3px rgba(143,169,236,.45);color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--page);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
@@ -52,8 +33,6 @@ button{font:inherit;color:inherit;cursor:pointer}
 .brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
 .mark{position:relative;width:36px;height:36px;flex:0 0 36px}
 .mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
-:root[data-theme="dark"] .mark i{mix-blend-mode:normal;opacity:.9}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mark i{mix-blend-mode:normal;opacity:.9}}
 .mark i:nth-child(1){left:0;top:2px;background:var(--blue)}.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
 .mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
 .brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
