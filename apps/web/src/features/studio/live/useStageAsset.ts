@@ -1,0 +1,7 @@
+import {useEffect,useState} from 'react';
+import type {StudioScene} from '../../../../../../packages/studio-core';
+import type {ResolvedStageAsset} from '../../../ui/studio';
+import {api} from '../../../api/transport';
+import {checksum} from '../api';
+/** Resolve only current authorized content; bytes must match the immutable scene checksum. */
+export function useStageAsset(scene:StudioScene){const [asset,setAsset]=useState<ResolvedStageAsset|undefined>();const [error,setError]=useState<string|null>(null);useEffect(()=>{setAsset(undefined);setError(null);const content=scene.content_asset;if(!content)return;const controller=new AbortController();let url:string|undefined;const path=scene.content_kind==='slides'?`/slide-pages/${scene.slide_id}/content`:`/studio-board-snapshots/${scene.board_snapshot_id}/content`;void api<Blob>(path,{responseType:'blob',signal:controller.signal}).then(async blob=>{if(await checksum(blob)!==content.sha256)throw new Error('asset_checksum_mismatch');if(controller.signal.aborted)return;url=URL.createObjectURL(blob);setAsset({...content,url});}).catch(()=>{if(!controller.signal.aborted)setError('Не удалось загрузить подтверждённый материал сцены. Обновите данные.');});return()=>{controller.abort();if(url)URL.revokeObjectURL(url);};},[scene.content_asset?.asset_id,scene.content_asset?.sha256,scene.content_kind,scene.slide_id,scene.board_snapshot_id]);return {asset,error};}
