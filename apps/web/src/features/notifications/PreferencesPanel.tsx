@@ -1,4 +1,4 @@
-import {useRef,useState,type FormEvent} from 'react';
+import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {Link} from 'react-router-dom';
 import {useQuery,useQueryClient} from '@tanstack/react-query';
 import {keys} from '../../api/keys';
@@ -12,22 +12,27 @@ export function PreferencesPanel(){
  const value=useQuery({queryKey:keys.self('notification-preferences'),queryFn:({signal})=>readPreferences(signal),staleTime:0});
  if(value.isPending)return <LoadingState label="Загружаем настройки уведомлений…"/>;
  if(value.error)return <ErrorState error={value.error} retry={()=>value.refetch()}/>;
- return <><PreferencesEditor key={value.data.version} value={value.data}/><TelegramBindingPanel/></>;
+ return <><PreferencesEditor value={value.data}/><TelegramBindingPanel/></>;
 }
 function PreferencesEditor({value}:{value:Preferences}){
  const client=useQueryClient(),{toast}=useToast();
  const [email,setEmail]=useState(value.email_enabled),[inApp,setInApp]=useState(value.in_app_enabled),[noContact,setNoContact]=useState(value.no_contact),[selected,setSelected]=useState(value.topics),[quiet,setQuiet]=useState(value.quiet_enabled),[from,setFrom]=useState(minuteTime(value.quiet_from)),[to,setTo]=useState(minuteTime(value.quiet_to)),[timezone,setTimezone]=useState(value.timezone),[busy,setBusy]=useState(false),[error,setError]=useState<unknown>(null);
  const form=useRef<HTMLFormElement>(null);
  const receipt=useRef({payload:'',key:''});
+ const fields=(next:Preferences)=>({email:next.email_enabled,inApp:next.in_app_enabled,noContact:next.no_contact,selected:next.topics,quiet:next.quiet_enabled,from:minuteTime(next.quiet_from),to:minuteTime(next.quiet_to),timezone:next.timezone});
+ const [base,setBase]=useState(()=>({version:value.version,fields:JSON.stringify(fields(value))}));
+ const dirty=JSON.stringify({email,inApp,noContact,selected,quiet,from,to,timezone})!==base.fields,conflict=dirty&&value.version!==base.version;
+ function load(next:Preferences){const updated=fields(next);setEmail(updated.email);setInApp(updated.inApp);setNoContact(updated.noContact);setSelected(updated.selected);setQuiet(updated.quiet);setFrom(updated.from);setTo(updated.to);setTimezone(updated.timezone);setBase({version:next.version,fields:JSON.stringify(updated)});setError(null);receipt.current={payload:'',key:''};}
+ useEffect(()=>{if(!dirty)load(value);},[value.version]);
  async function save(event:FormEvent){
-  event.preventDefault();const start=normalizeTime(from),end=normalizeTime(to);if(quiet&&(!start||!end)){form.current?.querySelector<HTMLElement>('[aria-invalid="true"],input:invalid')?.focus();return;}setBusy(true);setError(null);
-  const body={expected_version:value.version,no_contact:noContact,email_enabled:email,in_app_enabled:inApp,topics:selected,quiet_enabled:quiet,quiet_from:timeMinute(start??minuteTime(value.quiet_from)),quiet_to:timeMinute(end??minuteTime(value.quiet_to)),timezone};
+  event.preventDefault();if(busy||conflict)return;const start=normalizeTime(from),end=normalizeTime(to);if(quiet&&(!start||!end)){form.current?.querySelector<HTMLElement>('[aria-invalid="true"],input:invalid')?.focus();return;}setBusy(true);setError(null);
+  const body={expected_version:base.version,no_contact:noContact,email_enabled:email,in_app_enabled:inApp,topics:selected,quiet_enabled:quiet,quiet_from:timeMinute(start??minuteTime(value.quiet_from)),quiet_to:timeMinute(end??minuteTime(value.quiet_to)),timezone};
   const payload=JSON.stringify(body);if(receipt.current.payload!==payload)receipt.current={payload,key:crypto.randomUUID()};
-  try{const updated=await savePreferences(body,receipt.current.key);client.setQueryData(keys.self('notification-preferences'),updated);toast('Настройки уведомлений сохранены');}
-  catch(e){setError(e);if(e instanceof ApiError&&e.status===409){toast('Настройки изменились в другой сессии. Загружена текущая версия.','info');await client.invalidateQueries({queryKey:keys.self('notification-preferences')});}}
+  try{const updated=await savePreferences(body,receipt.current.key);load(updated);client.setQueryData(keys.self('notification-preferences'),updated);toast('Настройки уведомлений сохранены');}
+  catch(e){setError(e);if(e instanceof ApiError&&e.status===409){toast('Настройки изменились в другой сессии. Ваш ввод сохранён.','info');await client.invalidateQueries({queryKey:keys.self('notification-preferences')});}}
   finally{setBusy(false);}
  }
- return <Card className="notification-preferences"><form ref={form} onSubmit={save}>
+ return <Card className="notification-preferences"><form ref={form} onSubmit={save}><fieldset disabled={busy} style={{border:0,padding:0,margin:0,minWidth:0}}>
   <h2 className="h3">Куда присылать</h2><div className="notification-channels" role="group" aria-label="Каналы уведомлений"><Button variant={inApp?'accent':'secondary'} aria-pressed={inApp} onClick={()=>setInApp(v=>!v)}>В личном кабинете</Button><Button variant={email?'accent':'secondary'} aria-pressed={email} onClick={()=>setEmail(v=>!v)}>Электронная почта</Button></div>
   {value.email_provider_state!=='available'&&<p className="meta notification-hint">{value.email_provider_state==='development_only'?'Почта работает только в локальном режиме. Внешние письма пока не отправляются.':'Отправка писем пока недоступна. Предпочтение можно сохранить.'}</p>}
   <hr className="notification-divider"/><h2 className="h3">О чём</h2>
@@ -36,7 +41,7 @@ function PreferencesEditor({value}:{value:Preferences}){
   {quiet&&<div className="notification-quiet"><TimePicker onDraftChange={setFrom} label="Начало тихих часов" value={from} onChange={setFrom}/><TimePicker onDraftChange={setTo} label="Конец тихих часов" value={to} onChange={setTo}/><Field label="Часовой пояс" hint="Например, Europe/Moscow или Asia/Yekaterinburg."><Input value={timezone} onChange={e=>setTimezone(e.target.value)} maxLength={80} required/></Field></div>}
   <hr className="notification-divider"/><div className="notification-setrow"><span><b>Не связываться со мной</b><span className="notification-consent">Приостановить уведомления и обращения команды.</span></span><Switch label="Не связываться со мной" checked={noContact} onChange={()=>setNoContact(v=>!v)}/></div>
   {value.effective_no_contact&&!value.no_contact&&<p className="notification-notice" role="status">Команда уже зафиксировала просьбу не связываться. Этот запрет продолжит действовать после сохранения настроек.</p>}
-  {error?<ErrorState error={error}/>:null}<div className="notification-actions"><Button type="submit" loading={busy} disabled={!timezone.trim()}>Сохранить настройки</Button></div>
- </form></Card>;
+  {conflict&&<div role="status"><p>Настройки изменились в другой сессии. Ваш ввод сохранён. Загрузите актуальные настройки перед сохранением.</p><Button variant="secondary" onClick={()=>load(value)}>Загрузить актуальные настройки</Button></div>}{error?<ErrorState error={error}/>:null}<div className="notification-actions"><Button type="submit" loading={busy} disabled={!timezone.trim()||conflict}>Сохранить настройки</Button></div>
+ </fieldset></form></Card>;
 }
 function Switch({label,checked,onChange,disabled=false}:{label:string;checked:boolean;onChange:()=>void;disabled?:boolean}){return <button type="button" role="switch" aria-label={label} aria-checked={checked} disabled={disabled} className={`notification-switch${checked?' is-on':''}`} onClick={onChange}><span/></button>;}

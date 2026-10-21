@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 import React from 'react';
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
-import {cleanup,render,screen,waitFor,within} from '@testing-library/react';
+import {act,cleanup,fireEvent,render,screen,waitFor,within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {MemoryRouter} from 'react-router-dom';
 import {QueryClientProvider} from '@tanstack/react-query';
 import {queryClient} from '../../api/queryClient';
 import {ApiError} from '../../api/transport';
+import {keys} from '../../api/keys';
 import {ToastProvider} from '../../ui';
 import {AudiencePanel} from './AudiencePanel';
 import {DeliveryJournal} from './DeliveryJournal';
@@ -65,3 +66,9 @@ describe('template and delivery lifecycle',()=>{
  });
 });
 it('rejects invalid raw quiet hours rather than saving the previous time; corrected compact time is canonical',async()=>{const user=userEvent.setup();mocks.savePreferences.mockResolvedValue({...preference,version:4});render(page(<PreferencesPanel/>));await user.click(await screen.findByRole('switch',{name:'Тихие часы'}));const start=screen.getByRole('textbox',{name:'Начало тихих часов'});await user.clear(start);await user.type(start,'2575');await user.click(screen.getByRole('button',{name:'Сохранить настройки'}));expect(mocks.savePreferences).not.toHaveBeenCalled();expect(start.getAttribute('aria-invalid')).toBe('true');await user.clear(start);await user.type(start,'1500');await user.click(screen.getByRole('button',{name:'Сохранить настройки'}));await waitFor(()=>expect(mocks.savePreferences).toHaveBeenCalledWith(expect.objectContaining({quiet_from:900,quiet_to:540}),expect.any(String)));});
+
+it('preserves dirty notification preferences when a newer server version is refetched',async()=>{
+ render(page(<PreferencesPanel/>));fireEvent.click(await screen.findByRole('switch',{name:'Тихие часы'}));fireEvent.change(screen.getByRole('textbox',{name:'Начало тихих часов'}),{target:{value:'21:00'}});
+ await act(async()=>{queryClient.setQueryData(keys.self('notification-preferences'),{...preference,version:4,email_enabled:true});});
+ expect((screen.getByRole('textbox',{name:'Начало тихих часов'}) as HTMLInputElement).value).toBe('21:00');expect(await screen.findByText('Настройки изменились в другой сессии. Ваш ввод сохранён. Загрузите актуальные настройки перед сохранением.')).toBeTruthy();expect((screen.getByRole('button',{name:'Сохранить настройки'}) as HTMLButtonElement).disabled).toBe(true);expect(mocks.savePreferences).not.toHaveBeenCalled();
+});

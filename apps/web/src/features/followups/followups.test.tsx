@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import React from 'react';
 import {afterEach,beforeEach,describe,it,expect,vi} from 'vitest';
-import {cleanup,render,screen,waitFor} from '@testing-library/react';
+import {cleanup,fireEvent,render,screen,waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {MemoryRouter,Route,Routes} from 'react-router-dom';
+import {Link,MemoryRouter,Route,Routes} from 'react-router-dom';
 import {QueryClientProvider} from '@tanstack/react-query';
 import {queryClient} from '../../api/queryClient';
 import {ApiError} from '../../api/transport';
@@ -41,4 +41,10 @@ describe('follow-up journeys',()=>{
   await user.click(screen.getByRole('combobox',{name:'Решение после выхода'}));await user.click(screen.getByRole('option',{name:'Пауза'}));await user.type(screen.getByLabelText('Договорённость для волонтёра'),'Договорились о паузе.');await user.click(screen.getByRole('combobox',{name:'Ответственный за следующий шаг'}));await user.click(screen.getByRole('option',{name:'Координатор'}));await user.click(screen.getByRole('button',{name:'Сохранить следующий шаг'}));
   await waitFor(()=>expect(mocks.command).toHaveBeenCalledWith('/coord/reflections/reflection/review',{expected_version:2,decision:'pause',public_message:'Договорились о паузе.',assigned_user_id:'coordinator',next_date:null,internal_note:''}));
  });
+});
+
+it('does not carry a private question into another assignment preparation page',async()=>{
+ mocks.preparation.mockImplementation(async(id)=>({assignment_id:id,title:'Занятие '+id,status:'confirmed',starts_at:'2028-01-01T10:00:00Z',timezone:'Europe/Moscow',location:'Мастерская',allowed_actions:[],group_briefing_available:false,contacts:[],checklist:[],questions:[],version:1}));
+ render(<MemoryRouter initialEntries={['/my/assignments/one/preparation']}><QueryClientProvider client={queryClient}><ToastProvider><Link to="/my/assignments/two/preparation">Другое занятие</Link><Routes><Route path="/my/assignments/:id/preparation" element={<FirstShiftPage/>}/></Routes></ToastProvider></QueryClientProvider></MemoryRouter>);
+ fireEvent.change(await screen.findByLabelText('Вопрос координатору'),{target:{value:'Личный вопрос к первому занятию'}});fireEvent.click(screen.getByRole('checkbox',{name:/Личный вопрос/}));fireEvent.click(screen.getByRole('link',{name:'Другое занятие'}));await screen.findByText('Занятие two · Мастерская');expect((screen.getByLabelText('Вопрос координатору') as HTMLTextAreaElement).value).toBe('');expect((screen.getByRole('checkbox',{name:/Личный вопрос/}) as HTMLInputElement).checked).toBe(false);
 });
