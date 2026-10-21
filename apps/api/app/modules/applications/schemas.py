@@ -24,7 +24,7 @@ class SubmissionCommand(StrictModel):
 class VersionCommand(StrictModel):
     expected_version: int = Field(ge=1)
 
-class ReviewCommand(VersionCommand):
+class ApplicationReviewCommand(VersionCommand):
     state: Literal["reviewing", "discussed", "paused", "closed"]
     public_message: str = Field(default="", max_length=4000)
     assigned_coordinator_id: UUID | None = None

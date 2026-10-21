@@ -47,7 +47,7 @@ class PreferenceCommand(VersionCommand):
     reason:str=Field(min_length=1,max_length=4000)
     renewed_consent_confirmed:bool=False
 
-class ReviewCommand(VersionCommand):
+class CrmReviewCommand(VersionCommand):
     outcome:Literal['unverified','contacted','awaiting_reply','ready','paused','unavailable','unreachable']
     note:str=Field(min_length=1,max_length=8000)
     no_contact:bool=False

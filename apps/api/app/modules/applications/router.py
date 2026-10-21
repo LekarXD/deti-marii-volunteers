@@ -9,7 +9,7 @@ from app.core.audit import audit
 from app.core.idempotency import begin_command, finish_command
 from . import service
 from .models import Application, ApplicationRevision, ApplicationPrivateNote, CandidateRequest
-from .schemas import (DraftCommand, SubmissionCommand, VersionCommand, ReviewCommand, NoteCommand, RequestCommand,
+from .schemas import (DraftCommand, SubmissionCommand, VersionCommand, ApplicationReviewCommand, NoteCommand, RequestCommand,
     ResponseCommand, DraftView, ApplicationSelfView, CandidateView, CandidateListView, NoteView, RequestView)
 
 router = APIRouter(prefix="/api/v1", tags=["applications"])
@@ -84,7 +84,7 @@ async def candidate(application_id:UUID,principal:Principal=Depends(require_perm
 
 
 @router.post("/coord/candidates/{application_id}/review",response_model=CandidateView)
-async def review(application_id:UUID, command:ReviewCommand,principal:Principal=Depends(require_permission("candidates.review")),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+async def review(application_id:UUID, command:ApplicationReviewCommand,principal:Principal=Depends(require_permission("candidates.review")),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
     return await run_command(db,principal,f"application.review:{application_id}",idempotency_key,command,lambda:service.review(db,principal,application_id,command),permission="candidates.review")
 
 

@@ -12,7 +12,7 @@ from app.core.idempotency import begin_command,finish_command
 from app.core.models import StaffMembership,User
 from . import service,imports
 from .models import CrmVolunteer,FollowUpTask,ImportBatch
-from .schemas import (CreateVolunteerCommand,AgreementCommand,ContactCommand,AvailabilityCommand,VerificationCommand,PreferenceCommand,ReviewCommand,
+from .schemas import (CreateVolunteerCommand,AgreementCommand,ContactCommand,AvailabilityCommand,VerificationCommand,PreferenceCommand,CrmReviewCommand,
     TaskCreateCommand,TaskUpdateCommand,MergeCommand,ImportMappingCommand,ImportRowResolutionCommand,VersionCommand,SelfAvailabilityCommand,
     CrmVolunteerView,CrmVolunteerListView,FollowUpTaskView,ImportBatchView,ImportBatchSummary,OwnAvailabilityView,StaffOptionView,CrmApplicationOptionView)
 router=APIRouter(prefix='/api/v1',tags=['crm'])
@@ -117,7 +117,7 @@ async def reviews(state:str|None='unverified',q:str='',offset:int=Query(default=
 
 
 @router.post('/coord/contact-reviews/{volunteer_id}/record',response_model=CrmVolunteerView)
-async def record_review(volunteer_id:UUID,body:ReviewCommand,principal:Principal=Depends(require_permission('contacts.review')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+async def record_review(volunteer_id:UUID,body:CrmReviewCommand,principal:Principal=Depends(require_permission('contacts.review')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
     return await command(db,principal,f'crm.review:{volunteer_id}',idempotency_key,body,lambda:service.record_review(db,principal,volunteer_id,body),'contacts.review')
 
 
