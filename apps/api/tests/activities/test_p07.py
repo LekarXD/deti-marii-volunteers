@@ -37,7 +37,7 @@ async def context():
     load_models()
     # Shared readiness helpers can load these modules lazily during a previous run.
     import importlib
-    for model_module in ('app.modules.knowledge.models','app.integrations.ai.models','app.modules.profile.models'):
+    for model_module in ('app.modules.knowledge.models','app.integrations.ai.models','app.modules.profile.models','app.modules.crm.models'):
         try:importlib.import_module(model_module)
         except ModuleNotFoundError as error:
             if error.name not in (model_module,model_module.rsplit('.',1)[0]):raise

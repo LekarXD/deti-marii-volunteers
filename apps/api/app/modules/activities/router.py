@@ -113,7 +113,9 @@ async def opportunity_list(db, principal, staff, q, state, regularity, format, c
     if cursor:
         query = query.where(Opportunity.id > cursor)
     rows = list((await db.scalars(query.order_by(Opportunity.id).limit(limit+1))).all())
-    return OpportunityPage(items=[await service.opportunity_view(db, r, staff) for r in rows[:limit]], next_cursor=rows[limit-1].id if len(rows)>limit else None)
+    from .matching import own_match_context
+    match_context=await own_match_context(db,principal) if not staff else None
+    return OpportunityPage(items=[await service.opportunity_view(db, r, staff, match_context) for r in rows[:limit]], next_cursor=rows[limit-1].id if len(rows)>limit else None)
 
 
 @router.get('/opportunities', response_model=OpportunityPage, operation_id='listPublishedOpportunities')
@@ -128,7 +130,8 @@ async def list_staff_opportunities(q: str=Query('', max_length=200), state: str|
 
 @router.get('/opportunities/{opportunity_id}', response_model=OpportunityView, operation_id='getPublishedOpportunity')
 async def get_public_opportunity(opportunity_id: UUID, principal: Principal=Depends(get_principal), db: AsyncSession=Depends(get_db)):
-    return await service.opportunity_view(db, await service.find_opportunity(db, principal, opportunity_id))
+    from .matching import own_match_context
+    return await service.opportunity_view(db, await service.find_opportunity(db, principal, opportunity_id),match_context=await own_match_context(db,principal))
 
 
 @router.get('/coord/opportunities/{opportunity_id}', response_model=OpportunityView, operation_id='getStaffOpportunity')

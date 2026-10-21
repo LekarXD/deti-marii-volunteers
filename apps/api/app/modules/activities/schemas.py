@@ -108,8 +108,16 @@ class OpportunityUpdate(OpportunityCreate):
     expected_version: int = Field(gt=0)
 
 
+class ActivityMatchEvidence(BaseModel):
+    source_id: str
+    version: str
+    field: str
+
+
 class MatchExplanation(BaseModel):
-    algorithm_version: Literal['rules-v1'] = 'rules-v1'
+    algorithm_version: Literal['rules-v2'] = 'rules-v2'
+    evidence: list[ActivityMatchEvidence] = Field(default_factory=list)
+    context_versions: dict[str, int | None] = Field(default_factory=dict)
     reasons: list[str]
     missing_data: list[str]
     constraints: list[str]

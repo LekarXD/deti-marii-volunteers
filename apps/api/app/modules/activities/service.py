@@ -17,16 +17,20 @@ def role_view(role: VolunteerRole, staff=True):
 
 
 def explain_match(opportunity: Opportunity) -> MatchExplanation:
-    # No profile source has been connected: a condition is not evidence of a match.
+    # Staff snapshots describe conditions without embedding a volunteer profile.
     constraints = [r['title'] for r in opportunity.preparation_requirements if r['level'] == 'mandatory']
     return MatchExplanation(reasons=[], missing_data=['interests', 'availability', 'preparation'], constraints=constraints)
 
 
-async def opportunity_view(db, opportunity, staff=False):
+async def opportunity_view(db, opportunity, staff=False, match_context=None):
     role_ids = list((await db.scalars(select(OpportunityRoleLink.role_id).where(OpportunityRoleLink.opportunity_id == opportunity.id).order_by(OpportunityRoleLink.role_id))).all())
     fields = {name: getattr(opportunity, name) for name in OpportunityCreate.model_fields if name != 'role_ids'}
+    matching=explain_match(opportunity)
+    if not staff:
+        from .matching import explain_opportunity
+        matching=await explain_opportunity(db,opportunity,match_context)
     return OpportunityView(**fields, role_ids=role_ids, id=opportunity.id, version=opportunity.version,
-        state=opportunity.state, matching=explain_match(opportunity),
+        state=opportunity.state, matching=matching,
         allowed_actions=(['update', 'history'] + {'draft':['publish'], 'published':['pause','close'], 'paused':['publish','close'], 'closed':['reopen']}[opportunity.state]) if staff else [])
 
 
