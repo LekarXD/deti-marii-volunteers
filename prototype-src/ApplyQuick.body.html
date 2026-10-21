@@ -1,7 +1,0 @@
-<div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button onClick="{{fillDemo}}">Заполнить примером</button><button onClick="{{clear}}">Очистить</button><!--VARIANTS--></div>
-<div class="q-grid">
-<div class="q-side"><p class="eyebrow">Анкета волонтёра</p><h1 class="h1">{{title}}</h1><p class="lead">{{intro}}</p><ol class="a-pathlist q-path"><sc-for list="{{path}}" as="p"><li class="{{p.cls}}"><span class="a-path-ico" aria-hidden="true">ICONSWITCH(p)</span><span><b>{{p.title}}</b><small>{{p.meta}}</small></span></li></sc-for></ol></div>
-<section class="card q-card"><div class="a-form">
-<!--FIELDS-->
-</div><div class="actions q-actions"><button class="btn btn-primary btn-lg" onClick="{{submit}}">Отправить анкету</button><span class="meta">около минуты</span></div><sc-if value="{{hasErrors}}"><p class="err" role="alert">Проверьте отмеченные поля.</p></sc-if></section>
-</div>

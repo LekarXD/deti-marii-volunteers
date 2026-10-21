@@ -372,36 +372,3 @@
 .a-onb.is-nudge{box-shadow:inset 0 0 0 2px var(--orange)}
 @media (max-width:720px){.a-hero-title{font-size:32px}.card-hero .hero-when{font-size:36px}.a-hero-actions .btn{flex:1 1 auto}.a-onb.card{flex-direction:column;align-items:stretch;gap:16px}.a-onb .btn{width:100%}.a-book.card{padding:4px 20px}}
 @media (max-width:720px){.a-tiles{grid-template-columns:1fr;gap:8px}.a-tile{flex-direction:row;align-items:center;min-height:60px;padding:10px 48px 10px 10px}.a-tile.is-on::after{top:50%;transform:translateY(-50%)}}
-/* Переключатель вариантов анкеты в полосе прототипа */
-.a-var-cap{margin-left:8px}
-.a-var{height:34px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:14px;font-weight:500;color:var(--ink-2);text-decoration:none}
-.a-var:hover{text-decoration:none;background:rgba(255,255,255,.5)}
-.a-var.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
-/* Вариант 2: один вопрос на экран */
-.f-wrap{max-width:680px;margin:0 auto;padding:8px 0 40px}
-.f-top{display:flex;align-items:center;min-height:40px;margin-bottom:12px}
-.f-back{margin-left:-12px}
-.f-bar{height:6px}
-.f-q{margin-top:48px}
-.f-q-a{animation:f-in-a .35s ease both}.f-q-b{animation:f-in-b .35s ease both}
-@keyframes f-in-a{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes f-in-b{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.f-chapter{margin:0 0 10px;color:var(--orange-ink)}
-.f-title{margin:0;font-size:40px;font-weight:600;line-height:1.1;letter-spacing:-.03em;text-wrap:balance}
-.f-hint{margin-top:12px}
-.f-form{margin-top:32px}
-.f-form .a-chips .chip{height:48px;padding:0 20px;font-size:16px}
-.f-form .a-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
-.f-actions{display:flex;align-items:center;gap:18px;margin-top:36px}
-@media (prefers-reduced-motion:reduce){.f-q-a,.f-q-b{animation:none}}
-@media (max-width:720px){.f-q{margin-top:28px}.f-title{font-size:30px}.f-form{margin-top:24px}.f-form .a-tiles{grid-template-columns:1fr}.f-actions .btn{width:100%}.f-enter{display:none}}
-/* Вариант 3: короткая анкета на сайте */
-.q-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,560px);gap:48px;align-items:start}
-.q-side .lead{margin-top:14px}
-.q-path{margin:28px 0 0;max-width:380px}
-.q-card.card{padding:32px 36px}
-.q-card .a-form>.a-sec:first-child{margin-top:0}
-.q-actions{margin-top:28px;align-items:center;gap:16px}
-.q-more{margin-top:8px}
-@media (max-width:1000px){.q-grid{grid-template-columns:1fr;gap:24px}.q-path{display:none}}
-@media (max-width:720px){.q-card.card{padding:24px 20px}.q-actions .btn{width:100%}}

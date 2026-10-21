@@ -656,39 +656,6 @@ sc-if,sc-for{display:contents}
 .a-onb.is-nudge{box-shadow:inset 0 0 0 2px var(--orange)}
 @media (max-width:720px){.a-hero-title{font-size:32px}.card-hero .hero-when{font-size:36px}.a-hero-actions .btn{flex:1 1 auto}.a-onb.card{flex-direction:column;align-items:stretch;gap:16px}.a-onb .btn{width:100%}.a-book.card{padding:4px 20px}}
 @media (max-width:720px){.a-tiles{grid-template-columns:1fr;gap:8px}.a-tile{flex-direction:row;align-items:center;min-height:60px;padding:10px 48px 10px 10px}.a-tile.is-on::after{top:50%;transform:translateY(-50%)}}
-/* Переключатель вариантов анкеты в полосе прототипа */
-.a-var-cap{margin-left:8px}
-.a-var{height:34px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:14px;font-weight:500;color:var(--ink-2);text-decoration:none}
-.a-var:hover{text-decoration:none;background:rgba(255,255,255,.5)}
-.a-var.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
-/* Вариант 2: один вопрос на экран */
-.f-wrap{max-width:680px;margin:0 auto;padding:8px 0 40px}
-.f-top{display:flex;align-items:center;min-height:40px;margin-bottom:12px}
-.f-back{margin-left:-12px}
-.f-bar{height:6px}
-.f-q{margin-top:48px}
-.f-q-a{animation:f-in-a .35s ease both}.f-q-b{animation:f-in-b .35s ease both}
-@keyframes f-in-a{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes f-in-b{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.f-chapter{margin:0 0 10px;color:var(--orange-ink)}
-.f-title{margin:0;font-size:40px;font-weight:600;line-height:1.1;letter-spacing:-.03em;text-wrap:balance}
-.f-hint{margin-top:12px}
-.f-form{margin-top:32px}
-.f-form .a-chips .chip{height:48px;padding:0 20px;font-size:16px}
-.f-form .a-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
-.f-actions{display:flex;align-items:center;gap:18px;margin-top:36px}
-@media (prefers-reduced-motion:reduce){.f-q-a,.f-q-b{animation:none}}
-@media (max-width:720px){.f-q{margin-top:28px}.f-title{font-size:30px}.f-form{margin-top:24px}.f-form .a-tiles{grid-template-columns:1fr}.f-actions .btn{width:100%}.f-enter{display:none}}
-/* Вариант 3: короткая анкета на сайте */
-.q-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,560px);gap:48px;align-items:start}
-.q-side .lead{margin-top:14px}
-.q-path{margin:28px 0 0;max-width:380px}
-.q-card.card{padding:32px 36px}
-.q-card .a-form>.a-sec:first-child{margin-top:0}
-.q-actions{margin-top:28px;align-items:center;gap:16px}
-.q-more{margin-top:8px}
-@media (max-width:1000px){.q-grid{grid-template-columns:1fr;gap:24px}.q-path{display:none}}
-@media (max-width:720px){.q-card.card{padding:24px 20px}.q-actions .btn{width:100%}}
 
 </style>
 </helmet>
@@ -698,7 +665,7 @@ sc-if,sc-for{display:contents}
   <div class="top-end"><span class="a-sitenote">mariaschildren.ru · Стать волонтёром</span></div>
 </header>
 
-<div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button type="button" onClick="{{fillDemo}}">Заполнить примером</button><button type="button" onClick="{{clear}}">Очистить</button><span class="demo-cap a-var-cap">Вариант:</span><a class="a-var is-on" href="Apply.dc.html">1. Блоки</a><a class="a-var" href="ApplyFlow.dc.html">2. По одному вопросу</a><a class="a-var" href="ApplyQuick.dc.html">3. Коротко сейчас</a></div>
+<div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button type="button" onClick="{{fillDemo}}">Заполнить примером</button><button type="button" onClick="{{clear}}">Очистить</button></div>
 <div class="head"><div><p class="eyebrow">{{eyebrow}}</p><h1 class="h1">{{title}}</h1><p class="lead a-intro">{{intro}}</p></div></div>
 <div class="a-apply">
 <div class="a-apply-main">
@@ -857,40 +824,6 @@ window.FORM = {
       ]
     }
   ],
-
-  /* Вариант 2 — «По одному вопросу» (ApplyFlow): те же поля, но один вопрос на экран.
-     fields — id полей из steps; auto — сразу дальше после выбора; keepLabels — показать подписи всех полей. */
-  flow: [
-    { chapter: "О вас", title: "Как вас зовут?", fields: ["firstName", "lastName"], keepLabels: true },
-    { chapter: "О вас", title: "Когда вы родились?", hint: "Волонтёром можно стать с 16 лет.", fields: ["birthdate"] },
-    { chapter: "О вас", title: "Где вы живёте?", hint: "Чтобы предложить занятия поближе.", fields: ["area"], auto: true },
-    { chapter: "Связь", title: "Как с вами связаться?", fields: ["phone", "email"], keepLabels: true },
-    { chapter: "Связь", title: "Где вам удобнее отвечать?", hint: "Можно несколько.", fields: ["channels", "telegram"] },
-    { chapter: "Помощь", title: "Что вам было бы интересно?", hint: "Можно несколько. Это не обязательство — роль обсудим на встрече.", fields: ["directions"] },
-    { chapter: "Помощь", title: "Что вы умеете или любите делать?", hint: "По желанию — можно пропустить.", fields: ["skills"] },
-    { chapter: "Помощь", title: "Как часто хотели бы помогать?", hint: "Участникам важны знакомые лица: доверие строится месяцами.", fields: ["participation", "online"] },
-    { chapter: "Опыт", title: "Вы раньше были волонтёром?", fields: ["volExp", "volExpText"] },
-    { chapter: "Опыт", title: "Общались ли вы с людьми с особенностями развития?", fields: ["specialExp", "specialExpText"] },
-    { chapter: "Опыт", title: "Готовы получить справку о несудимости?", hint: "Она нужна для работы с детьми. Заказать можно бесплатно на Госуслугах — это займёт минуту.", fields: ["record"], auto: true },
-    { chapter: "Почти всё", title: "Откуда вы узнали о фонде?", fields: ["source"], auto: true },
-    { chapter: "Почти всё", title: "Последний шаг", hint: "Подтвердите согласие — и анкета уйдёт координатору.", fields: ["consentPD", "consentNews"], keepLabels: true }
-  ],
-
-  /* Вариант 3 — «Коротко сейчас, остальное потом» (ApplyQuick): на сайте только минимум,
-     остальные вопросы человек заполняет в кабинете перед встречей. override — как показать поле здесь. */
-  quick: {
-    title: "Стать волонтёром",
-    intro: "Одна минута — и вы в личном кабинете. Остальное расскажете потом, перед встречей.",
-    fields: [
-      { type: "section", id: "q-who", title: "Расскажите о себе", icon: "user" },
-      "firstName", "lastName", "birthdate", "phone", "email",
-      { id: "directions", override: { type: "chips", required: false, optional: true, label: "Что вам интересно?", why: "Можно выбрать позже." } },
-      "consentPD"
-    ],
-    moreTitle: "Расскажите о себе подробнее",
-    moreIntro: "Координатор прочитает это перед встречей и подготовится. Около 3 минут.",
-    moreHint: "Ещё 3 минуты: расскажите о себе, чтобы координатор подготовился к встрече."
-  },
 
   /* Раньше здесь был шаг онбординга «Профиль для подбора». Убран: физическую помощь и график
      координатор узнает на встрече, а «Когда свободна» и «Как часто» уже есть в профиле на платформе. */
@@ -1214,12 +1147,6 @@ const freshProgress = () => ({ done: {}, testDone: false, score: null, road: fal
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
 const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
-
-// Все поля анкеты по id (без заголовков блоков) — для вариантов 2 и 3
-const fieldById = id => FORM.steps.flatMap(s => s.fields).find(f => f.id === id && f.type !== 'section');
-const quickField = q => typeof q === 'string' ? fieldById(q) : q.type === 'section' ? q : { ...fieldById(q.id), ...(q.override || {}) };
-// Сохранить анкету и перейти в кабинет
-const submitCandidate = (data, extra) => { const me = { ...data, ...(extra || {}), name: [data.firstName, data.lastName].filter(Boolean).join(' '), submittedAt: new Date().toISOString() }; demoWrite('candidate', me); demoWrite('onboarding', freshProgress()); location.href = 'ApplicationStatus.dc.html'; };
 
 // Иконки по имени из контента (сборщик подставляет svg через ICONSWITCH)
 const ICON_KEYS = ['palette','book','users','user','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle','academy','pen','scissors','flame','globe','dice','film','image','file','chart','screen','database','send','inbox','settings','search','edit'];
