@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     max_asset_bytes: int = 10 * 1024 * 1024
     dev_inbox: bool = True
     session_hours: int = 24
+    worker_kinds: list[str] = ["outbox.deliver"]
     smtp_host: str | None = None
     smtp_port: int = 587
     smtp_from: str | None = None

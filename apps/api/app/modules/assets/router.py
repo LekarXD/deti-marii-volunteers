@@ -15,6 +15,31 @@ from app.core.errors import ApiError
 from app.core.models import MediaAsset
 from app.modules.assets.service import require_asset, asset_path, asset_content
 router = APIRouter(prefix="/api/v1/assets", tags=["assets"])
+validation_admission=asyncio.Semaphore(2)
+
+def verify_file(path,asset,policy):
+    try:
+        data=path.read_bytes()
+        if len(data)!=asset.expected_size or hashlib.sha256(data).hexdigest()!=asset.checksum:
+            return False
+        signatures={"image/png":b"\x89PNG\r\n\x1a\n","image/jpeg":b"\xff\xd8\xff","image/webp":b"RIFF","application/pdf":b"%PDF-"}
+        if policy:
+            if not policy.validate(data,asset.content_type):
+                return False
+        elif asset.content_type not in signatures or not data.startswith(signatures[asset.content_type]):
+            return False
+        if asset.content_type.startswith("image/"):
+            with Image.open(io.BytesIO(data)) as image:
+                expected={"image/png":"PNG","image/jpeg":"JPEG","image/webp":"WEBP"}[asset.content_type]
+                if image.width*image.height>25_000_000 or image.format!=expected:
+                    return False
+                image.verify()
+            with Image.open(io.BytesIO(data)) as image:
+                image.load()
+        return True
+    except (OSError,ValueError,KeyError,UnidentifiedImageError,Image.DecompressionBombError):
+        return False
+
 class UploadIntent(BaseModel):
     content_type: str
     expected_size: int = Field(gt=0)
@@ -80,35 +105,34 @@ async def complete_upload(asset_id: UUID, principal: Principal = Depends(get_pri
     await authz_guard(db, principal)
     asset = await require_asset(db, principal, asset_id, ready=False)
     await db.refresh(asset, with_for_update=True)
-    if asset.state == "ready":
+    if asset.state in ("ready","processing"):
         return view(asset)
     path = asset_path(asset)
     if asset.received_size != asset.expected_size or not path.exists():
         raise ApiError(409, "upload_incomplete", "Файл загружен не полностью")
-    data = await asyncio.to_thread(path.read_bytes)
-    signatures = {"image/png": b"\x89PNG\r\n\x1a\n", "image/jpeg": b"\xff\xd8\xff", "application/pdf": b"%PDF-", "image/webp": b"RIFF"}
-    if len(data) != asset.expected_size or hashlib.sha256(data).hexdigest() != asset.checksum or not data.startswith(signatures[asset.content_type]):
-        asset.state = "rejected"
+    policy = None
+    if asset.purpose != "generic":
+        from app.modules.assets.registry import authorize_bound_asset
+        policy=await authorize_bound_asset(db,principal,asset)
+    try:
+        await asyncio.wait_for(validation_admission.acquire(),timeout=1)
+    except TimeoutError:
+        raise ApiError(503,"asset_validation_busy","Проверка файлов занята. Повторите попытку",retryable=True)
+    try:
+        valid=await asyncio.to_thread(verify_file,path,asset,policy)
+    finally:
+        validation_admission.release()
+    if not valid:
+        asset.state="rejected"
         await db.commit()
-        raise ApiError(422, "asset_validation_failed", "Файл не прошёл проверку")
-    if asset.content_type.startswith("image/"):
-        def validate_image():
-            try:
-                with Image.open(io.BytesIO(data)) as image:
-                    if image.width * image.height > 25_000_000:
-                        return False
-                    expected_format = {"image/png":"PNG", "image/jpeg":"JPEG", "image/webp":"WEBP"}[asset.content_type]
-                    if image.format != expected_format:
-                        return False
-                    image.verify()
-                return True
-            except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
-                return False
-        if not await asyncio.to_thread(validate_image):
-            asset.state = "rejected"
-            await db.commit()
-            raise ApiError(422, "asset_validation_failed", "Изображение не прошло проверку")
-    asset.state = "ready"
+        raise ApiError(422,"asset_validation_failed","Файл не прошёл проверку")
+    if policy and policy.processor_kind:
+        from app.worker.queue import enqueue_job
+        job=enqueue_job(db,principal.foundation_id,policy.processor_kind,{"asset_id":str(asset.id),"resource_type":asset.resource_type,"resource_id":str(asset.resource_id),"source_checksum":asset.checksum})
+        asset.processing_job_id=job.id
+        asset.state="processing"
+    else:
+        asset.state = "ready"
     audit(db, principal, "asset.complete", "asset", asset.id, ("state",))
     await db.commit()
     return view(asset)

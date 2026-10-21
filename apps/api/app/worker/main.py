@@ -1,5 +1,6 @@
 """Run as python -m app.worker.main. Unknown external delivery is never marked sent."""
 import asyncio
+import argparse
 import json
 from datetime import timedelta
 from app.core.clock import utcnow
@@ -11,9 +12,15 @@ from app.core.models import OutboxMessage
 from app.core.config import get_settings
 from app.worker.queue import claim, complete, retry, LeaseLost
 
-async def run_once():
+async def run_once(kinds=None):
     async with SessionLocal() as db:
-        job = await claim(db)
+        from app.worker.registry import HANDLERS, load_extensions, run_handler
+        load_extensions()
+        kinds=kinds if kinds is not None else get_settings().worker_kinds
+        if not kinds or len(kinds)>32:
+            raise RuntimeError("An explicit bounded worker kind filter is required")
+        lease=max([HANDLERS[k].lease_seconds for k in kinds if k in HANDLERS]+[60])
+        job = await claim(db,kinds=kinds,lease_seconds=lease)
         await db.commit()
         if job is None:
             return False
@@ -42,6 +49,9 @@ async def run_once():
                 else:
                     message.state="unavailable"
                     await retry(db,job.id,job.claim_token,"channel_unavailable",job.attempts,job.max_attempts)
+            elif job.kind in HANDLERS:
+                result=await run_handler(db,job,HANDLERS[job.kind])
+                await complete(db,job.id,job.claim_token,result)
             else:
                 await retry(db, job.id, job.claim_token, "handler_unavailable", job.attempts, job.max_attempts)
             await db.commit()
@@ -56,10 +66,17 @@ async def run_once():
                 await db.rollback()
         return True
 
-async def main():
+async def main(kinds=None):
     while True:
-        if not await run_once():
+        try:
+            if not await run_once(kinds):
+                await asyncio.sleep(1)
+        except Exception:
+            # No job payload, contact or token is logged; durable leases recover outages.
             await asyncio.sleep(1)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--kind",action="append")
+    args=parser.parse_args()
+    asyncio.run(main(args.kind))

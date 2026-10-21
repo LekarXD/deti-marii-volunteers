@@ -16,7 +16,11 @@ async def require_asset(db, principal, asset_id, ready=True):
     asset = await db.scalar(select(MediaAsset).where(MediaAsset.id == asset_id, MediaAsset.foundation_id == principal.foundation_id))
     if not asset:
         raise ApiError(404, "asset_not_found", "Файл не найден")
-    if asset.access_permission:
+    if asset.purpose != "generic":
+        from app.modules.assets.registry import authorize_bound_asset
+        await authorize_bound_asset(db,principal,asset)
+        allowed = True
+    elif asset.access_permission:
         allowed = principal.has_permission(asset.access_permission)
     else:
         allowed = (principal.user_id is not None and asset.owner_user_id == principal.user_id) or (principal.registration_id is not None and asset.owner_registration_id == principal.registration_id) or principal.has_permission("assets.manage")
