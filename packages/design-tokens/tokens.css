@@ -189,3 +189,7 @@ sc-if,sc-for{display:contents}
 .ask{display:flex;gap:10px;margin-top:16px}
 .ask .input{flex:1 1 auto}
 .big{font-size:56px;font-weight:600;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums}
+
+/* Shared hero type from prototype-src/extensions.css:3,40. */
+.hero-copy{flex:1 1 560px;min-width:0}.hero-title{margin:10px 0 0;font-size:52px;font-weight:600;line-height:1.05;letter-spacing:-.035em;text-wrap:balance}
+@media(max-width:720px){.hero-title{font-size:36px}.hero-copy{flex-basis:100%}}

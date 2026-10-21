@@ -1,13 +1,7 @@
 /** Cookie transport adapted from OD client.js principal pinning/retry mechanics.
  * Server remains the authority for Origin, CSRF, permissions and receipts. */
-export interface Session {
-  user_id: string | null;
-  registration_id: string | null;
-  foundation_id: string;
-  is_staff: boolean;
-  permissions: string[];
-  csrf_token: string;
-}
+import type {components} from './generated/schema';
+export type Session = components['schemas']['AuthSessionView'];
 export class ApiError extends Error {
   readonly name = 'ApiError';
   constructor(public status: number, public code: string, message: string,

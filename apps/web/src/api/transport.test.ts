@@ -1,6 +1,6 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 import {api,clearSession,initializeSession,ApiError} from './transport';
-const initial={user_id:null,registration_id:'reg-a',foundation_id:'f',is_staff:false,permissions:[],csrf_token:'csrf-a'};
+const initial={actor_id:'reg-a',mfa_required:false,user_id:null,registration_id:'reg-a',foundation_id:'f',is_staff:false,permissions:[],csrf_token:'csrf-a'};
 const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json'}});
 beforeEach(()=>clearSession(false));afterEach(()=>{vi.unstubAllGlobals();vi.useRealTimers();clearSession(false);});
 describe('sole cookie transport',()=>{
