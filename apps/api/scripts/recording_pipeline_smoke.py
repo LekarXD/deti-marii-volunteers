@@ -63,8 +63,24 @@ async def main():
    server=uvicorn.Server(uvicorn.Config(app,host='127.0.0.1',port=http_port,log_level='critical',access_log=False));serving=asyncio.create_task(server.serve())
    while not server.started:await asyncio.sleep(.1)
    await asyncio.sleep(.7);await fixtures()
-   async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as client:
-    me,headers=await actor(client,'coordinator@example.test',True)
+   # Unique synthetic host and test client isolate real auth rate limits between runs.
+   from app.core.models import User,ContactChannel,StaffMembership,PermissionGrant,MfaFactor
+   from app.core.crypto import seal
+   from app.core.clock import utcnow
+   import pyotp
+   async with SessionLocal() as db:
+    original=await db.scalar(select(ContactChannel).where(ContactChannel.normalized_value=='coordinator@example.test'))
+    member=await db.scalar(select(StaffMembership).where(StaffMembership.user_id==original.user_id,StaffMembership.revoked_at.is_(None)))
+    permissions=(await db.scalars(select(PermissionGrant).where(PermissionGrant.membership_id==member.id,PermissionGrant.revoked_at.is_(None)))).all()
+    email='recording-proof-'+uuid4().hex+'@example.test'
+    host=User(foundation_id=member.foundation_id,display_name='Synthetic teacher');db.add(host);await db.flush()
+    db.add(ContactChannel(user_id=host.id,normalized_value=email,verified_at=utcnow()))
+    membership=StaffMembership(foundation_id=member.foundation_id,user_id=host.id);db.add(membership);await db.flush()
+    for permission in permissions:db.add(PermissionGrant(membership_id=membership.id,permission=permission.permission,scope_type=permission.scope_type,scope_id=permission.scope_id))
+    db.add(MfaFactor(user_id=host.id,secret_cipher=seal(pyotp.random_base32()),confirmed_at=utcnow()));await db.commit()
+   client_ip='127.20.'+str(int(uuid4().hex[:2],16))+'.'+str(int(uuid4().hex[:2],16))
+   async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app,client=(client_ip,12345)),base_url='http://testserver') as client:
+    me,headers=await actor(client,email,True)
     async def post(path,body):
      headers['Idempotency-Key']=uuid4().hex;r=await client.post('/api/v1'+path,json=body,headers=headers)
      if r.status_code!=200:raise RuntimeError(f'{path} {r.status_code} {r.text}')
