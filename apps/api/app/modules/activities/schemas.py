@@ -142,7 +142,7 @@ class RoleUsage(BaseModel):
     history_preserved: bool = True
 
 
-class RevisionView(BaseModel):
+class ActivityRevisionView(BaseModel):
     version: int
     snapshot: dict
     created_at: datetime

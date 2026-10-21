@@ -10,7 +10,7 @@ from app.core.db import get_db
 from app.core.errors import ApiError
 from app.core.idempotency import begin_command, finish_command
 from .models import Opportunity, OpportunityRoleLink, OpportunityVersion, VolunteerRole, VolunteerRoleVersion
-from .schemas import OpportunityCreate, OpportunityPage, OpportunityUpdate, OpportunityView, RevisionView, RoleCreate, RolePage, RoleUpdate, RoleUsage, RoleView, VersionCommand
+from .schemas import OpportunityCreate, OpportunityPage, OpportunityUpdate, OpportunityView, ActivityRevisionView, RoleCreate, RolePage, RoleUpdate, RoleUsage, RoleView, VersionCommand
 from . import service
 
 router = APIRouter(tags=['activities'])
@@ -90,11 +90,11 @@ async def role_usage(role_id: UUID, principal: Principal=Depends(roles_staff), d
     return RoleUsage(opportunity_count=len(rows), opportunities=[{'id': str(r.id), 'title': r.title, 'state': r.state} for r in rows])
 
 
-@router.get('/coord/roles/{role_id}/history', response_model=list[RevisionView], operation_id='getRoleHistory')
+@router.get('/coord/roles/{role_id}/history', response_model=list[ActivityRevisionView], operation_id='getRoleHistory')
 async def role_history(role_id: UUID, principal: Principal=Depends(roles_staff), db: AsyncSession=Depends(get_db)):
     await service.find_role(db, principal, role_id)
     rows = (await db.scalars(select(VolunteerRoleVersion).where(VolunteerRoleVersion.role_id == role_id).order_by(VolunteerRoleVersion.version.desc()).limit(100))).all()
-    return [RevisionView(version=r.version, snapshot=r.snapshot, created_at=r.created_at) for r in rows]
+    return [ActivityRevisionView(version=r.version, snapshot=r.snapshot, created_at=r.created_at) for r in rows]
 
 
 async def opportunity_list(db, principal, staff, q, state, regularity, format, cursor, limit):
@@ -157,8 +157,8 @@ async def close_opportunity(opportunity_id: UUID, body: VersionCommand, request:
     return await command(db, principal, f'opportunities.close:{opportunity_id}', key, body, lambda: service.change_opportunity_state(db, principal, opportunity_id, body, 'closed'), request)
 
 
-@router.get('/coord/opportunities/{opportunity_id}/history', response_model=list[RevisionView], operation_id='getOpportunityHistory')
+@router.get('/coord/opportunities/{opportunity_id}/history', response_model=list[ActivityRevisionView], operation_id='getOpportunityHistory')
 async def opportunity_history(opportunity_id: UUID, principal: Principal=Depends(opportunities_staff), db: AsyncSession=Depends(get_db)):
     await service.find_opportunity(db, principal, opportunity_id, True)
     rows = (await db.scalars(select(OpportunityVersion).where(OpportunityVersion.opportunity_id == opportunity_id).order_by(OpportunityVersion.version.desc()).limit(100))).all()
-    return [RevisionView(version=r.version, snapshot=r.snapshot, created_at=r.created_at) for r in rows]
+    return [ActivityRevisionView(version=r.version, snapshot=r.snapshot, created_at=r.created_at) for r in rows]
