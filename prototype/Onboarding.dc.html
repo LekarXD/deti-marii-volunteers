@@ -372,8 +372,6 @@ sc-if,sc-for{display:contents}
 .a-mod.is-done .a-num{background:var(--green);color:#fff}
 .a-num-o{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:var(--orange);color:#fff}
 .a-chev .ic{width:20px;height:20px}
-.a-readbar{position:fixed;top:0;left:0;right:0;height:5px;z-index:50}
-.a-readbar i{display:block;height:100%;width:0;background:var(--orange);transition:width .1s linear}
 .a-modnav{margin:0 0 20px;gap:12px}
 .a-pills{display:flex;gap:6px;flex-wrap:wrap}
 .a-pill{width:36px;height:36px;border:0;border-radius:50%;background:var(--paper);font-weight:600;color:var(--ink-2)}
@@ -817,7 +815,6 @@ sc-if,sc-for{display:contents}
 </header>
 
 <div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button type="button" onClick="{{restart}}">Начать сначала</button></div>
-<div class="a-readbar" aria-hidden="true"><i id="a-readbar"></i></div>
 <div class="a-ohead"><p class="eyebrow">{{stepLabel}}</p><div class="a-seg" aria-hidden="true"><sc-for list="{{segs}}" as="sg"><i class="{{sg.cls}}"></i></sc-for></div></div>
 
 <sc-if value="{{isModule}}">
@@ -1117,7 +1114,7 @@ window.ONBOARDING = {
           ["«Вижу, ты расстроился. Я рядом»", "«Да ладно, ничего страшного»"],
           ["«Кисточку не бросаем, давай положим её сюда»", "«Ты плохо себя ведёшь»"],
           ["«Можно я помогу?»", "Молча сделать за человека"],
-          ["«Человек на коляске», «у него аутизм»", "«Колясочник», «аутист», «страдает»"]
+          ["«Человек на коляске», «человек с аутизмом»", "«Колясочник», «аутист», «страдает аутизмом»"]
         ] },
         { type: "icards", title: "Если человеку трудно говорить", items: [
           { icon: "message", title: "Представьтесь", text: "Скажите, кто вы и зачем подошли" },
@@ -1483,7 +1480,7 @@ class Component extends DCLogic {
   document.querySelectorAll('.a-reveal:not(.is-in)').forEach(el=>{if(this.reduce)el.classList.add('is-in');else this.io.observe(el);});this.catchUp();}
  catchUp(){document.querySelectorAll('.a-reveal:not(.is-in)').forEach(el=>{if(el.getBoundingClientRect().top<window.innerHeight*.92)this.showEl(el);});}
  // Как с пользовательским соглашением: «дальше» открывается, когда шаг долистан до конца
- onScroll(){this.catchUp();const bar=document.getElementById('a-readbar');if(bar){const h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?Math.min(100,100*h.scrollTop/max):100)+'%';}
+ onScroll(){this.catchUp();
   const id=this.current().id,end=document.getElementById('a-read-end');if(!end||!id||this.state.read[id]||this.state.pr.done[id])return;if(end.getBoundingClientRect().top<=window.innerHeight)this.setState({read:{...this.state.read,[id]:true}});}
  // Без оглавления: открываем первый непройденный шаг, потом тест
  current(){const s=this.state,mods=ONB.modules;if(s.view==='test')return{test:true};if(s.view!=null)return{id:s.view,i:mods.findIndex(m=>m.id===s.view)};const i=mods.findIndex(m=>!s.pr.done[m.id]);return i<0?{test:true}:{id:mods[i].id,i};}
