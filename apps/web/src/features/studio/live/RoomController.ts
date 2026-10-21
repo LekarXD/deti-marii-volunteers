@@ -43,11 +43,12 @@ export class RoomController {
   if(!room||this.reconnectBlocked)return;
   const tracks:StageTrackBinding[]=[];const seen=new Set<string>();let unexpected=false;
   for(const participant of room.remoteParticipants.values())for(const publication of participant.trackPublications.values()){
-   const allowed=this.permitted(participant.identity,publication);publication.setSubscribed(allowed);
+   const allowed=this.permitted(participant.identity,publication),src=source(publication.source);publication.setSubscribed(allowed);
+   // A publication is part of the observed room even before its media arrives.
+   // Never subscribe to it, and never report ready while its scope is unknown.
+   if(this.hidden&&(!allowed||!src))unexpected=true;
    if(!publication.track)continue;
-   const src=source(publication.source);
    if(!src){unexpected=true;continue;}
-   if(this.hidden&&!allowed)unexpected=true;
    if(!allowed&&!this.hidden)continue;
    seen.add(publication.trackSid);tracks.push(this.bind(participant.identity,publication.track,publication.trackSid,src,allowed,publication.isMuted?'muted':'ready'));
   }

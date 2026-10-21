@@ -19,6 +19,16 @@ vi.mock('livekit-client',async()=>{
 function fixture(){const scene=fictionScene();const plan=fictionPlan(scene);return {scene,plan,grant:{url:'wss://rtc.example.test',token:'test-transport-pass',identity:'renderer',session_id:scene.session_id,generation:plan.generation}};}
 beforeEach(()=>{state.rooms.length=0;state.pending.length=0;});
 describe('private capture controller privacy and epochs',()=>{
+ it('blocks an unknown or unrecognized publication before it has a subscribed media track',async()=>{
+  const {scene,plan,grant}=fixture();const controller=new HiddenCaptureController({onChange:()=>{}});
+  await controller.connect(grant,scene,plan);const room=state.rooms[0];
+  for(const source of [Track.Source.Microphone,Track.Source.Unknown]){
+   const publication={source,kind:Track.Kind.Audio,trackSid:'TR_unapproved',track:undefined,setSubscribed:vi.fn(),isMuted:false};
+   room.remoteParticipants.set('other',{identity:'unapproved-participant',trackPublications:new Map([['unknown',publication]])});room.emit(RoomEvent.TrackPublished);
+   expect(publication.setSubscribed).toHaveBeenLastCalledWith(false);expect(controller.snapshot.status).toBe('blocked');expect(controller.snapshot.tracks).toEqual([]);
+  }
+  expect(room.localParticipant.setMicrophoneEnabled).not.toHaveBeenCalled();await controller.disconnect();
+ });
  it('manually subscribes only approved tracks and never captures devices or attaches audio itself',async()=>{
   const {scene,plan,grant}=fixture();const values:MediaSnapshot[]=[];const controller=new HiddenCaptureController({onChange:value=>values.push(value)});
   await controller.connect(grant,scene,{...plan,allowed_tracks:[{identity:scene.presenter_identity,track_id:'TR_approved',source:'microphone',kind:'audio',required:true}]});
