@@ -1,0 +1,150 @@
+import asyncio,hashlib,io,os
+from datetime import datetime,timedelta,timezone
+from types import SimpleNamespace
+from uuid import UUID,uuid4
+import httpx,jwt,pytest
+from PIL import Image
+from sqlalchemy import select,text,func
+from sqlalchemy.ext.asyncio import create_async_engine,async_sessionmaker
+from app.core.db import Base
+from app.core.auth import Principal
+from app.core.models import Foundation,User,Session,StaffMembership,PermissionGrant,MediaAsset,Job
+from app.core.errors import ApiError
+from app.core.config import get_settings
+from app.worker.registry import JobContext
+from app.worker.queue import LeaseLost,complete
+from app.modules.assets.router import complete_upload
+from app.modules.assets.service import asset_path
+from app.modules.studio import router as routes,service,jobs
+from app.modules.studio.models import StudioSession,StudioSceneEvent,WebinarEnrollment,SlidePage
+from app.modules.studio.schemas import WebinarInput,StudioVersionCommand,StudioSessionCreate,StudioSceneCommand,SlideUploadInput
+from app.integrations.rtc.livekit import RtcSettings,LiveKitAdapter
+
+@pytest.fixture
+async def world(tmp_path,monkeypatch):
+    url=os.environ.get('OPORA_STUDIO_TEST_DATABASE_URL') or os.environ.get('OPORA_TEST_DATABASE_URL')
+    if not url:pytest.skip('Set disposable OPORA_STUDIO_TEST_DATABASE_URL')
+    schema='studio_'+uuid4().hex;admin=create_async_engine(url)
+    async with admin.begin() as c:await c.execute(text('CREATE EXTENSION IF NOT EXISTS btree_gist'));await c.execute(text(f'CREATE SCHEMA "{schema}"'))
+    engine=create_async_engine(url,connect_args={'options':f'-csearch_path={schema}'});factory=async_sessionmaker(engine,expire_on_commit=False)
+    async with engine.begin() as c:await c.run_sync(Base.metadata.create_all)
+    async with factory() as db:
+        foundation=Foundation(name='Studio fixture');db.add(foundation);await db.flush()
+        host=User(foundation_id=foundation.id,display_name='Fixture Host');viewer=User(foundation_id=foundation.id,display_name='Fixture Viewer');db.add_all([host,viewer]);await db.flush()
+        membership=StaffMembership(foundation_id=foundation.id,user_id=host.id);db.add(membership);await db.flush();db.add(PermissionGrant(membership_id=membership.id,permission='studio.manage'))
+        sessions=[]
+        for user in (host,viewer):
+            session=Session(foundation_id=foundation.id,user_id=user.id,token_hash=uuid4().hex,csrf_hash=uuid4().hex,csrf_cipher='fixture',expires_at=datetime.now(timezone.utc)+timedelta(days=1),mfa_at=datetime.now(timezone.utc) if user.id==host.id else None);db.add(session);sessions.append(session)
+        await db.flush();await db.commit()
+        actors=[Principal(user.id,None,foundation.id,session.id,user.id==host.id,str(user.id),frozenset({'studio.manage'}) if user.id==host.id else frozenset(),(('studio.manage','foundation',None),) if user.id==host.id else ()) for user,session in zip((host,viewer),sessions)]
+    monkeypatch.setattr(get_settings(),'asset_root',str(tmp_path))
+    monkeypatch.setattr(RtcSettings,'from_env',classmethod(lambda cls:RtcSettings()))
+    yield SimpleNamespace(factory=factory,host=actors[0],viewer=actors[1],foundation=foundation)
+    await engine.dispose()
+    async with admin.begin() as c:await c.execute(text(f'DROP SCHEMA "{schema}" CASCADE'))
+    await admin.dispose()
+
+async def webinar(w):
+    async with w.factory() as db:
+        value=await routes.create_webinar(WebinarInput(title='Fixture class',starts_at=datetime.now(timezone.utc)+timedelta(days=1)),db,w.host,uuid4().hex)
+    async with w.factory() as db:
+        return await routes.publish_webinar(UUID(value['id']),StudioVersionCommand(expected_version=1),db,w.host,uuid4().hex)
+async def prepare(w,webinar):
+    async with w.factory() as db:return await routes.prepare(StudioSessionCreate(resource_kind='live_event',resource_id=webinar['id']),db,w.host,uuid4().hex)
+
+@pytest.mark.asyncio
+async def test_authoritative_prepare_noop_denied_and_scene_race(world):
+    w=world;event=await webinar(w);session=await prepare(w,event);session_id=UUID(session['id'])
+    assert session['state']=='prepared' and not session['capabilities']['configured']
+    async with w.factory() as db:
+        with pytest.raises(ApiError) as unavailable:await routes.start(session_id,StudioVersionCommand(expected_version=1),db,w.host,uuid4().hex)
+        assert unavailable.value.code=='rtc_unavailable'
+    async with w.factory() as db:assert (await db.get(StudioSession,session_id)).state=='prepared'
+    async with w.factory() as db:
+        with pytest.raises(ApiError):await routes.get_session(session_id,db,w.viewer)
+    async def patch(camera):
+        scene=dict(session['scene']);scene['presenter_camera']=camera
+        async with w.factory() as db:return await routes.patch_scene(session_id,StudioSceneCommand(expected_revision=0,scene=scene),db,w.host,uuid4().hex)
+    result=await asyncio.gather(patch(True),patch(False),return_exceptions=True)
+    assert sum(isinstance(value,dict) for value in result)==1
+    assert next(value for value in result if isinstance(value,ApiError)).code=='scene_revision_conflict'
+    async with w.factory() as db:assert await db.scalar(select(func.count()).select_from(StudioSceneEvent).where(StudioSceneEvent.session_id==session_id))==2
+    forged=dict(session['scene']);forged['foundation_id']=str(uuid4())
+    async with w.factory() as db:
+        with pytest.raises(ApiError) as bad:await routes.patch_scene(session_id,StudioSceneCommand(expected_revision=1,scene=forged),db,w.host,uuid4().hex)
+        assert bad.value.code=='scene_scope_mismatch'
+
+@pytest.mark.asyncio
+async def test_live_requires_provider_host_ack_and_current_enrollment(world,monkeypatch):
+    w=world;event=await webinar(w);session=await prepare(w,event);session_id=UUID(session['id']);seen=[];host_present=False
+    settings=RtcSettings(url='https://rtc.example.test',api_key='fixture',api_secret='fixture-signing-secret-long-enough-for-tests',deployment='cloud')
+    monkeypatch.setattr(RtcSettings,'from_env',classmethod(lambda cls:settings))
+    def handler(request):
+        seen.append(request.url.path)
+        return httpx.Response(200,json={'sid':'RM_fixture'} if request.url.path.endswith('CreateRoom') else {'participants':[{'identity':'opora-u'+w.host.user_id.hex}] if host_present else []})
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        monkeypatch.setattr(routes,'LiveKitAdapter',lambda:LiveKitAdapter(settings,client))
+        async with w.factory() as db:opening=await routes.start(session_id,StudioVersionCommand(expected_version=1),db,w.host,uuid4().hex)
+        assert opening['state']=='opening'
+        async with w.factory() as db:
+            with pytest.raises(ApiError):await routes.join(session_id,db,w.viewer)
+        async with w.factory() as db:
+            token=await routes.join(session_id,db,w.host)
+            claims=jwt.decode(token['token'],settings.api_secret,algorithms=['HS256'])
+            assert str(w.host.session_id) in claims['metadata']
+        async with w.factory() as db:
+            with pytest.raises(ApiError) as waiting:await routes.ready(session_id,StudioVersionCommand(expected_version=2),db,w.host,uuid4().hex)
+            assert waiting.value.code=='host_not_connected'
+        host_present=True
+        async with w.factory() as db:live=await routes.ready(session_id,StudioVersionCommand(expected_version=2),db,w.host,uuid4().hex)
+        assert live['state']=='live'
+        async with w.factory() as db:await routes.enroll(UUID(event['id']),None,db,w.viewer,uuid4().hex)
+        async with w.factory() as db:audience=await routes.join(session_id,db,w.viewer)
+        assert audience['role']=='audience'
+        async with w.factory() as db:await routes.withdraw(UUID(event['id']),StudioVersionCommand(expected_version=1),db,w.viewer,uuid4().hex)
+        async with w.factory() as db:
+            with pytest.raises(ApiError):await routes.join(session_id,db,w.viewer)
+        assert jwt.decode(audience['token'],settings.api_secret,algorithms=['HS256'])['sub'].endswith(w.viewer.user_id.hex)
+        async with w.factory() as db:
+            pending=await db.scalar(select(Job).where(Job.kind=='studio.revoke'));assert pending and pending.payload['enrollment_version']==2
+
+@pytest.mark.asyncio
+async def test_source_bound_slide_processing_and_lease_fence(world):
+    w=world;event=await webinar(w);stream=io.BytesIO();Image.new('RGB',(80,60),'#dbbe62').save(stream,'PNG');data=stream.getvalue()
+    body=SlideUploadInput(resource_kind='live_event',resource_id=event['id'],title='Fixture slides',content_type='image/png',expected_size=len(data),checksum=hashlib.sha256(data).hexdigest())
+    async with w.factory() as db:
+        with pytest.raises(ApiError):await routes.slide_intent(body,db,w.viewer,uuid4().hex)
+    async with w.factory() as db:deck=await routes.slide_intent(body,db,w.host,'slide-intent')
+    async with w.factory() as db:
+        assert (await routes.slide_intent(body,db,w.host,'slide-intent'))['id']==deck['id']
+    async with w.factory() as db:
+        asset=await db.get(MediaAsset,UUID(deck['upload']['id']));path=asset_path(asset);path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data);asset.received_size=len(data);await db.commit()
+    async with w.factory() as db:uploaded=await complete_upload(asset.id,w.host,db)
+    assert uploaded['state']=='processing'
+    async with w.factory() as db:
+        asset=await db.get(MediaAsset,asset.id);job=await db.get(Job,asset.processing_job_id);job.state='running';job.claim_token=uuid4();job.lease_until=datetime.now(timezone.utc)+timedelta(minutes=2);await db.commit()
+        context=JobContext(job.id,job.claim_token,w.foundation.id,dict(job.payload))
+        with pytest.raises(LeaseLost):await jobs.convert_slides(db,JobContext(context.job_id,uuid4(),context.foundation_id,context.payload))
+        await db.rollback()
+        assert await db.scalar(select(func.count()).select_from(SlidePage))==0
+        output=await jobs.convert_slides(db,context);await complete(db,context.job_id,context.claim_token,output);await db.commit()
+        assert output['state']=='ready' and output['pages']==1
+        page=await db.scalar(select(SlidePage));assert page.width==80 and page.height==60
+        output_asset=await db.get(MediaAsset,page.asset_id);assert hashlib.sha256(asset_path(output_asset).read_bytes()).hexdigest()==page.sha256
+    async with w.factory() as db:
+        view=await routes.slide_status(UUID(deck['id']),db,w.host);assert view['state']=='ready' and view['pages'][0]['asset_id']==page.asset_id
+
+@pytest.mark.asyncio
+async def test_board_signed_token_introspection_rechecks_current_auth_session(world,monkeypatch):
+    from starlette.requests import Request
+    w=world;event=await webinar(w);prepared=await prepare(w,event);id=UUID(prepared['id'])
+    settings=RtcSettings(board_url='wss://board.example.test',board_secret='board-fixture-secret-at-least-thirty-two-bytes')
+    monkeypatch.setattr(RtcSettings,'from_env',classmethod(lambda cls:settings))
+    async with w.factory() as db:grant=await routes.board_token(id,db,w.host)
+    def request():return Request({'type':'http','method':'POST','path':'/api/v1/studio-board/authorize','headers':[(b'authorization',('Bearer '+grant['token']).encode())]})
+    async with w.factory() as db:assert await routes.authorize_board(request(),db)=={'allowed':True,'can_draw':True}
+    async with w.factory() as db:
+        auth=await db.get(Session,w.host.session_id);auth.revoked_at=datetime.now(timezone.utc);await db.commit()
+    async with w.factory() as db:
+        with pytest.raises(ApiError) as revoked:await routes.authorize_board(request(),db)
+        assert revoked.value.status_code==403

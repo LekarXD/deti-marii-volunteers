@@ -1,0 +1,43 @@
+{
+  "repository": "curator-bot",
+  "commit": "38c92cd49b1b6c229ed473de991479ed261e4052",
+  "adaptation": "Opora UUID scopes, private assets/jobs, canonical P18A scene, current authorization and bounded subprocesses",
+  "files": [
+    {
+      "path": "backend/services/lms_studio/livekit_auth.py",
+      "sha256": "de3aa8ed7c0bfc699a6d97cb3841384aebb7f12b45d1e8a0ea0c45edb06649e2"
+    },
+    {
+      "path": "backend/services/lms_studio/livekit_rooms.py",
+      "sha256": "33557c69942609c61c04185a44ac20b37fc93651363791cccc7733a44cb4ddde"
+    },
+    {
+      "path": "backend/services/lms_studio/slides_convert.py",
+      "sha256": "ae6927604d100ae3ddc4e595937f4480b68f0238a7b07f57293535900127b4dc"
+    },
+    {
+      "path": "backend/utils/document_upload.py",
+      "sha256": "ce9dbe853694291c4d26671867bbaf3d893cfc0e803d57a85ea8aafdc0913a89"
+    },
+    {
+      "path": "backend/utils/safe_archive.py",
+      "sha256": "6d9d64c02bc4f2daa0e21d2cdde49dae200a03e89f46a97b7f2493f973c1f0ea"
+    },
+    {
+      "path": "infra/livekit/sidecar/media_sidecar/board.py",
+      "sha256": "9226275a09499c933a4ea407bf1bd1c282c0729fbc6d492b19f40cc1dce07773"
+    },
+    {
+      "path": "infra/livekit/sidecar/media_sidecar/channel.py",
+      "sha256": "57802a5b7e3cdd21ca19c61f24bdd8d0bc0228101cf330c78943158646af8d34"
+    },
+    {
+      "path": "infra/livekit/sidecar/media_sidecar/store.py",
+      "sha256": "efe1d527d59724bf113b016a62a89211e0762243e8baea8c1ca05bb3f064ef8b"
+    },
+    {
+      "path": "infra/livekit/sidecar/media_sidecar/logredact.py",
+      "sha256": "6d410e19620ddb2efdd1b1cfb61c29e10a6e99798245df20a1f649c7f01e9f34"
+    }
+  ]
+}

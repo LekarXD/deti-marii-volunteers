@@ -72,14 +72,14 @@ def _encode(settings,claims):
     import jwt
     return jwt.encode(claims,settings.api_secret,algorithm="HS256")
 
-def join_token(settings:RtcSettings,*,room:str,participant_identity:str,name:str,host:bool,policy:RevocationPolicy,now:int|None=None):
+def join_token(settings:RtcSettings,*,room:str,participant_identity:str,name:str,host:bool,policy:RevocationPolicy,auth_session_id:UUID|None=None,now:int|None=None):
     settings.assert_policy(policy)
     issued=int(time.time() if now is None else now)
     sources=["microphone","camera","screen_share","screen_share_audio"] if host else []
     grant={"room":room,"roomJoin":True,"canSubscribe":True,"canPublish":bool(sources),"canPublishData":False,"canUpdateOwnMetadata":False}
     if sources:grant["canPublishSources"]=sources
     # Host moderation is a fresh authorized API call, never a browser roomAdmin grant.
-    return _encode(settings,{"iss":settings.api_key,"sub":participant_identity,"name":name[:100],"nbf":issued-5,"iat":issued,"exp":issued+settings.join_ttl_seconds,"metadata":json.dumps({"role":"host" if host else "audience"}),"video":grant})
+    return _encode(settings,{"iss":settings.api_key,"sub":participant_identity,"name":name[:100],"nbf":issued-5,"iat":issued,"exp":issued+settings.join_ttl_seconds,"metadata":json.dumps({"role":"host" if host else "audience","auth_session_id":str(auth_session_id) if auth_session_id else None}),"video":grant})
 
 def server_token(settings,grant,now=None):
     issued=int(time.time() if now is None else now)

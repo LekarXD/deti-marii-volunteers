@@ -55,6 +55,7 @@ async def session(db,p,id,need_host=False,lock=False):
     if not row:deny()
     context=await authorize_resource(db,p,row.resource_kind,row.resource_id,need_host)
     if context.host_user_id!=row.host_user_id:deny()
+    if not context.can_host and row.state!='live':raise ApiError(409,'studio_not_live','Ведущий ещё не открыл комнату.')
     return row,context
 async def resource_lock(db,kind,id):
     await db.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'studio:{kind}:{id}'})
@@ -66,10 +67,12 @@ async def create_session(db,p,resource_kind,resource_id,*,resource_authorizer=No
     if existing:return existing,context
     generation=(await db.scalar(select(func.max(StudioSession.generation)).where(StudioSession.resource_kind==resource_kind,StudioSession.resource_id==resource_id)) or 0)+1
     host=await db.get(User,context.host_user_id)
+    if not host or host.foundation_id!=p.foundation_id or host.id!=p.user_id:deny()
     id=uuid4()
     scene=validate_scene({'schema_version':1,'foundation_id':str(p.foundation_id),'resource_kind':resource_kind,'resource_id':str(resource_id),'session_id':str(id),'take_id':None,'revision':0,'render_profile_version':'opora-stage/1','content_kind':'camera','content_asset':None,'deck_version_id':None,'slide_id':None,'board_snapshot_id':None,'presenter_identity':identity(host.id),'presenter_display_name':host.display_name[:160] or 'Ведущий','presenter_camera':False,'screen_track_id':None,'content_ratio':16/9,'layout':'camera_only','presenter_size':28,'theme_id':'opora-warm','recording_policy_id':str(context.recording_policy_id)})
     row=StudioSession(id=id,foundation_id=p.foundation_id,resource_kind=resource_kind,resource_id=resource_id,host_user_id=host.id,room_name=room_name(p.foundation_id,id,generation),generation=generation,state='prepared',scene=scene,scene_revision=0,recording_policy_id=context.recording_policy_id,require_strict_revocation=context.require_strict_revocation,version=1)
-    db.add(row);db.add(StudioSceneEvent(session_id=id,revision=0,scene=scene,actor_id=p.user_id));await db.flush()
+    db.add(row);await db.flush()
+    db.add(StudioSceneEvent(session_id=id,revision=0,scene=scene,actor_id=p.user_id));await db.flush()
     return row,context
 
 def session_view(row,context,settings=None):
@@ -106,5 +109,53 @@ async def issue_join(db,p,row,context,settings=None):
     settings=settings or RtcSettings.from_env()
     if row.state not in (('opening','live') if context.can_host else ('live',)):raise ApiError(409,'studio_not_live','Ведущий ещё не открыл комнату.')
     user=await db.get(User,p.user_id)
-    token=join_token(settings,room=row.room_name,participant_identity=identity(user.id),name=user.display_name,host=context.can_host,policy=RevocationPolicy(row.require_strict_revocation))
+    token=join_token(settings,room=row.room_name,participant_identity=identity(user.id),name=user.display_name,host=context.can_host,policy=RevocationPolicy(row.require_strict_revocation),auth_session_id=p.session_id)
     return {'provider':'livekit','url':(settings.public_url or settings.url).replace('https://','wss://',1).replace('http://','ws://',1),'token':token,'identity':identity(user.id),'host_identity':identity(row.host_user_id),'role':'host' if context.can_host else 'audience','session_id':row.id,'generation':row.generation,'expires_in':settings.join_ttl_seconds,'strict_revocation':settings.capabilities().strict_token_revocation}
+
+async def board_rights(db,p,row,context):
+    if context.can_host:return True
+    grant=await db.scalar(select(StudioBoardGrant).where(StudioBoardGrant.session_id==row.id,StudioBoardGrant.user_id==p.user_id))
+    return bool(grant and grant.can_draw)
+
+async def deck_context(db,p,id,need_host=False):
+    row=await db.scalar(select(SlideDeck).where(SlideDeck.id==id,SlideDeck.foundation_id==p.foundation_id))
+    if not row:deny()
+    context=await authorize_resource(db,p,row.resource_kind,row.resource_id,need_host)
+    return row,context
+
+async def deck_view(db,p,row):
+    from app.modules.assets.router import view as asset_view
+    deck_version=await db.scalar(select(SlideDeckVersion).where(SlideDeckVersion.deck_id==row.id).order_by(SlideDeckVersion.number.desc()))
+    pages=(await db.scalars(select(SlidePage).where(SlidePage.deck_version_id==deck_version.id).order_by(SlidePage.ordinal))).all() if deck_version else []
+    asset=await db.get(MediaAsset,row.source_asset_id) if row.source_asset_id else None
+    return {'id':row.id,'title':row.title,'state':'converting' if asset and asset.state=='processing' and row.state=='uploading' else row.state,'error_code':row.error_code,'version':row.version,'deck_version_id':deck_version.id if deck_version else None,'pages':[{'id':page.id,'ordinal':page.ordinal,'asset_id':page.asset_id,'sha256':page.sha256,'width':page.width,'height':page.height,'content_url':f'/api/v1/slide-pages/{page.id}/content'} for page in pages],'upload':asset_view(asset) if asset and asset.owner_user_id==p.user_id and asset.state in ('uploading','processing') else None}
+
+_internal_participant_authorizers=[]
+def register_internal_participant_authorizer(authorizer):
+    if authorizer not in _internal_participant_authorizers:_internal_participant_authorizers.append(authorizer)
+async def internal_participant_allowed(db,row,participant):
+    for authorizer in _internal_participant_authorizers:
+        if await authorizer(db,row,participant):return True
+    return False
+
+_close_guards=[]
+def register_close_guard(guard):
+    if guard not in _close_guards:_close_guards.append(guard)
+async def assert_capture_can_close(db,row):
+    if row.scene.get('take_id') and not _close_guards:raise ApiError(503,'capture_status_unavailable','Сначала подтвердите завершение записи.')
+    for guard in _close_guards:
+        if not await guard(db,row):raise ApiError(409,'capture_still_active','Сначала завершите запись и дождитесь подтверждения.')
+
+async def bind_capture_take(db,p,session_id,take_id,expected_revision,*,take_authorizer):
+    """P18C-only binding after its project/take locks, in the same transaction.
+
+    A take authorizer validates project/session/generation; the browser scene API cannot bind it.
+    """
+    row,context=await session(db,p,session_id,True,True)
+    if row.state not in ('prepared','opening','live'):raise ApiError(409,'studio_closed','Комната уже закрывается.')
+    if row.scene_revision!=expected_revision:raise ApiError(409,'scene_revision_conflict','Кадр изменился.',current_version=row.scene_revision)
+    await take_authorizer(db,p,row,take_id)
+    scene=dict(row.scene);scene['take_id']=str(take_id);scene['revision']=row.scene_revision+1
+    row.scene=validate_scene(scene);row.scene_revision+=1;row.version+=1
+    db.add(StudioSceneEvent(session_id=row.id,revision=row.scene_revision,scene=row.scene,actor_id=p.user_id));await db.flush()
+    return row
