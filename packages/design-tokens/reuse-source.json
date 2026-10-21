@@ -1,0 +1,30 @@
+{
+  "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052",
+  "source_project": "curator-bot",
+  "sources": [
+    {
+      "path": "packages/shared/src/api/client.js",
+      "sha256": "716fb80e81246a76bb4a3b210a3aac71f2917f7d657f82436d5c76bba41600ff"
+    },
+    {
+      "path": "packages/shared/src/queryClient.js",
+      "sha256": "99359b223dceb0a1ca13e09df6ca70caff59f7d2fede3b93bcc600aac0f60102"
+    },
+    {
+      "path": "packages/shared/src/lib/chunkReload.js",
+      "sha256": "8d94017eb3e66b75250087a7ed6b9113000a4ff0dc718a132bf72f340a7e8fc5"
+    },
+    {
+      "path": "packages/ui-core/src/useModalFocusLifecycle.js",
+      "sha256": "2b2cc4e8d11470f4ab0ef39adbfdc72264e6e1b555ffaed4f3ccc5eefae0fe1b"
+    }
+  ],
+  "destination": [
+    "apps/web/src/api/transport.ts",
+    "apps/web/src/api/queryClient.ts",
+    "apps/web/src/ui/overlays.tsx",
+    "apps/web/src/ui/chunkRecovery.ts"
+  ],
+  "owner": "P02/A2",
+  "adaptation": "Fetch and cookie CSRF, foundation/registration principal generation and abort fence; bounded retries; single QueryClient; nested focus and scroll locks; per-bundle chunk recovery. No school UI, JWT/axios/Telegram imports. Tests port scenarios rather than dependency-heavy source test harness."
+}

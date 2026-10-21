@@ -1,0 +1,32 @@
+import {useEffect,useId,useRef,useState,createContext,useContext,useCallback,type ReactNode,type RefObject} from 'react';
+import {createPortal} from 'react-dom';
+import {Button,cx} from './controls';
+import {Icon} from './Icon';
+const focusable='a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+let locks=0;let previousOverflow='';
+/** Ported OD focus lifecycle: topmost only, nested locks, initial/trap/return focus. */
+function useModalFocus(open:boolean,onClose:()=>void,initialFocusRef?:RefObject<HTMLElement>){
+ const ref=useRef<HTMLDivElement>(null);const close=useRef(onClose);close.current=onClose;
+ useEffect(()=>{if(!open)return;const previous=document.activeElement as HTMLElement|null;if(locks++===0){previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';}
+ const top=()=>{const all=document.querySelectorAll('[role="dialog"][aria-modal="true"]');return all[all.length-1]===ref.current;};
+ const available=()=>Array.from(ref.current?.querySelectorAll<HTMLElement>(focusable)??[]).filter(el=>!el.closest('[hidden],[aria-hidden="true"]'));
+ const timer=setTimeout(()=>{if(top())(initialFocusRef?.current??available()[0]??ref.current)?.focus();},0);
+ const key=(e:KeyboardEvent)=>{if(!top())return;if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close.current();}if(e.key==='Tab'){const items=available();const first=items[0],last=items.at(-1);if(!items.length){e.preventDefault();ref.current?.focus();}else if(!ref.current?.contains(document.activeElement)||(e.shiftKey&&document.activeElement===first)||(!e.shiftKey&&document.activeElement===last)){e.preventDefault();(e.shiftKey?last:first)?.focus();}}};
+ const keep=(e:FocusEvent)=>{if(top()&&!ref.current?.contains(e.target as Node))(available()[0]??ref.current)?.focus();};
+ document.addEventListener('keydown',key);document.addEventListener('focusin',keep);
+ return()=>{clearTimeout(timer);document.removeEventListener('keydown',key);document.removeEventListener('focusin',keep);if(--locks===0)document.body.style.overflow=previousOverflow;if(previous?.isConnected)previous.focus();};
+ },[open,initialFocusRef]);return ref;
+}
+export interface DialogProps {open:boolean;onClose:()=>void;title:ReactNode;children:ReactNode;footer?:ReactNode;description?:string;initialFocusRef?:RefObject<HTMLElement>;className?:string;}
+function Overlay({open,onClose,title,children,footer,description,initialFocusRef,className,drawer=false}:DialogProps & {drawer?:boolean}){const id=useId();const ref=useModalFocus(open,onClose,initialFocusRef);if(!open)return null;return createPortal(<div className={cx('dm modal-backdrop',drawer&&'drawer-backdrop')} onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}><div ref={ref} role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} aria-describedby={description?`${id}-description`:undefined} tabIndex={-1} className={cx('modal-surface',drawer&&'drawer-surface',className)}><header className="modal-head"><h2 className="h2" id={`${id}-title`}>{title}</h2><button type="button" className="iconbtn" aria-label="Закрыть" onClick={onClose}><span aria-hidden="true">×</span></button></header>{description&&<p className="meta" id={`${id}-description`}>{description}</p>}<div className="modal-body">{children}</div>{footer&&<footer className="modal-footer">{footer}</footer>}</div></div>,document.body);}
+export function Dialog(props:DialogProps){return <Overlay {...props}/>;}
+export function Drawer(props:DialogProps){return <Overlay {...props} drawer/>;}
+export type ToastTone='success'|'error'|'info';
+const ToastContext=createContext<{toast:(message:string,tone?:ToastTone)=>void}>({toast:()=>{throw new Error('ToastProvider is required');}});
+export function ToastProvider({children}:{children:ReactNode}){const [items,setItems]=useState<{id:number;message:string;tone:ToastTone}[]>([]);const counter=useRef(0);const timers=useRef<ReturnType<typeof setTimeout>[]>([]);useEffect(()=>()=>timers.current.forEach(clearTimeout),[]);const toast=useCallback((message:string,tone:ToastTone='info')=>{const id=++counter.current;setItems(old=>[...old.slice(-3),{id,message,tone}]);timers.current.push(setTimeout(()=>setItems(old=>old.filter(x=>x.id!==id)),tone==='error'?10000:6000));},[]);return <ToastContext.Provider value={{toast}}>{children}<div className="dm toast-region" aria-label="Уведомления">{items.map(item=><div key={item.id} className={`toast toast-${item.tone}`} role={item.tone==='error'?'alert':'status'}><span>{item.message}</span><button className="iconbtn" type="button" aria-label="Скрыть уведомление" onClick={()=>setItems(old=>old.filter(x=>x.id!==item.id))}>×</button></div>)}</div></ToastContext.Provider>;}
+export const useToast=()=>useContext(ToastContext);
+export function EmptyState({title,description,action,icon}:{title:string;description?:ReactNode;action?:ReactNode;icon?:ReactNode}){return <div className="empty">{icon&&<div className="art art-y">{icon}</div>}<h2 className="h2">{title}</h2>{description&&<p className="p">{description}</p>}{action}</div>;}
+export function LoadingState({label='Загружаем…'}:{label?:string}){return <div className="loading-state" role="status"><span className="spinner" aria-hidden="true"/>{label}</div>;}
+export function Skeleton({className=''}:{className?:string}){return <div aria-hidden="true" className={`skeleton ${className}`}/>;}
+export function ErrorState({error,retry}:{error:unknown;retry?:()=>void}){return <div className="empty" role="alert"><h2 className="h2">Не удалось загрузить</h2><p className="p">{error instanceof Error?error.message:'Проверьте соединение и попробуйте ещё раз.'}</p>{retry&&<Button variant="secondary" onClick={retry}>Попробовать ещё раз</Button>}</div>;}
+export function JobState({status,label,onRetry}:{status:'queued'|'processing'|'ready'|'failed'|'unavailable';label?:string;onRetry?:()=>void}){const labels={queued:'Ожидает обработки',processing:'Обрабатываем…',ready:'Готово',failed:'Не удалось обработать',unavailable:'Сервис пока недоступен'};return <div role="status" className={cx('job-state',status==='failed'&&'err')}>{status==='processing'&&<span className="spinner" aria-hidden="true"/>}{status==='ready'&&<Icon name="check"/>}<span>{label??labels[status]}</span>{status==='failed'&&onRetry&&<Button variant="secondary" size="sm" onClick={onRetry}>Повторить</Button>}</div>;}
