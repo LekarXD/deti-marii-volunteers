@@ -78,7 +78,7 @@ async def assignment_view(db,item,principal):
             if event.ends_at<=utcnow():actions.append('correct-attendance' if attendance else 'attendance')
     return AssignmentParticipationView(id=item.id,version=item.version,user_id=item.user_id,display_name=user.display_name,
         occurrence_id=item.occurrence_id,staffing_need_id=item.staffing_need_id,title=event.title,role_title=revision.snapshot['title'],
-        starts_at=event.starts_at,ends_at=event.ends_at,timezone=event.timezone,location=event.location,status=item.status,approved_at=item.approved_at,
+        starts_at=event.starts_at,ends_at=event.ends_at,timezone=event.timezone,location=event.location,status=item.status,occurrence_status=event.status,approved_at=item.approved_at,
         confirmed_at=item.confirmed_at,conditions_version=item.conditions_version,readiness=await readiness(db,item),allowed_actions=list(dict.fromkeys(actions)),
         history=[{'command':h.command,'status':h.status,'reason':h.reason,'at':h.created_at.isoformat()} for h in history],
         attendance={'id':str(attendance.id),'version':attendance.version,'outcome':attendance.outcome,'minutes':attendance.minutes,'ledger_state':latest_attendance_event.ledger_state if latest_attendance_event else 'pending'} if attendance else None)

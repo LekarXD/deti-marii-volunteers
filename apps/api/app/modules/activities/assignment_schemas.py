@@ -70,6 +70,7 @@ class AssignmentParticipationView(BaseModel):
     timezone:str
     location:str
     status:str
+    occurrence_status:str
     approved_at:datetime|None
     confirmed_at:datetime|None
     conditions_version:int

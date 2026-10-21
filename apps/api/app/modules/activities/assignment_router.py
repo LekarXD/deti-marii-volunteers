@@ -1,3 +1,6 @@
+from datetime import date,datetime,time,timedelta,timezone
+from typing import Literal
+from zoneinfo import ZoneInfo,ZoneInfoNotFoundError
 from uuid import UUID
 from fastapi import APIRouter,Depends,Header,Query,Request
 from sqlalchemy import select
@@ -6,6 +9,7 @@ from app.core.auth import Principal,get_principal,require_permission
 from app.core.db import get_db
 from app.core.errors import ApiError
 from app.core.models import User
+from .calendar_models import EventOccurrence
 from .assignment_models import Assignment,OpportunityResponse
 from .assignment_schemas import AssignmentInvite,AssignmentParticipationPage,AssignmentParticipationView,AssignmentRequirementDecision,AssignmentSuggestion,AttendanceCommand,ParticipationDecision,ParticipationResponseCreate,ParticipationResponsePage,ParticipationResponseView
 from .schemas import VersionCommand
@@ -93,6 +97,25 @@ async def assignment_list(db,principal,staff,occurrence_id,cursor,limit):
 async def own_assignments(cursor:UUID|None=None,limit:int=Query(50,ge=1,le=100),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     service.require_user(principal)
     return await assignment_list(db,principal,False,None,cursor,limit)
+
+
+@router.get('/me/schedule',response_model=AssignmentParticipationPage,operation_id='listOwnSchedule')
+async def own_schedule(from_date:date=Query(alias='from'),to_date:date=Query(alias='to'),display_timezone:str=Query('Europe/Moscow',alias='timezone'),state:Literal['all','active','cancelled']='all',cursor:UUID|None=None,limit:int=Query(100,ge=1,le=500),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    service.require_user(principal)
+    if to_date<from_date or (to_date-from_date).days>366:
+        raise ApiError(422,'schedule_range','Выберите диапазон до 366 дней. Другие даты можно запросить отдельно.')
+    try:zone=ZoneInfo(display_timezone)
+    except (ZoneInfoNotFoundError,ValueError):raise ApiError(422,'unknown_timezone','Неизвестный часовой пояс.')
+    lower=datetime.combine(from_date,time.min,tzinfo=zone).astimezone(timezone.utc)
+    upper=datetime.combine(to_date+timedelta(days=1),time.min,tzinfo=zone).astimezone(timezone.utc)
+    query=select(Assignment).join(EventOccurrence,Assignment.occurrence_id==EventOccurrence.id).where(
+        Assignment.foundation_id==principal.foundation_id,Assignment.user_id==principal.user_id,
+        EventOccurrence.foundation_id==principal.foundation_id,EventOccurrence.starts_at<upper,EventOccurrence.ends_at>lower)
+    if state=='active':query=query.where(Assignment.status.in_(('invited','confirmed')),EventOccurrence.status=='scheduled')
+    elif state=='cancelled':query=query.where(Assignment.status.in_(('declined','cancelled','expired')) | (EventOccurrence.status=='cancelled'))
+    if cursor:query=query.where(Assignment.id>cursor)
+    rows=list((await db.scalars(query.order_by(Assignment.id).limit(limit+1))).all())
+    return AssignmentParticipationPage(items=[await service.assignment_view(db,row,principal) for row in rows[:limit]],next_cursor=rows[limit-1].id if len(rows)>limit else None)
 
 
 @router.get('/coord/assignments',response_model=AssignmentParticipationPage,operation_id='listStaffAssignments')
