@@ -25,8 +25,8 @@ def view(asset):
 
 @router.post("/upload-intents", operation_id="asset_upload_intent")
 async def intent(body: UploadIntent, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
-    if body.content_type not in ("image/png", "image/jpeg", "application/pdf") or body.expected_size > get_settings().max_asset_bytes:
-        raise ApiError(422, "unsupported_asset", "Допустимы PNG, JPEG и PDF в пределах лимита")
+    if body.content_type not in ("image/png", "image/jpeg", "image/webp", "application/pdf") or body.expected_size > get_settings().max_asset_bytes:
+        raise ApiError(422, "unsupported_asset", "Допустимы PNG, JPEG, WebP и PDF в пределах лимита")
     asset = MediaAsset(foundation_id=principal.foundation_id, owner_user_id=principal.user_id, owner_registration_id=principal.registration_id, storage_key=uuid4().hex, content_type=body.content_type, expected_size=body.expected_size, checksum=body.checksum)
     db.add(asset)
     await db.flush()
@@ -78,7 +78,7 @@ async def complete_upload(asset_id: UUID, principal: Principal = Depends(get_pri
     if asset.received_size != asset.expected_size or not path.exists():
         raise ApiError(409, "upload_incomplete", "Файл загружен не полностью")
     data = await asyncio.to_thread(path.read_bytes)
-    signatures = {"image/png": b"\x89PNG\r\n\x1a\n", "image/jpeg": b"\xff\xd8\xff", "application/pdf": b"%PDF-"}
+    signatures = {"image/png": b"\x89PNG\r\n\x1a\n", "image/jpeg": b"\xff\xd8\xff", "application/pdf": b"%PDF-", "image/webp": b"RIFF"}
     if len(data) != asset.expected_size or hashlib.sha256(data).hexdigest() != asset.checksum or not data.startswith(signatures[asset.content_type]):
         asset.state = "rejected"
         await db.commit()
@@ -89,7 +89,7 @@ async def complete_upload(asset_id: UUID, principal: Principal = Depends(get_pri
                 with Image.open(io.BytesIO(data)) as image:
                     if image.width * image.height > 25_000_000:
                         return False
-                    expected_format = "PNG" if asset.content_type == "image/png" else "JPEG"
+                    expected_format = {"image/png":"PNG", "image/jpeg":"JPEG", "image/webp":"WEBP"}[asset.content_type]
                     if image.format != expected_format:
                         return False
                     image.verify()

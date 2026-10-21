@@ -61,11 +61,14 @@ async def test_real_auth_csrf_one_time_mfa_and_dynamic_revoke(app):
         async with SessionLocal() as db:
             factor = await db.scalar(select(MfaFactor).where(MfaFactor.user_id == session['user_id']))
             code = pyotp.TOTP(unseal(factor.secret_cipher)).now()
+            factor.last_counter = -1
+            await db.commit()
         response = await staff.post('/api/v1/auth/mfa/verify', json={'code':code},headers=headers)
         assert response.status_code == 200, response.text
         session=response.json()
         assert session['is_staff'] and 'staff.manage' in session['permissions']
         headers['X-CSRF-Token']=session['csrf_token']
+        headers['Idempotency-Key']=uuid4().hex
         candidate_session,_ = await login(candidate, f'isolated-{uuid4().hex}@example.test')
         assert candidate_session['user_id'] != session['user_id'] and not candidate_session['permissions']
         grant = await staff.post('/api/v1/coord/staff/grants', json={'user_id':candidate_session['user_id'],'permission':'roles.manage'},headers=headers)
@@ -81,6 +84,7 @@ async def test_real_auth_csrf_one_time_mfa_and_dynamic_revoke(app):
         verified=await candidate.post('/api/v1/auth/mfa/verify',json={'code':pyotp.TOTP(candidate_secret).now()},headers=ch)
         assert verified.status_code == 200, verified.text
         assert 'roles.manage' in verified.json()['permissions']
+        headers['Idempotency-Key']=uuid4().hex
         revoked=await staff.post('/api/v1/coord/staff/grants/'+grant.json()['id']+'/revoke',headers=headers)
         assert revoked.status_code==200
         assert 'roles.manage' not in (await candidate.get('/api/v1/auth/session')).json()['permissions']
@@ -125,3 +129,35 @@ async def test_atomic_receipt_replay_conflict_actor_and_lease_fencing():
         await db.rollback()
         await complete(db,jid,reclaimed.claim_token,{'ok':True})
         await db.commit()
+
+@pytest.mark.asyncio
+async def test_private_upload_checks_full_image_and_other_identity(app):
+    import hashlib
+    import io
+    from PIL import Image
+    await fixtures()
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as owner, httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as stranger:
+        session=(await owner.get('/api/v1/auth/session')).json()
+        await stranger.get('/api/v1/auth/session')
+        headers={'Origin':'http://testserver','X-CSRF-Token':session['csrf_token']}
+        buffer=io.BytesIO()
+        Image.new('RGB',(2,2),'blue').save(buffer,format='PNG')
+        data=buffer.getvalue()
+        response=await owner.post('/api/v1/assets/upload-intents',json={'content_type':'image/png','expected_size':len(data),'checksum':hashlib.sha256(data).hexdigest()},headers=headers)
+        assert response.status_code==200,response.text
+        aid=response.json()['id']
+        response=await owner.patch(f'/api/v1/assets/{aid}/upload',content=data,headers={**headers,'X-Upload-Offset':'0'})
+        assert response.status_code==200,response.text
+        duplicate=await owner.patch(f'/api/v1/assets/{aid}/upload',content=data,headers={**headers,'X-Upload-Offset':'0'})
+        assert duplicate.status_code==409
+        complete_response=await owner.post(f'/api/v1/assets/{aid}/complete-upload',headers=headers)
+        assert complete_response.status_code==200,complete_response.text
+        assert (await owner.get(f'/api/v1/assets/{aid}/content')).content==data
+        assert (await stranger.get(f'/api/v1/assets/{aid}/content')).status_code==404
+        # A matching PNG signature cannot turn malformed image bytes into a ready file.
+        malformed=b'\x89PNG\r\n\x1a\nnot-image'
+        response=await owner.post('/api/v1/assets/upload-intents',json={'content_type':'image/png','expected_size':len(malformed),'checksum':hashlib.sha256(malformed).hexdigest()},headers=headers)
+        bad=response.json()['id']
+        await owner.patch(f'/api/v1/assets/{bad}/upload',content=malformed,headers={**headers,'X-Upload-Offset':'0'})
+        assert (await owner.post(f'/api/v1/assets/{bad}/complete-upload',headers=headers)).status_code==422
+        assert (await owner.get(f'/api/v1/assets/{bad}/content')).status_code==409
