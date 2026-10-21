@@ -145,7 +145,7 @@ rejects skipped checks; an unset URL is a gate failure, never a passing test run
 `prepare-test-dbs.py` refuses existing databases and never drops one.
 
 For repeated integration checks on the specifically assigned QA cluster, the
-explicit command below resets only the twelve allowlisted disposable fixture schemas
+explicit command below resets only the thirteen allowlisted disposable fixture schemas
 and migrates them from empty. It fixes test-only `create_all`/Alembic stamp drift
 after new models arrive. The script pins loopback port 56148, verifies the exact
 QA data directory and database names, and cannot target proof/restore/G1 databases.
