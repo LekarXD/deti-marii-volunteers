@@ -7,6 +7,8 @@ from app.core.clock import utcnow
 from app.core.errors import ApiError
 from app.core.models import ResourceReservation,User
 from app.worker.queue import enqueue_outbox
+from app.modules.profile.ledger import append_service_time,post_pending_attendance,subject_lock
+from app.modules.profile.service import active_for_invitations
 from app.modules.participants.access import AssignmentParticipantAccess
 from app.modules.participants.models import GroupMembership
 from .assignment_models import Assignment,AssignmentEvent,AssignmentParticipantSnapshot,AssignmentRequirementReview,Attendance,AttendanceEvent,OpportunityResponse,OpportunityResponseEvent
@@ -98,6 +100,7 @@ async def invite(db,principal,need_id,body):
     if event.status!='scheduled' or event.ends_at<=utcnow() or need.capacity_required==0:raise ApiError(409,'event_not_open','Набор на занятие закрыт.')
     user=await db.get(User,body.user_id)
     if user is None or user.foundation_id!=principal.foundation_id or user.account_state!='active':raise ApiError(422,'invalid_volunteer','Волонтёр недоступен.')
+    if not await active_for_invitations(db,principal.foundation_id,user.id):raise ApiError(409,'volunteer_paused','Волонтёр сейчас на паузе. Сначала согласуйте возобновление участия.')
     item=await db.scalar(select(Assignment).where(Assignment.occurrence_id==event.id,Assignment.user_id==user.id).with_for_update())
     if item:
         if body.expected_assignment_version is None:raise ApiError(409,'already_invited','Назначение уже существует.',current_version=item.version)
@@ -126,6 +129,7 @@ async def confirm(db,principal,id,body):
     require_user(principal)
     item,event,need=await locked_assignment(db,principal,id,True);check_version(item,body.expected_version)
     if item.status!='invited' or event.status!='scheduled' or event.ends_at<=utcnow():raise ApiError(409,'assignment_state_conflict','Подтверждение больше недоступно.')
+    if not await active_for_invitations(db,principal.foundation_id,item.user_id):raise ApiError(409,'volunteer_paused','Участие сейчас на паузе. Сначала возобновите его в профиле.')
     if item.conditions_version!=need.version:raise ApiError(409,'conditions_changed','Условия изменились. Координатор должен обновить приглашение.')
     if item.conditions_snapshot['approval_policy']=='coordinator' and item.approved_at is None:raise ApiError(409,'approval_required','Сначала участие должен согласовать координатор.')
     pending=[r for r in await readiness(db,item) if r.level=='mandatory' and r.state=='pending']
@@ -170,6 +174,9 @@ async def review_requirement(db,principal,id,body):
 
 
 async def record_attendance(db,principal,id,body,correction=False):
+    identity=await assignment(db,principal,id)
+    await subject_lock(db,principal.foundation_id,identity.user_id)
+    await post_pending_attendance(db,principal,identity.user_id)
     item,event,need=await locked_assignment(db,principal,id);check_version(item,body.expected_version)
     if item.status!='confirmed' or event.status=='cancelled':raise ApiError(409,'attendance_not_available','Факт можно отметить только по подтверждённому участию.')
     if event.ends_at>utcnow():raise ApiError(409,'attendance_not_finished','Нельзя отмечать факт участия до окончания занятия.')
@@ -183,6 +190,8 @@ async def record_attendance(db,principal,id,body,correction=False):
     event_row=AttendanceEvent(foundation_id=principal.foundation_id,attendance_id=attendance.id,assignment_id=id,user_id=item.user_id,version=attendance.version,
         old_minutes=old,new_minutes=body.minutes,reason=body.reason,actor_id=principal.actor_id)
     db.add(event_row)
+    await db.flush()
+    await append_service_time(db,principal,item.user_id,item.id,event_row.id)
     await assignment_event(db,principal,item,'correct_attendance' if correction else 'record_attendance',body.reason)
     return await assignment_view(db,item,principal)
 

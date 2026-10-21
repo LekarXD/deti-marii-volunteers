@@ -9,6 +9,7 @@ from app.core.models import AuditEvent,MutationReceipt,PermissionGrant,ResourceR
 from app.modules.activities.assignment_models import Assignment,AssignmentEvent,Attendance,AttendanceEvent
 from app.modules.activities.calendar_models import EventOccurrence
 from app.modules.participants.models import GroupMembership,Participant,ParticipantGroup
+from app.modules.profile.models import ServiceTimeEntry,VolunteerProfile
 from .test_p07 import context,headers,post_role
 
 
@@ -134,10 +135,14 @@ async def test_attendance_idempotency_correction_and_absence_zero(context):
     assert invalid.status_code==422
     correction=await context.client.post(f"/api/v1/coord/assignments/{item['id']}/attendance/correct",headers=headers(),json={'expected_version':one.json()['version'],'outcome':'absent','minutes':0,'reason':'Исправлена ошибочная отметка.'})
     assert correction.status_code==200,correction.text
-    assert correction.json()['attendance']['minutes']==0 and correction.json()['attendance']['ledger_state']=='pending'
+    assert correction.json()['attendance']['minutes']==0 and correction.json()['attendance']['ledger_state']=='posted'
     async with context.db() as db:
         events=(await db.scalars(select(AttendanceEvent).order_by(AttendanceEvent.version))).all()
         assert [(r.old_minutes,r.new_minutes) for r in events]==[(0,120),(120,0)]
+        assert all(event.ledger_state=='posted' for event in events)
+        entries=(await db.scalars(select(ServiceTimeEntry).order_by(ServiceTimeEntry.source_revision))).all()
+        assert [entry.delta_minutes for entry in entries]==[120,-120]
+        assert {entry.attendance_event_id for entry in entries}=={event.id for event in events}
         assert await db.scalar(select(func.count()).select_from(Attendance))==1
 
 
@@ -225,3 +230,25 @@ async def test_attendance_fact_prevents_cancellation_and_keeps_correction_availa
         assert (await db.get(EventOccurrence,UUID(event['id']))).status=='scheduled'
         facts=(await db.scalars(select(AttendanceEvent).order_by(AttendanceEvent.version))).all()
         assert [(row.old_minutes,row.new_minutes) for row in facts]==[(0,120),(120,90)]
+
+
+@pytest.mark.asyncio
+async def test_profile_pause_is_checked_for_new_invites_and_confirmation(context):
+    event,need,user1,user2,_=await setup(context)
+    item=await invite_approve(context,need,user1)
+    async with context.db() as db:
+        db.add_all([VolunteerProfile(user_id=user_id,foundation_id=context.foundation.id,lifecycle='paused',paused_until=date(2029,1,1)) for user_id in (user1,user2)])
+        await db.commit()
+    denied_invite=await context.client.post(f"/api/v1/coord/staffing-needs/{need['id']}/invitations",headers=headers(),json={'expected_version':need['version'],'user_id':str(user2)})
+    assert denied_invite.status_code==409 and denied_invite.json()['code']=='volunteer_paused'
+    denied_confirm=await context.client.post(f"/api/v1/assignments/{item['id']}/confirm",headers=user_headers(),json={'expected_version':item['version']})
+    assert denied_confirm.status_code==409 and denied_confirm.json()['code']=='volunteer_paused'
+    async with context.db() as db:
+        profile=await db.get(VolunteerProfile,user1);profile.paused_until=utcnow().date()-timedelta(days=1)
+        await db.commit()
+    allowed=await context.client.post(f"/api/v1/assignments/{item['id']}/confirm",headers=user_headers(),json={'expected_version':item['version']})
+    assert allowed.status_code==200,allowed.text
+    async with context.db() as db:
+        profile=await db.get(VolunteerProfile,user1);profile.paused_until=date(2029,1,1)
+        await db.commit()
+        assert (await db.get(Assignment,UUID(item['id']))).status=='confirmed'
