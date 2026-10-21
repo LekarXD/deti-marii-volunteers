@@ -341,23 +341,6 @@
           }
         }
       }
-    },
-    {
-      "if": {
-        "properties": {
-          "resource_kind": {
-            "const": "lesson_recording_project"
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "take_id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      }
     }
   ]
 }

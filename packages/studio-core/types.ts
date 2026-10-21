@@ -18,6 +18,6 @@ export interface StudioScene {
 }
 export interface AllowedTrack {readonly identity:string;readonly track_id:string;readonly source:TrackSource;readonly kind:'video'|'audio';readonly required:boolean;}
 /** Server-signed capture scope; a subscribe-only token alone does not authorize tracks/audio. */
-export interface CapturePlan {readonly schema_version:1;readonly foundation_id:string;readonly resource_id:string;readonly session_id:string;readonly take_id:string|null;readonly generation:number;readonly scene_revision:number;readonly render_profile_version:'opora-stage/1';readonly recording_policy_id:string;readonly privacy_state:'approved'|'unknown'|'blocked';readonly raw_fallback:'forbidden';readonly allowed_tracks:readonly AllowedTrack[];}
+export interface CapturePlan {readonly schema_version:1;readonly foundation_id:string;readonly resource_id:string;readonly session_id:string;readonly take_id:string;readonly generation:number;readonly scene_revision:number;readonly render_profile_version:'opora-stage/1';readonly recording_policy_id:string;readonly privacy_state:'approved'|'unknown'|'blocked';readonly raw_fallback:'forbidden';readonly allowed_tracks:readonly AllowedTrack[];}
 export interface ObservedTrack {readonly identity:string;readonly track_id:string;readonly source:TrackSource;readonly kind:'video'|'audio';readonly privacy_state:'approved'|'unknown'|'blocked';readonly state:'ready'|'muted'|'missing';}
 export interface Readiness {readonly ready:boolean;readonly reasons:readonly string[];}
