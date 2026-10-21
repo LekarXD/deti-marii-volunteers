@@ -151,6 +151,7 @@ class ProfileDocumentReviewCommand(ProfileVersionCommand):
     body:str=Field(default='',max_length=12000)
     public_response:str=Field(min_length=1,max_length=4000)
 class ProfileDocumentView(BaseModel):
+    display_name:str=''
     id:UUID
     user_id:UUID
     kind:str
@@ -177,6 +178,7 @@ class ProfileDataReviewCommand(ProfileVersionCommand):
     retention_note:str=Field(default='',max_length=4000)
     scheduled_for:date|None=None
 class ProfileDataView(BaseModel):
+    display_name:str=''
     id:UUID
     user_id:UUID
     kind:str

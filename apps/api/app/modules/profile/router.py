@@ -6,6 +6,7 @@ from app.core.auth import Principal,get_principal,require_permission,authz_guard
 from app.core.audit import audit
 from app.core.db import get_db
 from app.core.errors import ApiError
+from app.core.models import User
 from app.core.idempotency import begin_command,finish_command
 from app.modules.applications.consents import consent_events
 from app.modules.applications.models import ConsentEvent
@@ -97,7 +98,7 @@ async def request_document(body:dto.ProfileDocumentCommand,principal:Principal=D
 @router.get('/coord/profile/documents',response_model=list[dto.ProfileDocumentView])
 async def documents_queue(principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db)):
     rows=(await db.scalars(select(ProfileDocument).where(ProfileDocument.foundation_id==principal.foundation_id).order_by(ProfileDocument.created_at.desc()).limit(200))).all()
-    return [documents.document_view(row) for row in rows]
+    return [documents.document_view(row).model_copy(update={'display_name':(await db.get(User,row.user_id)).display_name}) for row in rows]
 
 @router.post('/coord/profile/documents/{document_id}/review',response_model=dto.ProfileDocumentView)
 async def document_review(document_id:UUID,body:dto.ProfileDocumentReviewCommand,principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
@@ -120,7 +121,7 @@ async def data_cancel(request_id:UUID,body:dto.ProfileVersionCommand,principal:P
 @router.get('/coord/profile/data-requests',response_model=list[dto.ProfileDataView])
 async def data_queue(principal:Principal=Depends(require_permission('profile.requests.review')),db:AsyncSession=Depends(get_db)):
     rows=(await db.scalars(select(ProfileDataRequest).where(ProfileDataRequest.foundation_id==principal.foundation_id).order_by(ProfileDataRequest.created_at.desc()).limit(200))).all()
-    return [data_requests.data_view(row) for row in rows]
+    return [data_requests.data_view(row).model_copy(update={'display_name':(await db.get(User,row.user_id)).display_name}) for row in rows]
 
 @router.post('/coord/profile/data-requests/{request_id}/review',response_model=dto.ProfileDataView)
 async def data_review(request_id:UUID,body:dto.ProfileDataReviewCommand,principal:Principal=Depends(require_permission('profile.requests.review')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
