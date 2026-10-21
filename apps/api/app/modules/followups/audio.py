@@ -1,3 +1,4 @@
+from app.core.paths import public_path
 import asyncio
 import shutil
 from uuid import UUID
@@ -39,7 +40,7 @@ async def view(db,row,asset):
     state='cancelled' if row.cancelled_at else run.state if run else result['state'] if result.get('state') in ('failed','unavailable','cancelled') else 'failed' if asset.state=='rejected' or (job and job.state=='dead') else 'queued' if asset.state=='processing' else asset.state
     if state=='succeeded':state='ready' if asset.state=='ready' else 'processing'
     text=(run.output or {}).get('text') if state=='ready' else None
-    return ReflectionAudioView(asset_id=asset.id,version=row.version,state=state,asset_state=asset.state,upload_url=f'/api/v1/assets/{asset.id}/upload',received_size=asset.received_size,expected_size=asset.expected_size,content_type=asset.content_type,duration_seconds=row.duration_seconds,transcript=text,error_code=run.error_code if run else result.get('error_code') or (job.error_code if job else None) or ('audio_validation_failed' if asset.state=='rejected' else None),can_retry=state in ('failed','unknown','unavailable','budget_exceeded'))
+    return ReflectionAudioView(asset_id=asset.id,version=row.version,state=state,asset_state=asset.state,upload_url=public_path(f'/api/v1/assets/{asset.id}/upload'),received_size=asset.received_size,expected_size=asset.expected_size,content_type=asset.content_type,duration_seconds=row.duration_seconds,transcript=text,error_code=run.error_code if run else result.get('error_code') or (job.error_code if job else None) or ('audio_validation_failed' if asset.state=='rejected' else None),can_retry=state in ('failed','unknown','unavailable','budget_exceeded'))
 
 async def intent(db,principal,assignment_id,body):
     await authorize_audio_assignment(db,principal,RESOURCE,assignment_id)

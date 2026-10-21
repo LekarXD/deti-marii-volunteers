@@ -1,3 +1,4 @@
+from app.core.paths import public_path
 from dataclasses import asdict,dataclass
 from datetime import datetime,timezone
 import time
@@ -132,7 +133,7 @@ async def deck_view(db,p,row):
     from app.core.models import Job
     job=await db.get(Job,asset.processing_job_id) if asset and asset.processing_job_id else None
     terminal_failure=bool(job and job.state=='dead' and row.state not in ('ready','failed'))
-    return {'id':row.id,'title':row.title,'state':'failed' if terminal_failure else 'converting' if asset and asset.state=='processing' and row.state=='uploading' else row.state,'error_code':('conversion_worker_failed' if terminal_failure else row.error_code),'version':row.version,'deck_version_id':deck_version.id if deck_version else None,'pages':[{'id':page.id,'ordinal':page.ordinal,'asset_id':page.asset_id,'sha256':page.sha256,'width':page.width,'height':page.height,'content_url':f'/api/v1/slide-pages/{page.id}/content'} for page in pages],'upload':asset_view(asset) if asset and asset.owner_user_id==p.user_id and asset.state in ('uploading','processing') else None}
+    return {'id':row.id,'title':row.title,'state':'failed' if terminal_failure else 'converting' if asset and asset.state=='processing' and row.state=='uploading' else row.state,'error_code':('conversion_worker_failed' if terminal_failure else row.error_code),'version':row.version,'deck_version_id':deck_version.id if deck_version else None,'pages':[{'id':page.id,'ordinal':page.ordinal,'asset_id':page.asset_id,'sha256':page.sha256,'width':page.width,'height':page.height,'content_url':public_path(f'/api/v1/slide-pages/{page.id}/content')} for page in pages],'upload':asset_view(asset) if asset and asset.owner_user_id==p.user_id and asset.state in ('uploading','processing') else None}
 
 _internal_participant_authorizers=[]
 def register_internal_participant_authorizer(authorizer):

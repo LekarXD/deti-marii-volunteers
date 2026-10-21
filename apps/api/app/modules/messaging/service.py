@@ -1,3 +1,4 @@
+from app.core.paths import public_path
 import base64
 import binascii
 import json
@@ -36,7 +37,7 @@ async def message_views(db, messages):
     assets = (await db.execute(select(MessageAsset.message_id, MediaAsset).join(MediaAsset,MediaAsset.id==MessageAsset.asset_id).where(MessageAsset.message_id.in_(ids),MediaAsset.state=="ready"))).all()
     by_message = {}
     for message_id,asset in assets:
-        by_message.setdefault(message_id,[]).append({"id":str(asset.id),"content_type":asset.content_type,"size":asset.expected_size,"content_url":f"/api/v1/conversations/assets/{asset.id}/content"})
+        by_message.setdefault(message_id,[]).append({"id":str(asset.id),"content_type":asset.content_type,"size":asset.expected_size,"content_url":public_path(f"/api/v1/conversations/assets/{asset.id}/content")})
     return [{"id":str(m.id),"conversation_id":str(m.conversation_id),"author_user_id":str(m.author_user_id) if m.author_user_id else None,"author_name":authors.get(m.author_user_id,"Фонд «Дети Марии»"),"seq":m.seq,"text":m.text,"created_at":m.created_at.isoformat(),"assets":by_message.get(m.id,[])} for m in messages]
 
 async def conversation_view(db, principal, conversation):

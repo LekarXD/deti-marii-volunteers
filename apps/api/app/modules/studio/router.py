@@ -1,3 +1,4 @@
+from app.core.paths import public_path
 from datetime import datetime,timezone
 from dataclasses import asdict
 from uuid import UUID,uuid4
@@ -296,7 +297,7 @@ async def board_snapshot(id:UUID,body:StudioBoardSnapshotInput,db:AsyncSession=D
         width,height=await asyncio.to_thread(dimensions)
         snapshot=StudioBoardSnapshot(session_id=id,asset_id=asset.id,width=width,height=height,sha256=asset.checksum)
         db.add(snapshot);await db.flush();audit(db,p,'studio.board.snapshot','studio_session',id,('snapshot',))
-        return {'id':str(snapshot.id),'asset_id':str(asset.id),'sha256':asset.checksum,'width':width,'height':height,'content_url':f'/api/v1/studio-board-snapshots/{snapshot.id}/content'}
+        return {'id':str(snapshot.id),'asset_id':str(asset.id),'sha256':asset.checksum,'width':width,'height':height,'content_url':public_path(f'/api/v1/studio-board-snapshots/{snapshot.id}/content')}
     return await execute(db,p,'studio.board.snapshot:'+str(id),key,body.model_dump(mode='json'),lambda:s.session(db,p,id,True),action)
 
 @router.get('/studio-board-snapshots/{id}/content')
