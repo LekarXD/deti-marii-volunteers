@@ -6,6 +6,8 @@
 
 [Технический план реализации](docs/implementation/README.md): React + TypeScript, FastAPI, PostgreSQL; карта всех экранов, модель данных, API и пакеты мультиагентной разработки.
 
+**Реализация приложения** — `apps/web` (React) и `apps/api` (FastAPI), общие контракты и Studio — `packages/`. [Запуск и проверки](infra/README.md), [фактический прогресс и ограничения](docs/implementation/progress.md). После установки зависимостей и запуска локальной БД/API: `pnpm dev`, интерфейс — `http://127.0.0.1:5174`. Production не развёрнут.
+
 Материалы и постановка задачи — в [`materials/`](materials/README.md).
 
 **Путь кандидата** «анкета → кабинет → выбор времени встречи и знакомство с фондом параллельно → встреча с координатором» — в прототипе «Опора»: `prototype/Apply.dc.html`, `Onboarding.dc.html`, `ApplicationStatus.dc.html`. Тексты правятся в `prototype/content/`, после правки — `python3 scripts/build_prototype.py`. Координатор видит анкеты и прогресс в `Candidates.dc.html`, встречи и доступность — в `Interviews.dc.html`. Старые ссылки `prototype/index.html#/…` переводят в тот же интерфейс; сохранённые ответы переносятся. Подробнее — [prototype/README.md](prototype/README.md).

@@ -34,7 +34,7 @@
 
 Работать в отдельных `codex/<package>` ветках/worktrees от известного интеграционного SHA. Не использовать force push общей ветки. Не включать в коммиты текущие незакоммиченные правки прототипа и реальные файлы фонда без отдельной задачи. `prototype/` и архив — reference; product implementation появляется в новых `apps/` и `packages/`.
 
-21 октября: после сдачи P09 пакет P16 явно передан A5, чтобы A4 продолжал P18B без пересечения областей. A5 владеет `modules/simulator` и `features/simulator`; общий AI gateway остаётся у A7. Подготовка моделей/авторского редактора может идти заранее, но AI-команды подключаются только после проверенного P15 контракта.
+21 октября: после сдачи P12 frontend P17B передан A6; A1 сохраняет backend/delivery. После P18B A4 получил staff API extension для P19, core/auth и миграции остаются у A1. После сдачи P09 пакет P16 явно передан A5, чтобы A4 продолжал P18B без пересечения областей. A5 владеет `modules/simulator` и `features/simulator`; общий AI gateway остаётся у A7. Подготовка моделей/авторского редактора может идти заранее, но AI-команды подключаются только после проверенного P15 контракта.
 
 ## Очередь пакетов
 
@@ -59,7 +59,7 @@
 | P15 | A7 | P14/P17A | knowledge/editor, Mentor, индекс и общий AI gateway |
 | P16 | A5 (после P09) | P06/P14/P15 | Scenarios, Simulator, оценка/appeal; реальный AI вместо fixtures |
 | P17A | A1 | P01/P02 | внутренняя переписка, attachments, read cursors, sync, outbox handlers и delivery contract |
-| P17B | A1 | P17A | реальные email/прочие согласованные каналы, templates, preferences, webhooks, broadcast preview |
+| P17B | A1 backend + A6 UI | P17A | реальные email/прочие согласованные каналы, templates, preferences, webhooks, broadcast preview |
 | P18A | A2 | P01/P02 | извлечённые shared stage/types/geometry, Opora brand, render contracts |
 | P18B | A4 | P18A/P17A | live RTC, сцена, слайды/доска, host/audience и права |
 | P18C | A1 + A2 renderer | P18B/P14 | Egress/composite, media jobs/checkpoints/transfer и приватный recorder |

@@ -15,3 +15,6 @@ dist/
 playwright-report/
 test-results/
 .local/
+
+# Generated from the pinned npm package before dev/build.
+apps/web/public/studio-board-assets/

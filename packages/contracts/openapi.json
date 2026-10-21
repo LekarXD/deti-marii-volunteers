@@ -241,6 +241,29 @@
         "title": "AcknowledgeInput",
         "type": "object"
       },
+      "ActivityMatchEvidence": {
+        "properties": {
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "source_id": {
+            "title": "Source Id",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_id",
+          "version",
+          "field"
+        ],
+        "title": "ActivityMatchEvidence",
+        "type": "object"
+      },
       "ActivityRevisionView": {
         "properties": {
           "created_at": {
@@ -6254,8 +6277,8 @@
       "MatchExplanation": {
         "properties": {
           "algorithm_version": {
-            "const": "rules-v1",
-            "default": "rules-v1",
+            "const": "rules-v2",
+            "default": "rules-v2",
             "title": "Algorithm Version",
             "type": "string"
           },
@@ -6264,6 +6287,27 @@
               "type": "string"
             },
             "title": "Constraints",
+            "type": "array"
+          },
+          "context_versions": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Context Versions",
+            "type": "object"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityMatchEvidence"
+            },
+            "title": "Evidence",
             "type": "array"
           },
           "missing_data": {
@@ -9253,6 +9297,518 @@
         "title": "RecognitionBasisView",
         "type": "object"
       },
+      "RecordingCapabilities": {
+        "properties": {
+          "capture_available": {
+            "title": "Capture Available",
+            "type": "boolean"
+          },
+          "capture_reason": {
+            "title": "Capture Reason",
+            "type": "string"
+          },
+          "private_renderer_available": {
+            "title": "Private Renderer Available",
+            "type": "boolean"
+          },
+          "raw_fallback": {
+            "const": "forbidden",
+            "default": "forbidden",
+            "title": "Raw Fallback",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capture_available",
+          "capture_reason",
+          "private_renderer_available"
+        ],
+        "title": "RecordingCapabilities",
+        "type": "object"
+      },
+      "RecordingProjectInput": {
+        "properties": {
+          "mode": {
+            "const": "solo",
+            "default": "solo",
+            "title": "Mode",
+            "type": "string"
+          },
+          "target_lesson_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Lesson Id"
+          },
+          "title": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "RecordingProjectInput",
+        "type": "object"
+      },
+      "RecordingProjectPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RecordingProjectView"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "RecordingProjectPage",
+        "type": "object"
+      },
+      "RecordingProjectUpdate": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "target_lesson_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Lesson Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "RecordingProjectUpdate",
+        "type": "object"
+      },
+      "RecordingProjectView": {
+        "properties": {
+          "capabilities": {
+            "$ref": "#/components/schemas/RecordingCapabilities"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "mode": {
+            "title": "Mode",
+            "type": "string"
+          },
+          "owner_user_id": {
+            "format": "uuid",
+            "title": "Owner User Id",
+            "type": "string"
+          },
+          "privacy_state": {
+            "title": "Privacy State",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "studio_session_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Studio Session Id"
+          },
+          "takes": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Takes",
+            "type": "array"
+          },
+          "takes_next_cursor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Takes Next Cursor"
+          },
+          "target_lesson_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Lesson Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "owner_user_id",
+          "title",
+          "mode",
+          "target_lesson_id",
+          "state",
+          "privacy_state",
+          "version",
+          "studio_session_id",
+          "takes",
+          "takes_next_cursor",
+          "capabilities"
+        ],
+        "title": "RecordingProjectView",
+        "type": "object"
+      },
+      "RecordingRenderView": {
+        "properties": {
+          "approval_state": {
+            "title": "Approval State",
+            "type": "string"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id"
+          },
+          "content_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Hash"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "quality": {
+            "title": "Quality",
+            "type": "string"
+          },
+          "render_hash": {
+            "title": "Render Hash",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "take_id": {
+            "format": "uuid",
+            "title": "Take Id",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "take_id",
+          "generation",
+          "state",
+          "version",
+          "asset_id",
+          "render_hash",
+          "content_hash",
+          "duration_ms",
+          "quality",
+          "error_code",
+          "approval_state"
+        ],
+        "title": "RecordingRenderView",
+        "type": "object"
+      },
+      "RecordingReviewCommand": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "reason": {
+            "default": "",
+            "maxLength": 4000,
+            "title": "Reason",
+            "type": "string"
+          },
+          "render_hash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Render Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_version",
+          "render_hash"
+        ],
+        "title": "RecordingReviewCommand",
+        "type": "object"
+      },
+      "RecordingTakeInput": {
+        "properties": {
+          "expected_scene_revision": {
+            "minimum": 0.0,
+            "title": "Expected Scene Revision",
+            "type": "integer"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_version",
+          "expected_scene_revision"
+        ],
+        "title": "RecordingTakeInput",
+        "type": "object"
+      },
+      "RecordingTakePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RecordingTakeView"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "RecordingTakePage",
+        "type": "object"
+      },
+      "RecordingTakeView": {
+        "properties": {
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "projection_hash": {
+            "title": "Projection Hash",
+            "type": "string"
+          },
+          "readiness_state": {
+            "title": "Readiness State",
+            "type": "string"
+          },
+          "renderer_state_version": {
+            "title": "Renderer State Version",
+            "type": "integer"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "stopped_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stopped At"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "number",
+          "generation",
+          "state",
+          "version",
+          "renderer_state_version",
+          "projection_hash",
+          "readiness_state",
+          "started_at",
+          "stopped_at",
+          "error_code"
+        ],
+        "title": "RecordingTakeView",
+        "type": "object"
+      },
+      "RecordingVersionCommand": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "RecordingVersionCommand",
+        "type": "object"
+      },
       "RecurrenceRule": {
         "additionalProperties": false,
         "properties": {
@@ -9582,6 +10138,1389 @@
         "title": "ReleaseRollback",
         "type": "object"
       },
+      "RendererAssetProof": {
+        "properties": {
+          "asset_id": {
+            "format": "uuid",
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "sha256"
+        ],
+        "title": "RendererAssetProof",
+        "type": "object"
+      },
+      "RendererBootstrapView": {
+        "properties": {
+          "access_token": {
+            "title": "Access Token",
+            "type": "string"
+          },
+          "capture_plan": {
+            "$id": "urn:opora:capture-plan:1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "allowed_tracks": {
+                "items": {
+                  "additionalProperties": false,
+                  "allOf": [
+                    {
+                      "else": {
+                        "properties": {
+                          "kind": {
+                            "const": "audio"
+                          }
+                        }
+                      },
+                      "if": {
+                        "properties": {
+                          "source": {
+                            "enum": [
+                              "camera",
+                              "screen"
+                            ]
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "kind": {
+                            "const": "video"
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "properties": {
+                    "identity": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "kind": {
+                      "enum": [
+                        "video",
+                        "audio"
+                      ]
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "enum": [
+                        "camera",
+                        "screen",
+                        "microphone",
+                        "screen_audio"
+                      ]
+                    },
+                    "track_id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "identity",
+                    "track_id",
+                    "source",
+                    "kind",
+                    "required"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 64,
+                "type": "array"
+              },
+              "foundation_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "generation": {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              "privacy_state": {
+                "enum": [
+                  "approved",
+                  "unknown",
+                  "blocked"
+                ]
+              },
+              "raw_fallback": {
+                "const": "forbidden"
+              },
+              "recording_policy_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "render_profile_version": {
+                "const": "opora-stage/1"
+              },
+              "resource_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "scene_revision": {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "schema_version": {
+                "const": 1
+              },
+              "session_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "take_id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "foundation_id",
+              "resource_id",
+              "session_id",
+              "recording_policy_id",
+              "schema_version",
+              "take_id",
+              "generation",
+              "scene_revision",
+              "render_profile_version",
+              "privacy_state",
+              "raw_fallback",
+              "allowed_tracks"
+            ],
+            "title": "Capture Plan",
+            "type": "object"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "foundation_id": {
+            "format": "uuid",
+            "title": "Foundation Id",
+            "type": "string"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "invalidated": {
+            "default": false,
+            "title": "Invalidated",
+            "type": "boolean"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "projection_hash": {
+            "title": "Projection Hash",
+            "type": "string"
+          },
+          "provider_grant": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RendererProviderGrant"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "renderer_state_version": {
+            "title": "Renderer State Version",
+            "type": "integer"
+          },
+          "resolved_assets": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedRendererAsset"
+            },
+            "title": "Resolved Assets",
+            "type": "array"
+          },
+          "scene": {
+            "$id": "urn:opora:studio-scene:1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "content_kind": {
+                      "const": "slides"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "board_snapshot_id": {
+                      "type": "null"
+                    },
+                    "content_asset": {
+                      "not": {
+                        "type": "null"
+                      }
+                    },
+                    "deck_version_id": {
+                      "not": {
+                        "type": "null"
+                      }
+                    },
+                    "layout": {
+                      "enum": [
+                        "side",
+                        "overlay"
+                      ]
+                    },
+                    "screen_track_id": {
+                      "type": "null"
+                    },
+                    "slide_id": {
+                      "not": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "content_kind": {
+                      "const": "board"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "board_snapshot_id": {
+                      "not": {
+                        "type": "null"
+                      }
+                    },
+                    "content_asset": {
+                      "not": {
+                        "type": "null"
+                      }
+                    },
+                    "deck_version_id": {
+                      "type": "null"
+                    },
+                    "layout": {
+                      "enum": [
+                        "side",
+                        "overlay"
+                      ]
+                    },
+                    "screen_track_id": {
+                      "type": "null"
+                    },
+                    "slide_id": {
+                      "type": "null"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "content_kind": {
+                      "const": "screen"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "board_snapshot_id": {
+                      "type": "null"
+                    },
+                    "content_asset": {
+                      "type": "null"
+                    },
+                    "deck_version_id": {
+                      "type": "null"
+                    },
+                    "layout": {
+                      "enum": [
+                        "side",
+                        "overlay"
+                      ]
+                    },
+                    "screen_track_id": {
+                      "not": {
+                        "type": "null"
+                      }
+                    },
+                    "slide_id": {
+                      "type": "null"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "content_kind": {
+                      "const": "camera"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "board_snapshot_id": {
+                      "type": "null"
+                    },
+                    "content_asset": {
+                      "type": "null"
+                    },
+                    "deck_version_id": {
+                      "type": "null"
+                    },
+                    "layout": {
+                      "const": "camera_only"
+                    },
+                    "screen_track_id": {
+                      "type": "null"
+                    },
+                    "slide_id": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "board_snapshot_id": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "content_asset": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "asset_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "height": {
+                        "maximum": 16384.0,
+                        "minimum": 1.0,
+                        "type": "integer"
+                      },
+                      "sha256": {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      "width": {
+                        "maximum": 16384.0,
+                        "minimum": 1.0,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "sha256",
+                      "width",
+                      "height"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "content_kind": {
+                "enum": [
+                  "slides",
+                  "screen",
+                  "board",
+                  "camera"
+                ]
+              },
+              "content_ratio": {
+                "maximum": 10.0,
+                "minimum": 0.1,
+                "type": "number"
+              },
+              "deck_version_id": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "foundation_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "layout": {
+                "enum": [
+                  "side",
+                  "overlay",
+                  "camera_only"
+                ]
+              },
+              "presenter_camera": {
+                "type": "boolean"
+              },
+              "presenter_display_name": {
+                "maxLength": 160,
+                "minLength": 1,
+                "type": "string"
+              },
+              "presenter_identity": {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              "presenter_size": {
+                "maximum": 36.0,
+                "minimum": 22.0,
+                "type": "number"
+              },
+              "recording_policy_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "render_profile_version": {
+                "const": "opora-stage/1"
+              },
+              "resource_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "resource_kind": {
+                "enum": [
+                  "live_event",
+                  "lesson_recording_project"
+                ]
+              },
+              "revision": {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "schema_version": {
+                "const": 1
+              },
+              "screen_track_id": {
+                "anyOf": [
+                  {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "session_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "slide_id": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "take_id": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "theme_id": {
+                "const": "opora-warm"
+              }
+            },
+            "required": [
+              "foundation_id",
+              "resource_id",
+              "session_id",
+              "recording_policy_id",
+              "take_id",
+              "deck_version_id",
+              "slide_id",
+              "board_snapshot_id",
+              "schema_version",
+              "revision",
+              "resource_kind",
+              "render_profile_version",
+              "content_kind",
+              "content_asset",
+              "presenter_identity",
+              "presenter_display_name",
+              "presenter_camera",
+              "screen_track_id",
+              "content_ratio",
+              "layout",
+              "presenter_size",
+              "theme_id"
+            ],
+            "title": "Immutable StudioScene v1",
+            "type": "object"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "take_id": {
+            "format": "uuid",
+            "title": "Take Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "foundation_id",
+          "project_id",
+          "take_id",
+          "session_id",
+          "generation",
+          "renderer_state_version",
+          "projection_hash",
+          "scene",
+          "capture_plan",
+          "resolved_assets",
+          "access_token",
+          "expires_at"
+        ],
+        "title": "RendererBootstrapView",
+        "type": "object"
+      },
+      "RendererObservedTrack": {
+        "additionalProperties": false,
+        "properties": {
+          "identity": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Identity",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "video",
+              "audio"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "privacy_state": {
+            "enum": [
+              "approved",
+              "unknown",
+              "blocked"
+            ],
+            "title": "Privacy State",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "camera",
+              "screen",
+              "microphone",
+              "screen_audio"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "ready",
+              "muted",
+              "missing"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "track_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Track Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identity",
+          "track_id",
+          "source",
+          "kind",
+          "privacy_state",
+          "state"
+        ],
+        "title": "RendererObservedTrack",
+        "type": "object"
+      },
+      "RendererProviderGrant": {
+        "properties": {
+          "expires_in": {
+            "title": "Expires In",
+            "type": "integer"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "identity": {
+            "title": "Identity",
+            "type": "string"
+          },
+          "provider": {
+            "const": "livekit",
+            "default": "livekit",
+            "title": "Provider",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "token",
+          "identity",
+          "session_id",
+          "generation",
+          "expires_in"
+        ],
+        "title": "RendererProviderGrant",
+        "type": "object"
+      },
+      "RendererReadinessInput": {
+        "properties": {
+          "asset_proofs": {
+            "items": {
+              "$ref": "#/components/schemas/RendererAssetProof"
+            },
+            "maxItems": 64,
+            "title": "Asset Proofs",
+            "type": "array"
+          },
+          "device_pixel_ratio": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 8.0,
+            "title": "Device Pixel Ratio",
+            "type": "number"
+          },
+          "observed_tracks": {
+            "items": {
+              "$ref": "#/components/schemas/RendererObservedTrack"
+            },
+            "maxItems": 64,
+            "title": "Observed Tracks",
+            "type": "array"
+          },
+          "projection_hash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Projection Hash",
+            "type": "string"
+          },
+          "readiness_sequence": {
+            "minimum": 1.0,
+            "title": "Readiness Sequence",
+            "type": "integer"
+          },
+          "render_profile_version": {
+            "const": "opora-stage/1",
+            "title": "Render Profile Version",
+            "type": "string"
+          },
+          "renderer_state_version": {
+            "minimum": 1.0,
+            "title": "Renderer State Version",
+            "type": "integer"
+          },
+          "viewport_height": {
+            "maximum": 16384.0,
+            "minimum": 1.0,
+            "title": "Viewport Height",
+            "type": "integer"
+          },
+          "viewport_width": {
+            "maximum": 16384.0,
+            "minimum": 1.0,
+            "title": "Viewport Width",
+            "type": "integer"
+          },
+          "visual_ready": {
+            "title": "Visual Ready",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "readiness_sequence",
+          "visual_ready",
+          "renderer_state_version",
+          "projection_hash",
+          "viewport_width",
+          "viewport_height",
+          "device_pixel_ratio",
+          "render_profile_version",
+          "observed_tracks",
+          "asset_proofs"
+        ],
+        "title": "RendererReadinessInput",
+        "type": "object"
+      },
+      "RendererReadinessView": {
+        "properties": {
+          "capture_state": {
+            "title": "Capture State",
+            "type": "string"
+          },
+          "projection_hash": {
+            "title": "Projection Hash",
+            "type": "string"
+          },
+          "readiness_sequence": {
+            "title": "Readiness Sequence",
+            "type": "integer"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "boolean"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "renderer_state_version": {
+            "title": "Renderer State Version",
+            "type": "integer"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          }
+        },
+        "required": [
+          "readiness_sequence",
+          "ready",
+          "reasons",
+          "renderer_state_version",
+          "projection_hash",
+          "capture_state",
+          "valid_until"
+        ],
+        "title": "RendererReadinessView",
+        "type": "object"
+      },
+      "RendererStateView": {
+        "properties": {
+          "capture_plan": {
+            "$id": "urn:opora:capture-plan:1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "allowed_tracks": {
+                "items": {
+                  "additionalProperties": false,
+                  "allOf": [
+                    {
+                      "else": {
+                        "properties": {
+                          "kind": {
+                            "const": "audio"
+                          }
+                        }
+                      },
+                      "if": {
+                        "properties": {
+                          "source": {
+                            "enum": [
+                              "camera",
+                              "screen"
+                            ]
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "kind": {
+                            "const": "video"
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "properties": {
+                    "identity": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "kind": {
+                      "enum": [
+                        "video",
+                        "audio"
+                      ]
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "source": {
+                      "enum": [
+                        "camera",
+                        "screen",
+                        "microphone",
+                        "screen_audio"
+                      ]
+                    },
+                    "track_id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "identity",
+                    "track_id",
+                    "source",
+                    "kind",
+                    "required"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 64,
+                "type": "array"
+              },
+              "foundation_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "generation": {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              "privacy_state": {
+                "enum": [
+                  "approved",
+                  "unknown",
+                  "blocked"
+                ]
+              },
+              "raw_fallback": {
+                "const": "forbidden"
+              },
+              "recording_policy_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "render_profile_version": {
+                "const": "opora-stage/1"
+              },
+              "resource_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "scene_revision": {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "schema_version": {
+                "const": 1
+              },
+              "session_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "take_id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "foundation_id",
+              "resource_id",
+              "session_id",
+              "recording_policy_id",
+              "schema_version",
+              "take_id",
+              "generation",
+              "scene_revision",
+              "render_profile_version",
+              "privacy_state",
+              "raw_fallback",
+              "allowed_tracks"
+            ],
+            "title": "Capture Plan",
+            "type": "object"
+          },
+          "foundation_id": {
+            "format": "uuid",
+            "title": "Foundation Id",
+            "type": "string"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "invalidated": {
+            "default": false,
+            "title": "Invalidated",
+            "type": "boolean"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "projection_hash": {
+            "title": "Projection Hash",
+            "type": "string"
+          },
+          "provider_grant": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RendererProviderGrant"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "renderer_state_version": {
+            "title": "Renderer State Version",
+            "type": "integer"
+          },
+          "resolved_assets": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedRendererAsset"
+            },
+            "title": "Resolved Assets",
+            "type": "array"
+          },
+          "scene": {
+            "$id": "urn:opora:studio-scene:1",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "content_kind": {
+                      "const": "slides"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "board_snapshot_id": {
+                      "type": "null"
+                    },
+                    "content_asset": {
+                      "not": {
+                        "type": "null"
+                      }
+                    },
+                    "deck_version_id": {
+                      "not": {
+                        "type": "null"
+                      }
+                    },
+                    "layout": {
+                      "enum": [
+                        "side",
+                        "overlay"
+                      ]
+                    },
+                    "screen_track_id": {
+                      "type": "null"
+                    },
+                    "slide_id": {
+                      "not": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "content_kind": {
+                      "const": "board"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "board_snapshot_id": {
+                      "not": {
+                        "type": "null"
+                      }
+                    },
+                    "content_asset": {
+                      "not": {
+                        "type": "null"
+                      }
+                    },
+                    "deck_version_id": {
+                      "type": "null"
+                    },
+                    "layout": {
+                      "enum": [
+                        "side",
+                        "overlay"
+                      ]
+                    },
+                    "screen_track_id": {
+                      "type": "null"
+                    },
+                    "slide_id": {
+                      "type": "null"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "content_kind": {
+                      "const": "screen"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "board_snapshot_id": {
+                      "type": "null"
+                    },
+                    "content_asset": {
+                      "type": "null"
+                    },
+                    "deck_version_id": {
+                      "type": "null"
+                    },
+                    "layout": {
+                      "enum": [
+                        "side",
+                        "overlay"
+                      ]
+                    },
+                    "screen_track_id": {
+                      "not": {
+                        "type": "null"
+                      }
+                    },
+                    "slide_id": {
+                      "type": "null"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "content_kind": {
+                      "const": "camera"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "board_snapshot_id": {
+                      "type": "null"
+                    },
+                    "content_asset": {
+                      "type": "null"
+                    },
+                    "deck_version_id": {
+                      "type": "null"
+                    },
+                    "layout": {
+                      "const": "camera_only"
+                    },
+                    "screen_track_id": {
+                      "type": "null"
+                    },
+                    "slide_id": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "board_snapshot_id": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "content_asset": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "asset_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "height": {
+                        "maximum": 16384.0,
+                        "minimum": 1.0,
+                        "type": "integer"
+                      },
+                      "sha256": {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      "width": {
+                        "maximum": 16384.0,
+                        "minimum": 1.0,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "sha256",
+                      "width",
+                      "height"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "content_kind": {
+                "enum": [
+                  "slides",
+                  "screen",
+                  "board",
+                  "camera"
+                ]
+              },
+              "content_ratio": {
+                "maximum": 10.0,
+                "minimum": 0.1,
+                "type": "number"
+              },
+              "deck_version_id": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "foundation_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "layout": {
+                "enum": [
+                  "side",
+                  "overlay",
+                  "camera_only"
+                ]
+              },
+              "presenter_camera": {
+                "type": "boolean"
+              },
+              "presenter_display_name": {
+                "maxLength": 160,
+                "minLength": 1,
+                "type": "string"
+              },
+              "presenter_identity": {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              "presenter_size": {
+                "maximum": 36.0,
+                "minimum": 22.0,
+                "type": "number"
+              },
+              "recording_policy_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "render_profile_version": {
+                "const": "opora-stage/1"
+              },
+              "resource_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "resource_kind": {
+                "enum": [
+                  "live_event",
+                  "lesson_recording_project"
+                ]
+              },
+              "revision": {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "schema_version": {
+                "const": 1
+              },
+              "screen_track_id": {
+                "anyOf": [
+                  {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "session_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "slide_id": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "take_id": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "theme_id": {
+                "const": "opora-warm"
+              }
+            },
+            "required": [
+              "foundation_id",
+              "resource_id",
+              "session_id",
+              "recording_policy_id",
+              "take_id",
+              "deck_version_id",
+              "slide_id",
+              "board_snapshot_id",
+              "schema_version",
+              "revision",
+              "resource_kind",
+              "render_profile_version",
+              "content_kind",
+              "content_asset",
+              "presenter_identity",
+              "presenter_display_name",
+              "presenter_camera",
+              "screen_track_id",
+              "content_ratio",
+              "layout",
+              "presenter_size",
+              "theme_id"
+            ],
+            "title": "Immutable StudioScene v1",
+            "type": "object"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "take_id": {
+            "format": "uuid",
+            "title": "Take Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "foundation_id",
+          "project_id",
+          "take_id",
+          "session_id",
+          "generation",
+          "renderer_state_version",
+          "projection_hash",
+          "scene",
+          "capture_plan",
+          "resolved_assets"
+        ],
+        "title": "RendererStateView",
+        "type": "object"
+      },
       "RequestCommand": {
         "additionalProperties": false,
         "properties": {
@@ -9695,6 +11634,35 @@
           "created_at"
         ],
         "title": "ReserveReviewView",
+        "type": "object"
+      },
+      "ResolvedRendererAsset": {
+        "properties": {
+          "asset_id": {
+            "format": "uuid",
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "height": {
+            "title": "Height",
+            "type": "integer"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "width": {
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "asset_id",
+          "sha256",
+          "width",
+          "height"
+        ],
+        "title": "ResolvedRendererAsset",
         "type": "object"
       },
       "ResponseCommand": {
@@ -48393,6 +50361,2338 @@
         "summary": "Acknowledge",
         "tags": [
           "learning"
+        ]
+      }
+    },
+    "/api/v1/recording-projects": {
+      "get": {
+        "operationId": "recording_project_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingProjectPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Listing",
+        "tags": [
+          "recordings"
+        ]
+      },
+      "post": {
+        "operationId": "recording_project_create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingProjectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingProjectView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Create",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-projects/{id}": {
+      "get": {
+        "operationId": "recording_project_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingProjectView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Get",
+        "tags": [
+          "recordings"
+        ]
+      },
+      "patch": {
+        "operationId": "recording_project_edit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingProjectUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingProjectView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Edit",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-projects/{id}/prepare": {
+      "post": {
+        "operationId": "recording_project_prepare",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingVersionCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingProjectView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Prepare",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-projects/{id}/takes": {
+      "get": {
+        "operationId": "recording_take_list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Before"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingTakePage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "List Takes",
+        "tags": [
+          "recordings"
+        ]
+      },
+      "post": {
+        "operationId": "recording_take_create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingTakeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingTakeView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Create Take",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-renderer/assets/{asset_id}": {
+      "get": {
+        "operationId": "recording_renderer_asset",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "asset_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Asset",
+        "tags": [
+          "private-renderer"
+        ]
+      }
+    },
+    "/api/v1/recording-renderer/bootstrap": {
+      "post": {
+        "operationId": "recording_renderer_bootstrap",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RendererBootstrapView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Bootstrap",
+        "tags": [
+          "private-renderer"
+        ]
+      }
+    },
+    "/api/v1/recording-renderer/provider-grant": {
+      "post": {
+        "operationId": "recording_renderer_provider_grant",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RendererStateView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Provider Grant",
+        "tags": [
+          "private-renderer"
+        ]
+      }
+    },
+    "/api/v1/recording-renderer/readiness": {
+      "post": {
+        "operationId": "recording_renderer_readiness",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RendererReadinessInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RendererReadinessView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Readiness",
+        "tags": [
+          "private-renderer"
+        ]
+      }
+    },
+    "/api/v1/recording-renderer/state": {
+      "get": {
+        "operationId": "recording_renderer_state",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after_revision",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "After Revision"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RendererStateView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "State",
+        "tags": [
+          "private-renderer"
+        ]
+      }
+    },
+    "/api/v1/recording-renders/{id}/approve": {
+      "post": {
+        "operationId": "recording_render_approve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingReviewCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingRenderView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Approve",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-renders/{id}/reject": {
+      "post": {
+        "operationId": "recording_render_reject",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingReviewCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingRenderView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Reject",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-renders/{id}/status": {
+      "get": {
+        "operationId": "recording_render_status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingRenderView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Render Status",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-takes/{id}": {
+      "get": {
+        "operationId": "recording_take_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingTakeView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Get Take",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-takes/{id}/discard": {
+      "post": {
+        "operationId": "recording_take_discard",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingVersionCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingTakeView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Discard",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-takes/{id}/start": {
+      "post": {
+        "operationId": "recording_take_start",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingVersionCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingTakeView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Start",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-takes/{id}/stop": {
+      "post": {
+        "operationId": "recording_take_stop",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingVersionCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingTakeView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Stop",
+        "tags": [
+          "recordings"
         ]
       }
     },

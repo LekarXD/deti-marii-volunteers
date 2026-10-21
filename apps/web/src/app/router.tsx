@@ -10,11 +10,15 @@ const learning=(name:string)=>page(()=>import('../features/learning'),name);
 const activity=(name:string)=>page(()=>import('../features/activities'),name);
 const participant=(name:string)=>page(()=>import('../features/participants'),name);
 const knowledge=(name:string)=>page(()=>import('../features/knowledge'),name);
+const profile=(name:string)=>page(()=>import('../features/profile'),name);
+const notification=(name:string)=>page(()=>import('../features/notifications'),name);
+const simulator=(name:string)=>page(()=>import('../features/simulator'),name);
 const followup=(name:string)=>page(()=>import('../features/followups'),name);
 const crm=(name:string)=>page(()=>import('../features/crm'),name);
 const messages=(name:string)=>page(()=>import('../features/messaging'),name);
 function StaffBoundary(){const {session}=useSession();const location=useLocation();return session?.is_staff?<Outlet/>:<Navigate to={'/login?next='+encodeURIComponent(location.pathname+location.search)} replace/>;}
-async function entry(){const {ApplicationEntryPage}=await import('../features/applications/ApplicationEntryPage');return {Component:function Entry(){const {session}=useSession();return session?.is_staff?<Navigate to="/fund" replace/>:<ApplicationEntryPage/>;}};}
+async function staffWebinars(){const {WebinarsPage}=await import('../features/studio');return {Component:()=> <WebinarsPage staff/>};}
+async function entry(){const {ApplicationEntryPage}=await import('../features/applications/ApplicationEntryPage');return {Component:function Entry(){const {session}=useSession();return session?.is_staff?<Navigate to="/fund" replace/>:session?.mfa_required?<Navigate to="/login?next=%2Ffund" replace/>:session?.user_id?<Navigate to="/home" replace/>:<ApplicationEntryPage/>;}};}
 function NotFound(){return <Card><h1 className="h1">Страница не найдена</h1><Link className="btn btn-primary" to="/">На главную</Link></Card>;}
 function LegacyGroup(){const location=useLocation();return <Navigate to={'/me/group'+location.search} replace/>;}
 export const router=createBrowserRouter([{
@@ -22,19 +26,29 @@ export const router=createBrowserRouter([{
   {index:true,lazy:entry},
   {element:<PublicLayout/>,children:[{path:'apply',lazy:application('ApplyPage')},{path:'login',lazy:page(()=>import('../features/auth'),'LoginPage')}]},
   {element:<CandidateLayout/>,children:[
+   {path:'profile',lazy:profile('ProfilePage')},
+   {path:'hours',lazy:profile('HoursPage')},
+   {path:'hours/documents',lazy:profile('CertificatesPage')},
+   {path:'home',lazy:page(()=>import('../features/home'),'HomePage')},
    {path:'application',lazy:application('ApplicationPage')},
    {path:'application/edit',lazy:application('ApplyPage')},
    {path:'onboarding',lazy:learning('OnboardingPage')},
-   {path:'onboarding/cards',lazy:learning('OnboardingCardsPage')},
-   {path:'onboarding/list',lazy:learning('OnboardingListPage')},
+   {path:'onboarding/cards',element:<Navigate to="/onboarding" replace/>},
+   {path:'onboarding/list',element:<Navigate to="/onboarding" replace/>},
    {path:'interviews',lazy:interview('CandidateInterviewsPage')},
    {path:'academy',lazy:learning('AcademyPage')},
    {path:'academy/lessons/:id',lazy:learning('LessonPage')},
+   {path:'simulator',lazy:simulator('SimulatorPage')},
+   {path:'simulator/:scenario_id',lazy:simulator('SimulatorPage')},
+   {path:'simulator/sessions/:id',lazy:simulator('SimulatorSessionPage')},
    {path:'mentor',lazy:knowledge('MentorPage')},
    {path:'messages',lazy:messages('CandidateMessagesPage')},
    {path:'studio-preview',lazy:page(()=>import('../ui/studio'),'StudioPreviewFixture')},
    {path:'opportunities',lazy:activity('OpportunitiesPage')},
    {path:'opportunities/:id',lazy:activity('OpportunityPage')},
+   {path:'my/schedule',lazy:activity('PersonalSchedulePage')},
+   {path:'webinars',lazy:page(()=>import('../features/studio'),'WebinarsPage')},
+   {path:'studio/:sessionId',lazy:page(()=>import('../features/studio'),'LiveRoomPage')},
    {path:'my/assignments',lazy:activity('MyAssignmentsPage')},
    {path:'my/assignments/:id',lazy:activity('AssignmentPage')},
    {path:'my/assignments/:id/preparation',lazy:followup('FirstShiftPage')},
@@ -57,6 +71,11 @@ export const router=createBrowserRouter([{
    {path:'schedule',lazy:activity('CalendarPage')},
    {path:'events/:id',lazy:activity('EventPage')},
    {path:'messages',lazy:messages('CoordinatorMessagesPage')},
+   {path:'profile-review',lazy:profile('ProfileReviewPage')},
+   {path:'webinars',lazy:staffWebinars},
+   {path:'notifications',lazy:notification('NotificationAdminPage')},
+   {path:'scenarios',lazy:simulator('ScenariosPage')},
+   {path:'simulator/review',lazy:simulator('SimulatorReviewPage')},
    {path:'signals',lazy:followup('SignalsPage')},
    {path:'knowledge',lazy:knowledge('KnowledgePage')},
    {path:'learning',lazy:learning('BuilderPage')},

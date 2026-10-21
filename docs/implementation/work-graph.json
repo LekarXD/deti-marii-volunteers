@@ -188,12 +188,13 @@
       ]
     },
     "P17B": {
-      "owner": "A1",
+      "owner": "A1 backend + A6 UI",
       "depends_on": [
         "P17A"
       ],
       "required_agents": [
-        "A1"
+        "A1",
+        "A6"
       ]
     },
     "P18A": {
@@ -258,7 +259,8 @@
       ],
       "required_agents": [
         "A3"
-      ]
+      ],
+      "agent_note": "A4 explicitly owns canonical staff API extension; A1 retains core/auth/delivery/migrations. A3 owns reporting/Admin UI."
     },
     "P20": {
       "owner": "A8/A0",
