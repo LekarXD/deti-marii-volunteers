@@ -59,4 +59,19 @@ describe('manual Builder',()=>{
   expect(screen.getByRole('button',{name:/Согласовать редакцию/})).toBeTruthy();
  });
 
+ it.each([['practice',false],['introduction',true]])('shows acknowledgement fields only for the introduction track (%s)',async(key,acknowledgement)=>{
+  const track={id:'track',key,title:'Fixture track',version:2,archived:false,current_release_id:null,lessons:[{id:'lesson',title:'Fixture lesson',track_id:'track',key:'fixture',publication_revision:0,archived:false,current_version_id:null,draft:null}],assessment:null,releases:[]};
+  vi.mocked(api).mockImplementation(async(path)=>{
+   if(path==='/coord/learning/tracks')return [track] as never;
+   if(path==='/coord/learning/recipients')return [] as never;
+   throw new Error(`Unexpected ${path}`);
+  });
+  const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});
+  render(<QueryClientProvider client={client}><MemoryRouter initialEntries={['/fund/learning']}><Routes><Route path="/fund/learning" element={<BuilderPage/>}/></Routes></MemoryRouter></QueryClientProvider>);
+  await userEvent.click(await screen.findByRole('button',{name:'Опубликовать версию трека'}));
+  expect(screen.getByText(/В версию войдёт 1 урок\./)).toBeTruthy();
+  expect(!!screen.queryByLabelText('Нужно повторное подтверждение знакомства')).toBe(acknowledgement);
+  expect(!!screen.queryByLabelText('Какие обязательные пункты изменились')).toBe(acknowledgement);
+ });
+
 });
