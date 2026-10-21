@@ -12,8 +12,8 @@ from app.core.idempotency import begin_command,finish_command
 from app.core.models import StaffMembership,User
 from . import service,imports
 from .models import CrmVolunteer,FollowUpTask,ImportBatch
-from .schemas import (CreateVolunteerCommand,AgreementCommand,ContactCommand,AvailabilityCommand,VerificationCommand,PreferenceCommand,CrmReviewCommand,
-    TaskCreateCommand,TaskUpdateCommand,MergeCommand,ImportMappingCommand,ImportRowResolutionCommand,VersionCommand,SelfAvailabilityCommand,
+from .schemas import (CreateVolunteerCommand,AgreementCommand,ContactCommand,AvailabilityCommand,VerificationCommand,CrmPreferenceCommand,CrmReviewCommand,
+    TaskCreateCommand,TaskUpdateCommand,MergeCommand,ImportMappingCommand,ImportRowResolutionCommand,CrmVersionCommand,SelfAvailabilityCommand,
     CrmVolunteerView,CrmVolunteerListView,FollowUpTaskView,ImportBatchView,ImportBatchSummary,OwnAvailabilityView,StaffOptionView,CrmApplicationOptionView)
 router=APIRouter(prefix='/api/v1',tags=['crm'])
 
@@ -86,7 +86,7 @@ async def verification(volunteer_id:UUID,body:VerificationCommand,principal:Prin
 
 
 @router.post('/coord/volunteers/{volunteer_id}/contact-preference',response_model=CrmVolunteerView)
-async def preference(volunteer_id:UUID,body:PreferenceCommand,principal:Principal=Depends(require_permission('contacts.review')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+async def preference(volunteer_id:UUID,body:CrmPreferenceCommand,principal:Principal=Depends(require_permission('contacts.review')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
     return await command(db,principal,f'crm.preference:{volunteer_id}',idempotency_key,body,lambda:service.set_preference(db,principal,volunteer_id,body),'contacts.review')
 
 
@@ -160,7 +160,7 @@ async def map_batch(batch_id:UUID,body:ImportMappingCommand,principal:Principal=
 
 
 @router.post('/coord/import-batches/{batch_id}/dry-run',response_model=ImportBatchView)
-async def dry_run(batch_id:UUID,body:VersionCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+async def dry_run(batch_id:UUID,body:CrmVersionCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
     return await command(db,principal,f'crm.import.preview:{batch_id}',idempotency_key,body,lambda:imports.dry_run(db,principal,batch_id,body),'crm.write')
 
 
@@ -170,7 +170,7 @@ async def resolve_row(batch_id:UUID,row_id:UUID,body:ImportRowResolutionCommand,
 
 
 @router.post('/coord/import-batches/{batch_id}/apply',response_model=ImportBatchView)
-async def apply_batch(batch_id:UUID,body:VersionCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+async def apply_batch(batch_id:UUID,body:CrmVersionCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
     return await command(db,principal,f'crm.import.apply:{batch_id}',idempotency_key,body,lambda:imports.apply_batch(db,principal,batch_id,body),'crm.write')
 
 

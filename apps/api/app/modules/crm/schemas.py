@@ -6,19 +6,19 @@ from pydantic import BaseModel, ConfigDict, Field
 class Command(BaseModel):
     model_config=ConfigDict(extra="forbid")
 
-class VersionCommand(Command):
+class CrmVersionCommand(Command):
     expected_version:int=Field(ge=1)
 
 class CreateVolunteerCommand(Command):
     application_id:UUID
 
-class AgreementCommand(VersionCommand):
+class AgreementCommand(CrmVersionCommand):
     text:str=Field(min_length=1,max_length=8000)
     role_context:str=Field(default="",max_length=400)
     valid_until:date|None=None
     relationship_state:Literal['contacted','awaiting_reply','ready','active','paused','unavailable','unreachable','closed']|None=None
 
-class ContactCommand(VersionCommand):
+class ContactCommand(CrmVersionCommand):
     kind:Literal['phone','telegram','meeting','email','other']
     text:str=Field(min_length=1,max_length=8000)
     direction:Literal['incoming','outgoing','recorded']='recorded'
@@ -35,19 +35,19 @@ class AvailabilityInput(Command):
     preferred_channel:Literal['telegram','phone','email','max','whatsapp','other']='phone'
     windows:list[AvailabilityWindowInput]=Field(default_factory=list,max_length=28)
 
-class AvailabilityCommand(VersionCommand,AvailabilityInput):
+class AvailabilityCommand(CrmVersionCommand,AvailabilityInput):
     pass
 
-class VerificationCommand(VersionCommand):
+class VerificationCommand(CrmVersionCommand):
     valid_until:date
     source:str=Field(min_length=1,max_length=80)
 
-class PreferenceCommand(VersionCommand):
+class CrmPreferenceCommand(CrmVersionCommand):
     no_contact:bool
     reason:str=Field(min_length=1,max_length=4000)
     renewed_consent_confirmed:bool=False
 
-class CrmReviewCommand(VersionCommand):
+class CrmReviewCommand(CrmVersionCommand):
     outcome:Literal['unverified','contacted','awaiting_reply','ready','paused','unavailable','unreachable']
     note:str=Field(min_length=1,max_length=8000)
     no_contact:bool=False
@@ -55,28 +55,28 @@ class CrmReviewCommand(VersionCommand):
     valid_until:date|None=None
     agreement_text:str=Field(default='',max_length=8000)
 
-class TaskCreateCommand(VersionCommand):
+class TaskCreateCommand(CrmVersionCommand):
     title:str=Field(min_length=1,max_length=400)
     due_on:date
     assigned_user_id:UUID
 
-class TaskUpdateCommand(VersionCommand):
+class TaskUpdateCommand(CrmVersionCommand):
     state:Literal['open','done','cancelled']|None=None
     title:str|None=Field(default=None,min_length=1,max_length=400)
     due_on:date|None=None
     assigned_user_id:UUID|None=None
     reason:str=Field(min_length=1,max_length=4000)
 
-class MergeCommand(VersionCommand):
+class MergeCommand(CrmVersionCommand):
     target_id:UUID
     target_expected_version:int=Field(ge=1)
     reason:str=Field(min_length=1,max_length=4000)
 
-class ImportMappingCommand(VersionCommand):
+class ImportMappingCommand(CrmVersionCommand):
     mapping:dict[str,str]
     source_system:str=Field(min_length=1,max_length=80)
 
-class ImportRowResolutionCommand(VersionCommand):
+class ImportRowResolutionCommand(CrmVersionCommand):
     decision:Literal['create','link','skip']
     volunteer_id:UUID|None=None
     reason:str=Field(min_length=1,max_length=4000)
@@ -220,7 +220,7 @@ class CrmApplicationOptionView(BaseModel):
     application_id:UUID
     label:str
 
-class FirstVisitOutcomeCommand(VersionCommand):
+class FirstVisitOutcomeCommand(CrmVersionCommand):
     outcome:Literal['next_activity','preparation','different_role','pause','finish']
     note:str=Field(min_length=1,max_length=8000)
     due_on:date|None=None
