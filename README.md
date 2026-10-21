@@ -6,7 +6,7 @@
 
 [Технический план реализации](docs/implementation/README.md): React + TypeScript, FastAPI, PostgreSQL; карта всех экранов, модель данных, API и пакеты мультиагентной разработки.
 
-**Реализация приложения** — `apps/web` (React) и `apps/api` (FastAPI), общие контракты и Studio — `packages/`. [Запуск и проверки](infra/README.md), [фактический прогресс и ограничения](docs/implementation/progress.md). После установки зависимостей и запуска локальной БД/API: `pnpm dev`, интерфейс — `http://127.0.0.1:5174`. Production не развёрнут.
+**Реализация приложения** — `apps/web` (React) и `apps/api` (FastAPI), общие контракты и Studio — `packages/`. [Запуск и проверки](infra/README.md), [фактический прогресс и ограничения](docs/implementation/progress.md). После установки зависимостей и запуска локальной БД/API: `pnpm dev`, интерфейс — `http://127.0.0.1:5174`. Демонстрационный контур: https://www.odschool.ru/deti-marii/ — отдельная staging-база с вымышленными данными. Серверная проверка записи продолжается; статус — в журнале прогресса.
 
 Материалы и постановка задачи — в [`materials/`](materials/README.md).
 
