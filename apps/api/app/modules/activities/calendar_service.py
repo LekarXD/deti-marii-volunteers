@@ -7,7 +7,7 @@ from app.core.errors import ApiError
 from app.core.idempotency import payload_hash
 from app.modules.participants.models import ParticipantGroup
 from .calendar_models import EventOccurrence, EventRevision, EventSeries, EventSeriesNeedTemplate, OccurrenceOverride, StaffingNeed
-from .calendar_schemas import EventOccurrenceView, EventSeriesCreate, EventSeriesView, RecurrenceRule, SeriesChangePreview, StaffingNeedView
+from .calendar_schemas import EventOccurrenceView, EventSeriesCreate, EventSeriesView, RecurrenceRule, SeriesChangePreview, StaffingNeedView, StaffingNeedsUpdate
 from .models import VolunteerRoleVersion
 from .recurrence import dates_in_range, local_interval, occurrence_id
 from .service import check_version, role_snapshots
@@ -167,7 +167,12 @@ async def patch_occurrence(db,principal,id,body):
     if item.status!='scheduled':raise ApiError(409,'occurrence_not_scheduled','Сначала восстановите занятие.')
     await validate_group(db,principal,body.group_id)
     await lock_group(db,principal.foundation_id,body.group_id)
-    values=body.model_dump(exclude={'expected_version'})
+    values=body.model_dump(exclude={'expected_version','local_date','local_time','duration_minutes','staffing_needs'},exclude_none=True)
+    values['group_id']=body.group_id
+    if body.local_date is not None:
+        interval=local_interval(body.local_date,body.local_time,body.timezone,body.duration_minutes)
+        if interval is None:raise ApiError(422,'nonexistent_local_time','Такого времени нет при переходе на летнее время.')
+        values['starts_at'],values['ends_at']=interval
     conflicts=await group_conflicts(db,principal,values,[id])
     if conflicts:raise ApiError(409,'calendar_conflict','У группы уже есть занятие в это время.',field_errors={'starts_at':'Занятия пересекаются.'})
     for name,value in values.items():setattr(item,name,value)
@@ -175,6 +180,8 @@ async def patch_occurrence(db,principal,id,body):
     fields={name:value.isoformat() if hasattr(value,'isoformat') else str(value) if isinstance(value,UUID) else value for name,value in values.items()}
     if override is None:db.add(OccurrenceOverride(occurrence_id=id,fields=fields,updated_by=principal.actor_id))
     else:override.fields={**override.fields,**fields};override.version+=1;override.updated_at=datetime.now(timezone.utc);override.updated_by=principal.actor_id
+    if body.staffing_needs is not None:
+        return await patch_staffing(db,principal,id,StaffingNeedsUpdate(expected_version=item.version,staffing_needs=body.staffing_needs))
     item.version+=1;item.updated_at=datetime.now(timezone.utc);item.updated_by=principal.actor_id
     await record(db,principal,item,'occurrence')
     return await occurrence_view(db,item)

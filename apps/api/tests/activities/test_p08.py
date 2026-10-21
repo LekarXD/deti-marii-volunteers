@@ -101,3 +101,22 @@ async def test_group_scope_and_overlaps_rejected(context):
         db.add(foreign);await db.commit()
     bad=await context.client.post('/api/v1/coord/event-series',json={**body,'group_id':str(foreign.id),'start_date':'2028-01-04'},headers=headers())
     assert bad.status_code==422,bad.text
+
+
+@pytest.mark.asyncio
+async def test_local_edit_and_staffing_are_atomic_and_dst_gap_is_rejected(context):
+    created,body=await seed(context)
+    first=(await context.client.get('/api/v1/event-occurrences?from=2028-01-01&to=2028-01-31')).json()['items'][0]
+    missing_role='00000000-0000-0000-0000-000000000099'
+    mutation={'expected_version':1,'title':'Не должно сохраниться','group_id':None,'location':'Другое место','local_date':'2028-01-05','local_time':'16:00','timezone':'Europe/Moscow','duration_minutes':90,'staffing_needs':[{'role_id':missing_role,'capacity_required':1}]}
+    failed=await context.client.patch(f"/api/v1/coord/event-occurrences/{first['id']}",json=mutation,headers=headers())
+    assert failed.status_code==422,failed.text
+    unchanged=(await context.client.get(f"/api/v1/event-occurrences/{first['id']}")).json()
+    assert unchanged['version']==1 and unchanged['starts_at']==first['starts_at'] and not unchanged['has_override']
+    gap=await context.client.patch(f"/api/v1/coord/event-occurrences/{first['id']}",json={**mutation,'local_date':'2028-03-26','local_time':'02:30','timezone':'Europe/Berlin','staffing_needs':[]},headers=headers())
+    assert gap.status_code==422 and gap.json()['code']=='nonexistent_local_time'
+    successful=await context.client.patch(f"/api/v1/coord/event-occurrences/{first['id']}",json={**mutation,'staffing_needs':[{'role_id':first['staffing_needs'][0]['role_id'],'capacity_required':3}]},headers=headers())
+    assert successful.status_code==200,successful.text
+    saved=successful.json()
+    assert saved['version']==2 and saved['starts_at']=='2028-01-05T13:00:00Z' and saved['staffing_needs'][0]['required']==3
+    assert saved['origin_local_date']==first['origin_local_date']

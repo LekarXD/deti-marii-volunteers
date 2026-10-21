@@ -122,14 +122,26 @@ class EventOccurrenceView(BaseModel):
 
 
 class EventOccurrenceUpdate(VersionCommand):
+    staffing_needs:list[StaffingNeedInput]|None=Field(default=None,max_length=30)
     title:str=Field(min_length=1,max_length=200)
     group_id:UUID|None=None
-    starts_at:datetime
-    ends_at:datetime
+    starts_at:datetime|None=None
+    ends_at:datetime|None=None
+    local_date:date|None=None
+    local_time:time|None=None
+    timezone:str|None=None
+    duration_minutes:int|None=Field(default=None,gt=0,le=10080)
     location:str=Field(min_length=1,max_length=500)
     @model_validator(mode='after')
     def interval(self):
-        if not self.starts_at.tzinfo or not self.ends_at.tzinfo or self.ends_at<=self.starts_at:raise ValueError('Укажите время окончания после начала с часовым поясом.')
+        if self.starts_at is not None or self.ends_at is not None:
+            if self.local_date or self.local_time or self.duration_minutes:raise ValueError('Выберите один формат времени.')
+            if not self.starts_at or not self.ends_at or not self.starts_at.tzinfo or not self.ends_at.tzinfo or self.ends_at<=self.starts_at:raise ValueError('Укажите время окончания после начала с часовым поясом.')
+        else:
+            if not (self.local_date and self.local_time and self.timezone and self.duration_minutes):raise ValueError('Укажите дату, локальное время, часовой пояс и длительность.')
+            if self.local_time.tzinfo or self.local_time.second or self.local_time.microsecond:raise ValueError('Укажите локальное время с точностью до минуты.')
+            try:ZoneInfo(self.timezone)
+            except ZoneInfoNotFoundError:raise ValueError('Неизвестный часовой пояс.')
         return self
 
 
