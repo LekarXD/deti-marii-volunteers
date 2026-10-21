@@ -3,6 +3,7 @@ from uuid import UUID,uuid4
 import httpx
 import pytest
 from sqlalchemy import select
+from app.cli import fixtures
 from app.core.db import SessionLocal
 from app.core.crypto import unseal
 from app.core.models import ContactChannel,OutboxMessage,Session
@@ -16,6 +17,7 @@ async def proof(challenge_id):
 
 @pytest.mark.asyncio
 async def test_contact_change_binds_identity_rotates_sessions_and_refuses_collision(app):
+    await fixtures()
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as owner,httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as other:
         old_email=f'contact-owner-{uuid4().hex}@example.test'
         second_email=f'contact-other-{uuid4().hex}@example.test'
