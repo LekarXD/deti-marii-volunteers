@@ -8,7 +8,7 @@ import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
 import * as transport from '../../api/transport';
 import type {TransferPeriod,TransferRow} from './model';
 import {DobroTransferPage} from './DobroTransferPage';
-const activity={id:'10000000-0000-4000-8000-000000000001',opportunity_id:'10000000-0000-4000-8000-000000000002',url:'https://dobro.ru/event/1',kind:'long_term' as const,title:'Учебное доброе дело',valid_from:'2026-09-01',valid_until:'2027-05-31',version:1};
+const activity={can_edit:false,id:'10000000-0000-4000-8000-000000000001',opportunity_id:'10000000-0000-4000-8000-000000000002',url:'https://dobro.ru/event/1',kind:'long_term' as const,title:'Учебное доброе дело',valid_from:'2026-09-01',valid_until:'2027-05-31',version:1};
 const row:TransferRow={id:'10000000-0000-4000-8000-000000000003',user_id:'10000000-0000-4000-8000-000000000004',display_name:'Волонтёр Учебный',profile_url:'https://dobro.ru/volunteers/1',state:'applied',enrollment_version:2,minutes_in_period:610,eligible_minutes:490,capped_minutes:120,overlap_minutes:0,duration_trimmed_minutes:0,carry_minutes:10,entered_hours:0,hours_due:8,target_total_hours:8,correction_hours:0,hard_deadline:'2027-07-30',deadline_state:'risk',can_mark:true,historical:false,snapshot_hash:'1'.repeat(64),history:[],reminder_text:'Учебный текст со ссылкой https://dobro.ru/event/1'};
 const fixture:TransferPeriod={period:'2026-10',groups:[{activity,rows:[row]}],total_hours_due:8,total_people:1,work_deadline:'2026-11-05',at_risk_count:1,rules_note:'Учебное правило: отметка координатора, не ответ Добро.рф.'};
 let current:TransferPeriod,conflict=false,hold=false,release:(()=>void)|undefined;const clients:QueryClient[]=[];

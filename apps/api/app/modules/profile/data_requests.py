@@ -26,7 +26,9 @@ async def own_export(db,principal):
     from .documents import document_view
     own_documents=(await db.scalars(select(ProfileDocument).where(ProfileDocument.foundation_id==principal.foundation_id,ProfileDocument.user_id==principal.user_id).order_by(ProfileDocument.created_at))).all()
     data['documents']=[document_view(row).model_dump(mode='json') for row in own_documents]
-    data['included_sections']=['profile','hours','availability','application','consents','documents']
+    from app.modules.dobro.data_export import own_export_section
+    data['dobro']=await own_export_section(db,principal)
+    data['included_sections']=['profile','hours','availability','application','consents','documents','dobro']
     # Only domain self projections. Private staff notes never enter the archive.
     encoded=json.dumps(data,ensure_ascii=False,indent=2).encode()
     if len(encoded)>10*1024*1024:raise ApiError(413,'export_review_required','Объём архива требует подготовки сотрудником')
