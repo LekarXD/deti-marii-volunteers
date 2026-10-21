@@ -19,7 +19,15 @@ async def index_source(db,context):
     await context.fence(db)
     # Stable paragraph windows retain exact source text. Index rows are immutable.
     text=version.body.strip()
-    chunks=[text[start:start+1200] for start in range(0,len(text),1200)]
+    chunks=[]
+    start=0
+    while start<len(text):
+        end=min(start+1200,len(text))
+        if end<len(text):
+            boundary=max(text.rfind(' ',start+800,end),text.rfind('\n',start+800,end))
+            if boundary>start:end=boundary
+        chunks.append(text[start:end])
+        start=end
     for position,part in enumerate(chunks):
         await db.execute(insert(KnowledgeChunk).values(source_version_id=version.id,position=position,text=part).on_conflict_do_nothing())
     source.index_state='ready'

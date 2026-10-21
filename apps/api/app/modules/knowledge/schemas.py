@@ -44,6 +44,7 @@ class FragmentView(BaseModel):
     text:str
 class QuestionView(BaseModel):
     id:UUID
+    report_evidence:dict[str,Any]|None
     text:str
     kind:str
     state:str

@@ -193,7 +193,12 @@ async def test_real_gateway_adapter_mock_only_citations_and_durable_calling(setu
     async with factory() as db:
         usage=await db.get(AIDailyUsage,(foundation,utcnow().date()))
         assert usage.charged_tokens==99 and usage.reserved_tokens==0
+    reported=await post(client,f"/mentor/runs/{asked['id']}/report")
+    assert reported.status_code==200
     client.cookies.set('opora_session','staff'+str(foundation))
+    reports=(await client.get('/api/v1/coord/knowledge/questions')).json()
+    evidence=next(item['report_evidence'] for item in reports if item['kind']=='report')
+    assert evidence['run_id']==asked['id'] and evidence['answer']==result['answer'] and evidence['citation_ids']==[chunk]
     await post(client,f"/coord/knowledge/sources/{source['id']}/archive",{'expected_version':source['version']})
     client.cookies.set('opora_session','one'+str(foundation))
     withdrawn=(await client.get(f"/api/v1/mentor/runs/{asked['id']}")).json()
@@ -309,3 +314,18 @@ async def test_pdf_draft_failure_preserves_published_search_and_profile_contract
         assert source.current_version_id==UUID(published['current_version_id'])
     assert (await client.get('/api/v1/knowledge/search',params={'q':'личные контакты'})).json()
     path.unlink()
+
+@pytest.mark.asyncio
+async def test_explicit_introduction_import_reuses_exact_published_content(setup):
+    from app.modules.learning.seed import seed_introduction
+    from app.modules.knowledge.seed import seed_knowledge
+    client,factory,foundation=setup
+    async with factory() as db:
+        await seed_introduction(db,foundation)
+        assert await seed_knowledge(db,foundation)==4
+        assert await seed_knowledge(db,foundation)==0
+        await db.commit()
+    for _ in range(4):await process_index(factory,foundation)
+    client.cookies.set('opora_session','one'+str(foundation))
+    hits=(await client.get('/api/v1/knowledge/search',params={'q':'Мария Елисеева'})).json()
+    assert hits and any('1993' in item['text'] for item in hits)

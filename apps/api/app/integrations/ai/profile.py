@@ -1,7 +1,7 @@
 """P13/P20 boundary: produces reviewable data, never writes profile tables."""
 from app.core.errors import ApiError
 from .service import enqueue_ai_run
-PUBLIC_FIELDS=frozenset({'interests','skills','about','availability_summary','preferred_channel'})
+PUBLIC_FIELDS=frozenset({'interests','skills','about'})
 
 async def enqueue_profile_suggestion(db,principal,snapshot):
     if not principal.user_id or str(snapshot.get('user_id'))!=str(principal.user_id):

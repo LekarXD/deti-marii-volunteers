@@ -49,19 +49,8 @@ async def imported_lesson(db,principal,version_id):
     if not any(str(version_id) in release.lesson_version_ids for release in releases):
         raise ApiError(404,'lesson_not_published','Опубликованный урок не найден')
     blocks=(await db.scalars(select(LessonBlock).where(LessonBlock.lesson_version_id==version_id).order_by(LessonBlock.position))).all()
-    lines=[]
-    def text_parts(value):
-        if isinstance(value,str):
-            lines.append(value)
-        elif isinstance(value,list):
-            for part in value:text_parts(part)
-        elif isinstance(value,dict):
-            for key in ['title','text','intro','items']:
-                if key in value:text_parts(value[key])
-    for block in blocks:
-        if block.content.get('type') not in {'quiz','video','file'}:
-            text_parts(block.content)
-    return '\n\n'.join(lines)[:200000]
+    from .seed import extract_published_blocks
+    return extract_published_blocks([block.content for block in blocks])
 
 async def create_source(db,principal,body):
     permission(principal,'knowledge.write')
@@ -190,7 +179,7 @@ async def notify_staff(db,foundation_id,question):
     from app.modules.messaging.consumers import enqueue_notice
     users=(await db.scalars(select(User).join(StaffMembership,StaffMembership.user_id==User.id).join(PermissionGrant,PermissionGrant.membership_id==StaffMembership.id).where(User.foundation_id==foundation_id,User.account_state=='active',StaffMembership.revoked_at.is_(None),PermissionGrant.revoked_at.is_(None),PermissionGrant.permission=='knowledge.write',PermissionGrant.scope_type=='foundation').distinct().limit(20))).all()
     for user in users:
-        enqueue_notice(db,foundation_id,user.id,'Вопрос по материалам фонда',question.text+'\nОткрыть очередь: /fund/knowledge')
+        enqueue_notice(db,foundation_id,user.id,'Вопрос по материалам фонда','В очереди базы знаний появился вопрос. Открыть: /fund/knowledge')
 
 async def create_question(db,principal,text,kind='unknown'):
     item=KnowledgeQuestion(foundation_id=principal.foundation_id,user_id=principal.user_id,registration_id=None if principal.user_id else principal.registration_id,text=text,kind=kind)
@@ -261,6 +250,9 @@ async def escalate(db,principal,run_id,kind='question'):
     item=await owned_run(db,principal,run_id,True)
     if item.question_id is None or kind=='report':
         question=await create_question(db,principal,item.question,kind)
+        if kind=='report':
+            viewed=await mentor_view(db,principal,item.id)
+            question.report_evidence=dict(run_id=str(item.id),answer=viewed['answer'],state=viewed['state'],citation_ids=[str(citation['id']) for citation in viewed['citations']],model=viewed['model'],prompt_version=viewed['prompt_version'])
         if item.question_id is None:item.question_id=question.id
         return {'question_id':str(question.id),'state':'queued_for_coordinator'}
     return {'question_id':str(item.question_id),'state':'queued_for_coordinator'}
@@ -270,6 +262,8 @@ async def claim_registration(db,registration_id,user_id):
     registration=await db.get(RegistrationSession,registration_id)
     user=await db.get(User,user_id)
     if registration is None or user is None or registration.foundation_id!=user.foundation_id:raise ApiError(409,'owner_conflict','Не удалось перенести историю вопросов')
+    runs=(await db.scalars(select(AIRun).where(AIRun.foundation_id==user.foundation_id,AIRun.actor_id==str(registration_id)).with_for_update())).all()
+    for run in runs:run.actor_id=str(user_id)
     for model in [MentorRun,KnowledgeQuestion]:
         items=(await db.scalars(select(model).where(model.registration_id==registration_id,model.foundation_id==user.foundation_id).with_for_update())).all()
         for item in items:item.user_id,item.registration_id=user_id,None
@@ -281,7 +275,7 @@ async def question_list(db,principal):
     result=[]
     for item in items:
         answer=await db.scalar(select(ApprovedAnswer).where(ApprovedAnswer.question_id==item.id))
-        result.append(dict(id=item.id,text=item.text,kind=item.kind,state=item.state,version=item.version,answer=(dict(id=str(answer.id),body=answer.body,version=answer.version,reviewed_version=answer.reviewed_version,published_source_id=str(answer.published_source_id) if answer.published_source_id else None,citation_ids=answer.citations,can_edit=bool(principal.has_permission('knowledge.write') and (answer.author_user_id==principal.user_id or principal.has_permission('knowledge.manage')))) if answer else None)))
+        result.append(dict(id=item.id,report_evidence=item.report_evidence,text=item.text,kind=item.kind,state=item.state,version=item.version,answer=(dict(id=str(answer.id),body=answer.body,version=answer.version,reviewed_version=answer.reviewed_version,published_source_id=str(answer.published_source_id) if answer.published_source_id else None,citation_ids=answer.citations,can_edit=bool(principal.has_permission('knowledge.write') and (answer.author_user_id==principal.user_id or principal.has_permission('knowledge.manage')))) if answer else None)))
     return result
 
 async def question(db,principal,question_id,lock=False):

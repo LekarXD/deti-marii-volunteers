@@ -61,6 +61,7 @@ class KnowledgeQuestion(Base):
     registration_id: Mapped[UUID | None] = mapped_column(ForeignKey('registration_sessions.id'), nullable=True)
     text: Mapped[str] = mapped_column(String(3000))
     kind: Mapped[str] = mapped_column(String(30), default='unknown')
+    report_evidence: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     state: Mapped[str] = mapped_column(String(30), default='pending')
     version: Mapped[int] = mapped_column(BigInteger, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
