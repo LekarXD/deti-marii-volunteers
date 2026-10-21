@@ -233,3 +233,33 @@ async def test_committed_capture_receipt_recovery_does_not_require_live_authorit
             job=await claim(db,kinds=[job.kind]);await db.commit()
             assert await capture_take(db,JobContext(job.id,job.claim_token,job.foundation_id,job.payload))=={'state':'captured'}
             await db.rollback()
+
+@pytest.mark.asyncio
+async def test_exhausted_dead_capture_reconciles_and_allows_explicit_retake(app,monkeypatch):
+    from app.modules.recordings.models import RecordingRendererGrant,StudioCaptureSession
+    from app.modules.studio.models import StudioSession
+    from app.core.crypto import digest
+    monkeypatch.setattr(CaptureSettings,'configured',classmethod(lambda cls,**kwargs:object()))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as client:
+        me,headers,post,take=await prepared(client)
+        async with SessionLocal() as db:
+            row=await db.get(RecordingTake,UUID(take['id']));owner=await db.get(RecordingProject,row.project_id)
+            owner.privacy_state='approved';row.projection={**row.projection,'capture_plan':{**row.projection['capture_plan'],'privacy_state':'approved','allowed_tracks':[{'identity':identity(UUID(me['user_id'])),'track_id':'TR_exhausted','source':'microphone','kind':'audio','required':True}]}}
+            await db.commit()
+        started=await post(f"/recording-takes/{take['id']}/start",{'expected_version':1});assert started.status_code==200
+        async with SessionLocal() as db:
+            row=await db.get(RecordingTake,UUID(take['id']));row.state='capturing';row.started_at=utcnow();row.capture_checkpoint={'phase':'capturing'}
+            grant=RecordingRendererGrant(take_id=row.id,generation=row.generation,purpose='renderer',token_hash=digest(uuid4().hex),expires_at=utcnow()+timedelta(minutes=1));db.add(grant)
+            job=await db.get(Job,row.capture_job_id);job.kind='capture.exhausted.'+uuid4().hex;job.state='running';job.attempts=job.max_attempts;job.claim_token=uuid4();job.lease_until=utcnow()-timedelta(seconds=1);await db.commit();gid=grant.id
+            assert await claim(db,kinds=[job.kind]) is None
+            await db.commit();assert (await db.get(Job,job.id,populate_existing=True)).state=='dead'
+        current=(await client.get('/api/v1/recording-takes/'+take['id'])).json()
+        assert current['state']=='failed' and current['error_code']=='capture_job_exhausted' and current['readiness_state']=='blocked'
+        async with SessionLocal() as db:
+            assert (await db.get(RecordingRendererGrant,gid)).revoked_at is not None
+            assert not await db.scalar(select(RecordingRenderVersion.id).where(RecordingRenderVersion.take_id==UUID(take['id'])))
+            capture=await db.get(StudioCaptureSession,row.capture_session_id);session=await db.get(StudioSession,capture.studio_session_id);revision=session.scene_revision
+        project=(await client.get('/api/v1/recording-projects/'+take['project_id'])).json()
+        retake=await post('/recording-projects/'+take['project_id']+'/takes',{'expected_version':project['version'],'expected_scene_revision':revision})
+        assert retake.status_code==200,retake.text
+        assert retake.json()['state']=='created' and retake.json()['number']==2 and retake.json()['privacy_state']=='unknown'

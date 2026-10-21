@@ -1,16 +1,16 @@
 import hashlib
 import rfc8785
 from uuid import UUID,uuid4
-from sqlalchemy import select,func
+from sqlalchemy import select,func,update
 from datetime import datetime,timedelta
 from app.core.clock import utcnow
 from app.core.auth import authz_guard
 from app.core.errors import ApiError
-from app.core.models import User,Session
+from app.core.models import User,Session,Job
 from app.modules.studio import service as studio
 from app.modules.studio.models import StudioSession
 from app.modules.studio.scene import validate_capture_plan
-from .models import RecordingProject,StudioCaptureSession,RecordingTake,RecordingStageEvent,RecordingReview,RecordingRenderVersion
+from .models import RecordingProject,StudioCaptureSession,RecordingTake,RecordingStageEvent,RecordingReview,RecordingRenderVersion,RecordingRendererGrant
 
 def stable_hash(value):return hashlib.sha256(rfc8785.dumps(value)).hexdigest()
 def deny():raise ApiError(404,'recording_not_found','Запись не найдена')
@@ -23,7 +23,9 @@ async def project(db,p,id,lock=False):
     query=select(RecordingProject).where(RecordingProject.id==id,RecordingProject.foundation_id==p.foundation_id)
     row=await db.scalar(query.with_for_update().execution_options(populate_existing=True) if lock else query)
     if row is None:deny()
-    return await authorize(db,p,row)
+    await authorize(db,p,row)
+    await reconcile_dead_takes(db,row)
+    return row
 async def target(db,p,id):
     if id is None:return
     from app.modules.learning.models import Lesson
@@ -147,3 +149,21 @@ async def authorize_capture_session(db,p,owner,session):
         await active_webinar(db,p,resource_id)
         if session.state!='live':raise ApiError(409,'recording_live_session_inactive','Запись доступна в текущем открытом эфире')
     return session
+
+async def reconcile_dead_takes(db,owner):
+    """A queue-exhausted capture cannot keep the project permanently active.
+
+    Inspect only committed terminal job state; never reclaim a running lease here.
+    Lock order remains caller auth guard → project → take, without a Job mutation.
+    """
+    query=select(RecordingTake.id).join(Job,Job.id==RecordingTake.capture_job_id).where(RecordingTake.project_id==owner.id,RecordingTake.state.in_(('starting','capturing','stopping')),Job.state=='dead')
+    ids=(await db.scalars(query.order_by(RecordingTake.id).limit(2))).all()
+    if not ids:return
+    await db.scalar(select(RecordingProject).where(RecordingProject.id==owner.id).with_for_update().execution_options(populate_existing=True))
+    for id in ids:
+        row=await db.scalar(select(RecordingTake).where(RecordingTake.id==id).with_for_update().execution_options(populate_existing=True))
+        job=await db.get(Job,row.capture_job_id,populate_existing=True)
+        if row.state not in ('starting','capturing','stopping') or job.state!='dead':continue
+        row.state='failed';row.capture_phase='failed';row.error_code='capture_job_exhausted';row.version+=1;row.renderer_state_version+=1;row.readiness_state='blocked';row.readiness=None
+        await db.execute(update(RecordingRendererGrant).where(RecordingRendererGrant.take_id==row.id,RecordingRendererGrant.revoked_at.is_(None)).values(revoked_at=utcnow()))
+    await db.flush()
