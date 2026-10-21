@@ -1,15 +1,17 @@
 class Component extends DCLogic {
- constructor(p){super(p);interviewImportLegacy();const me=ensureCandidate();interviewSync();this.state={me,pr:loadProgress(),picking:false,picked:'',focus:INTERVIEW_TODAY,rescheduling:false,cancelling:false,cancelReason:'',requesting:false,requestText:'',error:'',notice:''};}
+ constructor(p){super(p);interviewImportLegacy();const me=ensureCandidate();interviewSync();this.state={me,pr:loadProgress(),remind:null,picking:false,picked:'',focus:INTERVIEW_TODAY,rescheduling:false,cancelling:false,cancelReason:'',requesting:false,requestText:'',error:'',notice:''};}
  componentDidMount(){this.unsubscribe=interviewSubscribe(this);}
  componentWillUnmount(){this.unsubscribe?.();}
  interviewRefresh(){const m=interviewCurrent(interviewRead(),interviewIdentity(this.state.me));if(this.state.rescheduling&&(!m||m.status!=='booked'||m.slotId!==this.state.movingSlot))this.setState({rescheduling:false,picked:'',notice:'Запись обновлена координатором',interviewRevision:Date.now()});else this.setState({interviewRevision:Date.now()});}
  save(pr){demoWrite('onboarding',pr);this.setState({pr});}
  openPicker(extra){this.setState({picking:true,picked:'',error:'',...extra});setTimeout(()=>document.getElementById('a-picker')?.scrollIntoView({behavior:'smooth',block:'start'}),50);}
- book(){const s=this.state,id=interviewIdentity(s.me),current=interviewCurrent(interviewRead(),id);const result=interviewBook(id,s.picked,s.rescheduling&&current?.status==='booked'?current.id:'','Волонтёр');this.setState(result.error?{error:result.error,picked:''}:{picked:'',picking:false,rescheduling:false,error:'',notice:s.rescheduling?'Встреча перенесена':'Вы записаны на встречу'});}
+ book(){const s=this.state,id=interviewIdentity(s.me),current=interviewCurrent(interviewRead(),id);const result=interviewBook(id,s.picked,s.rescheduling&&current?.status==='booked'?current.id:'','Волонтёр');if(!result.error)this.save({...s.pr,tg:this.remindOn()});window.scrollTo({top:0,behavior:'smooth'});this.setState(result.error?{error:result.error,picked:''}:{picked:'',picking:false,rescheduling:false,error:'',notice:s.rescheduling?'Встреча перенесена':'Вы записаны на встречу'});}
+ // Напоминание в Telegram включено по умолчанию, если человек указал Telegram в анкете
+ remindOn(){const s=this.state;return s.remind!=null?s.remind:(!!s.pr.tg||!!s.me?.telegram||arr(s.me?.channels).includes('Telegram'));}
  // Прототип: сбросить записи кандидата и при необходимости записать на ближайшее свободное время
  demo(pr,withMeeting){const id=interviewIdentity(this.state.me),data=interviewRead();data.bookings=data.bookings.filter(b=>b.candidateId!==id);data.profiles=data.profiles.map(p=>p.id===id?{...p,request:null}:p);interviewWrite(data);this.save(pr);
   if(withMeeting){const slot=interviewSlots(interviewRead(),INTERVIEW_TODAY,scheduleAdd(INTERVIEW_TODAY,13)).find(sl=>!sl.busy&&interviewFuture(sl.date,sl.start));if(slot)interviewBook(id,slot.id,'','Волонтёр');}
-  this.setState({picking:false,rescheduling:false,cancelling:false,requesting:false,picked:'',error:'',notice:''});}
+  this.setState({remind:null,picking:false,rescheduling:false,cancelling:false,requesting:false,picked:'',error:'',notice:''});}
  renderVals(){const s=this.state,me=s.me,pr=s.pr,data=interviewRead(),id=interviewIdentity(me),meeting=interviewCurrent(data,id),active=meeting?.status==='booked',completed=meeting?.status==='completed';
   const total=ONB.modules.length,n=ONB.modules.filter(m=>pr.done[m.id]).length,onboarded=!!pr.testDone;
   const allDone={};ONB.modules.forEach(m=>allDone[m.id]=true);
@@ -19,13 +21,22 @@ class Component extends DCLogic {
   const showPicker=!completed&&((!meeting&&s.picking)||(active&&s.rescheduling));
   const from=scheduleMonday(s.focus),to=scheduleAdd(from,6),available=interviewSlots(data,from,to,s.rescheduling&&active?meeting.id:'').filter(sl=>!sl.busy&&interviewFuture(sl.date,sl.start)&&sl.id!==meeting?.slotId);
   const last=data.bookings.filter(b=>b.candidateId===id).slice(-1)[0];
+  const meetDay=meeting?scheduleLabel(meeting.date,{day:'numeric',month:'long'}):'';
+  const big=meeting?scheduleLabel(meeting.date,{weekday:'short',day:'numeric',month:'long'})+', '+meeting.start:'';
+  const mode=!meeting&&!n&&!onboarded?'fresh':active&&!onboarded&&pr.tg?'booked':active&&onboarded?'all':'';
+  const remind=this.remindOn();
   return {first:firstName(me),
-   showReview:!completed,reviewTitle:FORM.done.title,reviewText:FORM.done.text,
+   modes:[['fresh','Только что отправил анкету',()=>this.demo(freshProgress(),false)],['booked','Записался, но не знаком с фондом',()=>this.demo({...freshProgress(),tg:true},true)],['all','Всё сделано',()=>this.demo({...freshProgress(),done:allDone,testDone:true,score:9,tg:true},true)]].map(([id,label,pick])=>({label,pick,cls:mode===id?'is-on':'',pressed:mode===id?'true':'false'})),
+   statusText:completed?'Встреча состоялась':FORM.done.title,statusCls:'dot '+(completed?'dot-green':'dot-yellow'),
+   heroInvite:!meeting,meetWhenBig:big.charAt(0).toUpperCase()+big.slice(1),meetDay,
    showNudge,meetWhen,onboarded,
-   onbCardCls:'card a-two-card'+(onboarded?' is-done':'')+(showNudge?' is-nudge':''),
-   onbText:onboarded?'Вы прошли знакомство с фондом. Вернуться к материалам можно в любой момент.':(n?'Пройдено '+n+' из '+total+' шагов. Осталось немного — и небольшой тест.':'Около 20 минут: история фонда, кому мы помогаем, кодекс этики и как общаться с участниками.'),
-   onbButton:onboarded?'Посмотреть ещё раз':(n?'Продолжить':'Начать'),onbBtnCls:'btn btn-lg '+(onboarded?'btn-ghost':'btn-dark'),
-   meetCardCls:'card a-two-card'+(meeting?' is-done':''),coordinator:ONB.meeting.coordinator,meetText:ONB.meeting.text,
+   onbHead:active?'До встречи':'Пока анкета проверяется',
+   onbCardCls:'card a-onb'+(showNudge?' is-nudge':''),
+   onbText:onboarded?'Вы прошли знакомство с фондом. Вернуться к материалам можно в любой момент.':'История фонда, кому мы помогаем, кодекс этики и как общаться с участниками. Около 20 минут и небольшой тест.',
+   onbBar:'width:'+Math.round(100*(onboarded?total:n)/total)+'%',onbCount:(onboarded?total:n)+' из '+total,
+   onbButton:onboarded?'Посмотреть ещё раз':(n?'Продолжить':'Начать'),onbBtnCls:'btn btn-lg '+(onboarded?'btn-secondary':'btn-primary'),
+   remindOn:remind?'true':'false',remindCls:'toggle'+(remind?' is-on':''),toggleRemind:()=>this.setState({remind:!remind}),roadCls:'toggle'+(pr.road?' is-on':''),
+   coordinator:ONB.meeting.coordinator,meetText:ONB.meeting.text,
    notBooked:!meeting,canOpenPicker:!meeting&&!s.picking,openPicker:()=>this.openPicker({}),
    hasCancellation:!meeting&&last?.status==='cancelled',cancellationText:last?.cancelReason||'',
    booked:!!active,completed:!!completed,meetWhere:meeting?.where||'',hasMeetingLink:!!meeting?.link,meetingLink:meeting?.link||'#',publicNote:meeting?.publicNote||'',result:meeting?.result||'',nextContact:meeting?.nextDate?interviewDay(meeting.nextDate):'',hasNextContact:!!meeting?.nextDate,
@@ -40,10 +51,7 @@ class Component extends DCLogic {
    requesting:s.requesting,requestText:s.requestText,startRequest:()=>this.setState({requesting:true,error:''}),changeRequest:e=>this.setState({requestText:e.target.value,error:''}),cancelRequest:()=>this.setState({requesting:false,error:''}),
    sendRequest:()=>{if(!s.requestText.trim()){this.setState({error:'Напишите, когда вам удобно встретиться.'});return;}const fresh=interviewRead();fresh.profiles=fresh.profiles.map(p=>p.id===id?{...p,request:{text:s.requestText,status:'new'}}:p);interviewWrite(fresh);this.setState({requesting:false,picking:false,requestText:'',notice:'Ваш запрос появился у координатора',error:''});},
    tgOn:!!pr.tg,tgOff:!pr.tg,
-   tgText:pr.tg?'Бот напомнит о встрече накануне и подскажет следующий шаг.':'Подключите бота фонда — он напомнит о встрече и подскажет следующий шаг.',
    connectTg:()=>this.save({...pr,tg:true}),
    notice:s.notice,dismissNotice:()=>this.setState({notice:''}),dismissError:()=>this.setState({error:''}),error:s.error,hasError:!!s.error,
-   demoFresh:()=>this.demo(freshProgress(),false),
-   demoBookedOnly:()=>this.demo({...freshProgress(),tg:true},true),
-   demoAll:()=>this.demo({...freshProgress(),done:allDone,testDone:true,score:9,tg:true},true)};}
+   };}
 }

@@ -1,9 +1,15 @@
 <div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button onClick="{{fillDemo}}">Заполнить примером</button><button onClick="{{clear}}">Очистить</button></div>
 <div class="head"><div><p class="eyebrow">{{eyebrow}}</p><h1 class="h1">{{title}}</h1><p class="lead a-intro">{{intro}}</p></div></div>
-<nav class="chips a-steps" aria-label="Шаги анкеты"><sc-for list="{{steps}}" as="s"><span class="{{s.cls}}">{{s.label}}</span></sc-for></nav>
-<div class="bar a-bar" role="progressbar" aria-label="{{progressLabel}}"><i style="{{barStyle}}"></i></div>
-<section class="card a-form">
+<div class="a-apply">
+<div class="a-apply-main">
+<section class="card a-form-card">
+<div class="a-stephead"><p class="eyebrow">{{progressLabel}}</p><h2 class="h2">{{stepTitle}}</h2><div class="bar a-bar" role="progressbar" aria-label="{{progressLabel}}"><i style="{{barStyle}}"></i></div></div>
+<div class="a-form">
 <!--FIELDS-->
+</div>
 </section>
 <div class="actions a-nav"><sc-if value="{{canBack}}"><button class="btn btn-ghost btn-lg" onClick="{{back}}">ICON_LEFT Назад</button></sc-if><span class="grow"></span><button class="btn btn-primary btn-lg" onClick="{{next}}">{{nextLabel}}</button></div>
-<sc-if value="{{hasErrors}}"><p class="error" role="alert">Проверьте отмеченные поля.</p></sc-if>
+<sc-if value="{{hasErrors}}"><p class="err a-errs" role="alert">Проверьте отмеченные поля.</p></sc-if>
+</div>
+<aside class="card a-path-card" aria-label="Как стать волонтёром"><h2 class="h3">Как стать волонтёром</h2><ol class="a-pathlist"><sc-for list="{{path}}" as="p"><li class="{{p.cls}}"><span class="a-path-ico" aria-hidden="true">ICONSWITCH(p)</span><span><b>{{p.title}}</b><small>{{p.meta}}</small></span></li></sc-for></ol><p class="meta">{{pathNote}}</p></aside>
+</div>

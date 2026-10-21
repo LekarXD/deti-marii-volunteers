@@ -10,7 +10,7 @@ class Component extends DCLogic {
   demoWrite('candidate',me);demoWrite('onboarding',freshProgress());demoWrite('apply-draft',{step:0,data:{}});location.href='ApplicationStatus.dc.html';}
  renderVals(){const s=this.state,step=FORM.steps[s.step],last=s.step===FORM.steps.length-1;
   return {eyebrow:'Стать волонтёром',title:FORM.title,intro:FORM.intro,
-   steps:FORM.steps.map((x,i)=>({label:(i+1)+'. '+x.title,cls:i===s.step?'chip is-on':(i<s.step?'chip a-done':'chip')})),
+   stepTitle:step.title,path:FORM.path.map((x,i)=>({...x,...icoFlags(x.icon),cls:i===0?'is-now':''})),pathNote:FORM.pathNote,
    progressLabel:'Шаг '+(s.step+1)+' из '+FORM.steps.length,barStyle:'width:'+Math.round(100*(s.step+1)/FORM.steps.length)+'%',
    fields:fieldViews(step.fields,s.data,s.errs,(id,v)=>this.update(id,v),s.ui,k=>this.setState({ui:{...this.state.ui,[k]:!this.state.ui[k]}})),
    canBack:s.step>0,back:()=>this.go(s.step-1),next:()=>this.next(),nextLabel:last?'Отправить заявку':'Далее',hasErrors:Object.keys(s.errs).length>0,

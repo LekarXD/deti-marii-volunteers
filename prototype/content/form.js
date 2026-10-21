@@ -1,9 +1,10 @@
 /*
-  Анкета волонтёра, версия 2.
+  Анкета волонтёра, версия 4.
   Это данные, а не код: поля, варианты и подсказки можно править прямо здесь.
   Обоснование каждого поля — materials/05-продукт/Анкета v2.md
 
-  Типы полей: text, email, tel, date, textarea, select, radio, checkbox, chips, grid, roles, consent.
+  Типы полей: section (заголовок блока с иконкой), text, email, tel, date, textarea, select (чипы, один ответ),
+  chips (чипы, несколько; варианты могут быть { label, icon }, а groups — группы с showIf), tiles (плитки с иконками), radio, checkbox, grid, roles, consent.
   required — обязательное; optional — пометка «по желанию»; why — короткое «зачем спрашиваем» под полем;
   showIf — показывать, только если в другом поле выбран один из вариантов;
   exclusive — варианты, которые нельзя выбрать вместе с остальными (например, «Нет, не подходит»);
@@ -12,66 +13,97 @@
 */
 window.FORM = {
   title: "Анкета волонтёра",
-  intro: "Мы рады, что вы хотите помогать фонду «Дети Марии». Три коротких шага — около 5 минут. Остальное обсудим лично.",
+  intro: "Мы рады, что вы хотите помогать. Три коротких шага — около 5 минут.",
+  /* Путь кандидата — карточка справа от анкеты */
+  path: [
+    { icon: "edit", title: "Анкета", meta: "5 минут" },
+    { icon: "book", title: "Знакомство с фондом", meta: "онлайн, около 20 минут" },
+    { icon: "calendar", title: "Встреча с координатором", meta: "30 минут, онлайн или в студии" }
+  ],
+  pathNote: "После встречи откроется платформа: занятия, обучение и сообщения.",
   steps: [
     {
       id: "about",
-      title: "Знакомство",
+      title: "О вас",
       fields: [
+        { type: "section", id: "s-who", title: "Кто вы", icon: "user" },
         { id: "firstName", label: "Имя", type: "text", required: true, mask: "name", half: true,
           placeholder: "Михаил", autocomplete: "given-name" },
         { id: "lastName", label: "Фамилия", type: "text", required: true, mask: "name", half: true,
           placeholder: "Михайлов", autocomplete: "family-name" },
-        { id: "birthdate", label: "Дата рождения", type: "date", required: true },
-        { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel",
-          placeholder: "+7 (999) 123-45-67" },
-        { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email",
-          why: "Пришлём ссылку на личный кабинет." },
-        { id: "channels", label: "Как с вами удобнее связываться?", type: "checkbox", required: true,
-          options: ["Telegram", "WhatsApp", "Max", "Электронная почта", "SMS", "Телефонный звонок"] },
-        { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username",
-          showIf: { field: "channels", value: "Telegram" } },
+        { id: "birthdate", label: "Дата рождения", type: "date", required: true, half: true },
         { id: "area", label: "Где вы живёте?", type: "select", required: true,
-          options: ["Центр Москвы", "Север / Северо-Восток", "Восток / Юго-Восток", "Юг / Юго-Запад", "Запад / Северо-Запад", "Новая Москва", "Московская область", "Ярославская область", "Северная Осетия", "Другой город"] }
+          options: ["Центр Москвы", "Север", "Восток", "Юг", "Запад", "Новая Москва", "Московская область", "Другой город"] },
+        { type: "section", id: "s-contact", title: "Как с вами связаться", icon: "message" },
+        { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel", half: true,
+          placeholder: "+7 (999) 123-45-67" },
+        { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email", half: true,
+          placeholder: "name@mail.ru" },
+        { id: "channels", label: "Где удобнее отвечать?", type: "chips", required: true,
+          options: [{ label: "Telegram", icon: "send" }, { label: "WhatsApp", icon: "message" }, { label: "Max", icon: "message" }, { label: "Почта", icon: "inbox" }, { label: "Звонок", icon: "phone" }] },
+        { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username", half: true,
+          showIf: { field: "channels", value: "Telegram" } }
       ]
     },
     {
       id: "help",
-      title: "О вас",
+      title: "Чем хотите помогать",
       fields: [
-        { id: "directions", label: "Что вам было бы интересно?", type: "chips", required: true,
-          options: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Фото, видео, соцсети", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Профессиональная помощь фонду: юрист, маркетинг, IT", "Пока не знаю"],
-          exclusive: ["Пока не знаю"],
-          why: "Можно несколько. Это не обязательство — роль обсудим на встрече." },
-        { id: "skills", label: "Что вы умеете или любите делать?", type: "chips",
-          options: ["Керамика", "Живопись и рисунок", "Валяние", "Шитьё и вышивка", "Кулинария", "Музыка и вокал", "Театр", "Спорт и игры", "Фотография", "Видео и монтаж", "Дизайн", "Соцсети", "Педагогика", "Психология", "Школьные предметы", "Английский"],
-          allowOther: true },
-        { id: "sphere", label: "В какой сфере вы работаете или учитесь?", type: "select", optional: true,
-          options: ["Образование и педагогика", "Психология, медицина, соцработа", "Искусство и ремёсла", "Дизайн, фото, медиа", "IT", "Маркетинг и продажи", "Право", "Финансы и бизнес", "Учусь в школе или колледже", "Учусь в вузе", "На пенсии", "Другое"] },
-        { id: "volExp", label: "У вас есть опыт волонтёрства?", type: "radio", required: true,
-          options: ["Да", "Нет"] },
-        { id: "volExpText", label: "Расскажите коротко: где и что делали", type: "textarea",
-          showIf: { field: "volExp", value: "Да" } },
-        { id: "specialExp", label: "Был ли у вас опыт общения с людьми с особенностями развития или с детьми, оставшимися без попечения родителей?", type: "radio", required: true,
-          options: ["Да", "Нет, но готов(а) попробовать", "Нет, хочу сначала обсудить на встрече"] },
-        { id: "specialExpText", label: "Расскажите об этом опыте", type: "textarea",
-          showIf: { field: "specialExp", value: "Да" } }
+        { type: "section", id: "s-dir", title: "Что вам интересно", icon: "sparkle",
+          note: "Можно несколько. Это не обязательство — роль обсудим на встрече." },
+        { id: "directions", label: "Направления", type: "tiles", required: true,
+          options: [
+            { label: "Творческие занятия и мастер-классы", icon: "palette" },
+            { label: "Помогать на занятиях", icon: "hand" },
+            { label: "Обучение и репетиторство", icon: "academy" },
+            { label: "Помощь психолога или логопеда", icon: "heart" },
+            { label: "Фото, видео, соцсети", icon: "camera" },
+            { label: "Мероприятия и выезды", icon: "star" },
+            { label: "Ярмарки и магазин фонда", icon: "home" },
+            { label: "Помощь фонду как специалист", icon: "settings" },
+            { label: "Пока не знаю", icon: "search" }
+          ],
+          exclusive: ["Пока не знаю"] },
+        /* Навыки показываем только по выбранным направлениям, чтобы не смешивать шитьё и IT */
+        { id: "skills", label: "Что вы умеете или любите делать?", type: "chips", optional: true, allowOther: true,
+          showIf: { field: "directions", value: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Фото, видео, соцсети", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Помощь фонду как специалист", "Пока не знаю"] },
+          groups: [
+            { title: "Творчество", showIf: { field: "directions", value: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Пока не знаю"] },
+              options: [{ label: "Керамика", icon: "palette" }, { label: "Живопись и рисунок", icon: "pen" }, { label: "Валяние", icon: "hand" }, { label: "Шитьё и вышивка", icon: "scissors" }, { label: "Кулинария", icon: "flame" }, { label: "Музыка и вокал", icon: "music" }, { label: "Театр", icon: "mask" }] },
+            { title: "Обучение и игры", showIf: { field: "directions", value: ["Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Мероприятия и выезды", "Пока не знаю"] },
+              options: [{ label: "Педагогика", icon: "academy" }, { label: "Психология", icon: "heart" }, { label: "Школьные предметы", icon: "book" }, { label: "Английский", icon: "globe" }, { label: "Спорт и игры", icon: "dice" }] },
+            { title: "Медиа", showIf: { field: "directions", value: ["Фото, видео, соцсети", "Помощь фонду как специалист", "Пока не знаю"] },
+              options: [{ label: "Фотография", icon: "camera" }, { label: "Видео и монтаж", icon: "film" }, { label: "Дизайн", icon: "image" }, { label: "Соцсети", icon: "message" }] },
+            { title: "Работа фонда", showIf: { field: "directions", value: ["Помощь фонду как специалист", "Ярмарки и магазин фонда", "Пока не знаю"] },
+              options: [{ label: "Право", icon: "file" }, { label: "Маркетинг", icon: "chart" }, { label: "IT", icon: "screen" }, { label: "Финансы", icon: "database" }, { label: "Продажи", icon: "users" }] }
+          ] },
+        { type: "section", id: "s-time", title: "Время и формат", icon: "clock",
+          note: "Участникам важны знакомые лица: доверие строится месяцами." },
+        { id: "participation", label: "Как часто хотели бы помогать?", type: "select", required: true,
+          options: ["Каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"] },
+        { id: "online", label: "Могу помогать и онлайн", type: "consent" }
       ]
     },
     {
       id: "final",
-      title: "Последний шаг",
+      title: "Опыт и документы",
       fields: [
-        { id: "participation", label: "Как часто хотели бы помогать?", type: "radio", required: true,
-          options: ["Регулярно, каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"],
-          why: "Участникам важны знакомые лица: доверие строится месяцами." },
-        { id: "online", label: "Могу помогать и онлайн", type: "consent" },
-        { id: "motivation", label: "Почему вы хотите помогать именно нам?", type: "textarea", optional: true },
+        { type: "section", id: "s-exp", title: "Ваш опыт", icon: "award" },
+        { id: "volExp", label: "Вы раньше были волонтёром?", type: "select", required: true,
+          options: ["Да", "Нет"] },
+        { id: "volExpText", label: "Где и что делали?", type: "textarea", optional: true,
+          showIf: { field: "volExp", value: "Да" } },
+        { id: "specialExp", label: "Общались ли вы с людьми с особенностями развития?", type: "select", required: true,
+          options: ["Да", "Нет, но готов(а) попробовать", "Хочу обсудить на встрече"] },
+        { id: "specialExpText", label: "Расскажите коротко об этом опыте", type: "textarea", optional: true,
+          showIf: { field: "specialExp", value: "Да" } },
+        { type: "section", id: "s-doc", title: "Справка о несудимости", icon: "shield",
+          note: "Нужна для работы с детьми. Заказать можно бесплатно на Госуслугах — это займёт минуту." },
+        { id: "record", label: "Готовы её получить?", type: "select", required: true,
+          options: ["Да", "Справка уже есть", "Хочу обсудить"] },
+        { type: "section", id: "s-last", title: "И последнее", icon: "check-circle" },
         { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
-          options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья или знакомые", "Был(а) на мероприятии фонда", "Другое"] },
-        { id: "record", label: "Для работы с детьми нужна справка об отсутствии судимости. Готовы её получить?", type: "radio", required: true,
-          options: ["Да", "Справка уже есть", "Хочу сначала обсудить"],
-          why: "Заказать её можно бесплатно на Госуслугах — это займёт минуту." },
+          options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья", "Мероприятие фонда", "Другое"] },
         { id: "consentPD", label: "Я согласен(на) на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
         { id: "consentNews", label: "Хочу получать новости и приглашения фонда", type: "consent" }
       ]
