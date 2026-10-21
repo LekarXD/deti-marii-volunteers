@@ -89,10 +89,10 @@ async def private_notes(reflection_id:UUID,db:AsyncSession=Depends(get_db),princ
     return [ReflectionPrivateNoteView(review_id=review_id,text=note.text,author_id=note.author_id,created_at=note.created_at) for note,review_id in rows]
 
 @router.get('/coord/followups/staff-options',response_model=FollowupStaffOptions)
-async def staff_options(db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal)):
+async def staff_options(group_id:UUID|None=None,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal)):
     service.any_permission(principal,'followups.manage')
     rows=await service.staff_options(db,principal.foundation_id)
-    return {'items':[{'id':row.id,'display_name':row.display_name,'restricted_eligible':await service.owner_eligible(db,principal.foundation_id,row.id,None,True)} for row in rows]}
+    return {'items':[{'id':row.id,'display_name':row.display_name,'restricted_eligible':await service.owner_eligible(db,principal.foundation_id,row.id,group_id,True)} for row in rows]}
 
 @router.get('/coord/signals',response_model=SupportSignalPage)
 async def signals(state:Literal['open','in_progress','resolved','dismissed']|None=None,limit:int=Query(100,ge=1,le=200),db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal)):
@@ -100,11 +100,11 @@ async def signals(state:Literal['open','in_progress','resolved','dismissed']|Non
     query=select(SupportSignal).where(service.scope(principal,'followups.read',SupportSignal),service.privacy(principal,SupportSignal))
     if state:query=query.where(SupportSignal.state==state)
     rows=(await db.scalars(query.order_by(SupportSignal.created_at.desc(),SupportSignal.id).limit(limit))).all()
-    return {'items':[await service.signal_view(db,row) for row in rows]}
+    return {'items':[await service.signal_view(db,row,principal) for row in rows]}
 
 @router.get('/coord/signals/{signal_id}',response_model=SupportSignalView)
 async def signal(signal_id:UUID,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal)):
-    return await service.signal_view(db,await service.staff_signal(db,principal,signal_id))
+    return await service.signal_view(db,await service.staff_signal(db,principal,signal_id),principal)
 
 def signal_endpoint(action):
     async def endpoint(signal_id:UUID,body:SignalActionCommand,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal),key:str|None=Header(default=None,alias='Idempotency-Key')):

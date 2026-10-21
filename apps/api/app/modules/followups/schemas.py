@@ -111,9 +111,12 @@ class OwnReflectionView(BaseModel):
     voice_unavailable_reason:str='Голосовой ввод пока недоступен. Можно написать текст.'
 
 class StaffReflectionView(OwnReflectionView):
+    group_id:UUID|None
     user_id:UUID
     display_name:str
     signal_id:UUID|None
+    can_review:bool
+    private_notes_available:bool
 
 class ReflectionStaffPage(BaseModel):
     items:list[StaffReflectionView]
@@ -137,6 +140,8 @@ class SupportSignalView(BaseModel):
     version:int
     reflection_id:UUID|None
     question_id:UUID|None
+    question_version:int|None
+    can_manage:bool
     subject_user_id:UUID
     display_name:str
     group_id:UUID|None

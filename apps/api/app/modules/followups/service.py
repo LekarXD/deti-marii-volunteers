@@ -139,7 +139,7 @@ async def reflection_view(db,principal,id,staff_row=None):
     values=dict(id=row.id if row else None,assignment_id=id,title=event.title,version=row.version if row else 0,mood=row.mood if row else None,text=row.text if row else '',unexpected=row.unexpected if row else '',help=row.help if row else 'later',help_text=row.help_text if row else '',continuation=row.continuation if row else 'discuss',restricted=row.restricted if row else False,submitted_at=row.submitted_at if row else None,can_submit=item.status=='confirmed' and event.status!='cancelled' and event.ends_at<=utcnow() and not(row and row.submitted_at),follow_up_registered=bool(signal and signal.follow_up_task_id),review=await public_review(db,review) if review else None)
     if staff_row:
         user=await db.get(User,row.user_id)
-        return StaffReflectionView(**values,user_id=row.user_id,display_name=user.display_name,signal_id=signal.id if signal else None)
+        return StaffReflectionView(**values,group_id=row.group_id,user_id=row.user_id,display_name=user.display_name,signal_id=signal.id if signal else None,can_review=has(principal,'followups.manage',row.group_id),private_notes_available=has(principal,'followups.private_notes',row.group_id))
     return OwnReflectionView(**values)
 
 async def save_reflection(db,principal,id,body):
@@ -166,12 +166,12 @@ async def submit_reflection(db,principal,id,body):
     row.submitted_at=utcnow();row.version+=1;row.updated_at=utcnow();await db.flush()
     return await reflection_view(db,principal,id)
 
-async def signal_view(db,row):
+async def signal_view(db,row,principal=None):
     user=await db.get(User,row.subject_user_id);owner=await db.get(User,row.assigned_user_id) if row.assigned_user_id else None
     source=await db.get(Reflection,row.reflection_id) if row.reflection_id else await db.get(AssignmentQuestion,row.question_id)
     history=(await db.scalars(select(SupportSignalEvent).where(SupportSignalEvent.signal_id==row.id).order_by(SupportSignalEvent.revision))).all()
     details='\n\n'.join(part for part in ([source.text,source.unexpected,source.help_text] if row.reflection_id else [source.text]) if part)
-    return SupportSignalView(id=row.id,version=row.version,reflection_id=row.reflection_id,question_id=row.question_id,subject_user_id=row.subject_user_id,display_name=user.display_name,group_id=row.group_id,restricted=row.restricted,priority=row.priority,state=row.state,assigned_user_id=row.assigned_user_id,assigned_staff_name=owner.display_name if owner else None,follow_up_task_id=row.follow_up_task_id,summary='Закрытое обращение' if row.restricted else 'Нужна поддержка после занятия' if row.reflection_id else 'Вопрос перед занятием',details=details,public_answer=source.public_answer if row.question_id else None,history=history)
+    return SupportSignalView(id=row.id,version=row.version,reflection_id=row.reflection_id,question_id=row.question_id,question_version=source.version if row.question_id else None,can_manage=bool(principal and has(principal,'followups.manage',row.group_id)),subject_user_id=row.subject_user_id,display_name=user.display_name,group_id=row.group_id,restricted=row.restricted,priority=row.priority,state=row.state,assigned_user_id=row.assigned_user_id,assigned_staff_name=owner.display_name if owner else None,follow_up_task_id=row.follow_up_task_id,summary='Закрытое обращение' if row.restricted else 'Нужна поддержка после занятия' if row.reflection_id else 'Вопрос перед занятием',details=details,public_answer=source.public_answer if row.question_id else None,history=history)
 
 async def latest_reflection_for_user(db,foundation_id,user_id,principal=None):
     """CRM read seam: current staff scope, submitted text only, no internal notes."""
@@ -229,7 +229,7 @@ async def signal_action(db,principal,id,body,action):
         row.follow_up_task_id=task.id if task else None
     else:await finish_task(db,principal,row,'done' if action=='resolve' else 'cancelled','Обращение разобрано' if action=='resolve' else 'Обращение закрыто с причиной')
     db.add(SupportSignalEvent(signal_id=row.id,revision=row.version,action=action,reason=reason,author_id=principal.actor_id));await db.flush()
-    return await signal_view(db,row)
+    return await signal_view(db,row,principal)
 
 async def staff_question(db,principal,id,lock=False):
     any_permission(principal,'followups.manage')

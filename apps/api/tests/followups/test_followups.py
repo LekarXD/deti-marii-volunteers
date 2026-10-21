@@ -148,3 +148,22 @@ async def test_no_contact_keeps_reflection_without_creating_contact_task(prepare
     async with x.sessions() as db:
         assert await db.scalar(select(func.count()).select_from(SupportSignal))==1
         assert await db.scalar(select(func.count()).select_from(FollowUpTask).where(FollowUpTask.state=='open'))==0
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('decision,next_date,crm_state',[
+    ('next_date','2028-01-12','contacted'),('other_role','2028-01-12','contacted'),
+    ('discussion','2028-01-12','contacted'),('pause',None,'paused'),('finish',None,'closed')])
+async def test_every_next_decision_is_persisted_on_both_sides(prepared,decision,next_date,crm_state):
+    x=prepared;_,submitted=await save_submit(x);assert submitted.status_code==200
+    row=submitted.json()
+    reviewed=await mutate(x.admin,f"/api/v1/coord/reflections/{row['id']}/review",{'expected_version':row['version'],'decision':decision,'public_message':'Согласованный следующий шаг.','assigned_user_id':str(x.users['admin']),'next_date':next_date})
+    assert reviewed.status_code==200,reviewed.text
+    own=(await x.first.get(x.root+'/reflection')).json()
+    staff=(await x.admin.get(f"/api/v1/coord/reflections/{row['id']}")).json()
+    assert own['review']['decision']==staff['review']['decision']==decision
+    assert own['review']['next_date']==staff['review']['next_date']==next_date
+    async with x.sessions() as db:
+        volunteer=await db.scalar(select(CrmVolunteer).where(CrmVolunteer.user_id==x.users['volunteer']))
+        assert volunteer.relationship_state==crm_state
+        open_count=await db.scalar(select(func.count()).select_from(FollowUpTask).where(FollowUpTask.state=='open'))
+        assert open_count==(1 if next_date else 0)
