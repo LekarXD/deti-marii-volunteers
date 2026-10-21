@@ -46,7 +46,9 @@ export OPORA_LEARNING_TEST_DATABASE_URL='postgresql+psycopg://opora:local-passwo
 export OPORA_PARTICIPANTS_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_participants_test'
 export OPORA_CANDIDATES_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_candidates_test'
 export OPORA_CRM_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_crm_test'
-# Only for a fresh local PostgreSQL instance, creates/migrates the five DBs:
+export OPORA_KNOWLEDGE_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_knowledge_test'
+export OPORA_STUDIO_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_studio_test'
+# Only for a fresh local PostgreSQL instance, creates/migrates the seven domain DBs:
 python infra/scripts/prepare-test-dbs.py
 export OPORA_ASSET_ROOT="${TMPDIR:-/tmp}/opora-private-test-assets"
 export OPORA_ENVIRONMENT=development
@@ -99,10 +101,26 @@ The runner defaults to port 8001; set `OPORA_G1_BASE_URL=http://127.0.0.1:8002`
 for a separate QA port. Stop any previous API on the chosen port first.
 
 Domain test fixtures deliberately drop/recreate their model tables. Keep their
-five URLs separate from development/staging and the external G1 database. Their
+seven domain URLs separate from development/staging and the external G1 database. Their
 exact database names are asserted by the domain suites. The CI pytest plugin
 rejects skipped checks; an unset URL is a gate failure, never a passing test run.
 `prepare-test-dbs.py` refuses existing databases and never drops one.
+
+## Separate board runtime gate
+
+The board sidecar has its own Starlette/CRDT environment. Do not install its
+requirements into the API virtualenv. The API pytest command excludes the sidecar
+directory; CI runs the actual loopback WebSocket tests separately and rejects skips.
+
+```sh
+python3.12 -m venv /tmp/opora-board-venv
+/tmp/opora-board-venv/bin/python -m pip install -r apps/api/app/integrations/rtc/sidecar/requirements.txt 'pytest==8.3.5' 'pytest-asyncio==0.26.0'
+OPORA_SIDECAR_PYTHON=/tmp/opora-board-venv/bin/python sh infra/scripts/verify-sidecar.sh
+```
+
+These tests cover viewer/drawer authorization, persisted Yjs state after restart
+and invalid grants on loopback. They do not prove browser camera/microphone,
+external media, deployment or strict revocation of an already issued LiveKit JWT.
 
 ## Isolated private-image restore drill (P20 subset)
 

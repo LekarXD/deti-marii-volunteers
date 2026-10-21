@@ -8,6 +8,8 @@ cd "$(dirname "$0")/../.."
 : "${OPORA_PARTICIPANTS_TEST_DATABASE_URL:?set the dedicated opora_participants_test database URL}"
 : "${OPORA_CANDIDATES_TEST_DATABASE_URL:?set the dedicated opora_candidates_test database URL}"
 : "${OPORA_CRM_TEST_DATABASE_URL:?set the dedicated opora_crm_test database URL}"
+: "${OPORA_KNOWLEDGE_TEST_DATABASE_URL:?set the dedicated opora_knowledge_test database URL}"
+: "${OPORA_STUDIO_TEST_DATABASE_URL:?set the dedicated Studio test database URL}"
 case "$OPORA_DATABASE_URL" in postgresql+psycopg://*) ;; *) echo 'A real PostgreSQL database is required' >&2; exit 2 ;; esac
 export PYTHONPATH="$PWD/apps/api${PYTHONPATH:+:$PYTHONPATH}"
 (
@@ -19,5 +21,5 @@ export PYTHONPATH="$PWD/apps/api${PYTHONPATH:+:$PYTHONPATH}"
 pnpm typecheck
 pnpm build
 pnpm test
-python3 -m pytest -p infra.pytest_gate -c apps/api/pyproject.toml apps/api tests/contract -q
+python3 -m pytest -p infra.pytest_gate -c apps/api/pyproject.toml apps/api tests/contract --ignore=apps/api/app/integrations/rtc/sidecar -q
 sh infra/scripts/check-openapi.sh
