@@ -7,10 +7,11 @@ import zipfile
 from collections import Counter
 from datetime import date, datetime
 from uuid import UUID
-from sqlalchemy import select, or_, text
+from sqlalchemy import select, or_, text, func
 from app.core.errors import ApiError
+from app.core.contact_policy import contact_guard
 from .models import CrmVolunteer,ImportBatch,ImportRow,ImportExternalReference,ImportEffect,MergeReview,ContactEvent,utcnow
-from .schemas import ImportBatchView,ImportRowView
+from .schemas import ImportBatchView,ImportBatchSummary,ImportRowView
 from .service import check_version,nonempty,scoped_volunteer
 
 MAX_BYTES=5*1024*1024
@@ -87,6 +88,12 @@ async def batch_view(db,batch):
         counts=dict(Counter(row.decision for row in rows)))
 
 
+async def batch_summary(db,batch):
+    counts=dict((await db.execute(select(ImportRow.decision,func.count()).where(ImportRow.batch_id==batch.id).group_by(ImportRow.decision))).all())
+    return ImportBatchSummary(id=batch.id,checksum=batch.checksum,filename=batch.filename,columns=batch.columns,mapping=batch.mapping,source_system=batch.source_system,
+        state=batch.state,version=batch.version,created_at=batch.created_at,applied_at=batch.applied_at,counts=counts)
+
+
 async def scoped_batch(db,principal,batch_id,lock=False):
     query=select(ImportBatch).where(ImportBatch.foundation_id==principal.foundation_id,ImportBatch.id==batch_id)
     if lock:query=query.with_for_update()
@@ -131,7 +138,7 @@ def normalize(raw,mapping):
         if len(phone)==11 and phone[0]=='8':phone='7'+phone[1:]
         if not 10<=len(phone)<=15:errors.append('Некорректный телефон')
         phone='+'+phone
-    telegram=value.get('telegram','').strip().lstrip('@')
+    telegram=value.get('telegram','').strip().lstrip('@').lower()
     if telegram and not re.fullmatch(r'[A-Za-z0-9_]{5,32}',telegram):errors.append('Некорректный Telegram')
     if not (email or phone or telegram):errors.append('Нет контакта для проверки')
     preference=value.get('no_contact','').strip().lower()
@@ -158,7 +165,7 @@ async def dry_run(db,principal,batch_id,command):
                 target=await scoped_volunteer(db,principal.foundation_id,reference.volunteer_id,allow_alias=True)
                 row.volunteer_id=target.merged_into_id or target.id;row.decision='link'
         if row.decision=='create':
-            conditions=[CrmVolunteer.contacts[key].astext==normalized[key] for key in ('email','phone','telegram') if normalized.get(key)]
+            conditions=[(func.lower(CrmVolunteer.contacts[key].astext) if key in ('email','telegram') else CrmVolunteer.contacts[key].astext)==normalized[key] for key in ('email','phone','telegram') if normalized.get(key)]
             matches=(await db.scalars(select(CrmVolunteer).where(CrmVolunteer.foundation_id==principal.foundation_id,CrmVolunteer.merged_into_id.is_(None),or_(*conditions)).limit(3))).all()
             if matches:
                 row.decision='review';row.volunteer_id=matches[0].id if len(matches)==1 else None
@@ -192,6 +199,7 @@ async def resolve_row(db,principal,batch_id,row_id,command):
 
 
 async def apply_batch(db,principal,batch_id,command):
+    await contact_guard(db,principal.foundation_id)
     batch=await scoped_batch(db,principal,batch_id,lock=True)
     # A second apply cannot create effects, even when a client lost the first result.
     if batch.state=='applied':return await batch_view(db,batch)
@@ -214,7 +222,7 @@ async def apply_batch(db,principal,batch_id,command):
                 raise ApiError(409,'external_identity_conflict','Внешний ID связан с другой карточкой. Сначала разрешите дубль')
         else:
             # Recheck contact collisions under source lock, including other batches applied after preview.
-            conditions=[CrmVolunteer.contacts[key].astext==normalized[key] for key in ('email','phone','telegram') if normalized.get(key)]
+            conditions=[(func.lower(CrmVolunteer.contacts[key].astext) if key in ('email','telegram') else CrmVolunteer.contacts[key].astext)==normalized[key] for key in ('email','phone','telegram') if normalized.get(key)]
             collision=await db.scalar(select(CrmVolunteer.id).where(CrmVolunteer.foundation_id==principal.foundation_id,CrmVolunteer.merged_into_id.is_(None),or_(*conditions)).limit(1))
             if collision and not row.resolution_reason:raise ApiError(409,'import_preview_stale','Появился похожий контакт. Повторите проверку и решите дубль')
             target=CrmVolunteer(foundation_id=principal.foundation_id,display_name=normalized['name'],contacts={key:normalized[key] for key in ('email','phone','telegram') if normalized.get(key)},

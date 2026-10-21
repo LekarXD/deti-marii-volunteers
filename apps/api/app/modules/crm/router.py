@@ -14,7 +14,7 @@ from . import service,imports
 from .models import CrmVolunteer,FollowUpTask,ImportBatch
 from .schemas import (CreateVolunteerCommand,AgreementCommand,ContactCommand,AvailabilityCommand,VerificationCommand,PreferenceCommand,ReviewCommand,
     TaskCreateCommand,TaskUpdateCommand,MergeCommand,ImportMappingCommand,ImportRowResolutionCommand,VersionCommand,SelfAvailabilityCommand,
-    CrmVolunteerView,CrmVolunteerListView,FollowUpTaskView,ImportBatchView,OwnAvailabilityView,StaffOptionView,CrmApplicationOptionView)
+    CrmVolunteerView,CrmVolunteerListView,FollowUpTaskView,ImportBatchView,ImportBatchSummary,OwnAvailabilityView,StaffOptionView,CrmApplicationOptionView)
 router=APIRouter(prefix='/api/v1',tags=['crm'])
 
 
@@ -143,10 +143,10 @@ async def upload(request:Request,x_filename:str=Header(default='contacts.csv'),p
     return await command(db,principal,'crm.import.upload',idempotency_key,payload,lambda:imports.upload(db,principal,blob,filename),'crm.write')
 
 
-@router.get('/coord/import-batches',response_model=list[ImportBatchView])
+@router.get('/coord/import-batches',response_model=list[ImportBatchSummary])
 async def batches(principal:Principal=Depends(require_permission('crm.read')),db:AsyncSession=Depends(get_db)):
     rows=(await db.scalars(select(ImportBatch).where(ImportBatch.foundation_id==principal.foundation_id).order_by(ImportBatch.created_at.desc()).limit(30))).all()
-    return [await imports.batch_view(db,batch) for batch in rows]
+    return [await imports.batch_summary(db,batch) for batch in rows]
 
 
 @router.get('/coord/import-batches/{batch_id}',response_model=ImportBatchView)
@@ -172,3 +172,9 @@ async def resolve_row(batch_id:UUID,row_id:UUID,body:ImportRowResolutionCommand,
 @router.post('/coord/import-batches/{batch_id}/apply',response_model=ImportBatchView)
 async def apply_batch(batch_id:UUID,body:VersionCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
     return await command(db,principal,f'crm.import.apply:{batch_id}',idempotency_key,body,lambda:imports.apply_batch(db,principal,batch_id,body),'crm.write')
+
+
+from .schemas import FirstVisitOutcomeCommand
+@router.post('/coord/volunteers/{volunteer_id}/first-visit-outcomes',response_model=CrmVolunteerView)
+async def first_visit_outcome(volunteer_id:UUID,body:FirstVisitOutcomeCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    return await command(db,principal,f'crm.first_visit:{volunteer_id}',idempotency_key,body,lambda:service.first_visit_outcome(db,principal,volunteer_id,body),'crm.write')

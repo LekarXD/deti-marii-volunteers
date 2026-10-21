@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from sqlalchemy import select, func, text, or_
 from app.core.auth import Principal
 from app.core.errors import ApiError
+from app.core.contact_policy import contact_guard
 from app.core.models import StaffMembership, User
 from app.modules.applications.models import Application, ApplicationRevision
 from .models import (CrmVolunteer,Agreement,ContactEvent,AvailabilityRule,AvailabilityWindow,AvailabilityVerification,
@@ -37,6 +38,7 @@ async def scoped_volunteer(db,foundation_id,volunteer_id,lock=False,allow_alias=
 
 
 async def ensure_volunteer(db,foundation_id,application_id):
+    await db.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'crm-create:{foundation_id}'})
     await db.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'crm-application:{foundation_id}:{application_id}'})
     value=await db.scalar(select(CrmVolunteer).where(CrmVolunteer.foundation_id==foundation_id,CrmVolunteer.application_id==application_id))
     if value:return await scoped_volunteer(db,foundation_id,value.merged_into_id or value.id)
@@ -50,9 +52,12 @@ async def ensure_volunteer(db,foundation_id,application_id):
             if current.application_id is None:current.application_id=application.id
             return current
     answers=revision.answers
+    contacts={key:str(answers[key]) for key in ('phone','email','telegram') if answers.get(key)}
+    if contacts.get('email'):contacts['email']=contacts['email'].lower()
+    if contacts.get('telegram'):contacts['telegram']='@'+contacts['telegram'].lstrip('@').lower()
     value=CrmVolunteer(foundation_id=foundation_id,user_id=application.user_id,application_id=application.id,
         display_name=' '.join(str(answers.get(key,'')) for key in ('firstName','lastName')).strip(),
-        contacts={key:str(answers[key]) for key in ('phone','email','telegram') if answers.get(key)},context='Анкета волонтёра',relationship_state='unverified')
+        contacts=contacts,context='Анкета волонтёра',relationship_state='unverified')
     db.add(value);await db.flush();return value
 
 
@@ -183,6 +188,7 @@ async def cancel_open_tasks(db,volunteer,principal,reason):
 
 
 async def set_preference(db,principal,volunteer_id,command):
+    await contact_guard(db,principal.foundation_id)
     volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer_id,lock=True);check_version(volunteer.version,command.expected_version)
     if volunteer.no_contact and not command.no_contact and not command.renewed_consent_confirmed:
         raise ApiError(422,'renewed_consent_required','Подтвердите, что человек снова разрешил связываться')
@@ -193,6 +199,7 @@ async def set_preference(db,principal,volunteer_id,command):
 
 
 async def record_review(db,principal,volunteer_id,command):
+    await contact_guard(db,principal.foundation_id)
     volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer_id,lock=True);check_version(volunteer.version,command.expected_version)
     if volunteer.no_contact and not command.no_contact:raise ApiError(409,'renewed_consent_required','Просьба не связываться действует. Измените её отдельно после согласия человека')
     if command.availability:
@@ -230,7 +237,8 @@ async def update_task(db,principal,task_id,command):
     # Same volunteer->task lock order as no-contact cancellation and result scheduling.
     task=await db.scalar(select(FollowUpTask).where(FollowUpTask.foundation_id==principal.foundation_id,FollowUpTask.id==task_id))
     if not task:raise ApiError(404,'task_not_found','Следующее действие не найдено')
-    volunteer=await scoped_volunteer(db,principal.foundation_id,task.volunteer_id,lock=True)
+    original=await scoped_volunteer(db,principal.foundation_id,task.volunteer_id,allow_alias=True)
+    volunteer=await scoped_volunteer(db,principal.foundation_id,original.merged_into_id or original.id,lock=True)
     task=await db.scalar(select(FollowUpTask).where(FollowUpTask.id==task_id).with_for_update());check_version(task.version,command.expected_version)
     if task.state!='open':raise ApiError(409,'task_closed','Действие уже завершено. Создайте следующий шаг отдельно')
     if volunteer.no_contact and command.state=='open':raise ApiError(409,'no_contact','Человек попросил не связываться')
@@ -281,6 +289,7 @@ async def schedule_follow_up(db,foundation_id,application_id,assigned_user_id,du
 
 
 async def merge_volunteers(db,principal,source_id,command):
+    await contact_guard(db,principal.foundation_id)
     if source_id==command.target_id:raise ApiError(422,'same_record','Выберите другую карточку')
     rows={}
     for record_id in sorted((source_id,command.target_id),key=str):rows[record_id]=await scoped_volunteer(db,principal.foundation_id,record_id,lock=True)
@@ -338,6 +347,7 @@ async def claim_registration(db,registration_id,user_id):
 
 async def contact_preference(db,foundation_id,*,user_id=None,application_id=None,volunteer_id=None):
     """P17 must recheck this before invitations/reminders; authentication is separate."""
+    await contact_guard(db,foundation_id)
     conditions=[]
     if user_id:conditions.append(CrmVolunteer.user_id==user_id)
     if application_id:conditions.append(CrmVolunteer.application_id==application_id)
@@ -353,6 +363,7 @@ async def contact_preference(db,foundation_id,*,user_id=None,application_id=None
 
 
 async def save_own_availability(db,principal,command):
+    await db.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'crm-create:{principal.foundation_id}'})
     volunteer=await own_volunteer(db,principal)
     if volunteer:
         volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer.id,lock=True)
@@ -364,3 +375,21 @@ async def save_own_availability(db,principal,command):
         volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer.id,lock=True)
     await write_availability(db,volunteer,principal,command);touch(volunteer);await db.flush()
     return await own_availability(db,principal)
+
+
+async def first_visit_outcome(db,principal,volunteer_id,command):
+    volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer_id,lock=True);check_version(volunteer.version,command.expected_version)
+    note=nonempty(command.note)
+    labels={'next_activity':'Следующее занятие','preparation':'Обсудить подготовку','different_role':'Другая роль','pause':'Пауза','finish':'Завершить участие'}
+    db.add(Agreement(volunteer_id=volunteer.id,text=note,role_context=labels[command.outcome],author_id=principal.actor_id))
+    db.add(ContactEvent(volunteer_id=volunteer.id,kind='first_visit_outcome',direction='recorded',text=labels[command.outcome]+': '+note,author_id=principal.actor_id))
+    volunteer.relationship_state='paused' if command.outcome=='pause' else 'closed' if command.outcome=='finish' else 'contacted'
+    if command.due_on:
+        if not command.assigned_user_id:raise ApiError(422,'task_owner_required','Укажите ответственного за следующий шаг')
+        if volunteer.no_contact:raise ApiError(409,'no_contact','Человек попросил не связываться')
+        await valid_owner(db,principal.foundation_id,command.assigned_user_id)
+        task=FollowUpTask(foundation_id=principal.foundation_id,volunteer_id=volunteer.id,application_id=volunteer.application_id,
+            assigned_user_id=command.assigned_user_id,due_on=command.due_on,title=labels[command.outcome],source_type='first_visit_outcome',source_id=uuid4(),source_revision=1)
+        db.add(task);await db.flush()
+        db.add(FollowUpTaskEvent(task_id=task.id,kind='created',reason=note,after=task_view(task).model_dump(mode='json'),author_id=principal.actor_id))
+    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True)

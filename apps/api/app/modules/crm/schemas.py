@@ -166,7 +166,7 @@ class ImportRowView(BaseModel):
     errors:list[str]
     resolution_reason:str
 
-class ImportBatchView(BaseModel):
+class ImportBatchSummary(BaseModel):
     id:UUID
     checksum:str
     filename:str
@@ -177,8 +177,10 @@ class ImportBatchView(BaseModel):
     version:int
     created_at:datetime
     applied_at:datetime|None
-    rows:list[ImportRowView]
     counts:dict[str,int]
+
+class ImportBatchView(ImportBatchSummary):
+    rows:list[ImportRowView]
 
 class OwnAvailabilityView(BaseModel):
     volunteer_id:UUID|None
@@ -196,3 +198,9 @@ class StaffOptionView(BaseModel):
 class CrmApplicationOptionView(BaseModel):
     application_id:UUID
     label:str
+
+class FirstVisitOutcomeCommand(VersionCommand):
+    outcome:Literal['next_activity','preparation','different_role','pause','finish']
+    note:str=Field(min_length=1,max_length=8000)
+    due_on:date|None=None
+    assigned_user_id:UUID|None=None

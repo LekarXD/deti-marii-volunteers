@@ -155,3 +155,40 @@ async def test_revoked_permission_blocks_receipt_replay_and_cross_foundation(env
             batch_row=await db.get(__import__('app.modules.crm.models',fromlist=['ImportBatch']).ImportBatch,UUID(batch['id']));batch_row.foundation_id=other.id;await db.commit()
         assert (await coord.get('/api/v1/coord/import-batches/'+batch['id'])).status_code==404
     finally:await coord.aclose()
+
+@pytest.mark.asyncio
+async def test_concurrent_apply_and_self_availability_are_scoped(env):
+    import asyncio
+    app,factory=env;coord=await coordinator(app,factory);candidate=await actor(app);other=await actor(app)
+    try:
+        batch=await prepare(coord,CSV)
+        results=await asyncio.gather(post(coord,f"/coord/import-batches/{batch['id']}/apply",dict(expected_version=batch['version'])),post(coord,f"/coord/import-batches/{batch['id']}/apply",dict(expected_version=batch['version'])))
+        assert [result.status_code for result in results]==[200,200]
+        async with factory() as db:assert await db.scalar(select(func.count()).select_from(ImportEffect))==2
+        application=(await post(candidate,'/applications/submit',body())).json()
+        first=await put(candidate,'/me/availability',dict(expected_version=0,summary='В субботу с 12 до 15',preferred_channel='email',windows=[dict(weekday=5,start_minute=720,end_minute=900)]))
+        assert first.status_code==200,first.text
+        own=first.json();assert not own['availability']['verified']
+        assert (await other.get('/api/v1/me/availability')).json()['volunteer_id'] is None
+        stale=await put(candidate,'/me/availability',dict(expected_version=0,summary='Устаревшее изменение',preferred_channel='phone'));assert stale.status_code==409
+        detail=(await coord.get('/api/v1/coord/volunteers/'+own['volunteer_id'])).json()
+        outcome=await post(coord,f"/coord/volunteers/{own['volunteer_id']}/first-visit-outcomes",dict(expected_version=detail['version'],outcome='pause',note='Попросил вернуться к обсуждению позже'))
+        assert outcome.status_code==200,outcome.text
+        assert outcome.json()['relationship_state']=='paused' and any(event['kind']=='first_visit_outcome' for event in outcome.json()['contact_events'])
+    finally:await coord.aclose();await candidate.aclose();await other.aclose()
+
+@pytest.mark.asyncio
+async def test_merged_follow_up_remains_actionable_without_rewriting_identity(env):
+    app,factory=env;coord=await coordinator(app,factory)
+    try:
+        batch=await prepare(coord,CSV.replace('да'.encode(),'нет'.encode()))
+        applied=(await post(coord,f"/coord/import-batches/{batch['id']}/apply",dict(expected_version=batch['version']))).json();target,source=[row['volunteer_id'] for row in applied['rows']]
+        owner=(await coord.get('/api/v1/auth/session')).json()['user_id']
+        task=(await post(coord,f"/coord/volunteers/{source}/follow-up-tasks",dict(expected_version=1,title='Обсудить доступность',due_on=today().isoformat(),assigned_user_id=owner))).json()
+        merged=await post(coord,f"/coord/volunteers/{source}/merge",dict(expected_version=2,target_id=target,target_expected_version=1,reason='Проверенный фиктивный дубль'))
+        assert merged.status_code==200,merged.text
+        assert merged.json()['next_task']['id']==task['id']
+        completed=await post(coord,f"/coord/follow-up-tasks/{task['id']}",dict(expected_version=task['version'],state='done',reason='Разговор состоялся'))
+        assert completed.status_code==200,completed.text
+        assert completed.json()['volunteer_id']==source and completed.json()['state']=='done'
+    finally:await coord.aclose()
