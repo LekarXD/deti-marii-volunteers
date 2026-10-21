@@ -10,11 +10,11 @@ from .models import Conversation, ConversationMember, Message
 
 LABELS={"interview.booked":"Встреча назначена", "interview.rescheduled":"Встреча перенесена", "interview.cancelled":"Встреча отменена", "interview.completed":"Встреча завершена", "interview.missed":"Не удалось встретиться", "interview.result_updated":"Итог встречи обновлён"}
 
-def enqueue_notice(db,foundation_id,recipient_id,subject,body,*,topic='messages'):
+def enqueue_notice(db,foundation_id,recipient_id,subject,body,*,topic='messages',source=None):
     """For authoritative, already-authorized non-scheduled system events only.
     Booking/reminder producers must use the source-bound internal event envelope.
     """
-    return enqueue_outbox(db,foundation_id,"in_app",{"topic":topic,"recipient_id":str(recipient_id),"subject":subject,"text":body})
+    return enqueue_outbox(db,foundation_id,"in_app",{"source":source,"topic":topic,"recipient_id":str(recipient_id),"subject":subject,"text":body})
 
 async def deliver_internal(db,outbox,payload):
     from app.core.contact_policy import contact_guard
@@ -22,6 +22,18 @@ async def deliver_internal(db,outbox,payload):
     existing=await db.scalar(select(Message.id).where(Message.source_outbox_id==outbox.id))
     if existing:
         return "delivered"
+    if payload.get('source') is not None:
+        from .registry import notice_source
+        source=payload['source']
+        if not isinstance(source,dict) or not isinstance(source.get('kind'),str):return 'unavailable'
+        resolver=notice_source(source['kind'])
+        if resolver is None:return 'unavailable'
+        resolved=await resolver(db,outbox,source)
+        if isinstance(resolved,str):return resolved if resolved.startswith('suppressed_') or resolved in ('unavailable','waiting_identity') else 'unavailable'
+        if not isinstance(resolved,dict) or not {'recipient_id','subject','text','topic'}<=resolved.keys() or resolved.get('topic') not in ('assignments','learning','messages','news') or not isinstance(resolved.get('subject'),str) or not isinstance(resolved.get('text'),str):return 'unavailable'
+        payload={key:resolved[key] for key in ('recipient_id','subject','text','topic')}
+        try:payload['recipient_id']=str(UUID(str(payload['recipient_id'])))
+        except (ValueError,TypeError):return 'unavailable'
     if payload.get("event", "").startswith("interview."):
         from app.modules.interviews.models import InterviewBooking
         booking=await db.scalar(select(InterviewBooking).where(InterviewBooking.id==UUID(payload['booking_id']),InterviewBooking.foundation_id==outbox.foundation_id).with_for_update())

@@ -8,7 +8,7 @@ from app.core.models import AuthChallenge,ContactChannel,OutboxMessage
 from app.integrations.delivery.email import DeliveryOutcome,deliver_email,readiness
 from app.worker.queue import fenced_update
 from .models import DeliveryAttempt,NotificationDelivery,NotificationTemplate,NotificationTemplateVersion
-from .service import may_contact,sender_authorized,quiet_until,topic_for
+from .service import may_contact,sender_authorized,quiet_until,topic_for,hard_contact_allowed
 
 async def journal(db,outbox,payload):
     row=await db.scalar(select(NotificationDelivery).where(NotificationDelivery.outbox_id==outbox.id).with_for_update())
@@ -40,8 +40,26 @@ async def check_email(db,outbox,payload):
             session=await db.get(Session,challenge.bound_session_id)
             if session is None or session.revoked_at or session.expires_at<=utcnow() or session.user_id!=challenge.bound_user_id:return 'suppressed_stale_auth'
         return None
-    if payload.get('purpose')!='notification' or not payload.get('recipient_id'):
-        return 'unavailable'
+    if payload.get('purpose')!='notification':
+        from app.integrations.delivery.registry import email_purpose
+        policy=email_purpose(payload.get('purpose'))
+        if policy is None:return 'unavailable'
+        try:actor_id=UUID(payload.get('actor_session_id',''))
+        except (ValueError,TypeError):return 'suppressed_authz'
+        from app.core.models import Session
+        from app.core.auth import resolve_principal
+        from app.core.errors import ApiError
+        session=await db.get(Session,actor_id,populate_existing=True)
+        if not session or session.foundation_id!=outbox.foundation_id or session.revoked_at or session.expires_at<=utcnow():return 'suppressed_authz'
+        try:principal=await resolve_principal(db,session)
+        except ApiError:return 'suppressed_authz'
+        if not principal.has_permission(policy.required_permission) or str(principal.user_id)!=payload.get('actor_user_id'):return 'suppressed_authz'
+        contact=await db.scalar(select(ContactChannel).where(ContactChannel.type=='email',ContactChannel.normalized_value==payload.get('to')))
+        if contact:
+            allowed,reason=await hard_contact_allowed(db,outbox.foundation_id,contact.user_id)
+            if not allowed:return 'suppressed_'+reason
+        return await policy.validate(db,outbox,payload)
+    if not payload.get('recipient_id'):return 'unavailable' 
     if not await sender_authorized(db,outbox.foundation_id,payload):return 'suppressed_authz'
     recipient=UUID(payload['recipient_id'])
     allowed,reason=await may_contact(db,outbox.foundation_id,recipient,'email',topic_for(payload))
@@ -52,6 +70,16 @@ async def check_email(db,outbox,payload):
     contact=await db.scalar(select(ContactChannel).where(ContactChannel.user_id==recipient,ContactChannel.type=='email'))
     if contact is None or contact.normalized_value!=payload.get('to'):return 'suppressed_contact_changed'
     return None
+
+async def email_quiet_until(db,outbox,payload,delivery):
+    if payload.get('purpose') in ('login','contact_change'):return None
+    uid=payload.get('recipient_id')
+    if uid is None:
+        contact=await db.scalar(select(ContactChannel).where(ContactChannel.type=='email',ContactChannel.normalized_value==payload.get('to')))
+        uid=contact.user_id if contact else None
+    if uid is None:return None
+    uid=UUID(str(uid));delivery.recipient_user_id=uid
+    return await quiet_until(db,outbox.foundation_id,uid)
 
 async def process_email(db,job,outbox,payload):
     if payload.get('purpose') not in ('login','contact_change'):await contact_guard(db,outbox.foundation_id)
@@ -75,7 +103,7 @@ async def process_email(db,job,outbox,payload):
         delivery.state=outbox.state=blocked
         delivery.version+=1
         return DeliveryOutcome(blocked)
-    outbox.defer_until=await quiet_until(db,outbox.foundation_id,UUID(payload['recipient_id'])) if payload.get('purpose')=='notification' else None
+    outbox.defer_until=await email_quiet_until(db,outbox,payload,delivery)
     if outbox.defer_until:
         attempt=await new_attempt(db,delivery,'deferred_quiet')
         attempt.completed_at=utcnow()
@@ -95,8 +123,8 @@ async def process_email(db,job,outbox,payload):
     await db.commit()
     if payload.get('purpose') not in ('login','contact_change'):await contact_guard(db,outbox.foundation_id)
     blocked=await check_email(db,outbox,payload)
-    if not blocked and payload.get('purpose')=='notification':
-        outbox.defer_until=await quiet_until(db,outbox.foundation_id,UUID(payload['recipient_id']))
+    if not blocked and payload.get('purpose') not in ('login','contact_change'):
+        outbox.defer_until=await email_quiet_until(db,outbox,payload,delivery)
         if outbox.defer_until:blocked='deferred_quiet'
     result=DeliveryOutcome(blocked) if blocked else await deliver_email({**payload,'message_id':delivery.provider_message_id})
     await fenced_update(db,job.id,job.claim_token,state='running')

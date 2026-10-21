@@ -27,7 +27,9 @@ async def deliver_email(payload):
     if not settings.smtp_host or not settings.smtp_from:
         return DeliveryOutcome("unavailable","provider_unavailable")
     purpose=payload.get('purpose')
-    if purpose not in ('login','contact_change','notification') or not payload.get('to') or any(c in payload['to'] for c in ('\r','\n')):
+    from app.integrations.delivery.registry import email_purpose
+    policy=email_purpose(purpose) if purpose not in ('login','contact_change','notification') else None
+    if (purpose not in ('login','contact_change','notification') and policy is None) or not payload.get('to') or any(c in payload['to'] for c in ('\r','\n')):
         return DeliveryOutcome("unavailable","template_unavailable")
     email=EmailMessage()
     email['From']=settings.smtp_from
@@ -40,6 +42,9 @@ async def deliver_email(payload):
         email['Subject']='Опора — подтверждение смены почты' if purpose=='contact_change' else 'Опора — подтверждение входа'
         email.set_content(f"Код подтверждения запроса в Опоре:\n{payload['token']}\n\nЗапрос: {payload['challenge_id']}\nКод действует 15 минут. Если вы не запрашивали вход, не используйте его.")
     else:
+        if policy:
+            subject,body=policy.render(payload)
+            payload={**payload,'subject':subject,'text':body}
         if not payload.get('subject') or not payload.get('text') or len(payload['subject'])>300 or len(payload['text'])>10000 or any(c in payload['subject'] for c in ('\r','\n')):
             return DeliveryOutcome('unavailable','template_unavailable')
         email['Subject']=payload['subject']

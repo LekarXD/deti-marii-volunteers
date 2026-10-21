@@ -70,13 +70,19 @@ async def quiet_until(db,foundation_id,user_id,now=None):
         if valid:return max(valid)
     raise ApiError(503,'quiet_timezone_unavailable','Не удалось определить конец тихих часов')
 
-async def may_contact(db,foundation_id,user_id,channel,topic='messages'):
+async def hard_contact_allowed(db,foundation_id,user_id):
     await contact_guard(db,foundation_id)
-    if (await contact_preference(db,foundation_id,user_id=user_id))['no_contact']:
-        return False,'no_contact'
+    user=await db.scalar(select(User).where(User.id==user_id,User.foundation_id==foundation_id,User.account_state=='active'))
+    if user is None:return False,'user_unavailable'
+    if (await contact_preference(db,foundation_id,user_id=user_id))['no_contact']:return False,'no_contact'
     pref=await preferences(db,foundation_id,user_id)
-    if pref and pref.no_contact:
-        return False,'no_contact'
+    if pref and pref.no_contact:return False,'no_contact'
+    return True,None
+
+async def may_contact(db,foundation_id,user_id,channel,topic='messages'):
+    allowed,reason=await hard_contact_allowed(db,foundation_id,user_id)
+    if not allowed:return False,reason
+    pref=await preferences(db,foundation_id,user_id)
     if channel=='email' and not (pref and pref.email_enabled):
         return False,'email_disabled'
     if channel=='in_app' and pref and not pref.in_app_enabled:

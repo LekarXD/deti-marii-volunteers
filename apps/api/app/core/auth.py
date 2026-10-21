@@ -93,3 +93,22 @@ async def issue_session(db, response, *, user_id=None, registration_id=None, mfa
 async def session_view(db, session):
     principal = await resolve_principal(db, session)
     return {"user_id": str(principal.user_id) if principal.user_id else None, "registration_id": str(principal.registration_id) if principal.registration_id else None, "foundation_id": str(principal.foundation_id), "is_staff": principal.is_staff, "permissions": sorted(principal.permissions), "csrf_token": unseal(session.csrf_cipher), "actor_id": principal.actor_id, "mfa_required": bool(principal.user_id and not session.mfa_at and await db.scalar(select(StaffMembership.id).where(StaffMembership.user_id == principal.user_id, StaffMembership.revoked_at.is_(None))))}
+
+@dataclass(frozen=True)
+class BackgroundStaffAuthorization:
+    """Read-only grants for an explicit persisted schedule; never an interactive identity."""
+    user_id:UUID
+    foundation_id:UUID
+    membership_id:UUID
+    grants:tuple
+    def has_permission(self,name,scope_type='foundation',scope_id=None):
+        return any(p==name and (t=='foundation' or (t==scope_type and i==scope_id)) for p,t,i in self.grants)
+
+async def load_background_staff_authorization(db,foundation_id,user_id):
+    from app.core.models import MfaFactor
+    user=await db.scalar(select(User).where(User.id==user_id,User.foundation_id==foundation_id,User.account_state=='active'))
+    member=await db.scalar(select(StaffMembership).where(StaffMembership.user_id==user_id,StaffMembership.foundation_id==foundation_id,StaffMembership.revoked_at.is_(None)))
+    factor=await db.scalar(select(MfaFactor.id).where(MfaFactor.user_id==user_id,MfaFactor.confirmed_at.is_not(None)))
+    if user is None or member is None or factor is None:return None
+    rows=(await db.scalars(select(PermissionGrant).where(PermissionGrant.membership_id==member.id,PermissionGrant.revoked_at.is_(None)))).all()
+    return BackgroundStaffAuthorization(user_id,foundation_id,member.id,tuple((g.permission,g.scope_type,g.scope_id) for g in rows))
