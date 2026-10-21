@@ -6,4 +6,6 @@
 
 Материалы и постановка задачи — в [`materials/`](materials/README.md).
 
+**Рабочий прототип** «анкета → кабинет → онбординг → встреча с координатором» — в [`prototype/`](prototype/README.md). Тексты правятся в `prototype/content/`.
+
 Прототип «Опора» и все сохранённые артефакты его подготовки — в [`materials/04-дизайн/прототип-до-фактуры/`](materials/04-дизайн/прототип-до-фактуры/README.md). [Интерактивный холст Claude Design](https://claude.ai/artifact/KeurJ9hsWHTx9g8ovz512u).
