@@ -44,6 +44,10 @@ only the media image has the executable Chrome path. SMTP settings are passed to
 the outbox worker. Defaults keep AI/capture disabled, RTC unconfigured and email
 in the explicit development inbox. Setting a URL alone is not provider
 acceptance. Do not print expanded environment/configuration with credentials.
+Telegram identity linking additionally passes `OPORA_TELEGRAM_LINK_ENABLED`,
+`OPORA_TELEGRAM_BOT_USERNAME` and `OPORA_TELEGRAM_WEBHOOK_SECRET` to the API only.
+It remains disabled with empty provider fields by default; this configuration
+does not supply or enable an outbound Telegram delivery transport.
 
 ## Native PostgreSQL (Docker unavailable)
 
@@ -69,7 +73,9 @@ export OPORA_PROFILE_TEST_DATABASE_URL='postgresql+psycopg://opora:local-passwor
 export OPORA_SIMULATOR_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_simulator_test'
 export OPORA_REPORTING_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_reporting_test'
 export OPORA_ADMIN_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_admin_test'
-# Only for a fresh local PostgreSQL instance, creates/migrates the twelve domain DBs:
+export OPORA_DOBRO_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_dobro_test'
+export OPORA_TELEGRAM_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_telegram_test'
+# Only for a fresh local PostgreSQL instance, creates/migrates the fourteen dedicated fixture DBs:
 python infra/scripts/prepare-test-dbs.py
 export OPORA_ASSET_ROOT="${TMPDIR:-/tmp}/opora-private-test-assets"
 export OPORA_ENVIRONMENT=development
@@ -139,13 +145,13 @@ It forwards quoted pytest arguments, for example `sh infra/scripts/run-g1.sh -k
 the HTTP G1 database; its ordinary server limits remain active across requests.
 
 Domain test fixtures deliberately drop/recreate their model tables. Keep their
-twelve domain URLs separate from development/staging and the external G1 database. Their
+fourteen fixture URLs separate from development/staging and the external G1 database. Their
 exact database names are asserted by the domain suites. The CI pytest plugin
 rejects skipped checks; an unset URL is a gate failure, never a passing test run.
 `prepare-test-dbs.py` refuses existing databases and never drops one.
 
 For repeated integration checks on the specifically assigned QA cluster, the
-explicit command below resets only the thirteen allowlisted disposable fixture schemas
+explicit command below resets only the fifteen allowlisted disposable fixture schemas
 and migrates them from empty. It fixes test-only `create_all`/Alembic stamp drift
 after new models arrive. The script pins loopback port 56148, verifies the exact
 QA data directory and database names, and cannot target proof/restore/G1 databases.

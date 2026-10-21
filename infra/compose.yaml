@@ -51,7 +51,11 @@ services:
   api:
     build: {context: .., dockerfile: infra/docker/api.Dockerfile, labels: {org.opencontainers.image.revision: "${OPORA_RELEASE:-development}"}}
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--no-access-log"]
-    environment: *api-environment
+    environment:
+      <<: *api-environment
+      OPORA_TELEGRAM_LINK_ENABLED: ${OPORA_TELEGRAM_LINK_ENABLED:-false}
+      OPORA_TELEGRAM_BOT_USERNAME: ${OPORA_TELEGRAM_BOT_USERNAME:-}
+      OPORA_TELEGRAM_WEBHOOK_SECRET: ${OPORA_TELEGRAM_WEBHOOK_SECRET:-}
     ports: ["127.0.0.1:8001:8001"]
     volumes: ["asset-data:/var/lib/opora/assets"]
     depends_on:

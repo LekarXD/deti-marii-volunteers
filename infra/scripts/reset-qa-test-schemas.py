@@ -15,6 +15,7 @@ DATABASES = (
     "opora_simulator_test",
     "opora_reporting_test",
     "opora_admin_test",
+    "opora_dobro_test", "opora_telegram_test",
     "opora_activities_perf_test",
 )
 parser = argparse.ArgumentParser(description=__doc__)

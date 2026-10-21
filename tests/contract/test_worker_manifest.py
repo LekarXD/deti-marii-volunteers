@@ -1,4 +1,5 @@
 """Every source-controlled job has one bounded, correctly isolated runtime owner."""
+import ast
 import json
 from pathlib import Path
 import subprocess
@@ -33,6 +34,21 @@ def test_every_registered_job_has_exactly_one_manifest_owner_and_workload():
         'load_extensions(); print(json.dumps({kind:spec.workload for kind,spec in HANDLERS.items()}))',
     ], capture_output=True, text=True, check=True, timeout=20)
     registered = json.loads(probe.stdout)
+    # A declaration in an unimported module would otherwise evade coverage while
+    # its queued jobs wait forever. Inspect the exact imported API source tree.
+    import app
+    declared = set()
+    for source in Path(app.__file__).parent.rglob('*.py'):
+        if 'tests' in source.parts or 'sidecar' in source.parts or source.name.startswith('test_'):
+            continue
+        for node in ast.walk(ast.parse(source.read_text(), filename=str(source))):
+            if not isinstance(node, ast.Call):
+                continue
+            name = node.func.id if isinstance(node.func, ast.Name) else node.func.attr if isinstance(node.func, ast.Attribute) else None
+            if name == 'register_handler':
+                assert node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str), f'Job kind must be source-controlled: {source}'
+                declared.add(node.args[0].value)
+    assert set(registered) == declared, {'unloaded': sorted(declared - set(registered)), 'undeclared': sorted(set(registered) - declared)}
     base, overlay = runtime_manifests()
     dockerfile = (ROOT / 'infra/docker/media.Dockerfile').read_text()
     media_command = json.loads(next(line[4:] for line in dockerfile.splitlines() if line.startswith('CMD ')))
@@ -71,3 +87,10 @@ def test_provider_configuration_reaches_api_io_and_media_without_enabling_defaul
     assert overlay['media-worker']['environment']['OPORA_CAPTURE_ENABLED'] == '${OPORA_CAPTURE_ENABLED:-false}'
     assert base['worker']['environment']['OPORA_DEV_INBOX'] == '${OPORA_DEV_INBOX:-true}'
     assert base['worker']['environment']['OPORA_SMTP_HOST'] == '${OPORA_SMTP_HOST:-}'
+    from app.modules.notifications.telegram_config import TelegramSettings
+    telegram_fields = {'OPORA_TELEGRAM_' + name.upper() for name in TelegramSettings.model_fields}
+    assert telegram_fields <= set(base['api']['environment'])
+    assert base['api']['environment']['OPORA_TELEGRAM_LINK_ENABLED'] == '${OPORA_TELEGRAM_LINK_ENABLED:-false}'
+    assert base['api']['environment']['OPORA_TELEGRAM_BOT_USERNAME'] == '${OPORA_TELEGRAM_BOT_USERNAME:-}'
+    assert base['api']['environment']['OPORA_TELEGRAM_WEBHOOK_SECRET'] == '${OPORA_TELEGRAM_WEBHOOK_SECRET:-}'
+    assert not telegram_fields & set(overlay['media-worker']['environment'])
