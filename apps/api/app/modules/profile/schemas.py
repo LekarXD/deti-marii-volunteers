@@ -199,3 +199,7 @@ class RecognitionBasisView(BaseModel):
     title:str
     service_date:date
     confirmed_minutes:int
+
+class StaffDocumentCommand(ProfileDocumentCommand):
+    user_id:UUID
+    basis_entry_id:UUID

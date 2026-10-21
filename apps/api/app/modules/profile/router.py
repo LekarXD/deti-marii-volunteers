@@ -130,3 +130,7 @@ async def data_review(request_id:UUID,body:dto.ProfileDataReviewCommand,principa
 @router.get('/coord/profile/recognition-bases',response_model=list[dto.RecognitionBasisView])
 async def recognition_bases(principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db)):
     return await ledger.recognition_bases(db,principal)
+
+@router.post('/coord/profile/documents',response_model=dto.ProfileDocumentView)
+async def staff_document_request(body:dto.StaffDocumentCommand,principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    return await command(db,principal,'profile.document.staff_request',idempotency_key,body,lambda:documents.request_staff_document(db,principal,body),'recognition.manage')
