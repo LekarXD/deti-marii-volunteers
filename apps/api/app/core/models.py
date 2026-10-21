@@ -16,6 +16,7 @@ class Foundation(IdentityMixin, Base):
 
 class User(IdentityMixin, Base):
     __tablename__ = "users"
+    __table_args__ = (UniqueConstraint("id","foundation_id",name="uq_user_foundation_identity"),)
     foundation_id: Mapped[UUID] = mapped_column(ForeignKey("foundations.id"), index=True)
     display_name: Mapped[str] = mapped_column(String(200), default="Волонтёр")
     account_state: Mapped[str] = mapped_column(String(30), default="active")
@@ -132,6 +133,7 @@ class OutboxMessage(IdentityMixin, Base):
 
 class MediaAsset(IdentityMixin, Base):
     __tablename__ = "media_assets"
+    __table_args__ = (UniqueConstraint("id","foundation_id",name="uq_asset_foundation_identity"),)
     foundation_id: Mapped[UUID] = mapped_column(ForeignKey("foundations.id"), index=True)
     owner_user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     owner_registration_id: Mapped[UUID | None] = mapped_column(ForeignKey("registration_sessions.id"))
