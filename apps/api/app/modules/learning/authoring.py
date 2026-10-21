@@ -495,3 +495,24 @@ async def preview_asset(db, principal, lesson_id, asset_id):
     if asset is None:
         raise ApiError(404, "asset_not_found", "Файл не найден")
     return await asset_content(db, asset)
+
+
+async def attach_recording(db,principal,lesson_id,body):
+    permission(principal,'learning.write')
+    from .recording_publication import prepare_recording_attachment
+    claim=await prepare_recording_attachment(db,principal,lesson_id,body.expected_version,body.render_id,body.render_hash)
+    value=await lesson(db,principal,lesson_id,lock=True)
+    if value.archived:raise ApiError(409,'lesson_archived','Урок в архиве')
+    draft=await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id==lesson_id).with_for_update().execution_options(populate_existing=True))
+    check_version(draft.version if draft else 0,body.expected_version)
+    if draft is None:
+        await begin_edit(db,principal,lesson_id)
+        draft=await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id==lesson_id).with_for_update())
+    if any(block.get('type')=='video' and str(block.get('asset_id'))==str(claim.asset_id) for block in draft.blocks):
+        return await author_lesson(db,principal,lesson_id)
+    if len(draft.blocks)>=100:raise ApiError(422,'lesson_block_limit','В уроке уже 100 блоков. Освободите место для записи')
+    draft.blocks=[*deepcopy(draft.blocks),{'type':'video','title':'Запись урока','asset_id':str(claim.asset_id)}]
+    draft.version+=1
+    draft.status,draft.reviewed_by='draft',None
+    await db.flush()
+    return await author_lesson(db,principal,lesson_id)

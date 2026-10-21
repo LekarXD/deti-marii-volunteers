@@ -19,7 +19,7 @@ async def command(db, principal, request, key, operation, payload, action):
     # private draft content and answer keys, so never short-circuit revoked reads.
     author_actions = {
         "learning.create_track": "learning.write", "learning.create_lesson": "learning.write",
-        "learning.begin_edit": "learning.write", "learning.save_draft": "learning.write",
+        "learning.begin_edit": "learning.write", "learning.save_draft": "learning.write", "learning.attach_recording": "learning.write",
         "learning.review": "learning.write", "learning.save_assessment": "learning.write",
         "learning.review_assessment": "learning.write", "learning.assign": "learning.write",
         "learning.validate": "learning.read", "learning.preview_quiz": "learning.read",
@@ -234,3 +234,10 @@ async def archive_lesson(lesson_id: UUID, body: VersionCommand, request: Request
 @router.get("/coord/learning/lessons/{lesson_id}/assets/{asset_id}")
 async def preview_asset(lesson_id: UUID, asset_id: UUID, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     return await authoring.preview_asset(db, principal, lesson_id, asset_id)
+
+
+from .schemas import RecordingAttach
+
+@router.post('/coord/learning/lessons/{lesson_id}/recording',response_model=AuthorLessonView)
+async def attach_recording(lesson_id:UUID,body:RecordingAttach,request:Request,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db),key:str|None=Header(None,alias='Idempotency-Key')):
+    return await command(db,principal,request,key,'learning.attach_recording',{'id':str(lesson_id),**body.model_dump(mode='json')},lambda:authoring.attach_recording(db,principal,lesson_id,body))

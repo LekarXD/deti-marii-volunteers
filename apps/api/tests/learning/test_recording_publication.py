@@ -15,7 +15,8 @@ from app.modules.recordings.models import RecordingProject,StudioCaptureSession,
 from test_introduction import setup,post
 
 @pytest.mark.asyncio
-async def test_exact_recording_review_publication_ledger_and_previous_primary_retention(setup):
+@pytest.mark.parametrize("via_attachment",[False,True])
+async def test_exact_recording_review_publication_ledger_and_previous_primary_retention(setup,via_attachment):
     client,factory,fid=setup
     old=(await client.get('/api/v1/me/preparation')).json()['assignments'][0]
     lid=UUID(old['lessons'][0]['lesson_id']);tid=UUID(old['track_id']);rid=uuid4()
@@ -30,7 +31,7 @@ async def test_exact_recording_review_publication_ledger_and_previous_primary_re
         take=RecordingTake(project_id=project.id,capture_session_id=capture.id,number=1,generation=1,state='captured',projection={},projection_hash='a'*64);db.add(take);await db.flush()
         asset=MediaAsset(foundation_id=fid,owner_user_id=user.id,purpose='recording.output',resource_type='recording_render',resource_id=rid,storage_key=uuid4().hex,content_type='video/mp4',expected_size=100,received_size=100,checksum='b'*64,state='ready');db.add(asset);await db.flush()
         render=RecordingRenderVersion(id=rid,project_id=project.id,take_id=take.id,generation=1,state='preview_ready',manifest={'synthetic_db_fixture':True},render_hash='c'*64,asset_id=asset.id,content_hash=asset.checksum,quality='verified',duration_ms=1000);db.add(render)
-        draft=LessonDraft(lesson_id=lid,foundation_id=fid,title='Recording lesson fixture',minutes=1,source='Synthetic review fixture',blocks=[{'type':'video','asset_id':str(asset.id),'title':'Private review fixture'}],version=2,status='reviewed');db.add(draft)
+        draft=LessonDraft(lesson_id=lid,foundation_id=fid,title='Recording lesson fixture',minutes=1,source='Synthetic review fixture',blocks=[{'type':'text','title':'Existing lesson','text':'Preserve this text'},{'type':'rules','items':['Preserve this rule']}] if via_attachment else [{'type':'video','asset_id':str(asset.id),'title':'Private review fixture'}],version=2,status='reviewed');db.add(draft)
         stable=await db.get(Lesson,lid);track=await db.get(LearningTrack,tid)
         old_primary=stable.current_version_id;revision=stable.publication_revision;track_version=track.version
         count=await db.scalar(select(func.count()).select_from(LessonVersion).where(LessonVersion.lesson_id==lid))
@@ -38,13 +39,42 @@ async def test_exact_recording_review_publication_ledger_and_previous_primary_re
     client.cookies.set('opora_session','recording'+str(fid))
     body={'expected_version':track_version,'lesson_ids':[str(lid)],'lesson_draft_versions':{str(lid):2},'lesson_publication_revisions':{str(lid):revision}}
     # A private render cannot replace the primary without its exact human review.
-    denied=await post(client,f'/coord/learning/tracks/{tid}/publish',body)
+    attachment={'expected_version':2,'render_id':str(rid),'render_hash':'c'*64}
+    denied=await post(client,f'/coord/learning/lessons/{lid}/recording',attachment) if via_attachment else await post(client,f'/coord/learning/tracks/{tid}/publish',body)
     assert denied.status_code==409 and denied.json()['code']=='recording_approval_required'
     async with factory() as db:
         assert (await db.get(Lesson,lid)).current_version_id==old_primary
         assert (await db.get(LearningTrack,tid)).current_release_id==UUID(old['release_id'])
         assert await db.scalar(select(func.count()).select_from(LessonVersion).where(LessonVersion.lesson_id==lid))==count
         db.add(RecordingReview(render_id=rid,render_hash='c'*64,content_hash='b'*64,decision='approved',reviewer_user_id=uid,reason='Synthetic DB review fixture'));await db.commit()
+    if via_attachment:
+        wrong_hash=await post(client,f'/coord/learning/lessons/{lid}/recording',{**attachment,'render_hash':'d'*64})
+        assert wrong_hash.status_code==409
+        stale=await post(client,f'/coord/learning/lessons/{lid}/recording',{**attachment,'expected_version':1})
+        assert stale.status_code==409 and stale.json()['code']=='version_conflict'
+        attached=await post(client,f'/coord/learning/lessons/{lid}/recording',attachment,key='attach-recording')
+        assert attached.status_code==200,attached.text
+        draft=attached.json()['draft']
+        assert draft['version']==3 and draft['status']=='draft'
+        assert draft['blocks'][:2]==[{'type':'text','title':'Existing lesson','text':'Preserve this text'},{'type':'rules','items':['Preserve this rule']}]
+        assert draft['blocks'][2]['asset_id']==str(asset.id)
+        repeat=await post(client,f'/coord/learning/lessons/{lid}/recording',attachment,key='attach-recording')
+        assert repeat.json()==attached.json()
+        duplicate=await post(client,f'/coord/learning/lessons/{lid}/recording',{**attachment,'expected_version':3})
+        assert duplicate.status_code==200 and duplicate.json()['draft']['blocks']==draft['blocks'] and duplicate.json()['draft']['version']==3
+        body['lesson_draft_versions'][str(lid)]=3
+        unreviewed=await post(client,f'/coord/learning/tracks/{tid}/publish',body)
+        assert unreviewed.status_code==409 and unreviewed.json()['code']=='review_required'
+        reviewed=await post(client,f'/coord/learning/lessons/{lid}/review',{'expected_version':3})
+        assert reviewed.status_code==200,reviewed.text
+        body['lesson_draft_versions'][str(lid)]=reviewed.json()['draft']['version']
+        async with factory() as db:
+            db.add(RecordingReview(render_id=rid,render_hash='c'*64,content_hash='b'*64,decision='rejected',reviewer_user_id=uid,reason='Approval changed after attachment'));await db.commit()
+        revoked=await post(client,f'/coord/learning/tracks/{tid}/publish',body)
+        assert revoked.status_code==409 and revoked.json()['code']=='recording_approval_required'
+        async with factory() as db:
+            assert (await db.get(Lesson,lid)).current_version_id==old_primary
+            db.add(RecordingReview(render_id=rid,render_hash='c'*64,content_hash='b'*64,decision='approved',reviewer_user_id=uid,reason='Current exact approval'));await db.commit()
     published=await post(client,f'/coord/learning/tracks/{tid}/publish',body,key='publish-recording')
     assert published.status_code==200,published.text
     replay=await post(client,f'/coord/learning/tracks/{tid}/publish',body,key='publish-recording')

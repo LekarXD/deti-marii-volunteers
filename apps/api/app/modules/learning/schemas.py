@@ -203,3 +203,8 @@ class TaskSubmissionView(BaseModel):
     block_id: UUID
     answer_text: str
     version: int
+
+
+class RecordingAttach(VersionCommand):
+    render_id: UUID
+    render_hash: str = Field(pattern=r"^[0-9a-f]{64}$")

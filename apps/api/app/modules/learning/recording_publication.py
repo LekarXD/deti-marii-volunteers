@@ -71,3 +71,17 @@ async def record_recording_assets(db,principal,lesson_id,draft_version,lesson_ve
     record=getattr(recording_module(),'record_recording_publications',None)
     if record is None:raise ApiError(503,'recording_publication_unavailable','Публикация записи пока недоступна')
     await record(db,claims=owned,lesson_version_id=lesson_version_id,actor_user_id=principal.user_id)
+
+
+async def prepare_recording_attachment(db,principal,lesson_id,draft_version,render_id,render_hash):
+    # Exact approval/owner/privacy/generation remain the recording authority's
+    # decision, with its locks taken before any learning pointer/draft lock.
+    module=recording_module()
+    models=import_module('app.modules.recordings.models')
+    render=(await db.execute(select(models.RecordingRenderVersion.asset_id,models.RecordingRenderVersion.render_hash).where(models.RecordingRenderVersion.id==render_id))).one_or_none()
+    if render is None or not render.asset_id or render.render_hash!=render_hash:
+        raise ApiError(409,'recording_approval_required','Запись изменилась. Откройте актуальную согласованную версию')
+    claim=await module.prepare_recording_publication(db,principal,asset_id=render.asset_id,target_lesson_id=lesson_id,expected_draft_version=draft_version)
+    if claim.render_id!=render_id or claim.render_hash!=render_hash:
+        raise ApiError(409,'recording_approval_required','Запись изменилась. Откройте актуальную согласованную версию')
+    return claim
