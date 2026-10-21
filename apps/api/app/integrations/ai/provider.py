@@ -51,7 +51,7 @@ async def request_json(spec:TaskSpec,data:dict,config:ProviderConfig,max_tokens:
                     validated=spec.output_model.model_validate_json(content)
                     usage=result.get('usage',{}).get('total_tokens')
                     tokens=usage if type(usage) is int and 0<=usage<=10000000 else None
-                    return ProviderResult('succeeded',output=validated.model_dump(),tokens=tokens,request_id=str(result.get('id',''))[:200] or None)
+                    return ProviderResult('succeeded',output=validated.model_dump(mode='json'),tokens=tokens,request_id=str(result.get('id',''))[:200] or None)
     except (TimeoutError,httpx.TimeoutException):
         return ProviderResult('unknown','provider_timeout')
     except httpx.RequestError:
