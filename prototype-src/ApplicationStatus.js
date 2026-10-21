@@ -51,7 +51,7 @@ class Component extends DCLogic {
    onbCardCls:'card a-onb'+(showNudge?' is-nudge':''),
    onbText:onboarded?'Можно вернуться к материалам в любой момент':'4 коротких шага и тест',
    // Справку заказывают на Госуслугах; ссылка — здесь, а не в анкете, чтобы не уводить человека с формы
-   needRecord:me?.record==='Получу её'&&!completed,recordUrl:'https://www.gosuslugi.ru/600109',
+   needRecord:me?.record==='Получу её'&&!completed,recordUrl:'https://www.gosuslugi.ru/life/details/issuing_certificate_criminal_record',
    onbBar:'width:'+Math.round(100*(onboarded?total:n)/total)+'%',onbCount:(onboarded?total:n)+' из '+total,
    onbButton:onboarded?'Посмотреть ещё раз':(n?'Продолжить':'Начать'),onbBtnCls:'btn btn-lg '+(onboarded?'btn-secondary':'btn-primary'),
 
