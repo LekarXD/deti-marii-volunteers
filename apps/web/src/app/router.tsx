@@ -77,6 +77,8 @@ export const router=createBrowserRouter([{
    {path:'recordings',lazy:recording('RecordingProjectsPage')},
    {path:'recordings/:id',lazy:recording('RecordingProjectPage')},
    {path:'notifications',lazy:notification('NotificationAdminPage')},
+   {path:'reports',lazy:page(()=>import('../features/reporting'),'ReportsPage')},
+   {path:'admin',lazy:page(()=>import('../features/admin'),'AdminPage')},
    {path:'scenarios',lazy:simulator('ScenariosPage')},
    {path:'simulator/review',lazy:simulator('SimulatorReviewPage')},
    {path:'signals',lazy:followup('SignalsPage')},
