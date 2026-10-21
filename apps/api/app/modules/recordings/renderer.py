@@ -3,7 +3,7 @@ import secrets
 from datetime import timedelta
 from uuid import UUID
 from fastapi import APIRouter,Depends,Header,Query,Response,Request
-from sqlalchemy import select
+from sqlalchemy import select,update
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import resolve_principal,authz_guard
 from app.core.clock import utcnow
@@ -25,6 +25,10 @@ async def issue_renderer_ticket(db,take,*,context):
     await context.fence(db)
     owner=await db.get(RecordingProject,take.project_id)
     if context.foundation_id!=owner.foundation_id or context.payload.get('take_id')!=str(take.id) or take.state not in ('created','starting'):rejected()
+    await db.scalar(select(RecordingProject).where(RecordingProject.id==take.project_id).with_for_update())
+    take=await db.scalar(select(RecordingTake).where(RecordingTake.id==take.id).with_for_update())
+    await db.execute(update(RecordingRendererGrant).where(RecordingRendererGrant.take_id==take.id,RecordingRendererGrant.revoked_at.is_(None)).values(revoked_at=utcnow()))
+    take.readiness_state='waiting';take.readiness=None
     raw=secrets.token_urlsafe(48)
     db.add(RecordingRendererGrant(take_id=take.id,generation=take.generation,token_hash=digest(raw),purpose='bootstrap',expires_at=utcnow()+timedelta(minutes=3)))
     await db.flush()
@@ -103,6 +107,11 @@ async def readiness(body:RendererReadinessInput,scope=Depends(active_renderer)):
     db,grant,take,owner,session=scope
     if body.renderer_state_version!=take.renderer_state_version or body.projection_hash!=take.projection_hash:
         raise ApiError(409,'renderer_state_conflict','Композиция записи изменилась',current_version=take.renderer_state_version)
+    receipt_hash=service.stable_hash(body.model_dump(mode='json'))
+    if body.readiness_sequence<grant.readiness_sequence or (body.readiness_sequence==grant.readiness_sequence and receipt_hash!=grant.readiness_hash):
+        raise ApiError(409,'renderer_readiness_sequence_conflict','Наблюдение renderer устарело',current_version=grant.readiness_sequence)
+    if body.readiness_sequence==grant.readiness_sequence:
+        return grant.readiness_response
     reasons=[]
     if not body.visual_ready:reasons.append('visual_frame_unready')
     plan=take.projection['capture_plan']
@@ -124,7 +133,9 @@ async def readiness(body:RendererReadinessInput,scope=Depends(active_renderer)):
     valid_until=utcnow()+timedelta(seconds=10) if not reasons else None
     take.readiness_state='ready' if not reasons else 'blocked'
     take.readiness=body.model_dump(mode='json')|{'reasons':sorted(set(reasons)),'grant_id':str(grant.id),'received_at':utcnow().isoformat(),'valid_until':valid_until.isoformat() if valid_until else None}
-    value={'ready':not reasons,'reasons':sorted(set(reasons)),'renderer_state_version':take.renderer_state_version,'projection_hash':take.projection_hash,'capture_state':take.state,'valid_until':valid_until}
+    value={'readiness_sequence':body.readiness_sequence,'ready':not reasons,'reasons':sorted(set(reasons)),'renderer_state_version':take.renderer_state_version,'projection_hash':take.projection_hash,'capture_state':take.state,'valid_until':valid_until}
+    grant.readiness_sequence=body.readiness_sequence;grant.readiness_hash=receipt_hash
+    grant.readiness_response=value|{'valid_until':valid_until.isoformat() if valid_until else None}
     await db.commit()
     return value
 

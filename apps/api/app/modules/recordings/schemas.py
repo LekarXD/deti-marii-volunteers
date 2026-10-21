@@ -94,6 +94,7 @@ class RendererAssetProof(BaseModel):
     asset_id:UUID
     sha256:str=Field(pattern='^[0-9a-f]{64}$')
 class RendererReadinessInput(BaseModel):
+    readiness_sequence:int=Field(ge=1)
     visual_ready:bool
     renderer_state_version:int=Field(ge=1)
     projection_hash:str=Field(pattern='^[0-9a-f]{64}$')
@@ -104,6 +105,7 @@ class RendererReadinessInput(BaseModel):
     observed_tracks:list[RendererObservedTrack]=Field(max_length=64)
     asset_proofs:list[RendererAssetProof]=Field(max_length=64)
 class RendererReadinessView(BaseModel):
+    readiness_sequence:int
     ready:bool
     reasons:list[str]
     renderer_state_version:int

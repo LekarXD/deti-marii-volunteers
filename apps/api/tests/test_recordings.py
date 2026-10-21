@@ -53,7 +53,7 @@ async def test_private_renderer_scope_monotonic_fences_and_readiness_is_not_capt
         assert initial['invalidated'] and initial['provider_grant'] is None
         assert 'no-store' in boot.headers['cache-control']
         assert (await renderer.post('/api/v1/recording-renderer/bootstrap',headers={'Authorization':'Bearer '+ticket})).status_code==401
-        readiness={'visual_ready':True,'renderer_state_version':initial['renderer_state_version'],'projection_hash':initial['projection_hash'],'viewport_width':1920,'viewport_height':1080,'device_pixel_ratio':1,'render_profile_version':'opora-stage/1','observed_tracks':[],'asset_proofs':[]}
+        readiness={'readiness_sequence':1,'visual_ready':True,'renderer_state_version':initial['renderer_state_version'],'projection_hash':initial['projection_hash'],'viewport_width':1920,'viewport_height':1080,'device_pixel_ratio':1,'render_profile_version':'opora-stage/1','observed_tracks':[],'asset_proofs':[]}
         not_ready=await renderer.post('/api/v1/recording-renderer/readiness',json=readiness,headers=access)
         assert not_ready.status_code==200 and not_ready.json()['reasons']==['privacy_not_approved']
         async with SessionLocal() as db:
@@ -63,13 +63,18 @@ async def test_private_renderer_scope_monotonic_fences_and_readiness_is_not_capt
         latest=(await renderer.get('/api/v1/recording-renderer/state',headers=access)).json()
         assert latest['renderer_state_version']>initial['renderer_state_version'] and latest['scene']['revision']==initial['scene']['revision']
         assert (await renderer.post('/api/v1/recording-renderer/readiness',json=readiness,headers=access)).status_code==409
-        readiness.update(renderer_state_version=latest['renderer_state_version'],projection_hash=latest['projection_hash'])
+        readiness.update(readiness_sequence=2,renderer_state_version=latest['renderer_state_version'],projection_hash=latest['projection_hash'])
         wrong_viewport=await renderer.post('/api/v1/recording-renderer/readiness',json=readiness|{'viewport_width':1280},headers=access)
         assert 'viewport_mismatch' in wrong_viewport.json()['reasons']
+        readiness['readiness_sequence']=3
         ready=await renderer.post('/api/v1/recording-renderer/readiness',json=readiness,headers=access)
         assert ready.json()['ready'] and ready.json()['capture_state']=='created' and ready.json()['valid_until']
-        lost=await renderer.post('/api/v1/recording-renderer/readiness',json=readiness|{'visual_ready':False},headers=access)
+        lost=await renderer.post('/api/v1/recording-renderer/readiness',json=readiness|{'visual_ready':False,'readiness_sequence':4},headers=access)
         assert lost.json()['reasons']==['visual_frame_unready'] and lost.json()['valid_until'] is None
+        stale=await renderer.post('/api/v1/recording-renderer/readiness',json=readiness,headers=access)
+        assert stale.status_code==409 and stale.json()['code']=='renderer_readiness_sequence_conflict'
+        exact_replay=await renderer.post('/api/v1/recording-renderer/readiness',json=readiness|{'visual_ready':False,'readiness_sequence':4},headers=access)
+        assert exact_replay.json()==lost.json()
         assert (await renderer.get(f'/api/v1/recording-renderer/assets/{uuid4()}',headers=access)).status_code==404
         unavailable=await host.post(f'/api/v1/recording-takes/{take_id}/start',json={'expected_version':made.json()['version']},headers=headers)
         assert unavailable.status_code==503 and unavailable.json()['code']=='recording_capture_unavailable'

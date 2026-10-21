@@ -2,6 +2,8 @@ import hashlib
 import rfc8785
 from uuid import UUID,uuid4
 from sqlalchemy import select,func
+from datetime import datetime
+from app.core.clock import utcnow
 from app.core.auth import authz_guard
 from app.core.errors import ApiError
 from app.core.models import User,Session
@@ -45,7 +47,15 @@ async def project_view(db,row):
     capture=await db.scalar(select(StudioCaptureSession).where(StudioCaptureSession.project_id==row.id).order_by(StudioCaptureSession.generation.desc()).limit(1))
     takes=(await db.scalars(select(RecordingTake).where(RecordingTake.project_id==row.id).order_by(RecordingTake.number.desc()).limit(51))).all()
     return {k:getattr(row,k) for k in ('id','owner_user_id','title','mode','target_lesson_id','state','privacy_state','version')}|{'studio_session_id':capture.studio_session_id if capture else None,'takes':[t.id for t in takes[:50]],'takes_next_cursor':takes[49].number if len(takes)>50 else None,'capabilities':capabilities()}
-def take_view(row):return {k:getattr(row,k) for k in ('id','project_id','number','generation','state','version','renderer_state_version','projection_hash','readiness_state','started_at','stopped_at','error_code')}
+def readiness_current(row,now=None):
+    if row.readiness_state!='ready' or not row.readiness or row.readiness.get('renderer_state_version')!=row.renderer_state_version or row.readiness.get('projection_hash')!=row.projection_hash:return False
+    try:expiry=datetime.fromisoformat(row.readiness.get('valid_until',''))
+    except (ValueError,TypeError):return False
+    return expiry>(now or utcnow())
+def take_view(row):
+    value={k:getattr(row,k) for k in ('id','project_id','number','generation','state','version','renderer_state_version','projection_hash','readiness_state','started_at','stopped_at','error_code')}
+    if value['readiness_state']=='ready' and not readiness_current(row):value['readiness_state']='expired'
+    return value
 async def prepare(db,p,row):
     if row.state=='archived':raise ApiError(409,'recording_archived','Проект закрыт')
     session,_=await studio.create_session(db,p,'lesson_recording_project',row.id,resource_authorizer=resource_authorizer)
