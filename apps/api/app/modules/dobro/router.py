@@ -69,6 +69,14 @@ async def enrollment(activity_id: UUID, user_id: UUID, body: dto.DobroEnrollment
 async def staff_profile(user_id: UUID, body: dto.DobroProfileCommand, principal: Principal = Depends(require_permission('hours.review')), db: AsyncSession = Depends(get_db), idempotency_key: str | None = Header(default=None)):
     return await command(db, principal, f'dobro.profile:{user_id}', idempotency_key, body, lambda: service.save_profile(db, principal, user_id, body), 'hours.review')
 
+@router.get('/fund/volunteers/{user_id}/external-profiles/dobro', response_model=dto.DobroProfileView)
+async def staff_profile_read(user_id: UUID, principal: Principal = Depends(require_permission('hours.review')), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    from .models import DobroProfile
+    await service.user(db, principal, user_id)
+    row = await db.scalar(select(DobroProfile).where(DobroProfile.user_id == user_id, DobroProfile.foundation_id == principal.foundation_id))
+    return dto.DobroProfileView(profile_url=row.profile_url if row else '', version=row.version if row else 0)
+
 @router.get('/me/dobro', response_model=dto.DobroOwnView)
 async def own(principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     return await service.own_view(db, principal)

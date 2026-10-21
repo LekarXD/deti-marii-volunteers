@@ -1,0 +1,24 @@
+import {useState} from 'react';
+import {Button,Card,Dialog,ErrorState,Field,Input,LoadingState} from '../../ui';
+import {useDobroQuery,useDobroCommand,dobroStates,type DobroOwn,type DobroOwnActivity} from './api';
+import './dobro.css';
+
+export function DobroMyPath(){
+ const query=useDobroQuery<DobroOwn>('own','/me/dobro');
+ if(query.isPending)return <LoadingState label="Загружаем данные Добро.рф…"/>;
+ if(query.error)return <ErrorState error={query.error} retry={()=>void query.refetch()}/>;
+ const view=query.data;
+ return <section className="dobro-section"><div className="section-head"><h2 className="h2">Добро.рф</h2><span className="tag">Перенос вручную</span></div><Card><p className="lead">{view.entered_hours} ч отмечено как внесённые{view.hours_due>0?` · ещё ${view.hours_due} ч к переносу`:''}</p><p>Координатор переносит подтверждённые часы в электронную книжку. Участие в занятиях доступно независимо от Добро.рф.</p><DobroProfileEditor key={view.profile_version} view={view}/>{view.registration_url&&!view.profile_url&&<a className="btn btn-secondary" href={view.registration_url} target="_blank" rel="noopener noreferrer">Зарегистрироваться на Добро.рф</a>}{view.verified_organization&&<p className="meta">В настройках фонда отмечена верификация на Добро.рф.</p>}</Card>{view.activities.length?view.activities.map(item=><OwnActivity key={item.activity.id} item={item}/>):<p className="meta">После подтверждения участия здесь появится доброе дело, если координатор добавил к нему ссылку.</p>}<details><summary>Как учитываются часы</summary><p>{view.rules_note}</p></details></section>;
+}
+
+function DobroProfileEditor({view}:{view:DobroOwn}){
+ const [profile,setProfile]=useState(view.profile_url),save=useDobroCommand('/me/external-profiles/dobro','PUT');
+ return <form className="dobro-inline" onSubmit={event=>{event.preventDefault();void save.mutateAsync({profile_url:profile,expected_version:view.profile_version}).catch(()=>{});}}><Field label="Ссылка на твой профиль" hint="Необязательно. Например, https://dobro.ru/volunteers/12345"><Input type="url" value={profile} onChange={e=>setProfile(e.target.value)} maxLength={1500}/></Field><Button type="submit" variant="secondary" disabled={profile===view.profile_url} loading={save.isPending}>Сохранить</Button>{save.error&&<ErrorState error={save.error}/>}</form>;
+}
+
+function OwnActivity({item}:{item:DobroOwnActivity}){
+ const action=useDobroCommand(`/me/dobro-enrollments/${item.activity.id}`),[opting,setOpting]=useState(false);
+ const state=dobroStates[item.state];
+ async function change(next:'none'|'applied'|'not_needed'){try{await action.mutateAsync({state:next,expected_version:item.enrollment_version});setOpting(false);}catch{}}
+ return <Card className="dobro-activity"><div className="dobro-split"><h3 className="h3">{item.activity.title}</h3><span className={`tag ${item.state==='approved'?'dobro-approved':''}`}>{state}</span></div>{item.state==='none'?<><p>Откликнись на доброе дело, чтобы фонд мог внести часы в твою электронную книжку. Для длительного дела достаточно одного отклика на сезон.</p><div className="actions"><a className="btn btn-primary" href={item.activity.url} target="_blank" rel="noopener noreferrer">Откликнуться на Добро.рф</a><Button variant="secondary" disabled={!item.can_apply} loading={action.isPending} onClick={()=>void change('applied')}>Я откликнулся</Button><Button variant="ghost" disabled={!item.can_apply||action.isPending} onClick={()=>setOpting(true)}>Мне это не нужно</Button></div></>:item.state==='not_needed'?<><p>Часы этого доброго дела не готовим к переносу. Помощь фонду остаётся в «Моём пути».</p><Button variant="secondary" loading={action.isPending} onClick={()=>void change('none')}>Всё-таки нужно</Button></>:<><p>{item.state==='applied'?'Координатор проверит отклик в CRM Добро.рф.':'Координатор отметил, что отклик одобрен.'}</p><p className="lead">{item.entered_hours} ч отмечено как внесённые{item.hours_due>0?` · ${item.hours_due} ч к переносу`:item.hours_due<0?` · исправление: уменьшить на ${-item.hours_due} ч`:''}</p>{item.carry_minutes>0&&<p className="meta">Остаток {item.carry_minutes} мин учтём при следующем переносе.</p>}<div className="actions"><a className="btn btn-secondary" href={item.activity.url} target="_blank" rel="noopener noreferrer">Открыть доброе дело</a><Button variant="ghost" disabled={action.isPending} onClick={()=>setOpting(true)}>Больше не нужно</Button></div></>}{action.error&&<ErrorState error={action.error}/>}<Dialog open={opting} onClose={()=>!action.isPending&&setOpting(false)} title="Не переносить часы?" footer={<><Button onClick={()=>void change('not_needed')} loading={action.isPending}>Да, мне это не нужно</Button><Button variant="ghost" onClick={()=>setOpting(false)}>Отмена</Button></>}><p>Это не отменит участие в занятиях и не изменит подтверждённые часы в Опоре. Уже внесённые в Добро.рф часы останутся в журнале.</p></Dialog></Card>;
+}

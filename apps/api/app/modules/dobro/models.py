@@ -1,8 +1,8 @@
 """Manual external copies. These tables never grant participation or mutate minutes."""
 from datetime import date, datetime
 from uuid import UUID, uuid4
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, ForeignKeyConstraint, Integer, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, ForeignKeyConstraint, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy.dialects.postgresql import JSONB, ExcludeConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from app.core.clock import utcnow
 from app.core.db import Base
@@ -23,7 +23,8 @@ class DobroActivityLink(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     __table_args__ = (UniqueConstraint('id', 'foundation_id'),
         ForeignKeyConstraint(['opportunity_id', 'foundation_id'], ['opportunities.id', 'opportunities.foundation_id']),
-        CheckConstraint("kind IN ('long_term','one_off') AND valid_until >= valid_from AND version > 0", name='ck_dobro_activity'))
+        CheckConstraint("kind IN ('long_term','one_off') AND valid_until >= valid_from AND version > 0", name='ck_dobro_activity'),
+        ExcludeConstraint(('foundation_id', '='), ('opportunity_id', '='), (func.daterange(valid_from, valid_until, '[]'), '&&'), using='gist', name='ex_dobro_activity_no_overlap'))
 
 
 class DobroSeriesOpportunity(Base):

@@ -12,6 +12,7 @@ from app.modules.activities.assignment_models import Assignment, Attendance
 from app.modules.profile.models import ServiceTimeEntry
 from app.modules.profile.ledger import subject_lock
 from app.modules.profile.dates import local_today
+from app.modules.applications.models import Application, ApplicationRevision
 from .models import DobroActivityLink, DobroSeriesOpportunity, DobroProfile, DobroEnrollment, DobroEnrollmentEvent, DobroTransfer, DobroSettings
 from . import schemas as dto
 from .calculation import Fact, allocate, month_start, next_month, ZONE
@@ -186,6 +187,8 @@ async def transfer_period(db, principal, period, only_user=None):
     end = next_month(start)
     settings = await settings_view(db, principal)
     links, allocations, enrollments, transfers, users, profiles, fingerprint = await projections(db, principal, end)
+    structured_names = (await db.execute(select(Application.user_id, ApplicationRevision.answers).join(ApplicationRevision, Application.submitted_revision_id == ApplicationRevision.id).where(Application.foundation_id == principal.foundation_id, Application.user_id.is_not(None)))).all()
+    sort_names = {identity: (str(answers.get('lastName', '')).strip() + ' ' + str(answers.get('firstName', '')).strip()).strip().casefold() for identity, answers in structured_names}
     enrollment_map = {(row.activity_id, row.user_id): row for row in enrollments}
     allocation_map = defaultdict(list)
     history_map = defaultdict(list)
@@ -215,7 +218,7 @@ async def transfer_period(db, principal, period, only_user=None):
             snapshot_hash = payload_hash({'source': fingerprint, 'settings': settings.model_dump(mode='json'), 'activity': str(activity_id), 'user': str(user_id), 'period': period, 'state': state, 'version': enrolled.version if enrolled else 0, 'eligible': eligible, 'entered': [(str(item.id), item.hours_delta, str(item.period)) for item in history], 'due': due})
             rows.append(dto.DobroTransferRowView(id=row_id, user_id=user_id, display_name=users[user_id].display_name, profile_url=profiles.get(user_id) or None, state=state, enrollment_version=enrolled.version if enrolled else 0, minutes_in_period=raw, eligible_minutes=eligible, capped_minutes=sum(item.capped_minutes for item in current), overlap_minutes=sum(item.overlap_minutes for item in current), duration_trimmed_minutes=sum(item.duration_trimmed_minutes for item in current), carry_minutes=eligible % 60, entered_hours=entered, hours_due=due, target_total_hours=target, correction_hours=max(0, -due), hard_deadline=hard, deadline_state=deadline_state, can_mark=not historical and start <= local_today().replace(day=1) and state in ('applied', 'approved') and due != 0, historical=historical, snapshot_hash=snapshot_hash, history=[dto.DobroTransferHistoryView(id=item.id, period=item.period.strftime('%Y-%m'), hours_delta=item.hours_delta, minutes_due_snapshot=item.minutes_due_snapshot, note=item.note, entered_at=item.entered_at) for item in history], reminder_text=settings.reminder_template.replace('{имя}', users[user_id].display_name.split()[0] if users[user_id].display_name else '').replace('{ссылка}', link.url)))
         if rows:
-            rows.sort(key=lambda item: (item.display_name.casefold(), str(item.user_id)))
+            rows.sort(key=lambda item: (sort_names.get(item.user_id) or item.display_name.casefold(), str(item.user_id)))
             groups.append(dto.DobroTransferGroupView(activity=activity_view(link), rows=rows))
     active = [row for group in groups for row in group.rows if row.state != 'not_needed' and row.hours_due]
     return dto.DobroTransferPeriodView(period=period, groups=groups, total_hours_due=sum(max(0, row.hours_due) for row in active), total_people=len({row.user_id for row in active}), work_deadline=end.replace(day=settings.monthly_day), at_risk_count=sum(row.deadline_state in ('risk', 'overdue') for row in active), rules_note=settings.rules_note)
