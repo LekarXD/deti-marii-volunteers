@@ -67,7 +67,7 @@
 | `interview_booking_events` | booking, тип действия, before/after время и автор, reason, created_at |
 | `interview_results` | booking UNIQUE, outcome, public_agreement, next_task_id, author |
 | `interview_private_notes` | booking, author, private text; только закрытые staff DTO |
-| `candidate_requests` | candidate, kind `alternate_time/question/road_help`, text, owner, state, response, responded_at |
+| `candidate_requests` | candidate, kind `alternate_time/question`, text, owner, state, response, responded_at |
 
 В первой версии перерыв — после встречи. Следующая встреча начинается не раньше `end + buffer_after`. Если нужны перерывы до встречи, добавить отдельную policy, не менять скрытно смысл диапазона.
 

@@ -532,7 +532,6 @@
       if (/^Постоянно/.test(c.participation || "")) out.push('<span class="badge ok">постоянно</span>');
       if (/^Разово/.test(c.participation || "")) out.push('<span class="badge">разово</span>');
       if (age(c.birthdate) != null && age(c.birthdate) < 18) out.push('<span class="badge draft">16–17 лет</span>');
-      if (arr(c.comfort).length) out.push('<span class="badge wait">помощь с дорогой</span>');
       if (c.record === "Хочу сначала обсудить") out.push('<span class="badge draft">справка?</span>');
       return out.join("");
     };

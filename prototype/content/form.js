@@ -88,7 +88,7 @@ window.FORM = {
         { id: "specialExpText", label: "Расскажите коротко об этом опыте", type: "textarea", optional: true,
           showIf: { field: "specialExp", value: "Да" } },
         /* Ссылку на Госуслуги в анкете не даём — человек уйдёт и не вернётся. Она появится в кабинете после отправки. */
-        { id: "record", label: "Для работы с детьми нужна справка о несудимости. Она у вас есть?", type: "select", required: true,
+        { id: "record", label: "Для участия в сменах нужна справка об отсутствии судимости. Она у вас есть?", type: "select", required: true,
           options: ["Справка уже есть", "Получу её"],
           why: "Если нет — ссылку на Госуслуги дадим сразу после анкеты" },
         { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,

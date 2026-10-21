@@ -47,7 +47,7 @@ function interviewSync(){
   const person=loadCandidate();if(!person)return;
   const id=interviewIdentity(person);if(!id)return;
   const data=interviewRead(),progress=loadProgress(),old=data.profiles.find(p=>p.id===id);
-  const profile={...old,id,person,progress:{done:progress.done,testDone:progress.testDone,score:progress.score,road:progress.road,best:progress.best,attempts:progress.attempts}};
+  const profile={...old,id,person,progress:{done:progress.done,testDone:progress.testDone,score:progress.score,best:progress.best,attempts:progress.attempts}};
   // Retain a previously chosen demo meeting when moving from the old candidate flow.
   if(progress.meeting&&!old?.legacyImported&&!data.bookings.some(b=>b.candidateId===id)){
     const match=String(progress.meeting.day||'').match(/(\d{1,2})\s+октябр/),start=progress.meeting.time;

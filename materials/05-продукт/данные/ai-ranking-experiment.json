@@ -1,0 +1,15 @@
+{
+ "sample": "150 приглашений после 2026-06-21 из synthetic-invitations.csv, исход скрыт от модели",
+ "model": "Claude Haiku (агент на подписке), оценка вероятности 0–100 по каждому случаю",
+ "auc": {
+  "hand_weights": 0.781,
+  "learned_weights": 0.786,
+  "haiku_same_features": 0.768,
+  "haiku_plus_segment_and_note": 0.759,
+  "ceiling_true_model": 0.789
+ },
+ "distinct_scores": {
+  "haiku_same_features": 15,
+  "haiku_plus_segment_and_note": 33
+ }
+}

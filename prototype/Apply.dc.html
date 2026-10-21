@@ -446,7 +446,6 @@ sc-if,sc-for{display:contents}
 .a-site .brand small{color:var(--mute)}
 .a-sitenote{font-size:14px;color:var(--mute)}
 .a-welcome{margin:0 0 24px}
-.a-road{margin-top:20px}
 .a-link{display:grid;gap:6px;text-decoration:none;color:inherit}
 .a-link:hover{box-shadow:inset 0 0 0 1px var(--line-2);text-decoration:none}
 .a-path.a-path{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -579,7 +578,6 @@ sc-if,sc-for{display:contents}
 .opt-day{font-weight:600}
 .opt-time{font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums}
 .opt-where{display:inline-flex;align-items:center;gap:6px;font-size:15px}
-.a-road{margin-top:22px}
 @media (max-width:720px){.opts{grid-template-columns:1fr 1fr}.opt-time{font-size:28px}}
 /* закрытые разделы платформы, пока анкета на проверке */
 .dm .nav .is-locked{display:inline-flex;align-items:center;gap:8px;color:var(--quiet);opacity:.55;cursor:not-allowed}
@@ -956,7 +954,7 @@ window.FORM = {
         { id: "specialExpText", label: "Расскажите коротко об этом опыте", type: "textarea", optional: true,
           showIf: { field: "specialExp", value: "Да" } },
         /* Ссылку на Госуслуги в анкете не даём — человек уйдёт и не вернётся. Она появится в кабинете после отправки. */
-        { id: "record", label: "Для работы с детьми нужна справка о несудимости. Она у вас есть?", type: "select", required: true,
+        { id: "record", label: "Для участия в сменах нужна справка об отсутствии судимости. Она у вас есть?", type: "select", required: true,
           options: ["Справка уже есть", "Получу её"],
           why: "Если нет — ссылку на Госуслуги дадим сразу после анкеты" },
         { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
@@ -1282,7 +1280,7 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
   });
 }
 
-const freshProgress = () => ({ done: {}, testDone: false, score: null, road: false, tg: false });
+const freshProgress = () => ({ done: {}, testDone: false, score: null, tg: false });
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
 const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творчество', 'Помощь на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Получу её', consentPD: true, submittedAt: new Date().toISOString() };
@@ -1375,7 +1373,7 @@ function interviewSync(){
   const person=loadCandidate();if(!person)return;
   const id=interviewIdentity(person);if(!id)return;
   const data=interviewRead(),progress=loadProgress(),old=data.profiles.find(p=>p.id===id);
-  const profile={...old,id,person,progress:{done:progress.done,testDone:progress.testDone,score:progress.score,road:progress.road,best:progress.best,attempts:progress.attempts}};
+  const profile={...old,id,person,progress:{done:progress.done,testDone:progress.testDone,score:progress.score,best:progress.best,attempts:progress.attempts}};
   // Retain a previously chosen demo meeting when moving from the old candidate flow.
   if(progress.meeting&&!old?.legacyImported&&!data.bookings.some(b=>b.candidateId===id)){
     const match=String(progress.meeting.day||'').match(/(\d{1,2})\s+октябр/),start=progress.meeting.time;
