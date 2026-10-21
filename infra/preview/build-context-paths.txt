@@ -2,6 +2,7 @@ apps/api/pyproject.toml
 apps/api/requirements.lock
 apps/api/alembic.ini
 apps/api/app
+apps/api/scripts
 apps/api/migrations
 apps/web/package.json
 apps/web/index.html
