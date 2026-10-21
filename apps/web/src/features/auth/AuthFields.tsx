@@ -7,12 +7,12 @@ export const verifiedEmail = (session: Session | null): string | null => (sessio
 export const demoCodeAllowed = (challenge: ({challenge_id:string;demo_code_allowed?:boolean}) | null): boolean => Boolean(challenge?.demo_code_allowed);
 
 export function AuthFrame({title, intro, children}: {title: string; intro: string; children: ReactNode}) {
-  return <div className="auth-page"><div className="auth-intro"><p className="eyebrow">Опора · Дети Марии</p><h1 className="h1">{title}</h1><p className="lead">{intro}</p></div><Card className="auth-card">{children}</Card></div>;
+  return <div className="auth-page"><Card className="auth-card"><h1 className="h1">{title}</h1>{intro&&<p className="auth-description">{intro}</p>}{children}</Card></div>;
 }
 
 export function PasswordField({value, onChange, disabled, fresh = false}: {value: string; onChange: (value: string) => void; disabled?: boolean; fresh?: boolean}) {
   const [shown, setShown] = useState(false);
-  return <Field label={fresh ? 'Придумайте пароль' : 'Пароль'} hint={fresh ? 'От 12 до 128 символов' : undefined}><div className="auth-password"><Input value={value} onChange={event=>onChange(event.target.value)} type={shown ? 'text' : 'password'} autoComplete={fresh ? 'new-password' : 'current-password'} minLength={fresh ? 12 : 1} maxLength={128} required disabled={disabled}/><button type="button" aria-label={shown ? 'Скрыть пароль' : 'Показать пароль'} aria-pressed={shown} onClick={()=>setShown(current=>!current)} disabled={disabled}><Icon name="eye"/></button></div></Field>;
+  return <Field label={fresh ? 'Придумайте пароль' : 'Пароль'} hint={fresh ? 'От 12 символов' : undefined}><div className="auth-password"><Input value={value} onChange={event=>onChange(event.target.value)} type={shown ? 'text' : 'password'} autoComplete={fresh ? 'new-password' : 'current-password'} minLength={fresh ? 12 : 1} maxLength={128} required disabled={disabled}/><button type="button" aria-label={shown ? 'Скрыть пароль' : 'Показать пароль'} aria-pressed={shown} onClick={()=>setShown(current=>!current)} disabled={disabled}><Icon name="eye"/></button></div></Field>;
 }
 
 export function OtpField({value, onChange, disabled, demo=false}: {value: string; onChange: (value: string) => void; disabled?: boolean; demo?: boolean}) {

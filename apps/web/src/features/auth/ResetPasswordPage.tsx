@@ -23,8 +23,7 @@ export function ResetPasswordPage() {
     event.preventDefault();setBusy(true);setError(null);
     try{await api('/auth/password/reset/verify',{method:'POST',body:{challenge_id:challenge!.challenge_id,code,password}});setPassword('');const current=await refresh();navigate(current.mfa_required?`/login?next=${encodeURIComponent(next)}`:next,{replace:true});}catch(value){setError(value);}finally{setBusy(false);}
   }
-  return <AuthFrame title="Восстановить пароль" intro="Вернём доступ к вашему аккаунту.">
-    <h2 className="h2">{challenge?'Новый пароль':'Укажите почту'}</h2>
+  return <AuthFrame title={challenge?'Новый пароль':'Восстановить пароль'} intro="">
     {challenge&&<p role="status">{demo?'Введите любой код и задайте новый пароль.':`Если аккаунт с адресом ${email.trim()} существует, вы получите код для восстановления.`}</p>}
     <form className="auth-form" onSubmit={challenge?reset:requestCode}>{challenge?<><OtpField demo={demo} value={code} onChange={setCode} disabled={busy}/><PasswordField fresh value={password} onChange={setPassword} disabled={busy}/></>:<Field label="Электронная почта"><Input type="email" value={email} onChange={event=>setEmail(event.target.value)} autoComplete="email" maxLength={320} placeholder="name@example.ru" required autoFocus disabled={busy}/></Field>}{error?<ErrorState error={error}/>:null}<Button type="submit" loading={busy}>{challenge?'Сохранить пароль и войти':'Получить код'}</Button>{challenge&&<Button variant="ghost" disabled={busy||cooldown.remaining>0} onClick={()=>void requestCode()}>{cooldown.remaining>0?`Отправить код ещё раз через ${cooldown.remaining} с`:'Отправить код ещё раз'}</Button>}</form><p className="auth-help"><Link to={`/login?next=${encodeURIComponent(next)}`}>Вернуться ко входу</Link></p>
   </AuthFrame>;

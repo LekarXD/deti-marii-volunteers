@@ -3,7 +3,7 @@
 *.tmp
 .env
 .env.*
-node_modules/
+node_modules
 __pycache__/
 .venv/
 .claude/launch.json
