@@ -85,4 +85,5 @@ all independent HTTP tests and stops its API. It deletes only its temporary
 credential file, never a database. Use a different database from backend unit
 checks, since their MFA enrollment consumes the same fixture TOTP counter.
 `OPORA_G1_FIXTURE_FILE` can point to the preserved initial seed output instead.
-The runner uses port 8001; stop any previous local API before invoking it.
+The runner defaults to port 8001; set `OPORA_G1_BASE_URL=http://127.0.0.1:8002`
+for a separate QA port. Stop any previous API on the chosen port first.

@@ -22,7 +22,8 @@ if [ ! -s "$OPORA_G1_FIXTURE_FILE" ]; then
   fixture_created=1
 fi
 python3 -c 'import json,os; d=json.load(open(os.environ["OPORA_G1_FIXTURE_FILE"])); assert d["identities"]["coordinator@example.test"].get("totp_secret"), "Fresh G1 DB or original private fixture required"'
-(cd apps/api && exec python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --no-access-log) > /tmp/opora-g1-api.log 2>&1 &
+api_port=$(python3 -c 'import os,urllib.parse; print(urllib.parse.urlparse(os.environ["OPORA_G1_BASE_URL"]).port or 8001)')
+(cd apps/api && exec python3 -m uvicorn app.main:app --host 127.0.0.1 --port "$api_port" --no-access-log) > /tmp/opora-g1-api.log 2>&1 &
 api_pid=$!
 python3 - <<'PY'
 import os,time,urllib.request

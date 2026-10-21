@@ -46,6 +46,18 @@ class Client:
         self.http.close()
 
 
+class PrivateEnvironment:
+    """Keep CLI secrets out of pytest's automatic fixture argument repr."""
+    def __init__(self, **values):
+        self._values = values
+
+    def __getitem__(self, key):
+        return self._values[key]
+
+    def __repr__(self):
+        return "<private G1 environment>"
+
+
 @pytest.fixture(scope="session")
 def environment():
     base = os.environ.get("OPORA_G1_BASE_URL", "http://127.0.0.1:8001")
@@ -59,7 +71,7 @@ def environment():
     if fixture.stat().st_mode & 0o077:
         raise pytest.UsageError("G1 credential fixture must have mode 0600")
     data = json.loads(fixture.read_text())
-    return {"base": base, "origin": os.environ.get("OPORA_G1_ORIGIN", "http://127.0.0.1:5174"), "fixture": data}
+    return PrivateEnvironment(base=base, origin=os.environ.get("OPORA_G1_ORIGIN", "http://127.0.0.1:5174"), fixture=data)
 
 
 @pytest.fixture

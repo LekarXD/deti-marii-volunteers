@@ -3,6 +3,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 from uuid import uuid4
 
+import pytest
+
 
 
 PRIVATE_SENTINEL = "G1-PRIVATE-NOTE-NOT-FOR-CANDIDATE"
@@ -119,6 +121,8 @@ def test_questionnaire_booking_learning_edit_and_coordinator(candidate, stranger
     scored = candidate.command("POST", f"/assessment-attempts/{attempt['id']}/submit", {})
     assert scored["score"] == 4, "Server must compute four correct all-zero answers from published ten-question source"
     assert candidate.read(f"/assessment-attempts/{attempt['id']}/result")["score"] == 4
+    candidate.command("POST", "/policy-acknowledgements", {"assignment_id": assignment["id"]})
+    assert candidate.read("/me/preparation")["introduction_completed"] is True
     second = candidate.command("POST", f"/assessments/{assignment['assessment_version_id']}/attempts", {})
     assert second["id"] != attempt["id"]
     assert second["score"] is None
@@ -257,3 +261,121 @@ def test_logout_revokes_cookie_and_no_http_dev_inbox(candidate):
     denied = candidate.http.get("/api/v1/me/preparation", headers={"Cookie": f"opora_session={cookie}"})
     assert denied.status_code == 401
     assert candidate.http.get("/api/v1/auth/dev-inbox").status_code == 404
+
+
+def test_learning_can_finish_before_booking_without_pass_threshold(candidate, staff):
+    submit(candidate)
+    assignment = candidate.read("/me/preparation")["assignments"][0]
+    for lesson in assignment["lessons"]:
+        candidate.command("POST", f"/learning/progress/{lesson['id']}/complete", {"assignment_id": assignment["id"]})
+    attempt = candidate.command("POST", f"/assessments/{assignment['assessment_version_id']}/attempts", {})
+    # All-zero answers deliberately produce a non-perfect instructional score.
+    for question in attempt["questions"]:
+        candidate.command("POST", f"/assessment-attempts/{attempt['id']}/answers", {
+            "question_id": question["id"], "selected_option": 0,
+        })
+    scored = candidate.command("POST", f"/assessment-attempts/{attempt['id']}/submit", {})
+    assert scored["score"] == 4
+    candidate.command("POST", "/policy-acknowledgements", {"assignment_id": assignment["id"]})
+    assert candidate.read("/me/preparation")["introduction_completed"] is True
+    booking = book(candidate, slots(staff, candidate)[0])
+    assert booking["status"] == "booked"
+
+
+def test_availability_edit_races_booking_without_stale_success(candidate, staff):
+    submit(candidate)
+    selected = slots(staff, candidate)[0]
+    window = staff.read(f"/coord/interview-availability/{selected['series_id']}")
+    # Move the entire window by three hours, preserving its duration/timezone.
+    changed = {key: value for key, value in window.items()
+               if key not in {"id", "coordinator_id", "version", "exceptions"}}
+    changed.update(expected_version=window["version"],
+                   start_minute=window["start_minute"] + 180,
+                   end_minute=window["end_minute"] + 180)
+    payload = {"slot_id": selected["id"], "slot_version": selected["version"]}
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        booking_future = pool.submit(candidate.request, "POST", "/interviews", payload)
+        edit_future = pool.submit(staff.request, "PATCH", f"/coord/interview-availability/{window['id']}", changed)
+        booking, edit = booking_future.result(), edit_future.result()
+    assert (booking.status_code, edit.status_code) in {(201, 409), (409, 200)}, \
+        f"Conflicting booking/window edit must serialize: {booking.status_code}/{edit.status_code}"
+    own = candidate.read("/me/interviews")
+    if booking.status_code == 201:
+        assert own[0]["id"] == booking.json()["id"]
+        assert own[0]["starts_at"] == selected["starts_at"]
+    else:
+        assert own == []
+
+
+def test_development_delivery_is_never_claimed_as_provider_success(candidate, environment):
+    import json
+    import os
+    from pathlib import Path
+    import subprocess
+    import sys
+    email = f"delivery-{uuid4().hex[:10]}@example.test"
+    result = candidate.command("POST", "/auth/challenges", {"email": email, "purpose": "login"})
+    assert result["status"] == "queued"
+    assert result["delivery"] == "dev_inbox"
+    assert "token" not in result
+    process = subprocess.run(
+        [sys.executable, "-m", "app.cli", "dev-inbox", "--email", email],
+        cwd=os.environ.get("OPORA_G1_API_DIR", str(Path(__file__).resolve().parents[2] / "apps/api")),
+        check=True, capture_output=True, text=True,
+    )
+    rows = json.loads(process.stdout)
+    message = next(row for row in rows if row["challenge_id"] == result["challenge_id"])
+    assert message["state"] in {"queued", "dev_inbox"}
+    assert message["state"] not in {"sent", "delivered", "provider_accepted"}
+
+
+@pytest.mark.parametrize("replay", [False, True])
+def test_revoke_commits_before_waiting_staff_command_and_receipt(staff, postgres, environment, replay):
+    """Force HTTP auth to precede revoke but its mutation guard to follow commit."""
+    from hashlib import sha256
+    import time
+    identity = environment["fixture"]["identities"]["coordinator@example.test"]
+    foundation = environment["fixture"]["foundation_id"]
+    with postgres.cursor() as cursor:
+        cursor.execute("""SELECT g.id FROM permission_grants g JOIN staff_memberships m ON m.id=g.membership_id
+            WHERE m.user_id=%s AND m.foundation_id=%s AND g.permission='interviews.manage'
+              AND g.revoked_at IS NULL AND g.scope_type='foundation'""", (identity["user_id"], foundation))
+        grants = [str(row[0]) for row in cursor.fetchall()]
+    assert len(grants) == 1, "Deterministic fixture requires one active interviews.manage grant"
+    lock = int.from_bytes(sha256(f"authz:{foundation}:{identity['user_id']}".encode()).digest()[:8], "big", signed=True)
+    day = date.today() + timedelta(days=4000 + int(uuid4().hex[:4], 16) % 3000)
+    body = {"local_start_date": day.isoformat(), "start_minute": 600, "end_minute": 720,
+            "timezone": "Europe/Moscow", "recurrence": "once", "duration_minutes": 30,
+            "buffer_after_minutes": 10, "venue": "Проверка отзыва", "active": True}
+
+    key = str(uuid4())
+    if replay:
+        staff.command("POST", "/coord/interview-availability", body, key)
+
+    def wait_for_waiters(expected):
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            with postgres.cursor() as cursor:
+                cursor.execute("""SELECT count(*) FROM pg_locks WHERE locktype='advisory' AND NOT granted
+                    AND database=(SELECT oid FROM pg_database WHERE datname=current_database())""")
+                if cursor.fetchone()[0] >= expected:
+                    return
+            time.sleep(.02)
+        raise AssertionError(f"Expected {expected} HTTP requests waiting on shared authz guard")
+
+    try:
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            with postgres.transaction():
+                postgres.execute("SELECT pg_advisory_xact_lock(%s)", (lock,))
+                revoke = pool.submit(staff.request, "POST", f"/coord/staff/grants/{grants[0]}/revoke", {})
+                wait_for_waiters(1)
+                command = pool.submit(staff.request, "POST", "/coord/interview-availability", body, key)
+                wait_for_waiters(2)
+            revoked, denied = revoke.result(), command.result()
+        assert revoked.status_code == 200
+        assert denied.status_code == 403, \
+            f"A command ordered after committed revoke must fail before action or receipt: {denied.status_code}"
+    finally:
+        staff.command("POST", "/coord/staff/grants", {
+            "user_id": identity["user_id"], "permission": "interviews.manage", "scope_type": "foundation",
+        })
