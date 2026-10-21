@@ -1,0 +1,1011 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Фонд: собеседования и доступность — Опора</title><script src="./support.js"></script></head><body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F0ECE3}
+.dm{--page:#F0ECE3;--paper:#FFFFFF;--soft:#F6F3EE;--soft-2:#E8E3D8;--line:#E9E4DA;--line-2:#D6D0C3;--ink:#12141A;--ink-2:#3B3E46;--mute:#5E5A52;--quiet:#8C877C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFE9DC;--yellow:#FFB93F;--yellow-ink:#7A4E00;--yellow-tint:#FFF1D2;--blue:#0F3DA7;--blue-tint:#E7ECF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DDF0E2;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE5E1;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE4ED;--shadow:0 4px 14px rgba(18,20,26,.06);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,185,63,.45)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:18px;height:18px}.ic-lg{width:26px;height:26px}.ic-xl{width:36px;height:36px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 80px}
+.top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand . end" "nav nav nav";align-items:center;gap:14px 16px;margin-bottom:40px}
+.top > .brand{grid-area:brand;justify-self:start}
+.top > .nav{grid-area:nav;justify-self:start}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:13px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--ink);color:#fff}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.top-end{grid-area:end;justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:9px;height:9px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink-2);font-size:15px;font-weight:500;text-decoration:none;white-space:nowrap}
+.role:hover{color:var(--ink);text-decoration:none}
+.avatar{width:44px;height:44px;flex:0 0 44px;border-radius:50%;display:inline-grid;place-items:center;font-size:15px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:36px;height:36px;flex-basis:36px;font-size:13px}
+.avatar-lg{width:72px;height:72px;flex-basis:72px;font-size:24px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+.display{margin:0;font-size:56px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:40px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:28px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:12px 0 0;font-size:18px;line-height:1.5;color:var(--ink-2);max-width:60ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:15px;line-height:1.45;color:var(--mute)}
+.eyebrow{font-size:15px;font-weight:600;color:var(--ink-2)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:56px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:18px}
+.card{background:var(--paper);border-radius:28px;padding:28px 32px}
+.card-soft{background:var(--soft);border-radius:28px;padding:28px 32px}
+.card-hero{background:var(--yellow);border-radius:32px;padding:40px 44px;color:var(--ink)}
+.card-hero .lead,.card-hero .p{color:var(--ink)}
+.card-hero .meta{color:var(--ink-2)}
+.card-hero .btn-secondary{background:transparent;border-color:rgba(18,20,26,.35)}
+.card-hero .btn-secondary:hover{border-color:var(--ink)}
+.card-hero .btn-ghost{color:var(--ink)}
+.card-hero .btn-ghost:hover{background:rgba(255,255,255,.35)}
+.card-hero .bar{background:rgba(18,20,26,.14)}
+.card-hero .bar > i{background:var(--ink)}
+.card-dark{background:var(--ink);color:#fff;border-radius:32px;padding:40px 44px}
+.card-tight{padding:18px 22px;border-radius:22px}
+.ai-box{background:#F3EFFD;border-radius:24px;padding:22px 26px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.divider{height:1px;background:var(--line);border:0;margin:20px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:18px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;border:1px solid transparent;font-size:16px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:#2B2E37}
+.btn-accent{background:var(--orange);color:var(--ink)}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:40px;padding:0 16px;font-size:15px}
+.btn-lg{height:56px;padding:0 28px;font-size:17px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft-2);color:var(--mute);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;font-size:14px;font-weight:500;white-space:nowrap;background:var(--soft-2);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:14px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:var(--ink-2)}
+.dot::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--quiet);flex:0 0 9px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:0;background:var(--paper);font-size:15px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.chip.is-on{background:var(--ink);color:#fff}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--paper)}
+.seg button{height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:15px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line-2);overflow-x:auto}
+.tabs button{height:50px;padding:0 18px;border:0;background:transparent;font-size:16px;font-weight:600;color:var(--mute);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.label{font-size:15px;font-weight:600;color:var(--ink)}
+.input,.textarea,.select{width:100%;min-height:52px;padding:13px 16px;border-radius:14px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:140px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:15px;color:var(--mute)}
+.err{font-size:15px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:16px;color:var(--ink-2)}
+.check input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--ink);flex:0 0 22px}
+.toggle{position:relative;width:48px;height:28px;flex:0 0 48px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:23px}
+.kpi{position:relative;display:flex;flex-direction:column;gap:8px;padding:26px 28px;border-radius:28px;background:var(--paper);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{position:relative;font-size:16px;color:var(--ink-2);z-index:1}
+.kpi-delta{font-size:15px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:72px;height:64px;left:14px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:10px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}.bar-ink > i{background:var(--ink)}
+.tbl{display:grid}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:16px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-row:last-child{border-bottom:0}
+.tbl-head{font-size:15px;font-weight:600;color:var(--mute);padding-top:8px;padding-bottom:12px}
+.scroll-x{overflow-x:auto}
+.art{width:60px;height:60px;flex:0 0 60px;border-radius:20px;display:grid;place-items:center}
+.art .ic{width:26px;height:26px}
+.art-lg{width:100%;height:150px;border-radius:24px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+.bubble{max-width:72%;padding:14px 18px;border-radius:22px;background:var(--soft);color:var(--ink);font-size:16px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F3EFFD}
+.cite{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:15px;color:var(--ink-2)}
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:0 0 32px;padding:6px;border-radius:999px;background:#E3DDD0}
+.demo-cap{font-size:14px;font-weight:600;color:var(--mute);padding:0 8px 0 10px}
+.demo button{height:34px;padding:0 14px;border-radius:999px;border:0;background:transparent;font-size:14px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:40px}.h1{font-size:30px}.h2{font-size:24px}.card,.card-soft{padding:22px 20px;border-radius:24px}.card-hero,.card-dark{padding:28px 22px;border-radius:26px}.top{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "end" "nav"}.top-end{justify-self:start;flex-wrap:wrap}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-when{margin:10px 0 0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center;color:var(--ink)}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.hero-note{margin-top:24px;padding:18px 22px;border-radius:22px;background:rgba(255,255,255,.7);display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.match{display:flex;flex-direction:column;gap:14px;min-height:100%;color:inherit;text-decoration:none}
+.match:hover{text-decoration:none}
+.match:hover .h3{color:var(--blue)}
+.match-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.score{display:inline-flex;align-items:baseline;gap:4px;font-size:28px;font-weight:600;color:var(--violet);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.formula{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:16px}
+.formula div{padding:14px 16px;border-radius:16px;background:var(--paper);font-size:15px;color:var(--ink-2)}
+.formula b{display:block;font-size:24px;color:var(--ink);font-variant-numeric:tabular-nums}
+.ask{display:flex;gap:10px;margin-top:16px}
+.ask .input{flex:1 1 auto}
+.big{font-size:56px;font-weight:600;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums}
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-copy{flex:1 1 560px;min-width:0}
+.hero-title{margin:10px 0 0;font-size:52px;font-weight:600;line-height:1.05;letter-spacing:-.035em;text-wrap:balance}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:24px}
+.subnav{margin:-16px 0 32px;gap:8px}
+.card-link{display:flex;flex-direction:column;gap:18px;color:var(--ink);text-decoration:none}
+.card-link:hover{text-decoration:none}.card-link:hover .h3{color:var(--blue)}
+.card-foot{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.field-wide{grid-column:1/-1}.filters{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:24px}
+.filters .input{flex:1 1 260px}.section-head .input{max-width:320px}
+.row-button{width:100%;padding:18px 0;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;display:flex;align-items:center;gap:16px}
+.row-button:first-child{border-top:0}.row-button:hover .li-title{color:var(--blue)}
+.card.row-button{background:var(--paper)}
+.profile-photo{width:84px;height:84px;flex:0 0 84px;border-radius:24px;object-fit:cover;background:var(--yellow-tint)}
+.profile-photo-lg{width:168px;height:168px;flex-basis:168px;border-radius:28px;font-size:52px}
+.profile-photo:not(img){display:grid;place-items:center;font-size:28px;font-weight:600}
+.profile-photo-lg:not(img){font-size:52px}.hint{padding:18px 22px;border-radius:22px;background:var(--green-tint);color:var(--green-ink);margin:20px 0 0;font-size:16px}
+.profile-photo.av-o{background:var(--orange-tint)}.profile-photo.av-v{background:var(--violet-tint)}.profile-photo.av-b{background:var(--blue-tint)}.profile-photo.av-g{background:var(--green-tint)}
+.error{padding:16px 20px;border-radius:18px;background:var(--red-tint);color:var(--red-ink);margin:16px 0}
+.count-big{font-size:44px;line-height:1;letter-spacing:-.03em;font-weight:600;font-variant-numeric:tabular-nums}
+.metric-row{display:flex;flex-wrap:wrap;gap:24px 44px;margin:24px 0}.metric-row div{display:flex;flex-direction:column;gap:8px}
+.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:24px}
+.day{min-height:96px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;border:0;border-radius:20px;background:var(--paper);padding:16px;font-size:16px}
+.day.is-on{background:var(--ink);color:#fff}.day.has-event{box-shadow:inset 0 0 0 2px var(--orange)}
+.day.is-on .strong,.day.is-on .meta{color:#fff}
+.calendar-cap{font-size:15px;color:var(--mute);text-align:center}
+.checkline{display:flex;gap:16px;align-items:center;padding:20px 0;border-top:1px solid var(--line)}.checkline:first-child{border-top:0}
+.checkline input{width:24px;height:24px;accent-color:var(--ink);flex:0 0 24px}
+.timeline{border-left:2px solid var(--line-2);padding-left:24px}.timeline .li{align-items:flex-start}
+.steps{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:24px}.step{display:flex;align-items:center;gap:10px;color:var(--mute)}
+.step.is-on{color:var(--ink);font-weight:600}.num-dot{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:var(--soft-2);flex:0 0 32px}
+.step.is-on .num-dot{background:var(--ink);color:#fff}.note-text{white-space:pre-line}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.group-card{display:flex;gap:20px;align-items:flex-start}.group-card .grow{min-width:0}
+.dm .grid-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}.dm .grid-3{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.dm .textarea{min-height:120px}.dm .chips a:hover{text-decoration:none}.dm .btn,.dm .chip,.dm .seg button{max-width:100%}
+.dm .hero-title,.dm .li-title,.dm .h3{overflow-wrap:anywhere}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:720px){.hero-title{font-size:36px}.hero-art{width:112px;height:112px;flex-basis:112px}.hero-art .ic{width:48px;height:48px}.field-grid{grid-template-columns:minmax(0,1fr)}.calendar{gap:5px}.day{min-height:64px;padding:8px;border-radius:14px}.day .meta{display:none}.profile-photo-lg{width:112px;height:112px;flex-basis:112px}.group-card{gap:14px}.group-card .profile-photo{width:60px;height:60px;flex-basis:60px}.demo{border-radius:24px}.hero-copy{flex-basis:100%}.row-button,.li{flex-wrap:wrap}.subnav .chip{height:40px;padding:0 14px}.metric-row{gap:22px}.btn{white-space:normal;text-align:center;line-height:1.25}}
+/* Schedule: calendar first, editing in a separate panel. */
+.p-heading{margin-bottom:28px}.p-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.p-month{font-size:28px;text-transform:capitalize;min-width:180px}.p-arrow{background:var(--paper);width:40px;height:40px}
+.p-filters{display:grid;grid-template-columns:minmax(0,1fr) 220px 190px;gap:12px;margin-bottom:20px}
+.p-filters .input,.p-filters .select{height:48px;min-height:48px;padding:10px 16px}
+.p-attention{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 22px;border-radius:20px;background:var(--yellow);margin-bottom:24px}
+.p-workspace{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}.p-calendar-col{min-width:0}
+.p-calendar.card{padding:14px 12px 12px;border-radius:28px}.p-calendar-head{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding:0 0 12px}
+.p-calendar-head span{font-size:15px;color:var(--mute);text-align:center}.p-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.p-day{position:relative;min-height:116px;padding:7px 4px;border-top:1px solid var(--line);border-left:1px solid var(--line);min-width:0}
+.p-day:nth-child(7n+1){border-left:0}.p-day.is-outside{background:var(--soft)}.p-day.is-selected{background:var(--yellow-tint);border-radius:12px}
+.p-date{width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;font-size:16px;font-weight:600;margin:0 0 6px 3px}
+.is-selected .p-date{background:var(--ink);color:#fff}.is-today:not(.is-selected) .p-date{background:var(--orange-tint);color:var(--orange-ink)}.is-outside .p-date{color:var(--mute)}
+.p-day-events{display:flex;flex-direction:column;gap:5px}.p-event{display:flex;flex-direction:column;gap:2px;width:100%;padding:7px 6px;border:0;border-radius:8px;text-align:left;background:var(--blue-tint);color:var(--blue);font-size:15px;line-height:1.25;overflow:hidden}
+.p-event span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.p-event.is-full{background:var(--green-tint);color:var(--green-ink)}.p-event.is-cancelled{background:var(--soft-2);color:var(--mute);text-decoration:line-through}
+.p-event:hover{box-shadow:inset 0 0 0 1px currentColor}.p-more{background:transparent;border:0;text-align:left;font-size:15px;color:var(--blue);padding:4px 6px}
+.p-mobile-count{display:none}.p-month-grid.is-week .p-day{min-height:260px}.p-agenda .section-head{margin:0 0 14px}.p-agenda-card.card,.p-selected.card{padding:22px 24px}
+.p-agenda-item{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;border:0;background:transparent;padding:16px 0;text-align:left;border-bottom:1px solid var(--line)}
+.p-agenda-item:first-child{padding-top:0}.p-agenda-item:last-child{border:0;padding-bottom:0}.p-agenda-item.is-on .h3{color:var(--blue)}.p-selected{margin-top:0}.p-agenda-card+.p-selected{margin-top:20px}.p-selected .li{padding:12px 0;gap:12px}.p-selected .section-head{gap:12px}
+.p-list-date{width:54px;flex:0 0 54px;text-align:center;display:flex;flex-direction:column;line-height:1.3}.p-list-date b{font-size:28px;letter-spacing:-.02em}.p-list-date span{font-size:15px;color:var(--mute)}
+.p-list-item .dot{max-width:180px}.p-overlay{position:fixed;inset:0;z-index:1000;background:rgba(18,20,26,.32);display:flex;justify-content:flex-end;overflow:hidden}
+.p-editor{display:flex;flex-direction:column;width:620px;max-width:100%;height:100%;background:var(--page);box-shadow:-8px 0 40px rgba(18,20,26,.12)}
+.p-editor-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;border-bottom:1px solid var(--line-2)}.p-editor-head .meta{margin:0 0 4px}
+.p-editor-body{padding:24px 28px;overflow-y:auto;min-height:0;flex:1}.p-editor-body .card{padding:24px}.p-editor-body .field-grid{gap:20px}.p-editor-body .p-scope{margin-bottom:24px}
+.p-editor-foot{display:flex;gap:12px;padding:20px 28px;border-top:1px solid var(--line-2);background:var(--paper)}.p-confirm{width:480px;max-width:calc(100% - 32px);margin:auto}
+.p-notice{position:fixed;z-index:1100;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:8px 12px 8px 24px;border-radius:999px;background:var(--ink);color:#fff;box-shadow:var(--shadow);max-width:calc(100% - 32px)}.p-notice .iconbtn{color:#fff;flex:0 0 44px}
+@media(max-width:1100px){.p-workspace{grid-template-columns:minmax(0,1fr)}.p-agenda{display:grid;grid-template-columns:1fr 1fr;gap:16px}.p-agenda>.section-head{grid-column:1/-1;margin-bottom:0}.p-selected{margin-top:0}}
+@media(max-width:720px){.p-toolbar .toolbar{gap:8px}.p-month{font-size:24px;min-width:150px}.p-toolbar .seg{width:100%;justify-content:center}.p-toolbar .seg button{flex:1}.p-filters{grid-template-columns:1fr 1fr}.p-filters>.field:first-child{grid-column:1/-1}.p-filters .input,.p-filters .select{font-size:15px;padding:10px 12px}.p-attention{align-items:flex-start;flex-direction:column;gap:4px;padding:16px 18px}.p-attention .btn{padding:0}.p-calendar.card{padding:14px 7px 7px;border-radius:24px}.p-day{min-height:70px;padding:7px 2px}.p-date{width:30px;height:30px;margin:0 auto 4px}.p-day-events{display:none}.p-mobile-count{display:block;text-align:center;font-size:15px;color:var(--blue)}.p-agenda{grid-template-columns:minmax(0,1fr)}.p-month-grid.is-week .p-day{min-height:90px}.p-calendar-head span{font-size:15px}.p-editor-head,.p-editor-body{padding:20px}.p-editor-body .card{padding:20px}.p-editor-head .h2{font-size:24px}.p-editor-body .field-grid{grid-template-columns:minmax(0,1fr)}.p-editor-foot{padding:16px 20px}.p-editor-body .p-scope{width:100%;display:flex}.p-scope button{padding:0 12px!important;flex:1}.p-list-item .dot{max-width:none}.p-notice{border-radius:20px;font-size:15px;bottom:12px}.p-heading{align-items:center}.p-heading .btn{height:44px;padding:0 18px;font-size:15px}}
+/* Built-in selection controls share the original surfaces and focus treatment. */
+.c-trigger{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;text-align:left;cursor:pointer;background:var(--paper);color:var(--ink);font-weight:400;line-height:1.35;height:auto;min-height:56px}.c-trigger span:first-child{min-width:0;overflow-wrap:anywhere}.c-trigger .ic{flex:0 0 22px;width:22px;height:22px}.c-chevron{width:9px;height:9px;border-right:1.5px solid;border-bottom:1.5px solid;transform:rotate(45deg);margin:0 4px 5px;flex:0 0 9px}.c-select{position:relative;min-width:0}
+.c-menu,.c-role-menu{background:var(--paper);border:1px solid var(--line-2);border-radius:20px;padding:8px;margin-top:8px;box-shadow:0 8px 24px rgba(18,20,26,.06)}.p-filters .c-menu{position:absolute;top:100%;left:0;right:0;z-index:10;margin-top:6px}.c-options{max-height:248px;overflow-y:auto;margin-top:8px;overscroll-behavior:contain}.c-option{display:block;position:relative;width:100%;padding:13px 38px 13px 14px;background:transparent;border:0;border-radius:12px;text-align:left;color:var(--ink);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere}.c-option:hover{background:var(--soft)}.c-option.is-on{background:var(--yellow-tint)}.c-option.is-on:after{content:'✓';position:absolute;right:14px;top:13px}.c-role-menu>.input{min-height:48px;height:48px;padding:12px 14px}.c-menu-foot{border-top:1px solid var(--line);margin-top:8px;padding:12px 6px 4px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;font-size:15px}.c-menu-foot .btn{padding:0;height:36px;gap:6px}.c-empty{padding:12px}.c-quick{background:var(--soft);padding:16px;border-radius:14px;margin-top:12px;display:flex;flex-direction:column;gap:16px}.c-quick .actions{margin-top:0}.c-quick .textarea{min-height:90px}
+.c-date-overlay{position:fixed;inset:0;z-index:1200;background:rgba(18,20,26,.32);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}.c-date-dialog.card{width:396px;max-width:100%;padding:24px;box-shadow:var(--shadow);border-radius:28px}.c-date-dialog .section-head{margin-bottom:18px;gap:8px}.c-date-dialog .section-head .h3{font-size:22px}.c-date-toolbar{display:flex;align-items:center;gap:4px;margin-bottom:18px}.c-date-toolbar .iconbtn{width:34px;height:40px;flex:0 0 34px}.c-month-label{border:0;background:transparent;text-transform:capitalize;font-size:18px;font-weight:600;flex:1;text-align:left;padding:8px 2px}.c-year.input{width:86px;min-height:44px;height:44px;padding:8px 10px;font-size:17px;border-radius:12px}.c-date-week,.c-date-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.c-date-week{margin-bottom:8px;text-align:center;color:var(--mute);font-size:15px}.c-date{border:0;background:transparent;border-radius:50%;height:42px;width:100%;font-size:16px;color:var(--ink);display:grid;place-items:center}.c-date:hover{background:var(--yellow-tint)}.c-date.is-outside{color:var(--mute)}.c-date.is-today{box-shadow:inset 0 0 0 1px var(--orange)}.c-date.is-on{background:var(--ink);color:#fff;box-shadow:none}.c-date-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:16px;margin-top:16px}.c-date-foot .btn{padding:0 12px;font-size:15px}.c-month-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.c-month{border:0;border-radius:12px;background:var(--soft);padding:14px 6px;text-transform:capitalize;font-size:16px}.c-month.is-on{background:var(--ink);color:#fff}
+.r-tools{display:flex;justify-content:space-between;gap:24px;margin:0 0 24px;align-items:center}.r-tools .field{max-width:520px;flex:1}.r-workspace{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);gap:24px;align-items:start}.r-list.card{padding:12px 24px}.r-role.row-button{gap:16px;padding:20px 0;border-radius:0}.r-role.is-on .h3{color:var(--blue)}.r-role-note{display:block;margin-top:8px;line-height:1.45}.r-detail>.field{margin-top:22px}.r-detail>.checkline{margin-top:20px}.r-detail .actions{gap:10px}.r-usage{margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}.r-usage .p{font-size:16px;margin-bottom:12px}
+@media(max-width:720px){.c-date-dialog.card{padding:20px;border-radius:24px}.c-date{height:38px}.c-month-label{font-size:17px}.c-date-toolbar .iconbtn{width:28px;flex-basis:28px}.c-year.input{width:78px;font-size:16px}.c-trigger{font-size:16px}.c-menu-foot{align-items:flex-start;flex-direction:column}.r-workspace{grid-template-columns:minmax(0,1fr)}.r-tools{flex-direction:column;align-items:stretch;gap:16px}.r-tools .field{max-width:none}.r-tools .seg{align-self:flex-start}.r-detail.card{padding:24px}.c-date-overlay{align-items:center}}
+
+.r-back{display:none}@media(max-width:720px){.r-workspace:not(.is-detail) .r-detail,.r-workspace.is-detail .r-list,.r-tools.is-detail{display:none}.r-back{display:inline-flex;padding:0;margin-bottom:20px}.r-role.row-button{flex-wrap:nowrap}.r-role .grow{min-width:0}.r-role .ic{flex:0 0 22px}}
+/* Interviews use the same controls and surfaces as the schedule. */
+.i-tabs{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:28px}.i-first.section{margin-top:0}.i-period{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:24px 0}.i-period>.field{width:250px;flex:0 0 250px}.i-booking-date{display:flex;flex-direction:column;gap:6px;width:260px;flex:0 0 260px}.i-booking{gap:20px}.i-note{display:block;margin:8px 0 0;line-height:1.45}.i-candidate{gap:20px}.i-candidate .grow{min-width:0}.i-candidate-stage{display:flex;flex-direction:column;gap:6px;flex:0 0 240px;text-align:right;font-size:16px}.i-availability{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}.i-day.card{padding:24px}.i-day .section-head{margin-bottom:16px}.i-window+.i-window{border-top:1px solid var(--line);padding-top:24px;margin-top:24px}.i-window-head{display:flex;flex-wrap:wrap;align-items:center;gap:14px}.i-window-head>b{font-size:22px}.i-times{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.i-time{display:flex;flex-direction:column;gap:4px;border-radius:14px;background:var(--green-tint);padding:10px 14px;color:var(--green-ink);font-size:15px;min-width:84px}.i-time.is-busy{background:var(--blue-tint);color:var(--blue)}.i-time.is-closed{background:var(--soft);color:var(--mute)}.i-times span span{font-size:15px}.i-slot-days.card{padding:8px 28px}.i-slot-day{padding:24px 0;border-bottom:1px solid var(--line)}.i-slot-day:last-child{border:0}.i-slot-day>.h3{margin-bottom:16px}.i-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}.i-slot{background:var(--paper);border:1px solid var(--line-2);border-radius:18px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:8px;color:var(--ink);font-size:16px;line-height:1.4}.i-slot b{font-size:18px}.i-slot span{font-size:15px;color:var(--mute)}.i-slot.is-on{border:2px solid var(--ink);padding:15px;background:var(--yellow-tint)}.i-slot:hover{border-color:var(--ink)}.i-profile{width:720px}.i-profile .p-editor-body>.card{padding:24px}.i-profile .p-editor-body{overflow-x:hidden}.i-assign-period{justify-content:space-between;flex-wrap:nowrap;font-size:16px;margin:16px 0}.i-assign-period>span{flex:1;text-align:center}.i-answer{border-top:1px solid var(--line);padding:16px 0}.i-answer:first-of-type{margin-top:16px}.i-answer p{margin:8px 0 0}.i-contact,.i-answer p{overflow-wrap:anywhere}.i-request{margin-top:24px;background:var(--yellow-tint)}.i-result{margin-top:24px;border-top:1px solid var(--line);padding-top:20px}
+@media(max-width:720px){.i-tabs{align-items:flex-start;flex-direction:column;gap:14px}.i-tabs .seg{display:flex;width:100%}.i-tabs .seg button{flex:1;padding:10px 14px;height:auto;min-height:44px;font-size:15px;white-space:normal;line-height:1.3}.i-period{align-items:stretch;flex-direction:column;gap:14px}.i-period>.field{width:100%;flex-basis:auto}.i-period .toolbar{flex-wrap:wrap;gap:8px}.i-period .toolbar>span{flex:1;min-width:190px;font-size:16px}.i-booking.row-button,.i-candidate.row-button{position:relative;flex-direction:column;align-items:flex-start;gap:12px;padding-right:32px}.i-booking-date{width:auto;flex-basis:auto;font-size:16px}.i-candidate-stage{flex-basis:auto;text-align:left;font-size:16px}.i-booking>.ic,.i-candidate>.ic{position:absolute;right:0;top:24px}.i-availability{grid-template-columns:minmax(0,1fr)}.i-day.card{padding:22px}.i-slot-days.card{padding:0 20px}.i-profile .p-editor-body>.card{padding:20px}.i-assign-period{font-size:15px}.i-slot{padding:14px}.i-slot.is-on{padding:13px}.i-time{min-width:78px}.i-slot-day>.h3{font-size:18px}}
+/* Coordinator workspace: one navigation and a clear working area. */
+.work-app{max-width:1280px;margin:0 auto;padding:20px 32px 64px}.work-header{display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;margin-bottom:36px;position:relative;z-index:100}.work-header-end{display:flex;align-items:center;gap:12px}.work-header>.brand{justify-self:start}.work-topnav{grid-column:1/-1;display:flex;align-items:center;gap:6px;background:var(--paper);border-radius:999px;padding:6px;justify-self:start;box-shadow:var(--shadow)}.work-link{display:flex;align-items:center;gap:9px;min-height:44px;padding:11px 16px;border-radius:14px;color:var(--ink);font-size:16px;line-height:1.35;text-decoration:none}.work-link:hover{background:var(--soft);text-decoration:none}.work-link.is-current{background:var(--ink);color:var(--paper);font-weight:600}.work-topnav>.work-link{border-radius:999px;min-height:48px}.work-dropdown{position:relative}.work-dropdown>summary{display:flex;align-items:center;gap:9px;min-height:48px;padding:11px 18px;list-style:none;cursor:pointer;border-radius:999px;font-size:16px;color:var(--ink)}.work-dropdown>summary::-webkit-details-marker{display:none}.work-dropdown>summary>.ic:last-child{width:16px;height:16px;margin-left:3px;transition:transform .15s}.work-dropdown[open]>summary>.ic:last-child{transform:rotate(180deg)}.work-dropdown.is-current>summary{background:var(--ink);color:var(--paper);font-weight:600}.work-dropdown:not(.is-current)>summary:hover,.work-dropdown:not(.is-current)[open]>summary{background:var(--soft)}.work-dropdown-panel{position:absolute;left:0;top:calc(100% + 12px);width:280px;padding:10px;background:var(--paper);border:1px solid var(--line);border-radius:24px;box-shadow:0 12px 40px rgba(18,20,26,.12);z-index:200}.work-dropdown-panel .work-link.is-current{background:var(--soft);color:var(--ink)}.work-dropdown-panel .work-link.is-current::after{content:'✓';margin-left:auto;color:var(--green-ink)}.work-nav-group{margin-top:20px}.work-nav-group>h2{font-size:15px;font-weight:500;color:var(--mute);padding:0 16px;margin:0 0 6px}.work-mobile-links .work-link.is-current{background:var(--soft);color:var(--ink)}.work-content{min-width:0;container-type:inline-size}.work-context{font-size:15px;color:var(--mute);margin:0 0 14px}.work-content .head{margin-bottom:26px}.work-content .h1{font-size:36px;line-height:1.15}.work-content .section{margin-top:32px}.work-content .card-hero{background:var(--paper);padding:26px 28px;border-radius:24px}.work-content .hero-title{font-size:30px;line-height:1.2}.work-content .hero-art{display:none}.work-content .lead{font-size:18px;line-height:1.5}.work-content .card-hero .actions{margin-top:20px}.work-content .hero-copy{flex-basis:auto}.work-content .card{border-radius:24px}.work-content .demo{display:none}.work-mobile-menu{display:none}.local-tabs{display:flex;gap:24px;overflow-x:auto;border-bottom:1px solid var(--line-2);margin:0 0 24px;scrollbar-width:thin}.local-tab{border:0;border-bottom:2px solid transparent;padding:12px 0;background:transparent;color:var(--mute);font-size:16px;white-space:nowrap;min-height:44px}.local-tab.is-on{border-color:var(--ink);color:var(--ink);font-weight:600}.work-content .i-first.section{margin-top:0}.i-list-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}.i-list-toolbar>.field{min-width:0;flex:1}.i-list-toolbar>.i-filter{width:260px;flex:0 0 260px}.i-profile-tabs{margin:0 0 20px}.i-week-layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;align-items:start}.i-days-list{display:flex;flex-direction:column;gap:6px}.i-day-choice{display:flex;flex-direction:column;gap:5px;padding:14px 16px;text-align:left;border:0;border-radius:16px;background:transparent;min-height:76px;font-size:16px;color:var(--ink)}.i-day-choice:hover{background:var(--paper)}.i-day-choice.is-on{background:var(--paper);box-shadow:inset 0 0 0 1px var(--line-2)}.i-day-choice .meta{font-size:15px}.i-day-focus .section-head{align-items:flex-start}.i-window+.i-window{margin-top:24px}.work-content .i-period{margin-top:0}.work-content .i-period .toolbar{flex:1;min-width:0}.work-content .i-period .toolbar>span{font-size:16px}.i-back{display:inline-flex;align-items:center;gap:6px}.work-content .p-editor-body .card{border-radius:20px}.record-next{display:flex;justify-content:space-between;align-items:center;gap:24px;background:var(--paper);padding:24px 28px;border-radius:24px}.record-next .h2{font-size:24px;margin:6px 0 8px}.record-next .actions{margin-top:0;flex:0 0 auto}.record-next p{margin:0}.work-mobile-menu summary{cursor:pointer}
+@container(max-width:980px){.p-workspace{grid-template-columns:minmax(0,1fr)}.p-agenda{display:grid;grid-template-columns:1fr 1fr;gap:16px}.p-agenda>.section-head{grid-column:1/-1}.i-booking-date{flex-basis:200px;width:200px}.i-candidate-stage{flex-basis:190px}}
+@media(max-width:900px){.work-app{padding:16px 24px 56px}.work-topnav{display:none}.work-mobile-menu{display:block;position:relative}.work-mobile-menu>summary{display:flex;align-items:center;gap:8px;list-style:none;background:var(--paper);padding:12px 16px;border-radius:999px;font-size:16px;min-height:48px;max-width:210px}.work-mobile-menu>summary::-webkit-details-marker{display:none}.work-mobile-menu>summary .ic{width:18px;height:18px;flex:0 0 18px}.work-mobile-menu[open]>summary .ic{transform:rotate(180deg)}.work-mobile-links{position:absolute;top:calc(100% + 12px);right:0;width:310px;max-width:calc(100vw - 32px);max-height:calc(100vh - 110px);overflow:auto;background:var(--paper);box-shadow:0 12px 40px rgba(18,20,26,.12);border:1px solid var(--line);padding:12px;border-radius:24px;z-index:200}.work-header{margin-bottom:28px}.work-view{display:none}}
+@media(max-width:720px){.work-app{padding:14px 16px 48px}.work-header{gap:12px}.work-header .brand{height:48px;padding-right:14px;gap:8px}.work-header .brand small{display:none}.work-header .mark{transform:scale(.85);transform-origin:center}.work-view{display:none}.work-content .h1{font-size:30px}.work-content .head{align-items:flex-start;gap:16px;flex-wrap:wrap}.work-content .head>.btn{min-height:44px;font-size:15px;padding:0 16px}.work-context{margin-bottom:10px}.work-content .section{margin-top:28px}.work-content .card-hero{padding:22px}.work-content .hero-title{font-size:26px}.local-tabs{gap:20px}.i-list-toolbar{align-items:stretch;flex-direction:column;gap:12px}.i-list-toolbar>.i-filter{width:100%;flex-basis:auto}.i-week-layout{display:block}.i-days-list{flex-direction:row;overflow-x:auto;gap:6px;margin:0 -2px 20px;padding:2px 2px 8px}.i-day-choice{flex:0 0 102px;min-height:88px;padding:12px;font-size:15px}.i-day-choice .meta{font-size:15px}.i-day-focus.card{padding:22px}.i-day-focus .h2{font-size:24px}.work-content .i-period .toolbar>span{min-width:160px}.record-next{align-items:flex-start;flex-direction:column;padding:22px;gap:16px}.record-next .actions{width:100%;gap:10px}.i-profile-tabs{gap:22px}.i-profile .p-editor-body{padding-top:12px}.work-content .card{border-radius:22px}}
+
+@media(max-width:720px){.i-booking-date,.i-candidate-stage{flex:0 0 auto;width:auto}.i-booking>.grow,.i-candidate>.grow{flex:0 0 auto}.i-booking.row-button,.i-candidate.row-button{flex-wrap:nowrap}}
+
+.n-role.row-button{display:grid;grid-template-columns:auto minmax(0,1fr) 20px;align-items:center;gap:16px}.n-role .h3{display:block}.n-role .meta{margin-top:5px}
+
+</style>
+</helmet>
+<div class="dm work-app"><header class="work-header"><a class="brand" href="CoordHome.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>команда фонда</small></span></a><div class="work-header-end"><a class="btn btn-ghost btn-sm work-view" href="ApplicationStatus.dc.html">Вид волонтёра</a><details class="work-mobile-menu" name="coord-navigation"><summary>Собеседования <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><nav class="work-mobile-links" aria-label="Разделы фонда"><a class="work-link" href="CoordHome.dc.html">Обзор</a><section class="work-nav-group"><h2>Волонтёры</h2><a class="work-link" href="Candidates.dc.html">Кандидаты</a><a class="work-link is-current" href="Interviews.dc.html" aria-current="page">Собеседования</a><a class="work-link" href="Volunteers.dc.html">Волонтёры</a><a class="work-link" href="Reserve.dc.html">Проверка контактов</a></section><section class="work-nav-group"><h2>Занятия</h2><a class="work-link" href="Planning.dc.html">Расписание</a><a class="work-link" href="Needs.dc.html">Возможности</a><a class="work-link" href="Roles.dc.html">Роли</a></section><section class="work-nav-group"><h2>Подопечные</h2><a class="work-link" href="Participants.dc.html">Участники</a><a class="work-link" href="Groups.dc.html">Группы</a></section><section class="work-nav-group"><h2>Ещё</h2><a class="work-link" href="Builder.dc.html">Обучение</a><a class="work-link" href="Knowledge.dc.html">База знаний</a><a class="work-link" href="Signals.dc.html">Сигналы</a><a class="work-link" href="Reports.dc.html">Отчёты</a><a class="work-link" href="Admin.dc.html">Настройки</a><a class="work-link" href="Main.dc.html">Карта прототипа</a></section></nav></details></div><nav class="work-topnav" aria-label="Разделы фонда"><a class="work-link" href="CoordHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Обзор</a><details class="work-dropdown is-current" name="coord-navigation"><summary><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg><span>Волонтёры</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="work-dropdown-panel" aria-label="Волонтёры"><a class="work-link" href="Candidates.dc.html">Кандидаты</a><a class="work-link is-current" href="Interviews.dc.html" aria-current="page">Собеседования</a><a class="work-link" href="Volunteers.dc.html">Волонтёры</a><a class="work-link" href="Reserve.dc.html">Проверка контактов</a></div></details><details class="work-dropdown" name="coord-navigation"><summary><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg><span>Занятия</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="work-dropdown-panel" aria-label="Занятия"><a class="work-link" href="Planning.dc.html">Расписание</a><a class="work-link" href="Needs.dc.html">Возможности</a><a class="work-link" href="Roles.dc.html">Роли</a></div></details><details class="work-dropdown" name="coord-navigation"><summary><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg><span>Подопечные</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="work-dropdown-panel" aria-label="Подопечные"><a class="work-link" href="Participants.dc.html">Участники</a><a class="work-link" href="Groups.dc.html">Группы</a></div></details><details class="work-dropdown" name="coord-navigation"><summary><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg><span>Ещё</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="work-dropdown-panel" aria-label="Ещё"><a class="work-link" href="Builder.dc.html">Обучение</a><a class="work-link" href="Knowledge.dc.html">База знаний</a><a class="work-link" href="Signals.dc.html">Сигналы</a><a class="work-link" href="Reports.dc.html">Отчёты</a><a class="work-link" href="Admin.dc.html">Настройки</a><a class="work-link" href="Main.dc.html">Карта прототипа</a></div></details></nav></header><main class="work-content"><p class="work-context">Волонтёры</p><div class="head"><h1 class="h1">{{pageTitle}}</h1><sc-if value="{{meetingsTab}}"><button type="button" class="btn btn-secondary" onClick="{{showAvailability}}">Настроить доступность</button></sc-if><sc-if value="{{availabilityTab}}"><button type="button" class="btn btn-ghost i-back" onClick="{{showMeetings}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg> К собеседованиям</button></sc-if><sc-if value="{{candidatesTab}}"><a class="btn btn-secondary" href="Apply.dc.html">Открыть анкету</a></sc-if></div>
+<sc-if value="{{meetingsTab}}"><div class="i-list-toolbar"><p class="meta">Московское время</p><div class="field i-filter"><label class="sr-only" for="meeting-filter">Какие встречи показать</label><div class="ui-choice" onKeyDown="{{ui_meeting_filter.key}}" onBlur="{{ui_meeting_filter.blur}}"><button type="button" class="input c-trigger" id="meeting-filter" aria-haspopup="listbox" aria-expanded="{{ui_meeting_filter.expanded}}" aria-controls="meeting-filter-options" onClick="{{ui_meeting_filter.toggle}}"><span>{{ui_meeting_filter.title}}</span><span class="c-chevron"></span></button><sc-if value="{{ui_meeting_filter.open}}"><div class="c-menu" id="meeting-filter-options" role="listbox" aria-label="Какие встречи показать"><sc-for list="{{ui_meeting_filter.options}}" as="o"><button type="button" class="{{o.cls}}" role="option" aria-selected="{{o.selected}}" onClick="{{o.pick}}">{{o.title}}</button></sc-for></div></sc-if></div></div></div><div class="card i-bookings"><sc-for list="{{bookings}}" as="b"><button type="button" class="row-button i-booking" onClick="{{b.open}}"><span class="i-booking-date"><b>{{b.dateLabel}}</b><span>{{b.timeLabel}}</span></span><span class="grow"><span class="h3">{{b.name}}</span><span class="meta i-note">{{b.where}}</span></span><span class="{{b.cls}}">{{b.statusLabel}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></sc-for><sc-if value="{{emptyBookings}}"><div class="empty"><h2 class="h3">Встреч пока нет</h2><p>Откройте свободное время — кандидаты смогут записаться после знакомства с фондом.</p><button type="button" class="btn btn-secondary" onClick="{{showAvailability}}">Настроить доступность</button></div></sc-if></div><div class="actions"><a href="Candidates.dc.html">Посмотреть кандидатов</a></div></sc-if>
+<sc-if value="{{candidatesTab}}"><div class="i-list-toolbar"><div class="field"><label class="sr-only" for="interview-search">Найти кандидата</label><input class="input" id="interview-search" placeholder="Поиск по имени или роли" value="{{query}}" onChange="{{search}}"></div><div class="field i-filter"><label class="sr-only" for="candidate-filter">Статус кандидата</label><div class="ui-choice" onKeyDown="{{ui_candidate_filter.key}}" onBlur="{{ui_candidate_filter.blur}}"><button type="button" class="input c-trigger" id="candidate-filter" aria-haspopup="listbox" aria-expanded="{{ui_candidate_filter.expanded}}" aria-controls="candidate-filter-options" onClick="{{ui_candidate_filter.toggle}}"><span>{{ui_candidate_filter.title}}</span><span class="c-chevron"></span></button><sc-if value="{{ui_candidate_filter.open}}"><div class="c-menu" id="candidate-filter-options" role="listbox" aria-label="Статус кандидата"><sc-for list="{{ui_candidate_filter.options}}" as="o"><button type="button" class="{{o.cls}}" role="option" aria-selected="{{o.selected}}" onClick="{{o.pick}}">{{o.title}}</button></sc-for></div></sc-if></div></div></div><div class="card"><sc-for list="{{people}}" as="p"><button type="button" class="row-button i-candidate" onClick="{{p.pick}}"><span class="grow"><span class="h3">{{p.name}}</span><span class="meta i-note">{{p.roles}}</span></span><span class="i-candidate-stage"><b>{{p.stage}}</b><span class="meta">{{p.progress}}</span></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></sc-for><sc-if value="{{emptyPeople}}"><div class="empty"><h2 class="h3">Кандидаты не найдены</h2><p>Измените фильтр или поисковый запрос.</p></div></sc-if></div></sc-if>
+<sc-if value="{{availabilityTab}}"><div class="i-period"><div class="toolbar"><button type="button" class="iconbtn p-arrow" aria-label="Предыдущая неделя" onClick="{{previous}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><button type="button" class="iconbtn p-arrow" aria-label="Следующая неделя" onClick="{{next}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><span>{{periodLabel}}</span><button type="button" class="btn btn-ghost btn-sm" onClick="{{today}}">Сегодня</button></div><div class="field"><label class="sr-only" for="availability-week">Перейти к дате</label><button type="button" class="input c-trigger" id="availability-week" aria-haspopup="dialog" onClick="{{ui_availability_week.open}}"><span>{{ui_availability_week.title}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></button></div></div><p class="meta">Московское время</p><div class="i-week-layout"><div class="i-days-list" role="tablist" aria-label="Дни недели"><sc-for list="{{days}}" as="d"><button type="button" class="{{d.cls}}" role="tab" aria-selected="{{d.selected}}" aria-label="{{d.label}}" onClick="{{d.pick}}"><b>{{d.short}}</b><span class="meta">{{d.summary}}</span></button></sc-for></div><section class="card i-day-focus" role="tabpanel"><div class="section-head"><h2 class="h2">{{selectedDay.label}}</h2><button type="button" class="btn btn-primary btn-sm" onClick="{{addWindow}}">Добавить время</button></div><sc-if value="{{selectedDay.empty}}"><div class="empty"><h3 class="h3">Запись на этот день не открыта</h3><p>Добавьте время, в которое можете проводить собеседования.</p></div></sc-if><sc-for list="{{selectedDay.windows}}" as="w"><div class="i-window"><div class="i-window-head"><b>{{w.time}}</b><span class="meta">{{w.repeatLabel}}</span><sc-if value="{{w.paused}}"><span class="dot">Закрыто</span></sc-if></div><p class="p i-note">{{w.description}}</p><div class="i-times"><sc-for list="{{w.slots}}" as="sl"><span class="{{sl.cls}}"><b>{{sl.time}}</b><span>{{sl.label}}</span></span></sc-for></div><div class="actions"><button type="button" class="btn btn-secondary btn-sm" onClick="{{w.edit}}">Редактировать окно</button><button type="button" class="btn btn-ghost btn-sm" onClick="{{w.toggle}}">{{w.toggleLabel}}</button></div></div></sc-for></section></div></sc-if>
+<sc-if value="{{editing}}"><div class="p-overlay" onKeyDown="{{dialogKey}}"><section class="p-editor" role="dialog" aria-modal="true" aria-labelledby="availability-title"><div class="p-editor-head"><h2 class="h2" id="availability-title">{{editorTitle}}</h2><button type="button" class="iconbtn" aria-label="Закрыть редактор доступности" autofocus="true" onClick="{{closeEditor}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="p-editor-body"><div class="card field-grid"><div class="field field-wide"><label class="label" for="interview-date">Дата</label><button type="button" class="input c-trigger" id="interview-date" aria-haspopup="dialog" onClick="{{ui_interview_date.open}}"><span>{{ui_interview_date.title}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></button></div><div class="field"><label class="label" for="interview-start">С</label><input class="input" id="interview-start" type="text" inputmode="numeric" placeholder="ЧЧ:ММ" maxlength="5" value="{{draft.start}}" onChange="{{changeStart}}"></div><div class="field"><label class="label" for="interview-end">До</label><input class="input" id="interview-end" type="text" inputmode="numeric" placeholder="ЧЧ:ММ" maxlength="5" value="{{draft.end}}" onChange="{{changeEnd}}"></div><div class="field"><label class="label" for="interview-duration">Длительность встречи</label><div class="ui-choice" onKeyDown="{{ui_interview_duration.key}}" onBlur="{{ui_interview_duration.blur}}"><button type="button" class="input c-trigger" id="interview-duration" aria-haspopup="listbox" aria-expanded="{{ui_interview_duration.expanded}}" aria-controls="interview-duration-options" onClick="{{ui_interview_duration.toggle}}"><span>{{ui_interview_duration.title}}</span><span class="c-chevron"></span></button><sc-if value="{{ui_interview_duration.open}}"><div class="c-menu" id="interview-duration-options" role="listbox" aria-label="Длительность встречи"><sc-for list="{{ui_interview_duration.options}}" as="o"><button type="button" class="{{o.cls}}" role="option" aria-selected="{{o.selected}}" onClick="{{o.pick}}">{{o.title}}</button></sc-for></div></sc-if></div></div><div class="field"><label class="label" for="interview-gap">Перерыв между встречами, мин</label><input class="input" id="interview-gap" type="number" min="0" max="60" value="{{draft.gap}}" onChange="{{changeGap}}"></div><div class="field field-wide"><label class="label" for="interview-where">Где встречаемся</label><input class="input" id="interview-where" value="{{draft.where}}" onChange="{{changeWhere}}"></div><div class="field field-wide"><label class="label" for="interview-link">Ссылка на встречу</label><input class="input" id="interview-link" type="url" placeholder="https:// — если встреча онлайн" value="{{draft.link}}" onChange="{{changeLink}}"></div><div class="field field-wide"><label class="label" for="interview-repeat">Повторение</label><div class="ui-choice" onKeyDown="{{ui_interview_repeat.key}}" onBlur="{{ui_interview_repeat.blur}}"><button type="button" class="input c-trigger" id="interview-repeat" aria-haspopup="listbox" aria-expanded="{{ui_interview_repeat.expanded}}" aria-controls="interview-repeat-options" onClick="{{ui_interview_repeat.toggle}}"><span>{{ui_interview_repeat.title}}</span><span class="c-chevron"></span></button><sc-if value="{{ui_interview_repeat.open}}"><div class="c-menu" id="interview-repeat-options" role="listbox" aria-label="Повторение"><sc-for list="{{ui_interview_repeat.options}}" as="o"><button type="button" class="{{o.cls}}" role="option" aria-selected="{{o.selected}}" onClick="{{o.pick}}">{{o.title}}</button></sc-for></div></sc-if></div></div><sc-if value="{{recurring}}"><div class="field field-wide"><label class="label" for="interview-until">Последняя дата</label><button type="button" class="input c-trigger" id="interview-until" aria-haspopup="dialog" onClick="{{ui_interview_until.open}}"><span>{{ui_interview_until.title}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></button></div><label class="check field-wide"><input type="checkbox" checked="{{noEnd}}" onChange="{{toggleNoEnd}}"><span>Без даты окончания</span></label><details class="field-wide"><summary class="h3">Пропуски</summary><div class="field" style="margin-top:20px"><label class="label" for="interview-exception">Когда не принимать записи</label><button type="button" class="input c-trigger" id="interview-exception" aria-haspopup="dialog" onClick="{{ui_interview_exception.open}}"><span>{{ui_interview_exception.title}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></button></div><button type="button" class="btn btn-secondary btn-sm" style="margin-top:12px" onClick="{{addException}}">Добавить пропуск</button><sc-for list="{{exceptions}}" as="e"><div class="li"><span class="grow">{{e.label}}</span><button type="button" class="btn btn-ghost btn-sm" onClick="{{e.remove}}">Вернуть дату</button></div></sc-for></details></sc-if></div><p class="hint">Изменение повторяющегося окна применяется ко всей серии. Назначенные встречи нужно сначала перенести, если меняются их условия.</p><sc-if value="{{hasError}}"><p class="error" role="alert">{{error}}</p></sc-if></div><div class="p-editor-foot"><button type="button" class="btn btn-primary" onClick="{{saveWindow}}">Сохранить доступность</button><button type="button" class="btn btn-ghost" onClick="{{closeEditor}}">Отмена</button></div></section></div></sc-if>
+<sc-if value="{{hasProfile}}"><div class="p-overlay" onKeyDown="{{dialogKey}}"><section class="p-editor i-profile" role="dialog" aria-modal="true" aria-labelledby="candidate-title"><div class="p-editor-head"><div><p class="meta">{{profileStage}}</p><h2 class="h2" id="candidate-title">{{profileName}}</h2></div><button type="button" class="iconbtn" aria-label="Закрыть карточку кандидата" autofocus="true" onClick="{{closeProfile}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="p-editor-body"><div class="local-tabs i-profile-tabs" role="tablist" aria-label="Карточка кандидата"><sc-for list="{{profileTabs}}" as="t"><button type="button" class="{{t.cls}}" role="tab" aria-selected="{{t.selected}}" onClick="{{t.pick}}">{{t.title}}</button></sc-for></div><sc-if value="{{profileOverview}}"><div class="card"><h3 class="h3">{{meetingLabel}}</h3><p class="p">{{meetingWhere}}</p><p class="meta">{{meetingStatus}}</p><sc-if value="{{hasJoinLink}}"><a class="btn btn-secondary btn-sm" href="{{joinLink}}" target="_blank" rel="noopener noreferrer">Открыть встречу</a></sc-if><sc-if value="{{activeMeeting}}"><div class="actions"><button type="button" class="btn btn-primary btn-sm" onClick="{{beginFinish}}">Записать итог</button><button type="button" class="btn btn-secondary btn-sm" onClick="{{beginMove}}">Перенести</button><button type="button" class="btn btn-ghost btn-sm" onClick="{{askCancel}}">Отменить встречу</button></div></sc-if><sc-if value="{{hasOtherMeeting}}"><div class="actions"><button type="button" class="btn btn-primary" onClick="{{openCurrentMeeting}}">Открыть актуальную встречу</button></div></sc-if><sc-if value="{{canAssign}}"><div class="actions"><button type="button" class="btn btn-primary" onClick="{{beginAssign}}">Назначить встречу</button></div></sc-if><sc-if value="{{notReady}}"><p class="hint">Сначала кандидат знакомится с фондом и проходит тест.</p></sc-if><sc-if value="{{cancelledMeeting}}"><p class="p">Причина отмены: {{cancelledReason}}</p></sc-if><sc-if value="{{showResult}}"><div class="i-result"><h3 class="h3">{{result}}</h3><p>{{resultPublic}}</p><sc-if value="{{hasResultNext}}"><p>Следующий контакт: {{resultNext}}</p></sc-if><details><summary>Внутренняя заметка</summary><p>{{resultPrivate}}</p></details></div></sc-if></div>
+<sc-if value="{{hasRequest}}"><div class="card i-request"><h3 class="h3">Просит другое время</h3><p>{{requestText}}</p><button type="button" class="btn btn-secondary btn-sm" onClick="{{resolveRequest}}">Запрос обработан</button></div></sc-if>
+<sc-if value="{{assigning}}"><div class="card" style="margin-top:24px"><h3 class="h3">{{assignTitle}}</h3><div class="field" style="margin:20px 0"><label class="label" for="interview-assign-date">Перейти к дате</label><button type="button" class="input c-trigger" id="interview-assign-date" aria-haspopup="dialog" onClick="{{ui_interview_assign_date.open}}"><span>{{ui_interview_assign_date.title}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></button></div><div class="toolbar i-assign-period"><button type="button" class="iconbtn p-arrow" aria-label="Предыдущая неделя выбора встречи" onClick="{{assignPrevious}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><span>{{assignPeriod}}</span><button type="button" class="iconbtn p-arrow" aria-label="Следующая неделя выбора встречи" onClick="{{assignNext}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></div><div role="radiogroup" aria-label="Свободное время встречи"><sc-for list="{{assignDays}}" as="d"><div class="i-slot-day"><h4 class="h3">{{d.label}}</h4><div class="i-slots"><sc-for list="{{d.slots}}" as="sl"><button type="button" class="{{sl.cls}}" role="radio" aria-checked="{{sl.checked}}" onClick="{{sl.pick}}"><b>{{sl.label}}</b><span>{{sl.where}}</span></button></sc-for></div></div></sc-for><sc-if value="{{emptyAssign}}"><p>На этой неделе свободного времени нет. Посмотрите другую неделю или добавьте доступность.</p></sc-if></div><div class="actions"><button type="button" class="btn btn-primary" disabled="{{cantAssign}}" onClick="{{confirmAssign}}">Подтвердить время</button><button type="button" class="btn btn-ghost" onClick="{{cancelAction}}">Отмена</button></div></div></sc-if>
+<sc-if value="{{cancelling}}"><div class="card" style="margin-top:24px"><h3 class="h3">Отменить встречу?</h3><div class="field" style="margin-top:20px"><label class="label" for="interview-cancel-reason">Причина для волонтёра</label><textarea class="textarea" id="interview-cancel-reason" value="{{cancelReason}}" onChange="{{changeCancelReason}}"></textarea></div><div class="actions"><button type="button" class="btn btn-danger" onClick="{{confirmCancel}}">Да, отменить встречу</button><button type="button" class="btn btn-ghost" onClick="{{cancelAction}}">Оставить встречу</button></div></div></sc-if>
+<sc-if value="{{finishing}}"><div class="card" style="margin-top:24px"><h3 class="h3">Итог встречи</h3><div class="field" style="margin-top:20px"><label class="label" for="interview-outcome">Следующий шаг</label><div class="ui-choice" onKeyDown="{{ui_interview_outcome.key}}" onBlur="{{ui_interview_outcome.blur}}"><button type="button" class="input c-trigger" id="interview-outcome" aria-haspopup="listbox" aria-expanded="{{ui_interview_outcome.expanded}}" aria-controls="interview-outcome-options" onClick="{{ui_interview_outcome.toggle}}"><span>{{ui_interview_outcome.title}}</span><span class="c-chevron"></span></button><sc-if value="{{ui_interview_outcome.open}}"><div class="c-menu" id="interview-outcome-options" role="listbox" aria-label="Следующий шаг"><sc-for list="{{ui_interview_outcome.options}}" as="o"><button type="button" class="{{o.cls}}" role="option" aria-selected="{{o.selected}}" onClick="{{o.pick}}">{{o.title}}</button></sc-for></div></sc-if></div></div><div class="field" style="margin-top:20px"><label class="label" for="interview-public-note">О чём договорились с волонтёром</label><textarea class="textarea" id="interview-public-note" value="{{publicNote}}" onChange="{{changePublicNote}}"></textarea></div><div class="field" style="margin-top:20px"><label class="label" for="interview-next-date">Дата следующего контакта</label><button type="button" class="input c-trigger" id="interview-next-date" aria-haspopup="dialog" onClick="{{ui_interview_next_date.open}}"><span>{{ui_interview_next_date.title}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></button></div><button type="button" class="btn btn-ghost btn-sm" onClick="{{clearNextDate}}">Без даты следующего контакта</button><div class="field" style="margin-top:20px"><label class="label" for="interview-private-note">Внутренняя заметка координатора</label><textarea class="textarea" id="interview-private-note" value="{{privateNote}}" onChange="{{changePrivateNote}}"></textarea></div><div class="actions"><button type="button" class="btn btn-primary" onClick="{{saveOutcome}}">Сохранить итог</button><button type="button" class="btn btn-ghost" onClick="{{cancelAction}}">Отмена</button></div></div></sc-if>
+<section class="card" style="margin-top:24px"><h3 class="h3">Знакомство с фондом</h3><p>{{moduleProgress}}</p><p>{{testLabel}}</p><details><summary>По шагам</summary><sc-for list="{{modules}}" as="m"><div class="li"><span class="grow">{{m.title}}</span><span>{{m.state}}</span></div></sc-for></details></section><section class="card" style="margin-top:24px"><h3 class="h3">Связь</h3><sc-if value="{{needsRoad}}"><p class="hint">Нужна помощь с дорогой</p></sc-if><p class="i-contact">{{contactText}}</p></section></sc-if><sc-if value="{{profileAnswers}}"><section><h3 class="sr-only">Анкета</h3><sc-for list="{{sections}}" as="part"><section class="card" style="margin-top:16px"><h3 class="h3">{{part.title}}</h3><sc-for list="{{part.answers}}" as="a"><div class="i-answer"><b>{{a.label}}</b><p>{{a.value}}</p></div></sc-for></section></sc-for></section></sc-if><sc-if value="{{profileHistory}}"><section class="card"><h3 class="h3">История встречи</h3><sc-if value="{{noMeeting}}"><p>Встреч ещё не было.</p></sc-if><sc-for list="{{timeline}}" as="t"><div class="li"><div><p class="meta">{{t.when}}</p><p>{{t.text}}</p></div></div></sc-for></section></sc-if><sc-if value="{{hasError}}"><p class="error" role="alert">{{error}}</p></sc-if></div><div class="p-editor-foot"><button type="button" class="btn btn-secondary" onClick="{{closeProfile}}">Закрыть карточку</button></div></section></div></sc-if>
+<sc-if value="{{notice}}"><div class="p-notice" role="status">{{notice}}<button type="button" class="iconbtn" aria-label="Закрыть уведомление" onClick="{{dismissNotice}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></sc-if><sc-if value="{{hasPageError}}"><p class="error" role="alert">{{error}}</p></sc-if>
+
+<sc-if value="{{uiDate.open}}"><div class="c-date-overlay" onKeyDown="{{uiDate.key}}"><section class="c-date-dialog card" role="dialog" aria-modal="true" aria-labelledby="ui-date-picker-title"><div class="section-head"><h2 class="h3" id="ui-date-picker-title">{{uiDate.pickerTitle}}</h2><button class="iconbtn" aria-label="Закрыть календарь" autofocus="true" onClick="{{uiDate.closeDatePicker}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="c-date-toolbar"><button class="iconbtn" aria-label="Предыдущий месяц" onClick="{{uiDate.pickerPrevious}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><button class="c-month-label" aria-label="Выбрать месяц" onClick="{{uiDate.pickerMonths}}">{{uiDate.pickerLabel}}</button><label class="sr-only" for="ui-picker-year">Год</label><input class="input c-year" type="number" id="ui-picker-year" min="1900" max="9999" value="{{uiDate.pickerYear}}" onChange="{{uiDate.changePickerYear}}"><button class="iconbtn" aria-label="Следующий месяц" onClick="{{uiDate.pickerNext}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></div><sc-if value="{{uiDate.pickerDayView}}"><div class="c-date-week"><sc-for list="{{uiDate.pickerWeekdays}}" as="w"><span>{{w.label}}</span></sc-for></div><div class="c-date-grid"><sc-for list="{{uiDate.pickerDays}}" as="d"><button class="{{d.cls}}" aria-label="{{d.aria}}" aria-pressed="{{d.pressed}}" onClick="{{d.pick}}">{{d.label}}</button></sc-for></div></sc-if><sc-if value="{{uiDate.pickerMonthView}}"><div class="c-month-grid"><sc-for list="{{uiDate.pickerMonthOptions}}" as="m"><button class="{{m.cls}}" onClick="{{m.pick}}">{{m.label}}</button></sc-for></div></sc-if><sc-if value="{{uiDate.pickerError}}"><p class="error" role="alert">{{uiDate.pickerError}}</p></sc-if><div class="c-date-foot"><button class="btn btn-ghost btn-sm" onClick="{{uiDate.pickerToday}}">Сегодня</button><sc-if value="{{uiDate.clearDateAllowed}}"><button class="btn btn-ghost btn-sm" onClick="{{uiDate.clearDate}}">Убрать дату</button></sc-if><button class="btn btn-secondary btn-sm" onClick="{{uiDate.closeDatePicker}}">Закрыть</button></div></section></div></sc-if>
+</main></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1800}}'>
+const scheduleDate = value => new Date(value + 'T12:00:00Z');
+const scheduleISO = date => date.toISOString().slice(0, 10);
+const scheduleAdd = (value, days) => {const date=scheduleDate(value);date.setUTCDate(date.getUTCDate()+days);return scheduleISO(date);};
+const scheduleMonday = value => scheduleAdd(value,-((scheduleDate(value).getUTCDay()+6)%7));
+const scheduleLabel = (value, options={day:'numeric',month:'long'}) => scheduleDate(value).toLocaleDateString('ru-RU',{...options,timeZone:'UTC'});
+const scheduleValid = value => /^\d{4}-\d{2}-\d{2}$/.test(value||'') && !Number.isNaN(scheduleDate(value).getTime()) && scheduleISO(scheduleDate(value))===value;
+
+// Browser-only demo data. No uploads or messages are sent to external services.
+const demoRead = (key, fallback) => {try {const raw = sessionStorage.getItem('opora-prototype-v1:'+key);return raw ? JSON.parse(raw) : fallback;} catch (_) {return fallback;}};
+const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-v1:'+key,JSON.stringify(value));if(['candidate','onboarding'].includes(key)&&typeof interviewSync==='function')interviewSync();} catch (_) {}};
+
+const ROLES = demoRead("roles", [
+ {"id":"assistant","title":"Ассистент педагога","program":"Арт-субботы","audience":"Взрослые участники с ментальными особенностями","task":"Помогать участникам включиться в занятие и подготовить материалы вместе с ведущей.","where":"Загородная мастерская, Грибаново","schedule":"Суббота, 14:00–18:00","regularity":"Регулярно","format":"Очно","need":2,"prep":"Встреча с координатором и знакомство с группой","certificate":true,"discussion":true,"approval":true,"status":"Опубликовано"},
+ {"id":"teacher","title":"Педагог творческих занятий","program":"Арт-лаборатория","audience":"Подростки из ЦССВ «Сколково»","task":"Проводить творческие занятия и согласовывать программу и материалы с командой.","where":"Студия у м. Театральная","schedule":"Четверг, 13:30–16:00","regularity":"Регулярно","format":"Очно","need":1,"prep":"Опыт проведения занятий, обсуждение программы","certificate":true,"discussion":true,"approval":true,"status":"Опубликовано"},
+ {"id":"tutor","title":"Волонтёр-репетитор","program":"Образовательные занятия","audience":"Дети и подростки из семей в трудной ситуации","task":"Помогать со школьной программой и адаптировать объяснения под участника.","where":"Онлайн или в студии фонда","schedule":"По договорённости","regularity":"Регулярно","format":"Онлайн / очно","need":1,"prep":"Опыт и расписание обсуждаются с координатором","certificate":true,"discussion":true,"approval":true,"status":"Опубликовано"},
+ {"id":"life","title":"Преподаватель жизненных навыков","program":"Практические занятия","audience":"Взрослые участники из социальных домов","task":"Вместе разбирать бытовые задачи: счёт, чтение, документы и квитанции.","where":"Онлайн или в студии фонда","schedule":"По договорённости","regularity":"Регулярно","format":"Онлайн / очно","need":1,"prep":"Обсуждение опыта и потребностей группы","certificate":true,"discussion":true,"approval":true,"status":"Опубликовано"},
+ {"id":"packing","title":"Подготовка продукции","program":"Магазин фонда","audience":"Помощь творческим мастерским","task":"Упаковывать изделия, собирать наборы и готовить продукцию к продаже.","where":"Студия у м. Театральная","schedule":"Даты согласуем","regularity":"Периодически","format":"Очно","need":3,"prep":"Инструктаж по работе с изделиями","certificate":false,"discussion":false,"approval":true,"status":"Опубликовано"},
+ {"id":"fair","title":"Волонтёр ярмарок и маркетов","program":"События фонда","audience":"Посетители ярмарки","task":"Рассказывать об изделиях, помогать покупателям с выбором и упаковывать покупки.","where":"Площадки в Москве","schedule":"Даты согласуем","regularity":"Разово","format":"Очно","need":3,"prep":"Знакомство с продукцией и инструктаж","certificate":false,"discussion":false,"approval":true,"status":"Опубликовано"},
+ {"id":"photo","title":"Предметный фотограф","program":"Магазин фонда","audience":"Изделия участников мастерских","task":"Снять и обработать фотографии изделий для интернет-магазина.","where":"Студия у м. Театральная","schedule":"Объём и даты согласуем","regularity":"Периодически","format":"Очно","need":1,"prep":"Опыт предметной съёмки и своё оборудование","certificate":false,"discussion":false,"approval":true,"status":"Опубликовано"},
+ {"id":"video","title":"Видеомонтаж","program":"Медиа фонда","audience":"Истории программ фонда","task":"Собрать ролик из материалов команды и внести согласованные правки.","where":"Удалённо","schedule":"Срок согласуем","regularity":"По задачам","format":"Онлайн","need":1,"prep":"Примеры работ и согласованное задание","certificate":false,"discussion":false,"approval":true,"status":"Опубликовано"},
+ {"id":"pro","title":"Профессиональная помощь фонду","program":"Pro bono","audience":"Задачи фонда и участников","task":"Юридическая помощь, работа с сайтом или маркетинг — задачу уточняем с командой.","where":"По договорённости","schedule":"Требует уточнения","regularity":"По задачам","format":"Онлайн / очно","need":1,"prep":"Согласовать задачу и требования","certificate":false,"discussion":true,"approval":true,"status":"На уточнении"}
+]);
+const PEOPLE = demoRead("people", [
+ {"id":"sasha","name":"Саша","age":"24","ini":"С","color":"av-o","group":"Арт-субботы","about":"Любит керамику и с удовольствием показывает готовые работы.","communication":"Объясняй по одному шагу и дай время ответить.","support":"Перед началом покажи, какие материалы можно выбрать.","privateNote":"Перед занятием сверить договорённости с ведущей.","photo":""},
+ {"id":"lena","name":"Лена","age":"27","ini":"Л","color":"av-v","group":"Арт-субботы","about":"Любит рисовать цветы и выбирать цвета для общей работы.","communication":"Сначала обратись по имени. Лучше предложить два варианта.","support":"В новой обстановке помогает знакомый человек рядом.","privateNote":"Уточнить у ведущей сопровождение на следующем занятии.","photo":""},
+ {"id":"pavel","name":"Павел","age":"31","ini":"П","color":"av-b","group":"Арт-субботы","about":"Любит работать с глиной и помогать накрывать общий стол.","communication":"Говори прямо с Павлом и спрашивай, нужна ли помощь.","support":"Использует коляску. Организацию места и помощь согласуй с ведущей.","privateNote":"До начала проверить доступность рабочего места.","photo":""},
+ {"id":"katya","name":"Катя","age":"22","ini":"К","color":"av-g","group":"Арт-субботы","about":"Любит оригами и рассказывать о своих работах.","communication":"Покажи готовый пример, затем предложи попробовать вместе.","support":"Дай возможность сделать перерыв и вернуться к работе.","privateNote":"Информацию об участии на следующей неделе уточняет координатор.","photo":""}
+]);
+const readRoleDirectory = () => demoRead('role-directory', ROLES.map(r=>({id:r.id,title:r.title,task:r.task,prep:r.prep,certificate:r.certificate,approval:r.approval,archived:false})));
+const writeRoleDirectory = roles => demoWrite('role-directory',roles);
+const roleDuplicate = (roles,title,id='') => roles.some(r=>r.id!==id&&r.title.trim().toLocaleLowerCase('ru')===title.trim().toLocaleLowerCase('ru'));
+
+/*
+  Анкета волонтёра, версия 2.
+  Это данные, а не код: поля, варианты и подсказки можно править прямо здесь.
+  Обоснование каждого поля — materials/05-продукт/Анкета v2.md
+
+  Типы полей: text, email, tel, date, textarea, select, radio, checkbox, chips, grid, roles, consent.
+  required — обязательное; optional — пометка «по желанию»; why — короткое «зачем спрашиваем» под полем;
+  showIf — показывать, только если в другом поле выбран один из вариантов;
+  exclusive — варианты, которые нельзя выбрать вместе с остальными (например, «Нет, не подходит»);
+  mask — автоформат ввода: name (заглавные буквы), phone (+7 (999) 123-45-67), telegram (@ник);
+  half — поле в половину ширины (два в ряд).
+*/
+window.FORM = {
+  title: "Анкета волонтёра",
+  intro: "Мы рады, что вы хотите помогать фонду «Дети Марии». Три коротких шага — около 5 минут. Остальное обсудим лично.",
+  steps: [
+    {
+      id: "about",
+      title: "Знакомство",
+      fields: [
+        { id: "firstName", label: "Имя", type: "text", required: true, mask: "name", half: true,
+          placeholder: "Михаил", autocomplete: "given-name" },
+        { id: "lastName", label: "Фамилия", type: "text", required: true, mask: "name", half: true,
+          placeholder: "Михайлов", autocomplete: "family-name" },
+        { id: "birthdate", label: "Дата рождения", type: "date", required: true },
+        { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel",
+          placeholder: "+7 (999) 123-45-67" },
+        { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email",
+          why: "Ссылку на личный кабинет пришлём на почту и по SMS." },
+        { id: "channels", label: "Как с вами удобнее связываться?", type: "checkbox", required: true,
+          options: ["Telegram", "WhatsApp", "Max", "Электронная почта", "SMS", "Телефонный звонок"] },
+        { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username",
+          showIf: { field: "channels", value: "Telegram" } },
+        { id: "area", label: "Где вы живёте?", type: "select", required: true,
+          options: ["Центр Москвы", "Север / Северо-Восток", "Восток / Юго-Восток", "Юг / Юго-Запад", "Запад / Северо-Запад", "Новая Москва", "Московская область", "Ярославская область", "Северная Осетия", "Другой город"] }
+      ]
+    },
+    {
+      id: "help",
+      title: "О вас",
+      fields: [
+        { id: "directions", label: "Что вам было бы интересно?", type: "chips", required: true,
+          options: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Фото, видео, соцсети", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Профессиональная помощь фонду: юрист, маркетинг, IT", "Пока не знаю"],
+          exclusive: ["Пока не знаю"],
+          why: "Можно несколько. Это не обязательство — роль обсудим на встрече." },
+        { id: "skills", label: "Что вы умеете или любите делать?", type: "chips",
+          options: ["Керамика", "Живопись и рисунок", "Валяние", "Шитьё и вышивка", "Кулинария", "Музыка и вокал", "Театр", "Спорт и игры", "Фотография", "Видео и монтаж", "Дизайн", "Соцсети", "Педагогика", "Психология", "Школьные предметы", "Английский"],
+          allowOther: true },
+        { id: "sphere", label: "В какой сфере вы работаете или учитесь?", type: "select", optional: true,
+          options: ["Образование и педагогика", "Психология, медицина, соцработа", "Искусство и ремёсла", "Дизайн, фото, медиа", "IT", "Маркетинг и продажи", "Право", "Финансы и бизнес", "Учусь в школе или колледже", "Учусь в вузе", "На пенсии", "Другое"] },
+        { id: "volExp", label: "У вас есть опыт волонтёрства?", type: "radio", required: true,
+          options: ["Да", "Нет"] },
+        { id: "volExpText", label: "Расскажите коротко: где и что делали", type: "textarea",
+          showIf: { field: "volExp", value: "Да" } },
+        { id: "specialExp", label: "Был ли у вас опыт общения с людьми с особенностями развития или с детьми, оставшимися без попечения родителей?", type: "radio", required: true,
+          options: ["Да", "Нет, но готов(а) попробовать", "Нет, хочу сначала обсудить на встрече"] },
+        { id: "specialExpText", label: "Расскажите об этом опыте", type: "textarea",
+          showIf: { field: "specialExp", value: "Да" } }
+      ]
+    },
+    {
+      id: "final",
+      title: "Последний шаг",
+      fields: [
+        { id: "participation", label: "Как часто хотели бы помогать?", type: "radio", required: true,
+          options: ["Регулярно, каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"],
+          why: "Участникам важны знакомые лица: доверие строится месяцами." },
+        { id: "online", label: "Могу помогать и онлайн", type: "consent" },
+        { id: "motivation", label: "Почему вы хотите помогать именно нам?", type: "textarea", optional: true },
+        { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
+          options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья или знакомые", "Был(а) на мероприятии фонда", "Другое"] },
+        { id: "record", label: "Для работы с детьми нужна справка об отсутствии судимости. Готовы её получить?", type: "radio", required: true,
+          options: ["Да", "Справка уже есть", "Хочу сначала обсудить"],
+          why: "Заказать её можно бесплатно на Госуслугах — это займёт минуту." },
+        { id: "consentPD", label: "Я согласен(на) на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
+        { id: "consentNews", label: "Хочу получать новости и приглашения фонда", type: "consent" }
+      ]
+    }
+  ],
+
+  /* Раньше здесь был шаг онбординга «Профиль для подбора». Убран: физическую помощь и график
+     координатор узнает на встрече, а «Когда свободна» и «Как часто» уже есть в профиле на платформе. */
+  matching: { title: "", intro: "", fields: [] },
+
+  /* Уменьшительные имена: если человек ввёл такое, мягко просим полное. Не блокирует отправку. */
+  shortNames: { "Миша": "Михаил", "Саша": "Александр или Александра", "Маша": "Мария", "Женя": "Евгений или Евгения", "Дима": "Дмитрий", "Катя": "Екатерина", "Настя": "Анастасия", "Лена": "Елена", "Таня": "Татьяна", "Оля": "Ольга", "Аня": "Анна", "Вова": "Владимир", "Петя": "Пётр", "Коля": "Николай", "Серёжа": "Сергей", "Сережа": "Сергей", "Лёша": "Алексей", "Леша": "Алексей", "Паша": "Павел", "Юля": "Юлия", "Света": "Светлана", "Наташа": "Наталья", "Ира": "Ирина", "Даша": "Дарья", "Ваня": "Иван", "Костя": "Константин", "Гриша": "Григорий", "Витя": "Виктор", "Галя": "Галина", "Люба": "Любовь", "Надя": "Надежда", "Соня": "Софья", "Ксюша": "Ксения", "Тёма": "Артём", "Тема": "Артём", "Андрюша": "Андрей", "Жора": "Георгий", "Слава": "Вячеслав или Ярослава" },
+
+  done: {
+    title: "Заявка отправлена",
+    text: "Ссылку на этот кабинет мы прислали по SMS и на почту — по ней можно вернуться в любой момент."
+  }
+};
+
+/*
+  Контент знакомства с фондом. Это данные, а не код: тексты правятся прямо здесь,
+  потом пересборка: python3 scripts/build_prototype.py
+
+  Шаги идут подряд, без оглавления: «Понятно, дальше» → следующий шаг → в конце тест → личный кабинет.
+  source — откуда текст (для команды, в интерфейсе не показывается).
+
+  Блоки (появляются с анимацией при прокрутке):
+    lead     { text }                                  — крупный вводный абзац
+    facts    { items: [[число, подпись], …] }           — числа «набегают» при появлении
+    timeline { items: [[год, заголовок, текст], …] }    — годы появляются по одному
+    icards   { title, items: [{ icon, title, text }] }  — карточки с иконкой
+    story    { title, intro, items: [[заголовок, текст, иконка], …] } — история по шагам
+    rules    { title, items: [строка, …] }              — нумерованные правила
+    phrases  { title, items: [[так, не так], …] }       — «Так говорим / Так не говорим»
+    quiz     { title, intro, items: [{ q, o: […], a, e }] } — выбор ответа, сразу зелёная или красная карточка с объяснением
+    video    { title, duration, src }                   — без src — заглушка «Видео скоро появится»
+    callout  { tone: "info" | "warn", text }
+  Иконки: palette, book, users, heart, home, hand, shield, smile, star, camera, calendar, pin, message, mask, music, award, sparkle, eye, clock, phone, alert, check-circle.
+*/
+window.ONBOARDING = {
+  title: "Знакомство с фондом",
+  intro: "Четыре коротких шага и небольшой тест — около 20 минут. Можно прерваться и вернуться.",
+
+  modules: [
+    {
+      id: "history",
+      title: "История фонда",
+      minutes: 3,
+      source: "Сайт фонда, материал АСИ к 25-летию (Фёдор), презентация фонда для партнёров 2025",
+      blocks: [
+        { type: "lead", text: "Всё началось с рисования за столом для пинг-понга." },
+        { type: "facts", items: [["2325+", "участников за всё время"], ["300+", "участников каждый год"], ["7", "дней в неделю идут мастерские"], ["4", "площадки в Москве"]] },
+        { type: "timeline", items: [
+          ["1993", "Первый раз в детском доме", "Семья и друзья художницы Марии Елисеевой приходят в интернат волонтёрами. Мария начинает рисовать вместе с детьми."],
+          ["1997", "Художественный центр", "Занятия переезжают в театр-студию «Подвал». Первый грант получают на краски."],
+          ["2020", "Благотворительный фонд", "Художественный центр становится фондом «Дети Марии»."],
+          ["2021", "Наставники и сопровождение", "Появляются программа наставничества и сопровождение ребят, которые выходят из детских учреждений."],
+          ["2026", "Сегодня", "Фонд объединился с АНО «Тверская 15». «Арт-лаборатория» получила Грант Мэра Москвы."]
+        ] },
+        { type: "video", title: "Как всё начиналось", duration: "2–3 мин" },
+        { type: "callout", tone: "info", text: "Фонд вырос из волонтёрской идеи. Волонтёры здесь с первого дня." }
+      ]
+    },
+
+    {
+      id: "people",
+      title: "Кому мы помогаем",
+      minutes: 4,
+      source: "Сайт фонда, презентация фонда для партнёров 2025, книги из библиотеки фонда",
+      blocks: [
+        { type: "lead", text: "Детям и взрослым с ментальными особенностями и опытом сиротства." },
+        { type: "icards", title: "Кто приходит на занятия", items: [
+          { icon: "home", title: "Ребята из детских домов", text: "Центры содействия семейному воспитанию «Радуга», «Сколковский», Угличский детский дом" },
+          { icon: "users", title: "Жители социальных домов", text: "Взрослые из бывших ПНИ: «Филимонки», «Нагатино-Садовники», «Егорьевский»" },
+          { icon: "star", title: "Выпускники", text: "Те, кто уже вышел из детского дома и учится жить самостоятельно" }
+        ] },
+        { type: "icards", title: "Чем занимаемся", items: [
+          { icon: "palette", title: "Творчество", text: "Арт-лаборатория, мастерские «Я могу больше», Арт-суббота" },
+          { icon: "book", title: "Обучение", text: "«Хочу больше знать»: школьные предметы и навыки для жизни" },
+          { icon: "smile", title: "Инклюзия", text: "«Воображариум» и «Разные вместе»: участники и гости вместе" },
+          { icon: "hand", title: "Сопровождение", text: "Куратор и тьютор: документы, город, работа" },
+          { icon: "pin", title: "Выезды", text: "Арт-резиденция на Волге, Сорочаны, Беслан" }
+        ] },
+        { type: "story", title: "История Вовы", intro: "Так выглядит регулярная помощь — много маленьких шагов.", items: [
+          ["Было", "Вова жил в социальном доме и впервые пришёл в фонд на занятия керамикой.", "home"],
+          ["Четыре года", "Каждую неделю: творчество, математика, логопед, куратор.", "calendar"],
+          ["Стало", "Своя квартира с сопровождением, работа, кот и гитара.", "star"]
+        ] },
+        { type: "icards", title: "Что важно знать", items: [
+          { icon: "clock", title: "Доверие строится месяцами", text: "Многие росли без постоянных взрослых. Важно приходить снова и снова." },
+          { icon: "heart", title: "Это не каприз", text: "Кто-то мало говорит, кто-то быстро устаёт от шума. Это особенность, а не невежливость." },
+          { icon: "hand", title: "Не делаем за человека", text: "Помогаем ровно настолько, насколько нужно. Остальное человек делает сам." },
+          { icon: "eye", title: "Диагнозы знать не нужно", text: "Педагог расскажет, что важно знать о группе." }
+        ] }
+      ]
+    },
+
+    {
+      id: "ethics",
+      title: "Кодекс этики",
+      minutes: 5,
+      source: "Кодекс этики и стандарты работы БФ «Дети Марии»; «уважать не жалея…» — сборник «Особенное тьюторство», 2025",
+      blocks: [
+        { type: "lead", text: "У фонда есть кодекс этики — он касается и волонтёров. На занятии всё сводится к четырём вещам." },
+        { type: "icards", items: [
+          { icon: "heart", title: "Уважение", text: "Уважать не жалея, помогать не унижая. Спрашиваем, а не решаем за человека. Со взрослыми — как со взрослыми." },
+          { icon: "shield", title: "Безопасность и тайна", text: "Фото — только с согласия человека и через фонд. Личные истории не пересказываем. Тревожное — сразу педагогу." },
+          { icon: "check-circle", title: "Честность", text: "Приходим, когда обещали. Не можем — предупреждаем заранее. Не обещаем того, что не сделаем." },
+          { icon: "users", title: "Вместе", text: "Волонтёр — часть команды занятия. Не уверены — спрашиваем педагога или координатора." }
+        ] },
+        { type: "quiz", title: "Как бы вы поступили?", items: [
+          { q: "Взрослый участник хочет сам налить себе чай, но у него дрожат руки.",
+            o: ["Налить за него, так быстрее", "Спросить: «Подержать чашку?» — и дать сделать самому"], a: 1,
+            e: "Самостоятельность важнее скорости. Подстраховать можно рядом, а налить — пусть сам. Так человек чувствует, что ему доверяют." },
+          { q: "Вы опаздываете на занятие на 20 минут. Участники ждут именно вас.",
+            o: ["Сразу написать педагогу или координатору", "Прийти как получится — главное, что пришли"], a: 0,
+            e: "Педагог предупредит ребят, и никто не будет волноваться. Молча опоздать — значит подвести тех, кто ждёт." },
+          { q: "Педагог просит не помогать участнику, хотя у него явно не получается.",
+            o: ["Всё-таки помочь, пока педагог не видит", "Довериться педагогу, а вопрос задать после занятия"], a: 1,
+            e: "Педагог знает участника и, возможно, учит его справляться самому. Все решения о том, как заниматься, — за педагогом." }
+        ] }
+      ]
+    },
+
+    {
+      id: "talk",
+      title: "Как общаться с участниками",
+      minutes: 6,
+      source: "Команда: кодекс этики, книги из библиотеки фонда («Жизнь как жизнь», Е. Заблоцкис, «Особенное тьюторство»), практики NSPCC и National Autistic Society. Заменить правилами коммуникации фонда, когда они будут",
+      blocks: [
+        { type: "lead", text: "Главное, на чём спотыкаются новые волонтёры, — не творчество, а общение. Пять правил помогут с первого дня." },
+        { type: "rules", items: [
+          "Обещайте только то, что точно сделаете.",
+          "Будьте на виду: общаемся там, где рядом другие взрослые.",
+          "Личные контакты не даём и не берём — только через фонд.",
+          "Сначала чувство, потом задание: если человек расстроен, сначала помогите успокоиться.",
+          "Не справляетесь — зовите педагога. Это не слабость, а правило."
+        ] },
+        { type: "phrases", title: "Как говорить", items: [
+          ["«Тебе синий или зелёный?» — и показать оба", "«Что ты хочешь?»"],
+          ["«Вижу, ты расстроился. Я рядом»", "«Да ладно, ничего страшного»"],
+          ["«Так делать не надо. А ты — молодец, что пришёл»", "«Ты плохо себя ведёшь»"],
+          ["«Можно я помогу?»", "Молча сделать за человека"],
+          ["«Человек на коляске», «у него аутизм»", "«Колясочник», «аутист», «страдает»"]
+        ] },
+        { type: "icards", title: "Если человеку трудно говорить", items: [
+          { icon: "message", title: "Представьтесь", text: "Скажите, кто вы и зачем подошли." },
+          { icon: "hand", title: "Показывайте", text: "Говорите медленно и просто, показывайте действие руками." },
+          { icon: "check-circle", title: "Да или нет", text: "Задавайте вопросы, на которые можно ответить «да» или «нет»." },
+          { icon: "clock", title: "Ждите ответа", text: "До 10 секунд. Жест и взгляд — тоже ответ." }
+        ] },
+        { type: "icards", title: "Если случилось", items: [
+          { icon: "alert", title: "Рассказывает о насилии", text: "Выслушать, сказать «ты не виноват», не обещать секрет и сразу сообщить педагогу." },
+          { icon: "phone", title: "Просит ваш телефон", text: "«Я не даю номер, но мы увидимся здесь в субботу» — и сказать координатору." },
+          { icon: "music", title: "Перегрузка от шума", text: "Убрать шум и зрителей, говорить мало и тихо, позвать педагога." },
+          { icon: "smile", title: "Не хочет заниматься", text: "Не настаивать: можно посидеть рядом или присоединиться позже." }
+        ] },
+        { type: "callout", tone: "warn", text: "Если есть угроза жизни или здоровью — сразу зовите педагога, при необходимости звоните 112." }
+      ]
+    }
+  ],
+
+  test: {
+    title: "Небольшой тест",
+    intro: "10 вопросов по тому, что вы прочитали. После каждого ответа — пояснение. Это не экзамен.",
+    pass: 0,
+    source: "Вопросы 1–5 — по онбордингу Фёдора, 6–10 — команда по кодексу и библиотеке фонда",
+    questions: [
+      { q: "С чего начался фонд «Дети Марии»?", o: ["Художница Мария Елисеева стала рисовать с детьми в интернате", "С большого государственного гранта"], a: 0,
+        e: "В 1993 году семья и друзья Марии Елисеевой пришли в интернат волонтёрами. Фонд вырос из волонтёрской идеи — поэтому волонтёрам здесь так рады." },
+      { q: "На кого распространяется кодекс этики фонда?", o: ["Только на сотрудников", "На всех: сотрудников, исполнителей и волонтёров"], a: 1,
+        e: "Кодекс прямо касается волонтёров. Уважение, безопасность, честность и командная работа — общие правила для всех, кто приходит к участникам." },
+      { q: "Участник рассказал вам о своей семье. Вечером знакомый спрашивает, как прошёл день.", o: ["Пересказать историю — знакомый всё равно не знает участника", "Рассказать о занятии в общих словах, без личного"], a: 1,
+        e: "Личные истории участников не выходят за пределы занятия. Человек доверился вам, а не всем вокруг." },
+      { q: "Вы сделали отличное фото с участниками на мастер-классе.", o: ["Не публиковать самому и спросить координатора", "Выложить к себе, закрыв лица"], a: 0,
+        e: "Фото участников публикуются только с их согласия и через фонд. Даже с закрытыми лицами человека могут узнать — решение принимаем вместе с фондом." },
+      { q: "Планы изменились, и вы не успеваете на занятие.", o: ["Просто не прийти — волонтёрство же добровольное", "Как можно раньше предупредить координатора", "Написать участнику напрямую"], a: 1,
+        e: "Участники ждут знакомых людей, и внезапное «не пришёл» ранит. Координатор предупредит группу и, если нужно, найдёт замену." },
+      { q: "Подросток просит ваш номер телефона, чтобы писать вам.", o: ["Мягко отказать: «Я не даю номер, но мы увидимся здесь» — и сказать координатору", "Дать номер — это знак доверия"], a: 0,
+        e: "Личные контакты — только через фонд. Так безопаснее и для подростка, и для вас. А его желание общаться — хороший знак, о нём стоит рассказать координатору." },
+      { q: "Участник рассказывает, что дома его обижают, и просит никому не говорить.", o: ["Пообещать молчать, чтобы не потерять доверие", "Выслушать, сказать, что он не виноват, и сразу сообщить педагогу"], a: 1,
+        e: "Секрет обещать нельзя: помочь могут только специалисты. Расспрашивать о деталях не нужно — достаточно спокойно выслушать, объяснить, что расскажете тому, кто поможет, и сразу передать." },
+      { q: "Участник закрыл уши и раскачивается, в комнате шумно.", o: ["Попросить его успокоиться", "Убрать шум и зрителей, говорить мало и тихо, позвать педагога", "Обнять, чтобы успокоить"], a: 1,
+        e: "Это перегрузка, а не каприз. Сначала убираем раздражители и даём время. Трогать без разрешения нельзя — это может усилить тревогу." },
+      { q: "Участница долго выбирает цвет краски и молчит.", o: ["Показать две баночки: «Синий или зелёный?» — и подождать", "Выбрать за неё, чтобы не терять время"], a: 0,
+        e: "Выбор из двух настоящих вариантов посилен. На ответ может понадобиться до 10 секунд — и это нормально." },
+      { q: "В конце занятия участник спрашивает: «Ты придёшь ещё?» Вы не уверены.", o: ["«Конечно, буду приходить всегда!»", "«Пока не знаю. Если смогу — приду, а если нет, обязательно скажу»"], a: 1,
+        e: "Честное обещание лучше большого. Многие участники привыкли, что взрослые исчезают без объяснений, — мы так не делаем." }
+    ]
+  },
+
+  meeting: {
+    title: "Встреча с координатором",
+    text: "Знакомство на 30 минут: расскажем о программах и вместе решим, с чего вам начать.",
+    coordinator: "Алевтина, координатор волонтёров",
+    slots: [
+      { day: "Чт, 23 октября", time: "18:30", where: "Онлайн, Яндекс Телемост" },
+      { day: "Пт, 24 октября", time: "12:00", where: "Студия, м. Театральная" },
+      { day: "Сб, 25 октября", time: "11:00", where: "Онлайн, Яндекс Телемост" },
+      { day: "Вт, 28 октября", time: "19:00", where: "Онлайн, Яндекс Телемост" }
+    ]
+  }
+};
+
+// Общая логика кандидата: анкета, маски ввода, проверки, прогресс онбординга.
+// Тексты анкеты и онбординга — в prototype/content/form.js и onboarding.js (FORM, ONBOARDING).
+const FORM = window.FORM, ONB = window.ONBOARDING;
+const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
+const cap = w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w;
+const ageOf = d => { const b = new Date(d); if (isNaN(b)) return null; const n = new Date(); let a = n.getFullYear() - b.getFullYear(); if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--; return a; };
+const fullName = c => (c && (c.name || [c.firstName, c.lastName].filter(Boolean).join(' '))) || '';
+const firstName = c => fullName(c).split(/\s+/)[0] || '';
+const allFields = () => FORM.steps.flatMap(s => s.fields).concat(FORM.matching.fields);
+
+const birthdateDisplay = value => /^\d{4}-\d{2}-\d{2}$/.test(value||'') ? value.slice(8,10)+'.'+value.slice(5,7)+'.'+value.slice(0,4) : (value||'');
+const birthdateInput = raw => {if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;const digits=raw.replace(/\D/g,'').slice(0,8);if(digits.length===8)return digits.slice(4)+'-'+digits.slice(2,4)+'-'+digits.slice(0,2);return [digits.slice(0,2),digits.slice(2,4),digits.slice(4)].filter(Boolean).join('.');};
+const MASK = {
+  name: v => v.replace(/[^A-Za-zА-Яа-яЁё\- ']/g, '').replace(/\s+/g, ' ').replace(/^[\s-]+/, '').replace(/(^|[\s-])([a-zа-яё])/g, (m, a, b) => a + b.toUpperCase()),
+  phone: v => {
+    let d = v.replace(/\D/g, '');
+    if (d[0] === '8') d = '7' + d.slice(1);
+    if (d[0] !== '7') d = '7' + d;
+    if (d.length > 11 && d[1] === '8') d = d[0] + d.slice(2); // набрали 8… после подставленного +7
+    const p = d.slice(1, 11);
+    let out = '+7';
+    if (p.length) out += ' (' + p.slice(0, 3);
+    if (p.length > 3) out += ') ' + p.slice(3, 6);
+    if (p.length > 6) out += '-' + p.slice(6, 8);
+    if (p.length > 8) out += '-' + p.slice(8, 10);
+    return out;
+  },
+  telegram: v => '@' + v.trim().replace(/^@+/, '').replace(/^(https?:\/\/)?(www\.)?(t\.me|telegram\.me)\//i, '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 32)
+};
+const FINAL = {
+  name: v => MASK.name(v).trim().replace(/-+$/, '').split(/([\s-])/).map(w => /[\s-]/.test(w) ? w : cap(w)).join(''),
+  phone: v => v.replace(/\D/g, '').length <= 1 ? '' : MASK.phone(v),
+  telegram: v => v === '@' ? '' : MASK.telegram(v)
+};
+const shortHint = (f, v) => {
+  if (f.id !== 'firstName') return '';
+  const full = (FORM.shortNames || {})[cap(String(v || '').trim())];
+  return full ? `Это полное имя? Например, ${full}. Так координатору будет проще найти вас в документах.` : '';
+};
+const visibleFor = (f, data) => {
+  if (!f.showIf) return true;
+  const v = arr(data[f.showIf.field]), want = arr(f.showIf.value);
+  return want.some(w => v.includes(w));
+};
+// «Нет, не подходит» и «Пока не знаю» нельзя выбрать вместе с остальными вариантами
+const withExclusive = (f, list, changed, added) => {
+  const ex = (f.exclusive || []).concat(f.unsure ? [f.unsure] : []);
+  if (!added || !ex.length) return list;
+  return ex.includes(changed) ? [changed] : list.filter(v => !ex.includes(v));
+};
+const roleGroups = roles => {
+  const f = FORM.steps.flatMap(s => s.fields).find(x => x.type === 'roles');
+  return f ? f.groups.filter(g => g.roles.some(r => arr(roles).includes(r))).map(g => g.title) : [];
+};
+function validateFields(fields, data) {
+  const errs = {};
+  fields.filter(f => visibleFor(f, data)).forEach(f => {
+    if (f.groups && f.type === 'checkbox') data[f.id] = arr(data[f.id]).filter(o => f.groups.some(g => visibleFor(g, data) && g.options.includes(o)));
+    const v = data[f.id];
+    const empty = v == null || v === '' || v === false || (Array.isArray(v) && v.length === 0);
+    if (f.required && empty) errs[f.id] = f.type === 'consent' ? 'Без согласия мы не сможем обработать заявку' : f.type === 'roles' ? 'Выберите хотя бы одну роль или «Пока не знаю»' : 'Заполните, пожалуйста';
+    else if (!empty && f.type === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) errs[f.id] = 'Проверьте адрес почты';
+    else if (!empty && f.mask === 'phone' && String(v).replace(/\D/g, '').length !== 11) errs[f.id] = 'Номер должен быть из 10 цифр после +7';
+    else if (!empty && f.mask === 'telegram' && !/^@[A-Za-z0-9_]{5,32}$/.test(v)) errs[f.id] = 'Ник — от 5 символов: латиница, цифры и _';
+    else if (!empty && f.mask === 'name' && !/^[А-ЯЁA-Z][а-яёa-z']+([\s-][А-ЯЁA-Z][а-яёa-z']+)*$/.test(v)) errs[f.id] = 'Проверьте написание: только буквы, без сокращений';
+    else if (!empty && f.id === 'birthdate' && !scheduleValid(v)) errs[f.id] = 'Введите дату в формате ДД.ММ.ГГГГ';
+    else if (!empty && f.id === 'birthdate') { const a = ageOf(v); if (a == null || a < 16) errs[f.id] = 'Волонтёром можно стать с 16 лет'; else if (a > 110) errs[f.id] = 'Проверьте дату'; }
+  });
+  return errs;
+}
+
+// Поля формы → данные для шаблона. update(id, value) меняет ответ; ui — раскрытые группы ролей.
+function fieldViews(fields, data, errs, update, ui, setUi) {
+  return fields.filter(f => visibleFor(f, data)).map(f => {
+    const v = data[f.id];
+    const t = f.type;
+    const isInput = ['text', 'email', 'tel', 'date'].includes(t);
+    const toggleIn = (o) => () => {
+      const set = new Set(arr(data[f.id]));
+      const on = !set.has(o);
+      on ? set.add(o) : set.delete(o);
+      update(f.id, withExclusive(f, [...set], o, on));
+    };
+    const optView = o => { const on = (t === 'radio' || t === 'select') ? v === o : arr(v).includes(o); return { label: o, checked: on, pressed: on, cls: on ? 'chip is-on' : 'chip', lineCls: on ? 'a-line is-on' : 'a-line', toggle: (t === 'radio' || t === 'select') ? () => update(f.id, o) : toggleIn(o) }; };
+    const warn = shortHint(f, v);
+    return {
+      id: f.id, label: f.label, req: !!f.required, opt: !!f.optional, why: f.why || '', hasWhy: !!f.why,
+      cls: 'field a-field' + (f.half ? ' a-half' : '') + (errs[f.id] ? ' a-bad' : ''),
+      err: errs[f.id] || '', hasErr: !!errs[f.id], warn, hasWarn: !!warn,
+      isConsent: t === 'consent', notConsent: t !== 'consent',
+      isInput, inputType: t === 'date' ? 'text' : t, inputMode: t === 'date' ? 'numeric' : t === 'email' ? 'email' : t === 'tel' ? 'tel' : 'text', value: t === 'date' ? birthdateDisplay(v) : v == null ? '' : v, placeholder: t === 'date' ? 'ДД.ММ.ГГГГ' : f.placeholder || '', autocomplete: f.autocomplete || 'off',
+      change: e => { const raw = e.target.value; update(f.id, t === 'date' ? birthdateInput(raw) : f.mask ? MASK[f.mask](raw) : raw); },
+      focus: () => { if (f.mask === 'phone' && !data[f.id]) update(f.id, '+7 ('); if (f.mask === 'telegram' && !data[f.id]) update(f.id, '@'); },
+      blur: () => { if (f.mask) update(f.id, FINAL[f.mask](String(data[f.id] || ''))); },
+      isTextarea: t === 'textarea', isSelect: t === 'select',
+      isChoice: (t === 'radio' || t === 'checkbox') && !f.groups, choiceType: t, options: (f.options || []).map(optView),
+      isGroups: t === 'checkbox' && !!f.groups,
+      groups: (t === 'checkbox' && f.groups ? f.groups : []).filter(g => visibleFor(g, data)).map(g => ({ title: g.title, note: g.note || '', hasNote: !!g.note, hasOptions: g.options.length > 0, options: g.options.map(optView) })),
+      isChips: t === 'chips', hasOther: !!f.allowOther, other: data[f.id + 'Other'] || '', changeOther: e => update(f.id + 'Other', e.target.value),
+      isGrid: t === 'grid', cols: f.cols || [],
+      rows: (f.rows || []).map(r => ({ label: r, cells: (f.cols || []).map(c => { const k = r + '·' + c, on = arr(v).includes(k); return { cls: on ? 'a-cell is-on' : 'a-cell', pressed: on, aria: r + ', ' + c, toggle: toggleIn(k) }; }) })),
+      isRoles: t === 'roles',
+      rgroups: (t === 'roles' ? f.groups : []).map((g, gi) => {
+        const n = g.roles.filter(r => arr(v).includes(r)).length, key = f.id + gi, open = n > 0 || !!ui[key];
+        return { title: g.title, hint: g.hint || '', hasHint: !!g.hint, open, cls: open ? 'a-rgroup is-open' : 'a-rgroup', badge: n ? `выбрано: ${n}` : (open ? 'свернуть' : 'открыть'), badgeCls: n ? 'tag t-orange' : 'tag', toggle: () => setUi(key), roles: g.roles.map(optView) };
+      }),
+      unsure: f.unsure || '', unsureOn: arr(v).includes(f.unsure), unsureToggle: toggleIn(f.unsure),
+      checked: !!v, toggle: () => update(f.id, !data[f.id])
+    };
+  });
+}
+
+const freshProgress = () => ({ done: {}, testDone: false, score: null, meeting: null, road: false });
+const loadCandidate = () => demoRead('candidate', null);
+const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
+const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Регулярно, каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+
+// Иконки по имени из контента (сборщик подставляет svg через ICONSWITCH)
+const ICON_KEYS = ['palette','book','users','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle'];
+const icoFlags = name => { const o = {}; ICON_KEYS.forEach(k => { o['ic_' + k.replace('-', '_')] = k === name; }); return o; };
+// В прототипе без анкеты показываем всё на демо-кандидате, чтобы ничего не заполнять руками
+const ensureCandidate = () => { const me = loadCandidate(); if (me) return me; demoWrite('candidate', DEMO_CANDIDATE); return DEMO_CANDIDATE; };
+
+// Shared browser demo registry for candidate progress, availability and interviews.
+// Stored locally on this origin; no real invitations or reminders are sent.
+const INTERVIEW_KEY = 'opora-interviews-v1';
+const INTERVIEW_TODAY = '2026-10-21';
+const interviewMinutes = text => {const m=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(text||'');return m?Number(m[1])*60+Number(m[2]):NaN;};
+const interviewTime = n => String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+const interviewFuture = (date,time) => date>INTERVIEW_TODAY||(date===INTERVIEW_TODAY&&time>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()));
+const interviewDay = date => scheduleLabel(date,{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+const interviewIdentity = person => String(person?.email||person?.phone||person?.name||'').trim().toLowerCase();
+const interviewDefaults = () => ({
+  windows: [
+    {id:'thu',date:'2026-10-22',start:'18:00',end:'20:00',duration:30,gap:10,repeat:'weekly',until:'',exceptions:[],where:'Онлайн, Яндекс Телемост',link:'',active:true},
+    {id:'fri',date:'2026-10-23',start:'12:00',end:'14:00',duration:30,gap:0,repeat:'weekly',until:'',exceptions:[],where:'Студия у м. Театральная',link:'',active:true},
+    {id:'sat',date:'2026-10-24',start:'11:00',end:'12:30',duration:30,gap:0,repeat:'weekly',until:'',exceptions:[],where:'Онлайн, Яндекс Телемост',link:'',active:true}
+  ],
+  profiles: [
+    {id:'egor@example.org',person:{firstName:'Егор',lastName:'Мельников',name:'Егор Мельников',email:'egor@example.org',phone:'+7 (900) 000-00-01',roles:['Ассистент педагога в мастерской'],channels:['Telegram'],telegram:'@egor_demo',participation:'Регулярно',slots:['Суббота·День']},progress:{done:Object.fromEntries(ONB.modules.map(m=>[m.id,true])),testDone:true,score:ONB.test.questions.length,best:ONB.test.questions.length,attempts:1}},
+    {id:'mila@example.org',person:{firstName:'Мила',lastName:'Орлова',name:'Мила Орлова',email:'mila@example.org',phone:'+7 (900) 000-00-02',roles:['Предметная фотография'],channels:['Электронная почта'],participation:'По задачам'},progress:{done:Object.fromEntries(ONB.modules.slice(0,2).map(m=>[m.id,true])),best:null,attempts:0}}
+  ],
+  bookings:[{id:'demo-egor',candidateId:'egor@example.org',slotId:'fri@2026-10-23@12:00',windowId:'fri',date:'2026-10-23',start:'12:00',end:'12:30',gap:0,where:'Студия у м. Театральная',link:'',status:'booked',history:[{text:'Егор записался на встречу',when:'21 октября'}]}]
+});
+let interviewFallback;
+function interviewRead(){
+  try {const raw=localStorage.getItem(INTERVIEW_KEY);if(raw)return JSON.parse(raw);}catch(_){}
+  if(!interviewFallback)interviewFallback=interviewDefaults();
+  return JSON.parse(JSON.stringify(interviewFallback));
+}
+function interviewWrite(data){
+  interviewFallback=JSON.parse(JSON.stringify(data));
+  try{localStorage.setItem(INTERVIEW_KEY,JSON.stringify(data));}catch(_){}
+  if(typeof window!=='undefined'&&typeof window.dispatchEvent==='function'&&typeof CustomEvent==='function')window.dispatchEvent(new CustomEvent('opora-interviews-change'));
+}
+function interviewImportLegacy(){
+  let old;try{old=JSON.parse(localStorage.getItem('dm-proto-v1')||'null');}catch(_){return;}
+  if(!old?.me)return;
+  const id=interviewIdentity(old.me),data=interviewRead();if(!id||data.profiles.some(p=>p.id===id))return;
+  const profile={id,person:old.me,progress:{done:old.done||{},best:old.test?.best??null,attempts:old.test?.attempts||0},legacyImported:true};
+  if(old.meeting){
+    const match=String(old.meeting.day||'').match(/(\d{1,2})\s+октябр/),start=old.meeting.time;
+    if(match&&Number.isFinite(interviewMinutes(start))){const date='2026-10-'+match[1].padStart(2,'0');if(scheduleValid(date))data.bookings.push({id:'legacy-'+Date.now(),candidateId:id,slotId:'legacy-'+id,windowId:'import',date,start,end:interviewTime(interviewMinutes(start)+30),gap:0,where:old.meeting.where||'',link:'',status:'booked',history:[{text:'Запись перенесена из прежнего кабинета',when:'Ранее'}]});}
+    else profile.request={text:'Проверьте прежнюю запись: '+(old.meeting.day||'')+', '+(start||''),status:'new'};
+  }
+  data.profiles.unshift(profile);interviewWrite(data);
+}
+function interviewSync(){
+  const person=loadCandidate();if(!person)return;
+  const id=interviewIdentity(person);if(!id)return;
+  const data=interviewRead(),progress=loadProgress(),old=data.profiles.find(p=>p.id===id);
+  const profile={...old,id,person,progress:{done:progress.done,testDone:progress.testDone,score:progress.score,road:progress.road,best:progress.best,attempts:progress.attempts}};
+  // Retain a previously chosen demo meeting when moving from the old candidate flow.
+  if(progress.meeting&&!old?.legacyImported&&!data.bookings.some(b=>b.candidateId===id)){
+    const match=String(progress.meeting.day||'').match(/(\d{1,2})\s+октябр/),start=progress.meeting.time;
+    if(match&&Number.isFinite(interviewMinutes(start))){const date='2026-10-'+match[1].padStart(2,'0');if(scheduleValid(date))data.bookings.push({id:'import-'+Date.now(),candidateId:id,slotId:'import-'+id,windowId:'import',date,start,end:interviewTime(interviewMinutes(start)+30),gap:0,where:progress.meeting.where||'',link:'',status:'booked',history:[{text:'Перенесено из прежней записи',when:'Ранее'}]});}
+    profile.legacyImported=true;
+  }
+  if(JSON.stringify(old)!==JSON.stringify(profile)){
+    data.profiles=old?data.profiles.map(p=>p.id===id?profile:p):[profile,...data.profiles];interviewWrite(data);
+  }
+}
+const interviewReady = profile => !!profile&&ONB.modules.every(m=>profile.progress.done?.[m.id])&&(profile.progress.testDone===true||profile.progress.best!=null);
+const interviewCurrent = (data,id) => {const all=data.bookings.filter(b=>b.candidateId===id),active=all.find(b=>b.status==='booked'),last=all.slice(-1)[0];return active||(last?.status==='completed'?last:null);};
+const interviewMatches = (w,date) => date>=w.date&&(!w.until||date<=w.until)&&!w.exceptions.includes(date)&&(w.repeat==='weekly'?scheduleDate(date).getUTCDay()===scheduleDate(w.date).getUTCDay():date===w.date);
+function interviewSlots(data,from,to,excludeBooking='',includeClosed=false){
+  const result=[];
+  for(let date=from;date<=to;date=scheduleAdd(date,1))for(const w of data.windows){
+    if((!w.active&&!includeClosed)||!interviewMatches(w,date))continue;
+    for(let n=interviewMinutes(w.start);n+Number(w.duration)<=interviewMinutes(w.end);n+=Number(w.duration)+Number(w.gap)){
+      const slot={id:w.id+'@'+date+'@'+interviewTime(n),windowId:w.id,date,start:interviewTime(n),end:interviewTime(n+Number(w.duration)),gap:Number(w.gap),where:w.where,link:w.link};
+      const busy=data.bookings.find(b=>b.status==='booked'&&b.id!==excludeBooking&&b.date===date&&n<interviewMinutes(b.end)+Number(b.gap||0)&&interviewMinutes(b.start)<n+Number(w.duration)+Number(w.gap));
+      result.push({...slot,busy:!!busy,booking:busy||null});
+    }
+  }
+  return result.sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+}
+function interviewBook(candidateId,slotId,bookingId='',actor='Кандидат'){
+  const data=interviewRead(),profile=data.profiles.find(p=>p.id===candidateId);
+  if(!interviewReady(profile))return {error:'Сначала нужно пройти знакомство с фондом и тест.'};
+  const old=bookingId?data.bookings.find(b=>b.id===bookingId&&b.candidateId===candidateId&&b.status==='booked'):null;
+  if(bookingId&&!old)return {error:'Запись уже изменилась. Обновите список встреч.'};
+  if(!bookingId&&data.bookings.some(b=>b.candidateId===candidateId&&b.status==='booked'))return {error:'У кандидата уже есть назначенная встреча.'};
+  const date=slotId.split('@')[1];if(!scheduleValid(date)||!interviewFuture(date,slotId.split('@')[2]))return {error:'Выберите будущее время.'};
+  const slot=interviewSlots(data,date,date,bookingId).find(s=>s.id===slotId&&!s.busy);
+  if(!slot)return {error:'Это время уже занято или закрыто. Выберите другое.'};
+  const entry={...old,...slot,id:old?.id||'meeting-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),slotId:slot.id,candidateId,status:'booked',history:[...(old?.history||[]),{text:actor+(old?' перенёс встречу':' записал встречу')+' на '+interviewDay(date)+', '+slot.start,when:'Сейчас'}]};
+  delete entry.busy;delete entry.booking;
+  data.bookings=old?data.bookings.map(b=>b.id===old.id?entry:b):[...data.bookings,entry];interviewWrite(data);return {booking:entry};
+}
+function interviewCancel(id,reason,actor='Координатор'){
+  if(!reason.trim())return {error:'Укажите причину отмены.'};
+  const data=interviewRead(),b=data.bookings.find(b=>b.id===id&&b.status==='booked');if(!b)return {error:'Эта запись уже изменилась.'};
+  data.bookings=data.bookings.map(x=>x.id===id?{...x,status:'cancelled',cancelReason:reason,history:[...x.history,{text:actor+' отменил встречу: '+reason,when:'Сейчас'}]}:x);
+  interviewWrite(data);return {};
+}
+function interviewSaveWindow(draft){
+  const data=interviewRead(),d={...draft,duration:Number(draft.duration),gap:Number(draft.gap),exceptions:[...(draft.exceptions||[])]};
+  if(!scheduleValid(d.date)||!Number.isFinite(interviewMinutes(d.start))||!Number.isFinite(interviewMinutes(d.end))||interviewMinutes(d.end)<=interviewMinutes(d.start)||!d.where.trim()||![15,20,30,45,60].includes(d.duration)||!Number.isInteger(d.gap)||d.gap<0||d.gap>60||interviewMinutes(d.end)-interviewMinutes(d.start)<d.duration)return {error:'Проверьте дату, время, длительность и место. В окне должна помещаться хотя бы одна встреча.'};
+  if(d.until&&(!scheduleValid(d.until)||d.until<d.date))return {error:'Дата окончания не может быть раньше первой даты.'};
+  if(d.link&&!/^https?:\/\//i.test(d.link))return {error:'Ссылка должна начинаться с https:// или http://.'};
+  for(const other of data.windows.filter(w=>w.id!==d.id&&w.active&&d.active)){
+    const from=d.date>other.date?d.date:other.date,limit=[d.until,other.until].filter(Boolean).sort()[0];
+    if(limit&&limit<from)continue;
+    const to=limit&&limit<scheduleAdd(from,7)?limit:scheduleAdd(from,7);
+    for(let date=from;date<=to;date=scheduleAdd(date,1))if(interviewMatches(d,date)&&interviewMatches(other,date)&&d.start<other.end&&other.start<d.end)return {error:'Это время пересекается с другим окном доступности.'};
+  }
+  const existing=data.windows.find(w=>w.id===d.id);const next={...data,windows:existing?data.windows.map(w=>w.id===d.id?d:w):[...data.windows,d]};
+  for(const b of data.bookings.filter(b=>b.windowId===d.id&&b.status==='booked')){
+    const same=interviewSlots({...next,bookings:[]},b.date,b.date,'',true).find(s=>s.id===b.slotId&&s.end===b.end&&s.gap===b.gap&&s.where===b.where&&s.link===b.link);
+    if(!same)return {error:'В этом окне есть назначенные встречи. Сначала перенесите или отмените их.'};
+  }
+  interviewWrite(next);return {};
+}
+function interviewFinish(id,result,publicNote,privateNote,nextDate){
+  if(!result||!publicNote.trim())return {error:'Выберите следующий шаг и запишите договорённость для волонтёра.'};
+  if(nextDate&&!scheduleValid(nextDate))return {error:'Проверьте дату следующего контакта.'};
+  const data=interviewRead(),old=data.bookings.find(b=>b.id===id&&b.status==='booked');if(!old)return {error:'Эта запись уже изменилась.'};
+  data.bookings=data.bookings.map(b=>b.id===id?{...b,status:result==='Не пришёл'?'missed':'completed',result,publicNote,privateNote,nextDate,history:[...b.history,{text:'Итог встречи: '+result,when:'Сейчас'}]}:b);interviewWrite(data);return {};
+}
+function interviewSubscribe(component){
+  if(typeof window==='undefined'||!window.addEventListener)return ()=>{};
+  const refresh=()=>{if(typeof component.interviewRefresh==='function')component.interviewRefresh();else component.setState({interviewRevision:Date.now()});};
+  const storage=e=>{if(e.key===INTERVIEW_KEY)refresh();};
+  window.addEventListener('storage',storage);window.addEventListener('focus',refresh);window.addEventListener('opora-interviews-change',refresh);
+  return ()=>{window.removeEventListener('storage',storage);window.removeEventListener('focus',refresh);window.removeEventListener('opora-interviews-change',refresh);};
+}
+
+const UI_FIELDS = [{"key": "ui_meeting_filter", "id": "meeting-filter", "label": "Какие встречи показать", "value": "meetingFilter", "change": "changeMeetingFilter", "options": [{"id": "upcoming", "title": "Предстоящие"}, {"id": "history", "title": "История встреч"}], "kind": "select"}, {"key": "ui_candidate_filter", "id": "candidate-filter", "label": "Статус кандидата", "value": "candidateFilter", "change": "changeCandidateFilter", "options": [{"id": "all", "title": "Все кандидаты"}, {"id": "ready", "title": "Ждут записи"}, {"id": "request", "title": "Просьбы о другом времени"}, {"id": "booked", "title": "Со встречей"}], "kind": "select"}, {"key": "ui_interview_duration", "id": "interview-duration", "label": "Длительность встречи", "value": "draft.duration", "change": "changeDuration", "options": [{"id": "15", "title": "15 минут"}, {"id": "20", "title": "20 минут"}, {"id": "30", "title": "30 минут"}, {"id": "45", "title": "45 минут"}, {"id": "60", "title": "60 минут"}], "kind": "select"}, {"key": "ui_interview_repeat", "id": "interview-repeat", "label": "Повторение", "value": "draft.repeat", "change": "changeRepeat", "options": [{"id": "none", "title": "Только в этот день"}, {"id": "weekly", "title": "Каждую неделю в этот день"}], "kind": "select"}, {"key": "ui_interview_outcome", "id": "interview-outcome", "label": "Следующий шаг", "value": "outcome", "change": "changeOutcome", "options": [{"id": "Подобрать первое занятие", "title": "Подобрать первое занятие"}, {"id": "Обсудить подготовку", "title": "Обсудить подготовку"}, {"id": "Другая роль", "title": "Другая роль"}, {"id": "Пауза", "title": "Пауза"}, {"id": "Завершить участие", "title": "Завершить участие"}, {"id": "Не пришёл", "title": "Не пришёл"}], "kind": "select"}, {"key": "ui_availability_week", "id": "availability-week", "label": "Перейти к дате", "value": "focus", "change": "changeFocus", "kind": "date"}, {"key": "ui_interview_date", "id": "interview-date", "label": "Дата", "value": "draft.date", "change": "changeDate", "kind": "date"}, {"key": "ui_interview_until", "id": "interview-until", "label": "Последняя дата", "value": "draft.until", "change": "changeUntil", "kind": "date"}, {"key": "ui_interview_exception", "id": "interview-exception", "label": "Когда не принимать записи", "value": "exceptionDate", "change": "changeException", "kind": "date"}, {"key": "ui_interview_assign_date", "id": "interview-assign-date", "label": "Перейти к дате", "value": "assignFocus", "change": "changeAssignFocus", "kind": "date"}, {"key": "ui_interview_next_date", "id": "interview-next-date", "label": "Дата следующего контакта", "value": "nextDate", "change": "changeNextDate", "kind": "date"}];
+// Shared select/date behavior. Screen handlers remain the source of form values.
+class FormControls extends DCLogic {
+  uiPatch(patch) {
+    this.setState({_ui: {...(this.state._ui || {}), ...patch}});
+  }
+  uiFocus(id) {
+    if (typeof document !== 'undefined') document.getElementById(id)?.focus();
+  }
+  uiDispatch(field, value) {
+    const values = this.screenVals();
+    const handler = field.change.split('.').reduce((value, key) => value?.[key], values);
+    handler({target: {value}});
+  }
+  uiSelectKey(event, field) {
+    const box = event.currentTarget;
+    const options = Array.from(box.querySelectorAll('[role=option]'));
+    const key = event.key;
+    if (key === 'Escape') {
+      event.preventDefault(); event.stopPropagation();
+      this.uiPatch({choice: ''}); this.uiFocus(field.id);
+      return;
+    }
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) return;
+    event.preventDefault();
+    if (!options.length) {
+      this.uiPatch({choice: field.id});
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => {
+        const items = Array.from(box.querySelectorAll('[role=option]'));
+        const selected = items.find(o => o.getAttribute('aria-selected') === 'true');
+        (selected || items[key === 'ArrowUp' || key === 'End' ? items.length - 1 : 0])?.focus();
+      });
+      return;
+    }
+    const i = options.indexOf(event.target);
+    const next = key === 'Home' ? 0 : key === 'End' ? options.length - 1 : i < 0 ? (key === 'ArrowDown' ? 0 : options.length - 1) : (i + (key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+    options[next].focus();
+  }
+  uiOpenDate(field, value) {
+    const date = scheduleValid(value) ? value : '2026-10-21';
+    this.uiPatch({date: field.id, month: date.slice(0, 7) + '-01', year: date.slice(0, 4), months: false, error: '', choice: ''});
+  }
+  uiChooseDate(value) {
+    const ui = this.state._ui || {};
+    if (ui.error) return;
+    const field = UI_FIELDS.find(f => f.id === ui.date);
+    this.uiDispatch(field, value);
+    this.uiPatch({date: ''});
+    this.uiFocus(field.id);
+  }
+  uiDateValues(values) {
+    const ui = this.state._ui || {};
+    const field = UI_FIELDS.find(f => f.id === ui.date);
+    if (!field) return {open: false};
+    const current = field ? field.value.split('.').reduce((v, k) => v?.[k], values) : '';
+    const date = scheduleValid(ui.month) ? ui.month : '2026-10-01';
+    const month = scheduleDate(date), from = scheduleMonday(date);
+    const close = () => {this.uiPatch({date: ''}); if (field) this.uiFocus(field.id);};
+    const move = delta => () => {
+      const next = scheduleISO(new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + delta, 1, 12)));
+      this.uiPatch({month: next, year: next.slice(0, 4), error: ''});
+    };
+    return {
+      open: !!field, pickerTitle: field?.label || '', pickerLabel: scheduleLabel(date, {month: 'long'}), pickerYear: ui.year ?? '2026',
+      pickerDayView: !ui.months, pickerMonthView: !!ui.months, pickerPrevious: move(-1), pickerNext: move(1), pickerMonths: () => this.uiPatch({months: !ui.months}),
+      changePickerYear: event => {
+        const text = event.target.value, year = Number(text);
+        const valid = /^\d{4}$/.test(text) && year >= 1900 && year <= 9999;
+        this.uiPatch({year: text, ...(valid ? {month: text + date.slice(4)} : {}), error: valid ? '' : 'Год: от 1900 до 9999.'});
+      },
+      pickerWeekdays: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(label => ({label})),
+      pickerDays: Array.from({length: 42}, (_, i) => {
+        const value = scheduleAdd(from, i);
+        return {label: scheduleDate(value).getUTCDate(), aria: scheduleLabel(value, {day:'numeric',month:'long',year:'numeric'}), cls: 'c-date' + (value === current ? ' is-on' : '') + (value.slice(0,7) !== date.slice(0,7) ? ' is-outside' : '') + (value === '2026-10-21' ? ' is-today' : ''), pressed: value === current ? 'true' : 'false', pick: () => this.uiChooseDate(value)};
+      }),
+      pickerMonthOptions: Array.from({length: 12}, (_, i) => {
+        const value = scheduleISO(new Date(Date.UTC(month.getUTCFullYear(), i, 1, 12)));
+        return {label: scheduleLabel(value, {month:'short'}).replace('.',''), cls: 'c-month' + (i === month.getUTCMonth() ? ' is-on' : ''), pick: () => this.uiPatch({month: value, months: false})};
+      }),
+      pickerError: ui.error || '', closeDatePicker: close, clearDateAllowed: false, clearDate: () => this.uiChooseDate(''), pickerToday: () => this.uiChooseDate('2026-10-21'),
+      key: event => {
+        if (event.key === 'Escape') {event.preventDefault(); event.stopPropagation(); close(); return;}
+        if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key) && event.target.classList.contains('c-date')) {
+          const days = Array.from(event.currentTarget.querySelectorAll('.c-date')), i = days.indexOf(event.target), step = {ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7}[event.key];
+          event.preventDefault(); days[Math.max(0,Math.min(days.length-1,i+step))].focus();
+        }
+        if (event.key === 'Tab') {
+          const items = Array.from(event.currentTarget.querySelectorAll('button,input')).filter(x => !x.disabled && x.getClientRects().length);
+          if (event.shiftKey && event.target === items[0]) {event.preventDefault(); items[items.length-1].focus();}
+          else if (!event.shiftKey && event.target === items[items.length-1]) {event.preventDefault(); items[0].focus();}
+        }
+      }
+    };
+  }
+  renderVals() {
+    const values = this.screenVals(), ui = this.state._ui || {};
+    for (const field of UI_FIELDS) {
+      const value = field.value.split('.').reduce((v, k) => v?.[k], values);
+      if (field.kind === 'date') {
+        values[field.key] = {title: scheduleValid(value) ? scheduleLabel(value, {day:'numeric',month:'long',year:'numeric'}) : 'Выбрать дату', open: () => this.uiOpenDate(field, value)};
+        continue;
+      }
+      values[field.key] = {
+        title: field.options.find(o => String(o.id) === String(value))?.title || 'Выбрать', open: ui.choice === field.id, expanded: ui.choice === field.id ? 'true' : 'false',
+        toggle: () => this.uiPatch({choice: ui.choice === field.id ? '' : field.id}), key: event => this.uiSelectKey(event, field),
+        blur: event => {if (!event.currentTarget.contains(event.relatedTarget)) this.uiPatch({choice: ''});},
+        options: field.options.map(o => ({...o, cls:'c-option' + (String(o.id) === String(value) ? ' is-on' : ''), selected: String(o.id) === String(value) ? 'true' : 'false', pick: () => {this.uiDispatch(field,o.id); this.uiPatch({choice:''}); this.uiFocus(field.id);}}))
+      };
+    }
+    values.uiDate = this.uiDateValues(values);
+    return values;
+  }
+}
+
+const INTERVIEW_VIEW = 'meetings';
+class Component extends FormControls {
+ constructor(p){super(p);interviewImportLegacy();interviewSync();this.state={tab:INTERVIEW_VIEW,focus:INTERVIEW_TODAY,query:'',filter:'all',history:false,selected:'',selectedBooking:'',profileTab:'overview',action:'',assignFocus:INTERVIEW_TODAY,picked:'',editing:false,draft:{},exceptionDate:'',outcome:'Подобрать первое занятие',publicNote:'',privateNote:'',nextDate:'',cancelReason:'',error:'',notice:''};}
+ componentDidMount(){this.unsubscribe=interviewSubscribe(this);}
+ componentWillUnmount(){this.unsubscribe?.();}
+ openProfile(id,booking=''){try{scrollTo(0,0);}catch(_){}this.setState({selected:id,selectedBooking:booking,profileTab:'overview',action:'',picked:'',error:'',notice:''});}
+ openWindow(w,date=this.state.focus){try{scrollTo(0,0);}catch(_){}this.setState({editing:true,draft:w?{...w,exceptions:[...w.exceptions]}:{id:'window-'+Date.now(),date,start:'10:00',end:'12:00',duration:30,gap:10,repeat:'none',until:'',exceptions:[],where:'Онлайн, Яндекс Телемост',link:'',active:true},exceptionDate:'',error:'',notice:''});}
+ screenVals(){const s=this.state,data=interviewRead(),from=scheduleMonday(s.focus),to=scheduleAdd(from,6),profile=data.profiles.find(p=>p.id===s.selected);
+ const current=profile?interviewCurrent(data,profile.id):null;const meeting=(s.selectedBooking&&data.bookings.find(b=>b.id===s.selectedBooking))||current||(profile?data.bookings.filter(b=>b.candidateId===profile.id).slice(-1)[0]:null);const active=meeting?.status==='booked';
+ const status=p=>{const b=interviewCurrent(data,p.id);if(p.request?.status==='new')return 'Просит другое время';if(b?.status==='booked')return 'Записан на встречу';if(b?.status==='completed')return 'Встреча состоялась';if(interviewReady(p))return 'Ждёт записи';return Object.keys(p.progress.done||{}).filter(k=>p.progress.done[k]).length?'Знакомится с фондом':'Новая анкета';};
+ const people=data.profiles.filter(p=>(s.filter==='all'||(s.filter==='ready'?interviewReady(p)&&!interviewCurrent(data,p.id):s.filter==='request'?p.request?.status==='new':!!interviewCurrent(data,p.id)))&&(`${fullName(p.person)} ${(p.person.roles||[]).join(' ')}`).toLowerCase().includes(s.query.toLowerCase()));
+ const bookings=data.bookings.filter(b=>s.history?b.status!=='booked':b.status==='booked').sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+ const allSlots=interviewSlots(data,from,to,'',true);const assignFrom=scheduleMonday(s.assignFocus),assignTo=scheduleAdd(assignFrom,6),choices=interviewSlots(data,assignFrom,assignTo,active?meeting.id:'').filter(sl=>!sl.busy&&interviewFuture(sl.date,sl.start)&&sl.id!==meeting?.slotId);
+ const person=profile?.person||{},progress=profile?.progress||{},completed=Object.keys(progress.done||{}).filter(k=>progress.done[k]).length;const format=v=>Array.isArray(v)?v.join(', ').replace(/·/g,' '):v===true?'Да':v===false?'Нет':String(v||'');
+ const sections=[...FORM.steps,{title:'Условия участия',fields:FORM.matching.fields}].map(part=>({title:part.title,answers:part.fields.filter(f=>person[f.id]!=null&&person[f.id]!==''&&(!Array.isArray(person[f.id])||person[f.id].length)).map(f=>({label:f.label,value:f.id==='birthdate'?birthdateDisplay(person[f.id]):format(person[f.id])}))})).filter(part=>part.answers.length);
+ const change=k=>e=>this.setState({[k]:e.target.value,error:'',notice:''}),draftChange=k=>e=>this.setState({draft:{...this.state.draft,[k]:e.target.value},error:''});
+ const notice=r=>{if(r.error)this.setState({error:r.error});else this.setState({action:'',editing:false,error:'',notice:'Изменения сохранены'});};
+ const result = {
+ pageTitle:s.tab==='candidates'?'Кандидаты':s.tab==='availability'?'Моя доступность':'Собеседования',candidatesTab:s.tab==='candidates',meetingFilter:s.history?'history':'upcoming',changeMeetingFilter:e=>this.setState({history:e.target.value==='history'}),candidateFilter:s.filter,changeCandidateFilter:e=>this.setState({filter:e.target.value}),meetingsTab:s.tab==='meetings',availabilityTab:s.tab==='availability',meetingsClass:s.tab==='meetings'?'is-on':'',availabilityClass:s.tab==='availability'?'is-on':'',showMeetings:()=>this.setState({tab:INTERVIEW_VIEW,error:''}),showAvailability:()=>this.setState({tab:'availability',error:''}),
+ history:s.history,upcomingClass:s.history?'':'is-on',historyClass:s.history?'is-on':'',showUpcoming:()=>this.setState({history:false}),showHistory:()=>this.setState({history:true}),bookingsTitle:s.history?'История встреч':'Предстоящие встречи',emptyBookings:!bookings.length,
+ bookings:bookings.map(b=>({...b,name:fullName(data.profiles.find(p=>p.id===b.candidateId)?.person),dateLabel:interviewDay(b.date),timeLabel:b.start+'–'+b.end,statusLabel:({booked:'Назначена',completed:'Состоялась',cancelled:'Отменена',missed:'Не пришёл'})[b.status],cls:'dot '+(b.status==='booked'?'dot-blue':b.status==='completed'?'dot-green':''),open:()=>this.openProfile(b.candidateId,b.id)})),
+ query:s.query,search:change('query'),filters:[['all','Все кандидаты'],['ready','Ждут записи'],['request','Просьбы о другом времени'],['booked','Со встречей']].map(([id,title])=>({title,cls:'chip'+(s.filter===id?' is-on':''),pick:()=>this.setState({filter:id})})),people:people.map(p=>({name:fullName(p.person),roles:format(p.person.roles),stage:status(p),progress:ONB.modules.filter(m=>p.progress.done?.[m.id]).length+' из '+ONB.modules.length+' шагов',pick:()=>this.openProfile(p.id)})),emptyPeople:!people.length,
+ focus:s.focus,changeFocus:e=>{if(scheduleValid(e.target.value))this.setState({focus:e.target.value,error:''});},periodLabel:interviewDay(from)+' — '+scheduleLabel(to,{day:'numeric',month:'long'}),previous:()=>this.setState({focus:scheduleAdd(s.focus,-7)}),next:()=>this.setState({focus:scheduleAdd(s.focus,7)}),today:()=>this.setState({focus:INTERVIEW_TODAY}),
+ days:Array.from({length:7},(_,i)=>{const date=scheduleAdd(from,i),windows=data.windows.filter(w=>interviewMatches(w,date));const daySlots=allSlots.filter(sl=>sl.date===date),free=daySlots.filter(sl=>!sl.busy&&data.windows.find(w=>w.id===sl.windowId)?.active).length;return {cls:'i-day-choice'+(date===s.focus?' is-on':''),selected:date===s.focus?'true':'false',short:scheduleLabel(date,{weekday:'short',day:'numeric',month:'short'}),summary:free?free+' свободно':daySlots.some(sl=>sl.busy)?'Есть встречи':'Нет записи',pick:()=>this.setState({focus:date}),label:interviewDay(date),empty:!windows.length,add:()=>{this.setState({focus:date});this.openWindow(null,date);},windows:windows.map(w=>{const slots=allSlots.filter(sl=>sl.windowId===w.id&&sl.date===date);return {id:w.id,time:w.start+'–'+w.end,description:w.duration+' мин · перерыв '+w.gap+' мин · '+w.where,repeatLabel:w.repeat==='weekly'?'Каждую неделю':'Один день',paused:!w.active,edit:()=>this.openWindow(w),toggle:()=>{const r=interviewSaveWindow({...w,active:!w.active});this.setState(r.error?{error:r.error}:{notice:w.active?'Свободное время закрыто. Назначенные встречи сохранены.':'Время снова доступно',error:''});},toggleLabel:w.active?'Закрыть свободное время':'Открыть запись',slots:slots.map(sl=>({time:sl.start,label:sl.busy?'Занято':!w.active?'Закрыто':'Свободно',cls:'i-time'+(sl.busy?' is-busy':!w.active?' is-closed':'')}))};})};}),addWindow:()=>this.openWindow(null),
+ editing:s.editing,draft:s.draft,editorTitle:data.windows.some(w=>w.id===s.draft.id)?'Редактировать доступность':'Добавить свободное время',recurring:s.draft.repeat==='weekly',changeDate:draftChange('date'),changeStart:draftChange('start'),changeEnd:draftChange('end'),changeDuration:draftChange('duration'),changeGap:draftChange('gap'),changeRepeat:draftChange('repeat'),changeUntil:draftChange('until'),changeWhere:draftChange('where'),changeLink:draftChange('link'),noEnd:!s.draft.until,toggleNoEnd:()=>this.setState({draft:{...s.draft,until:s.draft.until?'':scheduleAdd(s.draft.date,90)},error:''}),exceptionDate:s.exceptionDate,changeException:change('exceptionDate'),addException:()=>{if(!scheduleValid(s.exceptionDate)){this.setState({error:'Выберите дату пропуска.'});return;}this.setState({draft:{...s.draft,exceptions:[...new Set([...s.draft.exceptions,s.exceptionDate])].sort()},exceptionDate:'',error:''});},exceptions:(s.draft.exceptions||[]).map(date=>({label:interviewDay(date),remove:()=>this.setState({draft:{...s.draft,exceptions:s.draft.exceptions.filter(x=>x!==date)}})})),saveWindow:()=>notice(interviewSaveWindow(s.draft)),closeEditor:()=>this.setState({editing:false,error:''}),
+ needsRoad:!!progress.road,profileTabs:[['overview','Обзор'],['answers','Анкета'],['history','История']].map(([id,title])=>({title,cls:'local-tab'+(s.profileTab===id?' is-on':''),selected:s.profileTab===id?'true':'false',pick:()=>this.setState({profileTab:id,action:'',error:''})})),profileOverview:s.profileTab==='overview',profileAnswers:s.profileTab==='answers',profileHistory:s.profileTab==='history',hasProfile:!!profile,profileName:fullName(person),profileStage:profile?status(profile):'',profileReady:interviewReady(profile),notReady:!!profile&&!interviewReady(profile),closeProfile:()=>this.setState({selected:'',selectedBooking:'',action:'',error:''}),moduleProgress:completed+' из '+ONB.modules.length+' шагов',testLabel:interviewReady(profile)?(progress.score!=null?progress.score+' из '+ONB.test.questions.length+' · тест завершён':'Тест завершён'):'Тест ещё не завершён',modules:ONB.modules.map(m=>({title:m.title,state:progress.done?.[m.id]?'Прочитано':'Не прочитано'})),sections,contactText:format(person.channels)+(person.telegram?' · '+person.telegram:'')+' · '+format(person.email)+' · '+format(person.phone),
+ noMeeting:!meeting,hasMeeting:!!meeting,activeMeeting:!!active,meetingLabel:meeting?interviewDay(meeting.date)+', '+meeting.start+'–'+meeting.end:'Встреча ещё не назначена',meetingWhere:meeting?.where||'',meetingStatus:meeting?({booked:'Назначена',completed:'Состоялась',cancelled:'Отменена',missed:'Не пришёл'})[meeting.status]:'',hasJoinLink:!!meeting?.link,joinLink:meeting?.link||'#',hasOtherMeeting:current?.status==='booked'&&current.id!==meeting?.id,openCurrentMeeting:()=>this.setState({selectedBooking:current.id,action:'',error:''}),canAssign:!!profile&&interviewReady(profile)&&!data.bookings.some(b=>b.candidateId===profile.id&&b.status==='booked'),beginAssign:()=>this.setState({action:'assign',assignFocus:meeting?.date||INTERVIEW_TODAY,picked:'',error:''}),beginMove:()=>this.setState({action:'assign',assignFocus:meeting.date,picked:'',error:''}),
+ assigning:s.action==='assign',assignTitle:active?'Перенести встречу':'Назначить встречу',assignFocus:s.assignFocus,changeAssignFocus:e=>{if(scheduleValid(e.target.value))this.setState({assignFocus:e.target.value,picked:'',error:''});},assignPeriod:interviewDay(assignFrom)+' — '+scheduleLabel(assignTo,{day:'numeric',month:'long'}),assignPrevious:()=>this.setState({assignFocus:scheduleAdd(s.assignFocus,-7),picked:''}),assignNext:()=>this.setState({assignFocus:scheduleAdd(s.assignFocus,7),picked:''}),assignDays:[...new Set(choices.map(sl=>sl.date))].map(date=>({label:interviewDay(date),slots:choices.filter(sl=>sl.date===date).map(sl=>({...sl,label:sl.start+'–'+sl.end,cls:'i-slot'+(s.picked===sl.id?' is-on':''),checked:s.picked===sl.id?'true':'false',pick:()=>this.setState({picked:sl.id,error:''})}))})),emptyAssign:!choices.length,cantAssign:!choices.some(sl=>sl.id===s.picked),confirmAssign:()=>{const r=interviewBook(profile.id,s.picked,active?meeting.id:'','Координатор');if(r.error)this.setState({error:r.error,picked:''});else this.setState({action:'',selectedBooking:r.booking.id,picked:'',notice:active?'Встреча перенесена':'Встреча назначена',error:''});},cancelAction:()=>this.setState({action:'',error:''}),
+ cancelling:s.action==='cancel',askCancel:()=>this.setState({action:'cancel',cancelReason:'',error:''}),cancelReason:s.cancelReason,changeCancelReason:change('cancelReason'),confirmCancel:()=>notice(interviewCancel(meeting?.id,s.cancelReason)),
+ finishing:s.action==='finish',beginFinish:()=>this.setState({action:'finish',outcome:'Подобрать первое занятие',publicNote:'',privateNote:'',nextDate:'',error:''}),outcome:s.outcome,changeOutcome:change('outcome'),publicNote:s.publicNote,changePublicNote:change('publicNote'),privateNote:s.privateNote,changePrivateNote:change('privateNote'),nextDate:s.nextDate,changeNextDate:change('nextDate'),clearNextDate:()=>this.setState({nextDate:''}),saveOutcome:()=>notice(interviewFinish(meeting?.id,s.outcome,s.publicNote,s.privateNote,s.nextDate)),
+ showResult:!!meeting&&meeting.status==='completed',result:meeting?.result||'',resultPublic:meeting?.publicNote||'',resultPrivate:meeting?.privateNote||'',resultNext:meeting?.nextDate?interviewDay(meeting.nextDate):'',hasResultNext:!!meeting?.nextDate,cancelledMeeting:meeting?.status==='cancelled',cancelledReason:meeting?.cancelReason||'',timeline:meeting?.history||[],hasRequest:profile?.request?.status==='new',requestText:profile?.request?.text||'',resolveRequest:()=>{const fresh=interviewRead();fresh.profiles=fresh.profiles.map(p=>p.id===profile.id?{...p,request:{...p.request,status:'resolved'}}:p);interviewWrite(fresh);this.setState({notice:'Запрос отмечен обработанным'});},
+ notice:s.notice,dismissNotice:()=>this.setState({notice:''}),error:s.error,hasPageError:!!s.error&&!s.editing&&!s.selected,hasError:!!s.error,dialogKey:e=>{if(e.key==='Escape'){this.setState({editing:false,selected:'',action:'',error:''});return;}if(e.key==='Tab'){const items=Array.from(e.currentTarget.querySelectorAll('button,input,textarea,a[href],summary')).filter(x=>!x.disabled&&x.getClientRects().length);if(e.shiftKey&&e.target===items[0]){e.preventDefault();items[items.length-1].focus();}else if(!e.shiftKey&&e.target===items[items.length-1]){e.preventDefault();items[0].focus();}}}
+ };const selectedDay=result.days.find(d=>d.selected==='true');result.selectedDay=selectedDay||result.days[0];return result;}
+}
+
+</script><script src="./coordinator-nav.js"></script></body></html>

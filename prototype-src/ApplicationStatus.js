@@ -1,24 +1,28 @@
 class Component extends DCLogic {
- constructor(p){super(p);this.state={me:ensureCandidate(),pr:loadProgress(),picked:null,welcome:new URLSearchParams(location.search).has('welcome')};}
+ constructor(p){super(p);interviewImportLegacy();interviewSync();this.state={welcome:new URLSearchParams(location.search).has('welcome'),me:loadCandidate(),pr:loadProgress(),picked:'',focus:INTERVIEW_TODAY,rescheduling:false,cancelling:false,cancelReason:'',requesting:false,requestText:'',error:'',notice:''};}
+ componentDidMount(){this.unsubscribe=interviewSubscribe(this);}
+ componentWillUnmount(){this.unsubscribe?.();}
+ interviewRefresh(){const m=interviewCurrent(interviewRead(),interviewIdentity(this.state.me));if(this.state.rescheduling&&(!m||m.status!=='booked'||m.slotId!==this.state.movingSlot))this.setState({rescheduling:false,picked:'',notice:'Запись обновлена координатором',interviewRevision:Date.now()});else this.setState({interviewRevision:Date.now()});}
  save(pr){demoWrite('onboarding',pr);this.setState({pr});}
- renderVals(){const s=this.state,me=s.me,pr=s.pr,M=ONB.meeting,total=ONB.modules.length,n=ONB.modules.filter(m=>pr.done[m.id]).length,onboarded=!!pr.testDone;
-  const stages=[
-   {title:'Заявка',sub:'отправлена',done:true},
-   {title:'Знакомство с фондом',sub:onboarded?'пройдено':(n?n+' из '+total+' шагов':'около 20 минут'),done:onboarded},
-   {title:'Встреча с координатором',sub:pr.meeting?pr.meeting.day+', '+pr.meeting.time:'после знакомства',done:!!pr.meeting},
-   {title:'Первый выход',sub:'обсудим на встрече',done:false}];
-  const now=stages.findIndex(x=>!x.done);
-  const allDone={};ONB.modules.forEach(m=>allDone[m.id]=true);
-  return {welcome:s.welcome,welcomeTitle:FORM.done.title,welcomeText:FORM.done.text,first:firstName(me),
-   stages:stages.map((x,i)=>({...x,cls:x.done?'is-done':(i===now?'is-now':''),mark:x.done?'✓':String(i+1)})),
-   showOnboarding:!onboarded,onbEyebrow:n?'Продолжите':'Следующий шаг',onbButton:n?'Продолжить':'Начать',
-   onbLead:'Четыре коротких шага о фонде, участниках и правилах общения и небольшой тест. После него выберете время встречи с координатором.',
-   showPicker:onboarded&&!pr.meeting,booked:!!pr.meeting,meetTitle:M.title,meetText:M.text,coordinator:M.coordinator,
-   slots:M.slots.map((sl,i)=>({...sl,cls:s.picked===i?'opt is-on':'opt',checked:s.picked===i,pick:()=>this.setState({picked:i})})),
-   road:!!pr.road,toggleRoad:()=>this.save({...pr,road:!pr.road}),
-   cantBook:s.picked==null,book:()=>{this.save({...pr,meeting:M.slots[s.picked]});this.setState({picked:null,welcome:false});window.scrollTo(0,0);},
-   meetWhen:pr.meeting?pr.meeting.day+', '+pr.meeting.time:'',meetWhere:pr.meeting?pr.meeting.where:'',unbook:()=>this.save({...pr,meeting:null}),
-   demoFresh:()=>{this.save(freshProgress());this.setState({welcome:true,picked:null});},
-   demoOnboarded:()=>{this.save({...freshProgress(),done:allDone,testDone:true,score:9});this.setState({welcome:false,picked:null});},
-   demoBooked:()=>{this.save({...freshProgress(),done:allDone,testDone:true,score:9,meeting:M.slots[1]});this.setState({welcome:false,picked:null});}};}
+ book(){const s=this.state,id=interviewIdentity(s.me),data=interviewRead(),current=interviewCurrent(data,id);const result=interviewBook(id,s.picked,s.rescheduling&&current?.status==='booked'?current.id:'','Волонтёр');this.setState(result.error?{error:result.error,picked:''}:{picked:'',rescheduling:false,error:'',notice:s.rescheduling?'Встреча перенесена':'Вы записаны на встречу'});}
+ renderVals(){const s=this.state,me=s.me,pr=s.pr,data=interviewRead(),id=interviewIdentity(me),profile=data.profiles.find(p=>p.id===id),meeting=interviewCurrent(data,id),active=meeting?.status==='booked',completed=meeting?.status==='completed';
+ const total=ONB.modules.length,n=ONB.modules.filter(m=>pr.done[m.id]).length,N=ONB.test.questions.length,passed=interviewReady(profile),allDone=n===total;
+ const stages=[{title:'Заявка',sub:'отправлена',done:!!me},{title:'Знакомство с фондом',sub:passed?'пройдено':n+' из '+total+' шагов',done:passed},{title:'Встреча с координатором',sub:meeting?interviewDay(meeting.date)+', '+meeting.start:'после знакомства',done:!!meeting},{title:'Первый выход',sub:completed?meeting.result:'обсудим на встрече',done:false}];
+ const now=stages.findIndex(x=>!x.done),fmt=v=>Array.isArray(v)?v.join(', ').replace(/·/g,' '):(v||'');
+ const answers=me?[['Роли',fmt(me.roles)],['Как помогать',fmt(me.participation)],['Где удобно',fmt(me.places)],['Когда удобно',fmt(me.slots)],['Связь',fmt(me.channels)+(me.telegram?' · '+me.telegram:'')],['Телефон и почта',fmt(me.phone)+' · '+fmt(me.email)]].filter(x=>x[1]).map(([k,v])=>({k,v})):[];
+ const nextStep=!passed?{e:n?'Продолжите':'Следующий шаг',t:'Знакомство с фондом',l:'Четыре коротких шага о фонде, участниках и правилах общения и небольшой тест. После него выберете время встречи с координатором.',b:n?'Продолжить':'Начать',h:'Onboarding.dc.html'}:null;
+ const from=scheduleMonday(s.focus),to=scheduleAdd(from,6),available=interviewSlots(data,from,to,s.rescheduling&&active?meeting.id:'').filter(sl=>!sl.busy&&interviewFuture(sl.date,sl.start)&&sl.id!==meeting?.slotId);
+ const last=data.bookings.filter(b=>b.candidateId===id).slice(-1)[0];
+ return {
+ welcome:s.welcome,welcomeTitle:FORM.done.title,welcomeText:FORM.done.text,road:!!pr.road,toggleRoad:()=>this.save({...pr,road:!pr.road}),noCandidate:!me,hasCandidate:!!me,first:firstName(me),stages:stages.map((x,i)=>({...x,cls:x.done?'is-done':i===now?'is-now':'',mark:x.done?'✓':String(i+1)})),
+ showNext:!!nextStep,nextEyebrow:nextStep?.e||'',nextTitle:nextStep?.t||'',nextLead:nextStep?.l||'',nextButton:nextStep?.b||'',nextHref:nextStep?.h||'#',answers,
+ showPicker:!!me&&passed&&(!meeting||(active&&s.rescheduling)),rescheduling:!!active&&s.rescheduling,pickerTitle:s.rescheduling?'Выберите другое время':'Встреча с координатором',coordinator:ONB.meeting.coordinator,
+ focus:s.focus,changeFocus:e=>{if(scheduleValid(e.target.value))this.setState({focus:e.target.value,picked:'',error:''});},periodLabel:interviewDay(from)+' — '+scheduleLabel(to,{day:'numeric',month:'long'}),previous:()=>this.setState({focus:scheduleAdd(s.focus,-7),picked:''}),next:()=>this.setState({focus:scheduleAdd(s.focus,7),picked:''}),today:()=>this.setState({focus:INTERVIEW_TODAY,picked:''}),
+ slotDays:[...new Set(available.map(sl=>sl.date))].map(date=>({dateLabel:interviewDay(date),slots:available.filter(sl=>sl.date===date).map(sl=>({...sl,label:sl.start+'–'+sl.end,cls:'i-slot'+(s.picked===sl.id?' is-on':''),checked:s.picked===sl.id?'true':'false',pick:()=>this.setState({picked:sl.id,error:''})}))})),emptySlots:!available.length,cantBook:!available.some(sl=>sl.id===s.picked),book:()=>this.book(),bookLabel:s.rescheduling?'Подтвердить перенос':'Записаться',stopReschedule:()=>this.setState({rescheduling:false,picked:'',error:''}),
+ booked:!!active,completed:!!completed,meetWhen:meeting?interviewDay(meeting.date)+', '+meeting.start+'–'+meeting.end:'',meetWhere:meeting?.where||'',hasMeetingLink:!!meeting?.link,meetingLink:meeting?.link||'#',publicNote:meeting?.publicNote||'',result:meeting?.result||'',nextContact:meeting?.nextDate?interviewDay(meeting.nextDate):'',hasNextContact:!!meeting?.nextDate,
+ reschedule:()=>this.setState({rescheduling:true,movingSlot:meeting?.slotId,focus:meeting?.date||s.focus,picked:'',error:''}),askCancel:()=>this.setState({cancelling:true,cancelReason:'',error:''}),cancelling:s.cancelling,cancelReason:s.cancelReason,changeCancelReason:e=>this.setState({cancelReason:e.target.value,error:''}),keepMeeting:()=>this.setState({cancelling:false,error:''}),cancelMeeting:()=>{const r=interviewCancel(meeting?.id,s.cancelReason,'Волонтёр');this.setState(r.error?{error:r.error}:{cancelling:false,rescheduling:false,picked:'',notice:'Запись отменена. Можно выбрать другое время.',error:''});},
+ hasCancellation:!meeting&&last?.status==='cancelled',cancellationText:last?.cancelReason||'',requesting:s.requesting,requestText:s.requestText,startRequest:()=>this.setState({requesting:true,error:''}),changeRequest:e=>this.setState({requestText:e.target.value,error:''}),cancelRequest:()=>this.setState({requesting:false,error:''}),sendRequest:()=>{if(!s.requestText.trim()){this.setState({error:'Напишите, когда вам удобно встретиться.'});return;}const fresh=interviewRead();fresh.profiles=fresh.profiles.map(p=>p.id===id?{...p,request:{text:s.requestText,status:'new'}}:p);interviewWrite(fresh);this.setState({requesting:false,requestText:'',notice:'Ваш запрос появился у координатора',error:''});},
+ notice:s.notice,dismissNotice:()=>this.setState({notice:''}),dismissError:()=>this.setState({error:''}),error:s.error,hasError:!!s.error,
+ fillDemo:()=>{demoWrite('candidate',DEMO_CANDIDATE);this.setState({me:DEMO_CANDIDATE});},passAll:()=>{const me2=s.me||DEMO_CANDIDATE;demoWrite('candidate',me2);const done={};ONB.modules.forEach(m=>done[m.id]=true);this.setState({me:me2});this.save({...pr,done,testDone:true,score:N,best:N,attempts:1});},reset:()=>{demoWrite('candidate',null);demoWrite('onboarding',freshProgress());this.setState({me:null,pr:freshProgress(),picked:''});}
+ };}
 }

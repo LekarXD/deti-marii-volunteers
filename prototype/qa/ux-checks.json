@@ -1,0 +1,164 @@
+[
+  {
+    "screen": "Needs",
+    "device": "desktop",
+    "documentWidth": 1440,
+    "heading": "Возможности",
+    "holes": false,
+    "native": 0,
+    "width": 1440
+  },
+  {
+    "screen": "Roles",
+    "device": "desktop",
+    "documentWidth": 1440,
+    "heading": "Роли волонтёров",
+    "holes": false,
+    "native": 0,
+    "width": 1440
+  },
+  {
+    "screen": "Participants",
+    "device": "desktop",
+    "documentWidth": 1440,
+    "heading": "Участники",
+    "holes": false,
+    "native": 0,
+    "width": 1440
+  },
+  {
+    "screen": "Groups",
+    "device": "desktop",
+    "documentWidth": 1440,
+    "heading": "Группы",
+    "holes": false,
+    "native": 0,
+    "width": 1440
+  },
+  {
+    "screen": "Reserve",
+    "device": "desktop",
+    "documentWidth": 1440,
+    "heading": "Проверка контактов",
+    "holes": false,
+    "native": 0,
+    "width": 1440
+  },
+  {
+    "screen": "VolunteerRecord",
+    "device": "desktop",
+    "documentWidth": 1440,
+    "heading": "Егор Мельников",
+    "holes": false,
+    "native": 0,
+    "width": 1440
+  },
+  {
+    "screen": "Planning",
+    "device": "desktop",
+    "documentWidth": 1440,
+    "heading": "Расписание",
+    "holes": false,
+    "native": 0,
+    "width": 1440
+  },
+  {
+    "screen": "CoordHome",
+    "device": "desktop",
+    "documentWidth": 1440,
+    "heading": "Доброе утро, Ольга",
+    "holes": false,
+    "native": 0,
+    "width": 1440
+  },
+  {
+    "screen": "Volunteers",
+    "device": "desktop",
+    "documentWidth": 1440,
+    "heading": "Волонтёры",
+    "holes": false,
+    "native": 0,
+    "width": 1440
+  },
+  {
+    "screen": "Needs",
+    "device": "mobile",
+    "documentWidth": 390,
+    "heading": "Возможности",
+    "holes": false,
+    "native": 0,
+    "width": 390
+  },
+  {
+    "screen": "Roles",
+    "device": "mobile",
+    "documentWidth": 390,
+    "heading": "Роли волонтёров",
+    "holes": false,
+    "native": 0,
+    "width": 390
+  },
+  {
+    "screen": "Participants",
+    "device": "mobile",
+    "documentWidth": 390,
+    "heading": "Участники",
+    "holes": false,
+    "native": 0,
+    "width": 390
+  },
+  {
+    "screen": "Groups",
+    "device": "mobile",
+    "documentWidth": 390,
+    "heading": "Группы",
+    "holes": false,
+    "native": 0,
+    "width": 390
+  },
+  {
+    "screen": "Reserve",
+    "device": "mobile",
+    "documentWidth": 390,
+    "heading": "Проверка контактов",
+    "holes": false,
+    "native": 0,
+    "width": 390
+  },
+  {
+    "screen": "VolunteerRecord",
+    "device": "mobile",
+    "documentWidth": 390,
+    "heading": "Егор Мельников",
+    "holes": false,
+    "native": 0,
+    "width": 390
+  },
+  {
+    "screen": "Planning",
+    "device": "mobile",
+    "documentWidth": 390,
+    "heading": "Расписание",
+    "holes": false,
+    "native": 0,
+    "width": 390
+  },
+  {
+    "screen": "Candidates",
+    "device": "mobile",
+    "documentWidth": 390,
+    "heading": "Кандидаты",
+    "holes": false,
+    "native": 0,
+    "width": 390
+  },
+  {
+    "screen": "Interviews",
+    "device": "mobile",
+    "documentWidth": 390,
+    "heading": "Собеседования",
+    "holes": false,
+    "native": 0,
+    "width": 390
+  }
+]

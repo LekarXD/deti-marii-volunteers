@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import re
 from prototype_controls import enhance_controls
+from coordinator_layout import work_frame, wrap_original
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / 'prototype-src'
@@ -14,6 +15,8 @@ SCREENS = {
     'FundCatalog': ('Волонтёр: направления фонда', 'volunteer', 1270),
     'Needs': ('Фонд: возможности и подготовка к роли', 'coordinator', 1480),
     'Roles': ('Фонд: справочник ролей', 'coordinator', 1400),
+    'Candidates': ('Фонд: кандидаты и анкеты', 'coordinator', 1500),
+    'Interviews': ('Фонд: собеседования и доступность', 'coordinator', 1800),
     'Planning': ('Фонд: расписание и управление сменами', 'coordinator', 1290),
     'VolunteerRecord': ('Фонд: договорённости с волонтёром', 'coordinator', 1390),
     'Reserve': ('Фонд: проверка старых контактов', 'coordinator', 1140),
@@ -31,7 +34,7 @@ CONTENT = ROOT / 'prototype/content'
 CANDIDATE_ICONS = ['palette','book','users','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle']
 
 def subnav(role, current=''):
-    links = [('Needs', 'Возможности'), ('Planning', 'Расписание'), ('Roles', 'Роли'), ('Participants', 'Участники'), ('Groups', 'Группы'), ('Reserve', 'Резерв')] if role == 'coordinator' else [('FirstShift', 'Первый выход'), ('FundCatalog', 'Направления фонда'), ('Group', 'Моя группа')]
+    links = [('Interviews', 'Собеседования'), ('Needs', 'Возможности'), ('Planning', 'Расписание'), ('Roles', 'Роли'), ('Participants', 'Участники'), ('Groups', 'Группы'), ('Reserve', 'Резерв')] if role == 'coordinator' else [('FirstShift', 'Первый выход'), ('FundCatalog', 'Направления фонда'), ('Group', 'Моя группа')]
     return '<nav class="chips subnav" aria-label="' + ('Работа фонда' if role == 'coordinator' else 'Участие') + '">' + ''.join(f'<a class="chip{" is-on" if n == current else ""}" href="{n}.dc.html">{label}</a>' for n,label in links) + '</nav>'
 
 for p in BASE.iterdir():
@@ -40,7 +43,7 @@ for p in BASE.iterdir():
         text = text.replace('</style>', '.subnav{margin:0 0 32px}.dm .grid-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}\n</style>')
         # Original screens remain preserved in materials; only the working copy is linked.
         role = 'coordinator' if 'команда фонда' in text else 'volunteer'
-        if p.stem not in ['Apply.dc', 'ApplicationStatus.dc', 'Main.dc', 'Studio.dc', 'Phone.dc']:
+        if role != 'coordinator' and p.stem not in ['Apply.dc', 'ApplicationStatus.dc', 'Main.dc', 'Studio.dc', 'Phone.dc']:
             text = text.replace('</header>', '</header>\n' + subnav(role), 1)
         text = text.replace('href="Opportunity.dc.html"', 'href="Participation.dc.html"') if p.name == 'Catalog.dc.html' else text
         if p.name == 'Catalog.dc.html':
@@ -51,6 +54,11 @@ for p in BASE.iterdir():
             text = text.replace('href="Lesson.dc.html">Продолжить обучение','href="FirstShift.dc.html">Подготовиться к выходу')
             text = text.replace('href="Lesson.dc.html" style="margin-top:28px">Продолжить обучение','href="FirstShift.dc.html" style="margin-top:28px">Подготовиться к выходу')
             text = text.replace('<div class="row" style="gap:14px;margin-top:22px;max-width:460px"><div class="bar grow"><i style="width:20%"></i></div><span class="strong num">1 из 5</span></div>','')
+        if role == 'coordinator':
+            text = text.replace('href="Pipeline.dc.html"', 'href="Interviews.dc.html"').replace('Заявки<span class="count">7</span>', 'Заявки')
+        if role == 'coordinator':
+            text = text.replace('</style>', (SRC/'extensions.css').read_text()+'\n</style>')
+            text = wrap_original(text,SRC,p.stem.replace('.dc',''))
         (OUT / p.name).write_text('\n'.join(line.rstrip() for line in text.splitlines())+'\n')
 
 helmet = (SRC/'helmet.html').read_text()
@@ -72,9 +80,10 @@ for name,(title,role,height) in SCREENS.items():
             return ''.join(f'<sc-if value="{{{{{var}.ic_{k.replace("-", "_")}}}}}">{icons[k]}</sc-if>' for k in CANDIDATE_ICONS)
         body = re.sub(r'ICONSWITCH\((\w+)\)', iconswitch, body)
         body = re.sub(r'<button(?![^>]*\btype=)', '<button type="button"', body)
-        for token,key in [('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('CHECK','check-circle'),('SPARKLE','sparkle')]:
+        body, candidate_logic = enhance_controls(body, (SRC/f'{name}.js').read_text(), SRC)
+        for token,key in [('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('CHECK','check-circle'),('SPARKLE','sparkle'),('X','x')]:
             body = body.replace('ICON_'+token, icons[key])
-        logic = (SRC/'demo-store.js').read_text() + '\n' + (CONTENT/'form.js').read_text() + '\n' + (CONTENT/'onboarding.js').read_text() + '\n' + (SRC/'candidate-store.js').read_text() + '\n' + (SRC/f'{name}.js').read_text()
+        logic = (SRC/'date-utils.js').read_text() + '\n' + (SRC/'demo-store.js').read_text() + '\n' + (CONTENT/'form.js').read_text() + '\n' + (CONTENT/'onboarding.js').read_text() + '\n' + (SRC/'candidate-store.js').read_text() + '\n' + (SRC/'interview-store.js').read_text() + '\n' + candidate_logic
         h = helmet.replace('</style>', css + '\n' + (SRC/'candidate.css').read_text() + '\n</style>')
         doc = f'''<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{title} — Опора</title><script src="./support.js"></script></head><body>
@@ -93,18 +102,23 @@ for name,(title,role,height) in SCREENS.items():
         continue
     head = (SRC/f'{role}-header.html').read_text()
     head = head.replace('{{meAvCls}}', 'avatar av-b' if role=='coordinator' else 'avatar av-o').replace('{{meInitials}}', 'ОЛ' if role=='coordinator' else 'АС').replace('{{meLabel}}', 'Ольга Лебедева, координатор' if role=='coordinator' else 'Анна Соколова, волонтёр')
+    if name == 'Interviews':
+        head = head.replace('ОЛ', 'АВ').replace('Ольга Лебедева, координатор', 'Алевтина, координатор волонтёров')
     head = head.replace('class="is-active" aria-current="page" ', '')
-    active = 'Shifts' if name == 'Planning' else ('Volunteers' if name in ['VolunteerRecord','Reserve'] else ('Catalog' if name in ['FundCatalog','Participation'] else 'Home'))
+    head = head.replace('href="Pipeline.dc.html"', 'href="Interviews.dc.html"')
+    active = 'Interviews' if name == 'Interviews' else 'Shifts' if name == 'Planning' else ('Volunteers' if name in ['VolunteerRecord','Reserve'] else ('Catalog' if name in ['FundCatalog','Participation'] else 'Home'))
     head = head.replace(f'<a href="{active}.dc.html"', f'<a class="is-active" aria-current="page" href="{active}.dc.html"')
-    body = re.sub(r'<button(?![^>]*\btype=)', '<button type="button"', (SRC/f'{name}.body.html').read_text())
-    body, screen_logic = enhance_controls(body, (SRC/f'{name}.js').read_text(), SRC)
+    body = re.sub(r'<button(?![^>]*\btype=)', '<button type="button"', (SRC/f'{"Interviews" if name=="Candidates" else name}.body.html').read_text())
+    screen_logic=(SRC/f'{"Interviews" if name=="Candidates" else name}.js').read_text()
+    if name in ['Interviews','Candidates']:screen_logic="const INTERVIEW_VIEW = "+repr('candidates' if name=='Candidates' else 'meetings')+";\n"+screen_logic
+    body, screen_logic = enhance_controls(body, screen_logic, SRC)
     if 'UI_DATE_PICKER' in body:
         calendar = re.sub(r'\{\{uiDate\.([\w.]+)\}\}', lambda m: '{{'+{'open':'datePicker','key':'dateKey'}.get(m[1],m[1])+'}}', (SRC/'date-picker.html').read_text())
         body = body.replace('UI_DATE_PICKER', calendar)
     icons = dict(re.findall(r'^([\w-]+):\s*(<svg[^\n]+)', (ROOT/'materials/04-дизайн/прототип-до-фактуры/kit/icons.html').read_text(), re.M))
     for token,key in [('USERS','users'),('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('PLUS','plus'),('X','x')]:
         body = body.replace('ICON_'+token, icons[key])
-    logic = (SRC/'date-utils.js').read_text() + '\n' + (SRC/'demo-store.js').read_text() + '\nconst ROLES = demoRead("roles", ' + (SRC/'roles.json').read_text().strip() + ');\nconst PEOPLE = demoRead("people", ' + (SRC/'participants.json').read_text().strip() + ');\n' + (SRC/'role-directory.js').read_text() + '\n' + ((SRC/'Planning.controls.js').read_text() + '\n' if name=='Planning' else '') + screen_logic
+    logic = (SRC/'date-utils.js').read_text() + '\n' + (SRC/'demo-store.js').read_text() + '\nconst ROLES = demoRead("roles", ' + (SRC/'roles.json').read_text().strip() + ');\nconst PEOPLE = demoRead("people", ' + (SRC/'participants.json').read_text().strip() + ');\n' + (SRC/'role-directory.js').read_text() + '\n' + ((SRC/'Planning.controls.js').read_text() + '\n' if name=='Planning' else '') + (((CONTENT/'form.js').read_text()+'\n'+(CONTENT/'onboarding.js').read_text()+'\n'+(SRC/'candidate-store.js').read_text()+'\n'+(SRC/'interview-store.js').read_text()+'\n') if name in ['Interviews','Candidates'] else '') + screen_logic
     h = helmet.replace('</style>',css+'\n</style>')
     doc = f'''<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{title} — Опора</title><script src="./support.js"></script></head><body>
@@ -120,15 +134,19 @@ for name,(title,role,height) in SCREENS.items():
 {logic}
 </script></body></html>
 '''
+    if role == 'coordinator':
+        frame_start=doc.index('<div class="dm"><div class="shell">')
+        frame_end=doc.index('</x-dc>',frame_start)
+        doc=doc[:frame_start]+work_frame(SRC,name,body)+'\n'+doc[frame_end:]
     (OUT/f'{name}.dc.html').write_text(doc)
 
 # Add a connected entry into the original map, without replacing its four role cards.
 p = OUT/'Main.dc.html'
 t = p.read_text()
-extension = '<section class="section"><div class="section-head"><h2 class="h2">Новые сценарии</h2></div><div class="grid-3">' + ''.join(f'<a class="card" href="{name}.dc.html"><h3 class="h3">{label}</h3></a>' for name,label in [('Apply','Анкета волонтёра'),('Onboarding','Знакомство с фондом и тест'),('ApplicationStatus','Личный кабинет кандидата и встреча с координатором'),('FirstShift','Первый выход'),('Needs','Возможности и подготовка'),('Planning','Расписание'),('Roles','Роли волонтёров'),('VolunteerRecord','Договорённости с волонтёром'),('Participants','Участники фонда'),('Groups','Группы и состав')]) + '</div></section>'
+extension = '<section class="section"><div class="section-head"><h2 class="h2">Новые сценарии</h2></div><div class="grid-3">' + ''.join(f'<a class="card" href="{name}.dc.html"><h3 class="h3">{label}</h3></a>' for name,label in [('Apply','Анкета волонтёра'),('Onboarding','Знакомство с фондом и тест'),('ApplicationStatus','Личный кабинет кандидата и встреча с координатором'),('FirstShift','Первый выход'),('Needs','Возможности и подготовка'),('Planning','Расписание'),('Candidates','Кандидаты и анкеты'),('Interviews','Собеседования и доступность'),('Roles','Роли волонтёров'),('VolunteerRecord','Договорённости с волонтёром'),('Participants','Участники фонда'),('Groups','Группы и состав')]) + '</div></section>'
 t = t.replace('</div></div>\n</x-dc>', extension+'\n</div></div>\n</x-dc>')
 t = t.replace('class Component extends DCLogic', (SRC/'demo-store.js').read_text() + '\nclass Component extends DCLogic')
-t = t.replace('    return {\n      steps:', '    return {\n      demoReset:!!s.demoReset, resetDemo:()=>{["roles","role-directory","people","groups","reflection","schedule-v2","schedule-responses-v2","candidate","onboarding","apply-draft"].forEach(k=>{try{sessionStorage.removeItem("opora-prototype-v1:"+k);}catch(_){}});this.setState({demoReset:true});},\n      steps:')
+t = t.replace('    return {\n      steps:', '    return {\n      demoReset:!!s.demoReset, resetDemo:()=>{try{localStorage.removeItem("opora-interviews-v1");}catch(_){}["roles","role-directory","people","groups","reflection","schedule-v2","schedule-responses-v2","candidate","onboarding","apply-draft"].forEach(k=>{try{sessionStorage.removeItem("opora-prototype-v1:"+k);}catch(_){}});this.setState({demoReset:true});},\n      steps:')
 t = t.replace('<h2 class="h2">Новые сценарии</h2>', '<h2 class="h2">Новые сценарии</h2><button class="btn btn-ghost" onClick="{{resetDemo}}">Сбросить демо</button>')
 t = t.replace('</div></div>\n</x-dc>', '<sc-if value="{{demoReset}}"><p class="hint" role="status">Демо-данные сброшены</p></sc-if></div></div>\n</x-dc>')
 t=t.replace('"height":1670','"height":2450')
@@ -162,10 +180,20 @@ c=json.loads((BASE/'canvas.json').read_text())
 c['title']='Платформа волонтёров — прототип с дополнениями'
 for i,(name,(title,role,height)) in enumerate(SCREENS.items()):
     c['boards'][f'{name}.dc.html']={'x':(i%5)*1520,'y':13300+(i//5)*2300,'w':1440,'h':height,'title':title,'expand':'fill','is_interactive':True}
-    c['order'].append(f'{name}.dc.html')
+    if f'{name}.dc.html' not in c['order']:c['order'].append(f'{name}.dc.html')
 c['boards']['Main.dc.html']['h']=2450
 c['boards']['Reflection.dc.html']['h']=1400
 c['notes']['extensions']={'x':0,'y':13000,'text':'Новые сценарии: участие, планирование, люди и группы','kind':'title1','maxW':7520}
 (OUT/'canvas.json').write_text(json.dumps(c,ensure_ascii=False,indent=2)+'\n')
 (OUT/'opora.html').write_text('<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=Main.dc.html"><title>Опора</title></head><body><a href="Main.dc.html">Открыть прототип</a></body></html>')
+# Shared dropdown behaviour is outside the reactive template.
+(OUT/'coordinator-nav.js').write_text((SRC/'coordinator-nav.js').read_text())
+for page in OUT.glob('*.dc.html'):
+    text=page.read_text()
+    if 'class="work-app"' in text or 'class="dm work-app"' in text:
+        page.write_text(text.replace('</body>', '<script src="./coordinator-nav.js"></script></body>'))
 print('Built',len(c['boards']),'artboards')
+
+# Keep historical URLs as routes into the single Opora interface.
+(OUT/'legacy-redirect.js').write_text((SRC/'legacy-redirect.js').read_text())
+(OUT/'index.html').write_text('<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Опора — платформа волонтёров</title></head><body><p><a href="Main.dc.html">Открыть прототип «Опора»</a></p><script src="legacy-redirect.js"></script></body></html>')

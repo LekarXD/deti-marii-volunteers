@@ -20,7 +20,7 @@
       "is_interactive": true
     },
     "Apply.dc.html": {
-      "x": 1520,
+      "x": 4560,
       "y": 17900,
       "w": 1440,
       "h": 2600,
@@ -29,8 +29,8 @@
       "is_interactive": true
     },
     "ApplicationStatus.dc.html": {
-      "x": 4560,
-      "y": 17900,
+      "x": 0,
+      "y": 20200,
       "w": 1440,
       "h": 1700,
       "title": "Кандидат: личный кабинет",
@@ -279,9 +279,27 @@
       "expand": "fill",
       "is_interactive": true
     },
-    "Planning.dc.html": {
+    "Candidates.dc.html": {
       "x": 4560,
       "y": 13300,
+      "w": 1440,
+      "h": 1500,
+      "title": "Фонд: кандидаты и анкеты",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Interviews.dc.html": {
+      "x": 6080,
+      "y": 13300,
+      "w": 1440,
+      "h": 1800,
+      "title": "Фонд: собеседования и доступность",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Planning.dc.html": {
+      "x": 0,
+      "y": 15600,
       "w": 1440,
       "h": 1290,
       "title": "Фонд: расписание и управление сменами",
@@ -289,8 +307,8 @@
       "is_interactive": true
     },
     "VolunteerRecord.dc.html": {
-      "x": 6080,
-      "y": 13300,
+      "x": 1520,
+      "y": 15600,
       "w": 1440,
       "h": 1390,
       "title": "Фонд: договорённости с волонтёром",
@@ -298,7 +316,7 @@
       "is_interactive": true
     },
     "Reserve.dc.html": {
-      "x": 0,
+      "x": 3040,
       "y": 15600,
       "w": 1440,
       "h": 1140,
@@ -307,7 +325,7 @@
       "is_interactive": true
     },
     "Participants.dc.html": {
-      "x": 1520,
+      "x": 4560,
       "y": 15600,
       "w": 1440,
       "h": 1230,
@@ -316,7 +334,7 @@
       "is_interactive": true
     },
     "Groups.dc.html": {
-      "x": 3040,
+      "x": 6080,
       "y": 15600,
       "w": 1440,
       "h": 1650,
@@ -325,8 +343,8 @@
       "is_interactive": true
     },
     "Group.dc.html": {
-      "x": 4560,
-      "y": 15600,
+      "x": 0,
+      "y": 17900,
       "w": 1440,
       "h": 1590,
       "title": "Волонтёр: кто будет на занятии",
@@ -334,8 +352,8 @@
       "is_interactive": true
     },
     "FirstShift.dc.html": {
-      "x": 6080,
-      "y": 15600,
+      "x": 1520,
+      "y": 17900,
       "w": 1440,
       "h": 1940,
       "title": "Волонтёр: первый выход",
@@ -343,7 +361,7 @@
       "is_interactive": true
     },
     "Participation.dc.html": {
-      "x": 0,
+      "x": 3040,
       "y": 17900,
       "w": 1440,
       "h": 1320,
@@ -352,7 +370,7 @@
       "is_interactive": true
     },
     "Onboarding.dc.html": {
-      "x": 3040,
+      "x": 6080,
       "y": 17900,
       "w": 1440,
       "h": 2400,
@@ -392,6 +410,8 @@
     "FundCatalog.dc.html",
     "Needs.dc.html",
     "Roles.dc.html",
+    "Candidates.dc.html",
+    "Interviews.dc.html",
     "Planning.dc.html",
     "VolunteerRecord.dc.html",
     "Reserve.dc.html",
@@ -400,9 +420,7 @@
     "Group.dc.html",
     "FirstShift.dc.html",
     "Participation.dc.html",
-    "Apply.dc.html",
-    "Onboarding.dc.html",
-    "ApplicationStatus.dc.html"
+    "Onboarding.dc.html"
   ],
   "notes": {
     "row0": {

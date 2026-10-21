@@ -8,6 +8,8 @@ const fullName = c => (c && (c.name || [c.firstName, c.lastName].filter(Boolean)
 const firstName = c => fullName(c).split(/\s+/)[0] || '';
 const allFields = () => FORM.steps.flatMap(s => s.fields).concat(FORM.matching.fields);
 
+const birthdateDisplay = value => /^\d{4}-\d{2}-\d{2}$/.test(value||'') ? value.slice(8,10)+'.'+value.slice(5,7)+'.'+value.slice(0,4) : (value||'');
+const birthdateInput = raw => {if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;const digits=raw.replace(/\D/g,'').slice(0,8);if(digits.length===8)return digits.slice(4)+'-'+digits.slice(2,4)+'-'+digits.slice(0,2);return [digits.slice(0,2),digits.slice(2,4),digits.slice(4)].filter(Boolean).join('.');};
 const MASK = {
   name: v => v.replace(/[^A-Za-zА-Яа-яЁё\- ']/g, '').replace(/\s+/g, ' ').replace(/^[\s-]+/, '').replace(/(^|[\s-])([a-zа-яё])/g, (m, a, b) => a + b.toUpperCase()),
   phone: v => {
@@ -61,6 +63,7 @@ function validateFields(fields, data) {
     else if (!empty && f.mask === 'phone' && String(v).replace(/\D/g, '').length !== 11) errs[f.id] = 'Номер должен быть из 10 цифр после +7';
     else if (!empty && f.mask === 'telegram' && !/^@[A-Za-z0-9_]{5,32}$/.test(v)) errs[f.id] = 'Ник — от 5 символов: латиница, цифры и _';
     else if (!empty && f.mask === 'name' && !/^[А-ЯЁA-Z][а-яёa-z']+([\s-][А-ЯЁA-Z][а-яёa-z']+)*$/.test(v)) errs[f.id] = 'Проверьте написание: только буквы, без сокращений';
+    else if (!empty && f.id === 'birthdate' && !scheduleValid(v)) errs[f.id] = 'Введите дату в формате ДД.ММ.ГГГГ';
     else if (!empty && f.id === 'birthdate') { const a = ageOf(v); if (a == null || a < 16) errs[f.id] = 'Волонтёром можно стать с 16 лет'; else if (a > 110) errs[f.id] = 'Проверьте дату'; }
   });
   return errs;
@@ -85,8 +88,8 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
       cls: 'field a-field' + (f.half ? ' a-half' : '') + (errs[f.id] ? ' a-bad' : ''),
       err: errs[f.id] || '', hasErr: !!errs[f.id], warn, hasWarn: !!warn,
       isConsent: t === 'consent', notConsent: t !== 'consent',
-      isInput, inputType: t === 'tel' ? 'tel' : t, value: v == null ? '' : v, placeholder: f.placeholder || '', autocomplete: f.autocomplete || 'off',
-      change: e => { const raw = e.target.value; update(f.id, f.mask ? MASK[f.mask](raw) : raw); },
+      isInput, inputType: t === 'date' ? 'text' : t, inputMode: t === 'date' ? 'numeric' : t === 'email' ? 'email' : t === 'tel' ? 'tel' : 'text', value: t === 'date' ? birthdateDisplay(v) : v == null ? '' : v, placeholder: t === 'date' ? 'ДД.ММ.ГГГГ' : f.placeholder || '', autocomplete: f.autocomplete || 'off',
+      change: e => { const raw = e.target.value; update(f.id, t === 'date' ? birthdateInput(raw) : f.mask ? MASK[f.mask](raw) : raw); },
       focus: () => { if (f.mask === 'phone' && !data[f.id]) update(f.id, '+7 ('); if (f.mask === 'telegram' && !data[f.id]) update(f.id, '@'); },
       blur: () => { if (f.mask) update(f.id, FINAL[f.mask](String(data[f.id] || ''))); },
       isTextarea: t === 'textarea', isSelect: t === 'select',

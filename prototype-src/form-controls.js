@@ -100,10 +100,10 @@ class FormControls extends DCLogic {
         continue;
       }
       values[field.key] = {
-        title: field.options.find(o => o.id === value)?.title || 'Выбрать', open: ui.choice === field.id, expanded: ui.choice === field.id ? 'true' : 'false',
+        title: field.options.find(o => String(o.id) === String(value))?.title || 'Выбрать', open: ui.choice === field.id, expanded: ui.choice === field.id ? 'true' : 'false',
         toggle: () => this.uiPatch({choice: ui.choice === field.id ? '' : field.id}), key: event => this.uiSelectKey(event, field),
         blur: event => {if (!event.currentTarget.contains(event.relatedTarget)) this.uiPatch({choice: ''});},
-        options: field.options.map(o => ({...o, cls:'c-option' + (o.id === value ? ' is-on' : ''), selected: o.id === value ? 'true' : 'false', pick: () => {this.uiDispatch(field,o.id); this.uiPatch({choice:''}); this.uiFocus(field.id);}}))
+        options: field.options.map(o => ({...o, cls:'c-option' + (String(o.id) === String(value) ? ' is-on' : ''), selected: String(o.id) === String(value) ? 'true' : 'false', pick: () => {this.uiDispatch(field,o.id); this.uiPatch({choice:''}); this.uiFocus(field.id);}}))
       };
     }
     values.uiDate = this.uiDateValues(values);

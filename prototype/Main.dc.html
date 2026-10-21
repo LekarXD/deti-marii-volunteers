@@ -310,13 +310,13 @@ sc-if,sc-for{display:contents}
   </sc-if>
 </section>
 
-<section class="section"><div class="section-head"><h2 class="h2">Новые сценарии</h2><button class="btn btn-ghost" onClick="{{resetDemo}}">Сбросить демо</button></div><div class="grid-3"><a class="card" href="Apply.dc.html"><h3 class="h3">Анкета волонтёра</h3></a><a class="card" href="Onboarding.dc.html"><h3 class="h3">Знакомство с фондом и тест</h3></a><a class="card" href="ApplicationStatus.dc.html"><h3 class="h3">Личный кабинет кандидата и встреча с координатором</h3></a><a class="card" href="FirstShift.dc.html"><h3 class="h3">Первый выход</h3></a><a class="card" href="Needs.dc.html"><h3 class="h3">Возможности и подготовка</h3></a><a class="card" href="Planning.dc.html"><h3 class="h3">Расписание</h3></a><a class="card" href="Roles.dc.html"><h3 class="h3">Роли волонтёров</h3></a><a class="card" href="VolunteerRecord.dc.html"><h3 class="h3">Договорённости с волонтёром</h3></a><a class="card" href="Participants.dc.html"><h3 class="h3">Участники фонда</h3></a><a class="card" href="Groups.dc.html"><h3 class="h3">Группы и состав</h3></a></div></section>
+<section class="section"><div class="section-head"><h2 class="h2">Новые сценарии</h2><button class="btn btn-ghost" onClick="{{resetDemo}}">Сбросить демо</button></div><div class="grid-3"><a class="card" href="Apply.dc.html"><h3 class="h3">Анкета волонтёра</h3></a><a class="card" href="Onboarding.dc.html"><h3 class="h3">Знакомство с фондом и тест</h3></a><a class="card" href="ApplicationStatus.dc.html"><h3 class="h3">Личный кабинет кандидата и встреча с координатором</h3></a><a class="card" href="FirstShift.dc.html"><h3 class="h3">Первый выход</h3></a><a class="card" href="Needs.dc.html"><h3 class="h3">Возможности и подготовка</h3></a><a class="card" href="Planning.dc.html"><h3 class="h3">Расписание</h3></a><a class="card" href="Candidates.dc.html"><h3 class="h3">Кандидаты и анкеты</h3></a><a class="card" href="Interviews.dc.html"><h3 class="h3">Собеседования и доступность</h3></a><a class="card" href="Roles.dc.html"><h3 class="h3">Роли волонтёров</h3></a><a class="card" href="VolunteerRecord.dc.html"><h3 class="h3">Договорённости с волонтёром</h3></a><a class="card" href="Participants.dc.html"><h3 class="h3">Участники фонда</h3></a><a class="card" href="Groups.dc.html"><h3 class="h3">Группы и состав</h3></a></div></section>
 <sc-if value="{{demoReset}}"><p class="hint" role="status">Демо-данные сброшены</p></sc-if></div></div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2450}}'>
 // Browser-only demo data. No uploads or messages are sent to external services.
 const demoRead = (key, fallback) => {try {const raw = sessionStorage.getItem('opora-prototype-v1:'+key);return raw ? JSON.parse(raw) : fallback;} catch (_) {return fallback;}};
-const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-v1:'+key,JSON.stringify(value));} catch (_) {}};
+const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-v1:'+key,JSON.stringify(value));if(['candidate','onboarding'].includes(key)&&typeof interviewSync==='function')interviewSync();} catch (_) {}};
 
 class Component extends DCLogic {
   constructor(props) {
@@ -326,7 +326,7 @@ class Component extends DCLogic {
   renderVals() {
     const s = this.state;
     return {
-      demoReset:!!s.demoReset, resetDemo:()=>{["roles","role-directory","people","groups","reflection","schedule-v2","schedule-responses-v2","candidate","onboarding","apply-draft"].forEach(k=>{try{sessionStorage.removeItem("opora-prototype-v1:"+k);}catch(_){}});this.setState({demoReset:true});},
+      demoReset:!!s.demoReset, resetDemo:()=>{try{localStorage.removeItem("opora-interviews-v1");}catch(_){}["roles","role-directory","people","groups","reflection","schedule-v2","schedule-responses-v2","candidate","onboarding","apply-draft"].forEach(k=>{try{sessionStorage.removeItem("opora-prototype-v1:"+k);}catch(_){}});this.setState({demoReset:true});},
       steps: [
         { n: '1', title: 'Заявка', href: 'Apply.dc.html' },
         { n: '2', title: 'Собеседование и документы', href: 'ApplicationStatus.dc.html' },

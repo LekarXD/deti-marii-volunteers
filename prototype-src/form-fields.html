@@ -2,7 +2,7 @@
 <sc-if value="{{f.isConsent}}"><label class="check a-consent"><input type="checkbox" checked="{{f.checked}}" onChange="{{f.toggle}}"><span>{{f.label}}<sc-if value="{{f.req}}"> <b class="a-req">*</b></sc-if></span></label></sc-if>
 <sc-if value="{{f.notConsent}}"><span class="label">{{f.label}}<sc-if value="{{f.req}}"> <b class="a-req">*</b></sc-if><sc-if value="{{f.opt}}"> <span class="a-opt">по желанию</span></sc-if></span></sc-if>
 <sc-if value="{{f.hasWhy}}"><p class="a-why">{{f.why}}</p></sc-if>
-<sc-if value="{{f.isInput}}"><input class="input" type="{{f.inputType}}" value="{{f.value}}" placeholder="{{f.placeholder}}" autocomplete="{{f.autocomplete}}" aria-label="{{f.label}}" onChange="{{f.change}}" onFocus="{{f.focus}}" onBlur="{{f.blur}}"></sc-if>
+<sc-if value="{{f.isInput}}"><input class="input" type="{{f.inputType}}" inputmode="{{f.inputMode}}" value="{{f.value}}" placeholder="{{f.placeholder}}" autocomplete="{{f.autocomplete}}" aria-label="{{f.label}}" onChange="{{f.change}}" onFocus="{{f.focus}}" onBlur="{{f.blur}}"></sc-if>
 <sc-if value="{{f.isTextarea}}"><textarea class="textarea a-textarea" value="{{f.value}}" aria-label="{{f.label}}" onChange="{{f.change}}"></textarea></sc-if>
 <sc-if value="{{f.isSelect}}"><div class="chips a-chips" role="radiogroup" aria-label="{{f.label}}"><sc-for list="{{f.options}}" as="o"><button class="{{o.cls}}" role="radio" aria-checked="{{o.checked}}" onClick="{{o.toggle}}">{{o.label}}</button></sc-for></div></sc-if>
 <sc-if value="{{f.isChoice}}"><div class="a-lines"><sc-for list="{{f.options}}" as="o"><label class="{{o.lineCls}}"><input type="{{f.choiceType}}" name="{{f.id}}" checked="{{o.checked}}" onChange="{{o.toggle}}"><span>{{o.label}}</span></label></sc-for></div></sc-if>
