@@ -4597,6 +4597,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/recording-projects/{id}/renders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Render List */
+        get: operations["recording_render_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/recording-projects/{id}/takes": {
         parameters: {
             query?: never;
@@ -4779,6 +4796,23 @@ export interface paths {
         put?: never;
         /** Discard */
         post: operations["recording_take_discard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recording-takes/{id}/policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Policy */
+        post: operations["recording_take_policy"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9700,6 +9734,39 @@ export interface components {
              */
             raw_fallback: "forbidden";
         };
+        /** RecordingPolicyCommand */
+        RecordingPolicyCommand: {
+            /** Approved */
+            approved: boolean;
+            /** Expected Scene Revision */
+            expected_scene_revision: number;
+            /** Expected Version */
+            expected_version: number;
+            /** Tracks */
+            tracks: components["schemas"]["RecordingPolicyTrack"][];
+        };
+        /** RecordingPolicyTrack */
+        RecordingPolicyTrack: {
+            /** Identity */
+            identity: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "video" | "audio";
+            /**
+             * Required
+             * @default true
+             */
+            required: boolean;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "camera" | "screen" | "microphone" | "screen_audio";
+            /** Track Id */
+            track_id: string;
+        };
         /** RecordingProjectInput */
         RecordingProjectInput: {
             /**
@@ -9760,6 +9827,13 @@ export interface components {
             title: string;
             /** Version */
             version: number;
+        };
+        /** RecordingRenderPage */
+        RecordingRenderPage: {
+            /** Items */
+            items: components["schemas"]["RecordingRenderView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
         };
         /** RecordingRenderView */
         RecordingRenderView: {
@@ -10167,6 +10241,7 @@ export interface components {
                 /** @constant */
                 theme_id: "opora-warm";
             } & (unknown & unknown & unknown & unknown);
+            scene_transition?: components["schemas"]["RendererSceneTransition"] | null;
             /**
              * Session Id
              * Format: uuid
@@ -10235,6 +10310,8 @@ export interface components {
             asset_proofs: components["schemas"]["RendererAssetProof"][];
             /** Device Pixel Ratio */
             device_pixel_ratio: number;
+            /** Media State */
+            media_state?: ("connected" | "connecting" | "blocked" | "disconnected" | "reconnecting") | null;
             /** Observed Tracks */
             observed_tracks: components["schemas"]["RendererObservedTrack"][];
             /** Projection Hash */
@@ -10271,6 +10348,18 @@ export interface components {
             renderer_state_version: number;
             /** Valid Until */
             valid_until: string | null;
+        };
+        /** RendererSceneTransition */
+        RendererSceneTransition: {
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** From Projection Hash */
+            from_projection_hash: string;
+            /** From Renderer State Version */
+            from_renderer_state_version: number;
         };
         /** RendererStateView */
         RendererStateView: {
@@ -10371,6 +10460,7 @@ export interface components {
                 /** @constant */
                 theme_id: "opora-warm";
             } & (unknown & unknown & unknown & unknown);
+            scene_transition?: components["schemas"]["RendererSceneTransition"] | null;
             /**
              * Session Id
              * Format: uuid
@@ -42526,6 +42616,103 @@ export interface operations {
             };
         };
     };
+    recording_render_list: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingRenderPage"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+        };
+    };
     recording_take_list: {
         parameters: {
             query?: {
@@ -43595,6 +43782,104 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["RecordingVersionCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingTakeView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+        };
+    };
+    recording_take_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordingPolicyCommand"];
             };
         };
         responses: {

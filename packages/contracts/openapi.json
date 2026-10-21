@@ -9515,6 +9515,88 @@
         "title": "RecordingCapabilities",
         "type": "object"
       },
+      "RecordingPolicyCommand": {
+        "properties": {
+          "approved": {
+            "title": "Approved",
+            "type": "boolean"
+          },
+          "expected_scene_revision": {
+            "minimum": 0.0,
+            "title": "Expected Scene Revision",
+            "type": "integer"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/RecordingPolicyTrack"
+            },
+            "maxItems": 64,
+            "title": "Tracks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "expected_version",
+          "expected_scene_revision",
+          "approved",
+          "tracks"
+        ],
+        "title": "RecordingPolicyCommand",
+        "type": "object"
+      },
+      "RecordingPolicyTrack": {
+        "additionalProperties": false,
+        "properties": {
+          "identity": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Identity",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "video",
+              "audio"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "required": {
+            "default": true,
+            "title": "Required",
+            "type": "boolean"
+          },
+          "source": {
+            "enum": [
+              "camera",
+              "screen",
+              "microphone",
+              "screen_audio"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "track_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Track Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identity",
+          "track_id",
+          "source",
+          "kind"
+        ],
+        "title": "RecordingPolicyTrack",
+        "type": "object"
+      },
       "RecordingProjectInput": {
         "properties": {
           "mode": {
@@ -9710,6 +9792,35 @@
           "capabilities"
         ],
         "title": "RecordingProjectView",
+        "type": "object"
+      },
+      "RecordingRenderPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RecordingRenderView"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "RecordingRenderPage",
         "type": "object"
       },
       "RecordingRenderView": {
@@ -11035,6 +11146,16 @@
             "title": "Immutable StudioScene v1",
             "type": "object"
           },
+          "scene_transition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RendererSceneTransition"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "session_id": {
             "format": "uuid",
             "title": "Session Id",
@@ -11187,6 +11308,24 @@
             "title": "Device Pixel Ratio",
             "type": "number"
           },
+          "media_state": {
+            "anyOf": [
+              {
+                "enum": [
+                  "connected",
+                  "connecting",
+                  "blocked",
+                  "disconnected",
+                  "reconnecting"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media State"
+          },
           "observed_tracks": {
             "items": {
               "$ref": "#/components/schemas/RendererObservedTrack"
@@ -11299,6 +11438,30 @@
           "valid_until"
         ],
         "title": "RendererReadinessView",
+        "type": "object"
+      },
+      "RendererSceneTransition": {
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "from_projection_hash": {
+            "title": "From Projection Hash",
+            "type": "string"
+          },
+          "from_renderer_state_version": {
+            "title": "From Renderer State Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "from_renderer_state_version",
+          "from_projection_hash",
+          "expires_at"
+        ],
+        "title": "RendererSceneTransition",
         "type": "object"
       },
       "RendererStateView": {
@@ -11831,6 +11994,16 @@
             ],
             "title": "Immutable StudioScene v1",
             "type": "object"
+          },
+          "scene_transition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RendererSceneTransition"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "session_id": {
             "format": "uuid",
@@ -56632,6 +56805,148 @@
         ]
       }
     },
+    "/api/v1/recording-projects/{id}/renders": {
+      "get": {
+        "operationId": "recording_render_list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingRenderPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Render List",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
     "/api/v1/recording-projects/{id}/takes": {
       "get": {
         "operationId": "recording_take_list",
@@ -58115,6 +58430,129 @@
           }
         },
         "summary": "Discard",
+        "tags": [
+          "recordings"
+        ]
+      }
+    },
+    "/api/v1/recording-takes/{id}/policy": {
+      "post": {
+        "operationId": "recording_take_policy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingPolicyCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingTakeView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Policy",
         "tags": [
           "recordings"
         ]
