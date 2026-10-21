@@ -1,0 +1,15 @@
+import {canonicalSerialize,parseCapturePlan,parseStudioScene,SceneContractError,type StudioScene,type CapturePlan} from '../../../../../../packages/studio-core';
+/** Internal frame stamp only: not a second API DTO or a server journal. */
+export interface RendererFrame {readonly scene:StudioScene;readonly plan:CapturePlan;readonly stamp:string;readonly stateVersion:number;}
+function scope(scene:StudioScene,plan:CapturePlan){return canonicalSerialize({foundation_id:scene.foundation_id,resource_id:scene.resource_id,session_id:scene.session_id,take_id:scene.take_id,generation:plan.generation,render_profile_version:scene.render_profile_version,recording_policy_id:scene.recording_policy_id});}
+function frame(sceneValue:StudioScene,planValue:CapturePlan,stateVersion:number):RendererFrame{if(!Number.isSafeInteger(stateVersion)||stateVersion<1)throw new SceneContractError('renderer_state_version_invalid');const scene=parseStudioScene(sceneValue),plan=parseCapturePlan(planValue);if(scene.foundation_id!==plan.foundation_id||scene.resource_id!==plan.resource_id||scene.session_id!==plan.session_id||scene.take_id!==plan.take_id||scene.revision!==plan.scene_revision||scene.render_profile_version!==plan.render_profile_version||scene.recording_policy_id!==plan.recording_policy_id)throw new SceneContractError('capture_scope_mismatch');return Object.freeze({scene,plan,stateVersion,stamp:canonicalSerialize({scene,plan,stateVersion})});}
+/** Reject cross-take/old-generation delivery and stale readiness receipts before provider signals. */
+export function createRendererFrameFence(scene:StudioScene,plan:CapturePlan,stateVersion:number){let current=frame(scene,plan,stateVersion);if(current.plan.privacy_state!=='approved')throw new SceneContractError('recording_policy_not_approved');const fixedScope=scope(current.scene,current.plan);let closed=false;return Object.freeze({
+ current(){if(closed)throw new SceneContractError('renderer_closed');return current;},
+ close(){closed=true;},
+ isCurrent(stamp:string){return !closed&&current.stamp===stamp;},
+ accept(scene:StudioScene,plan:CapturePlan,stateVersion:number):'unchanged'|'advanced'|'stale'{
+  if(closed)throw new SceneContractError('renderer_closed');let incoming:RendererFrame;try{incoming=frame(scene,plan,stateVersion);if(scope(incoming.scene,incoming.plan)!==fixedScope)throw new SceneContractError('renderer_scope_changed');if(incoming.stateVersion<current.stateVersion)return 'stale';if(incoming.plan.privacy_state!=='approved')throw new SceneContractError('recording_policy_not_approved');if(incoming.stateVersion===current.stateVersion&&incoming.stamp!==current.stamp)throw new SceneContractError('renderer_state_version_reused');if(incoming.scene.revision<current.scene.revision)throw new SceneContractError('scene_revision_regressed');if(incoming.scene.revision===current.scene.revision&&canonicalSerialize(incoming.scene)!==canonicalSerialize(current.scene))throw new SceneContractError('scene_revision_reused');}catch(error){closed=true;throw error;}
+  if(incoming.stamp===current.stamp)return 'unchanged';current=incoming;return 'advanced';
+ },
+ });}
