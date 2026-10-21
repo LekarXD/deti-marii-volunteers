@@ -1,0 +1,11 @@
+[
+ {"name":"default","steps":[]},
+ {"name":"lead","steps":[{"fn":"modes.1.pick"}]},
+ {"name":"call","steps":[{"fn":"call"}]},
+ {"name":"write-open","steps":[{"fn":"openMsg"},{"fn":"typeMsg","value":"Привет"}]},
+ {"name":"write-sent","steps":[{"fn":"openMsg"},{"fn":"sendMsg"}]},
+ {"name":"edit-open","steps":[{"fn":"startEdit"}]},
+ {"name":"edit-saved","steps":[{"fn":"startEdit"},{"fn":"typeDraft","value":"Новый текст"},{"fn":"saveEdit"}]},
+ {"name":"edit-saved-lead","steps":[{"fn":"startEdit"},{"fn":"typeDraft","value":"Новый текст"},{"fn":"saveEdit"},{"fn":"modes.1.pick"}]},
+ {"name":"sent","steps":[{"fn":"send"}]}
+]

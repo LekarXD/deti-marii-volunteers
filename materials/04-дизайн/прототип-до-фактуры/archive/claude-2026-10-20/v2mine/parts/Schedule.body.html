@@ -1,0 +1,160 @@
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="2">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<div class="head" style="align-items:center;margin-bottom:24px">
+  <div><h1 class="h1">Мои смены</h1></div>
+  <sc-if value="{{hasShifts}}" hint-placeholder-val="{{true}}">
+    <div class="seg" role="group" aria-label="Вид">
+      <button type="button" class="{{listCls}}" aria-pressed="{{listPressed}}" onClick="{{toList}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 11l1.5 1.5L13 10M9 16h6"/></svg>Список</button>
+      <button type="button" class="{{calCls}}" aria-pressed="{{calPressed}}" onClick="{{toCal}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Календарь</button>
+    </div>
+  </sc-if>
+</div>
+
+<sc-if value="{{hasShifts}}" hint-placeholder-val="{{true}}">
+  <section class="card-hero" aria-label="Ближайшая смена">
+    <div class="hero-grid">
+      <div class="grow">
+        <sc-if value="{{heroPlain}}" hint-placeholder-val="{{true}}">
+          <p class="eyebrow" style="margin:0">Ближайшая смена</p>
+          <p class="hero-when">Сб, 24 октября, 12:00</p>
+          <p class="lead">Живопись с «Подсолнухами» в мастерской на Дмитровке</p>
+        </sc-if>
+        <sc-if value="{{heroIdle}}" hint-placeholder-val="{{true}}">
+          <div class="row wrap" style="margin-top:28px">
+            <button type="button" class="btn btn-primary btn-lg" onClick="{{confirm}}">Я приду</button>
+            <button type="button" class="btn btn-secondary btn-lg" onClick="{{cantGo}}">Не смогу</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{heroYes}}" hint-placeholder-val="{{false}}">
+          <div class="hero-note" role="status">
+            <span class="row strong grow"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Ты в списке, напомним накануне</span>
+            <button type="button" class="btn btn-ghost btn-sm" onClick="{{reset}}">Изменить</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{heroAsk}}" hint-placeholder-val="{{false}}">
+          <p class="eyebrow" style="margin:0">Сб, 24 октября, 12:00</p>
+          <p class="hero-when">Не сможешь прийти?</p>
+          <div class="chips" role="radiogroup" aria-label="Причина" style="margin-top:24px">
+            <sc-for list="{{reasons}}" as="r" hint-placeholder-count="3">
+              <button type="button" role="radio" aria-checked="{{r.checked}}" class="{{r.cls}}" onClick="{{r.pick}}">{{r.label}}</button>
+            </sc-for>
+          </div>
+          <div class="row wrap" style="margin-top:24px">
+            <button type="button" class="btn btn-primary btn-lg" onClick="{{send}}">Сообщить Ольге</button>
+            <button type="button" class="btn btn-ghost btn-lg" onClick="{{reset}}">Я приду</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{heroSent}}" hint-placeholder-val="{{false}}">
+          <p class="eyebrow" style="margin:0">Сб, 24 октября, 12:00</p>
+          <p class="hero-when">Ищем замену</p>
+          <p class="lead">Ольга подтвердит и предупредит группу</p>
+          <div class="hero-note">
+            <span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span>
+            <div class="subs grow" role="list" aria-label="Кого позвали на замену">
+              <sc-for list="{{subs}}" as="c" hint-placeholder-count="3">
+                <span class="sub" role="listitem"><span class="{{c.av}}" aria-hidden="true">{{c.ini}}</span>{{c.name}}</span>
+              </sc-for>
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost" style="margin-top:16px" onClick="{{reset}}">Я всё-таки приду</button>
+        </sc-if>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <sc-if value="{{artPalette}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></sc-if>
+        <sc-if value="{{artSwap}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg></sc-if>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+  <section class="card-hero" aria-label="Смен пока нет">
+    <div class="hero-grid">
+      <div class="grow">
+        <p class="hero-when" style="margin:0">Пока нет смен</p>
+        <p class="lead">Выбери занятие, и оно появится здесь</p>
+        <a class="btn btn-primary btn-lg" href="Catalog.dc.html" style="margin-top:28px">Подобрать занятие</a>
+      </div>
+      <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></div>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{showList}}" hint-placeholder-val="{{true}}">
+  <section class="section" aria-labelledby="up-title">
+    <div class="section-head"><h2 class="h2" id="up-title">Ближайшие</h2></div>
+    <div class="card">
+      <div class="list">
+        <sc-for list="{{upcoming}}" as="e" hint-placeholder-count="3">
+          <a class="li rowlink" href="{{e.href}}">
+            <span class="{{e.dateCls}}" aria-hidden="true"><b>{{e.dn}}</b><span>{{e.wd}}</span></span>
+            <span class="grow"><span class="h3" style="display:block">{{e.title}}</span><span class="p">{{e.when}}</span></span>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="past-title">
+    <div class="section-head" style="align-items:center">
+      <h2 class="h2" id="past-title">Прошедшие</h2>
+      <button type="button" class="btn btn-secondary btn-sm" aria-expanded="{{pastExpanded}}" onClick="{{togglePast}}">{{pastLabel}}</button>
+    </div>
+    <sc-if value="{{showPast}}" hint-placeholder-val="{{false}}">
+      <div class="card">
+        <div class="list">
+          <sc-for list="{{past}}" as="p" hint-placeholder-count="3">
+            <div class="li">
+              <span class="date" aria-hidden="true"><b>{{p.dn}}</b><span>{{p.wd}}</span></span>
+              <span class="grow"><span class="h3" style="display:block">{{p.title}}</span><span class="p">{{p.when}}</span></span>
+              <sc-if value="{{p.hasRefl}}" hint-placeholder-val="{{false}}"><a class="btn btn-ghost btn-sm" href="Reflection.dc.html">Как прошло</a></sc-if>
+              <span class="hours">{{p.hours}}
+                <sc-if value="{{p.ok}}" hint-placeholder-val="{{true}}"><span class="st st-ok" role="img" aria-label="Часы подтверждены"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span></sc-if>
+                <sc-if value="{{p.wait}}" hint-placeholder-val="{{false}}"><span class="st st-wait" role="img" aria-label="Ждут подтверждения"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></sc-if>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+  </section>
+</sc-if>
+
+<sc-if value="{{showCal}}" hint-placeholder-val="{{false}}">
+  <div class="split section">
+    <section class="main-col card" aria-labelledby="cal-title">
+      <div class="row" style="justify-content:space-between">
+        <button type="button" class="iconbtn" aria-label="Предыдущий месяц" aria-disabled="{{prevDis}}" onClick="{{prevMonth}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+        <h2 class="h2" id="cal-title">{{monthLabel}}</h2>
+        <button type="button" class="iconbtn" aria-label="Следующий месяц" aria-disabled="{{nextDis}}" onClick="{{nextMonth}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+      </div>
+      <div class="cal-head" aria-hidden="true"><span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span>сб</span><span>вс</span></div>
+      <div class="cal">
+        <sc-for list="{{cells}}" as="c" hint-placeholder-count="35">
+          <sc-if value="{{c.blank}}" hint-placeholder-val="{{false}}"><span class="cal-blank" aria-hidden="true"></span></sc-if>
+          <sc-if value="{{c.real}}" hint-placeholder-val="{{true}}"><button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" aria-label="{{c.aria}}" onClick="{{c.pick}}"><span class="num">{{c.n}}</span><span class="{{c.dotCls}}" aria-hidden="true"></span></button></sc-if>
+        </sc-for>
+      </div>
+    </section>
+    <aside class="side-col card" aria-labelledby="day-title">
+      <h2 class="h3" id="day-title">{{selLabel}}</h2>
+      <sc-if value="{{dayHas}}" hint-placeholder-val="{{true}}">
+        <div class="list" style="margin-top:6px">
+          <sc-for list="{{dayItems}}" as="e" hint-placeholder-count="1">
+            <div class="li"><span class="grow"><span class="li-title" style="display:block">{{e.title}}</span><span class="p">{{e.when}}</span></span></div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{dayEmpty}}" hint-placeholder-val="{{false}}">
+        <p class="p" style="margin-top:12px">Смен нет</p>
+      </sc-if>
+    </aside>
+  </div>
+</sc-if>

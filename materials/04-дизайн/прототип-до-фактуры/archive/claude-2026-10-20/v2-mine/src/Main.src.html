@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Карта платформы — Опора</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--HELMET-->
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>волонтёры «Дети Марии»</small></span></a>
+  <div class="top-end">
+    <span class="tag t-yellow">Концепт для хакатона</span>
+  </div>
+</header>
+
+<section class="card-hero" aria-labelledby="hero-title">
+  <div class="hero-grid">
+    <div class="grow">
+      <p class="eyebrow" style="margin:0">Платформа волонтёров фонда «Дети Марии»</p>
+      <h1 class="hero-title" id="hero-title">Путь волонтёра в одном месте</h1>
+      <p class="lead">От заявки до регулярных занятий — без мессенджеров и таблиц</p>
+      <div class="row wrap" style="margin-top:28px">
+        <a class="btn btn-primary btn-lg" href="Home.dc.html">Открыть как волонтёр</a>
+        <a class="btn btn-secondary btn-lg" href="CoordHome.dc.html">Как координатор</a>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="path-title">
+  <div class="section-head"><h2 class="h2" id="path-title">Путь волонтёра</h2></div>
+  <div class="cols-3">
+    <sc-for list="{{steps}}" as="st" hint-placeholder-count="6">
+      <a class="card step" href="{{st.href}}">
+        <span class="step-top">
+          <span class="step-n">{{st.n}}</span>
+          <svg class="ic go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </span>
+        <span class="h3">{{st.title}}</span>
+      </a>
+    </sc-for>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="roles-title">
+  <div class="section-head"><h2 class="h2" id="roles-title">Роли</h2></div>
+  <div class="cols-2">
+    <a class="card tile" href="Apply.dc.html">
+      <span class="art art-y" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
+      <span class="grow"><span class="h3" style="display:block">Кандидат</span><span class="p">Максим подаёт заявку</span></span>
+      <svg class="ic go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+    <a class="card tile" href="Home.dc.html">
+      <span class="art art-o" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></span>
+      <span class="grow"><span class="h3" style="display:block">Волонтёр</span><span class="p">Анна, четыре месяца с фондом</span></span>
+      <svg class="ic go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+    <a class="card tile" href="Academy.dc.html">
+      <span class="art art-v" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></span>
+      <span class="grow"><span class="h3" style="display:block">Академия</span><span class="p">Треки, тренажёр, вебинары</span></span>
+      <svg class="ic go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+    <a class="card tile" href="CoordHome.dc.html">
+      <span class="art art-b" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></span>
+      <span class="grow"><span class="h3" style="display:block">Команда фонда</span><span class="p">Заявки, смены, сигналы, отчёты</span></span>
+      <svg class="ic go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="ai-title">
+  <div class="section-head">
+    <div class="row" style="gap:12px"><h2 class="h2" id="ai-title">Где помогает ИИ</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+    <button type="button" class="btn btn-ghost btn-sm" aria-expanded="{{rulesExpanded}}" aria-controls="rules" onClick="{{toggleRules}}">{{rulesLabel}}</button>
+  </div>
+  <div class="cols-2">
+    <a class="card tile" href="Catalog.dc.html">
+      <span class="art art-v" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+      <span class="h3 grow">Подбор задач с объяснением</span>
+      <svg class="ic go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+    <a class="card tile" href="Simulator.dc.html">
+      <span class="art art-v" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></span>
+      <span class="h3 grow">Тренажёр трудных ситуаций</span>
+      <svg class="ic go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+    <a class="card tile" href="Mentor.dc.html">
+      <span class="art art-v" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></span>
+      <span class="h3 grow">Наставник по базе знаний фонда</span>
+      <svg class="ic go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+    <a class="card tile" href="Signals.dc.html">
+      <span class="art art-v" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></span>
+      <span class="h3 grow">Сигналы из рефлексий</span>
+      <svg class="ic go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+  </div>
+  <sc-if value="{{showRules}}" hint-placeholder-val="{{false}}">
+    <div class="card" id="rules" style="margin-top:16px">
+      <div class="list">
+        <sc-for list="{{rules}}" as="r" hint-placeholder-count="4">
+          <div class="li">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--violet)"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+            <span class="li-title">{{r}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+</section>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1670}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { rules: false };
+  }
+  renderVals() {
+    const s = this.state;
+    return {
+      steps: [
+        { n: '1', title: 'Заявка', href: 'Apply.dc.html' },
+        { n: '2', title: 'Собеседование и документы', href: 'ApplicationStatus.dc.html' },
+        { n: '3', title: 'Обучение', href: 'Academy.dc.html' },
+        { n: '4', title: 'Подбор занятия', href: 'Catalog.dc.html' },
+        { n: '5', title: 'Смены и рефлексия', href: 'Schedule.dc.html' },
+        { n: '6', title: 'Часы и признание', href: 'Hours.dc.html' }
+      ],
+      showRules: s.rules,
+      rulesExpanded: s.rules ? 'true' : 'false',
+      rulesLabel: s.rules ? 'Скрыть принципы' : 'Принципы',
+      toggleRules: () => this.setState({ rules: !s.rules }),
+      rules: [
+        'ИИ предлагает, решает человек',
+        'Данные детей в модель не уходят',
+        'Без ИИ всё работает',
+        'Провайдер сменный: YandexGPT, GigaChat, OpenAI'
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

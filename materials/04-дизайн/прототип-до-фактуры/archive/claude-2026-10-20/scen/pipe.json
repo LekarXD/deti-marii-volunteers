@@ -1,0 +1,17 @@
+[
+ {"name":"default-open","steps":[]},
+ {"name":"board","steps":[{"fn":"modes.0.pick"}]},
+ {"name":"reject","steps":[{"fn":"modes.2.pick"}]},
+ {"name":"reject-sent","steps":[{"fn":"modes.2.pick"},{"fn":"sendReject"}]},
+ {"name":"reject-restore","steps":[{"fn":"modes.2.pick"},{"fn":"sendReject"},{"fn":"restore"}]},
+ {"name":"schedule","steps":[{"fn":"setSlot","value":"sun"},{"fn":"schedule"}]},
+ {"name":"to-docs","steps":[{"fn":"goNext"}]},
+ {"name":"stage-admitted","steps":[{"fn":"setStage","value":"admitted"}]},
+ {"name":"alina","steps":[{"fn":"cols.0.cards.0.pick"},{"fn":"schedule"}]},
+ {"name":"oleg","steps":[{"fn":"cols.2.cards.0.pick"},{"fn":"nudge"}]},
+ {"name":"egor","steps":[{"fn":"cols.3.cards.0.pick"}]},
+ {"name":"egor-reject","steps":[{"fn":"cols.3.cards.0.pick"},{"fn":"startReject"}]},
+ {"name":"questions","steps":[{"fn":"questions.0.remove"},{"fn":"addFromPool"},{"fn":"addFromPool"},{"fn":"addFromPool"}]},
+ {"name":"own","steps":[{"fn":"typeOwn","value":"Почему именно мы?"},{"fn":"addOwn"}]},
+ {"name":"close","steps":[{"fn":"closePane"}]}
+]

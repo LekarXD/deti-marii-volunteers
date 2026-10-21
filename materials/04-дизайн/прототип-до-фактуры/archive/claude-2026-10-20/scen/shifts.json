@@ -1,0 +1,18 @@
+[
+ {"name":"week","steps":[]},
+ {"name":"invite","steps":[{"fn":"modes.1.pick"}]},
+ {"name":"hours","steps":[{"fn":"modes.2.pick"}]},
+ {"name":"slot-p3","steps":[{"fn":"wkRows.0.cells.5.slots.0.pick"}]},
+ {"name":"slot-film","steps":[{"fn":"wkRows.6.cells.4.slots.0.pick"}]},
+ {"name":"slot-m1","steps":[{"fn":"wkRows.2.cells.0.slots.0.pick"}]},
+ {"name":"det-invite","steps":[{"fn":"det.invite"}]},
+ {"name":"gap-felt","steps":[{"fn":"gaps.1.pick"}]},
+ {"name":"invite-send","steps":[{"fn":"modes.1.pick"},{"fn":"inv.send"}]},
+ {"name":"invite-send-more","steps":[{"fn":"modes.1.pick"},{"fn":"inv.send"},{"fn":"inv.cands.2.toggle"},{"fn":"inv.send"}]},
+ {"name":"invite-uncheck-all","steps":[{"fn":"modes.1.pick"},{"fn":"inv.cands.0.toggle"},{"fn":"inv.cands.1.toggle"}]},
+ {"name":"felt-send-week","steps":[{"fn":"modes.1.pick"},{"fn":"inviteChips.1.pick"},{"fn":"inv.send"},{"fn":"tabs.0.pick"},{"fn":"wkRows.3.cells.5.slots.0.pick"}]},
+ {"name":"film","steps":[{"fn":"modes.1.pick"},{"fn":"inviteChips.2.pick"}]},
+ {"name":"urgent","steps":[{"fn":"modes.1.pick"},{"fn":"urgent.call"},{"fn":"urgent.reserve"}]},
+ {"name":"hours-toggle","steps":[{"fn":"modes.2.pick"},{"fn":"past.0.people.0.toggle"},{"fn":"past.0.confirm"}]},
+ {"name":"hours-all","steps":[{"fn":"modes.2.pick"},{"fn":"confirmAll"}]}
+]

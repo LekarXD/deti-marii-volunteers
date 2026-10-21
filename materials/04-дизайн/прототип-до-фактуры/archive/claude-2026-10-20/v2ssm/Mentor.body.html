@@ -1,0 +1,134 @@
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<div class="title-row">
+  <h1 class="h1">Что делать, если…</h1>
+  <span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ-наставник</span>
+</div>
+
+<sc-if value="{{isUrgent}}" hint-placeholder-val="{{false}}">
+  <section class="alarm" role="alert" aria-labelledby="alarm-title">
+    <span class="alarm-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></span>
+    <div class="grow">
+      <h2 class="alarm-title" id="alarm-title">Ребёнок в опасности — звони психологу сейчас</h2>
+      <p class="lead">Ирина Власова. Если угроза жизни — 112.</p>
+    </div>
+    <button type="button" class="btn btn-primary btn-lg"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Позвонить</button>
+  </section>
+</sc-if>
+
+<div class="mentor">
+  <aside aria-labelledby="hist-title">
+    <section class="card hist-card">
+      <h2 class="h3" id="hist-title">Мои вопросы</h2>
+      <div class="stack" style="gap:2px;margin-top:10px">
+        <sc-for list="{{history}}" as="h" hint-placeholder-count="3">
+          <button type="button" class="{{h.cls}}" aria-pressed="{{h.pressed}}" title="{{h.q}}" onClick="{{h.pick}}"><span class="hist-t">{{h.q}}</span></button>
+        </sc-for>
+      </div>
+    </section>
+  </aside>
+
+  <section class="card chat" aria-label="Диалог с наставником">
+    <div class="msgs" role="log" aria-label="Реплики">
+      <div class="me"><p class="bb-me"><span class="sr">Ты: </span>{{question}}</p></div>
+
+      <!-- Ответ с источниками -->
+      <sc-if value="{{isAnswer}}" hint-placeholder-val="{{true}}">
+        <div>
+          <div class="ans">
+            <p class="ans-lead">Номер не давай — это правило для всех взрослых в фонде. Откажи тепло и предложи разрешённый способ связи.</p>
+            <ol class="steps">
+              <li><span class="n" aria-hidden="true">1</span><span>Признай чувство: «Тебе важно знать, что я не пропаду»</span></li>
+              <li><span class="n" aria-hidden="true">2</span><span>Объясни правило без стыда: оно одно для всех взрослых</span></li>
+              <li><span class="n" aria-hidden="true">3</span><span>Предложи открытку через координатора</span></li>
+              <li><span class="n" aria-hidden="true">4</span><span>Скажи честно, когда придёшь, — только то, что знаешь точно</span></li>
+            </ol>
+            <p class="say-cap">Можно сказать так</p>
+            <p class="say-q">«Я не могу дать свой номер, у нас такое правило для всех взрослых. Но я приду в субботу, и мы увидимся здесь».</p>
+          </div>
+          <div class="srcs" role="group" aria-label="Источники">
+            <sc-for list="{{cites}}" as="c" hint-placeholder-count="3">
+              <button type="button" class="{{c.cls}}" aria-expanded="{{c.expanded}}" onClick="{{c.toggle}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>{{c.label}}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{citeOpen}}" hint-placeholder-val="{{false}}">
+            <div class="frag">
+              <p class="frag-t">{{citeTitle}}</p>
+              <p class="frag-q">«{{citeText}}»</p>
+              <sc-if value="{{citeHasLink}}" hint-placeholder-val="{{false}}"><a class="btn btn-ghost btn-sm" href="{{citeHref}}" style="margin:8px 0 0 -16px">{{citeLinkLabel}}</a></sc-if>
+            </div>
+          </sc-if>
+          <div class="after">
+            <sc-if value="{{notSent}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-ghost" style="margin-left:-22px" onClick="{{sendCoord}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>Спросить координатора</button></sc-if>
+            <sc-if value="{{sent}}" hint-placeholder-val="{{false}}"><span class="dot dot-green" style="font-size:16px;padding:12px 0">Передано Ольге Лебедевой, ответ придёт в сообщения</span></sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Нет ответа в базе -->
+      <sc-if value="{{isNone}}" hint-placeholder-val="{{false}}">
+        <div class="ans">
+          <p class="ans-lead">В документах фонда ответа нет. Не буду гадать.</p>
+          <p class="ans-p">Передам вопрос координатору, ответ придёт в сообщения.</p>
+          <sc-if value="{{notPassed}}" hint-placeholder-val="{{true}}">
+            <button type="button" class="btn btn-primary btn-lg" style="margin-top:22px" onClick="{{passQ}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>Передать Ольге Лебедевой</button>
+          </sc-if>
+          <sc-if value="{{passed}}" hint-placeholder-val="{{false}}">
+            <div class="passed">
+              <span class="avatar av-b" aria-hidden="true">ОЛ</span>
+              <span class="h3 grow">Передано Ольге Лебедевой</span>
+              <a class="btn btn-secondary" href="Messages.dc.html">Открыть сообщения</a>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- Срочная ситуация -->
+      <sc-if value="{{isUrgent}}" hint-placeholder-val="{{false}}">
+        <div>
+          <div class="ans">
+            <p class="ans-lead">Хорошо, что спросила. Порядок такой:</p>
+            <ol class="steps">
+              <li><span class="n" aria-hidden="true">1</span><span>Не обещай тайну: «Я расскажу только тем, кто может помочь, и скажу тебе, кому»</span></li>
+              <li><span class="n" aria-hidden="true">2</span><span>Не расспрашивай о деталях. Только «Расскажи, если хочешь»</span></li>
+              <li><span class="n" aria-hidden="true">3</span><span>Поддержи: «Ты правильно сделала, что рассказала. Ты не виновата»</span></li>
+              <li><span class="n" aria-hidden="true">4</span><span>Запиши её слова дословно и сообщи психологу сегодня. Сама не выясняй</span></li>
+            </ol>
+            <sc-if value="{{notReported}}" hint-placeholder-val="{{true}}">
+              <button type="button" class="btn btn-secondary btn-lg" style="margin-top:22px" onClick="{{report}}">Сообщить Ирине Власовой</button>
+            </sc-if>
+            <sc-if value="{{reported}}" hint-placeholder-val="{{false}}">
+              <div class="passed">
+                <span class="avatar av-v" aria-hidden="true">ИВ</span>
+                <span class="h3 grow">Передано Ирине Власовой</span>
+                <a class="btn btn-secondary" href="Reflection.dc.html">Записать её слова</a>
+              </div>
+            </sc-if>
+          </div>
+          <div class="srcs" role="group" aria-label="Источники">
+            <sc-for list="{{cites}}" as="c" hint-placeholder-count="2">
+              <button type="button" class="{{c.cls}}" aria-expanded="{{c.expanded}}" onClick="{{c.toggle}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>{{c.label}}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{citeOpen}}" hint-placeholder-val="{{false}}">
+            <div class="frag">
+              <p class="frag-t">{{citeTitle}}</p>
+              <p class="frag-q">«{{citeText}}»</p>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </div>
+
+    <div class="composer">
+      <label class="sr" for="q-input">Вопрос наставнику</label>
+      <input id="q-input" class="input" type="text" placeholder="Что делать, если ребёнок…" value="{{draft}}" onChange="{{typeDraft}}">
+      <button type="button" class="btn btn-ai btn-lg" onClick="{{ask}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>Спросить</button>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,1163 @@
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+° 2002)
+American Journal of Community Psychology, Vol. 30, No. 2, April 2002 ( C
+
+The Test of Time: Predictors and Effects of
+Duration in Youth Mentoring Relationships1
+Jean B. Grossman2
+Public/Private Ventures
+
+Jean E. Rhodes
+University of Illinois at Urbana-Champaign
+
+The effects and predictors of duration in youth mentor relationships were examined. The study included 1,138 young, urban adolescents (Mean age =
+12.25), all of whom applied to Big Brothers Big Sisters programs. The adolescents were randomly assigned to either the treatment or control group, and
+administered questions at baseline and 18 months later. Adolescents in relationships that lasted a year or longer reported the largest number of improvements, with progressively fewer effects emerging among youth who were in
+relationships that terminated earlier. Adolescents who were in relationships
+that terminated within a very short period of time reported decrements in
+several indicators of functioning. Older adolescents, as well as those who had
+been referred for services or had sustained emotional, sexual or physical abuse,
+were most likely to be in early terminating relationships, as were married volunteers aged 26–30 and those with lower incomes. Several dyadic factors were
+also found to be related to earlier terminations, including race, gender, and
+relationship quality.
+KEY WORDS: mentoring; adolescence; volunteerism.
+
+1 This study was completed with the assistance of a grant from the William T. Grant Foundation.
+
+The authors also gratefully acknowledge the assistance of Joseph P. Tierney, Nancy Resch,
+Sarah Pepper, and the cooperation of Big Brothers Big Sisters of America.
+
+2 To whom correspondence should be addressed at Public/Private Ventures, One Commerce
+
+Square, 2005 Market Street, Suite 900, Philadelphia, Pennyslvania 19103.
+199
+° 2002 Plenum Publishing Corporation
+0091-0562/02/0400-0199/0 C
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+200
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Grossman and Rhodes
+
+INTRODUCTION
+Interventions that link adolescents with volunteer mentors have become
+increasingly common in recent years. An estimated five million American
+youth are currently involved in school- and community-based volunteer
+mentoring programs nationwide, including more than 100,000 participants
+in Big Brothers Big Sisters of America programs (McLearn, Colasanto,
+& Schoen, 1998). Enduring mentoring relationships have been found to be
+associated with a range of benefits to youth. But what are the consequences
+to adolescents when relationships terminate prematurely? Indeed, approximately half of all youth mentoring relationships dissolve after only a few
+months, often as the result of the volunteers feeling overwhelmed, burned
+out, or unappreciated (Freedman, 1993; Hamilton & Hamilton, 1990; Styles
+& Morrow, 1992). Here we address this issue, and attempt to identify the
+predictors of early termination in youth mentoring relationships.
+
+Background
+Evaluations of volunteer mentoring programs provide evidence of positive influences on adolescent developmental outcomes, including improvements in academic achievement, self-concept, prosocial behavior, and interpersonal relationships (Davidson, Redner, Blakely, Mitchell, & Esmhoff,
+1987; DuBois & Neville, 1997; Grossman & Tierney; 1998; LoSciuto, Rajala,
+Townsend, & Taylor, 1996). Despite this evidence, very little is known about
+how variations in the characteristics of mentor relationships relate to youth
+outcomes. For example, while some relationships last for several years, many
+volunteer relationships terminate within only a few months. Because the
+central component of mentoring is the formation of intensive one-on-one
+relationships, terminations may touch on vulnerabilities in youth in ways
+that other, less personal interventions do not. This may be particularly true
+for youth who are referred to relationship-based interventions. In particular,
+many adolescents in mentoring programs come from single-parent homes
+(an eligibility requirement for some programs) and may have already sustained the loss of regular contact with their nonresidential parent. Such
+youth may feel particularly vulnerable to, and responsible for, problems in
+subsequent adult relationships (Wallerstein, 1988). Other youth may have
+experienced unsatisfactory or rejecting parental relationships in the past.
+Consequently, they may have developed internal representations of relationships that incorporate fears and doubts about whether others will accept and support them (Bowlby, 1982; Egeland, Jacobvitz, & Sroufe, 1988).
+When such adolescents encounter cues that relationships will not proceed,
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+Predictors and Effects of Duration in Youth Mentoring Relationships
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+201
+
+however minimal or ambiguous, they may readily perceive intentional rejection from their mentors (Downey & Feldman, 1996; Downey, Lebolt,
+Rincon, & Freitas, 1998).
+Irrespective of their relationship histories, all youth may show certain
+vulnerabilities to early terminations. Adolescence is a life stage during which
+issues of acceptance and rejection are especially salient (Cauce, Mason,
+Gonzales, Hiraga, & Liu, 1994; Lerner & Galambos, 1998). To the extent that
+adolescents have identified with their mentors, and have begun to value the
+relationship, they may feel profound disappointment when the relationship
+does not progress. Feelings of rejection and disappointment, in turn, may
+lead to a host of negative emotional, behavioral, and academic outcomes
+(Downey et al., 1998).
+Mentor relationships that take hold, on the other hand, are likely to grow
+progressively more effective with time. Researchers generally agree that
+mentors promote positive developmental outcomes through role modeling
+and the provision of emotional support and positive feedback. By serving as
+supportive models of success, mentors may directly stimulate improvements
+in adolescents’ self-perceptions, attitudes, and behaviors (Bandura, 1969;
+Hamilton & Hamilton, 1990; Klaw & Rhodes, 1995; Taylor, 1989; Walker
+& Freedman, 1996). Additionally, there is some evidence to suggest that
+mentors may affect change through their positive influence on the more
+proximal relationships in adolescents’ lives. By helping adolescents cope
+with everyday stressors, providing a model for effective conflict resolution,
+and indirectly reducing parental stress, mentor relationships are thought
+to have the capacity to facilitate improvements in parent–child interactions
+(Flaxman, Ascher, & Harringon, 1988; Rhodes, Grossman, & Resch, 2000;
+Rhodes, Haight, & Briggs, 1999). Additionally, enduring positive relationships may modify adolescents’ general perceptions of relationships (Bowlby,
+1982; Belsky & Cassidy, 1994; Sroufe, 1995). Specifically, mentors can challenge negative views that adolescents may hold of themselves or of relationships with adults and demonstrate that positive, caring relationships with
+adults are possible. The helping relationship can thus become a “corrective
+experience” for those adolescents who may have experienced unsatisfactory
+relationships with their parents (Olds, Kitzman, Cole, & Robinson, 1997;
+Main, Kaplan, & Cassidy, 1985).
+Because such processes are complex and, in some instances, may involve changes in internal representations of relationships, it is likely that the
+benefits of mentoring emerge over a relatively long period of time (Rhodes
+et al., in press). In their qualitative investigation of mentoring relationships,
+for example, Styles and Morrow (1992) concluded that youth needed to be
+engaged with their mentors for at least 6 months before the relationships
+began to take hold. We examine the issue of duration in the current study,
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+202
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Grossman and Rhodes
+
+and attempt to determine whether there is some minimum level of exposure
+after which benefits are more likely to emerge.
+In light of the potential significance of relationship duration, both in
+terms of the possible harm associated with early terminations and the benefits of sustained contact, it is also important to identify factors that predict
+the length of the relationship. Observations of mentoring programs, as well
+as a small but growing body of psychological research on volunteerism, suggest that early terminations of volunteer relationships may occur for a wide
+variety of reasons. Graduations, illnesses, or changes in family structure or
+residence, for instance, may influence adolescents’ eligibility or leave dyads
+unable to meet on a regular basis (Sipe, 1996). Some volunteers may be discouraged by what they perceive as a lack of appreciation on the part of their
+mentee or find that the personal investment that is required to work with
+troubled adolescents exceeds their expectations, particularly if the volunteers’ involvement is drawing them away from social and family obligations
+(Freedman, 1993; Omoto & Snyder, 1995). In some instances, adolescents
+may terminate relationships in response to what they perceive as unsupportive, disappointing, or overly demanding mentors (Styles & Morrow, 1992).
+Still other dyads may lack a basic chemistry and the relationships may gradually give way to other demands. Indeed, Flaxman et al. (1988) has discussed
+the social distance that often exists among middle-class mentors and lowerincome mentees, particularly when the mentors and mentees are of different
+races. In this study, we will attempt to identify volunteer, adolescent, and
+dyadic predictors of sustained involvement in mentoring relationships.
+
+Goals of the Current Paper
+To address the issues raised above, we examine the differential effects
+and predictors of mentor relationships of varying lengths. It is hypothesized
+that the effects of mentoring relationships will intensify with time, and that
+relatively short matches will be disruptive to youth. Next we examine the
+predictors of relationship duration. At a theoretical level, identifying effects and predictors of sustained volunteerism touches on questions that
+are fundamental to our understanding of helping relationships (i.e., how
+does duration affect outcome? what personal and social factors promote
+long-term involvement?). Moreover, in light of the sheer number of adolescents who are currently involved in volunteer mentoring interventions,
+as well as the lack of empirically based guidelines for the screening and
+matching of volunteers, findings regarding the effects and predictors of relationship duration are likely to have far-reaching implications. This study
+makes use of longitudinal data from the largest and arguably most influential,
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+Predictors and Effects of Duration in Youth Mentoring Relationships
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+203
+
+evaluation of mentoring to date (Grossman & Tierney, 1998) to address these
+issues.
+
+METHOD
+Participants
+The study included 1,138 youth, all of whom applied to Big Brothers
+Big Sisters programs in 1992 and 1993. Applicants were randomly assigned
+to either the treatment or control group, and administered questions at baseline and 18 months later. Eighty-five percent of the sample (N = 959; 487
+treatments and 472 controls) completed both the baseline and the follow-up
+interviews. Over half of this analysis sample were boys (62.4%) and approximately half were members of minority groups (57.5%). Seventy-one
+percent of the minority youth were African Americans, 18% were Hispanic,
+and the remaining were members of a variety of other racial/ethnic groups.
+Participants ranged in age from 10 to 16 (Mean = 12.25), most (69%) of
+whom were between the ages of 11 and 13. More than 40% of the youth lived
+in households that were receiving food stamps and/or public assistance. The
+only systematic difference between the treatment and control group youth
+at baseline was that the treatment youth had the opportunity to be matched
+with mentors.
+
+Design and Procedure
+From the network of over 500 Big Brothers Big Sisters local agencies,
+8 agencies were selected to participate in the outcome study. The key selection criteria for inclusion in the impact study were a large, active caseload
+waiting list and geographic diversity. With only a few exceptions, all of the
+youth who enrolled in the 8 selected Big Brothers Big Sisters agencies during the intake period were encouraged to participate in the research. Once a
+youth was informed about the study, determined to be eligible, and assented
+to participate (along with parents’ signed, informed consent), he or she was
+randomly assigned to either the treatment or control group. Only 2.7% of the
+youth refused to participate in the evaluation. The control group was placed
+on a waiting list for a poststudy match. All participants were interviewed by
+telephone before they knew their experimental status. Follow-up interviews
+were conducted 18 months later by telephone with baselined participants.
+Agency staff matched particular adult volunteers with particular youth
+on the basis of a variety of factors, including shared interest, reasonable
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+204
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Grossman and Rhodes
+
+geographic proximity, and same-race match preference. All volunteers underwent an intensive screening process, followed by agency-based training and case management. At the conclusion of the study, 378 (78%) of
+the treatment youth had been matched.3 At the time of the follow-up,
+matched youth had been meeting with their mentors for approximately
+12 months, while 40% of the matches were no longer meeting. Among
+closed matches, the pairs met for an average of 9 months. The ongoing
+matches had been meeting an average of 12.9 months. Over 70% of the
+youth met with their mentor at least three times a month and approximately
+45% met one or more times per week. An average meeting lasted 3.6 hr.
+Dyads typically engaged in a wide variety of leisure- and goal-oriented discussions and activities with the overall goal of promoting the youth’s positive
+development.
+
+Measures
+Parent Relationships
+The Inventory of Parent and Peer Attachment (IPPA; Armsden
+& Greenberg, 1987) is a 23-item scale containing questions related to a
+child or adolescent’s relationship with his/her primary care giver (the corresponding peer questions were not administered). Responses are coded
+on a 4-point scale, ranging from 1 (hardly ever true) to 4 (very often true).
+The IPPA contains three subscales: communication (e.g., my mother can tell
+when I am upset about something), trust (e.g., my father respects my feelings), and alienation (e.g., talking over problems with my mother makes me
+feel ashamed or foolish). At pretest, Cronbach’s alpha reliability coefficients
+of the subscales were .77, .83, and .76, respectively.
+Scholastic Competence
+This six-item subscale of the Self-Perception Profile for Children
+(Harter, 1986) contains statements describing confidence in school work,
+3 Agency staff reported three major reasons for the failure to match the 109 treatment youth
+
+during the study period. Thirty-three of the unmatched treatment youth became ineligible
+during the study period because the parent remarried, the youth was no longer within the
+eligible age range, or the youth’s place of residence changed. Thirty-one were not matched
+because the youth no longer wanted a Big Brother or Big Sister. Twenty-one were not matched
+because a suitable volunteer could not be found during the study period. The 24 remaining
+treatment youth were not matched for a variety of reasons, most commonly because the parent
+or youth did not follow through with the intake process.
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+Predictors and Effects of Duration in Youth Mentoring Relationships
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+205
+
+dividing children into two groups, e.g., “some kids feel that they are very
+good at their schoolwork/other kids worry about whether they can do the
+schoolwork assigned to them.” Respondents were asked to determine if they
+were more like the first or second group, and whether the statement was
+“really true” or “sort of true” for them (α = .77).
+
+Grades and Attendance
+Individual items relating to scholastic behaviors were asked, including
+grades, number of unexcused absences from school, visits to college campuses, books read, trips to the library, hours spent on homework, and hours
+spent reading. For purposes of this study, we focused on grades and the
+number of unexcused absences.
+
+School Value
+This 18-item measure (Berndt & Miller, 1986) assesses the extent to
+which respondents value academic success and the information that they
+learn in school, e.g., “do you care about doing your best at school?” Respondents were asked to indicate the frequency with which they felt certain ways
+about school, ranging from 1 (hardly ever) to 4 ( pretty often) (α = .86).
+
+Self-Worth
+This six-item subscale of the Self-Perception Profile for Children
+(Harter, 1986) contains statements describing the global self-worth of two
+groups, “e.g., some kids are pretty pleased with themselves/other kids are
+often unhappy with themselves.” Respondents were asked to determine
+whether they were more like the first or second group, and whether the
+statement was “really true” or “sort of true” for them (α = .75).
+
+Quality of Relationship
+Relationship quality was determined by Langhout, Osborne, and
+Rhodes’ analysis of scales that characterized youth’s feelings toward their
+mentors (Langhout, Osborne, & Rhodes, 1999). The two scales that were
+most predictive of outcomes, “youth-centered” or the degree to which the
+volunteer took the youth’s desires into consideration and “disappointment”
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+206
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Grossman and Rhodes
+
+or the degree to which youth felt let down or disappointed by their mentors,
+were considered indices of relationship quality.
+Length of Relationship
+Relationship length was assessed in terms of months, and coded as 0 for
+all controls and unmatched treatment participants.
+
+RESULTS
+Study 1: Effects of Relationship Length
+In order to investigate the effects of relationship duration, we began by
+categorizing the mentored youth into four groups, depending on how long
+their matches had lasted: less than 3 months (6%), 3 to just under 6 months
+(13%), 6 to just under 12 months (36%), and 12 months or more (45%). We
+then used multivariate regression to estimate the effect of the length of the
+match on youth outcomes.
+Specifically, the four length-of-match dummy variables were entered
+into a regression equation for each outcome. The equations were estimated
+over the full sample—treatment and control youth. All of the length-ofmatch dummies were set equal to zero for the controls and unmatched treatment participants. Because we were interested in explaining the changes
+during the 18-month period, not the level of the outcomes, we controlled
+for baseline levels of variables. Other baseline characteristics were also included in the models to reduce the variance unrelated to mentoring.4 Table I
+presents the resulting estimates of how treatment youth fared compared
+with similar control group youth who did not have mentors. Youth who
+were in matches that terminated within the first 3 months suffered significant declines in their global self-worth and their perceived scholastic
+4 In addition to the length-of-match variables, the following variables were also included in the
+
+regressions: the baseline value of the outcome; the youth’s age, gender, race; whether the youth
+was an academic underachiever; if the youth was learning disabled; if the parent worked full
+time; if the family received welfare; if the parent had a GED or high school diploma; if the
+youth had repeated a grade; if the youth was an only child; the number of siblings; the number
+of moves the youth had made in the 2 years prior to applying for BBBS; whether the youth had
+a natural mentor; whether the youth had a Big previously; whether the custodial parent was
+male; if the parent had been a teen parent; if the parent had never been married; if the parent
+had referred the child; if the youth had experienced emotional, sexual, or physical abuse; if
+the other parent was missing due to death, divorce, or illness; if the family had a history of
+substance abuse or domestic violence; if the youth live in a rural or urban environment; and
+the agency.
+
+Self-worth
+Perceived social acceptance
+Perceived scholastic competence
+Skipping school
+Grades
+Value of school
+Quality of the parental relationship
+Hitting someone
+Frequency of drug use
+Frequency of alcohol use
+
+0.08 (.48)
+0.28 (.03)
+0.53 (.08)
+−0.65∗ (−.12)
+0.08 (.03)
+−1.15 (−.02)
+−0.30 (.00)
+−1.06 (.09)
+−0.40∗∗ (−.12)
+−0.12 (.01)
+
+6–12 mo
+
+0.93∗ (.12)
+−0.40 (−.08) ( p = .06)
+0.26 (.07) ( p = .06)
+1.85∗∗ (.11)
+2.35∗ (.08)
+0.17 (−.02)
+−0.34∗ (−.11)
+−0.57∗ (−.05)
+
+12+ mo
+0.76∗ (.08)
+0.83∗ (.07)
+
+American Journal of Community Psychology [ajcp]
+PP402-368416
+
+∗ p ≤ .05. ∗∗ p ≤ .01.
+
+0.30 (.25)
+0.19 (.02)
+0.58 (.10)
+−0.18 (−.07)
+0.10 (.05)
+0.58 (.08)
+4.17∗ (.09)
+−2.08∗ (−14)
+0.39 (.01)
+0.18 (.05)
+
+−2.24∗∗ (−.05)
+−0.95 (−.02)
+−1.83∗ (.03)
+−0.26 (−.09)
+0.07 (.05)
+−1.16 (−.05)
+1.75 (.04)
+−1.28 (−.11)
+0.21 (−.03)
+0.29 (.06)
+
+3–6 mo
+
+<3 mo
+
+Table I. Estimated Impacts Using the Observed Length of Match (Standardized Coefficients)
+Outcome
+
+P1: GYK/GVH
+March 12, 2002
+
+Predictors and Effects of Duration in Youth Mentoring Relationships
+
+8:16
+Style file version Nov. 19th, 1999
+
+207
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+208
+
+PP402-368416
+
+March 12, 2002
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Grossman and Rhodes
+
+competence. On the other hand, youth who were in matches that lasted more
+than 12 months reported significant increases in their self-worth, perceived
+social acceptance, perceived scholastic competence, parental relationship
+quality, school value, and decreases in both drug and alcohol use.
+This pattern of estimated impacts is consistent with the hypotheses that
+short-lived matches can have detrimental effects on youth; and that the
+impact of mentoring grows as the relationship matures. However, a similar
+pattern would also have been observed if the youth who were particularly
+well-adjusted were also the youth most likely to be able to sustain mentor
+relationships, whereas the less well-adjusted youth were the most likely to fail
+in establishing a relationship with a mentor. If this were the case, then youth
+in longer matches may have improved relative to those in shorter matches,
+not because of their greater dosage of mentoring, but simply because lengthof-match sorts youth on the basis of their adjustment status.
+Statistically, the selection bias would manifest itself as a correlation between the length of the mentoring relationship and youth outcomes. One
+can correct for this potential selection bias by substituting an instrument for
+length of match that is similar to the observed length of match but which
+is purged of the unwanted correlation with the error term. This can be accomplished using the statistical technique called Two-Stage Least Squares
+(2SLS; Berry & Feldman, 1985; James & Singh, 1978). In the first-stage regression, the endogenous variable, length-of-match, is regressed on all the
+exogenous variables in the model, plus additional variables that are correlated with length of match but uncorrelated with the outcome variables.
+We use the number of times the youth has moved during the 18-month
+follow-up period and whether they live in two-parent families at follow-up,
+because if the youth moves out of the BBBS catchment area or lives in
+a two-parent household they become ineligible for BBBS. The predicted
+value of length-of-match, which is now assumed to be free of correlated
+error, is used in place of the original value in the second stage of the regression. By regressing length-of-match onto variables that are unrelated
+to youth outcomes, the predicted value is assumed to be unrelated to youth
+outcomes. Thus, the estimates produced in the second stage of the regression
+are considered consistent estimates of the effect of relationship length on the
+outcomes.
+A first stage regression of length of match on all the system’s exogenous variables plus the identifying variable was performed. Overall, the correlation between the resulting instrumental variable (included in Stage 2)
+and the observed length of match is equal to .44. However, the model did
+poorly in predicting short matches. The correlation between the instrument
+and the observed length of match is equal to .36 for matches that lasted at
+least 6 months but only .02 for matches that lasted less than 6 months. The
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Predictors and Effects of Duration in Youth Mentoring Relationships
+
+209
+
+Table II. Estimated Impacts Using Two-Stage Least Squares
+Outcome
+
+<6 mo
+
+Self-worth
+Perceived social acceptance
+Perceived scholastic
+competence
+Skipping school
+Grades
+Value of school
+Quality of the parental
+relationship
+Hitting someone
+Frequency of drug use
+Frequency of alcohol use
+
+0.02 (.00)
+0.92 (.01)
+−3.06 (−.03)
+
+0.20 (.02)
+0.04 (.00)
+0.69∗ (.07)
+
+0.48 (.04)
+1.10∗∗ (.09)
+0.81∗ (.07)
+
+1.30 (−.02)
+−0.36 (−.01)
+−3.65 (−.02)
+0.11 (.00)
+
+−0.36∗ (−.07)
+0.15 (.04)
+0.59 (.35)
+1.26 (.05)
+
+−0.65∗∗ (−1.00)
+0.21 (.05)
+0.94 (.05)
+1.74 (.05)
+
+1.85 (.01)
+−0.29 (−.09)
+4.85∗ (.07)
+
+−1.26∗∗ (−.09)
+−0.19 (−.06) ( p = .08)
+0.10 (.02)
+
+−0.14 (−.09)
+−0.31∗ (−.09)
+−0.55∗ (−.07)
+
+6–12 mo
+
+12+ mo
+
+∗ p ≤ .05. ∗∗ p ≤ .01.
+
+first-stage regression could have done poorly in predicting very short matches
+for one of two reasons. If early terminations were driven primarily by the
+mentor, then the estimates in Table I (using the observed length of match)
+are unbiased and valid. Alternatively, if the terminations were youth driven,
+then we would have a poor model of short matches. This implies that the
+standard errors of the estimates in Stage 2 would be large, but the estimates would still be unbiased. For the second-stage regression, we grouped
+matches into three categories: less than 6 months, 6 to less than 12 months,
+and 12 months or more.
+Table II presents the 2SLS estimates of length of match on the outcomes. Although the point estimates changed, the pattern of impacts still
+primarily held. There were no significant, positive effects for short matches
+lasting less than 6 months and, in fact, the only significant finding for this
+group was an increase in alcohol use. There were a few significant findings
+in the 6–12-month group—an increase in perceived scholastic competence,
+a decrease in days skipped, and a decrease in the number of times the youth
+hit someone else. The largest number of significant, positive effects emerged
+in the 12-month or longer group, an increase in perceived scholastic competence and self-perceived social acceptance, and reductions in truancy and
+substance use. In general, the significant, positive impacts increased with
+relationship duration (see Fig. 1).
+Predictors of Relationship Length
+In light of the importance of duration to youth outcomes, the next step
+was to identify factors that were associated with longer matches. At followup, 60% of matches that had been made were still intact. Thus, we do not
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+210
+
+PP402-368416
+
+March 12, 2002
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Grossman and Rhodes
+
+Fig. 1. Outcomes as a function of relationship duration.
+
+know how long they ultimately lasted. Given that the completed length of
+match is not observed for all sample members (i.e., some of the data are censured), ordinary least-squares techniques would have produced biased inferences about factors associated with the longevity of matches. An appropriate analytical technique for analyzing censured data is proportional hazard
+rate analysis (Cox, 1972; Kalbfreisch & Prentice, 1980). This technique takes
+into account the fact that some of the observations are not censured (i.e., the
+shorter matches), whereas others are (i.e., the longer matches). Underlying
+this approach is the assumption that all matches experience a probability of
+breaking up each period. The smaller this break-up or “hazard” rate is, the
+longer the match is expected to last. Before presenting information about
+which factors increase or decrease the likelihood that a match breaks up, we
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+Predictors and Effects of Duration in Youth Mentoring Relationships
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+211
+
+Fig. 2. Kaplan–Meier empirical hazard rates.
+
+present information on the observed monthly hazard rates to help put the
+estimated parameters into perspective.
+Figure 2 plots the Kaplan–Meier empirical hazard rate. Each rate is
+calculated as the number of matches that close in a given month relative to
+the number of matches that survived that month. The average hazard rate (h)
+is .06, which implies that the expected length of a match is 1/h or 16.6 months.
+A 25% increase in this average hazard rate would decrease the length of the
+match to 13.3 months, whereas a 50% increase would decrease the length of
+the match to 11.1 months. A 25% decrease in the average hazard rate would
+increase the length of the match to 22 months.
+Four sets of factors were examined as possible predictors of relationship duration. These included the baseline characteristics of the youth, the
+baseline characteristics of the adult, the characteristics of the match, such as
+whether the pair was matched primarily because of similar interests or race,
+and the quality of the relationship. We examined how the length of the match
+was related to the latter two characteristics and whether the influences of
+the other factors changed when these dimensions were taken into account.
+Matches with adolescents who were referred for psychological or educational programs, or had sustained emotional, sexual, or physical abuse,
+were more likely to break up. Additionally, matches involving 13–16 year
+olds were 65% more likely to break up in each period than matches with
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+212
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Grossman and Rhodes
+
+10–12 year olds. Using the average hazard rate, this would imply that if the
+match of a younger adolescent lasted for two years, then the match of a
+similar, but older, adolescent would last for a year and a quarter.
+Matches involving higher income volunteers lasted longer than those
+involving lower income volunteers. Volunteers’ age appeared to interact
+with marital status in its effects on match duration. Relative to matches
+with 18- to 25-year-old volunteers, unmarried volunteers aged 26–30 were
+65% less likely to terminate each month, but married volunteers aged 26–
+30 years were 86% (exp[1.05 − .43]) more likely to terminate each month.
+The volunteers’ and adolescents’ age did not interact with each other in their
+prediction of relationship duration.
+Next, the effects of the characteristics of the match on duration were
+examined, including the role of gender, race, and assignment considerations.
+BBBS makes no cross-gender matches and so the effects of the adults’ gender
+could not be separated from that of the youth. Nonetheless, female matches
+were marginally more likely to terminate than those of males ( p < .08).
+Additionally, although same-race minority matches terminated marginally
+more often than same-race white matches ( p = .08), this finding did not hold
+with respect to minority dyads in which race was an explicit matching criteria.
+Similarly, although cross-race minority matches terminated more often than
+same-race white ( p < .05), this finding did not hold with respect to dyads
+in which the interests of the youth and volunteer were a primary matching
+criteria (see Table III).
+Table III. Hazard Rate Analysis of Length of Match
+Variable
+
+Coefficient
+
+Risk ratio
+
+p
+
+Baseline values of
+Volunteer is 26–30
+Volunteer is 31 or older
+Youth is 13–16
+Volunteer is 26–30 and married
+Female
+Same-race minority match
+Cross-race match
+Reason for match—race of mentor
+Reason for match—interest of mentor
+Referred as a school underachiever
+Referred for being overly dependent on adults
+Referred after intake for psychological testing
+Referred after intake to an educational program
+Volunteer’s household income ($000s)
+Number of moves 2 years prior to baseline
+Youth had experienced abuse
+(emotional, sexual, or physical)
+
+−.43
+−.18
+.50
+1.05
+.36
+.42
+.40
+−.50
+−.33
+.35
+.67
+2.63
+.81
+−.23
+.19
+.42
+
+.65
+.84
+1.65
+2.87
+1.40
+1.53
+1.49
+.61
+.72
+1.42
+1.97
+13.94
+2.25
+.79
+1.21
+1.53
+
+.08
+.44
+.001
+.01
+.08
+.09
+.05
+.24
+.25
+.05
+.002
+.0001
+.04
+.02
+.03
+.03
+
+Note. The sample consists of 376 observations, 229 are censored. −2(Log Likelihood) is 1146
+without the covariates and 1076 with them. The global null hypothesis is rejected at p = .0001.
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+Predictors and Effects of Duration in Youth Mentoring Relationships
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+213
+
+Finally, we examined the potential mediating role of relationship quality (as measured by “youth-centered” and “disappointment” domains) on
+the influence of the factors cited above. If all the factors became insignificant once the quality of the relationship was held constant, then we could
+conclude that the quality of the relationship fully mediated the influence
+of the factors on the length of the match. If some of the factors remained
+significant but their coefficients changed, then we could conclude that they
+exerted some independence but are partially mediated through the quality of
+the relationship. The relationship scales significantly increased the explanatory power of the model (model chi-square 69.6 vs. 109.30) and attenuated
+the negative effects of being a married volunteer 26–30 years old and being
+of lower income. All of the other factors remained significant, even after
+taking into account the influence of relationship quality.
+
+DISCUSSION
+The first goal of this study was to test the hypothesis that the effects of
+mentoring relationships grow stronger over time, and that relatively short
+matches can lead to negative outcomes. In support of this prediction we
+found that youth who were in relationships that lasted a year or longer reported improvements in academic, psychosocial, and behavioral outcomes;
+and progressively fewer effects emerged among youth who were in relationships that terminated between 6 months and 1 year or between 3 and
+6 months. Additionally, youth who were in relationships that terminated
+within 3 months reported drops in self-worth and perceived scholastic competence. When potential self-selection biases were taken into account, the
+basic pattern of effects remained. Specifically, youth in relationships that
+lasted for a year or more reported the largest number of improvements,
+with fewer effects emerging among youth in relationships that lasted from
+6 to 12 months. Those in relationships that terminated within 6 months reported decrements in several indicators of functioning, including significant
+increases in alcohol use.
+Taken together, this pattern of findings underscores the importance of
+considering relationship duration in determining the effects of mentoring
+programs. Consistent with previous research regarding the complexities of
+mentoring relationships (Rhodes et al., 1999), most of the positive effects
+emerged in relationships that persisted for a year or longer. This lag may
+help to explain the relatively modest effects that have been reported in
+mentoring program evaluations that occur before matches have been meeting for at least a year (see Abbott, Meredith, Self-Kelly, & Davis, 1997;
+Freedman, 1993). Modest effects sizes may also be an artifact of evaluation
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+214
+
+PP402-368416
+
+March 12, 2002
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Grossman and Rhodes
+
+designs that combine relationships of varying duration into a single treatment
+group.
+The findings regarding early terminations are consistent with previous work which has demonstrated the particular vulnerabilities of youth
+to relationship disruption (Downey et al., 1998). Still, it is unclear whether
+these negative effects stemmed from youth’s feelings of rejection and disappointment or from other processes or contextual influences. Future studies
+should include measures of adolescents’ sensitivity to rejection (e.g., Downey
+et al., 1998), their attributions of regarding their mentors’ intent (e.g., Dodge,
+1980), and other potential mediators of this link between early termination
+and poor outcomes.
+Of course, it remains possible that relationship duration is simply a
+proxy for poorer underlying adjustment in youth. Specifically, the observed
+negative effects of early terminations may reflect unmeasured factors such
+as poor social skills or underlying psychopathology. It should be noted,
+however, that the basic pattern of findings held even after controlling for
+potential self-selection biases. Moreover, there were no baseline differences
+between the treatment group and the controls on any measures, including
+indices of psychosocial adjustment.
+Proportional hazard rate analyses revealed several youth, volunteer,
+and dyadic characteristics that were associated with higher termination rates.
+In particular, older adolescents tended to have shorter relationships than
+younger adolescents. In light of developmental changes that occur throughout adolescence, this is not particularly surprising. For example, older adolescents’ desires for autonomy and independence from adults may result
+in less compliance and emotional accessibility. Similarly, peer and romantic relationships may compete increasingly for adolescents’ attention and
+commitment.
+Beyond age, adolescents who had sustained emotional, sexual, or physical abuse were also more likely to have shorter relationships. The challenges
+associated with working with maltreated adolescents are likely to be substantial and, at least in the early stages of the relationships, accompanied by
+fewer rewards. Indeed, maltreated youth frequently manifest highly problematic attachment relationships with their parents and other adults (e.g.,
+Carlson, Cicchetti, Barnett, & Braunwald, 1989) and may find it relatively
+difficult to establish close, supportive relationship with mentors. Unfortunately, such youth are most likely to harbor expectations of rejection and
+to experience negative consequence following early terminations (Downey,
+Khouri, & Feldman, 1997). Given the potential of supportive relationships
+for helping adolescents to transcend severe childhood rejection (Egeland
+et al., 1988; Rhodes et al., in press), caseworkers should work closely with
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+Predictors and Effects of Duration in Youth Mentoring Relationships
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+215
+
+such dyads to move them beyond the initial, challenging stages of the relationship. Along similar lines, the mentor relationships of adolescents who
+had been referred for psychological treatment or educational remediation
+were less likely to remain intact. Again, such youth may present challenges
+that overwhelm the mentors’ capacity or willingness to help.
+Several factors associated with the mentors’ characteristics were also
+predictive of relationship duration. For example, volunteers with higher incomes tended to be in matches that lasted longer than lower income volunteers. Although the positive impact of income on initial levels of voluntary participation has been confirmed in many previous studies (Wilson
+& Musick, 1997), no other studies have identified this variable as a predictor
+of relationship duration. Nonetheless, mentors with higher incomes probably
+have greater flexibility in their work schedules and can more readily afford
+amenities, such as child care and personal transportation, that increase the
+convenience of sustained contact (Miller, Powell, & Seltzer, 1990).
+Interestingly, married volunteers aged 26–30 were at greatest risk for
+early termination. Although not specifically measured, this cohort may be
+coping with the competing demands of their small children and have neither
+the time nor flexibility to sustain contact with potentially troubled youth.
+As a corollary, unmarried adults in their late 20s may have approached the
+volunteering activity as an opportunity to meet people, enrich their lives, and
+contribute to the community, all of which have been identified as motivations
+associated with volunteer relationship longevity (Omoto & Snyder, 1995;
+Penner & Finkelstein, 1998). It should be noted that the risks associated
+with being married and 26–30 years old were attenuated when relationship
+quality was taken into account. In other words, if volunteers were able to
+form good relationships with their youth, their marital status had little effect
+on the ultimate length of the match. This highlights the need for more careful
+screening and supervision of volunteers.
+Several dyadic factors were related to somewhat higher termination
+rates, including gender (matches with females) and race (matches with sameand cross-race minorities), but these effects were only marginally significant
+and did not remain when specifications regarding the mentors’ race or interests were considered in the analyses. Still, these trends are worth noting as
+they may provide insights into factors that may precipitate termination. Being female and/or of minority status tends to be associated with higher levels
+of stress (Reid, 1988), which may increase the likelihood of early termination
+in the relationship (Wilson & Musick, 1997). It appears, however, that this
+risk can be overcome through the exercise of greater matching precision.
+The strengths and limitations of the research deserve comment. Our
+collection of data from a large, national sample of adolescents in naturalistic
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+216
+
+PP402-368416
+
+March 12, 2002
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Grossman and Rhodes
+
+settings, over time (1.5 years) confers confidence in the precision and generalizability of the findings. Nonetheless, the mentor relationships were all
+situated within the context of a single youth mentoring program and, as
+such, the pattern of findings may not apply as well to other, short-term or
+less formal mentoring interventions. For example, some mentoring programs
+may coincide with school calendars and, as such, have predetermined relationship durations of 9 months or shorter. Since students may enter such
+interventions with different expectations, they may be less negatively affected by terminations. Ideally, this study should be replicated with other
+samples of adolescents and volunteers in other types of mentoring interventions. It is also worth noting that the assessments were based solely on the
+adolescents’ perceptions. Participants in this study may have been limited
+in their ability to engage in assessments of their relationships and inhibited
+in their willingness to report personal problems or relationship difficulties.
+Future evaluations should move beyond adolescent self-reports to include
+data from school records, teachers, and case managers.
+Despite these limitations, this research has both basic and applied implications. The findings shed light onto adolescents’ relationships with nonparental adults and address fundamental issues regarding helping behavior.
+The pattern of effects should stimulate additional research on adolescents’
+attributions and attachment relationships, including variations in rejection
+sensitivity and the underlying processes by which mentors effect positive
+change. Additional research is also needed regarding the factors that mediate
+sustained mentoring, including the dispositional attributes and motivations
+of volunteers in long-term relationships.
+These findings also have implications for the refinement of mentoring
+interventions. By all accounts, the number of mentor volunteer programs
+will only increase in the years ahead and it is very likely that this expansion
+will include poorly funded efforts that are neither as intensive nor lasting
+as Big Brothers Big Sisters (Sipe, 1996). Freedman (1993) has referred to
+this enthusiasm for the rapid expansion of mentoring programs as “fervor
+without infrastructure,” a view that amounts to the belief in simple solutions
+to complex problems. He warns that
+Fervor without infrastructure is dangerous at the program level because it leads
+to disappointed mentors and youth. It is dangerous at the policy level because it
+plays into the unfortunate tendency to lunge at new and glossy strategies, glorify
+them over the short term, and discard them as they tarnish. More disturbing is the
+way that fervor without infrastructure feeds the recurring appetite for voluntaristic
+panaceas, idealized in isolation from institutions, and proposed as quick, cheap, and
+easy. (p. 93)
+
+Our research has the potential to contribute to a theoretically informed
+and practically applicable understanding of mentoring relationships. The
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+Predictors and Effects of Duration in Youth Mentoring Relationships
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+217
+
+findings serve as an acknowledgment of the potential benefits of enduring
+mentoring relationships and as a mandate for sufficient program resources
+to ensure reasonable levels of screening, training, and postmatch mentor
+support.
+REFERENCES
+Abbott, D. A., Meredith, W. H., Self-Kelly, R., & Davis, M. E. (1997). The influence of a
+Big Brothers program on the adjustment of boys in single-parent families. The Journal of
+Psychology, 131, 143156.
+Armsden, G., & Greenberg, M. T. (1987). Inventory of parent and peer attachment: Individual
+differences in their relationship to psychological well-being in adolescence. Journal of
+Youth and Adolescence, 16, 427–453.
+Bandura, A. (1969). Social learning theory of identification processes. In D. A. Goslin (Ed.),
+Handbook of socialization theory and research. Chicago: Rand-McNally.
+Belsky, J., & Cassidy, J. (1994). Attachment and close relationships: An individual difference
+perspective. Psychological Inquiry, 5, 27–30.
+Berndt, T., & Miller, K. (1986). Expectancies, values, and achievement in junior high school.
+Journal of Educational Psychology, 82, 319–326.
+Berry, W. D., & Feldman, S. (1985). Multiple Regression in Practice, Quantitative Applications
+in the Social Sciences Series, No. 50, Beverly Hills: Sage.
+Bowlby, J. (1982). Attachment and loss: Retrospect and prospect. American Journal of
+Orthopsychiatry, 52, 664–676.
+Carlson, V., Cicchetti, D., Barnett, D., & Braunwald, K. (1989). Finding order in disorganization: Lessons from research on maltreated infants’ attachments to their care givers. In
+D. Cicchetti & V. Carlson (Eds.), Child maltreatment: Theory and research on the
+causes and consequences of child abuse and neglect. New York: Cambridge University
+Press.
+Cauce, A. M., Mason, C., Gonzales, N., Hiraga, Y., & Liu, G. (1994). Social support during adolescence: Methodological and theoretical considerations. In F. Nestmann & K. Hurrelmann
+(Eds.), Social networks and social support in childhood and adolescence. New York: Walter
+de Gruyter.
+Cox, D. R. (1972). Regression modes and life-tables (with Discussion), Journal of the Royal
+Statistical Society, 34, 187–220.
+Davidson, W. S., II, Redner, R., Blakely, C. H., Mitchell, C. M., & Esmhoff, J. G. (1987). Diversion
+of juvenile offenders: An experimental comparison. Journal of Consulting and Clinical
+Psychology, 55, 68–75.
+Dodge, K. A. (1980). Social cognition and children’s aggressive behavior. Child Development,
+51, 162–170.
+Downey, G., & Feldman, S. I. (1996). The implications of rejection sensitivity for intimate
+relationships. Journal of Personality and Social Psychology, 70, 1327–1343.
+Downey, G., Khouri, H., & Feldman, S. (1997). Early interpersonal trauma and adult adjustment:
+The mediational role of rejection sensitivity. In D. Cicchette & S. Toth (Eds.), Rochester
+Symposium on Developmental Psychopathology: Vol. 8. The effects of trauma on the developmental process (pp. 85–114). Rochester, NY: University of Rochester Press.
+Downey, G., Lebolt, A., Rincon, C., & Freitas, A. L. (1998). Rejection sensitivity and children’s
+interpersonal difficulties. Child Development, 69, 1074–1091.
+DuBois, D. L., & Neville, H. A. (1997). Youth mentoring: Investigation of relationship characteristics and perceived benefits. Journal of Community Psychology, 25, 227–234.
+Egeland, B., Jacobvitz, D., & Sroufe, L. A. (1988). Breaking the cycle of abuse. Child Development, 59, 1080–1088.
+Flaxman, E., Ascher, C., & Harringon, C. (1988, December). Youth mentoring: Programs and
+practices. New York: Columbia University, Teachers College. (Available from the ERIC
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+218
+
+PP402-368416
+
+March 12, 2002
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+Grossman and Rhodes
+
+Clearinghouse on Urban Education, Institute for Urban Minority Education, Box 40,
+Teachers College, Columbia University, New York, NY 10027)
+Freedman, M. (1993). The kindness of strangers: Adult mentors, urban youth, and the new
+volunteerism. San Francisco: Jossey-Bass.
+Grossman, J. B., & Tierney, J. P. (1998). Does mentoring work? An impact study of the Big
+Brothers/Big Sisters program. Evaluation Review, 22, 403–426.
+Hamilton, S. F., & Hamilton, M. A. (1990, June). Linking up: Final report on a mentoring
+program for youth. New York: Cornell University, College of Human Ecology, Department
+of Human Development & Family Studies.
+Harter, S. (1986). The self-perception profile for children. Unpublished manual, University of
+Denver.
+James, L. R., & Singh, B. K. (1978). An introduction to the logic, assumptions, and basic
+analytical procedures of two-stage least squares. Psychological Bulletin, 85, 1104–
+1122.
+Kalbfreisch, J. & Prentice, R. (1980). The Statistical Analysis of Failure time Data. New York:
+Wiley.
+Klaw, E. L., & Rhodes, J. E. (1995). Mentor relationships and the career development of pregnant and parenting African-American teenagers. Psychology of Women Quarterly, 19,
+551–562.
+Langhout, R. D., Osborne, L. & Rhodes, J. E. (1999). Volunteer mentoring with at-risk youth:
+Toward a typology of relationships. Manuscript submitted for publication.
+Lerner, R. M., & Galambos, N. L. (1998). Adolescent development: Challenges and opportunities for research, programs, and policies. Annual Review of Psychology, 49, 413–446.
+LoSciuto, L., Rajala, A. K., Townsend, T. N., & Taylor, A. S. (1996). An outcome evaluation
+of Across Ages: An intergenerational mentoring approach to drug prevention. Journal of
+Adolescent Research, 11, 116–129.
+Main, M., Kaplan, K., & Cassidy, J. (1985). Security in infancy, childhood, and adulthood: A
+move to the level of representation. In I. Bretherton & E. Waters (Eds.), Growing points
+of attachment theory and research (pp. 66–104). Monographs of the Society for Research
+in Child Development, 50(1–2, Serial No. 209).
+McLearn, K. T., Colasanto, D., & Schoen, C. (1998, June). Mentoring makes a difference: Findings from The commonwealth Fund 1998 Survey of Adults Mentoring Young People. Paper
+presented at the State and Future of Mentoring Symposium, Washington, DC.
+Miller, L. E., Powell, G. N., & Seltzer, J. (1990). Determinants of turnover among volunteers.
+Human Relations, 43, 901–917.
+Olds, D., Kitzman, H., Cole, R., & Robinson, J. (1997). Theoretical formulations of a program of
+home visitation for pregnant women and parents of young children. Journal of Community
+Psychology, 25, 9–26.
+Omoto, A. M., & Snyder, M. (1995). Sustained helping without obligation: Motivation, longevity
+of service, and perceived attitude change among AIDS volunteers. Journal of Personality
+and Social Psychology, 68, 671–686.
+Penner, L. A., & Finkelstein, M. A. (1998). Dispositional and structural determinants of volunteerism. Journal of Personality and Social Psychology, 74, 525–537.
+Reid, P. T. (1988). Racism and sexism: Comparisons and conflicts. In P. A. Katz & D. A.
+Taylor (Eds.), Eliminating racism (pp. 203–221). New York: Plenum.
+Rhodes, J. E., Grossman, J. B., & Resch, N. L. (2000). Agents of change: Pathways through which
+mentoring relationships influence adolescents academic adjustment. Child Development,
+71, 1662–1671.
+Rhodes, J. E., Haight, W. L., & Briggs, E. C. (1999). The influence of mentoring on the peer
+relationships of foster youth in relative and non-relative care. Journal of Research on
+Adolescence, 2, 185–202.
+Sipe, C. L. (1996). Mentoring: A synthesis of P/PV’s Research: 1988–1995. Philadelphia, PA:
+Public/Private Ventures.
+Sroufe, A. L. (1995). Contribution of attachment theory to developmental psychopathology. In
+E. A. Carlson & A. L. Sroufe (Eds.), Developmental psychopathology: Vol. 1. Theory and
+methods. New York: Plenum.
+
+P1: GYK/GVH
+American Journal of Community Psychology [ajcp]
+
+PP402-368416
+
+March 12, 2002
+
+Predictors and Effects of Duration in Youth Mentoring Relationships
+
+8:16
+
+Style file version Nov. 19th, 1999
+
+219
+
+Styles, M. B., & Morrow, K. V. (1992, June). Understanding how youth and elders form relationships: A study of four Linking Lifetimes programs (Research report). Philadelphia, PA:
+Public/Private Ventures.
+Taylor, R. L. (1989). Black youth, role models and the social construction of identity. In
+R. L. Jones (Ed.), Black adolescents. Berkeley, CA: Cobb & Henry.
+Walker, G., & Freeman, M. (1996). Social change one on one: The new mentoring movement.
+The American Prospect, 27, 75–81.
+Wallerstein, J. S. (1988). Children of divorce: Stress and developmental tasks. In N. Garmezy &
+M. Rutter (Eds.), Center for advanced study in the behavioral sciences. Inc.: Stress, coping
+and development in children (pp. 265–302). Baltimore, MD: Johns Hopkins University
+Press.
+Wilson, J., & Musick, M. (1997). Who cares? Toward an integrated theory of volunteer work.
+American Sociological Review, 62, 694–713.
+
+

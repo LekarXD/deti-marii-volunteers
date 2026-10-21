@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вебинар в студии — Опора</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FFFEFA}
+.dm{--page:#FFFEFA;--paper:#FFFFFF;--soft:#F6F6F6;--soft-2:#EEEDE8;--line:#ECE9E2;--line-2:#DEDAD1;--ink:#12141A;--ink-2:#3F424A;--mute:#646464;--quiet:#8C8C8C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFEDE2;--yellow:#FFB03B;--yellow-ink:#8A5A00;--yellow-tint:#FFF3D6;--blue:#0F3DA7;--blue-tint:#E9EDF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DFF0E3;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE7E4;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE6EE;--shadow:0 4px 12px rgba(18,20,26,.05);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,176,59,.4)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:16px;height:16px}.ic-lg{width:24px;height:24px}.ic-xl{width:32px;height:32px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+/* layout */
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 72px}
+.shell-wide{max-width:1440px}
+.top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand . end" "nav nav nav";align-items:center;gap:14px 16px;margin-bottom:36px}
+.top > .brand{grid-area:brand;justify-self:start}
+.top > .nav{grid-area:nav;justify-self:start}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:12px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--yellow);color:var(--ink)}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.nav a.is-active .count{background:var(--paper)}
+.top-end{grid-area:end;justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--ink-2);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.role:hover{background:var(--soft-2);text-decoration:none;color:var(--ink)}
+.avatar{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:32px;height:32px;flex-basis:32px;font-size:12px}
+.avatar-lg{width:64px;height:64px;flex-basis:64px;font-size:22px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+/* type */
+.display{margin:0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:36px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:26px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:10px 0 0;font-size:17px;line-height:1.55;color:var(--ink-2);max-width:62ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:13px;line-height:1.4;color:var(--mute)}
+.eyebrow{font-size:13px;font-weight:600;color:var(--mute)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:40px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:14px}
+/* surfaces */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px 28px}
+.card-soft{background:var(--soft);border-radius:24px;padding:22px 28px}
+.card-hero{background:linear-gradient(160deg,#FFF9EF 0%,#FFEED6 100%);border:1px solid #F5E2C4;border-radius:28px;padding:32px 36px}
+.card-tight{padding:16px 20px;border-radius:18px}
+.ai-box{background:#F8F5FF;border:1px solid #E4DBFA;border-radius:20px;padding:18px 22px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.divider{height:1px;background:var(--line);border:0;margin:16px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:999px;border:1px solid transparent;font-size:15px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--orange);color:var(--ink)}
+.btn-primary:hover{background:#FF7535}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:36px;padding:0 14px;font-size:13px}
+.btn-lg{height:52px;padding:0 26px;font-size:16px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft);color:var(--quiet);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:500;white-space:nowrap;background:var(--soft);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:12px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--quiet);flex:0 0 8px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:14px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{border-color:var(--ink-2);color:var(--ink)}
+.chip.is-on{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--soft)}
+.seg button{height:38px;padding:0 16px;border:0;border-radius:999px;background:transparent;font-size:14px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{height:46px;padding:0 16px;border:0;background:transparent;font-size:15px;font-weight:600;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--orange)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.label{font-size:14px;font-weight:500;color:var(--ink-2)}
+.input,.textarea,.select{width:100%;min-height:48px;padding:12px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:120px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:13px;color:var(--mute)}
+.err{font-size:13px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:var(--ink-2)}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--orange);flex:0 0 20px}
+.toggle{position:relative;width:44px;height:26px;flex:0 0 44px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:21px}
+/* data */
+.kpi{position:relative;display:flex;flex-direction:column;gap:6px;padding:22px 24px;border-radius:24px;background:var(--paper);border:1px solid var(--line);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:38px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{font-size:14px;color:var(--ink-2)}
+.kpi-delta{font-size:13px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:58px;height:52px;left:12px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%;opacity:.9}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:8px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}
+.tbl{display:grid;border-top:1px solid var(--line)}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:14px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-head{font-size:13px;font-weight:600;color:var(--mute);padding-top:10px;padding-bottom:10px}
+.scroll-x{overflow-x:auto}
+.art{width:56px;height:56px;flex:0 0 56px;border-radius:18px;display:grid;place-items:center}
+.art-lg{width:100%;height:132px;border-radius:20px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+/* chat */
+.bubble{max-width:72%;padding:12px 16px;border-radius:20px;background:var(--soft);color:var(--ink);font-size:15px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F8F5FF;border:1px solid #E4DBFA}
+.cite{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:13px;color:var(--ink-2)}
+/* demo-only switcher */
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 24px;padding:8px 10px;border:1px dashed var(--line-2);border-radius:16px;background:var(--page)}
+.demo-cap{font-size:13px;font-weight:600;color:var(--mute);padding:0 6px}
+.demo button{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:13px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--ink);border-color:var(--ink);color:#fff}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:48px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:38px}.h1{font-size:28px}.card,.card-soft{padding:18px 18px;border-radius:20px}.card-hero{padding:22px 20px}.top{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "end" "nav"}.top-end{justify-self:start;flex-wrap:wrap}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+.st-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;min-height:60px;padding:8px 10px 8px 6px;margin-bottom:20px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+.st-sep{width:1px;height:28px;background:var(--line)}
+.st-title{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.st-rec{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--red-ink);white-space:nowrap}
+.st-rec i{width:10px;height:10px;border-radius:50%;background:var(--red)}
+.st-rec.is-pause{color:var(--yellow-ink)}.st-rec.is-pause i{background:var(--yellow)}
+.st-rec.is-off{color:var(--mute)}.st-rec.is-off i{background:var(--quiet)}
+.st-timer{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.st-people{display:inline-flex;align-items:center;gap:6px;font-size:15px;color:var(--ink-2);white-space:nowrap}
+.st-grid{display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:20px}
+.st-side-wrap{position:relative;min-height:560px}
+.st-side{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:24px;overflow:hidden}
+.st-side .tabs{flex:0 0 auto;padding:0 8px}
+.st-side .tabs button{padding:0 12px;display:inline-flex;align-items:center;gap:6px}
+.st-body{flex:1 1 auto;min-height:0;overflow:auto;padding:14px 18px}
+.st-foot{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:12px 12px 12px 14px;border-top:1px solid var(--line)}
+.st-foot .input{min-height:44px;padding:10px 14px}
+.stage{position:relative;aspect-ratio:16/9;border-radius:24px;border:1px solid var(--line);background:var(--paper);overflow:hidden}
+.slide{position:absolute;inset:0;padding:44px 52px;display:flex;flex-direction:column;gap:22px}
+.slide-blob{position:absolute;right:-70px;top:-80px;width:320px;height:280px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%;background:var(--yellow-tint)}
+.slide-count{position:absolute;right:26px;top:22px;font-size:13px;font-weight:600;color:var(--yellow-ink);font-variant-numeric:tabular-nums}
+.slide-title{position:relative;margin:0;font-size:32px;font-weight:600;letter-spacing:-.03em;line-height:1.12;max-width:640px;text-wrap:balance}
+.slide-sub{position:relative;margin:0;font-size:18px;color:var(--ink-2);max-width:560px}
+.slide-pts{position:relative;display:flex;flex-direction:column;gap:14px;max-width:610px;margin:0;padding:0;list-style:none}
+.slide-pts li{display:flex;gap:14px;align-items:flex-start;font-size:17px;line-height:1.45;color:var(--ink-2)}
+.slide-pts b{color:var(--ink);font-weight:600}
+.slide-n{width:30px;height:30px;flex:0 0 30px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:600;background:var(--orange-tint);color:var(--orange-ink)}
+.slide-foot{position:absolute;left:52px;bottom:22px;font-size:13px;color:var(--mute)}
+.cam-host{position:absolute;right:16px;bottom:16px;width:220px;aspect-ratio:16/9;border-radius:18px;background:var(--violet-tint);display:grid;place-items:center;border:2px solid transparent;z-index:1}
+.cam-host.is-speaking{border-color:var(--green)}
+.cam-host .avatar-lg{background:var(--paper)}
+.pill-on-stage{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:var(--paper);font-size:13px;font-weight:600;color:var(--ink)}
+.cam-host .pill-on-stage{position:absolute;left:8px;bottom:8px}
+.react-float{position:absolute;right:252px;bottom:16px;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:14px;font-weight:600;color:var(--ink);z-index:1}
+.react-float .ic{color:var(--orange)}
+.strip{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:8px;margin-top:12px}
+.ptile{position:relative;height:72px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border:2px solid transparent;min-width:0}
+.ptile b{font-size:16px;font-weight:600;color:var(--ink);line-height:1.3}
+.ptile span{font-size:13px;color:var(--ink-2);line-height:1.3}
+.ptile.is-speaking{border-color:var(--green)}
+.ptile-more{background:var(--soft)}
+.hand-badge{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;color:var(--ink)}
+.controls{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:10px 10px;margin-top:16px}
+.ctl-wrap{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:72px}
+.dm .ctl{position:relative;width:52px;height:52px;border-radius:50%;border:1px solid var(--line-2);background:var(--paper);display:grid;place-items:center;color:var(--ink)}
+.dm .ctl:hover{border-color:var(--ink-2)}
+.dm .ctl.is-on{background:var(--yellow);border-color:var(--yellow)}
+.dm .ctl.is-off{background:var(--red-tint);border-color:var(--red-tint);color:var(--red-ink)}
+.dm .ctl.is-off::after{content:"";position:absolute;width:30px;height:2px;border-radius:2px;background:currentColor;transform:rotate(-45deg)}
+.ctl-lab{font-size:13px;color:var(--ink-2);white-space:nowrap}
+.ctl-leave{align-self:flex-start;margin:4px 0 0 14px}
+.react-pop{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);display:flex;gap:2px;padding:5px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);z-index:3}
+.dm .react-pop button{width:42px;height:42px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;color:var(--orange-ink)}
+.dm .react-pop button:hover{background:var(--soft)}
+.leave-confirm{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 16px;margin-top:16px;padding:10px 12px 10px 22px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2)}
+.pinned{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:var(--yellow-tint);margin-bottom:4px}
+.pinned .ic{color:var(--yellow-ink);margin-top:3px}
+.msg{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+.msg:first-child{border-top:0}
+.msg-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.msg-name{font-weight:600;color:var(--ink)}
+.dm .react{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:13px;color:var(--ink-2);margin-top:6px}
+.dm .react.is-on{background:var(--yellow-tint);border-color:var(--yellow);color:var(--ink)}
+.prow{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);min-width:0}
+.prow:first-child{border-top:0}
+.prow .ic{color:var(--mute)}
+.console{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);background:var(--page)}
+.con-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 10px;min-width:0}
+.con-lab{font-size:15px;font-weight:600;color:var(--ink)}
+.seg-sm{padding:4px}
+.dm .seg-sm button{height:32px;padding:0 12px;font-size:13px}
+.board{position:absolute;inset:0;background:var(--paper)}
+.board > svg{position:absolute;inset:0;width:100%;height:100%}
+.board-tools{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:5px 10px 5px 5px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);z-index:2;white-space:nowrap}
+.board-tools .seg{padding:0;background:transparent}
+.dm .swatch{width:26px;height:26px;border-radius:50%;border:3px solid var(--paper);padding:0;box-shadow:0 0 0 1px var(--line-2)}
+.dm .swatch.is-on{box-shadow:0 0 0 2px var(--ink)}
+.dm .sw-ink{background:var(--ink)}.dm .sw-orange{background:var(--orange)}.dm .sw-blue{background:var(--blue)}.dm .sw-green{background:var(--green)}
+.board-who{position:absolute;left:16px;top:18px;z-index:2;border:1px solid var(--line-2)}
+.ai-row{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-top:1px solid #E4DBFA;min-width:0}
+.ai-row:first-child{border-top:0}
+.ai-n{width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:var(--violet-tint);color:var(--violet);display:grid;place-items:center;font-weight:700;font-size:14px}
+.live-row{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+.live-row:first-child{border-top:0}
+.live-t{flex:0 0 46px;font-size:13px;font-weight:600;color:var(--violet);font-variant-numeric:tabular-nums;padding-top:2px}
+.rec-thumb{position:relative;flex:0 0 260px;height:146px;border-radius:16px;background:var(--yellow-tint);overflow:hidden;padding:16px 18px}
+.rec-thumb .rt-title{position:relative;display:block;font-size:15px;font-weight:600;line-height:1.3;color:var(--ink);max-width:210px}
+.rec-play{position:absolute;left:16px;bottom:12px;width:48px;height:48px;border-radius:50%;border:0;background:var(--paper);display:grid;place-items:center;color:var(--ink)}
+.rec-dur{position:absolute;right:10px;bottom:10px;height:24px;padding:0 8px;border-radius:999px;background:var(--ink);color:#fff;font-size:13px;font-weight:600;display:inline-flex;align-items:center;font-variant-numeric:tabular-nums}
+.quiz{margin:12px 0 0;padding:0 0 0 22px;display:flex;flex-direction:column;gap:8px;color:var(--ink-2)}
+.tr-line{display:grid;grid-template-columns:52px minmax(0,1fr);gap:4px 10px;padding:12px 0;border-top:1px solid var(--line)}
+.tr-line:first-child{border-top:0}
+.tr-t{font-size:13px;font-weight:600;color:var(--mute);font-variant-numeric:tabular-nums;padding-top:2px}
+.st-note{margin:20px 0 0}
+@media (max-width:1100px){.st-grid{grid-template-columns:1fr}.st-side-wrap{min-height:0;height:620px}.strip{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media (max-width:720px){.stage{aspect-ratio:auto;min-height:560px}.cam-host .pill-on-stage{display:none}.slide{padding:24px 20px}.slide-title{font-size:22px}.slide-pts li{font-size:15px}.slide-foot{display:none}.cam-host{width:112px}.react-float{right:auto;left:16px}.st-top{border-radius:24px}.rec-thumb{flex-basis:100%}}
+</style>
+</helmet>
+<div class="dm"><div class="shell shell-wide">
+
+<header class="st-top">
+  <a class="btn btn-ghost btn-sm" href="Academy.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>Академия</a>
+  <span class="st-sep" aria-hidden="true"></span>
+  <div class="grow">
+    <h1 class="st-title">Супервизия с психологом</h1>
+    <span class="meta">Ведёт Ирина Власова</span>
+  </div>
+  <sc-if value="{{isLive}}" hint-placeholder-val="{{true}}">
+    <span class="{{recCls}}"><i aria-hidden="true"></i>{{recLabel}}</span>
+    <span class="st-timer" aria-label="Идёт 18 минут 42 секунды">00:18:42</span>
+  </sc-if>
+  <sc-if value="{{isAfter}}" hint-placeholder-val="{{false}}">
+    <span class="dot dot-green">Запись обработана</span>
+    <span class="st-timer">1:12:05</span>
+  </sc-if>
+  <span class="st-people"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg>14 участников</span>
+  <span class="{{meCls}}" aria-label="{{meName}}">{{meIni}}</span>
+</header>
+
+<div class="demo" role="group" aria-label="Состояния для показа">
+  <span class="demo-cap">Показать:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="4">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<!-- ═══ Идёт занятие ═══ -->
+<sc-if value="{{isLive}}" hint-placeholder-val="{{true}}">
+<div class="st-grid">
+  <div class="st-main">
+    <div class="stage">
+
+      <sc-if value="{{showSlide}}" hint-placeholder-val="{{true}}">
+        <div class="slide">
+          <span class="slide-blob" aria-hidden="true"></span>
+          <span class="slide-count">{{slideCount}}</span>
+          <h2 class="slide-title">{{slideTitle}}</h2>
+          <sc-if value="{{slideMain}}" hint-placeholder-val="{{true}}">
+            <ol class="slide-pts">
+              <li><span class="slide-n">1</span><span><b>Честно о будущем.</b> «Две субботы меня не будет. Я приду 15-го» — вместо «конечно приду».</span></li>
+              <li><span class="slide-n">2</span><span><b>Тепло, про чувство.</b> «Тебе важно знать, что я не пропаду».</span></li>
+              <li><span class="slide-n">3</span><span><b>Свой номер не даём.</b> Разрешённый канал — открытка или письмо через координатора.</span></li>
+              <li><span class="slide-n">4</span><span><b>Прощание предсказуемо.</b> «До 15-го. Попрошу Ольгу напомнить тебе, когда я приду».</span></li>
+            </ol>
+            <span class="slide-foot">Основа: NSPCC, MENTOR, PACE, TBRI</span>
+          </sc-if>
+          <sc-if value="{{slideOther}}" hint-placeholder-val="{{false}}">
+            <p class="slide-sub">{{slideSub}}</p>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showBoard}}" hint-placeholder-val="{{false}}">
+        <div class="board" role="img" aria-label="Доска: ребёнок, волонтёр и координатор; личный номер зачёркнут, открытки идут через координатора">
+          <svg viewBox="0 0 960 540" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><pattern id="board-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" style="fill:var(--line-2)"/></pattern></defs>
+            <rect width="960" height="540" fill="url(#board-dots)"/>
+            <text x="60" y="118" style="font-family:Inter,system-ui,sans-serif;font-size:28px;font-weight:600;fill:var(--ink)">Разрешённый канал</text>
+            <path d="M60 134 q 40 -9 80 0 t 80 0 t 80 0" style="fill:none;stroke:var(--orange);stroke-width:4;stroke-linecap:round"/>
+            <path d="M118 322 C 116 272, 158 248, 194 250 C 240 252, 266 286, 262 324 C 258 366, 228 392, 188 390 C 148 388, 120 362, 118 322 Z" style="fill:none;stroke:var(--orange);stroke-width:4;stroke-linecap:round"/>
+            <text x="190" y="328" text-anchor="middle" style="font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:600;fill:var(--ink)">Ребёнок</text>
+            <path d="M452 152 C 520 146, 590 148, 642 154 C 646 180, 646 206, 640 230 C 580 236, 510 234, 454 230 C 448 204, 448 178, 452 152 Z" style="fill:none;stroke:var(--blue);stroke-width:4;stroke-linejoin:round"/>
+            <text x="547" y="199" text-anchor="middle" style="font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:600;fill:var(--ink)">Волонтёр</text>
+            <path d="M452 392 C 530 386, 610 388, 680 394 C 684 420, 684 446, 678 468 C 600 474, 520 472, 454 468 C 448 444, 448 416, 452 392 Z" style="fill:none;stroke:var(--green);stroke-width:4;stroke-linejoin:round"/>
+            <text x="566" y="438" text-anchor="middle" style="font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:600;fill:var(--ink)">Координатор</text>
+            <path d="M232 258 Q 320 182 444 176" style="fill:none;stroke:var(--ink-2);stroke-width:3;stroke-linecap:round"/>
+            <path d="M444 176 l -16 -9 M444 176 l -14 12" style="fill:none;stroke:var(--ink-2);stroke-width:3;stroke-linecap:round"/>
+            <text x="280" y="160" style="font-family:Inter,system-ui,sans-serif;font-size:18px;font-weight:500;fill:var(--ink-2)">занятие, разговор</text>
+            <path d="M264 306 Q 360 282 446 222" style="fill:none;stroke:var(--red);stroke-width:3;stroke-linecap:round;stroke-dasharray:10 10"/>
+            <path d="M340 254 l 34 34 M374 254 l -34 34" style="fill:none;stroke:var(--red);stroke-width:5;stroke-linecap:round"/>
+            <text x="300" y="330" style="font-family:Inter,system-ui,sans-serif;font-size:18px;font-weight:600;fill:var(--red-ink)">личный номер</text>
+            <path d="M548 236 C 562 290, 532 334, 550 386" style="fill:none;stroke:var(--green-ink);stroke-width:3;stroke-linecap:round"/>
+            <path d="M550 386 l -11 -14 M550 386 l 9 -15" style="fill:none;stroke:var(--green-ink);stroke-width:3;stroke-linecap:round"/>
+            <text x="570" y="318" style="font-family:Inter,system-ui,sans-serif;font-size:18px;font-weight:500;fill:var(--green-ink)">открытка, письмо</text>
+            <path d="M448 438 Q 330 446 246 384" style="fill:none;stroke:var(--green-ink);stroke-width:3;stroke-linecap:round"/>
+            <path d="M246 384 l 6 17 M246 384 l 17 3" style="fill:none;stroke:var(--green-ink);stroke-width:3;stroke-linecap:round"/>
+            <text x="236" y="476" style="font-family:Inter,system-ui,sans-serif;font-size:18px;font-weight:500;fill:var(--green-ink)">передаёт в тот же день</text>
+          </svg>
+          <span class="pill-on-stage board-who"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/></svg>{{drawWho}}</span>
+          <sc-if value="{{canDraw}}" hint-placeholder-val="{{true}}">
+            <div class="board-tools" role="toolbar" aria-label="Инструменты доски">
+              <div class="seg seg-sm" role="group" aria-label="Инструмент">
+                <sc-for list="{{tools}}" as="t" hint-placeholder-count="4">
+                  <button type="button" class="{{t.cls}}" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}">{{t.label}}</button>
+                </sc-for>
+              </div>
+              <span class="st-sep" aria-hidden="true"></span>
+              <sc-for list="{{colors}}" as="c" hint-placeholder-count="4">
+                <button type="button" class="{{c.cls}}" aria-label="{{c.label}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}"></button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <div class="{{hostCamCls}}">
+        <span class="avatar avatar-lg" aria-hidden="true">ИВ</span>
+        <span class="pill-on-stage">Ирина Власова, психолог</span>
+      </div>
+      <sc-if value="{{hasReaction}}" hint-placeholder-val="{{false}}">
+        <span class="react-float">
+          <sc-if value="{{rHeart}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></sc-if>
+          <sc-if value="{{rStar}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if>
+          <sc-if value="{{rSmile}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if>
+          {{reactWho}}
+        </span>
+      </sc-if>
+    </div>
+
+    <div class="strip" aria-label="Участники на видео">
+      <sc-for list="{{tiles}}" as="p" hint-placeholder-count="9">
+        <div class="{{p.cls}}">
+          <b>{{p.ini}}</b><span>{{p.label}}</span>
+          <sc-if value="{{p.hand}}" hint-placeholder-val="{{false}}"><span class="hand-badge" aria-label="Подняла руку"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></span></sc-if>
+        </div>
+      </sc-for>
+      <div class="ptile ptile-more"><b>+4</b><span>ещё</span></div>
+    </div>
+
+    <sc-if value="{{notLeaving}}" hint-placeholder-val="{{true}}">
+      <div class="controls" role="toolbar" aria-label="Управление">
+        <div class="ctl-wrap">
+          <button type="button" class="{{micCls}}" aria-pressed="{{micPressed}}" aria-label="{{micAria}}" onClick="{{toggleMic}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>
+          <span class="ctl-lab">Микрофон</span>
+        </div>
+        <div class="ctl-wrap">
+          <button type="button" class="{{camCls}}" aria-pressed="{{camPressed}}" aria-label="{{camAria}}" onClick="{{toggleCam}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="13" height="12" rx="3"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg></button>
+          <span class="ctl-lab">Камера</span>
+        </div>
+        <div class="ctl-wrap">
+          <button type="button" class="{{screenCls}}" aria-pressed="{{screenPressed}}" aria-label="Показать экран" onClick="{{toggleScreen}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 17v4"/></svg></button>
+          <span class="ctl-lab">{{screenLabel}}</span>
+        </div>
+        <div class="ctl-wrap">
+          <button type="button" class="{{boardCls}}" aria-pressed="{{boardPressed}}" aria-label="Доска" onClick="{{toggleBoard}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21l4-4 4 4M7 9.5c2-2 4 1 6-1s3 0 4 0"/></svg></button>
+          <span class="ctl-lab">Доска</span>
+        </div>
+        <sc-if value="{{isPart}}" hint-placeholder-val="{{true}}">
+          <div class="ctl-wrap">
+            <button type="button" class="{{handCls}}" aria-pressed="{{handPressed}}" aria-label="Поднять руку" onClick="{{toggleHand}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></button>
+            <span class="ctl-lab">{{handLabel}}</span>
+          </div>
+        </sc-if>
+        <div class="ctl-wrap">
+          <button type="button" class="{{reactCls}}" aria-expanded="{{reactExpanded}}" aria-label="Реакции" onClick="{{toggleReact}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></button>
+          <span class="ctl-lab">Реакции</span>
+          <sc-if value="{{reactOpen}}" hint-placeholder-val="{{false}}">
+            <div class="react-pop" role="group" aria-label="Выбрать реакцию">
+              <button type="button" aria-label="Сердце" onClick="{{reactHeart}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></button>
+              <button type="button" aria-label="Звезда" onClick="{{reactStar}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></button>
+              <button type="button" aria-label="Улыбка" onClick="{{reactSmile}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></button>
+            </div>
+          </sc-if>
+        </div>
+        <button type="button" class="btn btn-danger btn-lg ctl-leave" onClick="{{askLeave}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/></svg>Выйти</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{leaving}}" hint-placeholder-val="{{false}}">
+      <div class="leave-confirm" role="alertdialog" aria-label="Выйти из занятия">
+        <span class="p" style="color:var(--ink)">{{leaveText}}</span>
+        <div class="row">
+          <a class="btn btn-danger" href="Academy.dc.html">Выйти</a>
+          <button type="button" class="btn btn-ghost" onClick="{{stayHere}}">Остаться</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div class="st-side-wrap">
+    <aside class="st-side" aria-label="Панель занятия">
+
+      <sc-if value="{{isHost}}" hint-placeholder-val="{{false}}">
+        <div class="console" aria-label="Пульт ведущего">
+          <div class="con-row"><span class="h3">Пульт ведущего</span><span class="meta">видите только вы</span></div>
+          <div class="con-row">
+            <span class="con-lab">Говорить</span>
+            <div class="seg seg-sm" role="group" aria-label="Кто может говорить">
+              <sc-for list="{{talkOpts}}" as="o" hint-placeholder-count="3">
+                <button type="button" class="{{o.cls}}" aria-pressed="{{o.pressed}}" onClick="{{o.pick}}">{{o.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{hasRequest}}" hint-placeholder-val="{{true}}">
+            <div class="con-row">
+              <span class="row" style="gap:10px"><span class="avatar avatar-sm av-o" aria-hidden="true">АС</span><span><span class="strong" style="display:block">Анна Соколова</span><span class="meta">подняла руку</span></span></span>
+              <button type="button" class="btn btn-secondary btn-sm" onClick="{{giveWord}}">Дать слово</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{annaSpeaks}}" hint-placeholder-val="{{false}}">
+            <div class="con-row">
+              <span class="dot dot-green" style="font-size:15px;color:var(--ink)">Говорит Анна Соколова</span>
+              <button type="button" class="btn btn-ghost btn-sm" onClick="{{takeWord}}">Забрать слово</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{noRequests}}" hint-placeholder-val="{{false}}">
+            <div class="con-row"><span class="p">Запросов слова нет</span></div>
+          </sc-if>
+          <div class="con-row">
+            <span class="con-lab">Рисуют на доске</span>
+            <div class="seg seg-sm" role="group" aria-label="Кто рисует на доске">
+              <sc-for list="{{drawOpts}}" as="o" hint-placeholder-count="3">
+                <button type="button" class="{{o.cls}}" aria-pressed="{{o.pressed}}" onClick="{{o.pick}}">{{o.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div class="con-row">
+            <span class="{{recCls}}"><i aria-hidden="true"></i>{{recLabel}}</span>
+            <sc-if value="{{recOn}}" hint-placeholder-val="{{true}}"><span class="row" style="gap:6px"><button type="button" class="btn btn-secondary btn-sm" onClick="{{pauseRec}}">Пауза</button><button type="button" class="btn btn-ghost btn-sm" onClick="{{askStop}}">Стоп</button></span></sc-if>
+            <sc-if value="{{recPaused}}" hint-placeholder-val="{{false}}"><span class="row" style="gap:6px"><button type="button" class="btn btn-secondary btn-sm" onClick="{{resumeRec}}">Продолжить</button><button type="button" class="btn btn-ghost btn-sm" onClick="{{askStop}}">Стоп</button></span></sc-if>
+            <sc-if value="{{recConfirm}}" hint-placeholder-val="{{false}}"><span class="row" style="gap:6px"><button type="button" class="btn btn-danger btn-sm" onClick="{{stopRec}}">Остановить запись</button><button type="button" class="btn btn-ghost btn-sm" onClick="{{cancelStop}}">Отмена</button></span></sc-if>
+          </div>
+          <sc-if value="{{recConfirm}}" hint-placeholder-val="{{false}}"><p class="meta" style="margin:-4px 0 0">Продолжить эту запись будет нельзя, начнётся новый файл.</p></sc-if>
+          <div class="con-row">
+            <span class="con-lab">Слайды</span>
+            <span class="row" style="gap:4px">
+              <button type="button" class="iconbtn" style="width:36px;height:36px" aria-label="Предыдущий слайд" onClick="{{prevSlide}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+              <span class="strong num" style="min-width:52px;text-align:center">{{slideCount}}</span>
+              <button type="button" class="iconbtn" style="width:36px;height:36px" aria-label="Следующий слайд" onClick="{{nextSlide}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+            </span>
+          </div>
+        </div>
+      </sc-if>
+
+      <div class="tabs" role="tablist" aria-label="Панель">
+        <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+          <button type="button" role="tab" class="{{t.cls}}" aria-selected="{{t.selected}}" onClick="{{t.pick}}">
+            <sc-if value="{{t.ai}}" hint-placeholder-val="{{false}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--violet)"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg></sc-if>
+            {{t.label}}
+          </button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{tabChat}}" hint-placeholder-val="{{true}}">
+        <div class="st-body">
+          <div class="pinned">
+            <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            <div class="grow">
+              <span class="strong" style="display:block">Марина Белова: что говорить, если ребёнок просит забрать его домой?</span>
+              <span class="meta">Закреплено. Ирина ответит в конце</span>
+            </div>
+          </div>
+          <div class="list">
+            <sc-for list="{{msgs}}" as="mm" hint-placeholder-count="4">
+              <div class="msg">
+                <span class="{{mm.av}}" aria-hidden="true">{{mm.ini}}</span>
+                <div class="grow">
+                  <div class="msg-head"><span class="msg-name">{{mm.name}}</span><span class="meta">{{mm.time}}</span></div>
+                  <p class="p">{{mm.text}}</p>
+                  <button type="button" class="{{mm.reactCls}}" aria-pressed="{{mm.liked}}" aria-label="{{mm.reactAria}}" onClick="{{mm.like}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg>{{mm.count}}</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div class="st-foot">
+          <label for="chat-input" class="meta" style="position:absolute;left:-9999px">Сообщение в чат</label>
+          <input id="chat-input" class="input" type="text" placeholder="Написать в чат" value="{{draft}}" onChange="{{typeDraft}}">
+          <button type="button" class="iconbtn" aria-label="Отправить" onClick="{{sendMsg}}" style="background:var(--blue-tint);color:var(--blue)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{tabPeople}}" hint-placeholder-val="{{false}}">
+        <div class="st-body">
+          <sc-if value="{{handUp}}" hint-placeholder-val="{{false}}">
+            <p class="eyebrow" style="margin:0 0 4px">Подняли руку</p>
+            <div class="prow" style="border-top:0;margin-bottom:8px">
+              <span class="avatar avatar-sm av-o" aria-hidden="true">АС</span>
+              <span class="grow"><span class="strong" style="display:block">Анна Соколова</span><span class="meta">волонтёр, живопись</span></span>
+              <span class="hand-badge" style="position:static" aria-label="Рука поднята"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></span>
+            </div>
+          </sc-if>
+          <p class="eyebrow" style="margin:0 0 4px">В занятии 14</p>
+          <div class="list">
+            <div class="prow">
+              <span class="avatar avatar-sm av-v" aria-hidden="true">ИВ</span>
+              <span class="grow"><span class="strong" style="display:block">Ирина Власова</span><span class="meta">ведущая, психолог фонда</span></span>
+              <sc-if value="{{hostSpeaks}}" hint-placeholder-val="{{true}}"><span class="dot dot-green">говорит</span></sc-if>
+            </div>
+            <sc-for list="{{people}}" as="pp" hint-placeholder-count="10">
+              <div class="prow">
+                <span class="{{pp.av}}" aria-hidden="true">{{pp.ini}}</span>
+                <span class="grow"><span class="strong" style="display:block">{{pp.full}}</span><span class="meta">{{pp.role}}</span></span>
+                <sc-if value="{{pp.speaks}}" hint-placeholder-val="{{false}}"><span class="dot dot-green">говорит</span></sc-if>
+              </div>
+            </sc-for>
+            <div class="prow"><span class="p">и ещё 3 участника</span></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{tabNotes}}" hint-placeholder-val="{{false}}">
+        <div class="st-body">
+          <label class="label" for="notes" style="display:block;margin-bottom:8px">Мои заметки</label>
+          <textarea id="notes" class="textarea" style="min-height:260px" value="{{notes}}" onChange="{{typeNotes}}"></textarea>
+          <p class="meta" style="margin:8px 0 0">Видишь только ты. Сохраним рядом с записью в Академии.</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{tabAi}}" hint-placeholder-val="{{false}}">
+        <div class="st-body">
+          <div class="row" style="justify-content:space-between;margin-bottom:4px"><span class="h3">Конспект по ходу</span><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+          <p class="p">Черновик. После занятия Ирина проверит его и разошлёт.</p>
+          <div class="list" style="margin-top:8px">
+            <sc-for list="{{livePoints}}" as="lp" hint-placeholder-count="4">
+              <div class="live-row"><span class="live-t">{{lp.t}}</span><span class="p" style="color:var(--ink)">{{lp.text}}</span></div>
+            </sc-for>
+            <div class="live-row"><span class="live-t">сейчас</span><span class="dot dot-orange" style="font-size:15px">Что делать, если ребёнок находит тебя в соцсетях</span></div>
+          </div>
+        </div>
+      </sc-if>
+    </aside>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══ После занятия ═══ -->
+<sc-if value="{{isAfter}}" hint-placeholder-val="{{false}}">
+<div class="split">
+  <div class="main-col">
+    <section class="card" style="padding:18px 22px" aria-labelledby="rec-title">
+      <div class="row wrap" style="gap:18px 22px;align-items:center">
+        <div class="rec-thumb">
+          <span class="slide-blob" aria-hidden="true" style="width:160px;height:140px;right:-40px;top:-50px;background:var(--orange-tint)"></span>
+          <span class="rt-title">Границы с детьми: что говорить, когда просят телефон</span>
+          <button type="button" class="rec-play" aria-label="Смотреть запись"><svg class="ic ic-fill ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></button>
+          <span class="rec-dur">1:12:05</span>
+        </div>
+        <div class="grow">
+          <p class="eyebrow" style="margin:0 0 4px">Запись обработана</p>
+          <h2 class="h2" id="rec-title">Супервизия с психологом</h2>
+          <p class="p" style="margin-top:6px">Чт, 23 октября, 19:00–20:12. 14 участников</p>
+          <div class="row wrap" style="gap:8px 18px;margin-top:10px">
+            <span class="dot dot-green">Расшифровка</span>
+            <span class="dot dot-green">Конспект</span>
+            <span class="dot dot-green">Тест</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ai-box" style="margin-top:20px;padding:24px 28px" aria-labelledby="sum-title">
+      <div class="row wrap" style="justify-content:space-between">
+        <h2 class="h3" id="sum-title">Конспект для участников</h2>
+        <span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span>
+      </div>
+      <p class="p" style="margin-top:4px">Собран из записи и чата. Проверьте перед отправкой: участники получат его вместе с тестом.</p>
+      <sc-if value="{{sumView}}" hint-placeholder-val="{{true}}">
+        <div class="list" style="margin-top:6px">
+          <sc-for list="{{summary}}" as="sp" hint-placeholder-count="5">
+            <div class="ai-row"><span class="ai-n num">{{sp.n}}</span><span class="grow" style="color:var(--ink)">{{sp.text}}</span><span class="meta num">{{sp.t}}</span></div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{sumEdit}}" hint-placeholder-val="{{false}}">
+        <div class="field" style="margin-top:14px">
+          <label class="label" for="sum-edit">Пункты конспекта, по одному в строке</label>
+          <textarea id="sum-edit" class="textarea" style="min-height:220px" value="{{sumText}}" onChange="{{typeSum}}"></textarea>
+        </div>
+        <div class="row wrap" style="margin-top:12px">
+          <button type="button" class="btn btn-secondary" onClick="{{saveSum}}">Сохранить</button>
+          <button type="button" class="btn btn-ghost" onClick="{{cancelSum}}">Отмена</button>
+        </div>
+      </sc-if>
+      <hr class="divider" style="background:#E4DBFA;margin:16px 0 12px">
+      <div class="row wrap" style="justify-content:space-between">
+        <span class="li-title">Тест из 5 вопросов создан</span>
+        <button type="button" class="btn btn-ghost btn-sm" aria-expanded="{{quizExpanded}}" onClick="{{toggleQuiz}}">{{quizLabel}}</button>
+      </div>
+      <sc-if value="{{quizOpen}}" hint-placeholder-val="{{false}}">
+        <ol class="quiz">
+          <li>Ребёнок просит твой номер телефона. Что ответишь?</li>
+          <li>Тебя не будет две субботы. Как сказать об этом группе?</li>
+          <li>«Ты меня заберёшь к себе?» Какой ответ бережный?</li>
+          <li>Как передать ребёнку открытку или письмо?</li>
+          <li>Ребёнок нашёл тебя в соцсетях. Что делать?</li>
+        </ol>
+      </sc-if>
+      <div class="row wrap" style="margin-top:20px;gap:10px 12px">
+        <sc-if value="{{notSent}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-primary btn-lg" onClick="{{sendAll}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>Отправить участникам</button></sc-if>
+        <sc-if value="{{isSent}}" hint-placeholder-val="{{false}}"><span class="dot dot-green" style="font-size:15px;color:var(--ink)">Отправлено 13 участникам: конспект и тест</span></sc-if>
+        <sc-if value="{{notPublished}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary btn-lg" onClick="{{publish}}">Опубликовать запись в Академии</button></sc-if>
+        <sc-if value="{{isPublished}}" hint-placeholder-val="{{false}}"><span class="dot dot-green" style="font-size:15px;color:var(--ink)">Запись в Академии,</span><a href="Academy.dc.html">открыть</a></sc-if>
+        <sc-if value="{{sumView}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-ghost btn-lg" onClick="{{editSum}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg>Исправить</button></sc-if>
+      </div>
+    </section>
+  </div>
+
+  <aside class="side-col card" aria-labelledby="tr-title">
+    <div class="row" style="justify-content:space-between">
+      <h2 class="h3" id="tr-title">Расшифровка</h2>
+      <button type="button" class="btn btn-ghost btn-sm" aria-expanded="{{trExpanded}}" onClick="{{toggleTr}}">{{trLabel}}<svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    </div>
+    <div class="list" style="margin-top:6px">
+      <sc-for list="{{transcript}}" as="tl" hint-placeholder-count="4">
+        <div class="tr-line"><span class="tr-t">{{tl.t}}</span><span><span class="strong" style="display:block">{{tl.who}}</span><span class="p">{{tl.text}}</span></span></div>
+      </sc-for>
+    </div>
+    <sc-if value="{{trCollapsed}}" hint-placeholder-val="{{true}}"><p class="meta" style="margin:8px 0 0">Ещё 4 фрагмента и полный текст в PDF</p></sc-if>
+  </aside>
+</div>
+</sc-if>
+
+<p class="meta st-note">Видео — LiveKit, как в студии «Общего Дела»: запись, доска, права ведущего</p>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.summaryDefault = [
+      { text: 'Граница — это забота о ребёнке. Тайный канал со взрослым — красный флаг, даже при добрых намерениях.', t: '03:10' },
+      { text: 'Говорить только то, что знаешь точно: «Я приду 15-го», а не «конечно приду».', t: '07:45' },
+      { text: 'Сначала признать чувство: «Тебе важно знать, что я не пропаду».', t: '09:30' },
+      { text: 'Личные номера и соцсети детям не даём. Открытки и письма — через координатора, Ольга передаёт в тот же день.', t: '12:20' },
+      { text: 'Прощаться по ритуалу: назвать дату и попросить координатора напомнить ребёнку.', t: '16:05' }
+    ];
+    this.state = {
+      role: 'part', view: 'slide', phase: 'live',
+      tab: 'chat',
+      mic: true, cam: true, screen: false, hand: false,
+      reactOpen: false, reaction: '', leave: false,
+      talk: 'word', draw: 'all', speaker: 'host', rec: 'on', slide: 4,
+      tool: 'pen', color: 'orange',
+      msgs: [], draft: '', liked: {},
+      notes: 'Перед отпуском — сказать «Подсолнухам» дату возвращения заранее.\nОткрытки детям — только через Ольгу.',
+      summary: this.summaryDefault.slice(), sumEdit: false, sumText: '',
+      quiz: false, sent: false, published: false, tr: false
+    };
+  }
+
+  sendMsg() {
+    const text = String(this.state.draft || '').trim();
+    if (!text) return;
+    const host = this.state.role === 'host';
+    const m = { id: 100 + this.state.msgs.length, ini: host ? 'ИВ' : 'АС', av: host ? 'av-v' : 'av-o', name: host ? 'Ирина Власова' : 'Анна Соколова', time: '19:18', text: text, likes: 0 };
+    this.setState({ msgs: this.state.msgs.concat([m]), draft: '' });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const live = s.phase === 'live';
+    const host = s.role === 'host';
+    const board = s.view === 'board';
+    const demoId = !live ? 'after' : (board ? 'board' : (host ? 'host' : 'part'));
+    const demoDefs = [
+      { id: 'part', label: 'Участник', set: { role: 'part', view: 'slide', phase: 'live', leave: false } },
+      { id: 'host', label: 'Ведущий', set: { role: 'host', view: 'slide', phase: 'live', hand: true, speaker: 'host', leave: false } },
+      { id: 'board', label: 'Доска', set: { role: 'part', view: 'board', phase: 'live', leave: false } },
+      { id: 'after', label: 'После занятия', set: { role: 'host', phase: 'after', leave: false } }
+    ];
+    const slides = [
+      { t: 'Супервизия: как мы говорим', s: 'Что звучит здесь, остаётся здесь. Детей называем только по имени.' },
+      { t: 'Что такое границы', s: 'Правила, которые одинаковы для всех взрослых и понятны ребёнку.' },
+      { t: 'Почему детям важны предсказуемые взрослые', s: 'Опыт потерь делает любое исчезновение болезненным.' },
+      { t: 'Границы с детьми: что говорить, когда просят телефон', s: '' },
+      { t: 'Разбор: Аня, 10 лет, просит номер', s: 'Сценарий из тренажёра и ваши ответы.' },
+      { t: 'Если ребёнок находит тебя в соцсетях', s: 'Не отвечать и сразу сказать координатору.' },
+      { t: 'Если просит забрать домой', s: 'Без обещаний и без резкого «нет».' },
+      { t: 'Как предупредить о пропуске', s: 'Сказать группе дату возвращения заранее.' },
+      { t: 'Открытки и письма в фонде', s: 'Всё через координатора, в тот же день.' },
+      { t: 'Ваши случаи', s: 'Разбираем вопросы из чата.' },
+      { t: 'Что забрать с собой', s: 'Три фразы, которые пригодятся в субботу.' },
+      { t: 'Вопросы', s: 'Ирина отвечает на закреплённые вопросы.' }
+    ];
+    const sl = slides[s.slide - 1];
+    const people = [
+      { id: 'as', ini: 'АС', name: 'Ты', full: 'Анна Соколова', role: 'волонтёр, живопись', av: 'av-o' },
+      { id: 'ol', ini: 'ОЛ', name: 'Ольга', full: 'Ольга Лебедева', role: 'координатор', av: 'av-b' },
+      { id: 'sk', ini: 'СК', name: 'Светлана', full: 'Светлана Ким', role: 'волонтёр, керамика', av: 'av-g' },
+      { id: 'mb', ini: 'МБ', name: 'Марина', full: 'Марина Белова', role: 'волонтёр, музыка', av: 'av-p' },
+      { id: 'pz', ini: 'ПЗ', name: 'Полина', full: 'Полина Зайцева', role: 'волонтёр, валяние', av: 'av-y' },
+      { id: 'do', ini: 'ДО', name: 'Дмитрий', full: 'Дмитрий Орлов', role: 'волонтёр, театр', av: 'av-v' },
+      { id: 'em', ini: 'ЕМ', name: 'Егор', full: 'Егор Мельников', role: 'новичок', av: 'av-g' },
+      { id: 'ks', ini: 'КС', name: 'Кирилл', full: 'Кирилл Смирнов', role: 'ведущий клуба настольных игр', av: 'av-b' },
+      { id: 'vn', ini: 'ВН', name: 'Вера', full: 'Вера Новикова', role: 'волонтёр, фото', av: 'av-y' },
+      { id: 'ta', ini: 'ТА', name: 'Тимур', full: 'Тимур Ахмедов', role: 'волонтёр, выезды', av: 'av-o' }
+    ];
+    const annaSpeaks = s.speaker === 'as';
+    const baseMsgs = [
+      { id: 1, ini: 'СК', av: 'av-g', name: 'Светлана Ким', time: '19:12', text: 'У нас в керамике так и договорились: открытки детям — только через Ольгу. Дети их очень ждут.', likes: 6 },
+      { id: 2, ini: 'ОЛ', av: 'av-b', name: 'Ольга Лебедева', time: '19:13', text: 'Да, всё через меня. Если смена в мастерской, передаю в тот же день.', likes: 4 },
+      { id: 3, ini: 'ДО', av: 'av-v', name: 'Дмитрий Орлов', time: '19:15', text: 'А если ребёнок сам находит меня в соцсетях?', likes: 0 },
+      { id: 4, ini: 'ИВ', av: 'av-v', name: 'Ирина Власова', time: '19:16', text: 'Хороший вопрос, Дмитрий. Разберём через два слайда.', likes: 2 }
+    ];
+    const recLabels = { on: 'Идёт запись', pause: 'Запись на паузе', confirm: 'Идёт запись', off: 'Запись остановлена' };
+    const recCls = s.rec === 'pause' ? 'st-rec is-pause' : (s.rec === 'off' ? 'st-rec is-off' : 'st-rec');
+    const drawWho = { me: 'Рисует только Ирина', olga: 'Рисуют Ирина и Ольга', all: 'Рисовать могут все' };
+    const tabDefs = [
+      { id: 'chat', label: 'Чат', ai: false },
+      { id: 'people', label: 'Участники', ai: false },
+      { id: 'notes', label: 'Заметки', ai: false },
+      { id: 'ai', label: 'Конспект', ai: true }
+    ];
+    const transcript = [
+      { t: '00:02', who: 'Ирина Власова', text: '«Сегодня про границы: что говорить, когда ребёнок просит телефон»' },
+      { t: '03:10', who: 'Ирина Власова', text: '«Тайный канал со взрослым — красный флаг, даже если вы ничего плохого не хотите»' },
+      { t: '07:45', who: 'Ирина Власова', text: '«Не „конечно приду“, а „я приду 15-го“. Только то, что знаете точно»' },
+      { t: '12:20', who: 'Ольга Лебедева', text: '«Открытки и письма детям — через меня, передаю в тот же день»' },
+      { t: '16:05', who: 'Ирина Власова', text: '«Прощание — по ритуалу. Ребёнку важно знать, когда вы вернётесь»' },
+      { t: '18:30', who: 'Дмитрий Орлов', text: '«А если ребёнок сам находит меня в соцсетях?»' },
+      { t: '19:10', who: 'Ирина Власова', text: '«Не отвечайте и скажите Ольге. Дальше решаем вместе, это не ваша ошибка»' },
+      { t: '41:00', who: 'Марина Белова', text: '«Что говорить, если ребёнок просит забрать его домой?»' }
+    ];
+    const ctl = (on, kind) => 'ctl' + (on ? (kind === 'off' ? '' : ' is-on') : (kind === 'off' ? ' is-off' : ''));
+    const colorDefs = [
+      { id: 'ink', label: 'Чёрный', v: 'var(--ink)' },
+      { id: 'orange', label: 'Оранжевый', v: 'var(--orange)' },
+      { id: 'blue', label: 'Синий', v: 'var(--blue)' },
+      { id: 'green', label: 'Зелёный', v: 'var(--green)' }
+    ];
+
+    return {
+      isLive: live,
+      isAfter: !live,
+      isHost: host,
+      isPart: !host,
+      meIni: host ? 'ИВ' : 'АС',
+      meName: host ? 'Вы: Ирина Власова' : 'Вы: Анна Соколова',
+      meCls: host ? 'avatar av-v' : 'avatar av-o',
+      modes: demoDefs.map((d) => ({
+        label: d.label,
+        cls: d.id === demoId ? 'is-on' : '',
+        pressed: d.id === demoId ? 'true' : 'false',
+        pick: () => this.setState(Object.assign({ reactOpen: false }, d.set))
+      })),
+
+      recCls: recCls,
+      recLabel: recLabels[s.rec],
+      recOn: s.rec === 'on',
+      recPaused: s.rec === 'pause',
+      recConfirm: s.rec === 'confirm',
+      pauseRec: () => this.setState({ rec: 'pause' }),
+      resumeRec: () => this.setState({ rec: 'on' }),
+      askStop: () => this.setState({ rec: 'confirm' }),
+      cancelStop: () => this.setState({ rec: 'on' }),
+      stopRec: () => this.setState({ rec: 'off' }),
+
+      showSlide: !board,
+      showBoard: board,
+      slideTitle: sl.t,
+      slideSub: sl.s,
+      slideMain: s.slide === 4,
+      slideOther: s.slide !== 4,
+      slideCount: s.slide + ' / 12',
+      prevSlide: () => this.setState({ slide: Math.max(1, this.state.slide - 1) }),
+      nextSlide: () => this.setState({ slide: Math.min(12, this.state.slide + 1) }),
+
+      drawWho: drawWho[s.draw],
+      canDraw: host || s.draw === 'all',
+      tools: [{ id: 'pen', label: 'Перо' }, { id: 'shape', label: 'Фигура' }, { id: 'text', label: 'Текст' }, { id: 'eraser', label: 'Ластик' }].map((t) => ({
+        label: t.label,
+        cls: t.id === s.tool ? 'is-on' : '',
+        pressed: t.id === s.tool ? 'true' : 'false',
+        pick: () => this.setState({ tool: t.id })
+      })),
+      colors: colorDefs.map((c) => ({
+        label: c.label,
+        cls: 'swatch sw-' + c.id + (c.id === s.color ? ' is-on' : ''),
+        pressed: c.id === s.color ? 'true' : 'false',
+        pick: () => this.setState({ color: c.id })
+      })),
+
+      hostCamCls: 'cam-host' + (annaSpeaks ? '' : ' is-speaking'),
+      hasReaction: !!s.reaction,
+      rHeart: s.reaction === 'heart',
+      rStar: s.reaction === 'star',
+      rSmile: s.reaction === 'smile',
+      reactWho: host ? 'Ирина' : 'Ты',
+
+      tiles: people.slice(0, 9).map((p) => ({
+        ini: p.ini,
+        label: p.name,
+        cls: 'ptile ' + p.av + (p.id === 'as' && annaSpeaks ? ' is-speaking' : ''),
+        hand: p.id === 'as' && s.hand
+      })),
+
+      notLeaving: !s.leave,
+      leaving: s.leave,
+      leaveText: host ? 'Завершить занятие для всех? Запись обработаем и пришлём конспект.' : 'Выйти из занятия? Запись и конспект придут в Академию.',
+      askLeave: () => this.setState({ leave: true, reactOpen: false }),
+      stayHere: () => this.setState({ leave: false }),
+      micCls: ctl(s.mic, 'off'),
+      micPressed: s.mic ? 'false' : 'true',
+      micAria: s.mic ? 'Выключить микрофон' : 'Включить микрофон',
+      toggleMic: () => this.setState({ mic: !this.state.mic }),
+      camCls: ctl(s.cam, 'off'),
+      camPressed: s.cam ? 'false' : 'true',
+      camAria: s.cam ? 'Выключить камеру' : 'Включить камеру',
+      toggleCam: () => this.setState({ cam: !this.state.cam }),
+      screenCls: ctl(s.screen, 'on'),
+      screenPressed: s.screen ? 'true' : 'false',
+      screenLabel: s.screen ? 'Показываю' : 'Экран',
+      toggleScreen: () => this.setState({ screen: !this.state.screen }),
+      boardCls: ctl(board, 'on'),
+      boardPressed: board ? 'true' : 'false',
+      toggleBoard: () => this.setState({ view: this.state.view === 'board' ? 'slide' : 'board' }),
+      handCls: ctl(s.hand, 'on'),
+      handPressed: s.hand ? 'true' : 'false',
+      handLabel: s.hand ? 'Опустить' : 'Рука',
+      toggleHand: () => this.setState({ hand: !this.state.hand }),
+      reactCls: ctl(s.reactOpen, 'on'),
+      reactExpanded: s.reactOpen ? 'true' : 'false',
+      reactOpen: s.reactOpen,
+      toggleReact: () => this.setState({ reactOpen: !this.state.reactOpen }),
+      reactHeart: () => this.setState({ reaction: 'heart', reactOpen: false }),
+      reactStar: () => this.setState({ reaction: 'star', reactOpen: false }),
+      reactSmile: () => this.setState({ reaction: 'smile', reactOpen: false }),
+
+      talkOpts: [{ id: 'all', label: 'Все' }, { id: 'word', label: 'По слову' }, { id: 'none', label: 'Никто' }].map((o) => ({
+        label: o.label,
+        cls: o.id === s.talk ? 'is-on' : '',
+        pressed: o.id === s.talk ? 'true' : 'false',
+        pick: () => this.setState({ talk: o.id })
+      })),
+      drawOpts: [{ id: 'me', label: 'Я' }, { id: 'olga', label: 'Я и Ольга' }, { id: 'all', label: 'Все' }].map((o) => ({
+        label: o.label,
+        cls: o.id === s.draw ? 'is-on' : '',
+        pressed: o.id === s.draw ? 'true' : 'false',
+        pick: () => this.setState({ draw: o.id })
+      })),
+      hasRequest: s.hand && !annaSpeaks,
+      annaSpeaks: annaSpeaks,
+      noRequests: !s.hand && !annaSpeaks,
+      giveWord: () => this.setState({ speaker: 'as', hand: false }),
+      takeWord: () => this.setState({ speaker: 'host' }),
+
+      tabs: tabDefs.map((t) => ({
+        label: t.label,
+        ai: t.ai,
+        cls: t.id === s.tab ? 'is-on' : '',
+        selected: t.id === s.tab ? 'true' : 'false',
+        pick: () => this.setState({ tab: t.id })
+      })),
+      tabChat: s.tab === 'chat',
+      tabPeople: s.tab === 'people',
+      tabNotes: s.tab === 'notes',
+      tabAi: s.tab === 'ai',
+      msgs: baseMsgs.concat(s.msgs).map((m) => {
+        const on = !!s.liked[m.id];
+        const n = m.likes + (on ? 1 : 0);
+        return {
+          ini: m.ini,
+          av: 'avatar avatar-sm ' + m.av,
+          name: m.name,
+          time: m.time,
+          text: m.text,
+          count: n ? String(n) : '',
+          liked: on ? 'true' : 'false',
+          reactAria: on ? 'Убрать сердце' : 'Поставить сердце',
+          reactCls: 'react' + (on ? ' is-on' : ''),
+          like: () => { const l = Object.assign({}, this.state.liked); l[m.id] = !l[m.id]; this.setState({ liked: l }); }
+        };
+      }),
+      draft: s.draft,
+      typeDraft: (e) => this.setState({ draft: e.target.value }),
+      sendMsg: () => this.sendMsg(),
+
+      handUp: s.hand,
+      hostSpeaks: !annaSpeaks,
+      people: people.map((p) => ({ ini: p.ini, full: p.full, role: p.role, av: 'avatar avatar-sm ' + p.av, speaks: p.id === 'as' && annaSpeaks })),
+      notes: s.notes,
+      typeNotes: (e) => this.setState({ notes: e.target.value }),
+      livePoints: this.summaryDefault.slice(0, 4).map((p) => ({ t: p.t, text: p.text })),
+
+      summary: s.summary.map((p, i) => ({ n: i + 1, text: p.text, t: p.t })),
+      sumView: !s.sumEdit,
+      sumEdit: s.sumEdit,
+      sumText: s.sumText,
+      editSum: () => this.setState({ sumEdit: true, sumText: this.state.summary.map((p) => p.text).join('\n') }),
+      typeSum: (e) => this.setState({ sumText: e.target.value }),
+      saveSum: () => {
+        const old = this.state.summary;
+        const lines = String(this.state.sumText || '').split('\n').map((x) => x.trim()).filter((x) => x);
+        this.setState({ sumEdit: false, summary: lines.map((x, i) => ({ text: x, t: old[i] ? old[i].t : '' })) });
+      },
+      cancelSum: () => this.setState({ sumEdit: false }),
+      quizOpen: s.quiz,
+      quizExpanded: s.quiz ? 'true' : 'false',
+      quizLabel: s.quiz ? 'Скрыть вопросы' : 'Показать вопросы',
+      toggleQuiz: () => this.setState({ quiz: !this.state.quiz }),
+      notSent: !s.sent,
+      isSent: s.sent,
+      sendAll: () => this.setState({ sent: true }),
+      notPublished: !s.published,
+      isPublished: s.published,
+      publish: () => this.setState({ published: true }),
+      transcript: s.tr ? transcript : transcript.slice(0, 4),
+      trCollapsed: !s.tr,
+      trExpanded: s.tr ? 'true' : 'false',
+      trLabel: s.tr ? 'Свернуть' : 'Развернуть',
+      toggleTr: () => this.setState({ tr: !this.state.tr })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Отчёты и признание — Опора</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FFFEFA}
+.dm{--page:#FFFEFA;--paper:#FFFFFF;--soft:#F6F6F6;--soft-2:#EEEDE8;--line:#ECE9E2;--line-2:#DEDAD1;--ink:#12141A;--ink-2:#3F424A;--mute:#646464;--quiet:#8C8C8C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFEDE2;--yellow:#FFB03B;--yellow-ink:#8A5A00;--yellow-tint:#FFF3D6;--blue:#0F3DA7;--blue-tint:#E9EDF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DFF0E3;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE7E4;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE6EE;--shadow:0 4px 12px rgba(18,20,26,.05);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,176,59,.4)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:16px;height:16px}.ic-lg{width:24px;height:24px}.ic-xl{width:32px;height:32px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+/* layout */
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 72px}
+.shell-wide{max-width:1440px}
+.top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand . end" "nav nav nav";align-items:center;gap:14px 16px;margin-bottom:36px}
+.top > .brand{grid-area:brand;justify-self:start}
+.top > .nav{grid-area:nav;justify-self:start}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:12px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--yellow);color:var(--ink)}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.nav a.is-active .count{background:var(--paper)}
+.top-end{grid-area:end;justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--ink-2);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.role:hover{background:var(--soft-2);text-decoration:none;color:var(--ink)}
+.avatar{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:32px;height:32px;flex-basis:32px;font-size:12px}
+.avatar-lg{width:64px;height:64px;flex-basis:64px;font-size:22px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+/* type */
+.display{margin:0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:36px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:26px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:10px 0 0;font-size:17px;line-height:1.55;color:var(--ink-2);max-width:62ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:13px;line-height:1.4;color:var(--mute)}
+.eyebrow{font-size:13px;font-weight:600;color:var(--mute)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:40px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:14px}
+/* surfaces */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px 28px}
+.card-soft{background:var(--soft);border-radius:24px;padding:22px 28px}
+.card-hero{background:linear-gradient(160deg,#FFF9EF 0%,#FFEED6 100%);border:1px solid #F5E2C4;border-radius:28px;padding:32px 36px}
+.card-tight{padding:16px 20px;border-radius:18px}
+.ai-box{background:#F8F5FF;border:1px solid #E4DBFA;border-radius:20px;padding:18px 22px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.divider{height:1px;background:var(--line);border:0;margin:16px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:999px;border:1px solid transparent;font-size:15px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--orange);color:var(--ink)}
+.btn-primary:hover{background:#FF7535}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:36px;padding:0 14px;font-size:13px}
+.btn-lg{height:52px;padding:0 26px;font-size:16px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft);color:var(--quiet);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:500;white-space:nowrap;background:var(--soft);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:12px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--quiet);flex:0 0 8px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:14px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{border-color:var(--ink-2);color:var(--ink)}
+.chip.is-on{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--soft)}
+.seg button{height:38px;padding:0 16px;border:0;border-radius:999px;background:transparent;font-size:14px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{height:46px;padding:0 16px;border:0;background:transparent;font-size:15px;font-weight:600;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--orange)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.label{font-size:14px;font-weight:500;color:var(--ink-2)}
+.input,.textarea,.select{width:100%;min-height:48px;padding:12px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:120px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:13px;color:var(--mute)}
+.err{font-size:13px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:var(--ink-2)}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--orange);flex:0 0 20px}
+.toggle{position:relative;width:44px;height:26px;flex:0 0 44px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:21px}
+/* data */
+.kpi{position:relative;display:flex;flex-direction:column;gap:6px;padding:22px 24px;border-radius:24px;background:var(--paper);border:1px solid var(--line);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:38px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{font-size:14px;color:var(--ink-2)}
+.kpi-delta{font-size:13px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:58px;height:52px;left:12px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%;opacity:.9}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:8px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}
+.tbl{display:grid;border-top:1px solid var(--line)}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:14px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-head{font-size:13px;font-weight:600;color:var(--mute);padding-top:10px;padding-bottom:10px}
+.scroll-x{overflow-x:auto}
+.art{width:56px;height:56px;flex:0 0 56px;border-radius:18px;display:grid;place-items:center}
+.art-lg{width:100%;height:132px;border-radius:20px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+/* chat */
+.bubble{max-width:72%;padding:12px 16px;border-radius:20px;background:var(--soft);color:var(--ink);font-size:15px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F8F5FF;border:1px solid #E4DBFA}
+.cite{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:13px;color:var(--ink-2)}
+/* demo-only switcher */
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 24px;padding:8px 10px;border:1px dashed var(--line-2);border-radius:16px;background:var(--page)}
+.demo-cap{font-size:13px;font-weight:600;color:var(--mute);padding:0 6px}
+.demo button{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:13px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--ink);border-color:var(--ink);color:#fff}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:48px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:38px}.h1{font-size:28px}.card,.card-soft{padding:18px 18px;border-radius:20px}.card-hero{padding:22px 20px}.top{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "end" "nav"}.top-end{justify-self:start;flex-wrap:wrap}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+.st{font-size:15px}
+.acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px}
+.dm .tick{width:26px;height:26px;flex:0 0 26px;border-radius:8px;border:1.5px solid var(--line-2);background:var(--paper);display:inline-grid;place-items:center;color:#fff;padding:0}
+.tick:hover{border-color:var(--ink-2)}
+.tick.is-on{background:var(--green);border-color:var(--green)}
+.vnum{font-size:22px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink)}
+.story{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px 0;border-top:1px solid #E4DBFA}
+.story:first-child{border-top:0;padding-top:6px}
+.story .p{color:var(--ink)}
+.paper{background:var(--paper);border:1px solid var(--line-2);border-radius:20px;padding:26px 28px}
+.letter{margin:14px 0 0;font-size:16px;line-height:1.65;color:var(--ink);white-space:pre-line}
+.fact{display:inline-flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:14px;background:var(--paper);border:1px solid #E4DBFA;min-width:0}
+.fact b{font-size:15px;font-weight:600;color:var(--ink)}
+.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 16px;margin:14px 0 0}
+.kv dt{color:var(--mute)}
+.kv dd{margin:0;color:var(--ink);font-weight:500}
+.qr{width:96px;height:96px;flex:0 0 96px;border-radius:12px;border:1px solid var(--line-2);display:grid;place-items:center;color:var(--ink)}
+.qr .ic{width:76px;height:76px;stroke-width:1.3}
+.mail-row{display:grid;grid-template-columns:80px minmax(0,1fr);gap:12px;align-items:baseline;padding:8px 0;border-top:1px solid var(--line)}
+.mail-row:first-child{border-top:0}
+.digest-h{margin:20px 0 0;font-size:15px;font-weight:600;color:var(--ink)}
+.bul{margin:6px 0 0;padding-left:20px;color:var(--ink-2)}
+.bul li{margin:4px 0}
+.opt{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.opt:first-child{border-top:0}
+.opt-cap{margin:22px 0 6px}
+.sec + .sec{margin-top:12px}
+.btn-wrap{white-space:normal;height:auto;min-height:44px;padding-top:10px;padding-bottom:10px;line-height:1.3;text-align:left}
+</style>
+</helmet>
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>команда фонда</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="CoordHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Обзор</a>
+    <a href="Pipeline.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/></svg>Заявки<span class="count">7</span></a>
+    <a href="Volunteers.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg>Волонтёры</a>
+    <a href="Shifts.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Смены<span class="count">3</span></a>
+    <a href="Signals.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg>Сигналы<span class="count">4</span></a>
+    <a href="Builder.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Обучение</a>
+    <a class="is-active" aria-current="page" href="Reports.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Отчёты</a>
+    <a href="Admin.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Настройки</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="Home.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид волонтёра</a>
+    <div class="pillbox">
+      <button class="iconbtn" type="button" aria-label="Уведомления, 5 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <span class="avatar av-b" aria-label="Ольга Лебедева, координатор волонтёров">ОЛ</span>
+    </div>
+  </div>
+</header>
+
+<div class="head">
+  <div>
+    <h1 class="h1">Отчёты и признание</h1>
+    <p class="lead">Отчёт грантодателю, письма волонтёрам и сводка для руководителя — из смен, часов и посещаемости, которые уже есть на платформе.</p>
+  </div>
+</div>
+
+<div class="tabs" role="tablist" aria-label="Разделы отчётов">
+  <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+    <button type="button" role="tab" class="{{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}</button>
+  </sc-for>
+</div>
+
+<!-- ═══ Отчёт грантодателю ═══ -->
+<sc-if value="{{isGrant}}" hint-placeholder-val="{{true}}">
+  <section class="card-hero" style="margin-top:28px" aria-labelledby="grant-title">
+    <div class="split" style="align-items:flex-end">
+      <div class="main-col">
+        <p class="eyebrow" style="margin:0 0 8px">Отчёт для Фонда президентских грантов</p>
+        <h2 class="h1" id="grant-title">Мастерские для детей из учреждений</h2>
+        <p class="lead">Раньше такой отчёт собирали из таблиц около двух недель. Наша цель — черновик за минуту и проверка за один вечер.</p>
+        <div class="grid-2" style="margin-top:20px">
+          <div class="field">
+            <label class="label" for="proj">Проект</label>
+            <select id="proj" class="select"><option value="masters">Мастерские для детей из учреждений</option></select>
+          </div>
+          <div class="field">
+            <label class="label" for="period">Период</label>
+            <select id="period" class="select"><option value="q3">Июль–сентябрь 2026</option><option value="q2">Апрель–июнь 2026</option></select>
+          </div>
+        </div>
+        <p class="row p" style="gap:10px;margin-top:14px"><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span>Черновик собран 21 октября, 10:12</p>
+      </div>
+      <div class="side-col">
+        <div class="kpi"><span class="blob blob-g" aria-hidden="true"></span><span class="kpi-num">{{checkedLabel}}</span><span class="kpi-label">пунктов проверено человеком</span></div>
+        <div class="row wrap" style="margin-top:14px">
+          <button type="button" class="btn btn-primary btn-lg" onClick="{{dlWord}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Скачать в Word</button>
+          <button type="button" class="btn btn-secondary btn-lg" onClick="{{dlPdf}}">PDF</button>
+        </div>
+        <sc-if value="{{hasDl}}" hint-placeholder-val="{{false}}"><p class="{{dlCls}}" style="margin:12px 0 0">{{dlText}}</p></sc-if>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="nums-title">
+    <div class="section-head"><h2 class="h2" id="nums-title">Показатели</h2><span class="p">Отметьте, что сверили</span></div>
+    <div class="card">
+      <div class="scroll-x">
+        <div class="tbl" style="min-width:680px;border-top:0">
+          <div class="tbl-row tbl-head" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,2.4fr) 72px"><span>Показатель</span><span>Июль–сентябрь</span><span>Откуда цифра</span><span>Сверено</span></div>
+          <sc-for list="{{nums}}" as="n" hint-placeholder-count="5">
+            <div class="tbl-row" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,2.4fr) 72px">
+              <span class="strong">{{n.label}}</span>
+              <span class="vnum">{{n.value}}</span>
+              <span class="p">{{n.src}}</span>
+              <button type="button" class="{{n.cls}}" role="checkbox" aria-checked="{{n.checked}}" aria-label="{{n.aria}}" onClick="{{n.toggle}}"><sc-if value="{{n.on}}" hint-placeholder-val="{{true}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width:2.6"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if></button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <p class="row p" style="gap:8px;margin-top:14px;align-items:flex-start"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true" style="margin-top:3px"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg>Имена детей и волонтёров в отчёт не попадают — только цифры и обезличенные истории.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="secs-title">
+    <div class="section-head">
+      <div class="row" style="gap:10px"><h2 class="h2" id="secs-title">Разделы отчёта</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+      <span class="p">Черновики из данных платформы. Проверяет и правит человек</span>
+    </div>
+    <div>
+      <sc-for list="{{secs}}" as="x" hint-placeholder-count="4">
+        <article class="ai-box sec">
+          <div class="row wrap" style="justify-content:space-between;gap:8px 16px">
+            <h3 class="h3">{{x.title}}</h3>
+            <span class="{{x.tagCls}}">{{x.tag}}</span>
+          </div>
+
+          <sc-if value="{{x.isPlain}}" hint-placeholder-val="{{true}}">
+            <sc-if value="{{x.notEditing}}" hint-placeholder-val="{{true}}"><p class="p pre" style="margin-top:10px;color:var(--ink)">{{x.text}}</p></sc-if>
+            <sc-if value="{{x.editing}}" hint-placeholder-val="{{false}}">
+              <label class="label" for="{{x.fid}}" style="display:block;margin-top:10px">Текст раздела</label>
+              <textarea id="{{x.fid}}" class="textarea" style="margin-top:6px;min-height:150px" value="{{x.text}}" onChange="{{x.type}}"></textarea>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{x.isStories}}" hint-placeholder-val="{{false}}">
+            <p class="p" style="margin-top:6px">Обезличенные. В отчёт войдут только истории с согласием.</p>
+            <div class="list" style="margin-top:6px">
+              <sc-for list="{{x.stories}}" as="y" hint-placeholder-count="2">
+                <div class="story">
+                  <sc-if value="{{y.notEditing}}" hint-placeholder-val="{{true}}"><p class="p">{{y.text}}</p></sc-if>
+                  <sc-if value="{{y.editing}}" hint-placeholder-val="{{false}}">
+                    <label class="label" for="{{y.fid}}">{{y.fieldLabel}}</label>
+                    <textarea id="{{y.fid}}" class="textarea" style="min-height:96px" value="{{y.text}}" onChange="{{y.type}}"></textarea>
+                  </sc-if>
+                  <div class="row wrap" style="gap:8px 12px">
+                    <span class="{{y.tagCls}}">{{y.tagLabel}}</span>
+                    <sc-if value="{{y.canAsk}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-ghost btn-sm" onClick="{{y.ask}}">Запросить согласие</button></sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div class="acts">
+            <sc-if value="{{x.canAccept}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary btn-sm" onClick="{{x.accept}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Принять</button></sc-if>
+            <button type="button" class="btn btn-ghost btn-sm" aria-expanded="{{x.editExp}}" onClick="{{x.toggleEdit}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg>{{x.editLabel}}</button>
+            <sc-if value="{{x.isDone}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-ghost btn-sm" onClick="{{x.reopen}}">Вернуть в черновик</button></sc-if>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+  </section>
+</sc-if>
+
+<!-- ═══ Письма и справки ═══ -->
+<sc-if value="{{isLetters}}" hint-placeholder-val="{{false}}">
+  <div class="split" style="margin-top:28px">
+    <div class="main-col">
+      <div class="grid-2">
+        <div class="field">
+          <label class="label" for="vol">Волонтёр</label>
+          <select id="vol" class="select" value="{{vol}}" onChange="{{setVol}}"><option value="sk">Светлана Ким — керамика, больше года</option><option value="as">Анна Соколова — живопись, 4 месяца</option></select>
+        </div>
+        <sc-if value="{{isSk}}" hint-placeholder-val="{{true}}">
+          <div class="field">
+            <span class="label" id="occ-label">Повод</span>
+            <div class="chips" role="group" aria-labelledby="occ-label">
+              <sc-for list="{{occs}}" as="o" hint-placeholder-count="3">
+                <button type="button" class="{{o.cls}}" aria-pressed="{{o.pressed}}" onClick="{{o.pick}}">{{o.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{isSk}}" hint-placeholder-val="{{true}}">
+        <section class="ai-box" style="margin-top:20px;padding:22px 26px" aria-labelledby="letter-title">
+          <div class="row wrap" style="justify-content:space-between;gap:12px 16px">
+            <div class="row" style="gap:10px"><h2 class="h3" id="letter-title">{{letterTitle}}</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+            <div class="seg" role="group" aria-label="Тон письма">
+              <sc-for list="{{tones}}" as="tn" hint-placeholder-count="2">
+                <button type="button" class="{{tn.cls}}" aria-pressed="{{tn.pressed}}" onClick="{{tn.pick}}">{{tn.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{letterView}}" hint-placeholder-val="{{true}}"><p class="letter">{{letterText}}</p></sc-if>
+          <sc-if value="{{letterEditing}}" hint-placeholder-val="{{false}}">
+            <label class="label" for="letter-text" style="display:block;margin-top:14px">Текст письма</label>
+            <textarea id="letter-text" class="textarea" style="margin-top:6px;min-height:280px" value="{{letterText}}" onChange="{{typeLetter}}"></textarea>
+          </sc-if>
+
+          <p class="strong" style="margin:20px 0 8px">Факты из истории</p>
+          <div class="chips">
+            <sc-for list="{{facts}}" as="fc" hint-placeholder-count="4">
+              <span class="fact"><b>{{fc.label}}</b><span class="meta">{{fc.src}}</span></span>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{notSent}}" hint-placeholder-val="{{true}}">
+            <div class="acts" style="margin-top:20px">
+              <button type="button" class="btn btn-primary btn-wrap" onClick="{{send}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>Отправить на подпись Наталье Гордеевой</button>
+              <button type="button" class="btn btn-ghost" aria-expanded="{{letterEditExp}}" onClick="{{toggleLetterEdit}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg>{{letterEditLabel}}</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{sent}}" hint-placeholder-val="{{false}}">
+            <div class="acts" style="margin-top:20px">
+              <span class="dot dot-green st">На подписи у Натальи Гордеевой с 21 окт. После подписи письмо и справка уйдут Светлане на почту</span>
+              <button type="button" class="btn btn-ghost btn-sm" onClick="{{unsend}}">Отозвать</button>
+            </div>
+          </sc-if>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{isAs}}" hint-placeholder-val="{{false}}">
+        <section class="card" style="margin-top:20px">
+          <div class="row" style="gap:14px;align-items:flex-start">
+            <span class="art art-y" aria-hidden="true"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg></span>
+            <div class="grow">
+              <h2 class="h3">Повода для письма пока нет</h2>
+              <p class="p" style="margin-top:4px">Ближайший — «Полгода с нами», 14 декабря. Напомним за неделю и подготовим черновик. Справка о часах доступна уже сейчас.</p>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+    </div>
+
+    <aside class="side-col" aria-labelledby="cert-title">
+      <div class="section-head" style="margin-bottom:10px"><h2 class="h3" id="cert-title">Справка о часах</h2><span class="meta">превью</span></div>
+      <div class="paper">
+        <p class="eyebrow" style="margin:0">Благотворительный фонд «Дети Марии»</p>
+        <h3 class="h3" style="margin-top:6px">Справка о волонтёрской работе</h3>
+        <p class="p" style="margin-top:10px">{{certText}}</p>
+        <dl class="kv">
+          <dt>Направление</dt><dd>{{certDir}}</dd>
+          <dt>Период</dt><dd>{{certPeriod}}</dd>
+          <dt>Занятий</dt><dd class="num">{{certLessons}}</dd>
+          <dt>Часов</dt><dd class="num">{{certHours}}</dd>
+        </dl>
+        <p class="p" style="margin-top:14px;color:var(--ink)">Н. Гордеева, руководитель программ</p>
+        <div class="row" style="gap:16px;margin-top:14px;align-items:center">
+          <span class="qr" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><path d="M13.5 13.5h3v3h-3zM20.5 13.5v3M13.5 20.5h7"/></svg></span>
+          <p class="p">Подлинность справки проверяется по QR-коду</p>
+        </div>
+      </div>
+      <div class="acts"><button type="button" class="btn btn-secondary btn-sm"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Скачать справку</button></div>
+    </aside>
+  </div>
+</sc-if>
+
+<!-- ═══ Сводка недели ═══ -->
+<sc-if value="{{isWeekly}}" hint-placeholder-val="{{false}}">
+  <div class="split" style="margin-top:28px">
+    <section class="main-col" aria-labelledby="digest-title">
+      <div class="section-head">
+        <div class="row" style="gap:10px"><h2 class="h2" id="digest-title">Понедельничная сводка</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+        <span class="meta">Последняя: пн, 20 октября, 9:00</span>
+      </div>
+      <div class="paper">
+        <div class="list">
+          <div class="mail-row"><span class="meta">Кому</span><span class="p">{{toLine}}</span></div>
+          <div class="mail-row"><span class="meta">Тема</span><span class="p">Опора: неделя 13–19 октября</span></div>
+          <div class="mail-row"><span class="meta">Канал</span><span class="p">{{chanLine}}</span></div>
+        </div>
+        <hr class="divider">
+        <p class="p" style="color:var(--ink)">Наталья, доброе утро. Главное за неделю.</p>
+        <sc-if value="{{incNums}}" hint-placeholder-val="{{true}}">
+          <p class="digest-h">Цифры</p>
+          <ul class="bul">
+            <li>Активных волонтёров 84 — на 6 больше, чем в сентябре.</li>
+            <li>Смен закрыто 94%, в сентябре было 89%.</li>
+            <li>Новых заявок в октябре 23. От заявки до первого занятия — 19 дней, в сентябре было 26.</li>
+            <li>Часов с детьми в октябре — 612.</li>
+          </ul>
+        </sc-if>
+        <sc-if value="{{incShifts}}" hint-placeholder-val="{{true}}">
+          <p class="digest-h">Смены без людей</p>
+          <ul class="bul"><li>Театр, вт 28 октября: записан 1 из 3. Ольга ищет замену.</li></ul>
+        </sc-if>
+        <sc-if value="{{incVols}}" hint-placeholder-val="{{true}}">
+          <p class="digest-h">Волонтёры под риском</p>
+          <ul class="bul">
+            <li>Дмитрий Орлов пропустил два вторника подряд в театре.</li>
+            <li>Марине Беловой тяжело с группой в музыкальной студии, предложим супервизию.</li>
+            <li>Егор Мельников 16 дней не возвращается к обучению.</li>
+          </ul>
+        </sc-if>
+        <sc-if value="{{incKids}}" hint-placeholder-val="{{true}}">
+          <p class="digest-h">Дети</p>
+          <ul class="bul"><li>Один тревожный сигнал после занятия 18 октября. Случай ведёт Ирина Власова, подробности — у неё.</li></ul>
+        </sc-if>
+        <sc-if value="{{incGood}}" hint-placeholder-val="{{true}}">
+          <p class="digest-h">Хорошие новости</p>
+          <ul class="bul">
+            <li>Светлана Ким больше года с фондом, наставница двух новичков.</li>
+            <li>Анна Соколова девять недель подряд без пропусков.</li>
+          </ul>
+        </sc-if>
+        <sc-if value="{{incAsk}}" hint-placeholder-val="{{true}}">
+          <p class="digest-h">Что нужно от вас</p>
+          <ul class="bul"><li>Подписать благодарственное письмо Светлане Ким.</li></ul>
+        </sc-if>
+      </div>
+      <p class="row p" style="gap:8px;margin-top:12px;align-items:flex-start"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true" style="margin-top:3px"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg>Цифры берутся из платформы, ИИ только складывает их в текст. Имён детей в сводке нет.</p>
+    </section>
+
+    <aside class="side-col card" aria-labelledby="dset-title">
+      <h2 class="h3" id="dset-title">Настройки сводки</h2>
+
+      <p class="label opt-cap">Кому</p>
+      <div class="list">
+        <sc-for list="{{recips}}" as="r" hint-placeholder-count="3">
+          <div class="opt">
+            <button type="button" class="{{r.cls}}" role="checkbox" aria-checked="{{r.checked}}" aria-label="{{r.name}}" onClick="{{r.toggle}}"><sc-if value="{{r.on}}" hint-placeholder-val="{{true}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width:2.6"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if></button>
+            <span class="{{r.avCls}}" aria-hidden="true">{{r.av}}</span>
+            <span class="grow"><span class="strong" style="display:block">{{r.name}}</span><span class="p">{{r.role}}</span></span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div class="field" style="margin-top:18px">
+        <label class="label" for="when">Когда</label>
+        <select id="when" class="select" value="{{when}}" onChange="{{setWhen}}"><option value="mon9">Понедельник, 9:00</option><option value="mon8">Понедельник, 8:00</option><option value="fri17">Пятница, 17:00</option></select>
+      </div>
+
+      <p class="label opt-cap" id="chan-label">Канал</p>
+      <div class="seg" role="group" aria-labelledby="chan-label">
+        <sc-for list="{{chans}}" as="c" hint-placeholder-count="2">
+          <button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.label}}</button>
+        </sc-for>
+      </div>
+
+      <p class="label opt-cap">Что включать</p>
+      <div class="list">
+        <sc-for list="{{incs}}" as="i" hint-placeholder-count="6">
+          <div class="opt">
+            <button type="button" class="{{i.cls}}" role="checkbox" aria-checked="{{i.checked}}" aria-label="{{i.label}}" onClick="{{i.toggle}}"><sc-if value="{{i.on}}" hint-placeholder-val="{{true}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width:2.6"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if></button>
+            <span class="p grow">{{i.label}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <hr class="divider">
+      <div class="opt" style="border-top:0;padding-top:0">
+        <button type="button" class="{{previewCls}}" role="checkbox" aria-checked="{{previewChecked}}" aria-label="Присылать мне черновик в 8:00, до отправки" onClick="{{togglePreview}}"><sc-if value="{{previewOn}}" hint-placeholder-val="{{true}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width:2.6"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if></button>
+        <span class="p grow">Присылать мне черновик в 8:00, до отправки</span>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-block" style="margin-top:18px" onClick="{{save}}">Сохранить</button>
+      <sc-if value="{{saved}}" hint-placeholder-val="{{false}}"><p class="dot dot-green st" style="margin:12px 0 0">Сохранено. Следующая сводка — пн, 27 октября</p></sc-if>
+    </aside>
+  </div>
+</sc-if>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2550}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tab: 'grant',
+      ver: { kids: true, lessons: true, vols: false, hours: false, ret: false },
+      secDone: {}, secEdit: null,
+      texts: {
+        done: 'С июля по сентябрь 2026 года прошло 528 занятий в Мастерской на Дмитровке и на выездах в ЦССУ: живопись, музыка, театр, витраж, валяние, керамика, киноклуб и клуб настольных игр. Летом часть мастерских работала реже, с сентября все вернулись к регулярному расписанию.\n\nИнклюзивная театральная мастерская начала готовить спектакль к декабрю.',
+        results: 'Занятия посетил 231 ребёнок. Волонтёры провели с детьми 2 896 часов.\n\nИз волонтёров, пришедших весной, 69% продолжают через три месяца. У групп остаются те же взрослые, и детям не приходится каждый раз привыкать заново.',
+        st1: 'М., 9 лет, три месяца приходил на живопись и никому не показывал рисунки. В сентябре сам предложил повесить свою работу на выставку группы.',
+        st2: 'Подростки из клуба настольных игр в сентябре сами провели игротеку для младшей группы.',
+        hard: 'В сентябре закрыли людьми 89% смен, чаще всего пустовали вторники в театральной мастерской. Новые волонтёры долго ждали первого занятия: медиана — 26 дней.\n\nЧто изменим: заранее ищем замену на смены, где записано меньше половины людей. Обучение «Первые шаги» перенесли на платформу, его можно пройти частями за пару вечеров. В октябре от заявки до первого занятия уже 19 дней.'
+      },
+      consentAsked: false, dl: '',
+      vol: 'sk', occ: 'year', tone: 'warm', letterEdit: false, custom: {}, sent: false,
+      to: { ng: true, ol: true, iv: false }, chan: 'mail', when: 'mon9',
+      inc: { nums: true, shifts: true, vols: true, kids: true, good: true, ask: true },
+      preview: true, saved: false
+    };
+  }
+  setText(id, v) { this.setState({ texts: { ...this.state.texts, [id]: v } }); }
+  renderVals() {
+    const s = this.state;
+    const ok = (on) => ({ cls: on ? 'tick is-on' : 'tick', checked: on ? 'true' : 'false', on: !!on });
+
+    const tabDefs = [
+      { id: 'grant', label: 'Отчёт грантодателю' },
+      { id: 'letters', label: 'Письма и справки' },
+      { id: 'weekly', label: 'Сводка недели' }
+    ];
+
+    const numDefs = [
+      { id: 'kids', label: 'Детей охвачено', value: '231', src: 'Из посещаемости: уникальные дети на занятиях' },
+      { id: 'lessons', label: 'Занятий проведено', value: '528', src: 'Из смен: занятия с отметкой ведущего' },
+      { id: 'vols', label: 'Волонтёров участвовало', value: '89', src: 'Из смен: хотя бы одна смена за период' },
+      { id: 'hours', label: 'Часов волонтёров', value: '2 896', src: 'Из учёта часов, подтверждены координатором' },
+      { id: 'ret', label: 'Удержание волонтёров через 3 месяца', value: '69%', src: 'Из профилей: пришли в апреле–июне и продолжают' }
+    ];
+    const secDefs = [
+      { id: 'done', title: 'Что сделано' },
+      { id: 'results', title: 'Результаты' },
+      { id: 'stories', title: 'Истории', stories: true },
+      { id: 'hard', title: 'Трудности и что изменим' }
+    ];
+    const verCount = numDefs.filter((n) => s.ver[n.id]).length + secDefs.filter((x) => s.secDone[x.id]).length;
+    const total = numDefs.length + secDefs.length;
+    const left = total - verCount;
+
+    const occDefs = [
+      { id: 'year', label: 'Год с фондом' },
+      { id: 'leave', label: 'Уход из фонда' },
+      { id: 'uni', label: 'Характеристика в вуз' }
+    ];
+    const toneDefs = [
+      { id: 'warm', label: 'Теплее' },
+      { id: 'official', label: 'Официальнее' }
+    ];
+    const sign = 'Наталья Гордеева,\nруководитель программ фонда «Дети Марии»';
+    const letters = {
+      year_warm: 'Светлана, здравствуйте!\n\nУже больше года вы приходите в мастерскую керамики: 52 занятия и 128 часов с ребятами. Двум новичкам было к кому прийти с вопросом в первые месяцы — спасибо, что помогли им освоиться.\n\nДети знают, что в мастерской их встретит знакомый взрослый. Для них это очень важно, и это благодаря вашему постоянству.\n\n' + sign,
+      year_official: 'Уважаемая Светлана!\n\nФонд «Дети Марии» благодарит вас за год волонтёрской работы. С августа 2025 года вы провели в мастерской керамики 52 занятия, 128 часов с детьми, и стали наставницей двух новых волонтёров.\n\nДля наших детей особенно важно, чтобы рядом был постоянный взрослый. Спасибо, что вы с нами.\n\nС уважением,\n' + sign,
+      leave_warm: 'Светлана, здравствуйте!\n\nСпасибо за 14 месяцев в мастерской керамики: 52 занятия, 128 часов с ребятами и двое новичков, которым вы помогли освоиться.\n\nСправку о часах прикладываем. Если захотите вернуться — напишите Ольге Лебедевой, мы будем очень рады.\n\n' + sign,
+      leave_official: 'Уважаемая Светлана!\n\nФонд «Дети Марии» благодарит вас за волонтёрскую работу с августа 2025 по октябрь 2026 года. За это время вы провели 52 занятия в мастерской керамики, 128 часов с детьми, и были наставницей двух новых волонтёров.\n\nСправка о часах приложена к письму. Будем рады видеть вас снова.\n\nС уважением,\n' + sign,
+      uni_warm: 'Характеристика\n\nСветлана Ким больше года помогает в мастерской керамики фонда «Дети Марии»: 52 занятия, 128 часов с детьми. Новые волонтёры приходят к ней за советом — она наставница двух новичков.\n\nСветлана приходит на занятия регулярно и прошла обучение фонда по работе с детьми и правилам безопасности. Рекомендуем её как надёжного и внимательного человека.\n\n' + sign,
+      uni_official: 'Характеристика\n\nСветлана Ким — волонтёр благотворительного фонда «Дети Марии» с августа 2025 года. В мастерской керамики провела 52 занятия с детьми, всего 128 часов. Прошла обучение фонда по работе с детьми и правилам безопасности. Наставница двух новых волонтёров.\n\nРуководитель программ фонда «Дети Марии»\nН. Гордеева'
+    };
+    const key = s.occ + '_' + s.tone;
+    const letterText = s.custom[key] !== undefined ? s.custom[key] : letters[key];
+    const titles = { year: 'Письмо Светлане Ким', leave: 'Письмо Светлане Ким', uni: 'Характеристика для вуза' };
+
+    const recDefs = [
+      { id: 'ng', av: 'НГ', avCls: 'avatar avatar-sm av-y', name: 'Наталья Гордеева', role: 'руководитель программ' },
+      { id: 'ol', av: 'ОЛ', avCls: 'avatar avatar-sm av-b', name: 'Ольга Лебедева', role: 'координатор' },
+      { id: 'iv', av: 'ИВ', avCls: 'avatar avatar-sm av-v', name: 'Ирина Власова', role: 'психолог' }
+    ];
+    const toNames = recDefs.filter((r) => s.to[r.id]).map((r) => r.name);
+    const incDefs = [
+      { id: 'nums', label: 'Цифры недели' },
+      { id: 'shifts', label: 'Смены без людей' },
+      { id: 'vols', label: 'Волонтёры под риском' },
+      { id: 'kids', label: 'Сигналы о детях — только факт, без подробностей' },
+      { id: 'good', label: 'Хорошие новости' },
+      { id: 'ask', label: 'Что нужно от руководителя' }
+    ];
+    const isSk = s.vol === 'sk';
+
+    return {
+      tabs: tabDefs.map((t) => ({
+        ...t,
+        cls: t.id === s.tab ? 'is-on' : '',
+        sel: t.id === s.tab ? 'true' : 'false',
+        pick: () => this.setState({ tab: t.id })
+      })),
+      isGrant: s.tab === 'grant',
+      isLetters: s.tab === 'letters',
+      isWeekly: s.tab === 'weekly',
+
+      checkedLabel: verCount + ' из ' + total,
+      hasDl: !!s.dl,
+      dlCls: left ? 'dot dot-yellow st' : 'dot dot-green st',
+      dlText: (s.dl === 'pdf' ? 'PDF собран. ' : 'Word-файл собран. ') + (left ? 'Непроверенное (' + left + ') выделено в файле жёлтым.' : 'Всё проверено.'),
+      dlWord: () => this.setState({ dl: 'word' }),
+      dlPdf: () => this.setState({ dl: 'pdf' }),
+      nums: numDefs.map((n) => ({
+        ...n,
+        ...ok(s.ver[n.id]),
+        aria: 'Сверено: ' + n.label,
+        toggle: () => this.setState({ ver: { ...s.ver, [n.id]: !s.ver[n.id] } })
+      })),
+      secs: secDefs.map((x) => {
+        const done = !!s.secDone[x.id];
+        const editing = s.secEdit === x.id;
+        return {
+          title: x.title,
+          fid: 'sec-' + x.id,
+          isPlain: !x.stories, isStories: !!x.stories,
+          text: x.stories ? '' : s.texts[x.id],
+          editing, notEditing: !editing,
+          tag: done ? 'Проверено' : 'Черновик — проверьте',
+          tagCls: done ? 'tag t-green' : 'tag t-yellow',
+          canAccept: !done, isDone: done,
+          accept: () => this.setState({ secDone: { ...s.secDone, [x.id]: true }, secEdit: null }),
+          reopen: () => this.setState({ secDone: { ...s.secDone, [x.id]: false } }),
+          editExp: editing ? 'true' : 'false',
+          editLabel: editing ? 'Готово' : 'Править',
+          toggleEdit: () => this.setState({ secEdit: editing ? null : x.id }),
+          type: (e) => this.setText(x.id, e.target.value),
+          stories: x.stories ? [
+            { id: 'st1', fieldLabel: 'История 1', okc: 'yes' },
+            { id: 'st2', fieldLabel: 'История 2', okc: s.consentAsked ? 'asked' : 'no' }
+          ].map((y) => ({
+            fid: 'story-' + y.id,
+            fieldLabel: y.fieldLabel,
+            text: s.texts[y.id],
+            editing, notEditing: !editing,
+            tagCls: y.okc === 'yes' ? 'tag t-green' : (y.okc === 'asked' ? 'tag t-blue' : 'tag t-yellow'),
+            tagLabel: y.okc === 'yes' ? 'Согласие есть, войдёт в отчёт' : (y.okc === 'asked' ? 'Согласие запрошено 21 окт' : 'Нет согласия, не войдёт'),
+            canAsk: y.okc === 'no',
+            ask: () => this.setState({ consentAsked: true }),
+            type: (e) => this.setText(y.id, e.target.value)
+          })) : []
+        };
+      }),
+
+      vol: s.vol,
+      setVol: (e) => this.setState({ vol: e.target.value, letterEdit: false }),
+      isSk, isAs: !isSk,
+      occs: occDefs.map((o) => ({
+        ...o,
+        cls: o.id === s.occ ? 'chip is-on' : 'chip',
+        pressed: o.id === s.occ ? 'true' : 'false',
+        pick: () => this.setState({ occ: o.id, sent: false })
+      })),
+      tones: toneDefs.map((t) => ({
+        ...t,
+        cls: t.id === s.tone ? 'is-on' : '',
+        pressed: t.id === s.tone ? 'true' : 'false',
+        pick: () => this.setState({ tone: t.id, sent: false })
+      })),
+      letterTitle: titles[s.occ],
+      letterText,
+      letterView: !s.letterEdit,
+      letterEditing: s.letterEdit,
+      typeLetter: (e) => this.setState({ custom: { ...s.custom, [key]: e.target.value } }),
+      letterEditExp: s.letterEdit ? 'true' : 'false',
+      letterEditLabel: s.letterEdit ? 'Готово' : 'Править',
+      toggleLetterEdit: () => this.setState({ letterEdit: !s.letterEdit }),
+      facts: [
+        { label: '14 месяцев в фонде', src: 'профиль, с августа 2025' },
+        { label: 'Мастерская керамики', src: 'смены' },
+        { label: 'Наставница двух новичков', src: 'программа «бадди»' },
+        { label: '52 занятия, 128 часов', src: 'учёт часов' }
+      ],
+      notSent: !s.sent,
+      sent: s.sent,
+      send: () => this.setState({ sent: true, letterEdit: false }),
+      unsend: () => this.setState({ sent: false }),
+      certText: isSk ? 'Выдана Ким Светлане в том, что она участвует в волонтёрской программе фонда.' : 'Выдана Соколовой Анне в том, что она участвует в волонтёрской программе фонда.',
+      certDir: isSk ? 'Мастерская керамики' : 'Мастерская живописи',
+      certPeriod: isSk ? 'август 2025 — октябрь 2026' : '14 июня — 21 октября 2026',
+      certLessons: isSk ? '52' : '19',
+      certHours: isSk ? '128' : '46',
+
+      toLine: toNames.length ? toNames.join(', ') : 'Никому. Выберите получателей',
+      chanLine: s.chan === 'mail' ? 'Почта' : 'Telegram',
+      incNums: s.inc.nums, incShifts: s.inc.shifts, incVols: s.inc.vols,
+      incKids: s.inc.kids, incGood: s.inc.good, incAsk: s.inc.ask,
+      recips: recDefs.map((r) => ({
+        ...r,
+        ...ok(s.to[r.id]),
+        toggle: () => this.setState({ to: { ...s.to, [r.id]: !s.to[r.id] }, saved: false })
+      })),
+      when: s.when,
+      setWhen: (e) => this.setState({ when: e.target.value, saved: false }),
+      chans: [{ id: 'mail', label: 'Почта' }, { id: 'tg', label: 'Telegram' }].map((c) => ({
+        ...c,
+        cls: c.id === s.chan ? 'is-on' : '',
+        pressed: c.id === s.chan ? 'true' : 'false',
+        pick: () => this.setState({ chan: c.id, saved: false })
+      })),
+      incs: incDefs.map((i) => ({
+        ...i,
+        ...ok(s.inc[i.id]),
+        toggle: () => this.setState({ inc: { ...s.inc, [i.id]: !s.inc[i.id] }, saved: false })
+      })),
+      previewCls: s.preview ? 'tick is-on' : 'tick',
+      previewChecked: s.preview ? 'true' : 'false',
+      previewOn: s.preview,
+      togglePreview: () => this.setState({ preview: !s.preview, saved: false }),
+      save: () => this.setState({ saved: true }),
+      saved: s.saved
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,547 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=1400">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F0ECE3}
+.dm{--page:#F0ECE3;--paper:#FFFFFF;--soft:#F6F3EE;--soft-2:#E8E3D8;--line:#E9E4DA;--line-2:#D6D0C3;--ink:#12141A;--ink-2:#3B3E46;--mute:#5E5A52;--quiet:#8C877C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFE9DC;--yellow:#FFB93F;--yellow-ink:#7A4E00;--yellow-tint:#FFF1D2;--blue:#0F3DA7;--blue-tint:#E7ECF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DDF0E2;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE5E1;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE4ED;--shadow:0 4px 14px rgba(18,20,26,.06);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,185,63,.45)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:18px;height:18px}.ic-lg{width:26px;height:26px}.ic-xl{width:36px;height:36px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 80px}
+.top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand . end" "nav nav nav";align-items:center;gap:14px 16px;margin-bottom:40px}
+.top > .brand{grid-area:brand;justify-self:start}
+.top > .nav{grid-area:nav;justify-self:start}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:13px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--ink);color:#fff}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.top-end{grid-area:end;justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:9px;height:9px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink-2);font-size:15px;font-weight:500;text-decoration:none;white-space:nowrap}
+.role:hover{color:var(--ink);text-decoration:none}
+.avatar{width:44px;height:44px;flex:0 0 44px;border-radius:50%;display:inline-grid;place-items:center;font-size:15px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:36px;height:36px;flex-basis:36px;font-size:13px}
+.avatar-lg{width:72px;height:72px;flex-basis:72px;font-size:24px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+.display{margin:0;font-size:56px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:40px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:28px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:12px 0 0;font-size:18px;line-height:1.5;color:var(--ink-2);max-width:60ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:15px;line-height:1.45;color:var(--mute)}
+.eyebrow{font-size:15px;font-weight:600;color:var(--ink-2)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:56px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:18px}
+.card{background:var(--paper);border-radius:28px;padding:28px 32px}
+.card-soft{background:var(--soft);border-radius:28px;padding:28px 32px}
+.card-hero{background:var(--yellow);border-radius:32px;padding:40px 44px;color:var(--ink)}
+.card-hero .lead,.card-hero .p{color:var(--ink)}
+.card-hero .meta{color:var(--ink-2)}
+.card-hero .btn-secondary{background:transparent;border-color:rgba(18,20,26,.35)}
+.card-hero .btn-secondary:hover{border-color:var(--ink)}
+.card-hero .btn-ghost{color:var(--ink)}
+.card-hero .btn-ghost:hover{background:rgba(255,255,255,.35)}
+.card-hero .bar{background:rgba(18,20,26,.14)}
+.card-hero .bar > i{background:var(--ink)}
+.card-dark{background:var(--ink);color:#fff;border-radius:32px;padding:40px 44px}
+.card-tight{padding:18px 22px;border-radius:22px}
+.ai-box{background:#F3EFFD;border-radius:24px;padding:22px 26px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.divider{height:1px;background:var(--line);border:0;margin:20px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:18px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;border:1px solid transparent;font-size:16px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:#2B2E37}
+.btn-accent{background:var(--orange);color:var(--ink)}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:40px;padding:0 16px;font-size:15px}
+.btn-lg{height:56px;padding:0 28px;font-size:17px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft-2);color:var(--mute);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;font-size:14px;font-weight:500;white-space:nowrap;background:var(--soft-2);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:14px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:var(--ink-2)}
+.dot::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--quiet);flex:0 0 9px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:0;background:var(--paper);font-size:15px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.chip.is-on{background:var(--ink);color:#fff}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--paper)}
+.seg button{height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:15px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line-2);overflow-x:auto}
+.tabs button{height:50px;padding:0 18px;border:0;background:transparent;font-size:16px;font-weight:600;color:var(--mute);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.label{font-size:15px;font-weight:600;color:var(--ink)}
+.input,.textarea,.select{width:100%;min-height:52px;padding:13px 16px;border-radius:14px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:140px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:15px;color:var(--mute)}
+.err{font-size:15px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:16px;color:var(--ink-2)}
+.check input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--ink);flex:0 0 22px}
+.toggle{position:relative;width:48px;height:28px;flex:0 0 48px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:23px}
+.kpi{position:relative;display:flex;flex-direction:column;gap:8px;padding:26px 28px;border-radius:28px;background:var(--paper);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{position:relative;font-size:16px;color:var(--ink-2);z-index:1}
+.kpi-delta{font-size:15px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:72px;height:64px;left:14px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:10px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}.bar-ink > i{background:var(--ink)}
+.tbl{display:grid}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:16px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-row:last-child{border-bottom:0}
+.tbl-head{font-size:15px;font-weight:600;color:var(--mute);padding-top:8px;padding-bottom:12px}
+.scroll-x{overflow-x:auto}
+.art{width:60px;height:60px;flex:0 0 60px;border-radius:20px;display:grid;place-items:center}
+.art .ic{width:26px;height:26px}
+.art-lg{width:100%;height:150px;border-radius:24px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+.bubble{max-width:72%;padding:14px 18px;border-radius:22px;background:var(--soft);color:var(--ink);font-size:16px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F3EFFD}
+.cite{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:15px;color:var(--ink-2)}
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:0 0 32px;padding:6px;border-radius:999px;background:#E3DDD0}
+.demo-cap{font-size:14px;font-weight:600;color:var(--mute);padding:0 8px 0 10px}
+.demo button{height:34px;padding:0 14px;border-radius:999px;border:0;background:transparent;font-size:14px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:40px}.h1{font-size:30px}.h2{font-size:24px}.card,.card-soft{padding:22px 20px;border-radius:24px}.card-hero,.card-dark{padding:28px 22px;border-radius:26px}.top{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "end" "nav"}.top-end{justify-self:start;flex-wrap:wrap}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+.ph-board{position:relative;width:1400px;height:1000px;min-height:0;overflow:hidden;background:var(--soft-2);display:flex;align-items:center;justify-content:center}
+.ph-row{display:flex;gap:76px;align-items:flex-start}
+.ph-col{display:flex;flex-direction:column;gap:22px;width:375px}
+.ph-cap{display:flex;align-items:center;gap:12px}
+.ph-n{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:15px;font-weight:600}
+.ph-cap-t{font-size:20px;font-weight:600;letter-spacing:-.015em}
+.phone{position:relative;width:375px;height:780px;border-radius:48px;background:var(--page);overflow:hidden;box-shadow:0 0 0 8px var(--ink)}
+.ph-screen{position:absolute;left:0;right:0;top:0;bottom:84px;overflow:hidden;padding:30px 18px 18px;display:flex;flex-direction:column;gap:16px}
+.ph-screen > *,.ph-screen > sc-if > *{flex-shrink:0}
+.ph-tabs{position:absolute;left:0;right:0;bottom:0;height:84px;padding:0 16px 14px;background:var(--paper);display:flex;align-items:center;justify-content:space-between}
+.dm a.ph-tab{height:48px;min-width:48px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;color:var(--ink-2);text-decoration:none}
+.dm a.ph-tab.is-active{padding:0 18px;background:var(--yellow);color:var(--ink);font-size:15px;font-weight:600}
+.ph-h1{margin:0;font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.12}
+.ph-hero{padding:24px 22px;border-radius:28px;display:flex;flex-direction:column;gap:6px}
+.ph-big{font-size:32px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.ph-btns{display:flex;gap:8px;margin-top:16px}
+.ph-btns .btn{flex:1 1 0}
+.ph-note{margin-top:16px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ph-card{padding:4px 18px;border-radius:24px}
+.ph-li{display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--line);min-width:0}
+.ph-li:first-child{border-top:0}
+.dm a.ph-li{color:inherit;text-decoration:none}
+.ph-art{width:48px;height:48px;flex:0 0 48px;border-radius:16px}
+.ph-score{font-size:22px;font-weight:600;color:var(--violet);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ph-notif{display:flex;gap:12px;align-items:center;padding:12px 8px 12px 14px;border-radius:22px;background:var(--paper)}
+.ph-notif .mark{width:30px;height:30px;flex-basis:30px}
+.ph-map{height:120px;border-radius:16px;overflow:hidden;background:var(--soft)}
+.ph-map svg{display:block;width:100%;height:100%}
+.ph-mood{display:flex;justify-content:space-between;gap:6px}
+.dm .ph-mood button{width:60px;height:60px;border-radius:50%;border:0;background:var(--paper);display:grid;place-items:center;color:var(--ink-2)}
+.dm .ph-mood button.is-on{background:var(--ink);color:#fff}
+.ph-center{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.dm .ph-mic{width:104px;height:104px;border-radius:50%;border:0;display:grid;place-items:center;background:var(--paper);color:var(--ink)}
+.ph-mic .ic{width:40px;height:40px}
+.dm .ph-mic.is-rec{background:var(--red);color:#fff;box-shadow:0 0 0 12px rgba(255,255,255,.45)}
+.ph-bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px;text-align:center}
+.ph-quote{margin:10px 0 0;color:var(--ink)}
+</style>
+</head><body><div id="__root"></div><template id="__tpl">
+
+<div class="dm ph-board">
+  <div class="ph-row">
+
+    <!-- 1. Главная -->
+    <div class="ph-col">
+      <div class="ph-cap"><span class="ph-n">1</span><span class="ph-cap-t">Главная</span></div>
+      <div class="phone">
+        <div class="ph-screen">
+          <div class="row" style="justify-content:space-between">
+            <h2 class="ph-h1">Привет, Анна</h2>
+            <a href="Profile.dc.html" class="avatar av-o" aria-label="Профиль: Анна Соколова" style="color:var(--ink);text-decoration:none">АС</a>
+          </div>
+
+          <section class="card-hero ph-hero" aria-label="Ближайшая смена">
+            <span class="eyebrow">Ближайшая смена</span>
+            <span class="ph-big">Сб, 24 октября</span>
+            <span class="p">12:00, живопись с «Подсолнухами»</span>
+            <sc-if value="{{p1Open}}" hint-placeholder-val="{{true}}">
+              <div class="ph-btns">
+                <button type="button" class="btn btn-primary btn-lg" onClick="{{p1Yes}}">Я приду</button>
+                <button type="button" class="btn btn-secondary btn-lg" onClick="{{p1No}}">Не смогу</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{p1IsYes}}" hint-placeholder-val="{{false}}">
+              <div class="ph-note">
+                <span class="row strong" style="gap:8px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Ты в списке</span>
+                <button type="button" class="btn btn-ghost btn-sm" onClick="{{p1Reset}}">Изменить</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{p1IsNo}}" hint-placeholder-val="{{false}}">
+              <div class="ph-note">
+                <span class="strong">Ищем замену</span>
+                <button type="button" class="btn btn-ghost btn-sm" onClick="{{p1Reset}}">Я приду</button>
+              </div>
+            </sc-if>
+          </section>
+
+          <div class="row" style="justify-content:space-between;margin-top:8px">
+            <div class="row" style="gap:10px"><h3 class="h3">Подобрано для тебя</h3><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+            <a href="Catalog.dc.html">Все</a>
+          </div>
+          <div class="card ph-card">
+            <a class="ph-li" href="Opportunity.dc.html">
+              <span class="art art-o ph-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3.5" width="18" height="17" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-5-5-9 10"/></svg></span>
+              <span class="grow"><span class="li-title" style="display:block">Дизайн афиши</span><span class="meta">Онлайн, до 9 ноября</span></span>
+              <span class="ph-score" aria-label="Совпадение 88 из 100">88</span>
+            </a>
+            <a class="ph-li" href="Opportunity.dc.html">
+              <span class="art art-y ph-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8.2 20 18M8 15.8 20 6"/></svg></span>
+              <span class="grow"><span class="li-title" style="display:block">Мастер-класс по валянию</span><span class="meta">Сб, 31 октября</span></span>
+              <span class="ph-score" aria-label="Совпадение 81 из 100">81</span>
+            </a>
+          </div>
+        </div>
+        <nav class="ph-tabs" aria-label="Разделы">
+          <a class="ph-tab is-active" aria-current="page" href="Home.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>Главная</a>
+          <a class="ph-tab" href="Catalog.dc.html" aria-label="Возможности" title="Возможности"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></a>
+          <a class="ph-tab" href="Schedule.dc.html" aria-label="Смены" title="Смены"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></a>
+          <a class="ph-tab" href="Academy.dc.html" aria-label="Академия" title="Академия"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></a>
+          <a class="ph-tab" href="Profile.dc.html" aria-label="Ещё" title="Ещё"><svg class="ic ic-lg ic-dots" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg></a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- 2. В день смены -->
+    <div class="ph-col">
+      <div class="ph-cap"><span class="ph-n">2</span><span class="ph-cap-t">В день смены</span></div>
+      <div class="phone">
+        <div class="ph-screen">
+          <sc-if value="{{notifOn}}" hint-placeholder-val="{{true}}">
+            <div class="ph-notif" role="status">
+              <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+              <span class="grow strong">Сегодня в 12:00, Дмитровка</span>
+              <button type="button" class="iconbtn" style="width:36px;height:36px" aria-label="Скрыть уведомление" onClick="{{hideNotif}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+            </div>
+          </sc-if>
+
+          <section class="card-hero ph-hero" aria-label="Смена сегодня">
+            <span class="eyebrow">Сегодня</span>
+            <span class="ph-big">12:00–14:00</span>
+            <span class="p">Мастерская на Дмитровке</span>
+            <sc-if value="{{notHere}}" hint-placeholder-val="{{true}}">
+              <button type="button" class="btn btn-primary btn-lg btn-block" style="margin-top:16px" onClick="{{checkIn}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>Я на месте</button>
+            </sc-if>
+            <sc-if value="{{isHere}}" hint-placeholder-val="{{false}}">
+              <div class="ph-note">
+                <span class="row strong" style="gap:8px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Отмечено в 11:52</span>
+                <button type="button" class="btn btn-ghost btn-sm" onClick="{{undoCheck}}">Отменить</button>
+              </div>
+            </sc-if>
+          </section>
+
+          <div class="card ph-card" style="padding:12px">
+            <div class="ph-map" aria-hidden="true">
+              <svg viewBox="0 0 339 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <rect width="339" height="120" style="fill:var(--soft)"/>
+                <path d="M-10 90 L350 64" style="stroke:var(--paper);stroke-width:12;fill:none"/>
+                <path d="M-10 24 L350 12" style="stroke:var(--paper);stroke-width:7;fill:none"/>
+                <path d="M64 -10 L112 130" style="stroke:var(--paper);stroke-width:10;fill:none"/>
+                <path d="M226 -10 L252 130" style="stroke:var(--paper);stroke-width:9;fill:none"/>
+                <ellipse cx="172" cy="106" rx="44" ry="18" style="fill:var(--green-tint)"/>
+                <path d="M42 94 C 92 86, 104 64, 150 60 S 232 44, 270 36" style="stroke:var(--blue);stroke-width:4;fill:none;stroke-linecap:round;stroke-dasharray:1 9"/>
+                <circle cx="42" cy="94" r="7" style="fill:var(--blue);stroke:var(--paper);stroke-width:3"/>
+                <circle cx="272" cy="35" r="12" style="fill:var(--orange);stroke:var(--paper);stroke-width:4"/>
+              </svg>
+            </div>
+            <div class="row" style="margin-top:12px;padding:0 6px 4px">
+              <span class="li-title grow">Выйти в 11:25</span>
+              <a class="btn btn-secondary btn-sm" href="Schedule.dc.html">Маршрут</a>
+            </div>
+          </div>
+
+          <div class="card ph-card row" style="padding:12px 12px 12px 16px">
+            <span class="avatar avatar-sm av-y" aria-hidden="true">ЕК</span>
+            <span class="li-title grow">Елена Карпова, ведущая</span>
+            <a class="iconbtn" href="Messages.dc.html" aria-label="Написать Елене Карповой"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></a>
+          </div>
+        </div>
+        <nav class="ph-tabs" aria-label="Разделы">
+          <a class="ph-tab" href="Home.dc.html" aria-label="Главная" title="Главная"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+          <a class="ph-tab" href="Catalog.dc.html" aria-label="Возможности" title="Возможности"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></a>
+          <a class="ph-tab is-active" aria-current="page" href="Schedule.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Смены</a>
+          <a class="ph-tab" href="Academy.dc.html" aria-label="Академия" title="Академия"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></a>
+          <a class="ph-tab" href="Profile.dc.html" aria-label="Ещё" title="Ещё"><svg class="ic ic-lg ic-dots" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg></a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- 3. Минута после занятия -->
+    <div class="ph-col">
+      <div class="ph-cap"><span class="ph-n">3</span><span class="ph-cap-t">Минута после занятия</span></div>
+      <div class="phone">
+        <div class="ph-screen">
+          <sc-if value="{{notSent}}" hint-placeholder-val="{{true}}">
+            <h2 class="ph-h1">Как прошло занятие?</h2>
+
+            <div class="ph-mood" role="group" aria-label="Настроение после занятия">
+              <sc-for list="{{moods}}" as="mo" hint-placeholder-count="5">
+                <button type="button" class="{{mo.cls}}" aria-pressed="{{mo.pressed}}" aria-label="{{mo.label}}" title="{{mo.label}}" onClick="{{mo.pick}}">
+                  <sc-if value="{{mo.isStar}}" hint-placeholder-val="{{false}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if>
+                  <sc-if value="{{mo.isSmile}}" hint-placeholder-val="{{true}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if>
+                  <sc-if value="{{mo.isMeh}}" hint-placeholder-val="{{false}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 15h7M9 9.5h.01M15 9.5h.01"/></svg></sc-if>
+                  <sc-if value="{{mo.isFrown}}" hint-placeholder-val="{{false}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 16a4.5 4.5 0 0 1 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if>
+                  <sc-if value="{{mo.isAlert}}" hint-placeholder-val="{{false}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></sc-if>
+                </button>
+              </sc-for>
+            </div>
+            <sc-if value="{{hasMood}}" hint-placeholder-val="{{false}}">
+              <p class="h3" style="margin:-4px 0 0;text-align:center">{{moodLabel}}</p>
+            </sc-if>
+            <sc-if value="{{isHeavy}}" hint-placeholder-val="{{false}}">
+              <p class="p" style="margin:-6px 0 0;text-align:center">Ольга напишет тебе сегодня</p>
+            </sc-if>
+
+            <sc-if value="{{micNotDone}}" hint-placeholder-val="{{true}}">
+              <section class="card-hero ph-hero ph-center" style="padding:28px 22px;gap:14px" aria-label="Голосом">
+                <sc-if value="{{micIdle}}" hint-placeholder-val="{{true}}">
+                  <button type="button" class="ph-mic" aria-label="Начать запись" onClick="{{startRec}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>
+                  <span class="h3">Расскажи голосом</span>
+                  <button type="button" class="btn btn-ghost btn-sm" style="margin-top:-6px">Написать текстом</button>
+                </sc-if>
+                <sc-if value="{{micRec}}" hint-placeholder-val="{{false}}">
+                  <button type="button" class="ph-mic is-rec" aria-label="Остановить запись" onClick="{{stopRec}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/></svg></button>
+                  <span class="h3 num">0:24</span>
+                  <span class="p">Нажми, чтобы закончить</span>
+                </sc-if>
+              </section>
+            </sc-if>
+            <sc-if value="{{micDone}}" hint-placeholder-val="{{false}}">
+              <section class="ai-box" style="padding:18px 20px" aria-label="Расшифровка">
+                <div class="row" style="justify-content:space-between"><span class="li-title">Расшифровка</span><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+                <p class="ph-quote">«Миша сначала не хотел рисовать, потом сделал два листа и один подарил Елене. Устала, но всё хорошо».</p>
+                <div class="row" style="justify-content:space-between;margin-top:10px">
+                  <span class="dot dot-green">Тревожного нет</span>
+                  <button type="button" class="btn btn-ghost btn-sm" onClick="{{resetRec}}">Заново</button>
+                </div>
+              </section>
+            </sc-if>
+
+            <div class="ph-bottom">
+              <sc-if value="{{canSend}}" hint-placeholder-val="{{false}}">
+                <button type="button" class="btn btn-primary btn-lg btn-block" onClick="{{send}}">Отправить</button>
+              </sc-if>
+              <sc-if value="{{cantSend}}" hint-placeholder-val="{{true}}">
+                <button type="button" class="btn btn-primary btn-lg btn-block" aria-disabled="true">Отправить</button>
+                <span class="meta">Сначала выбери настроение</span>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{isSent}}" hint-placeholder-val="{{false}}">
+            <div class="ph-center" style="margin:auto 0">
+              <span class="art art-g" aria-hidden="true" style="width:104px;height:104px;flex-basis:104px;border-radius:50%"><svg class="ic ic-xl" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+              <h2 class="ph-h1" style="margin-top:8px">Спасибо, Анна</h2>
+              <p class="p" style="margin:0">Следующее занятие — 31 октября</p>
+              <button type="button" class="btn btn-ghost" onClick="{{resetP3}}">Изменить ответ</button>
+            </div>
+          </sc-if>
+        </div>
+        <nav class="ph-tabs" aria-label="Разделы">
+          <a class="ph-tab" href="Home.dc.html" aria-label="Главная" title="Главная"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+          <a class="ph-tab" href="Catalog.dc.html" aria-label="Возможности" title="Возможности"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></a>
+          <a class="ph-tab is-active" aria-current="page" href="Schedule.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Смены</a>
+          <a class="ph-tab" href="Academy.dc.html" aria-label="Академия" title="Академия"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></a>
+          <a class="ph-tab" href="Profile.dc.html" aria-label="Ещё" title="Ещё"><svg class="ic ic-lg ic-dots" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg></a>
+        </nav>
+      </div>
+    </div>
+
+  </div>
+</div>
+</template><script>
+class DCLogic { constructor(props){ this.props = props || {}; this.state = {}; } setState(p){ Object.assign(this.state, p); __render(); } }
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { shift: 'open', notif: true, here: false, mood: '', mic: 'idle', sent: false };
+  }
+  renderVals() {
+    const s = this.state;
+    const moods = [
+      { id: 'great', label: 'Отлично', icon: 'star' },
+      { id: 'good', label: 'Хорошо', icon: 'smile' },
+      { id: 'ok', label: 'Ровно', icon: 'meh' },
+      { id: 'hard', label: 'Трудно', icon: 'frown' },
+      { id: 'heavy', label: 'Тяжело', icon: 'alert' }
+    ];
+    const cur = moods.filter((m) => m.id === s.mood)[0];
+    return {
+      p1Open: s.shift === 'open',
+      p1IsYes: s.shift === 'yes',
+      p1IsNo: s.shift === 'no',
+      p1Yes: () => this.setState({ shift: 'yes' }),
+      p1No: () => this.setState({ shift: 'no' }),
+      p1Reset: () => this.setState({ shift: 'open' }),
+
+      notifOn: s.notif,
+      hideNotif: () => this.setState({ notif: false }),
+      notHere: !s.here,
+      isHere: s.here,
+      checkIn: () => this.setState({ here: true }),
+      undoCheck: () => this.setState({ here: false }),
+
+      notSent: !s.sent,
+      isSent: s.sent,
+      moods: moods.map((m) => ({
+        label: m.label,
+        cls: m.id === s.mood ? 'is-on' : '',
+        pressed: m.id === s.mood ? 'true' : 'false',
+        pick: () => this.setState({ mood: m.id }),
+        isStar: m.icon === 'star',
+        isSmile: m.icon === 'smile',
+        isMeh: m.icon === 'meh',
+        isFrown: m.icon === 'frown',
+        isAlert: m.icon === 'alert'
+      })),
+      hasMood: !!cur,
+      moodLabel: cur ? cur.label : '',
+      isHeavy: s.mood === 'heavy',
+      micIdle: s.mic === 'idle',
+      micRec: s.mic === 'rec',
+      micDone: s.mic === 'done',
+      micNotDone: s.mic !== 'done',
+      startRec: () => this.setState({ mic: 'rec' }),
+      stopRec: () => this.setState({ mic: 'done' }),
+      resetRec: () => this.setState({ mic: 'idle' }),
+      canSend: !!s.mood,
+      cantSend: !s.mood,
+      send: () => this.setState({ sent: true }),
+      resetP3: () => this.setState({ sent: false, mood: '', mic: 'idle' })
+    };
+  }
+}
+
+const __comp = new Component({});
+function __lookup(scope, path){
+  path = path.trim();
+  if (path === 'true') return true; if (path === 'false') return false;
+  if (/^\d+$/.test(path)) return +path;
+  const parts = path.split('.'); let v = scope[parts[0]];
+  for (let i = 1; i < parts.length; i++) v = (v == null) ? undefined : v[parts[i]];
+  return v;
+}
+function __interp(str, scope){
+  const m = str.match(/^\{\{([^}]*)\}\}$/);
+  if (m) return __lookup(scope, m[1]);
+  return str.replace(/\{\{([^}]*)\}\}/g, (_, p) => { const v = __lookup(scope, p); return v == null ? '' : String(v); });
+}
+function __walk(src, scope, parent){
+  for (const n of src.childNodes){
+    if (n.nodeType === 3){ parent.appendChild(document.createTextNode(__interp(n.nodeValue, scope))); continue; }
+    if (n.nodeType !== 1) continue;
+    const tag = n.localName;
+    if (tag === 'sc-for'){
+      const list = __lookup(scope, n.getAttribute('list').replace(/[{}]/g,'')) || [];
+      const as = n.getAttribute('as');
+      list.forEach((item) => { const s2 = Object.create(scope); s2[as] = item; __walk(n, s2, parent); });
+      continue;
+    }
+    if (tag === 'sc-if'){
+      if (__lookup(scope, n.getAttribute('value').replace(/[{}]/g,''))) __walk(n, scope, parent);
+      continue;
+    }
+    const el = n.namespaceURI && n.namespaceURI !== 'http://www.w3.org/1999/xhtml' ? document.createElementNS(n.namespaceURI, tag) : document.createElement(tag);
+    for (const a of n.attributes){
+      if (/^on/i.test(a.name)){
+        const fn = __interp(a.value, scope);
+        let ev = a.name.slice(2).toLowerCase();
+        if (ev === 'change' && (tag === 'input' || tag === 'textarea')) ev = 'input';
+        if (typeof fn === 'function') el.addEventListener(ev, fn);
+        continue;
+      }
+      if (a.name.startsWith('hint-')) continue;
+      const v = __interp(a.value, scope);
+      if (a.name === 'value' && (tag === 'input' || tag === 'textarea')) { el.value = v == null ? '' : v; continue; }
+      el.setAttribute(a.name, v == null ? '' : String(v));
+    }
+    __walk(tag === 'template' ? n.content : n, scope, el);
+    parent.appendChild(el);
+  }
+}
+function __render(){
+  const ae = document.activeElement; const aid = ae && ae.id; const sel = ae && ae.selectionStart;
+  const vals = __comp.renderVals();
+  const root = document.getElementById('__root'); root.innerHTML = '';
+  __walk(document.getElementById('__tpl').content, vals, root);
+  if (aid){ const e = document.getElementById(aid); if (e){ e.focus(); try { e.setSelectionRange(sel, sel); } catch(_){} } }
+}
+__render();
+</script></body></html>

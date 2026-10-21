@@ -1,0 +1,28 @@
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-title{margin:0;font-size:48px;font-weight:600;line-height:1.04;letter-spacing:-.035em;text-wrap:balance}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center;color:var(--ink)}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.att{display:flex;flex-direction:column;margin-top:22px}
+.att-row{display:flex;align-items:center;gap:18px;padding:18px 0;border-top:1px solid rgba(18,20,26,.14);min-width:0}
+.att-row:first-child{border-top:0}
+.att-ic{width:56px;height:56px;flex:0 0 56px;border-radius:50%;background:rgba(255,255,255,.6);display:grid;place-items:center;font-size:17px;font-weight:600;color:var(--ink)}
+.att-ic .ic{width:26px;height:26px}
+.att-text{flex:1 1 auto;min-width:0;font-size:22px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.att-done{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 6px;font-size:16px;font-weight:600;color:var(--ink);white-space:nowrap}
+.kpi .kpi-big{font-size:56px}
+.sum p{margin:0;font-size:17px;line-height:1.6;color:var(--ink);max-width:72ch}
+.sum p + p{margin-top:14px}
+.sum-acts{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:22px}
+.done-line{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
+.done-line .ic{color:var(--green-ink)}
+.chart{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px;align-items:end;height:220px;border-bottom:1px solid var(--line-2)}
+.chart i{display:block;border-radius:10px 10px 4px 4px;background:var(--soft-2)}
+.chart i.now{background:var(--yellow)}
+.months{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px;margin-top:12px}
+.months span{font-size:15px;color:var(--mute)}
+.months span.now{color:var(--ink);font-weight:600}
+.frow{display:grid;grid-template-columns:180px minmax(0,1fr) 48px;align-items:center;gap:20px;padding:14px 0}
+.frow span{font-size:17px;color:var(--ink)}
+.frow .bar{height:14px}
+.frow b{font-size:24px;font-weight:600;text-align:right;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+@media (max-width:720px){.hero-title{font-size:36px}.att-row{flex-wrap:wrap;gap:12px 16px}.att-text{font-size:19px;flex-basis:calc(100% - 72px)}.kpi .kpi-big{font-size:44px}.frow{grid-template-columns:120px minmax(0,1fr) 36px;gap:12px}.chart,.months{gap:4px}}

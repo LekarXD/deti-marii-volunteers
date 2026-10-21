@@ -1,0 +1,135 @@
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<sc-if value="{{showForm}}" hint-placeholder-val="{{true}}">
+  <section class="card-hero" aria-labelledby="form-title">
+    <p class="eyebrow" style="margin:0">Живопись, сб 17 октября</p>
+    <h1 class="hero-title" id="form-title">Как прошло занятие?</h1>
+    <div class="moods" role="radiogroup" aria-labelledby="form-title">
+      <sc-for list="{{moods}}" as="m" hint-placeholder-count="5">
+        <button type="button" role="radio" aria-checked="{{m.checked}}" class="{{m.cls}}" onClick="{{m.pick}}">
+          <sc-if value="{{m.isHeart}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></sc-if>
+          <sc-if value="{{m.isSmile}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if>
+          <sc-if value="{{m.isMeh}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 15h7M9 9.5h.01M15 9.5h.01"/></svg></sc-if>
+          <sc-if value="{{m.isFrown}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 16a4.5 4.5 0 0 1 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if>
+          <span>{{m.label}}</span>
+        </button>
+      </sc-for>
+    </div>
+    <label for="r-text" style="position:absolute;left:-9999px">Расскажи своими словами</label>
+    <textarea id="r-text" class="textarea say" placeholder="Что получилось, что было трудно, что нужно" value="{{text}}" onChange="{{typeText}}"></textarea>
+    <div class="row wrap" style="margin-top:20px">
+      <button type="button" class="btn btn-primary btn-lg" onClick="{{send}}">Отправить</button>
+      <sc-if value="{{voiceIdle}}" hint-placeholder-val="{{true}}">
+        <button type="button" class="btn btn-secondary btn-lg" onClick="{{startRec}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>Сказать голосом</button>
+      </sc-if>
+      <sc-if value="{{voiceRec}}" hint-placeholder-val="{{false}}">
+        <button type="button" class="rec" onClick="{{stopRec}}"><span class="rec-dot" aria-hidden="true"></span>Остановить <span class="num">0:34</span></button>
+      </sc-if>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{showDone}}" hint-placeholder-val="{{false}}">
+  <section class="card-hero" aria-labelledby="done-title">
+    <div class="hero-grid">
+      <div class="grow">
+        <p class="eyebrow" style="margin:0">Живопись, сб 17 октября</p>
+        <h1 class="hero-title" id="done-title">Спасибо, Анна</h1>
+        <p class="lead">2 часа засчитаем, когда ведущая подтвердит</p>
+        <a class="btn btn-primary btn-lg" href="Schedule.dc.html" style="margin-top:28px">К моим сменам</a>
+      </div>
+      <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></div>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{showAlarm}}" hint-placeholder-val="{{false}}">
+  <section class="card-alarm" aria-labelledby="alarm-title">
+    <div class="hero-grid">
+      <div class="grow">
+        <p class="eyebrow" style="margin:0;color:var(--red-ink)">Тревожный сигнал о ребёнке</p>
+        <h1 class="hero-title" id="alarm-title">Мы передали это психологу</h1>
+        <p class="lead" style="color:var(--ink)">Ирина Власова свяжется с тобой сегодня. Ты правильно сделала, что написала.</p>
+        <ol class="steps">
+          <li><span class="step-n" aria-hidden="true">1</span>Запиши слова ребёнка дословно, без выводов</li>
+          <li><span class="step-n" aria-hidden="true">2</span>Не расспрашивай дальше, этим займётся психолог</li>
+          <li><span class="step-n" aria-hidden="true">3</span>Не обещай хранить тайну</li>
+        </ol>
+        <div class="row wrap" style="margin-top:28px">
+          <button type="button" class="btn btn-primary btn-lg"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Позвонить психологу</button>
+          <a class="btn btn-secondary btn-lg" href="Messages.dc.html">Написать Ирине</a>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></div>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{showHard}}" hint-placeholder-val="{{false}}">
+  <section class="card-hero" aria-labelledby="hard-title">
+    <div class="hero-grid">
+      <div class="grow">
+        <p class="eyebrow" style="margin:0">Живопись, сб 17 октября</p>
+        <h1 class="hero-title" id="hard-title">Спасибо, что сказала</h1>
+        <p class="lead">Так бывает у многих. Ольга напишет тебе сегодня.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="care-title">
+    <div class="section-head"><h2 class="h2" id="care-title">Что может помочь</h2></div>
+    <div class="grid-3">
+      <div class="card care">
+        <span class="art art-b" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><rect x="2.5" y="6" width="13" height="12" rx="3"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg></span>
+        <span><span class="h3" style="display:block">Супервизия с психологом</span><span class="p">Чт, 22 октября, 19:00</span></span>
+        <div class="care-foot">
+          <sc-if value="{{supOpen}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary" onClick="{{toggleSup}}">Записаться</button></sc-if>
+          <sc-if value="{{supJoined}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-ghost" onClick="{{toggleSup}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Ты записана</button></sc-if>
+        </div>
+      </div>
+      <div class="card care">
+        <span class="avatar avatar-lg av-v" aria-hidden="true" style="width:60px;height:60px;flex-basis:60px;font-size:20px">СК</span>
+        <span class="h3">Поговорить со Светланой Ким</span>
+        <div class="care-foot"><a class="btn btn-secondary" href="Messages.dc.html">Написать</a></div>
+      </div>
+      <div class="card care">
+        <span class="art art-y" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <span class="h3">Пауза без потери места</span>
+        <div class="care-foot">
+          <sc-if value="{{pauseOff}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary" onClick="{{togglePause}}">Взять паузу</button></sc-if>
+          <sc-if value="{{pauseOn}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-ghost" onClick="{{togglePause}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Пауза оформлена</button></sc-if>
+        </div>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{showResult}}" hint-placeholder-val="{{false}}">
+  <section class="section" aria-labelledby="und-title">
+    <div class="section-head">
+      <div class="row" style="gap:12px"><h2 class="h2" id="und-title">Мы поняли так</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+    </div>
+    <div class="ai-box" style="padding:28px 32px">
+      <div class="list">
+        <sc-for list="{{und}}" as="u" hint-placeholder-count="3">
+          <div class="und"><span class="strong">{{u.label}}</span><span>{{u.value}}</span></div>
+        </sc-for>
+      </div>
+      <sc-if value="{{notConfirmed}}" hint-placeholder-val="{{true}}">
+        <div class="row wrap" style="margin-top:20px">
+          <button type="button" class="btn btn-secondary" onClick="{{confirm}}">Всё верно</button>
+          <button type="button" class="btn btn-ghost" onClick="{{edit}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg>Исправить</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{confirmed}}" hint-placeholder-val="{{false}}">
+        <p class="dot dot-green" style="margin:20px 0 0;font-size:16px">Сохранили</p>
+      </sc-if>
+    </div>
+  </section>
+</sc-if>

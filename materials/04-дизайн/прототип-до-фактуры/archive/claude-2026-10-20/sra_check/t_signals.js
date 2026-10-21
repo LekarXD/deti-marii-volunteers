@@ -1,0 +1,20 @@
+module.exports = (C, V) => {
+  let v = V();
+  console.log('lead:', v.lead, '| att', v.att.length, '| dis', v.dismissed.length, '| filters', v.filters.map(f=>f.label+f.n).join(','));
+  v.att[0].acts[0].run(); v = V(); console.log('after call:', v.att[0].isActed, v.att[0].actedText, '| lead', v.lead);
+  v.att[1].startDismiss(); v = V(); console.log('dismissing:', v.att[1].isDismissing, v.att[1].confirmDis);
+  v.att[1].confirm(); v = V(); console.log('confirm w/o reason still:', v.att[1].isDismissing);
+  v.att[1].reasons[0].pick(); v = V(); console.log('reason picked:', v.att[1].confirmDis);
+  v.att[1].confirm(); v = V(); console.log('after dismiss att:', v.att.length, 'dis:', v.dismissed.map(d=>d.name+': '+d.reason).join(' | '));
+  v.dismissed[1].restore(); v = V(); console.log('restored att:', v.att.length);
+  v.dismissed[0].toggleWhy(); v = V(); console.log('why:', v.dismissed[0].showWhy, v.dismissed[0].whyLabel);
+  v.filters[3].pick(); v = V(); console.log('shift filter:', v.showUrgent, v.att.map(a=>a.name), v.showGood, v.showDis, v.showNone);
+  v.filters[1].pick(); v = V(); console.log('kids filter:', v.showUrgent, v.showAtt, v.showGood, v.showDis);
+  v.startThank(); v = V(); console.log('thank:', v.thankOpen, v.thankDraft); v.editThank(); v = V(); console.log('edit', v.thankEdit); v.sendThank(); v = V(); console.log('sent', v.thankSent);
+  v.modes[1].pick(); v = V(); console.log('psy:', v.isPsy, v.avInit, v.protoDone, v.closeDis);
+  v.checks.forEach(c => { if (!c.on) c.toggle(); v = V(); }); v = V(); console.log('all checked:', v.protoDone, v.closeDis);
+  v.typeNote({target:{value:'Тест'}}); v = V(); v.addNote(); v = V(); console.log('notes:', v.notes.length);
+  v.closeCase(); v = V(); console.log('closed:', v.caseClosed, v.caseTag, v.log.length);
+  v.modes[0].pick(); v = V(); console.log('coord urgent status:', v.urgentStatus);
+  v.modes[2].pick(); v = V(); console.log('calm:', v.lead, v.showUrgent, v.showAtt, v.showGood, v.showNone);
+};

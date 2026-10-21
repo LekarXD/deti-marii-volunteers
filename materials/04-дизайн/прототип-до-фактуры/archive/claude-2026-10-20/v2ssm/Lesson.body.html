@@ -1,0 +1,183 @@
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<div class="lesson">
+  <div class="read-col">
+    <a class="back" href="Academy.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>Ассистент мастерской</a>
+    <h1 class="h1" id="lesson-title">Инклюзия: дети с особенностями развития</h1>
+
+    <article class="card read" id="text" aria-labelledby="lesson-title">
+      <p class="intro">В группах фонда есть дети с аутизмом, задержкой развития, нарушениями слуха или речи. Им нужно то же, что и всем: безопасность, понятный порядок и взрослый, который не торопит.</p>
+
+      <h2>Предсказуемость</h2>
+      <p>Рассказывай заранее, что будет: «Сначала фон, потом перерыв, потом моем кисти». Если меняется зал или ведущий, предупреди до начала, а не в момент перехода.</p>
+
+      <h2>Сенсорная нагрузка</h2>
+      <p>Громкая музыка, яркий свет, толпа у стола: одному ребёнку это фон, другому — перегрузка. Он зажимает уши, раскачивается, перестаёт отвечать.</p>
+      <div class="note" role="note">
+        <span class="note-ic" aria-hidden="true"><svg class="ic ic-lg" viewBox="0 0 24 24"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></span>
+        <p>Срыв от перегрузки — не плохое поведение. Убери шум, говори минимум, держи дистанцию и позови второго взрослого.</p>
+      </div>
+
+      <h2>Выбор и темп</h2>
+      <p>Предлагай два понятных варианта: «Кисть или губка?» И жди ответа дольше, чем кажется нужным.</p>
+      <figure class="quote">
+        <blockquote><p>«Когда взрослый спрашивает „как тебе удобнее?“ и правда ждёт ответа, ребёнок начинает доверять».</p></blockquote>
+        <figcaption><span class="avatar av-v" aria-hidden="true">ИВ</span><span>Ирина Власова, психолог фонда</span></figcaption>
+      </figure>
+
+      <h2>Говори коротко</h2>
+      <div class="say">
+        <span><span class="say-cap">Вместо</span><span class="say-txt">«Давай, наверное, уже потихоньку будем убирать, а то скоро конец»</span></span>
+        <span><span class="say-cap is-good">Лучше</span><span class="say-txt is-good">«Через пять минут убираем»</span></span>
+      </div>
+      <div class="say">
+        <span><span class="say-cap">Вместо</span><span class="say-txt">«Что случилось? Тебе не нравится? Почему ты так?»</span></span>
+        <span><span class="say-cap is-good">Лучше</span><span class="say-txt is-good">«Громко. Сейчас станет тише»</span></span>
+      </div>
+    </article>
+
+    <section class="blk" id="video" aria-labelledby="video-title">
+      <div class="blk-head"><h2 class="h2" id="video-title">Видео</h2></div>
+      <figure class="video" aria-label="Видео, 8 минут 40 секунд">
+        <span class="vid-title">Ирина Власова: три случая из мастерских</span>
+        <sc-if value="{{videoIdle}}" hint-placeholder-val="{{true}}">
+          <button type="button" class="play" aria-label="Смотреть видео" onClick="{{playVideo}}"><svg class="ic ic-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></button>
+          <span class="vid-dur num">8:40</span>
+        </sc-if>
+        <sc-if value="{{videoOn}}" hint-placeholder-val="{{false}}">
+          <span class="playing"><span class="num">2:15</span><span class="bar"><i style="width:26%"></i></span><span class="num">8:40</span></span>
+        </sc-if>
+      </figure>
+    </section>
+
+    <section class="blk" id="exercise" aria-labelledby="ex-title">
+      <div class="blk-head">
+        <h2 class="h2" id="ex-title">Разложи по корзинам</h2>
+        <p class="lead">Выбери карточку, потом корзину.</p>
+      </div>
+      <sc-if value="{{hasPool}}" hint-placeholder-val="{{true}}">
+        <div class="stmts">
+          <sc-for list="{{pool}}" as="c" hint-placeholder-count="6">
+            <button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.text}}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div class="bins">
+        <div class="card bin">
+          <div class="bin-head">
+            <div class="row" style="gap:14px"><span class="bin-ic bin-ok" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><h3 class="h3">Помогает</h3></div>
+            <sc-if value="{{hasSel}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-secondary btn-sm" onClick="{{putHelp}}">Положить сюда</button></sc-if>
+          </div>
+          <div class="list">
+            <sc-for list="{{helpItems}}" as="b" hint-placeholder-count="2">
+              <div class="li bin-li">
+                <span class="grow"><span class="bin-t">{{b.text}}</span><sc-if value="{{b.wrong}}" hint-placeholder-val="{{false}}"><span class="why">{{b.why}}</span></sc-if></span>
+                <sc-if value="{{b.plain}}" hint-placeholder-val="{{true}}"><button type="button" class="x" aria-label="{{b.backLabel}}" onClick="{{b.unplace}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></sc-if>
+                <sc-if value="{{b.right}}" hint-placeholder-val="{{false}}"><span class="v v-ok"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span class="sr">Верно</span></span></sc-if>
+                <sc-if value="{{b.wrong}}" hint-placeholder-val="{{false}}"><span class="v v-no"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="sr">Неверно</span></span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div class="card bin">
+          <div class="bin-head">
+            <div class="row" style="gap:14px"><span class="bin-ic bin-no" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span><h3 class="h3">Мешает</h3></div>
+            <sc-if value="{{hasSel}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-secondary btn-sm" onClick="{{putHurt}}">Положить сюда</button></sc-if>
+          </div>
+          <div class="list">
+            <sc-for list="{{hurtItems}}" as="b" hint-placeholder-count="2">
+              <div class="li bin-li">
+                <span class="grow"><span class="bin-t">{{b.text}}</span><sc-if value="{{b.wrong}}" hint-placeholder-val="{{false}}"><span class="why">{{b.why}}</span></sc-if></span>
+                <sc-if value="{{b.plain}}" hint-placeholder-val="{{true}}"><button type="button" class="x" aria-label="{{b.backLabel}}" onClick="{{b.unplace}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></sc-if>
+                <sc-if value="{{b.right}}" hint-placeholder-val="{{false}}"><span class="v v-ok"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span class="sr">Верно</span></span></sc-if>
+                <sc-if value="{{b.wrong}}" hint-placeholder-val="{{false}}"><span class="v v-no"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg><span class="sr">Неверно</span></span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div class="foot">
+        <sc-if value="{{exWait}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary" aria-disabled="true">Проверить</button><span class="p">Сначала разложи все карточки</span></sc-if>
+        <sc-if value="{{exReady}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-secondary" onClick="{{checkEx}}">Проверить</button></sc-if>
+        <sc-if value="{{exChecked}}" hint-placeholder-val="{{false}}"><span class="res"><b class="num">{{exScore}}</b>верно</span><button type="button" class="btn btn-ghost btn-sm" onClick="{{resetEx}}">Разложить заново</button></sc-if>
+      </div>
+    </section>
+
+    <div class="file" id="file">
+      <span class="art art-o" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
+      <span class="h3 grow">Памятка: инклюзивное занятие</span>
+      <button type="button" class="btn btn-secondary"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Скачать PDF</button>
+    </div>
+
+    <section class="blk" id="test" aria-labelledby="test-title">
+      <div class="blk-head">
+        <h2 class="h2" id="test-title">Тест</h2>
+        <p class="lead">Три вопроса, нужно 2 верных ответа.</p>
+      </div>
+      <sc-for list="{{questions}}" as="q" hint-placeholder-count="3">
+        <fieldset class="q">
+          <legend class="q-title">{{q.title}}</legend>
+          <div class="opts">
+            <sc-for list="{{q.opts}}" as="o" hint-placeholder-count="3">
+              <button type="button" class="{{o.cls}}" aria-pressed="{{o.pressed}}" onClick="{{o.pick}}"><span class="letter" aria-hidden="true">{{o.letter}}</span><span>{{o.text}}</span></button>
+            </sc-for>
+          </div>
+          <sc-if value="{{q.showWhy}}" hint-placeholder-val="{{false}}"><p class="q-why">{{q.why}}</p></sc-if>
+        </fieldset>
+      </sc-for>
+      <div class="foot" style="margin-top:0">
+        <sc-if value="{{testWait}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary" aria-disabled="true">Проверить ответы</button><span class="p">Ответь на все вопросы</span></sc-if>
+        <sc-if value="{{testReady}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-secondary" onClick="{{checkTest}}">Проверить ответы</button></sc-if>
+        <sc-if value="{{tested}}" hint-placeholder-val="{{false}}"><span class="res"><b class="num">{{testScore}}</b>верно</span></sc-if>
+        <sc-if value="{{testFailed}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-secondary" onClick="{{retryTest}}">Пройти тест ещё раз</button></sc-if>
+      </div>
+    </section>
+
+    <section class="card-hero blk" aria-labelledby="done-title">
+      <div class="hero-grid">
+        <div class="grow">
+          <p class="eyebrow" style="margin:0">Модуль 3 из 5</p>
+          <h2 class="hero-title" id="done-title">{{heroTitle}}</h2>
+          <p class="lead">{{heroLead}}</p>
+          <div class="row wrap" style="margin-top:28px">
+            <sc-if value="{{canMark}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-primary btn-lg" onClick="{{markDone}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Отметить пройденным</button></sc-if>
+            <sc-if value="{{cantMark}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-primary btn-lg" aria-disabled="true">Отметить пройденным</button></sc-if>
+            <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+              <a class="btn btn-primary btn-lg" href="Simulator.dc.html">К тренажёру<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+              <button type="button" class="btn btn-ghost btn-lg" onClick="{{undoDone}}">Отменить</button>
+            </sc-if>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if>
+          <sc-if value="{{notDone}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></sc-if>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="aside" aria-label="Прогресс урока">
+    <div class="card">
+      <p class="prog-num num">{{progLabel}}</p>
+      <div class="bar bar-green" style="margin-top:16px"><i style="{{progStyle}}"></i></div>
+      <nav class="toc" aria-label="Шаги урока">
+        <sc-for list="{{steps}}" as="st" hint-placeholder-count="4">
+          <a class="{{st.cls}}" href="{{st.href}}">
+            <span class="{{st.icCls}}" aria-hidden="true">
+              <sc-if value="{{st.done}}" hint-placeholder-val="{{true}}"><svg class="ic ic-sm" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if>
+              <sc-if value="{{st.todo}}" hint-placeholder-val="{{false}}">{{st.n}}</sc-if>
+            </span>
+            <span>{{st.label}}</span>
+            <sc-if value="{{st.done}}" hint-placeholder-val="{{true}}"><span class="sr">пройдено</span></sc-if>
+          </a>
+        </sc-for>
+      </nav>
+    </div>
+    <a class="btn btn-ai btn-block" href="Mentor.dc.html" style="margin-top:12px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg>Спросить наставника</a>
+  </aside>
+</div>

@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Профиль — Опора</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--HELMET-->
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>волонтёры «Дети Марии»</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="Home.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>Главная</a>
+    <a href="Catalog.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Возможности</a>
+    <a href="Schedule.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Мои смены</a>
+    <a href="Academy.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Академия</a>
+    <a href="Messages.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Сообщения<span class="count">3</span></a>
+    <a href="Hours.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg>Мой путь</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="CoordHome.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид координатора</a>
+    <div class="pillbox">
+      <a class="iconbtn" href="Mentor.dc.html" aria-label="ИИ-наставник"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></a>
+      <button class="iconbtn" type="button" aria-label="Уведомления, 2 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <a href="Profile.dc.html" class="avatar av-o" aria-current="page" aria-label="Профиль: Анна Соколова">АС</a>
+    </div>
+  </div>
+</header>
+
+<section class="card-hero" aria-labelledby="who">
+  <div class="id">
+    <span class="id-av" aria-hidden="true">АС</span>
+    <div class="grow">
+      <p class="eyebrow" style="margin:0">Волонтёр с 13 июня</p>
+      <h1 class="hero-title" id="who">Анна Соколова</h1>
+      <p class="lead">Ассистент в мастерской живописи</p>
+    </div>
+    <a class="btn btn-primary btn-lg" href="Hours.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><path d="M13.5 13.5h3v3h-3zM20.5 13.5v3M13.5 20.5h7"/></svg>Справка о часах</a>
+  </div>
+</section>
+
+<div class="tabs" role="tablist" aria-label="Разделы профиля" style="margin-top:40px">
+  <sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
+    <button type="button" role="tab" class="{{t.cls}}" aria-selected="{{t.sel}}" aria-controls="profile-panel" onClick="{{t.pick}}">{{t.label}}</button>
+  </sc-for>
+</div>
+
+<div class="tabpanel" id="profile-panel" role="tabpanel" aria-label="{{tabLabel}}">
+
+  <!-- Обо мне -->
+  <sc-if value="{{isAbout}}" hint-placeholder-val="{{true}}">
+    <div class="split">
+      <div class="main-col">
+        <section class="card" aria-labelledby="about-title">
+          <div class="section-head" style="margin-bottom:10px">
+            <h2 class="h3" id="about-title">О себе</h2>
+            <sc-if value="{{notEditing}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-ghost btn-sm" onClick="{{startEdit}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg>Изменить</button></sc-if>
+          </div>
+          <sc-if value="{{notEditing}}" hint-placeholder-val="{{true}}"><p class="p pre">{{about}}</p></sc-if>
+          <sc-if value="{{editing}}" hint-placeholder-val="{{false}}">
+            <label class="sr" for="about-text">О себе</label>
+            <textarea id="about-text" class="textarea" style="min-height:180px" value="{{aboutDraft}}" onChange="{{onAboutDraft}}"></textarea>
+            <div class="row wrap" style="margin-top:12px">
+              <button type="button" class="btn btn-secondary" onClick="{{saveAbout}}">Сохранить</button>
+              <button type="button" class="btn btn-ghost" onClick="{{cancelEdit}}">Отмена</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{aiIdle}}" hint-placeholder-val="{{false}}">
+            <button type="button" class="btn btn-ai" style="margin-top:18px" onClick="{{runAi}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>Обновить навыки по тексту</button>
+          </sc-if>
+        </section>
+
+        <sc-if value="{{aiOpen}}" hint-placeholder-val="{{true}}">
+          <section class="ai-box" style="margin-top:16px" aria-labelledby="ai-title">
+            <div class="row" style="gap:12px"><h2 class="h3" id="ai-title">Добавить керамику в навыки?</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+            <p class="quote">«Весной прошла курсы лепки и хочу попробовать керамику с детьми»</p>
+            <div class="row wrap" style="margin-top:16px">
+              <button type="button" class="btn btn-secondary" onClick="{{acceptAi}}">Добавить</button>
+              <button type="button" class="btn btn-ghost" onClick="{{rejectAi}}">Не надо</button>
+            </div>
+          </section>
+        </sc-if>
+        <sc-if value="{{aiAccepted}}" hint-placeholder-val="{{false}}">
+          <div class="ai-box row wrap" style="margin-top:16px;justify-content:space-between" role="status">
+            <span class="row strong"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Керамика в навыках</span>
+            <button type="button" class="btn btn-ghost btn-sm" onClick="{{undoAi}}">Отменить</button>
+          </div>
+        </sc-if>
+      </div>
+
+      <aside class="side-col card" aria-labelledby="team-title" style="flex-basis:440px">
+        <h2 class="h3" id="team-title">Команда</h2>
+        <div class="list" style="margin-top:6px">
+          <div class="li">
+            <span class="art art-o" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></span>
+            <span class="grow"><span class="li-title" style="display:block">«Подсолнухи»</span><span class="meta">Сб, 12:00–14:00</span></span>
+          </div>
+          <a class="li person" href="Messages.dc.html" aria-label="Написать Светлане Ким, наставнице">
+            <span class="avatar av-v" aria-hidden="true">СК</span>
+            <span class="li-title grow">Светлана Ким, наставница</span>
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--quiet)"><path d="m9 6 6 6-6 6"/></svg>
+          </a>
+          <a class="li person" href="Messages.dc.html" aria-label="Написать Ольге Лебедевой, координатору">
+            <span class="avatar av-b" aria-hidden="true">ОЛ</span>
+            <span class="li-title grow">Ольга Лебедева, координатор</span>
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--quiet)"><path d="m9 6 6 6-6 6"/></svg>
+          </a>
+        </div>
+      </aside>
+    </div>
+  </sc-if>
+
+  <!-- Навыки -->
+  <sc-if value="{{isSkills}}" hint-placeholder-val="{{false}}">
+    <section class="card" aria-label="Навыки и интересы">
+      <div class="grp">
+        <h2 class="h3">Навыки</h2>
+        <div class="chips">
+          <sc-for list="{{skills}}" as="sk" hint-placeholder-count="4">
+            <button type="button" class="chip chip-skill" aria-label="{{sk.aria}}" onClick="{{sk.toggle}}">{{sk.label}}<span class="lvl">{{sk.lvl}}</span></button>
+          </sc-for>
+          <sc-if value="{{notAddingSkill}}" hint-placeholder-val="{{true}}"><button type="button" class="addchip" onClick="{{startAddSkill}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Добавить</button></sc-if>
+        </div>
+        <sc-if value="{{addingSkill}}" hint-placeholder-val="{{false}}">
+          <div class="add-row">
+            <label class="sr" for="skill-new">Новый навык</label>
+            <input id="skill-new" class="input" type="text" value="{{skillDraft}}" onChange="{{onSkillDraft}}" placeholder="Например, линогравюра">
+            <button type="button" class="btn btn-secondary" onClick="{{commitSkill}}">Добавить</button>
+            <button type="button" class="btn btn-ghost" onClick="{{cancelSkill}}">Отмена</button>
+          </div>
+        </sc-if>
+      </div>
+      <sc-for list="{{chipGroups}}" as="cg" hint-placeholder-count="3">
+        <div class="grp">
+          <h2 class="h3">{{cg.title}}</h2>
+          <div class="chips">
+            <sc-for list="{{cg.items}}" as="it" hint-placeholder-count="4"><button type="button" class="{{it.cls}}" aria-pressed="{{it.pressed}}" onClick="{{it.toggle}}">{{it.label}}</button></sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </section>
+  </sc-if>
+
+  <!-- Время -->
+  <sc-if value="{{isAvail}}" hint-placeholder-val="{{false}}">
+    <section class="card" aria-label="Время">
+      <h2 class="h3">Когда свободна</h2>
+      <div class="avail" role="group" aria-label="Свободное время по дням недели">
+        <span aria-hidden="true"></span>
+        <sc-for list="{{days}}" as="d" hint-placeholder-count="7"><span class="dh">{{d}}</span></sc-for>
+        <sc-for list="{{availRows}}" as="ar" hint-placeholder-count="3">
+          <span class="rh">{{ar.label}}</span>
+          <sc-for list="{{ar.cells}}" as="c" hint-placeholder-count="7">
+            <button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" aria-label="{{c.aria}}" onClick="{{c.toggle}}">
+              <sc-if value="{{c.on}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if>
+            </button>
+          </sc-for>
+        </sc-for>
+      </div>
+      <div class="setrow" style="margin-top:24px">
+        <h2 class="h3">Как часто</h2>
+        <div class="seg" role="group" aria-label="Как часто" style="flex-wrap:wrap">
+          <sc-for list="{{freq}}" as="fq" hint-placeholder-count="3"><button type="button" class="{{fq.cls}}" aria-pressed="{{fq.pressed}}" onClick="{{fq.pick}}">{{fq.label}}</button></sc-for>
+        </div>
+      </div>
+      <div class="setrow">
+        <h2 class="h3">Пауза</h2>
+        <sc-if value="{{notPaused}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary" onClick="{{togglePause}}">Поставить паузу</button></sc-if>
+        <sc-if value="{{paused}}" hint-placeholder-val="{{false}}">
+          <span class="row" style="gap:14px"><span class="dot dot-yellow">На паузе</span><button type="button" class="btn btn-ghost" onClick="{{togglePause}}">Снять паузу</button></span>
+        </sc-if>
+      </div>
+    </section>
+  </sc-if>
+
+  <!-- Документы -->
+  <sc-if value="{{isDocs}}" hint-placeholder-val="{{false}}">
+    <section class="card" aria-label="Документы">
+      <div class="list">
+        <sc-for list="{{docs}}" as="dc" hint-placeholder-count="4">
+          <div class="li">
+            <span class="{{dc.art}}" aria-hidden="true">
+              <sc-if value="{{dc.isShield}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></sc-if>
+              <sc-if value="{{dc.isFile}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></sc-if>
+              <sc-if value="{{dc.isPen}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg></sc-if>
+              <sc-if value="{{dc.isList}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 11l1.5 1.5L13 10M9 16h6"/></svg></sc-if>
+            </span>
+            <span class="li-title grow">{{dc.title}}</span>
+            <sc-if value="{{dc.hasDate}}" hint-placeholder-val="{{false}}"><span class="meta">{{dc.date}}</span></sc-if>
+            <svg class="ic ic-lg" viewBox="0 0 24 24" role="img" aria-label="Действует" style="color:var(--green-ink)"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <!-- Уведомления -->
+  <sc-if value="{{isNotif}}" hint-placeholder-val="{{false}}">
+    <section class="card" aria-label="Уведомления">
+      <h2 class="h3">Куда присылать</h2>
+      <div class="chips" role="group" aria-label="Каналы" style="margin-top:14px">
+        <sc-for list="{{channels}}" as="ch" hint-placeholder-count="4">
+          <button type="button" class="{{ch.cls}}" aria-pressed="{{ch.pressed}}" onClick="{{ch.toggle}}">{{ch.label}}</button>
+        </sc-for>
+      </div>
+      <hr class="divider" style="margin:28px 0 22px">
+      <h2 class="h3">О чём</h2>
+      <div style="margin-top:6px">
+        <sc-for list="{{topics}}" as="tp" hint-placeholder-count="4">
+          <div class="setrow">
+            <span class="li-title">{{tp.label}}</span>
+            <button type="button" class="{{tp.cls}}" role="switch" aria-checked="{{tp.checked}}" aria-label="{{tp.label}}" onClick="{{tp.toggle}}"></button>
+          </div>
+        </sc-for>
+      </div>
+      <div class="setrow" style="margin-top:10px">
+        <span class="row">
+          <button type="button" class="{{quietCls}}" role="switch" aria-checked="{{quietChecked}}" aria-labelledby="quiet-title" onClick="{{toggleQuiet}}"></button>
+          <span class="li-title" id="quiet-title">Тихие часы</span>
+        </span>
+        <span class="row">
+          <label class="sr" for="q-from">С</label>
+          <input id="q-from" class="input time-in num" type="text" inputmode="numeric" maxlength="5" value="{{qFrom}}" onChange="{{onQFrom}}">
+          <span class="p" aria-hidden="true">—</span>
+          <label class="sr" for="q-to">До</label>
+          <input id="q-to" class="input time-in num" type="text" inputmode="numeric" maxlength="5" value="{{qTo}}" onChange="{{onQTo}}">
+        </span>
+      </div>
+    </section>
+  </sc-if>
+
+  <!-- Приватность -->
+  <sc-if value="{{isPrivacy}}" hint-placeholder-val="{{false}}">
+    <section class="ai-box" aria-labelledby="sees-title">
+      <div class="row" style="gap:12px"><h2 class="h3" id="sees-title">Что видит ИИ</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+      <div style="margin-top:6px">
+        <sc-for list="{{aiSees}}" as="a" hint-placeholder-count="3">
+          <div class="ai-row">
+            <span class="li-title grow">{{a.title}}</span>
+            <button type="button" class="{{a.cls}}" role="switch" aria-checked="{{a.checked}}" aria-label="{{a.title}}" onClick="{{a.toggle}}"></button>
+          </div>
+        </sc-for>
+        <div class="ai-row">
+          <span class="li-title grow">Почта, телефон, документы и фото детей — никогда</span>
+          <svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--violet)"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px" aria-labelledby="data-title">
+      <sc-if value="{{delIdle}}" hint-placeholder-val="{{true}}">
+        <div class="row wrap" style="justify-content:space-between;gap:12px 24px">
+          <h2 class="h3" id="data-title">Мои данные</h2>
+          <div class="row wrap">
+            <sc-if value="{{notExported}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary" onClick="{{exportData}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Скачать архив</button></sc-if>
+            <sc-if value="{{exported}}" hint-placeholder-val="{{false}}"><span class="row strong" role="status"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Архив придёт на почту</span></sc-if>
+            <button type="button" class="btn btn-danger" onClick="{{askDelete}}">Удалить аккаунт</button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{delAsk}}" hint-placeholder-val="{{false}}">
+        <h2 class="h3">Удалить аккаунт насовсем?</h2>
+        <p class="p" style="margin-top:8px">Ольга поможет спокойно попрощаться с «Подсолнухами».</p>
+        <div class="row wrap" style="margin-top:16px">
+          <button type="button" class="btn btn-danger" onClick="{{confirmDelete}}">Да, удалить</button>
+          <button type="button" class="btn btn-ghost" onClick="{{cancelDelete}}">Отмена</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{delDone}}" hint-placeholder-val="{{false}}">
+        <div class="row wrap" style="justify-content:space-between;gap:12px 24px" role="status">
+          <h2 class="h3">Запрос отправлен, Ольга напишет</h2>
+          <button type="button" class="btn btn-ghost" onClick="{{cancelDelete}}">Я передумала</button>
+        </div>
+      </sc-if>
+    </section>
+  </sc-if>
+
+</div>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":970}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const about = 'Я графический дизайнер, рисую акварелью — чаще всего городские скетчи. Была вожатой в лагере, в отряде ребята 8–12 лет. Весной прошла курсы лепки и хочу попробовать керамику с детьми.';
+    this.state = {
+      tab: 'about',
+      about, aboutDraft: about, editing: false, ai: 'open',
+      levels: { watercolor: 'sure', design: 'sure', group: 'sure', special: 'learn', ceramics: 'learn' },
+      extraSkills: [], addingSkill: false, skillDraft: '',
+      interests: { painting: true, ceramics: true, theatre: true },
+      ages: { a8: true },
+      places: { dmitrovka: true, online: true },
+      avail: { '5-1': true, '2-2': true },
+      freq: 'week', paused: false,
+      channels: { tg: true, mail: true },
+      topics: { shifts: true, learn: true, msgs: true },
+      quiet: true, qFrom: '22:00', qTo: '09:00',
+      aiSee: { profile: true, refl: true, chats: true },
+      exported: false, del: 'idle'
+    };
+  }
+  renderVals() {
+    const s = this.state;
+    const tabDefs = [
+      { id: 'about', label: 'Обо мне' },
+      { id: 'skills', label: 'Навыки' },
+      { id: 'avail', label: 'Время' },
+      { id: 'docs', label: 'Документы' },
+      { id: 'notif', label: 'Уведомления' },
+      { id: 'privacy', label: 'Приватность' }
+    ];
+    const tabs = tabDefs.map((t) => ({
+      ...t,
+      cls: t.id === s.tab ? 'is-on' : '',
+      sel: t.id === s.tab ? 'true' : 'false',
+      pick: () => this.setState({ tab: t.id })
+    }));
+    const current = tabDefs.find((t) => t.id === s.tab);
+
+    const lvlText = { sure: 'уверенно', learn: 'учусь' };
+    const skillDefs = [
+      { id: 'watercolor', label: 'Акварель' },
+      { id: 'design', label: 'Графический дизайн' },
+      { id: 'group', label: 'Группа 8–12 лет' },
+      { id: 'special', label: 'Дети с особенностями' }
+    ];
+    if (s.ai === 'accepted') skillDefs.push({ id: 'ceramics', label: 'Керамика' });
+    s.extraSkills.forEach((label, i) => skillDefs.push({ id: 'x' + i, label }));
+    const skills = skillDefs.map((d) => {
+      const lv = s.levels[d.id] || 'learn';
+      const nextLv = lv === 'sure' ? 'learn' : 'sure';
+      return {
+        label: d.label, lvl: lvlText[lv],
+        aria: d.label + ', ' + lvlText[lv] + '. Сменить на «' + lvlText[nextLv] + '»',
+        toggle: () => this.setState({ levels: { ...s.levels, [d.id]: nextLv } })
+      };
+    });
+
+    const chipsOf = (defs, key) => defs.map((d) => {
+      const on = !!s[key][d.id];
+      return {
+        label: d.label,
+        cls: on ? 'chip is-on' : 'chip',
+        pressed: on ? 'true' : 'false',
+        toggle: () => this.setState({ [key]: { ...s[key], [d.id]: !on } })
+      };
+    });
+    const chipGroups = [
+      { title: 'Интересы', items: chipsOf([
+        { id: 'painting', label: 'Живопись' }, { id: 'ceramics', label: 'Керамика' }, { id: 'theatre', label: 'Театр' },
+        { id: 'cinema', label: 'Кино' }, { id: 'games', label: 'Настольные игры' }, { id: 'music', label: 'Музыка' }
+      ], 'interests') },
+      { title: 'Возраст детей', items: chipsOf([
+        { id: 'a4', label: '4–7 лет' }, { id: 'a8', label: '8–12 лет' }, { id: 'a13', label: '13–17 лет' }, { id: 'a18', label: 'Выпускники' }
+      ], 'ages') },
+      { title: 'Где удобно', items: chipsOf([
+        { id: 'dmitrovka', label: 'Мастерская на Дмитровке' }, { id: 'cssu', label: 'Выезды в ЦССУ' }, { id: 'online', label: 'Онлайн' }
+      ], 'places') }
+    ];
+
+    const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    const parts = ['Утро', 'День', 'Вечер'];
+    const availRows = parts.map((p, pi) => ({
+      label: p,
+      cells: days.map((d, di) => {
+        const k = di + '-' + pi;
+        const on = !!s.avail[k];
+        return {
+          on, cls: on ? 'slot is-on' : 'slot', pressed: on ? 'true' : 'false', aria: d + ', ' + p.toLowerCase(),
+          toggle: () => this.setState({ avail: { ...s.avail, [k]: !on } })
+        };
+      })
+    }));
+    const freq = [
+      { id: 'week', label: 'Каждую неделю' }, { id: 'twice', label: '2–3 раза в месяц' }, { id: 'month', label: 'Раз в месяц' }
+    ].map((f) => ({ ...f, cls: f.id === s.freq ? 'is-on' : '', pressed: f.id === s.freq ? 'true' : 'false', pick: () => this.setState({ freq: f.id }) }));
+
+    const docs = [
+      { title: 'Справка о несудимости', date: '9 июня', icon: 'shield', art: 'art art-b' },
+      { title: 'Согласие на обработку данных', icon: 'file', art: 'art art-g' },
+      { title: 'Договор добровольца', icon: 'pen', art: 'art art-g' },
+      { title: 'Кодекс волонтёра', icon: 'list', art: 'art art-g' }
+    ].map((d) => ({ ...d, date: d.date || '', hasDate: !!d.date, isShield: d.icon === 'shield', isFile: d.icon === 'file', isPen: d.icon === 'pen', isList: d.icon === 'list' }));
+
+    const channels = [
+      { id: 'tg', label: 'Telegram' }, { id: 'mail', label: 'Почта' }, { id: 'vk', label: 'VK' }, { id: 'max', label: 'MAX' }
+    ].map((c) => {
+      const on = !!s.channels[c.id];
+      return {
+        label: c.label, cls: on ? 'chip is-on' : 'chip', pressed: on ? 'true' : 'false',
+        toggle: () => this.setState({ channels: { ...s.channels, [c.id]: !on } })
+      };
+    });
+    const topics = [
+      { id: 'shifts', label: 'Смены и замены' }, { id: 'learn', label: 'Обучение' },
+      { id: 'msgs', label: 'Сообщения' }, { id: 'news', label: 'Новости фонда' }
+    ].map((t) => {
+      const on = !!s.topics[t.id];
+      return {
+        label: t.label, cls: on ? 'toggle is-on' : 'toggle', checked: on ? 'true' : 'false',
+        toggle: () => this.setState({ topics: { ...s.topics, [t.id]: !on } })
+      };
+    });
+
+    const aiSees = [
+      { id: 'profile', title: 'Навыки и «о себе» — для подбора' },
+      { id: 'refl', title: 'Рефлексии, без имён детей' },
+      { id: 'chats', title: 'Чаты команды — для сводки' }
+    ].map((a) => {
+      const on = !!s.aiSee[a.id];
+      return {
+        ...a, cls: on ? 'toggle is-on' : 'toggle', checked: on ? 'true' : 'false',
+        toggle: () => this.setState({ aiSee: { ...s.aiSee, [a.id]: !on } })
+      };
+    });
+
+    return {
+      tabs, tabLabel: current ? current.label : '',
+      isAbout: s.tab === 'about', isSkills: s.tab === 'skills', isAvail: s.tab === 'avail',
+      isDocs: s.tab === 'docs', isNotif: s.tab === 'notif', isPrivacy: s.tab === 'privacy',
+
+      about: s.about, aboutDraft: s.aboutDraft,
+      editing: s.editing, notEditing: !s.editing,
+      startEdit: () => this.setState({ editing: true, aboutDraft: s.about }),
+      onAboutDraft: (e) => this.setState({ aboutDraft: e.target.value }),
+      saveAbout: () => this.setState({ about: s.aboutDraft, editing: false, ai: s.aboutDraft !== s.about ? 'idle' : s.ai }),
+      cancelEdit: () => this.setState({ editing: false, aboutDraft: s.about }),
+      aiIdle: s.ai === 'idle' && !s.editing, aiOpen: s.ai === 'open', aiAccepted: s.ai === 'accepted',
+      runAi: () => this.setState({ ai: 'open' }),
+      acceptAi: () => this.setState({ ai: 'accepted' }),
+      rejectAi: () => this.setState({ ai: 'rejected' }),
+      undoAi: () => this.setState({ ai: 'open' }),
+
+      skills, chipGroups,
+      addingSkill: s.addingSkill, notAddingSkill: !s.addingSkill, skillDraft: s.skillDraft,
+      startAddSkill: () => this.setState({ addingSkill: true, skillDraft: '' }),
+      onSkillDraft: (e) => this.setState({ skillDraft: e.target.value }),
+      commitSkill: () => {
+        const t = (s.skillDraft || '').trim();
+        if (!t) { this.setState({ addingSkill: false }); return; }
+        this.setState({ extraSkills: s.extraSkills.concat([t]), addingSkill: false, skillDraft: '' });
+      },
+      cancelSkill: () => this.setState({ addingSkill: false, skillDraft: '' }),
+
+      days, availRows, freq,
+      paused: s.paused, notPaused: !s.paused,
+      togglePause: () => this.setState({ paused: !s.paused }),
+
+      docs,
+
+      channels, topics,
+      quietCls: s.quiet ? 'toggle is-on' : 'toggle',
+      quietChecked: s.quiet ? 'true' : 'false',
+      toggleQuiet: () => this.setState({ quiet: !s.quiet }),
+      qFrom: s.qFrom, qTo: s.qTo,
+      onQFrom: (e) => this.setState({ qFrom: e.target.value }),
+      onQTo: (e) => this.setState({ qTo: e.target.value }),
+
+      aiSees,
+      exported: s.exported, notExported: !s.exported,
+      exportData: () => this.setState({ exported: true }),
+      delIdle: s.del === 'idle', delAsk: s.del === 'ask', delDone: s.del === 'done',
+      askDelete: () => this.setState({ del: 'ask' }),
+      confirmDelete: () => this.setState({ del: 'done' }),
+      cancelDelete: () => this.setState({ del: 'idle' })
+    };
+  }
+}
+</script>
+</body>
+</html>

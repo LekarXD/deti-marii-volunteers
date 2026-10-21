@@ -1,0 +1,21 @@
+[
+ {"name":"dima","steps":[]},
+ {"name":"anna","steps":[{"fn":"modes.1.pick"}]},
+ {"name":"empty","steps":[{"fn":"modes.2.pick"}]},
+ {"name":"empty-reset","steps":[{"fn":"modes.2.pick"},{"fn":"resetFilters"}]},
+ {"name":"chip-signal","steps":[{"fn":"chips.4.pick"}]},
+ {"name":"chip-pause","steps":[{"fn":"chips.3.pick"}]},
+ {"name":"chip-new","steps":[{"fn":"chips.2.pick"}]},
+ {"name":"ws-theatre","steps":[{"fn":"setWs","value":"theatre"}]},
+ {"name":"query","steps":[{"fn":"typeQuery","value":"ан"}]},
+ {"name":"dima-tabs-hours","steps":[{"fn":"tabs.1.pick"}]},
+ {"name":"dima-tabs-learn","steps":[{"fn":"tabs.2.pick"}]},
+ {"name":"dima-tabs-refl","steps":[{"fn":"tabs.3.pick"}]},
+ {"name":"dima-actions","steps":[{"fn":"v.actions.0.run"},{"fn":"v.actions.1.run"},{"fn":"tabs.4.pick"}]},
+ {"name":"egor-hours","steps":[{"fn":"rows.3.pick"},{"fn":"tabs.1.pick"}]},
+ {"name":"egor-refl","steps":[{"fn":"rows.3.pick"},{"fn":"tabs.3.pick"}]},
+ {"name":"polina-refl","steps":[{"fn":"rows.4.pick"},{"fn":"tabs.3.pick"}]},
+ {"name":"ksenia","steps":[{"fn":"rows.9.pick"}]},
+ {"name":"marina-write","steps":[{"fn":"rows.8.pick"},{"fn":"v.write"},{"fn":"v.actions.1.run"}]},
+ {"name":"close","steps":[{"fn":"closePane"}]}
+]

@@ -1,0 +1,34 @@
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.pillbox .avatar[aria-current="page"]{box-shadow:0 0 0 2px var(--ink)}
+.id{display:flex;flex-wrap:wrap;align-items:center;gap:24px 32px}
+.id-av{width:136px;height:136px;flex:0 0 136px;border-radius:50%;background:rgba(255,255,255,.6);display:grid;place-items:center;font-size:48px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
+.hero-title{margin:8px 0 0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em}
+.tabpanel{margin-top:28px}
+.grp + .grp{border-top:1px solid var(--line);margin-top:24px;padding-top:24px}
+.grp .chips{margin-top:14px}
+.lvl{font-weight:500;color:var(--mute)}
+.chip-skill{color:var(--ink)}
+.addchip{display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 16px;border-radius:999px;border:0;background:transparent;font-size:15px;font-weight:600;color:var(--blue)}
+.addchip:hover{background:var(--blue-tint)}
+.add-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;max-width:560px}
+.add-row .input{flex:1 1 220px;width:auto;min-height:44px}
+.avail{display:grid;grid-template-columns:76px repeat(7,minmax(0,1fr));gap:6px;align-items:center;margin-top:16px}
+.avail .dh{font-size:15px;font-weight:600;color:var(--ink-2);text-align:center}
+.avail .rh{font-size:15px;color:var(--ink-2)}
+.slot{height:48px;padding:0;border-radius:14px;border:0;background:var(--soft);display:grid;place-items:center;color:var(--ink)}
+.slot:hover{background:var(--soft-2)}
+.slot.is-on{background:var(--yellow)}
+.setrow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;padding:16px 0;border-top:1px solid var(--line)}
+.setrow:first-child{border-top:0}
+.ai-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-top:1px solid #E4DBFA}
+.ai-row:first-child{border-top:0}
+.time-in{width:104px;min-height:44px;text-align:center}
+.quote{margin:8px 0 0;color:var(--ink-2)}
+.person{color:inherit;text-decoration:none}
+.person:hover{text-decoration:none}
+.person:hover .li-title{color:var(--blue)}
+.card .chip{background:var(--soft)}
+.card .chip:hover{box-shadow:inset 0 0 0 1px var(--line-2)}
+.card .chip.is-on{background:var(--ink);color:#fff}
+.card .seg{background:var(--soft)}
+@media (max-width:720px){.id-av{width:96px;height:96px;flex-basis:96px;font-size:34px}.hero-title{font-size:38px}.avail{grid-template-columns:52px repeat(7,minmax(0,1fr));gap:4px}.slot{height:40px;border-radius:10px}}

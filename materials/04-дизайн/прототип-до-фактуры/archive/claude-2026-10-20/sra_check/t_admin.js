@@ -1,0 +1,22 @@
+module.exports = (C, V) => {
+  let v = V();
+  console.log('default ai:', v.isAi, v.navAi, v.curAi, v.provWhere, '| budget', v.budgetLabel, v.budgetCanSave);
+  v.provs[2].pick(); v = V(); console.log('openai:', v.provDot, v.provWhere);
+  v.toggleRefl(); v = V(); console.log('refl off:', v.reflOff, v.reflCls);
+  v.typeBudget({target:{value:'1000'}}); v = V(); console.log('budget 1000 err', v.budgetErr, v.budgetCanSave);
+  v.typeBudget({target:{value:'6000'}}); v = V(); console.log('budget 6000', v.budgetErr, v.budgetCanSave); v.saveBudget(); v = V(); console.log('saved', v.budgetSaved, v.budgetLabel);
+  v.goRoles(); v = V(); console.log('roles', v.isRoles, v.matrix.map(r => r.label + ':' + r.cells.map(c => c.isLock ? 'L' : (c.isOn ? '1' : '0')).join('')).join(' '));
+  v.matrix[0].cells[2].toggle(); v = V(); console.log('locked toggle ignored', v.matrix[0].cells[2].isLock, v.permSaved);
+  v.matrix[3].cells[0].toggle(); v = V(); console.log('instr apps', v.matrix[3].cells[0].isOn, v.permSaved);
+  v.startInvite(); v = V(); console.log('invite open', v.inviteOpen, v.inviteIdle, v.sendInviteDis); v.sendInvite(); v = V(); console.log('still open', v.inviteOpen);
+  v.typeInvite({target:{value:'a@b.ru'}}); v = V(); v.sendInvite(); v = V(); console.log('sent', v.inviteSent, v.inviteIdle);
+  v.goImport(); v = V(); console.log('import', v.impSource); v.pickSheet(); v = V(); console.log('map', v.impMap, v.impName, v.mapRows.map(m => m.opts[0].l).join(','));
+  v.toggleDup(); v = V(); console.log('dup', v.showDup); v.doImport(); v = V(); console.log('done', v.impDone);
+  v.goChannels(); v = V(); console.log('ch', v.chans.map(c => c.name + (c.on ? '+' : '-')).join(' ')); v.chans[2].connect(); v = V(); console.log('vk', v.chans[2].on);
+  v.tpls[0].toggle(); v = V(); console.log('tpl edit', v.tpls[0].editing, v.tpls[0].btn);
+  v.goInteg(); v = V(); v.dobroNow(); v = V(); console.log('dobro', v.dobroDone);
+  v.goRules(); v = V(); console.log('rules clean', v.rulesClean, v.rulesDis);
+  v.rules[1].set({target:{value:'14'}}); v = V(); console.log('dirty', v.rulesDirty, v.rulesDis);
+  v.rules[0].set({target:{value:'0'}}); v = V(); console.log('bad', v.rulesBad, v.rulesDis);
+  v.rules[0].set({target:{value:'3'}}); v = V(); v.saveRules(); v = V(); console.log('saved', v.rulesSaved, v.rulesDirty, v.rulesClean);
+};

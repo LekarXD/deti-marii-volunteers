@@ -1,0 +1,49 @@
+{
+ "v": 3,
+ "createdOnFiles": {"v": 1, "at": "2026-10-20T13:40:00Z"},
+ "title": "Платформа волонтёров — прототип",
+ "launch": {"view": "canvas"},
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {"x": 0, "y": 0, "w": 1440, "h": 1700, "title": "Карта платформы и роли", "expand": "fill", "is_interactive": true},
+  "Apply.dc.html": {"x": 1520, "y": 0, "w": 1440, "h": 1800, "title": "Кандидат: стать волонтёром", "expand": "fill", "is_interactive": true},
+  "ApplicationStatus.dc.html": {"x": 3040, "y": 0, "w": 1440, "h": 1600, "title": "Кандидат: моя заявка", "expand": "fill", "is_interactive": true},
+
+  "Home.dc.html": {"x": 0, "y": 2400, "w": 1440, "h": 2000, "title": "Волонтёр: главная", "expand": "fill", "is_interactive": true},
+  "Catalog.dc.html": {"x": 1520, "y": 2400, "w": 1440, "h": 2100, "title": "Волонтёр: возможности и подбор", "expand": "fill", "is_interactive": true},
+  "Opportunity.dc.html": {"x": 3040, "y": 2400, "w": 1440, "h": 1900, "title": "Волонтёр: карточка возможности", "expand": "fill", "is_interactive": true},
+  "Schedule.dc.html": {"x": 4560, "y": 2400, "w": 1440, "h": 1700, "title": "Волонтёр: мои смены", "expand": "fill", "is_interactive": true},
+  "Reflection.dc.html": {"x": 6080, "y": 2400, "w": 1440, "h": 1700, "title": "Волонтёр: как прошло занятие", "expand": "fill", "is_interactive": true},
+  "Hours.dc.html": {"x": 7600, "y": 2400, "w": 1440, "h": 2200, "title": "Волонтёр: мой путь, часы и признание", "expand": "fill", "is_interactive": true},
+  "Messages.dc.html": {"x": 9120, "y": 2400, "w": 1440, "h": 1300, "title": "Волонтёр: сообщения", "expand": "fill", "is_interactive": true},
+  "Profile.dc.html": {"x": 10640, "y": 2400, "w": 1440, "h": 2000, "title": "Волонтёр: профиль", "expand": "fill", "is_interactive": true},
+
+  "Academy.dc.html": {"x": 0, "y": 5000, "w": 1440, "h": 2000, "title": "Академия: треки", "expand": "fill", "is_interactive": true},
+  "Lesson.dc.html": {"x": 1520, "y": 5000, "w": 1440, "h": 2800, "title": "Академия: урок", "expand": "fill", "is_interactive": true},
+  "Simulator.dc.html": {"x": 3040, "y": 5000, "w": 1440, "h": 2000, "title": "Академия: тренажёр трудных ситуаций", "expand": "fill", "is_interactive": true},
+  "Mentor.dc.html": {"x": 4560, "y": 5000, "w": 1440, "h": 1500, "title": "ИИ-наставник: что делать, если…", "expand": "fill", "is_interactive": true},
+  "Studio.dc.html": {"x": 6080, "y": 5000, "w": 1440, "h": 1100, "title": "Вебинар в студии", "expand": "fill", "is_interactive": true},
+
+  "CoordHome.dc.html": {"x": 0, "y": 8300, "w": 1440, "h": 2300, "title": "Фонд: обзор", "expand": "fill", "is_interactive": true},
+  "Pipeline.dc.html": {"x": 1520, "y": 8300, "w": 1440, "h": 1800, "title": "Фонд: заявки", "expand": "fill", "is_interactive": true},
+  "Volunteers.dc.html": {"x": 3040, "y": 8300, "w": 1440, "h": 2000, "title": "Фонд: волонтёры", "expand": "fill", "is_interactive": true},
+  "Shifts.dc.html": {"x": 4560, "y": 8300, "w": 1440, "h": 1900, "title": "Фонд: смены и подбор", "expand": "fill", "is_interactive": true},
+  "Signals.dc.html": {"x": 6080, "y": 8300, "w": 1440, "h": 1900, "title": "Фонд: сигналы и рефлексии", "expand": "fill", "is_interactive": true},
+  "Builder.dc.html": {"x": 7600, "y": 8300, "w": 1440, "h": 2100, "title": "Инструктор: уроки и треки", "expand": "fill", "is_interactive": true},
+  "Knowledge.dc.html": {"x": 9120, "y": 8300, "w": 1440, "h": 2000, "title": "Инструктор: база знаний", "expand": "fill", "is_interactive": true},
+  "Scenarios.dc.html": {"x": 10640, "y": 8300, "w": 1440, "h": 2100, "title": "Психолог: сценарии тренажёра", "expand": "fill", "is_interactive": true},
+  "Reports.dc.html": {"x": 12160, "y": 8300, "w": 1440, "h": 2100, "title": "Фонд: отчёты и признание", "expand": "fill", "is_interactive": true},
+  "Admin.dc.html": {"x": 13680, "y": 8300, "w": 1440, "h": 2000, "title": "Фонд: настройки", "expand": "fill", "is_interactive": true},
+
+  "Phone.dc.html": {"x": 0, "y": 11000, "w": 1400, "h": 1000, "title": "Телефон волонтёра", "is_interactive": true}
+ },
+ "order": ["Main.dc.html","Apply.dc.html","ApplicationStatus.dc.html","Home.dc.html","Catalog.dc.html","Opportunity.dc.html","Schedule.dc.html","Reflection.dc.html","Hours.dc.html","Messages.dc.html","Profile.dc.html","Academy.dc.html","Lesson.dc.html","Simulator.dc.html","Mentor.dc.html","Studio.dc.html","CoordHome.dc.html","Pipeline.dc.html","Volunteers.dc.html","Shifts.dc.html","Signals.dc.html","Builder.dc.html","Knowledge.dc.html","Scenarios.dc.html","Reports.dc.html","Admin.dc.html","Phone.dc.html"],
+ "notes": {
+  "row0": {"x": 0, "y": -300, "text": "Старт и кандидат", "kind": "title1", "maxW": 4480},
+  "row1": {"x": 0, "y": 2100, "text": "Волонтёр: смены, подбор, часы, признание", "kind": "title1", "maxW": 12080},
+  "row2": {"x": 0, "y": 4700, "text": "Академия: уроки, тренажёр, ИИ-наставник, вебинары", "kind": "title1", "maxW": 7520},
+  "row3": {"x": 0, "y": 8000, "text": "Команда фонда: координатор, инструктор, психолог, руководитель", "kind": "title1", "maxW": 15120},
+  "row4": {"x": 0, "y": 10700, "text": "Телефон", "kind": "title1", "maxW": 1400}
+ },
+ "designSystems": []
+}
