@@ -22,9 +22,11 @@ async def command(db, principal, operation, key, body, action, request):
     payload = body.model_dump(mode='json')
     try:
         await authz_guard(db, principal)
-        permission = 'roles.manage' if operation.startswith('roles.') else 'schedule.manage' if operation.startswith('calendar.') else 'opportunities.manage'
-        if not principal.has_permission(permission):
+        permission = ('roles.manage' if operation.startswith('roles.') else 'schedule.manage' if operation.startswith('calendar.') else 'assignments.manage' if operation.startswith('assignments.') else None if operation.startswith('participation.') else 'opportunities.manage')
+        if permission and not principal.has_permission(permission):
             raise ApiError(403, 'permission_denied', 'Недостаточно прав.')
+        if operation.startswith('participation.') and principal.user_id is None:
+            raise ApiError(403, 'user_required', 'Подтвердите контакт и войдите в свой кабинет.')
         replay = await begin_command(db, principal, operation, key, payload)
         if replay is not None:
             await db.commit()
@@ -38,6 +40,8 @@ async def command(db, principal, operation, key, body, action, request):
         return result_json
     except IntegrityError as exc:
         await db.rollback()
+        if 'reservation_no_overlap' in str(exc.orig):
+            raise ApiError(409, 'participation_overlap', 'В это время уже есть подтверждённое занятие или встреча.') from exc
         if 'uq_active_role_title' in str(exc.orig):
             raise ApiError(409, 'duplicate_role_title', 'Действующая роль с таким названием уже есть.', field_errors={'title': 'Выберите другое название.'}) from exc
         raise
@@ -171,3 +175,6 @@ async def opportunity_history(opportunity_id: UUID, principal: Principal=Depends
 # One module export; calendar keeps the same API root and shared command boundary.
 from .calendar_router import router as calendar_router
 router.include_router(calendar_router)
+
+from .assignment_router import router as assignment_router
+router.include_router(assignment_router)

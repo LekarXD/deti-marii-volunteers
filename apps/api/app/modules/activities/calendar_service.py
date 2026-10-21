@@ -175,6 +175,8 @@ async def patch_occurrence(db,principal,id,body):
         values['starts_at'],values['ends_at']=interval
     conflicts=await group_conflicts(db,principal,values,[id])
     if conflicts:raise ApiError(409,'calendar_conflict','У группы уже есть занятие в это время.',field_errors={'starts_at':'Занятия пересекаются.'})
+    from .assignment_service import ensure_occurrence_change_safe
+    await ensure_occurrence_change_safe(db,id,values,item)
     for name,value in values.items():setattr(item,name,value)
     override=await db.get(OccurrenceOverride,id)
     fields={name:value.isoformat() if hasattr(value,'isoformat') else str(value) if isinstance(value,UUID) else value for name,value in values.items()}
@@ -198,6 +200,9 @@ async def change_occurrence_state(db,principal,id,body,state):
     override=await db.get(OccurrenceOverride,id)
     if override is None:db.add(OccurrenceOverride(occurrence_id=id,fields={'status':state},updated_by=principal.actor_id))
     else:override.fields={**override.fields,'status':state};override.version+=1;override.updated_at=datetime.now(timezone.utc);override.updated_by=principal.actor_id
+    if state=='cancelled':
+        from .assignment_service import cancel_occurrence_assignments
+        await cancel_occurrence_assignments(db,principal,item.id)
     item.status=state;item.cancellation_source='manual' if state=='cancelled' else None;item.version+=1;item.updated_at=datetime.now(timezone.utc);item.updated_by=principal.actor_id
     await record(db,principal,item,'occurrence')
     return await occurrence_view(db,item)
@@ -332,7 +337,10 @@ async def change_series_state(db,principal,id,body,state):
         if state=='active' and item.cancellation_source=='series':
             if await group_conflicts(db,principal,{'group_id':item.group_id,'starts_at':item.starts_at,'ends_at':item.ends_at},[r.id for r in future]):raise ApiError(409,'calendar_conflict','При восстановлении найдено пересечение занятий группы.')
             item.status='scheduled';item.cancellation_source=None
-        elif state=='cancelled' and item.status=='scheduled':item.status='cancelled';item.cancellation_source='series'
+        elif state=='cancelled' and item.status=='scheduled':
+            from .assignment_service import cancel_occurrence_assignments
+            await cancel_occurrence_assignments(db,principal,item.id)
+            item.status='cancelled';item.cancellation_source='series'
         else:continue
         item.version+=1;item.updated_by=principal.actor_id;item.updated_at=datetime.now(timezone.utc)
         await record(db,principal,item,'occurrence')

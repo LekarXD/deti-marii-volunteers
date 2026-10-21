@@ -103,3 +103,4 @@ class OpportunityVersion(Base):
 
 # Imported here for the shared model loader and Alembic registry.
 from .calendar_models import EventSeries, EventSeriesNeedTemplate, EventOccurrence, OccurrenceOverride, StaffingNeed, EventRevision  # noqa: E402,F401
+from .assignment_models import Assignment, AssignmentEvent, AssignmentParticipantSnapshot, AssignmentRequirementReview, Attendance, AttendanceEvent, OpportunityResponse, OpportunityResponseEvent  # noqa: E402,F401

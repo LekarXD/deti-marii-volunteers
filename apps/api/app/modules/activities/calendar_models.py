@@ -106,7 +106,7 @@ class StaffingNeed(Base):
     preparation_requirements:Mapped[list]=mapped_column(JSONB,default=list)
     approval_policy:Mapped[str]=mapped_column(String(30),default='coordinator')
     version:Mapped[int]=mapped_column(BigInteger,default=1)
-    __table_args__=(ForeignKeyConstraint(['occurrence_id','foundation_id'],['event_occurrences.id','event_occurrences.foundation_id']),
+    __table_args__=(UniqueConstraint('id','occurrence_id','foundation_id'),ForeignKeyConstraint(['occurrence_id','foundation_id'],['event_occurrences.id','event_occurrences.foundation_id']),
         ForeignKeyConstraint(['role_id','foundation_id'],['volunteer_roles.id','volunteer_roles.foundation_id']),
         ForeignKeyConstraint(['role_version_id','role_id'],['volunteer_role_versions.id','volunteer_role_versions.role_id']),
         CheckConstraint('capacity_required >= 0 AND capacity_required <= 1000'),
