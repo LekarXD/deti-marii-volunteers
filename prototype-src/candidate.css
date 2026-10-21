@@ -259,9 +259,7 @@
 .a-dotline{top:26px}
 .a-icard h3{font-size:18px;font-weight:600}
 @media (max-width:720px){.a-year{padding-top:0}.a-dotline{top:6px}}
-/* карточки: белые, цвет — только у иконки; у каждого блока свой цвет */
-.a-icard,.a-icard.a-ic-o,.a-icard.a-ic-b,.a-icard.a-ic-g,.a-icard.a-ic-v,.a-icard.a-ic-y{background:var(--paper)}
-.a-ic-o .a-ico{background:var(--orange-tint)}.a-ic-b .a-ico{background:var(--blue-tint)}.a-ic-g .a-ico{background:var(--green-tint)}.a-ic-v .a-ico{background:var(--violet-tint)}.a-ic-y .a-ico{background:var(--yellow-tint)}
+/* карточки цветные, но у каждого блока на экране свой цвет — блоки не повторяют друг друга */
 /* история Вовы: иконки вместо цветных плашек */
 .a-stage .a-ico{width:44px;height:44px;border-radius:14px;background:var(--paper)}
 .a-stage .a-ico .ic{width:22px;height:22px}
