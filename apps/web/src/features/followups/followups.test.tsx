@@ -11,11 +11,11 @@ import {ToastProvider} from '../../ui';
 import {FirstShiftPage} from './FirstShiftPage';
 import {ReflectionPage} from './ReflectionPage';
 import {SignalsPage} from './SignalsPage';
-const mocks=vi.hoisted(()=>({preparation:vi.fn(),reflection:vi.fn(),reflections:vi.fn(),staffReflection:vi.fn(),staff:vi.fn(),signals:vi.fn(),privateNotes:vi.fn(),command:vi.fn()}));
-vi.mock('./api',async(importOriginal)=>({...await importOriginal<typeof import('./api')>(),readPreparation:mocks.preparation,readReflection:mocks.reflection,readReflections:mocks.reflections,readStaffReflection:mocks.staffReflection,readStaff:mocks.staff,readSignals:mocks.signals,readPrivateNotes:mocks.privateNotes,command:mocks.command}));
+const mocks=vi.hoisted(()=>({latestAudio:vi.fn(),preparation:vi.fn(),reflection:vi.fn(),reflections:vi.fn(),staffReflection:vi.fn(),staff:vi.fn(),signals:vi.fn(),privateNotes:vi.fn(),command:vi.fn()}));
+vi.mock('./api',async(importOriginal)=>({...await importOriginal<typeof import('./api')>(),readLatestAudio:mocks.latestAudio,readPreparation:mocks.preparation,readReflection:mocks.reflection,readReflections:mocks.reflections,readStaffReflection:mocks.staffReflection,readStaff:mocks.staff,readSignals:mocks.signals,readPrivateNotes:mocks.privateNotes,command:mocks.command}));
 const initialReflection={id:null,assignment_id:'assignment',title:'Творческое занятие',version:0,mood:null,text:'',unexpected:'',help:'later',help_text:'',continuation:'discuss',restricted:false,submitted_at:null,can_submit:true,follow_up_registered:false,review:null,voice_available:false,voice_unavailable_reason:'Голосовой ввод пока недоступен. Можно написать текст.'};
 function page(path:string){return <MemoryRouter initialEntries={[path]}><QueryClientProvider client={queryClient}><ToastProvider><Routes><Route path="/my/assignments/:id/preparation" element={<FirstShiftPage/>}/><Route path="/my/assignments/:id/reflection" element={<ReflectionPage/>}/><Route path="/fund/signals" element={<SignalsPage/>}/></Routes></ToastProvider></QueryClientProvider></MemoryRouter>;}
-beforeEach(()=>{queryClient.clear();for(const mock of Object.values(mocks))mock.mockReset();});
+beforeEach(()=>{queryClient.clear();for(const mock of Object.values(mocks))mock.mockReset();mocks.latestAudio.mockResolvedValue(null);});
 afterEach(()=>{cleanup();queryClient.clear();});
 describe('follow-up journeys',()=>{
  it('keeps the saved reflection draft editable when restricted escalation has no configured specialist',async()=>{

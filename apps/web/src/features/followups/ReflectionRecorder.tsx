@@ -12,7 +12,7 @@ type Phase='idle'|'requesting'|'recording'|'recorded'|'uploading'|'processing'|'
 type Live={recorder:MediaRecorder;stream:MediaStream;chunks:Blob[];bytes:number;cancelled:boolean;started:number;timer:ReturnType<typeof setInterval>|null};
 const labels:Record<string,string>={queued:'Запись в очереди распознавания',calling:'Распознаём запись…',processing:'Проверяем запись…',unknown:'Результат распознавания неизвестен. Можно повторить запрос явно.',unavailable:'Распознавание сейчас недоступно. Текст можно написать вручную.',budget_exceeded:'Лимит распознавания исчерпан. Текст можно написать вручную.',failed:'Не удалось обработать запись. Можно повторить или записать заново.'};
 
-export function ReflectionRecorder({id,text,onApply,disabled=false}:{id:string;text:string;onApply:(text:string)=>void;disabled?:boolean}){
+export function ReflectionRecorder({id,text,onApply,disabled=false,available=true}:{id:string;text:string;onApply:(text:string)=>void;disabled?:boolean;available?:boolean}){
  const client=useQueryClient();const [phase,setPhase]=useState<Phase>('idle'),[file,setFile]=useState<Blob|null>(null),[url,setUrl]=useState(''),[elapsed,setElapsed]=useState(0),[row,setRow]=useState<ReflectionAudio|null>(null),[transcript,setTranscript]=useState(''),[applied,setApplied]=useState(false),[error,setError]=useState<unknown>(null),[blocked,setBlocked]=useState(false),[cancelling,setCancelling]=useState(false);
  const live=useRef<Live|null>(null),generation=useRef(0),mounted=useRef(true),controller=useRef<AbortController|null>(null),receipt=useRef(crypto.randomUUID()),restored=useRef(false),loaded=useRef(''),pendingIntent=useRef<Promise<ReflectionAudio>|null>(null);
  const latest=useQuery({queryKey:keys.detail('reflection-audio-latest',id),queryFn:({signal})=>readLatestAudio(id,signal),staleTime:0});
@@ -38,7 +38,7 @@ export function ReflectionRecorder({id,text,onApply,disabled=false}:{id:string;t
   catch(e){setError(e);setPhase('failed');}finally{setCancelling(false);}
  }
  async function record(){
-  if(disabled||blocked||row)return;
+  if(disabled||blocked||row||!available)return;
   if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==='undefined'){setError(new Error('Этот браузер не поддерживает запись. Можно написать текст.'));setPhase('failed');return;}
   setError(null);setPhase('requesting');setFile(null);setTranscript('');setElapsed(0);setApplied(false);const epoch=++generation.current;
   let opened:MediaStream|null=null;
@@ -57,7 +57,7 @@ export function ReflectionRecorder({id,text,onApply,disabled=false}:{id:string;t
   }catch(e){opened?.getTracks().forEach(track=>track.stop());if(epoch===generation.current&&mounted.current){setError(e instanceof DOMException&&e.name==='NotAllowedError'?new Error('Доступ к микрофону не предоставлен. Можно написать текст.'):e);setPhase('failed');}}
  }
  async function upload(){
-  if(!file||disabled||blocked)return;const epoch=++generation.current;const abort=new AbortController();controller.current=abort;setPhase('uploading');setError(null);
+  if(!file||disabled||blocked||!available)return;const epoch=++generation.current;const abort=new AbortController();controller.current=abort;setPhase('uploading');setError(null);
   try{
    let current=row?await readAudio(id,row.asset_id,abort.signal):null;if(epoch!==generation.current||abort.signal.aborted)return;
    if(!current){const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());const checksum=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');if(epoch!==generation.current||abort.signal.aborted)return;const pending=audioCommand(id,'audio-intent',{content_type:file.type.split(';')[0],expected_size:file.size,checksum},receipt.current);pendingIntent.current=pending;try{current=await pending;}finally{if(pendingIntent.current===pending)pendingIntent.current=null;}if(epoch===generation.current)setRow(current);}
@@ -69,17 +69,17 @@ export function ReflectionRecorder({id,text,onApply,disabled=false}:{id:string;t
    if(epoch===generation.current){setRow(current);setPhase('processing');await client.invalidateQueries({queryKey:keys.detail('reflection-audio',`${id}:${current.asset_id}`)});}
   }catch(e){if(epoch===generation.current){setError(e);setPhase('failed');}}finally{if(controller.current===abort)controller.current=null;}
  }
- async function retry(){if(!row)return;setError(null);try{const current=await readAudio(id,row.asset_id);const updated=await audioCommand(id,`audio/${row.asset_id}/retry`,{expected_version:current.version},crypto.randomUUID());setTranscript('');loaded.current='';accept(updated);}catch(e){setError(e);}}
+ async function retry(){if(!row||!available)return;setError(null);try{const current=await readAudio(id,row.asset_id);const updated=await audioCommand(id,`audio/${row.asset_id}/retry`,{expected_version:current.version},crypto.randomUUID());setTranscript('');loaded.current='';accept(updated);}catch(e){setError(e);}}
  const combined=[text.trim(),transcript.trim()].filter(Boolean).join('\n\n'),tooLong=combined.length>12000;
  const active=['requesting','recording','uploading','processing'].includes(phase);
- return <section className="reflection-recorder" aria-label="Голосовая заметка"><div className="followup-actions">{!row&&!active&&<Button variant="secondary" disabled={disabled||blocked||latest.isPending} onClick={()=>void record()}><Icon name="mic"/>Записать голосом</Button>}{phase==='recording'&&<><span className="reflection-recording" role="status">Запись {clock(elapsed)} / 3:00</span><Button variant="secondary" onClick={stop}>Остановить запись</Button></>}{phase==='requesting'&&<p role="status">Ожидаем разрешение на микрофон…</p>}{(active||row||file)&&<Button variant="ghost" loading={cancelling} onClick={()=>void cancel()}>Отменить запись</Button>}</div>
+ return <section className="reflection-recorder" aria-label="Голосовая заметка"><div className="followup-actions">{!row&&!active&&<Button variant="secondary" disabled={disabled||blocked||latest.isPending||!available} onClick={()=>void record()}><Icon name="mic"/>Записать голосом</Button>}{phase==='recording'&&<><span className="reflection-recording" role="status">Запись {clock(elapsed)} / 3:00</span><Button variant="secondary" onClick={stop}>Остановить запись</Button></>}{phase==='requesting'&&<p role="status">Ожидаем разрешение на микрофон…</p>}{(active||row||file)&&<Button variant="ghost" loading={cancelling} onClick={()=>void cancel()}>Отменить запись</Button>}</div>
  <p className="meta">До 3 минут и 10 МБ. Запись начнётся по нажатию. После распознавания проверьте текст перед добавлением в рефлексию.</p>
  {(url||(row?.state==='ready'))&&<audio aria-label="Прослушать свою запись" controls preload="none" src={url||`/api/v1/assets/${row!.asset_id}/content`}/>}
- {phase==='recorded'&&file&&<Button variant="secondary" disabled={disabled} onClick={()=>void upload()}>Распознать запись</Button>}
+ {phase==='recorded'&&file&&<Button variant="secondary" disabled={disabled||!available} onClick={()=>void upload()}>Распознать запись</Button>}
  {phase==='recorded'&&!file&&<p className="meta">Предыдущая загрузка не завершена. Отмените её, чтобы записать заново.</p>}
  {phase==='uploading'&&<p role="status">Загружаем запись…{row?` ${Math.floor(row.received_size/row.expected_size*100)}%`:''}</p>}
  {phase==='processing'&&<p role="status">{labels[row?.state??'processing']??'Обрабатываем запись…'}</p>}
- {phase==='failed'&&row&&<><p className="meta">{labels[row.state]??'Запись можно отменить и записать заново.'}</p>{file&&row.state==='uploading'&&<Button variant="secondary" onClick={()=>void upload()}>Повторить загрузку</Button>}{row.can_retry&&!blocked&&<Button variant="secondary" onClick={()=>void retry()}>Повторить распознавание</Button>}</>}
+ {phase==='failed'&&row&&<><p className="meta">{labels[row.state]??'Запись можно отменить и записать заново.'}</p>{file&&row.state==='uploading'&&<Button variant="secondary" onClick={()=>void upload()}>Повторить загрузку</Button>}{row.can_retry&&!blocked&&<Button variant="secondary" disabled={!available} onClick={()=>void retry()}>Повторить распознавание</Button>}</>}
  {phase==='preview'&&!blocked&&<div className="followup-fields"><Field label="Распознанный текст" hint="Можно исправить слова. Исходная рефлексия изменится только по кнопке ниже."><Textarea value={transcript} onChange={e=>{setTranscript(e.target.value);setApplied(false);}} maxLength={12000} disabled={disabled}/></Field>{tooLong&&<p className="err">Вместе с рефлексией получится больше 12 000 символов. Сократите текст.</p>}<Button variant="secondary" disabled={disabled||!transcript.trim()||tooLong||applied} onClick={()=>{onApply(transcript.trim());setApplied(true);}}>Добавить к тексту</Button>{applied&&<p role="status" className="meta">Текст добавлен. Черновик можно проверить и сохранить.</p>}</div>}
  {error?<ErrorState error={error}/>:null}{latest.error?<ErrorState error={latest.error} retry={()=>latest.refetch()}/>:null}
  </section>;

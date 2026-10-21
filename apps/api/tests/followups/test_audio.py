@@ -148,3 +148,32 @@ async def test_invalid_codec_duration_and_session_revocation_have_no_transcript(
     async with x.sessions() as db:
         run=await db.get(AIRun,UUID(queued['run_id']));assert run.output is None and run.charged_tokens==0
     assert (await x.first.get(x.root+'/reflection/audio/'+source['asset_id'])).status_code==401
+
+
+@pytest.mark.asyncio
+async def test_lost_media_lease_cannot_enqueue_a_provider_run(prepared,monkeypatch):
+    from app.worker.queue import LeaseLost
+    x=prepared;_,done,_=await uploaded(x,monkeypatch);assert done.status_code==200
+    async with x.sessions() as db:
+        job=await db.scalar(select(Job).where(Job.foundation_id==x.foundation,Job.kind=='followups.audio'))
+        job.state='running';job.claim_token=uuid4();job.lease_until=utcnow()+timedelta(minutes=2);await db.commit()
+        stale=JobContext(job.id,uuid4(),job.foundation_id,job.payload)
+        with pytest.raises(LeaseLost):await audio.process_audio(db,stale)
+        await db.rollback()
+    async with x.sessions() as db:
+        assert await db.scalar(select(func.count()).select_from(AIRun))==0
+        assert (await db.scalar(select(ReflectionAudioUpload))).run_id is None
+
+
+@pytest.mark.asyncio
+async def test_revoked_assignment_blocks_before_provider_io(prepared,monkeypatch):
+    from app.modules.activities.assignment_models import Assignment
+    x=prepared;source,done,_=await uploaded(x,monkeypatch);assert done.status_code==200
+    queued=await process(x,'followups.audio')
+    async with x.sessions() as db:
+        item=await db.get(Assignment,UUID(x.confirmed['id']));item.status='cancelled';await db.commit()
+    def never(request):raise AssertionError('Revoked assignment cannot reach provider')
+    assert (await process(x,'ai.generate',httpx.MockTransport(never)))['state']=='cancelled'
+    async with x.sessions() as db:
+        run=await db.get(AIRun,UUID(queued['run_id']));assert run.output is None and run.charged_tokens==0
+    assert (await x.first.get(x.root+'/reflection/audio/'+source['asset_id'])).status_code==403

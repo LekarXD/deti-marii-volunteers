@@ -19,7 +19,7 @@ class Recorder{
  start(){this.state='recording';}
  stop(){this.state='inactive';this.ondataavailable?.({data:new Blob([new Uint8Array(44)],{type:this.mimeType})});this.onstop?.();}
 }
-function page(){return <StrictMode><QueryClientProvider client={query}><ReflectionRecorder id="assignment" text="Мой черновик" onApply={apply}/></QueryClientProvider></StrictMode>;}
+function page(available=true){return <StrictMode><QueryClientProvider client={query}><ReflectionRecorder available={available} id="assignment" text="Мой черновик" onApply={apply}/></QueryClientProvider></StrictMode>;}
 beforeEach(()=>{
  query=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});for(const mock of Object.values(mocks))mock.mockReset();apply.mockReset();stopTrack.mockReset();microphone.mockReset();
  mocks.latest.mockResolvedValue(null);mocks.status.mockResolvedValue(initial);
@@ -29,6 +29,11 @@ beforeEach(()=>{
 });
 afterEach(()=>{cleanup();query.clear();vi.restoreAllMocks();vi.unstubAllGlobals();});
 describe('voluntary voice input using simulated MediaRecorder',()=>{
+ it('keeps a previous note cancellable while new recognition is unavailable',async()=>{
+  const user=userEvent.setup();mocks.latest.mockResolvedValue({...initial,state:'unknown',can_retry:true});mocks.command.mockResolvedValue({...initial,state:'cancelled'});
+  render(page(false));await screen.findByText('Результат распознавания неизвестен. Можно повторить запрос явно.');expect((screen.getByRole('button',{name:'Повторить распознавание'}) as HTMLButtonElement).disabled).toBe(true);expect(microphone).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button',{name:'Отменить запись'}));await waitFor(()=>expect(mocks.command).toHaveBeenCalledWith('assignment','audio/source/cancel',{expected_version:1},'receipt'));expect((await screen.findByRole('button',{name:'Записать голосом'}) as HTMLButtonElement).disabled).toBe(true);
+ });
  it('opens only after a click, stops tracks, uploads and requires explicit edited text application',async()=>{
   const user=userEvent.setup();mocks.command.mockResolvedValue(initial);
   mocks.api.mockImplementation(async(path:string,options?:{body?:Blob})=>path.endsWith('/upload')?{received_size:options!.body!.size}:{state:'processing'});
