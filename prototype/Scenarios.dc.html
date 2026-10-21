@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сценарии тренажёра — Опора</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F0ECE3}
+.dm{--page:#F0ECE3;--paper:#FFFFFF;--soft:#F6F3EE;--soft-2:#E8E3D8;--line:#E9E4DA;--line-2:#D6D0C3;--ink:#12141A;--ink-2:#3B3E46;--mute:#5E5A52;--quiet:#8C877C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFE9DC;--yellow:#FFB93F;--yellow-ink:#7A4E00;--yellow-tint:#FFF1D2;--blue:#0F3DA7;--blue-tint:#E7ECF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DDF0E2;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE5E1;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE4ED;--shadow:0 4px 14px rgba(18,20,26,.06);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,185,63,.45)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:18px;height:18px}.ic-lg{width:26px;height:26px}.ic-xl{width:36px;height:36px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 80px}
+.top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand . end" "nav nav nav";align-items:center;gap:14px 16px;margin-bottom:40px}
+.top > .brand{grid-area:brand;justify-self:start}
+.top > .nav{grid-area:nav;justify-self:start}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:13px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--ink);color:#fff}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.top-end{grid-area:end;justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:9px;height:9px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink-2);font-size:15px;font-weight:500;text-decoration:none;white-space:nowrap}
+.role:hover{color:var(--ink);text-decoration:none}
+.avatar{width:44px;height:44px;flex:0 0 44px;border-radius:50%;display:inline-grid;place-items:center;font-size:15px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:36px;height:36px;flex-basis:36px;font-size:13px}
+.avatar-lg{width:72px;height:72px;flex-basis:72px;font-size:24px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+.display{margin:0;font-size:56px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:40px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:28px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:12px 0 0;font-size:18px;line-height:1.5;color:var(--ink-2);max-width:60ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:15px;line-height:1.45;color:var(--mute)}
+.eyebrow{font-size:15px;font-weight:600;color:var(--ink-2)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:56px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:18px}
+.card{background:var(--paper);border-radius:28px;padding:28px 32px}
+.card-soft{background:var(--soft);border-radius:28px;padding:28px 32px}
+.card-hero{background:var(--yellow);border-radius:32px;padding:40px 44px;color:var(--ink)}
+.card-hero .lead,.card-hero .p{color:var(--ink)}
+.card-hero .meta{color:var(--ink-2)}
+.card-hero .btn-secondary{background:transparent;border-color:rgba(18,20,26,.35)}
+.card-hero .btn-secondary:hover{border-color:var(--ink)}
+.card-hero .btn-ghost{color:var(--ink)}
+.card-hero .btn-ghost:hover{background:rgba(255,255,255,.35)}
+.card-hero .bar{background:rgba(18,20,26,.14)}
+.card-hero .bar > i{background:var(--ink)}
+.card-dark{background:var(--ink);color:#fff;border-radius:32px;padding:40px 44px}
+.card-tight{padding:18px 22px;border-radius:22px}
+.ai-box{background:#F3EFFD;border-radius:24px;padding:22px 26px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.divider{height:1px;background:var(--line);border:0;margin:20px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:18px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;border:1px solid transparent;font-size:16px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:#2B2E37}
+.btn-accent{background:var(--orange);color:var(--ink)}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:40px;padding:0 16px;font-size:15px}
+.btn-lg{height:56px;padding:0 28px;font-size:17px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft-2);color:var(--mute);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;font-size:14px;font-weight:500;white-space:nowrap;background:var(--soft-2);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:14px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:var(--ink-2)}
+.dot::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--quiet);flex:0 0 9px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:0;background:var(--paper);font-size:15px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.chip.is-on{background:var(--ink);color:#fff}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--paper)}
+.seg button{height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:15px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line-2);overflow-x:auto}
+.tabs button{height:50px;padding:0 18px;border:0;background:transparent;font-size:16px;font-weight:600;color:var(--mute);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.label{font-size:15px;font-weight:600;color:var(--ink)}
+.input,.textarea,.select{width:100%;min-height:52px;padding:13px 16px;border-radius:14px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:140px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:15px;color:var(--mute)}
+.err{font-size:15px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:16px;color:var(--ink-2)}
+.check input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--ink);flex:0 0 22px}
+.toggle{position:relative;width:48px;height:28px;flex:0 0 48px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:23px}
+.kpi{position:relative;display:flex;flex-direction:column;gap:8px;padding:26px 28px;border-radius:28px;background:var(--paper);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{position:relative;font-size:16px;color:var(--ink-2);z-index:1}
+.kpi-delta{font-size:15px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:72px;height:64px;left:14px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:10px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}.bar-ink > i{background:var(--ink)}
+.tbl{display:grid}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:16px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-row:last-child{border-bottom:0}
+.tbl-head{font-size:15px;font-weight:600;color:var(--mute);padding-top:8px;padding-bottom:12px}
+.scroll-x{overflow-x:auto}
+.art{width:60px;height:60px;flex:0 0 60px;border-radius:20px;display:grid;place-items:center}
+.art .ic{width:26px;height:26px}
+.art-lg{width:100%;height:150px;border-radius:24px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+.bubble{max-width:72%;padding:14px 18px;border-radius:22px;background:var(--soft);color:var(--ink);font-size:16px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F3EFFD}
+.cite{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:15px;color:var(--ink-2)}
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:0 0 32px;padding:6px;border-radius:999px;background:#E3DDD0}
+.demo-cap{font-size:14px;font-weight:600;color:var(--mute);padding:0 8px 0 10px}
+.demo button{height:34px;padding:0 14px;border-radius:999px;border:0;background:transparent;font-size:14px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:40px}.h1{font-size:30px}.h2{font-size:24px}.card,.card-soft{padding:22px 20px;border-radius:24px}.card-hero,.card-dark{padding:28px 22px;border-radius:26px}.top{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "end" "nav"}.top-end{justify-self:start;flex-wrap:wrap}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-text{flex:1 1 420px;min-width:0}
+.hero-title{margin:10px 0 0;font-size:48px;font-weight:600;line-height:1.04;letter-spacing:-.035em;text-wrap:balance}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center;color:var(--ink)}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.hero-note{margin-top:24px;padding:16px 16px 16px 22px;border-radius:22px;background:rgba(255,255,255,.7);display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+.scn-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:48px}
+.scn{display:flex;align-items:center;gap:16px;width:100%;min-width:0;padding:20px 0;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;font-size:18px;font-weight:600;line-height:1.35;color:var(--ink)}
+.scn:nth-child(-n+2){border-top:0}
+.scn:hover .scn-t{color:var(--blue)}
+.scn > .ic{color:var(--mute)}
+.st{width:44px;height:44px;flex:0 0 44px;border-radius:50%;display:grid;place-items:center}
+.st-ok{background:var(--green-tint);color:var(--green-ink)}
+.st-wait{background:var(--yellow);color:var(--ink)}
+.st-draft{background:var(--soft-2);color:var(--mute)}
+@media (max-width:860px){.scn-grid{grid-template-columns:minmax(0,1fr)}.scn:nth-child(2){border-top:1px solid var(--line)}}
+.back{margin:0 0 12px -16px}
+.kid-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:20px 24px}
+.chat{display:flex;flex-direction:column;gap:12px}
+.ai-box .bubble-them{background:var(--paper)}
+.verdict{display:flex;align-items:flex-start;gap:12px;margin:22px 0 0;padding-top:20px;border-top:1px solid #E4DBFA;font-size:17px;font-weight:600;color:var(--ink)}
+.verdict .ic{margin-top:2px}
+.v-ok{color:var(--green-ink)}
+.v-bad{color:var(--red-ink)}
+.crit-card{padding:6px 32px 14px}
+.crit-head{display:flex;justify-content:space-between;gap:16px;padding:16px 0 10px;font-size:15px;font-weight:600;color:var(--mute)}
+.crit-row{display:flex;align-items:center;gap:16px;padding:12px 0;border-top:1px solid var(--line)}
+.crit-btn{display:flex;align-items:center;gap:12px;flex:1 1 auto;min-width:0;min-height:44px;padding:0;border:0;background:transparent;text-align:left;font-size:18px;font-weight:600;line-height:1.35;color:var(--ink)}
+.crit-btn .ic{color:var(--mute);transition:transform .15s}
+.crit-btn[aria-expanded="true"] .ic{transform:rotate(90deg)}
+.crit-good{margin:0 0 14px 32px;padding:14px 18px;border-radius:16px;background:var(--soft);color:var(--ink-2)}
+.meth{margin-bottom:16px;padding:8px 32px}
+.meth .li{padding:14px 0}
+.meth-name{flex:0 0 200px;font-weight:600;color:var(--ink)}
+@media (max-width:720px){.hero-title{font-size:34px}.hero-art{display:none}.crit-card,.meth{padding-left:20px;padding-right:20px}.meth-name{flex-basis:100%}}
+.subnav{margin:0 0 32px}.dm .grid-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+</style>
+</helmet>
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>команда фонда</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="CoordHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Обзор</a>
+    <a href="Pipeline.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/></svg>Заявки<span class="count">7</span></a>
+    <a href="Volunteers.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg>Волонтёры</a>
+    <a href="Shifts.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Смены<span class="count">3</span></a>
+    <a href="Signals.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg>Сигналы<span class="count">4</span></a>
+    <a class="is-active" aria-current="page" href="Builder.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Обучение</a>
+    <a href="Reports.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Отчёты</a>
+    <a href="Admin.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Настройки</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="Home.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид волонтёра</a>
+    <div class="pillbox">
+      <button class="iconbtn" type="button" aria-label="Уведомления, 5 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <span class="avatar av-v" aria-label="Ирина Власова, психолог фонда">ИВ</span>
+    </div>
+  </div>
+</header>
+<nav class="chips subnav" aria-label="Работа фонда"><a class="chip" href="Needs.dc.html">Возможности</a><a class="chip" href="Planning.dc.html">Расписание</a><a class="chip" href="Roles.dc.html">Роли</a><a class="chip" href="Participants.dc.html">Участники</a><a class="chip" href="Groups.dc.html">Группы</a><a class="chip" href="Reserve.dc.html">Резерв</a></nav>
+
+<nav class="chips" aria-label="Обучение" style="margin:-12px 0 28px">
+  <a class="chip" href="Builder.dc.html">Уроки и треки</a>
+  <a class="chip" href="Knowledge.dc.html">База знаний</a>
+  <a class="chip is-on" aria-current="page" href="Scenarios.dc.html">Сценарии тренажёра</a>
+  <a class="chip" href="Studio.dc.html">Вебинары</a>
+</nav>
+
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<!-- Список -->
+<sc-if value="{{isList}}" hint-placeholder-val="{{true}}">
+  <h1 class="h1" style="margin-bottom:24px">Сценарии тренажёра</h1>
+
+  <section class="card-hero" aria-labelledby="wait-title">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <p class="eyebrow" style="margin:0">{{listEyebrow}}</p>
+        <h2 class="hero-title" id="wait-title">«Ты придёшь ещё? Дай свой телефон»</h2>
+        <p class="lead">{{listLead}}</p>
+        <sc-if value="{{pending3}}" hint-placeholder-val="{{true}}">
+          <button type="button" class="btn btn-primary btn-lg" style="margin-top:28px" onClick="{{open3}}">Проверить и одобрить</button>
+        </sc-if>
+        <sc-if value="{{approved3}}" hint-placeholder-val="{{false}}">
+          <button type="button" class="btn btn-secondary btn-lg" style="margin-top:28px" onClick="{{open3}}">Открыть сценарий</button>
+        </sc-if>
+      </div>
+      <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="all-title">
+    <div class="section-head"><h2 class="h2" id="all-title">Все сценарии</h2></div>
+    <div class="card" style="padding:6px 32px">
+      <div class="scn-grid">
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+          <button type="button" class="scn" aria-label="{{r.aria}}" onClick="{{r.open}}">
+            <span class="{{r.stCls}}" aria-hidden="true">
+              <sc-if value="{{r.isOk}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if>
+              <sc-if value="{{r.isWait}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></sc-if>
+              <sc-if value="{{r.isDraft}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg></sc-if>
+            </span>
+            <span class="scn-t grow">{{r.title}}</span>
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<!-- Сценарий -->
+<sc-if value="{{isEdit}}" hint-placeholder-val="{{false}}">
+  <button type="button" class="btn btn-ghost btn-sm back" onClick="{{toList}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>Все сценарии</button>
+  <h1 class="h1" style="margin-bottom:24px">{{scTitle}}</h1>
+
+  <section class="card-hero" aria-labelledby="ver-title">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <p class="eyebrow" style="margin:0">{{heroEyebrow}}</p>
+        <h2 class="hero-title" id="ver-title">{{heroTitle}}</h2>
+        <p class="lead">{{heroLead}}</p>
+        <sc-if value="{{showRunBtn}}" hint-placeholder-val="{{true}}">
+          <button type="button" class="btn btn-primary btn-lg" style="margin-top:28px" onClick="{{runTest}}"><svg class="ic ic-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>Тестовый прогон</button>
+        </sc-if>
+        <sc-if value="{{showApproveBtn}}" hint-placeholder-val="{{false}}">
+          <button type="button" class="btn btn-primary btn-lg" style="margin-top:28px" onClick="{{approve}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Одобрить</button>
+        </sc-if>
+        <sc-if value="{{confirming}}" hint-placeholder-val="{{false}}">
+          <div class="hero-note" role="alertdialog" aria-labelledby="confirm-text">
+            <span class="strong grow" id="confirm-text">{{confirmText}}</span>
+            <button type="button" class="btn btn-primary" onClick="{{confirmApprove}}">Да, одобрить</button>
+            <button type="button" class="btn btn-ghost" onClick="{{cancelApprove}}">Отмена</button>
+          </div>
+        </sc-if>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <sc-if value="{{heroOk}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></sc-if>
+        <sc-if value="{{heroWait}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></sc-if>
+      </div>
+    </div>
+  </section>
+
+  <sc-if value="{{runDone}}" hint-placeholder-val="{{false}}">
+    <section class="section" aria-labelledby="run-title">
+      <div class="section-head" style="align-items:center">
+        <div class="row" style="gap:12px"><h2 class="h2" id="run-title">Тестовый прогон</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+        <div class="seg" role="group" aria-label="Какой ход волонтёра проверить">
+          <button type="button" class="{{goodCls}}" aria-pressed="{{goodPressed}}" onClick="{{setGood}}">Хороший ход</button>
+          <button type="button" class="{{badCls}}" aria-pressed="{{badPressed}}" onClick="{{setBad}}">Плохой ход</button>
+        </div>
+      </div>
+      <div class="ai-box" style="padding:28px 32px">
+        <div class="chat">
+          <sc-for list="{{runLines}}" as="ln" hint-placeholder-count="3">
+            <div class="{{ln.cls}}">{{ln.text}}</div>
+          </sc-for>
+        </div>
+        <p class="{{verdictCls}}">
+          <sc-if value="{{isGood}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if>
+          <sc-if value="{{isBad}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></sc-if>
+          <span>{{runNote}}</span>
+        </p>
+      </div>
+    </section>
+  </sc-if>
+
+  <section class="section" aria-labelledby="kid-title">
+    <div class="section-head"><h2 class="h2" id="kid-title">Ребёнок</h2></div>
+    <div class="card">
+      <div class="kid-grid">
+        <div class="field">
+          <label class="label" for="f-profile">Профиль</label>
+          <textarea id="f-profile" class="textarea" value="{{fProfile}}" onChange="{{onProfile}}"></textarea>
+        </div>
+        <div class="field">
+          <label class="label" for="f-first">Первая реплика</label>
+          <textarea id="f-first" class="textarea" value="{{fFirst}}" onChange="{{onFirst}}"></textarea>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="crit-title">
+    <div class="section-head" style="align-items:center">
+      <h2 class="h2" id="crit-title">Критерии</h2>
+      <button type="button" class="btn btn-ghost" aria-expanded="{{methExpanded}}" onClick="{{toggleMeth}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg>{{methLabel}}</button>
+    </div>
+    <sc-if value="{{methOpen}}" hint-placeholder-val="{{false}}">
+      <div class="card meth">
+        <div class="list">
+          <sc-for list="{{methods}}" as="me" hint-placeholder-count="3">
+            <div class="li"><span class="meth-name">{{me.name}}</span><span class="p grow">{{me.org}}</span></div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+    <div class="card crit-card">
+      <div class="crit-head"><span>Критерий</span><span>Критический</span></div>
+      <sc-for list="{{criteria}}" as="cr" hint-placeholder-count="5">
+        <div class="crit-row">
+          <button type="button" class="crit-btn" aria-expanded="{{cr.expanded}}" onClick="{{cr.toggleOpen}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg><span>{{cr.name}}</span></button>
+          <button type="button" class="{{cr.cls}}" aria-pressed="{{cr.pressed}}" aria-label="{{cr.aria}}" onClick="{{cr.toggle}}"></button>
+        </div>
+        <sc-if value="{{cr.open}}" hint-placeholder-val="{{false}}"><p class="crit-good">{{cr.good}}</p></sc-if>
+      </sc-for>
+    </div>
+  </section>
+</sc-if>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = this.fresh('list');
+  }
+  fresh(mode) {
+    return {
+      mode, view: mode === 'list' ? 'list' : 'edit', sel: 3,
+      st: { 1: 'ok', 2: 'ok', 3: 'review', 4: 'ok', 5: 'ok', 6: 'draft' }, today: {},
+      ran: mode === 'run' ? { 3: true } : {}, variant: 'good', confirm: false,
+      crit: {}, openCrit: '', meth: false, edits: {}
+    };
+  }
+  methodsDef() {
+    return {
+      'TBRI': 'Karyn Purvis Institute of Child Development, TCU',
+      'PACE': 'Дэн Хьюз, DDP Network',
+      'SAMHSA': 'Шесть принципов травма-информированного подхода',
+      'NSPCC': 'Раскрытие насилия и кодекс поведения взрослых',
+      'Darkness to Light': 'Пять шагов защиты детей',
+      'Keeping Children Safe': 'International Child Safeguarding Standards',
+      'MENTOR': 'Elements of Effective Practice for Mentoring',
+      'CPI': 'Десять советов по деэскалации',
+      'Studio III': 'Подход низкого возбуждения',
+      'National Autistic Society': 'Мелтдаун: что это и как помочь'
+    };
+  }
+  scenarios() {
+    return [
+      { id: 1, title: 'Отказывается участвовать', child: 'Миша, 9 лет, живопись', date: '1 сентября', ver: 1,
+        methods: ['TBRI', 'PACE', 'SAMHSA'],
+        profile: 'Миша, 9 лет, живёт в ЦССУ. Ходит на живопись третий месяц, волонтёра знает. Замкнутый, неудачи переживает остро. Все начали рисовать, Миша сидит в капюшоне.',
+        first: '[натягивает капюшон, отодвигает лист] Не буду я ничего рисовать. Это тупо.',
+        criteria: [
+          { name: 'Контакт до просьбы', good: '«Вижу, сегодня не хочется. Можно я посижу рядом?»', crit: false },
+          { name: 'Принятие и любопытство', good: 'Называет возможное чувство без допроса и без «почему».', crit: false },
+          { name: 'Выбор и голос', good: 'Два варианта: посмотреть рядом или выбрать краски для фона.', crit: false },
+          { name: 'Без стыда и сравнения', good: 'Ни «все рисуют, а ты», ни «вот видишь». Оценивает поступок, а не ребёнка.', crit: false },
+          { name: 'Дверь открыта', good: '«Я за этим столом до конца, позови, если захочешь».', crit: false }
+        ],
+        run: {
+          good: { vol: 'Вижу, сегодня не хочется. Можно я посижу рядом?', ai: '[пауза] …Ну сиди. У меня всё равно ничего не получается.', note: '«Контакт до просьбы» — 2 балла' },
+          bad: { vol: 'Миш, ну все же рисуют, давай хотя бы попробуешь?', ai: 'Отстань. [отворачивается]', note: '0 по критерию «Без стыда и сравнения»' }
+        } },
+      { id: 2, title: 'Рассказывает о насилии', child: 'Даша, 11 лет, валяние', date: '1 сентября', ver: 1, warn: true,
+        methods: ['NSPCC', 'Darkness to Light', 'Keeping Children Safe'],
+        profile: 'Даша, 11 лет, живёт в ЦССУ. Ходит на валяние, доверяет волонтёру. Конец занятия, ведущий и дети через пару столов.',
+        first: '[тихо, не поднимая глаз] А если я тебе кое-что скажу, ты никому не расскажешь? Обещаешь?',
+        criteria: [
+          { name: 'Не обещает тайну', good: '«Я не могу обещать никому не говорить. Но расскажу только тем, кто может помочь».', crit: true },
+          { name: 'Слушает без наводящих вопросов', good: 'Не перебивает, не показывает шок. Только открытые вопросы: «Что было дальше?»', crit: false },
+          { name: 'Поддерживает и верит', good: '«Ты правильно сделала, что рассказала. Ты ни в чём не виновата».', crit: false },
+          { name: 'Объясняет, что будет дальше', good: 'Кому расскажет и что Дашу не оставят одну с этим.', crit: false },
+          { name: 'Сообщает по протоколу', good: 'В тот же день психологу или координатору, слова ребёнка дословно.', crit: true }
+        ],
+        run: {
+          good: { vol: 'Я не могу обещать никому не говорить. Но расскажу только тем, кто может помочь, и скажу тебе, кому.', ai: '[молчит] …Тогда не скажу. [пауза] Ладно. Один взрослый делает то, что мне не нравится.', note: '«Не обещает тайну» — 2 балла' },
+          bad: { vol: 'Обещаю, никому не скажу. Что случилось?', ai: 'Один взрослый делает то, что мне не нравится. Только ты точно никому, да?', note: '0 по критическому «Не обещает тайну» — сценарий не пройден' }
+        } },
+      { id: 3, title: 'Ты придёшь ещё? Дай свой телефон', child: 'Аня, 10 лет, лепка', date: '1 сентября', ver: 2,
+        methods: ['NSPCC', 'MENTOR', 'PACE'],
+        profile: 'Аня, 10 лет, живёт в ЦССУ. Ходит на лепку, быстро привязывается. Конец занятия. Волонтёра не будет две субботы.',
+        first: '[держит за рукав] А ты в следующую субботу придёшь? Дай свой номер, я тебе буду писать. А можно ты меня к себе заберёшь?',
+        criteria: [
+          { name: 'Не даёт личных контактов', good: '«У нас правило для всех взрослых: личные номера детям не даём». Предлагает открытку через координатора.', crit: true },
+          { name: 'Честность о будущем', good: 'Только то, что точно знает: «Две субботы меня не будет. Приду 15-го».', crit: false },
+          { name: 'Признаёт чувство', good: '«Тебе важно знать, что я не пропаду. Скучать — это нормально».', crit: false },
+          { name: 'Бережный ответ про усыновление', good: 'Без обещаний и без резкого «нет». После занятия сообщает координатору.', crit: false },
+          { name: 'Предсказуемое прощание', good: '«До 15-го. Попрошу координатора напомнить тебе, когда я приду».', crit: false }
+        ],
+        run: {
+          good: { vol: 'Две субботы меня не будет, приду 15-го. Номер дать не могу, у нас такое правило для всех взрослых. Но открытку можно передать через Ольгу.', ai: '[отпускает рукав] …А 15-го точно? Ладно. Я тебе нарисую открытку.', note: '«Не даёт личных контактов» и «Честность о будущем» — по 2 балла' },
+          bad: { vol: 'Конечно приду! Номер потом напишу, только никому не говори.', ai: '[крепче держит рукав] Точно придёшь? Прям в субботу? Я тебе каждый день писать буду!', note: '0 по критическому «Не даёт личных контактов» — сценарий не пройден' }
+        } },
+      { id: 4, title: 'Сенсорная перегрузка у ребёнка с аутизмом', child: 'Тимур, 8 лет, музыкальная студия', date: '15 сентября', ver: 1,
+        methods: ['National Autistic Society', 'Studio III', 'TBRI'],
+        profile: 'Тимур, 8 лет, аутизм, живёт в приёмной семье. Ходит на музыкальную студию. Сегодня группа играет на барабанах.',
+        first: '[зажимает уши, раскачивается, кричит] Нет! Нет! Громко! Громко!',
+        criteria: [
+          { name: 'Распознаёт мелтдаун', good: 'Не наказывает, не уговаривает, не стыдит: понимает, что это перегрузка.', crit: false },
+          { name: 'Снижает раздражители', good: 'Просит остановить барабаны, предлагает тихое место или наушники.', crit: false },
+          { name: 'Минимум слов и требований', good: '«Громко. Сейчас станет тише». Ждёт ответа.', crit: false },
+          { name: 'Безопасность без давления', good: 'Держит дистанцию, не хватает за руки. При риске зовёт второго взрослого.', crit: false },
+          { name: 'Восстановление и передача', good: 'Даёт время, не разбирает сразу. Рассказывает ведущему, что запустило срыв.', crit: false }
+        ],
+        run: {
+          good: { vol: '[просит ведущего остановить барабаны] Громко. Сейчас станет тише. Наушники тут.', ai: '[всё ещё раскачивается, но тише] …Тише. Тише.', note: '«Снижает раздражители» и «Минимум слов» — по 2 балла' },
+          bad: { vol: 'Тимур, что случилось? Прекрати кричать, ты всем мешаешь.', ai: '[кричит громче, бросает вторую палочку] Нет! Громко!', note: '0 по критериям «Распознаёт мелтдаун» и «Минимум слов»' }
+        } },
+      { id: 5, title: 'Ударил другого ребёнка', child: 'Костя, 7 лет, лепка', date: '29 сентября', ver: 1,
+        methods: ['TBRI', 'CPI', 'Studio III'],
+        profile: 'Костя, 7 лет, живёт в ЦССУ. Ходит на лепку, импульсивный. Соседка взяла его пластилин, он ударил её по руке.',
+        first: '[толкает девочку, сжимает кулаки] Это моё! Она забрала! Я её ненавижу!',
+        criteria: [
+          { name: 'Безопасность прежде всего', good: 'Спокойно разводит детей, проверяет пострадавшую, зовёт ведущего.', crit: true },
+          { name: 'Тон и темп', good: 'Говорит мало, медленно, низким голосом, без крика и нотаций.', crit: false },
+          { name: 'Чувство — да, удар — нет', good: '«Ты очень разозлился. Злиться можно. Бить — нельзя».', crit: false },
+          { name: 'Коррекция поведения, а не личности', good: '«Давай переиграем. Как сказать Лизе, что это твоё?»', crit: false },
+          { name: 'Сообщает об инциденте', good: 'Рассказывает ведущему или координатору, что произошло.', crit: false }
+        ],
+        run: {
+          good: { vol: '[встаёт между детьми, спокойно] Ты очень разозлился. Злиться можно, бить нельзя. Сначала посмотрим, как Лиза.', ai: '[тяжело дышит] Она первая забрала…', note: '«Безопасность прежде всего» и «Чувство — да, удар — нет» — по 2 балла' },
+          bad: { vol: 'Костя, ты что творишь?! Немедленно извинись!', ai: '[кидает пластилин] Не буду! Ненавижу вас всех!', note: '0 по критерию «Тон и темп»' }
+        } },
+      { id: 6, title: 'Подросток грубит и провоцирует', child: 'Влад, 14 лет, киноклуб', date: '', ver: 1,
+        methods: ['CPI', 'PACE', 'SAMHSA'],
+        profile: 'Влад, 14 лет, живёт в ЦССУ. Ходит в киноклуб, волонтёров видел много, многие «пропадали». Демонстративно перебивает.',
+        first: 'Ты чё тут вообще забыла? Тебе за это платят? Вы все приходите пару раз поиграть в добреньких, а потом сваливаете.',
+        criteria: [
+          { name: 'Не реагирует на провокацию', good: 'Ровный тон, не спорит о «платят ли»: отвечает коротко и возвращается к сути.', crit: false },
+          { name: 'Слышит то, что за словами', good: '«Похоже, к вам часто приходили люди, а потом исчезали. Это бесит».', crit: false },
+          { name: 'Честно о себе и своих сроках', good: '«Мне не платят. Я прихожу по пятницам до мая, дальше скажу заранее».', crit: false },
+          { name: 'Уважительная граница', good: '«Со мной можно не соглашаться. Оскорблять — нельзя».', crit: false },
+          { name: 'Роль и выбор', good: 'Предлагает реальное влияние: выбрать фильм, вести спор.', crit: false }
+        ],
+        run: {
+          good: { vol: 'Не платят. Я прихожу по пятницам до мая, дальше скажу заранее. Хочешь выбрать фильм на следующий раз?', ai: '[пожимает плечами] Ну, может. Только не мультики.', note: '«Честно о себе» и «Роль и выбор» — по 2 балла' },
+          bad: { vol: 'Как ты разговариваешь со взрослыми? Я никогда не уйду, вот увидишь.', ai: 'Ага, все так говорят. [громко] Слышали? Она никогда не уйдёт!', note: '0 по критериям «Не реагирует на провокацию» и «Честно о себе»' }
+        } }
+    ];
+  }
+  renderVals() {
+    const s = this.state;
+    const all = this.scenarios();
+    const sc = all.find((x) => x.id === s.sel) || all[2];
+    const status = s.st[sc.id];
+    const ranDone = !!s.ran[sc.id];
+    const METH = this.methodsDef();
+    const openSc = (id) => () => this.setState({ view: 'edit', sel: id, confirm: false, variant: 'good', openCrit: '', meth: false });
+    const val = (field) => {
+      const k = sc.id + '.' + field;
+      return Object.prototype.hasOwnProperty.call(s.edits, k) ? s.edits[k] : sc[field];
+    };
+    const setVal = (field) => (e) => this.setState({ edits: { ...s.edits, [sc.id + '.' + field]: e.target.value } });
+    const critOn = (i) => {
+      const k = sc.id + '-' + i;
+      return Object.prototype.hasOwnProperty.call(s.crit, k) ? s.crit[k] : sc.criteria[i].crit;
+    };
+    const stLabel = (x) => {
+      const st = s.st[x.id];
+      if (st === 'ok') return 'одобрен';
+      return st === 'review' ? 'ждёт одобрения' : 'черновик';
+    };
+
+    let heroEyebrow = 'Ждёт вашего одобрения';
+    if (status === 'draft') heroEyebrow = 'Черновик Ольги Лебедевой';
+    if (status === 'ok') heroEyebrow = s.today[sc.id] ? 'Одобрено сегодня' : 'Одобрен ' + sc.date;
+    let heroLead = sc.warn ? 'С предупреждением о содержании' : sc.child;
+    if (sc.id === 3) heroLead = status === 'ok' ? 'Волонтёры уже проходят новую версию' : 'Новое: Аня переспрашивает «Точно придёшь?», если обещают без даты';
+
+    const v = sc.run[s.variant];
+    const curMode = s.view === 'list' ? 'list' : (ranDone ? 'run' : 'edit');
+    const modeDefs = [
+      { id: 'list', label: 'Список' },
+      { id: 'edit', label: 'Сценарий' },
+      { id: 'run', label: 'После прогона' }
+    ];
+
+    return {
+      modes: modeDefs.map((m) => ({
+        ...m,
+        cls: m.id === curMode ? 'is-on' : '',
+        pressed: m.id === curMode ? 'true' : 'false',
+        pick: () => this.setState(this.fresh(m.id))
+      })),
+      isList: s.view === 'list',
+      isEdit: s.view === 'edit',
+
+      listEyebrow: s.st[3] === 'ok' ? 'Одобрено сегодня' : 'Ждёт вашего одобрения',
+      listLead: s.st[3] === 'ok' ? 'Волонтёры уже проходят версию 2' : 'Версия 2 от Ольги Лебедевой',
+      pending3: s.st[3] !== 'ok',
+      approved3: s.st[3] === 'ok',
+      open3: openSc(3),
+      rows: all.map((x) => ({
+        title: x.title,
+        aria: x.title + ', ' + stLabel(x),
+        stCls: s.st[x.id] === 'ok' ? 'st st-ok' : (s.st[x.id] === 'review' ? 'st st-wait' : 'st st-draft'),
+        isOk: s.st[x.id] === 'ok',
+        isWait: s.st[x.id] === 'review',
+        isDraft: s.st[x.id] === 'draft',
+        open: openSc(x.id)
+      })),
+
+      toList: () => this.setState({ view: 'list', confirm: false }),
+      scTitle: '«' + sc.title + '»',
+      heroEyebrow,
+      heroTitle: 'Версия ' + sc.ver,
+      heroLead,
+      heroOk: status === 'ok',
+      heroWait: status !== 'ok',
+      showRunBtn: !ranDone && !s.confirm,
+      showApproveBtn: ranDone && status !== 'ok' && !s.confirm,
+      confirming: s.confirm,
+      runTest: () => this.setState({ ran: { ...s.ran, [sc.id]: true }, variant: 'good' }),
+      approve: () => this.setState({ confirm: true }),
+      confirmText: status === 'review' ? 'Одобрить версию 2? Волонтёры увидят её сразу.' : 'Одобрить сценарий? Он сразу появится в Академии.',
+      confirmApprove: () => this.setState({ st: { ...s.st, [sc.id]: 'ok' }, today: { ...s.today, [sc.id]: true }, confirm: false }),
+      cancelApprove: () => this.setState({ confirm: false }),
+
+      runDone: ranDone,
+      goodCls: s.variant === 'good' ? 'is-on' : '',
+      badCls: s.variant === 'bad' ? 'is-on' : '',
+      goodPressed: s.variant === 'good' ? 'true' : 'false',
+      badPressed: s.variant === 'bad' ? 'true' : 'false',
+      setGood: () => this.setState({ variant: 'good' }),
+      setBad: () => this.setState({ variant: 'bad' }),
+      runLines: [
+        { text: val('first'), cls: 'bubble bubble-them' },
+        { text: v.vol, cls: 'bubble bubble-me' },
+        { text: v.ai, cls: 'bubble bubble-them' }
+      ],
+      isGood: s.variant === 'good',
+      isBad: s.variant === 'bad',
+      verdictCls: s.variant === 'good' ? 'verdict v-ok' : 'verdict v-bad',
+      runNote: v.note,
+
+      fProfile: val('profile'),
+      fFirst: val('first'),
+      onProfile: setVal('profile'),
+      onFirst: setVal('first'),
+
+      methOpen: s.meth,
+      methExpanded: s.meth ? 'true' : 'false',
+      methLabel: s.meth ? 'Скрыть методики' : 'Методики',
+      toggleMeth: () => this.setState({ meth: !s.meth }),
+      methods: sc.methods.map((name) => ({ name, org: METH[name] })),
+      criteria: sc.criteria.map((c, i) => {
+        const key = sc.id + '-' + i;
+        const isOpen = s.openCrit === key;
+        return {
+          name: c.name,
+          good: c.good,
+          open: isOpen,
+          expanded: isOpen ? 'true' : 'false',
+          toggleOpen: () => this.setState({ openCrit: isOpen ? '' : key }),
+          cls: critOn(i) ? 'toggle is-on' : 'toggle',
+          pressed: critOn(i) ? 'true' : 'false',
+          aria: 'Критический критерий: ' + c.name,
+          toggle: () => this.setState({ crit: { ...s.crit, [key]: !critOn(i) } })
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

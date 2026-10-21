@@ -1,0 +1,4 @@
+class Component extends DCLogic {
+ constructor(p){super(p);this.state={sel:''};}
+ renderVals(){const s=this.state;const g=demoRead('groups',[]).find(g=>g.id==='art')||{title:'Арт-субботы',schedule:'Суббота, 24 октября, 14:00',where:'Загородная мастерская',members:PEOPLE.filter(p=>p.group==='Арт-субботы').map(p=>p.id)};const assigned=PEOPLE.filter(p=>g.members.includes(p.id));const p=assigned.find(x=>x.id===s.sel)||assigned[0]||{name:'',age:'',ini:'',about:'',communication:'',support:'',color:'',photo:''};const visible=x=>({id:x.id,name:x.name,age:x.age,ini:x.ini,about:x.about,communication:x.communication,support:x.support,photo:x.photo,hasPhoto:!!x.photo,noPhoto:!x.photo,avatar:'profile-photo '+x.color,pick:()=>this.setState({sel:x.id})});return {group:g,noMembers:!assigned.length,hasPerson:!!s.sel,person:visible(p),people:assigned.map(visible),close:()=>this.setState({sel:''})};}
+}

@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Стать волонтёром — Опора</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F0ECE3}
+.dm{--page:#F0ECE3;--paper:#FFFFFF;--soft:#F6F3EE;--soft-2:#E8E3D8;--line:#E9E4DA;--line-2:#D6D0C3;--ink:#12141A;--ink-2:#3B3E46;--mute:#5E5A52;--quiet:#8C877C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFE9DC;--yellow:#FFB93F;--yellow-ink:#7A4E00;--yellow-tint:#FFF1D2;--blue:#0F3DA7;--blue-tint:#E7ECF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DDF0E2;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE5E1;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE4ED;--shadow:0 4px 14px rgba(18,20,26,.06);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,185,63,.45)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:18px;height:18px}.ic-lg{width:26px;height:26px}.ic-xl{width:36px;height:36px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 80px}
+.top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand . end" "nav nav nav";align-items:center;gap:14px 16px;margin-bottom:40px}
+.top > .brand{grid-area:brand;justify-self:start}
+.top > .nav{grid-area:nav;justify-self:start}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:13px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--ink);color:#fff}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.top-end{grid-area:end;justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:9px;height:9px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink-2);font-size:15px;font-weight:500;text-decoration:none;white-space:nowrap}
+.role:hover{color:var(--ink);text-decoration:none}
+.avatar{width:44px;height:44px;flex:0 0 44px;border-radius:50%;display:inline-grid;place-items:center;font-size:15px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:36px;height:36px;flex-basis:36px;font-size:13px}
+.avatar-lg{width:72px;height:72px;flex-basis:72px;font-size:24px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+.display{margin:0;font-size:56px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:40px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:28px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:12px 0 0;font-size:18px;line-height:1.5;color:var(--ink-2);max-width:60ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:15px;line-height:1.45;color:var(--mute)}
+.eyebrow{font-size:15px;font-weight:600;color:var(--ink-2)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:56px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:18px}
+.card{background:var(--paper);border-radius:28px;padding:28px 32px}
+.card-soft{background:var(--soft);border-radius:28px;padding:28px 32px}
+.card-hero{background:var(--yellow);border-radius:32px;padding:40px 44px;color:var(--ink)}
+.card-hero .lead,.card-hero .p{color:var(--ink)}
+.card-hero .meta{color:var(--ink-2)}
+.card-hero .btn-secondary{background:transparent;border-color:rgba(18,20,26,.35)}
+.card-hero .btn-secondary:hover{border-color:var(--ink)}
+.card-hero .btn-ghost{color:var(--ink)}
+.card-hero .btn-ghost:hover{background:rgba(255,255,255,.35)}
+.card-hero .bar{background:rgba(18,20,26,.14)}
+.card-hero .bar > i{background:var(--ink)}
+.card-dark{background:var(--ink);color:#fff;border-radius:32px;padding:40px 44px}
+.card-tight{padding:18px 22px;border-radius:22px}
+.ai-box{background:#F3EFFD;border-radius:24px;padding:22px 26px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.divider{height:1px;background:var(--line);border:0;margin:20px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:18px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;border:1px solid transparent;font-size:16px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:#2B2E37}
+.btn-accent{background:var(--orange);color:var(--ink)}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:40px;padding:0 16px;font-size:15px}
+.btn-lg{height:56px;padding:0 28px;font-size:17px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft-2);color:var(--mute);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;font-size:14px;font-weight:500;white-space:nowrap;background:var(--soft-2);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:14px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:var(--ink-2)}
+.dot::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--quiet);flex:0 0 9px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:0;background:var(--paper);font-size:15px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.chip.is-on{background:var(--ink);color:#fff}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--paper)}
+.seg button{height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:15px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line-2);overflow-x:auto}
+.tabs button{height:50px;padding:0 18px;border:0;background:transparent;font-size:16px;font-weight:600;color:var(--mute);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.label{font-size:15px;font-weight:600;color:var(--ink)}
+.input,.textarea,.select{width:100%;min-height:52px;padding:13px 16px;border-radius:14px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:140px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:15px;color:var(--mute)}
+.err{font-size:15px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:16px;color:var(--ink-2)}
+.check input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--ink);flex:0 0 22px}
+.toggle{position:relative;width:48px;height:28px;flex:0 0 48px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:23px}
+.kpi{position:relative;display:flex;flex-direction:column;gap:8px;padding:26px 28px;border-radius:28px;background:var(--paper);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{position:relative;font-size:16px;color:var(--ink-2);z-index:1}
+.kpi-delta{font-size:15px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:72px;height:64px;left:14px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:10px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}.bar-ink > i{background:var(--ink)}
+.tbl{display:grid}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:16px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-row:last-child{border-bottom:0}
+.tbl-head{font-size:15px;font-weight:600;color:var(--mute);padding-top:8px;padding-bottom:12px}
+.scroll-x{overflow-x:auto}
+.art{width:60px;height:60px;flex:0 0 60px;border-radius:20px;display:grid;place-items:center}
+.art .ic{width:26px;height:26px}
+.art-lg{width:100%;height:150px;border-radius:24px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+.bubble{max-width:72%;padding:14px 18px;border-radius:22px;background:var(--soft);color:var(--ink);font-size:16px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F3EFFD}
+.cite{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:15px;color:var(--ink-2)}
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:0 0 32px;padding:6px;border-radius:999px;background:#E3DDD0}
+.demo-cap{font-size:14px;font-weight:600;color:var(--mute);padding:0 8px 0 10px}
+.demo button{height:34px;padding:0 14px;border-radius:999px;border:0;background:transparent;font-size:14px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:40px}.h1{font-size:30px}.h2{font-size:24px}.card,.card-soft{padding:22px 20px;border-radius:24px}.card-hero,.card-dark{padding:28px 22px;border-radius:26px}.top{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "end" "nav"}.top-end{justify-self:start;flex-wrap:wrap}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-title{margin:10px 0 0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center;color:var(--ink)}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.cols-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin:0;padding:0;list-style:none}
+.track li{position:relative;display:flex;flex-direction:column;gap:14px;min-width:0}
+.track li::after{content:"";position:absolute;top:23px;left:62px;right:-2px;height:2px;border-radius:2px;background:var(--line-2)}
+.track li:last-child::after{display:none}
+.track-n{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--soft-2);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.track li:first-child .track-n{background:var(--yellow)}
+.wiz{max-width:880px}
+.stepper{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin:0 0 20px}
+.stepper-bars{display:flex;gap:6px;flex:0 1 360px;min-width:200px}
+.stepper-bars button{flex:1 1 0;height:28px;padding:0;border:0;background:transparent;display:flex;align-items:center}
+.stepper-bars button::before{content:"";display:block;width:100%;height:8px;border-radius:999px;background:var(--soft-2)}
+.stepper-bars button.is-done::before{background:var(--ink)}
+.stepper-bars button.is-now::before{background:var(--yellow)}
+.stepper-bars button.is-seen::before{background:var(--line-2)}
+.stepper-bars button[aria-disabled="true"]{cursor:default}
+.input-bad{border-color:var(--red)}
+.input-bad:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(226,22,12,.18)}
+.field-err{display:flex;align-items:flex-start;gap:8px;margin:0;font-size:15px;line-height:1.45;color:var(--red-ink)}
+.field-err .ic{margin-top:2px}
+.grp{display:grid;grid-template-columns:170px minmax(0,1fr);gap:8px 20px;align-items:start;padding:16px 0}
+.grp + .grp{border-top:1px solid #E4DBFA}
+.grp-label{font-weight:600;color:var(--ink);padding-top:9px}
+.xchip{display:inline-flex;align-items:center;gap:4px;height:42px;padding:0 5px 0 18px;border-radius:999px;background:var(--paper);font-size:15px;font-weight:500;color:var(--ink);white-space:nowrap}
+.xchip button{width:32px;height:32px;padding:0;border:0;border-radius:50%;background:transparent;display:grid;place-items:center;color:var(--mute)}
+.xchip button:hover{background:var(--violet-tint);color:var(--violet)}
+.addchip{display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 16px;border-radius:999px;border:0;background:transparent;font-size:15px;font-weight:600;color:var(--violet)}
+.addchip:hover{background:rgba(255,255,255,.6)}
+.add-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;max-width:560px}
+.add-row .input{flex:1 1 220px;width:auto;min-height:44px}
+.quote{margin:10px 0 0;color:var(--ink-2)}
+.avail{display:grid;grid-template-columns:76px repeat(7,minmax(0,1fr));gap:6px;align-items:center;margin-top:16px}
+.avail .dh{font-size:15px;font-weight:600;color:var(--ink-2);text-align:center}
+.avail .rh{font-size:15px;color:var(--ink-2)}
+.slot{height:48px;padding:0;border-radius:14px;border:0;background:var(--soft);display:grid;place-items:center;color:var(--ink)}
+.slot:hover{background:var(--soft-2)}
+.slot.is-on{background:var(--yellow)}
+.sum{display:grid;grid-template-columns:150px minmax(0,1fr);gap:4px 20px;padding:16px 0;border-top:1px solid var(--line)}
+.sum:first-child{border-top:0;padding-top:4px}
+.sum-k{font-weight:600;color:var(--ink)}
+.wiz-nav{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-top:28px}
+.wiz-nav .push{margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:12px 16px}
+.num-dot{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-weight:600;font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums}
+.card .chip{background:var(--soft)}
+.card .chip:hover{box-shadow:inset 0 0 0 1px var(--line-2)}
+.card .chip.is-on{background:var(--ink);color:#fff}
+@media (max-width:900px){.cols-3{grid-template-columns:minmax(0,1fr)}.track{grid-template-columns:minmax(0,1fr)}.track li{flex-direction:row;align-items:center}.track li::after{display:none}}
+@media (max-width:720px){.hero-title{font-size:38px}.hero-art{display:none}.grp{grid-template-columns:minmax(0,1fr)}.grp-label{padding-top:0}.avail{grid-template-columns:52px repeat(7,minmax(0,1fr));gap:4px}.slot{height:40px;border-radius:10px}.sum{grid-template-columns:minmax(0,1fr)}}
+.subnav{margin:0 0 32px}.dm .grid-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+</style>
+</helmet>
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>волонтёры «Дети Марии»</small></span></a>
+  <div class="top-end">
+    <a class="btn btn-ghost" href="ApplicationStatus.dc.html">Моя заявка</a>
+    <span class="avatar av-g" aria-label="Максим Ильин">МИ</span>
+  </div>
+</header>
+
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<!-- Знакомство -->
+<sc-if value="{{isIntro}}" hint-placeholder-val="{{false}}">
+  <section class="card-hero" aria-labelledby="intro-title">
+    <div class="hero-grid">
+      <div class="grow">
+        <p class="eyebrow" style="margin:0">Фонд «Дети Марии»</p>
+        <h1 class="hero-title" id="intro-title">Стать волонтёром</h1>
+        <p class="lead">Занятия с ребятами в мастерских фонда в Москве</p>
+        <div class="row wrap" style="margin-top:28px;gap:12px 18px">
+          <button type="button" class="btn btn-primary btn-lg" onClick="{{start}}">Начать анкету</button>
+          <span class="p">10 минут</span>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="way-title">
+    <div class="section-head"><h2 class="h2" id="way-title">Как устроен путь</h2><span class="meta">около 3 недель</span></div>
+    <div class="card">
+      <ol class="track">
+        <li><span class="track-n">1</span><span class="h3">Заявка</span></li>
+        <li><span class="track-n">2</span><span class="h3">Собеседование</span></li>
+        <li><span class="track-n">3</span><span class="h3">Документы</span></li>
+        <li><span class="track-n">4</span><span class="h3">Обучение</span></li>
+        <li><span class="track-n">5</span><span class="h3">Первое занятие</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="req-title">
+    <div class="section-head"><h2 class="h2" id="req-title">Что нужно</h2></div>
+    <div class="cols-3">
+      <div class="card row" style="gap:18px">
+        <span class="art art-y" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+        <span class="h3">Есть 18 лет</span>
+      </div>
+      <div class="card row" style="gap:18px">
+        <span class="art art-b" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></span>
+        <span class="h3">Справка о несудимости</span>
+      </div>
+      <div class="card row" style="gap:18px">
+        <span class="art art-g" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></span>
+        <span class="h3">Раз в неделю от 3 месяцев</span>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<!-- Анкета: шаги 1–4 -->
+<sc-if value="{{isWizard}}" hint-placeholder-val="{{true}}">
+  <div class="wiz">
+    <div class="stepper">
+      <span class="eyebrow num">{{stepCount}}</span>
+      <div class="stepper-bars" role="group" aria-label="Шаги анкеты">
+        <sc-for list="{{bars}}" as="b" hint-placeholder-count="4">
+          <button type="button" class="{{b.cls}}" aria-label="{{b.aria}}" aria-current="{{b.current}}" aria-disabled="{{b.disabled}}" onClick="{{b.pick}}"></button>
+        </sc-for>
+      </div>
+    </div>
+    <h1 class="h1" style="margin-bottom:24px">{{stepTitle}}</h1>
+
+    <!-- 1. Контакты -->
+    <sc-if value="{{isStep1}}" hint-placeholder-val="{{false}}">
+      <section class="card" aria-label="Контакты">
+        <div class="grid-2" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+          <div class="field">
+            <label class="label" for="f-name">Имя и фамилия</label>
+            <input id="f-name" class="input" type="text" autocomplete="name" value="{{name}}" onChange="{{onName}}">
+          </div>
+          <div class="field">
+            <label class="label" for="f-email">Почта</label>
+            <input id="f-email" class="{{emailCls}}" type="email" autocomplete="email" value="{{email}}" onChange="{{onEmail}}" aria-invalid="{{emailInvalid}}" aria-describedby="f-email-err">
+            <sc-if value="{{emailBad}}" hint-placeholder-val="{{false}}">
+              <p class="field-err" id="f-email-err"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg>{{emailErr}}</p>
+            </sc-if>
+          </div>
+          <div class="field">
+            <label class="label" for="f-phone">Телефон</label>
+            <input id="f-phone" class="input" type="tel" autocomplete="tel" value="{{phone}}" onChange="{{onPhone}}">
+          </div>
+          <div class="field">
+            <label class="label" for="f-district">Район Москвы</label>
+            <input id="f-district" class="input" type="text" value="{{district}}" onChange="{{onDistrict}}">
+          </div>
+        </div>
+        <label class="check" for="f-adult" style="margin-top:24px"><input id="f-adult" type="checkbox" checked="{{adult}}" onChange="{{onAdult}}"><span>Мне есть 18 лет</span></label>
+      </section>
+    </sc-if>
+
+    <!-- 2. О себе -->
+    <sc-if value="{{isStep2}}" hint-placeholder-val="{{true}}">
+      <section class="card" aria-label="О себе">
+        <div class="field">
+          <label class="label" for="f-about">Как другу: что умеешь, был ли опыт с детьми, когда свободен</label>
+          <textarea id="f-about" class="textarea" style="min-height:190px" value="{{about}}" onChange="{{onAbout}}"></textarea>
+        </div>
+        <div class="row wrap" style="margin-top:16px;gap:10px 16px">
+          <button type="button" class="btn btn-ai" onClick="{{build}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg>{{buildLabel}}</button>
+          <sc-if value="{{showStale}}" hint-placeholder-val="{{false}}"><span class="p">Текст изменился — собери заново</span></sc-if>
+        </div>
+      </section>
+
+      <sc-if value="{{aiDone}}" hint-placeholder-val="{{true}}">
+        <section class="ai-box" style="margin-top:16px" aria-labelledby="found-title">
+          <div class="row wrap" style="justify-content:space-between">
+            <div class="row" style="gap:12px"><h2 class="h3" id="found-title">Профиль из твоего текста</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+            <button type="button" class="btn btn-ghost btn-sm" aria-expanded="{{srcExpanded}}" onClick="{{toggleSrc}}">{{srcLabel}}</button>
+          </div>
+          <div style="margin-top:4px">
+            <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+              <div class="grp">
+                <span class="grp-label">{{g.label}}</span>
+                <div>
+                  <div class="chips">
+                    <sc-for list="{{g.chips}}" as="c" hint-placeholder-count="3">
+                      <span class="xchip">{{c.text}}<button type="button" aria-label="{{c.aria}}" onClick="{{c.remove}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>
+                    </sc-for>
+                    <sc-if value="{{g.canAdd}}" hint-placeholder-val="{{true}}">
+                      <button type="button" class="addchip" aria-label="{{g.addAria}}" onClick="{{g.startAdd}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Добавить</button>
+                    </sc-if>
+                  </div>
+                  <sc-if value="{{g.isAdding}}" hint-placeholder-val="{{false}}">
+                    <div class="add-row">
+                      <label class="sr" for="{{g.inputId}}">{{g.addAria}}</label>
+                      <input id="{{g.inputId}}" class="input" type="text" value="{{g.draft}}" onChange="{{g.onDraft}}" placeholder="{{g.placeholder}}">
+                      <button type="button" class="btn btn-secondary" onClick="{{g.commit}}">Добавить</button>
+                      <button type="button" class="btn btn-ghost" onClick="{{g.cancel}}">Отмена</button>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{g.showSrc}}" hint-placeholder-val="{{false}}"><p class="quote">{{g.src}}</p></sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+    </sc-if>
+
+    <!-- 3. Когда и как -->
+    <sc-if value="{{isStep3}}" hint-placeholder-val="{{false}}">
+      <section class="card" aria-labelledby="when-title">
+        <div class="row" style="gap:12px"><h2 class="h3" id="when-title">Когда свободен</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+        <div class="avail" role="group" aria-label="Свободное время по дням недели">
+          <span aria-hidden="true"></span>
+          <sc-for list="{{days}}" as="d" hint-placeholder-count="7"><span class="dh">{{d}}</span></sc-for>
+          <sc-for list="{{availRows}}" as="ar" hint-placeholder-count="3">
+            <span class="rh">{{ar.label}}</span>
+            <sc-for list="{{ar.cells}}" as="c" hint-placeholder-count="7">
+              <button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" aria-label="{{c.aria}}" onClick="{{c.toggle}}">
+                <sc-if value="{{c.on}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if>
+              </button>
+            </sc-for>
+          </sc-for>
+        </div>
+        <hr class="divider" style="margin:28px 0 22px">
+        <h2 class="h3">Как хочешь помогать</h2>
+        <div class="chips" role="group" aria-label="Форматы помощи" style="margin-top:14px">
+          <sc-for list="{{formats}}" as="fm" hint-placeholder-count="5">
+            <button type="button" class="{{fm.cls}}" aria-pressed="{{fm.pressed}}" onClick="{{fm.toggle}}">{{fm.label}}</button>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <!-- 4. Проверка и согласия -->
+    <sc-if value="{{isStep4}}" hint-placeholder-val="{{false}}">
+      <section class="card" aria-label="Проверка анкеты">
+        <div>
+          <sc-for list="{{summary}}" as="sm" hint-placeholder-count="4">
+            <div class="sum"><span class="sum-k">{{sm.k}}</span><span class="p">{{sm.v}}</span></div>
+          </sc-for>
+        </div>
+        <hr class="divider" style="margin:24px 0">
+        <div class="stack" style="gap:18px">
+          <label class="check" for="c-pd"><input id="c-pd" type="checkbox" checked="{{c1}}" onChange="{{onC1}}"><span>Согласен на обработку персональных данных</span></label>
+          <label class="check" for="c-code"><input id="c-code" type="checkbox" checked="{{c2}}" onChange="{{onC2}}"><span>Прочитал <a href="Lesson.dc.html">правила безопасности</a> и кодекс волонтёра</span></label>
+          <label class="check" for="c-cert"><input id="c-cert" type="checkbox" checked="{{c3}}" onChange="{{onC3}}"><span>Принесу справку о несудимости до первого занятия</span></label>
+        </div>
+      </section>
+    </sc-if>
+
+    <div class="wiz-nav">
+      <button type="button" class="btn btn-ghost" onClick="{{back}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>Назад</button>
+      <div class="push">
+        <sc-if value="{{showNextHint}}" hint-placeholder-val="{{false}}"><span class="p" id="next-hint">{{nextHint}}</span></sc-if>
+        <button type="button" class="btn btn-primary btn-lg" aria-disabled="{{nextDisabled}}" aria-describedby="next-hint" onClick="{{next}}">{{nextLabel}}<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- Отправлено -->
+<sc-if value="{{isSent}}" hint-placeholder-val="{{false}}">
+  <section class="card-hero" aria-labelledby="sent-title">
+    <div class="hero-grid">
+      <div class="grow">
+        <p class="eyebrow" style="margin:0">Заявка отправлена</p>
+        <h1 class="hero-title" id="sent-title">Спасибо, Максим!</h1>
+        <p class="lead">Ольга Лебедева, координатор, ответит в течение 3 дней</p>
+        <div class="row wrap" style="margin-top:28px">
+          <a class="btn btn-primary btn-lg" href="ApplicationStatus.dc.html">Моя заявка</a>
+          <button type="button" class="btn btn-ghost btn-lg" onClick="{{reviewForm}}">Посмотреть анкету</button>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="after-title">
+    <div class="section-head"><h2 class="h2" id="after-title">Что дальше</h2></div>
+    <div class="card">
+      <div class="list">
+        <div class="li"><span class="num-dot">1</span><span class="li-title grow">Собеседование с Ольгой</span></div>
+        <div class="li"><span class="num-dot">2</span><span class="li-title grow">Справка о несудимости</span><a class="btn btn-secondary btn-sm" href="ApplicationStatus.dc.html">Как заказать</a></div>
+        <div class="li"><span class="num-dot">3</span><span class="li-title grow">Обучение «Первые шаги»</span></div>
+        <div class="li"><span class="num-dot">4</span><span class="li-title grow">Первое занятие</span></div>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      mode: 'form', step: 2, maxStep: 2,
+      name: 'Максим Ильин', email: 'maxim.ilin@yandex.ru', phone: '+7 912 345-67-89', district: 'Тимирязевский', adult: true,
+      about: 'Я звукорежиссёр, мне 34. Пишу и свожу музыку, иногда монтирую видео. Год вёл кружок звукозаписи для школьников: записывали подкасты и песни. Играю на гитаре, люблю кино. Хочется помогать подросткам — показать, что из увлечения может вырасти профессия.\nСвободен по будням после 19:00 и в воскресенье.',
+      aiDone: true, aiStale: false, removed: {}, extra: { skills: [], interests: [], kids: [], time: [] },
+      adding: '', draft: '', showSrc: false,
+      avail: { '0-2': true, '1-2': true, '2-2': true, '3-2': true, '4-2': true, '6-0': true, '6-1': true, '6-2': true },
+      formats: { regular: true, once: true, pro: true },
+      c1: false, c2: false, c3: false
+    };
+  }
+  renderVals() {
+    const s = this.state;
+    const go = (n) => this.setState({ step: n, maxStep: Math.max(s.maxStep, n), adding: '', draft: '' });
+
+    const modes = [
+      { id: 'form', label: 'Анкета' },
+      { id: 'error', label: 'Ошибка в поле' },
+      { id: 'sent', label: 'Отправлено' }
+    ].map((m) => ({
+      ...m,
+      cls: m.id === s.mode ? 'is-on' : '',
+      pressed: m.id === s.mode ? 'true' : 'false',
+      pick: () => {
+        if (m.id === 'form') this.setState({ mode: 'form', step: 2, maxStep: Math.max(s.maxStep, 2), email: 'maxim.ilin@yandex.ru', adding: '' });
+        else if (m.id === 'error') this.setState({ mode: 'error', step: 1, maxStep: Math.max(s.maxStep, 2), email: 'maxim.ilin@', adding: '' });
+        else this.setState({ mode: 'sent' });
+      }
+    }));
+
+    const titles = ['', 'Контакты', 'Расскажи о себе', 'Когда и как', 'Проверь и отправь'];
+    const bars = [1, 2, 3, 4].map((i) => {
+      const now = i === s.step;
+      const later = i > s.maxStep;
+      return {
+        cls: now ? 'is-now' : (i < s.step ? 'is-done' : (later ? '' : 'is-seen')),
+        aria: 'Шаг ' + i + ': ' + titles[i],
+        current: now ? 'step' : 'false',
+        disabled: later ? 'true' : 'false',
+        pick: () => { if (!later) this.setState({ step: i, adding: '', draft: '' }); }
+      };
+    });
+
+    const emailRaw = (s.email || '').trim();
+    const at = emailRaw.indexOf('@');
+    const dom = at >= 0 ? emailRaw.slice(at + 1) : '';
+    let emailErr = '';
+    if (!emailRaw) emailErr = 'Напиши почту — на неё придёт ответ';
+    else if (at < 1) emailErr = 'В адресе нет значка @';
+    else if (!dom || dom.indexOf('.') < 1 || dom.lastIndexOf('.') > dom.length - 3) emailErr = 'Допиши домен после @, например yandex.ru';
+    const emailBad = !!emailErr;
+
+    const groupDefs = [
+      { id: 'skills', label: 'Навыки', items: ['звукорежиссура', 'монтаж видео', 'гитара'], ph: 'Например, сведение', src: '«Я звукорежиссёр… иногда монтирую видео… Играю на гитаре»' },
+      { id: 'interests', label: 'Интересы', items: ['музыка', 'кино', 'подростки'], ph: 'Например, настольные игры', src: '«Пишу и свожу музыку… люблю кино… помогать подросткам»' },
+      { id: 'kids', label: 'Опыт с детьми', items: ['кружок звукозаписи, 1 год'], ph: 'Например, вожатый в лагере', src: '«Год вёл кружок звукозаписи для школьников»' },
+      { id: 'time', label: 'Когда свободен', items: ['будни после 19:00', 'воскресенье'], ph: 'Например, суббота утром', src: '«Свободен по будням после 19:00 и в воскресенье»' }
+    ];
+    const groups = groupDefs.map((g) => {
+      const extra = s.extra[g.id] || [];
+      const base = g.items.filter((t) => !s.removed[g.id + ':' + t]);
+      const chips = base.map((t) => ({
+        text: t, aria: 'Убрать: ' + t,
+        remove: () => this.setState({ removed: { ...s.removed, [g.id + ':' + t]: true } })
+      })).concat(extra.map((t, k) => ({
+        text: t, aria: 'Убрать: ' + t,
+        remove: () => this.setState({ extra: { ...s.extra, [g.id]: extra.filter((x, j) => j !== k) } })
+      })));
+      const isAdding = s.adding === g.id;
+      return {
+        label: g.label, chips, src: g.src, showSrc: s.showSrc,
+        isAdding, canAdd: !isAdding,
+        addAria: 'Добавить: ' + g.label.toLowerCase(), inputId: 'add-' + g.id, placeholder: g.ph,
+        draft: s.draft,
+        onDraft: (e) => this.setState({ draft: e.target.value }),
+        startAdd: () => this.setState({ adding: g.id, draft: '' }),
+        cancel: () => this.setState({ adding: '', draft: '' }),
+        commit: () => {
+          const t = (s.draft || '').trim();
+          if (!t) { this.setState({ adding: '' }); return; }
+          this.setState({ extra: { ...s.extra, [g.id]: extra.concat([t]) }, adding: '', draft: '' });
+        }
+      };
+    });
+
+    const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    const parts = ['Утро', 'День', 'Вечер'];
+    const availRows = parts.map((p, pi) => ({
+      label: p,
+      cells: days.map((d, di) => {
+        const k = di + '-' + pi;
+        const on = !!s.avail[k];
+        return {
+          on, cls: on ? 'slot is-on' : 'slot', pressed: on ? 'true' : 'false', aria: d + ', ' + p.toLowerCase(),
+          toggle: () => this.setState({ avail: { ...s.avail, [k]: !on } })
+        };
+      })
+    }));
+    const anyAvail = Object.keys(s.avail).some((k) => s.avail[k]);
+    const perDay = days.map((d, di) => ({ d, p: parts.filter((p, pi) => s.avail[di + '-' + pi]).map((p) => p.toLowerCase()).join(', ') })).filter((x) => x.p);
+    const grouped = [];
+    perDay.forEach((x) => {
+      const last = grouped[grouped.length - 1];
+      if (last && last.p === x.p) last.ds.push(x.d); else grouped.push({ p: x.p, ds: [x.d] });
+    });
+    const availLine = grouped.length ? grouped.map((g) => g.ds.join(', ') + ' — ' + g.p).join('; ') : 'не отмечено';
+
+    const fmtDefs = [
+      { id: 'regular', label: 'Регулярно' },
+      { id: 'once', label: 'Разово' },
+      { id: 'online', label: 'Онлайн' },
+      { id: 'pro', label: 'По профессии' },
+      { id: 'cssu', label: 'Выезды в ЦССУ' }
+    ];
+    const formats = fmtDefs.map((f) => {
+      const on = !!s.formats[f.id];
+      return {
+        label: f.label, cls: on ? 'chip is-on' : 'chip', pressed: on ? 'true' : 'false',
+        toggle: () => this.setState({ formats: { ...s.formats, [f.id]: !on } })
+      };
+    });
+    const fmtLine = fmtDefs.filter((f) => s.formats[f.id]).map((f) => f.label.toLowerCase()).join(', ') || 'не выбрано';
+
+    const listOf = (i) => groups[i].chips.map((c) => c.text).join(', ') || 'не указано';
+    const summary = [
+      { k: 'Контакты', v: s.name + ', ' + s.email + ', ' + s.phone },
+      { k: 'Навыки', v: listOf(0) },
+      { k: 'Когда', v: availLine },
+      { k: 'Как', v: fmtLine }
+    ];
+
+    const consents = [s.c1, s.c2, s.c3].filter(Boolean).length;
+    let nextHint = '';
+    if (s.step === 1 && emailBad) nextHint = 'Исправь почту';
+    else if (s.step === 1 && !s.adult) nextHint = 'Волонтёром можно стать с 18 лет';
+    else if (s.step === 3 && !anyAvail) nextHint = 'Отметь удобное время';
+    else if (s.step === 4 && consents < 3) nextHint = 'Отметь все согласия';
+    const nextDisabled = !!nextHint;
+
+    const isSent = s.mode === 'sent';
+    return {
+      modes,
+      isIntro: !isSent && s.step === 0,
+      isWizard: !isSent && s.step > 0,
+      isSent,
+      start: () => go(1),
+
+      bars,
+      stepCount: 'Шаг ' + s.step + ' из 4',
+      stepTitle: titles[s.step] || '',
+      isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3, isStep4: s.step === 4,
+
+      name: s.name, email: s.email, phone: s.phone, district: s.district, adult: s.adult,
+      onName: (e) => this.setState({ name: e.target.value }),
+      onEmail: (e) => this.setState({ email: e.target.value }),
+      onPhone: (e) => this.setState({ phone: e.target.value }),
+      onDistrict: (e) => this.setState({ district: e.target.value }),
+      onAdult: (e) => this.setState({ adult: e.target.checked }),
+      emailBad, emailErr,
+      emailCls: emailBad ? 'input input-bad' : 'input',
+      emailInvalid: emailBad ? 'true' : 'false',
+
+      about: s.about,
+      onAbout: (e) => this.setState({ about: e.target.value, aiStale: true }),
+      build: () => this.setState({ aiDone: true, aiStale: false, removed: {}, extra: { skills: [], interests: [], kids: [], time: [] }, adding: '', draft: '' }),
+      buildLabel: s.aiDone ? 'Собрать заново' : 'Собрать профиль',
+      showStale: s.aiDone && s.aiStale,
+      aiDone: s.aiDone,
+      srcExpanded: s.showSrc ? 'true' : 'false',
+      srcLabel: s.showSrc ? 'Скрыть цитаты' : 'Откуда это',
+      toggleSrc: () => this.setState({ showSrc: !s.showSrc }),
+      groups,
+
+      days, availRows, formats,
+
+      summary,
+      c1: s.c1, c2: s.c2, c3: s.c3,
+      onC1: (e) => this.setState({ c1: e.target.checked }),
+      onC2: (e) => this.setState({ c2: e.target.checked }),
+      onC3: (e) => this.setState({ c3: e.target.checked }),
+
+      back: () => go(Math.max(0, s.step - 1)),
+      next: () => {
+        if (nextDisabled) return;
+        if (s.step === 4) this.setState({ mode: 'sent' });
+        else go(s.step + 1);
+      },
+      nextDisabled: nextDisabled ? 'true' : 'false',
+      nextHint, showNextHint: nextDisabled,
+      nextLabel: s.step === 4 ? 'Отправить заявку' : 'Дальше',
+
+      reviewForm: () => this.setState({ mode: 'form', step: 4, maxStep: 4 })
+    };
+  }
+}
+</script>
+</body>
+</html>
