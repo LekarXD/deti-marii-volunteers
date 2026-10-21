@@ -49,7 +49,11 @@ Thus ordinary Staff administration could not grant reporting editing/export or
 group reports. `recordings.manage/review/publish` were also absent. This was
 reported to Staff's owner, who delivered `9b7d5ee` with the exact missing entries,
 scope constraints and an HTTP grant/resolved-principal test. That fix is outside
-this immutable 71b75c0 run and needs its integrated follow-up checkpoint.
+the immutable 71b75c0 run. Its focused integrated follow-up on frozen
+`b027e6d747533a0b49168727036f341ad7e4d3fa` passed: **1 passed, 9 deselected,
+zero skips, 1.00s**. This executes actual HTTP grants from the Staff catalog and
+checks the freshly resolved permission scope. It used an isolated schema on the
+owned QA cluster; no broad backend rerun was performed for this follow-up.
 
 ## Packaging checkpoint
 
