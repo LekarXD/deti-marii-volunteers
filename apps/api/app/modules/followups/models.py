@@ -139,3 +139,5 @@ class ReflectionAudioUpload(Base):
         ForeignKeyConstraint(['user_id','foundation_id'],['users.id','users.foundation_id']),
         CheckConstraint('version > 0 AND (duration_seconds IS NULL OR (duration_seconds > 0 AND duration_seconds <= 180))'),
         Index('ix_reflection_audio_owner','foundation_id','user_id','assignment_id','created_at'))
+
+from .rule_models import SignalRuleSettings,RuleSignal
