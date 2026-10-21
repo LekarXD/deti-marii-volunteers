@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     dev_inbox: bool = True
     session_hours: int = 24
     worker_kinds: list[str] = ["outbox.deliver"]
+    email_webhook_secret: str | None = None
     smtp_host: str | None = None
     smtp_port: int = 587
     smtp_from: str | None = None

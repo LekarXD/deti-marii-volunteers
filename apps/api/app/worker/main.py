@@ -30,16 +30,16 @@ async def run_once(kinds=None):
                 message = await db.get(OutboxMessage, UUID(job.payload["outbox_id"]))
                 payload=json.loads(unseal(message.payload_cipher))
                 if message.channel in ("internal","in_app"):
-                    from app.modules.messaging.consumers import deliver_internal
-                    state=await deliver_internal(db,message,payload)
+                    from app.modules.notifications.delivery import process_internal
+                    state=await process_internal(db,job,message,payload)
                     message.state=state
                     if state=="waiting_identity":
                         await fenced_update(db,job.id,job.claim_token,state="queued",attempts=max(0,job.attempts-1),available_at=utcnow()+timedelta(minutes=5),lease_until=None)
                     else:
                         await complete(db,job.id,job.claim_token,{"delivery":state})
                 elif message.channel=="email":
-                    from app.integrations.delivery.email import deliver_email
-                    result=await deliver_email(payload)
+                    from app.modules.notifications.delivery import process_email
+                    result=await process_email(db,job,message,payload)
                     message.state=result.state
                     if result.state=="unavailable":
                         await retry(db,job.id,job.claim_token,result.error_code or "provider_unavailable",job.attempts,job.max_attempts)

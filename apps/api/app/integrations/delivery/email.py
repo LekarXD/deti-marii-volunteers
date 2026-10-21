@@ -26,14 +26,24 @@ async def deliver_email(payload):
         return DeliveryOutcome("dev_inbox")
     if not settings.smtp_host or not settings.smtp_from:
         return DeliveryOutcome("unavailable","provider_unavailable")
-    if payload.get('purpose')!='login' or not all(payload.get(k) for k in ('to','challenge_id','token')):
+    purpose=payload.get('purpose')
+    if purpose not in ('login','notification') or not payload.get('to') or any(c in payload['to'] for c in ('\r','\n')):
         return DeliveryOutcome("unavailable","template_unavailable")
     email=EmailMessage()
     email['From']=settings.smtp_from
     email['To']=payload['to']
-    email['Subject']='Опора — подтверждение входа'
-    # Token consumption remains POST-only, never through a GET link.
-    email.set_content(f"Код подтверждения входа в Опору:\n{payload['token']}\n\nЗапрос: {payload['challenge_id']}\nКод действует 15 минут. Если вы не запрашивали вход, не используйте его.")
+    if payload.get('message_id'):
+        email['Message-ID']=payload['message_id']
+    if purpose=='login':
+        if not all(payload.get(k) for k in ('challenge_id','token')):
+            return DeliveryOutcome('unavailable','template_unavailable')
+        email['Subject']='Опора — подтверждение входа'
+        email.set_content(f"Код подтверждения входа в Опору:\n{payload['token']}\n\nЗапрос: {payload['challenge_id']}\nКод действует 15 минут. Если вы не запрашивали вход, не используйте его.")
+    else:
+        if not payload.get('subject') or not payload.get('text') or len(payload['subject'])>300 or len(payload['text'])>10000 or any(c in payload['subject'] for c in ('\r','\n')):
+            return DeliveryOutcome('unavailable','template_unavailable')
+        email['Subject']=payload['subject']
+        email.set_content(payload['text'])
     def send():
         client=None
         attempted_data=False
@@ -47,7 +57,7 @@ async def deliver_email(payload):
                 client.login(settings.smtp_username,settings.smtp_password or '')
             attempted_data=True
             refused=client.send_message(email)
-            return DeliveryOutcome("rejected","recipient_rejected") if refused else DeliveryOutcome("delivered")
+            return DeliveryOutcome("rejected","recipient_rejected") if refused else DeliveryOutcome("accepted")
         except (smtplib.SMTPRecipientsRefused,smtplib.SMTPSenderRefused,smtplib.SMTPDataError):
             return DeliveryOutcome("rejected","smtp_rejected")
         except (OSError,smtplib.SMTPException):

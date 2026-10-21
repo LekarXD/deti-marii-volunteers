@@ -46,7 +46,7 @@ def load_extensions():
                 raise
 
 # Heartbeats cannot be starved by domain commands occupying the regular connection pool.
-heartbeat_engine=create_async_engine(get_settings().database_url,pool_size=2,max_overflow=0,pool_timeout=2,pool_pre_ping=True)
+heartbeat_engine=create_async_engine(get_settings().database_url,pool_size=2,max_overflow=0,pool_timeout=2,pool_pre_ping=True,hide_parameters=True)
 HeartbeatSession=async_sessionmaker(heartbeat_engine,expire_on_commit=False)
 # One admitted task per worker process. Additional processes are an explicit deployment choice.
 admission=asyncio.Semaphore(1)

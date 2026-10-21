@@ -68,9 +68,12 @@ async def deliver_internal(db,outbox,payload):
         content=f"{payload.get('subject','Уведомление фонда')}\n{payload.get('text','')}".strip()
         if len(content)>8000:
             return "unavailable"
-    from app.modules.crm.service import contact_preference
-    if (await contact_preference(db,outbox.foundation_id,user_id=recipient))["no_contact"]:
-        return "suppressed_no_contact"
+    from app.modules.notifications.service import may_contact,sender_authorized
+    if not await sender_authorized(db,outbox.foundation_id,payload):
+        return "suppressed_authz"
+    allowed,reason=await may_contact(db,outbox.foundation_id,recipient,"in_app")
+    if not allowed:
+        return "suppressed_"+reason
     user=await db.get(User,recipient)
     if user is None or user.foundation_id!=outbox.foundation_id or user.account_state!="active":
         return "suppressed_recipient"
