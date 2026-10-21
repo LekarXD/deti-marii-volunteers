@@ -25,6 +25,8 @@ class WebinarView(WebinarInput):
     state:str
     version:int
     enrollment_state:str|None=None
+    enrollment_version:int|None=None
+    can_host:bool=False
     session_id:UUID|None=None
 class StudioSessionCreate(BaseModel):
     resource_kind:Literal['live_event','lesson_recording_project']
@@ -96,3 +98,10 @@ class SlideDeckView(BaseModel):
 class StudioBoardSnapshotInput(BaseModel):
     asset_id:UUID
     taken_at:datetime|None=None
+
+class StudioParticipantView(BaseModel):
+    user_id:UUID
+    display_name:str
+    enrollment_state:str
+    enrollment_version:int
+    can_draw:bool=False

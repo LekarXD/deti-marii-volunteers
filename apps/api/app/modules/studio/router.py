@@ -17,7 +17,7 @@ from app.core.rate_limit import rate_limit
 from app.worker.queue import enqueue_job
 from app.integrations.rtc.livekit import RtcSettings,LiveKitAdapter,RevocationPolicy,ProviderError,identity
 from .models import Webinar,WebinarEnrollment,StudioSession,StudioBoardGrant
-from .schemas import WebinarInput,WebinarView,WebinarUpdate,StudioVersionCommand,StudioSessionCreate,StudioSessionView,StudioSceneCommand,StudioJoinView,StudioEnrollmentView,StudioBoardPass,StudioBoardGrantInput,SlideDeckView,SlideUploadInput,StudioBoardSnapshotInput
+from .schemas import WebinarInput,WebinarView,WebinarUpdate,StudioVersionCommand,StudioSessionCreate,StudioSessionView,StudioSceneCommand,StudioJoinView,StudioEnrollmentView,StudioBoardPass,StudioBoardGrantInput,SlideDeckView,SlideUploadInput,StudioBoardSnapshotInput,StudioParticipantView
 from . import service as s
 router=APIRouter(prefix='/api/v1',tags=['studio'])
 
@@ -42,7 +42,7 @@ async def manage_scope(p):require_manage(p)
 async def webinar_view(db,p,row):
     enrollment=await db.scalar(select(WebinarEnrollment).where(WebinarEnrollment.webinar_id==row.id,WebinarEnrollment.user_id==p.user_id)) if p.user_id else None
     current=await db.scalar(select(StudioSession).where(StudioSession.resource_kind=='live_event',StudioSession.resource_id==row.id,StudioSession.state.in_(['prepared','opening','live','closing'])))
-    return WebinarView.model_validate(row).model_dump()|{'enrollment_state':enrollment.state if enrollment else None,'session_id':current.id if current else None}
+    return WebinarView.model_validate(row).model_dump()|{'enrollment_state':enrollment.state if enrollment else None,'enrollment_version':enrollment.version if enrollment else None,'can_host':p.user_id==row.host_user_id and (p.has_permission('studio.manage') or p.has_permission('studio.host','webinar',row.id)),'session_id':current.id if current else None}
 
 @router.get('/webinars',response_model=list[WebinarView])
 async def webinars(db:AsyncSession=Depends(get_db),p:Principal=Depends(get_principal)):
@@ -346,3 +346,12 @@ async def webinar_join(id:UUID,db:AsyncSession=Depends(get_db),p:Principal=Depen
     row=await db.scalar(select(StudioSession).where(StudioSession.foundation_id==p.foundation_id,StudioSession.resource_kind=='live_event',StudioSession.resource_id==id,StudioSession.state.in_(['opening','live'])))
     if not row:raise ApiError(409,'studio_not_live','Ведущий ещё не открыл комнату.')
     return await join(row.id,db,p)
+
+
+@router.get('/webinars/{id}/enrollments',response_model=list[StudioParticipantView])
+async def webinar_participants(id:UUID,db:AsyncSession=Depends(get_db),p:Principal=Depends(get_principal)):
+    await s.authorize_resource(db,p,'live_event',id,True)
+    current=await db.scalar(select(StudioSession).where(StudioSession.foundation_id==p.foundation_id,StudioSession.resource_kind=='live_event',StudioSession.resource_id==id,StudioSession.state.in_(['prepared','opening','live','closing'])))
+    grants=dict((await db.execute(select(StudioBoardGrant.user_id,StudioBoardGrant.can_draw).where(StudioBoardGrant.session_id==current.id))).all()) if current else {}
+    rows=(await db.execute(select(WebinarEnrollment,User.display_name).join(User,User.id==WebinarEnrollment.user_id).where(WebinarEnrollment.webinar_id==id,WebinarEnrollment.foundation_id==p.foundation_id).order_by(User.display_name,User.id))).all()
+    return [{'user_id':enrollment.user_id,'display_name':name,'enrollment_state':enrollment.state,'enrollment_version':enrollment.version,'can_draw':grants.get(enrollment.user_id,False)} for enrollment,name in rows]

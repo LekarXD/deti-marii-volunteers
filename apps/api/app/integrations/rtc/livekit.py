@@ -81,6 +81,19 @@ def join_token(settings:RtcSettings,*,room:str,participant_identity:str,name:str
     # Host moderation is a fresh authorized API call, never a browser roomAdmin grant.
     return _encode(settings,{"iss":settings.api_key,"sub":participant_identity,"name":name[:100],"nbf":issued-5,"iat":issued,"exp":issued+settings.join_ttl_seconds,"metadata":json.dumps({"role":"host" if host else "audience","auth_session_id":str(auth_session_id) if auth_session_id else None}),"video":grant})
 
+def renderer_token(settings:RtcSettings,*,room:str,participant_identity:str,capture_grant_id:UUID,take_id:UUID,generation:int,policy:RevocationPolicy,now:int|None=None):
+    """P18C private factory; caller authorizes the current capture grant before signing.
+
+    Short-lived SDK room token is distinct from the header-only purpose ticket.
+    No user identity, audience data, room management or media publishing privileges.
+    """
+    settings.assert_policy(policy)
+    if generation<1 or not room or not participant_identity:raise ValueError('invalid_capture_scope')
+    issued=int(time.time() if now is None else now)
+    grant={'room':room,'roomJoin':True,'canSubscribe':True,'canPublish':False,'canPublishData':False,'canUpdateOwnMetadata':False,'hidden':True}
+    metadata={'role':'recording_renderer','capture_grant_id':str(capture_grant_id),'take_id':str(take_id),'generation':generation}
+    return _encode(settings,{'iss':settings.api_key,'sub':participant_identity,'nbf':issued-5,'iat':issued,'exp':issued+min(60,settings.join_ttl_seconds),'metadata':json.dumps(metadata),'video':grant})
+
 def server_token(settings,grant,now=None):
     issued=int(time.time() if now is None else now)
     return _encode(settings,{"iss":settings.api_key,"sub":"opora-api","nbf":issued-5,"exp":issued+60,"video":grant})

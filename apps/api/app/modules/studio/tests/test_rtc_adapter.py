@@ -53,3 +53,15 @@ async def test_cloud_revoke_has_cutoff_selfhosted_cannot_claim_old_token_invalid
 def test_resource_namespace_has_no_school_identity():
     foundation,session,user=uuid4(),uuid4(),uuid4()
     assert room_name(foundation,session,1).startswith('opora-f') and identity(user)=='opora-u'+user.hex
+
+def test_renderer_factory_is_hidden_subscribe_only_and_exact_capture_scope():
+    import json,jwt
+    from uuid import uuid4
+    from app.integrations.rtc.livekit import renderer_token
+    settings=RtcSettings(url='https://rtc.example.test',api_key='fixture',api_secret='a-private-fixture-secret-with-enough-bytes')
+    grant,take=uuid4(),uuid4();token=renderer_token(settings,room='opora-private-room',participant_identity='opora-renderer-'+grant.hex,capture_grant_id=grant,take_id=take,generation=3,policy=RevocationPolicy(False))
+    claims=jwt.decode(token,settings.api_secret,algorithms=['HS256'])
+    assert claims['exp']-claims['iat']<=60
+    assert json.loads(claims['metadata'])=={'role':'recording_renderer','capture_grant_id':str(grant),'take_id':str(take),'generation':3}
+    assert claims['video']=={'room':'opora-private-room','roomJoin':True,'canSubscribe':True,'canPublish':False,'canPublishData':False,'canUpdateOwnMetadata':False,'hidden':True}
+    with pytest.raises(ApiError):renderer_token(settings,room='opora-private-room',participant_identity='renderer',capture_grant_id=grant,take_id=take,generation=3,policy=RevocationPolicy(True))

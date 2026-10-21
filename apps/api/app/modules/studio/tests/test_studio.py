@@ -24,6 +24,9 @@ from app.integrations.rtc.livekit import RtcSettings,LiveKitAdapter
 async def world(tmp_path,monkeypatch):
     url=os.environ.get('OPORA_STUDIO_TEST_DATABASE_URL') or os.environ.get('OPORA_TEST_DATABASE_URL')
     if not url:pytest.skip('Set disposable OPORA_STUDIO_TEST_DATABASE_URL')
+    from app.core.model_loader import load_models
+    from app.modules.activities import assignment_models
+    load_models()
     schema='studio_'+uuid4().hex;admin=create_async_engine(url)
     async with admin.begin() as c:await c.execute(text('CREATE EXTENSION IF NOT EXISTS btree_gist'));await c.execute(text(f'CREATE SCHEMA "{schema}"'))
     engine=create_async_engine(url,connect_args={'options':f'-csearch_path={schema}'});factory=async_sessionmaker(engine,expire_on_commit=False)
@@ -183,3 +186,16 @@ async def test_reconcile_authorized_participant_preserves_worker_fence(world,mon
     context=SimpleNamespace(foundation_id=w.foundation.id,payload={'session_id':prepared['id'],'generation':1,'identity':'opora-u'+w.host.user_id.hex},fence=fence)
     async with w.factory() as db:assert (await jobs.reconcile_participant(db,context))['state']=='authorized'
     assert fenced==[True]
+
+@pytest.mark.asyncio
+async def test_enrollment_roster_is_host_only_and_versions_survive_reload(world):
+    w=world;event=await webinar(w);id=UUID(event['id']);await prepare(w,event)
+    async with w.factory() as db:await routes.enroll(id,None,db,w.viewer,uuid4().hex)
+    async with w.factory() as db:
+        own=await routes.webinar_detail(id,db,w.viewer);assert own['enrollment_version']==1 and not own['can_host']
+        with pytest.raises(ApiError):await routes.webinar_participants(id,db,w.viewer)
+    async with w.factory() as db:
+        rows=await routes.webinar_participants(id,db,w.host);assert rows==[{'user_id':w.viewer.user_id,'display_name':'Fixture Viewer','enrollment_state':'enrolled','enrollment_version':1,'can_draw':False}]
+    async with w.factory() as db:await routes.withdraw(id,StudioVersionCommand(expected_version=1),db,w.viewer,uuid4().hex)
+    async with w.factory() as db:
+        own=await routes.webinar_detail(id,db,w.viewer);assert own['enrollment_version']==2 and own['enrollment_state']=='withdrawn'
