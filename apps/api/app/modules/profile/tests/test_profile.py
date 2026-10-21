@@ -206,3 +206,25 @@ async def test_gratitude_uses_actual_confirmed_basis_and_rejects_invalidated_tim
         assert (await reviewer.get('/api/v1/coord/profile/recognition-bases')).json()==[]
         assert (await post(reviewer,'/coord/gratitudes',dict(user_id=basis['user_id'],basis_entry_id=basis['entry_id'],text='Повтор без подтверждённого основания'))).status_code==409
     finally:await own.aclose();await reviewer.aclose()
+
+@pytest.mark.asyncio
+async def test_matching_context_is_self_selected_and_has_actual_version_provenance(env):
+    from app.modules.profile.service import matching_context
+    from app.modules.crm.service import save_own_availability
+    from app.modules.crm.schemas import SelfAvailabilityCommand
+    app,factory=env;own=await volunteer(app,factory);other=await volunteer(app,factory)
+    try:
+        values=update();values['tags']+=[dict(kind='interest',label='Керамика',level='learn')];values['lifecycle']='paused'
+        saved=await put(own,values);assert saved.status_code==200,saved.text
+        principal=await principal_for(own,factory);another=await principal_for(other,factory)
+        async with factory() as db:
+            await save_own_availability(db,principal,SelfAvailabilityCommand(expected_version=0,summary='Суббота днём',preferred_channel='email',windows=[dict(weekday=5,start_minute=720,end_minute=900)]));await db.commit()
+        async with factory() as db:
+            context=await matching_context(db,principal)
+            assert context['profile_version']==1 and context['paused'] and not context['no_contact']
+            assert context['skills']==[dict(label='Акварель',normalized='акварель',level='sure')]
+            assert context['interests'][0]['label']=='Керамика' and context['availability']['windows'][0]['weekday']==5
+            assert context['evidence'][-1]['field']=='availability' and context['evidence'][-1]['version']==1
+            assert 'contacts' not in context and 'email' not in str(context) and 'about' not in context
+            blank=await matching_context(db,another);assert blank['profile_version']==0 and blank['skills']==[] and blank['availability'] is None
+    finally:await own.aclose();await other.aclose()

@@ -128,3 +128,18 @@ async def active_for_invitations(db,foundation_id,user_id):
     return profile is None or profile.lifecycle!='paused' or bool(profile.paused_until and profile.paused_until<utcnow().date())
 
 from .ledger import append_service_time  # internal P09 transaction seam
+
+async def matching_context(db,principal):
+    """Current self-selected facts, not an inference or a staff identity override."""
+    from app.modules.crm.service import own_availability
+    view=await profile_view(db,principal);own=await own_availability(db,principal);rule=own.availability
+    skills=[dict(label=tag.label,normalized=tag.label.casefold(),level=tag.level) for tag in view.tags if tag.kind=='skill']
+    interests=[dict(kind=tag.kind,label=tag.label,normalized=tag.label.casefold()) for tag in view.tags if tag.kind!='skill']
+    evidence=[]
+    if view.version:
+        evidence=[dict(source_id=str(view.revisions[0].id),source_type='profile_revision',version=view.version,field=field) for field in ('skills','interests','lifecycle')]
+    availability=None
+    if rule:
+        availability=dict(version=rule.number,owner_version=own.version,summary=rule.summary,timezone=rule.timezone,windows=[window.model_dump(mode='json') for window in rule.windows],verified=rule.verified)
+        evidence.append(dict(source_id=str(rule.id),source_type='availability_rule',version=rule.number,field='availability'))
+    return dict(profile_version=view.version,skills=skills,interests=interests,availability=availability,paused=view.lifecycle=='paused',no_contact=own.no_contact,evidence=evidence)

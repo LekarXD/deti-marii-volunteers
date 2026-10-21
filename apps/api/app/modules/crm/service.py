@@ -379,9 +379,11 @@ async def save_own_availability(db,principal,command):
         volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer.id,lock=True)
     check_version(volunteer.version if volunteer else 0,command.expected_version)
     if not volunteer:
-        from app.modules.applications.service import own_application
-        application=await own_application(db,principal)
-        volunteer=await ensure_volunteer(db,principal.foundation_id,application.id)
+        if principal.user_id:volunteer=await ensure_user_volunteer(db,principal.foundation_id,principal.user_id)
+        else:
+            from app.modules.applications.service import own_application
+            application=await own_application(db,principal)
+            volunteer=await ensure_volunteer(db,principal.foundation_id,application.id)
         volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer.id,lock=True)
     await write_availability(db,volunteer,principal,command);touch(volunteer);await db.flush()
     return await own_availability(db,principal)
