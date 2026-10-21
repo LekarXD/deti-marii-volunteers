@@ -59,7 +59,7 @@ async def preparation(db: AsyncSession, principal: Principal):
 
 
 def learner_block(block: LessonBlock):
-    content = deepcopy(block.content)
+    content = {key: deepcopy(value) for key, value in block.content.items() if not key.startswith("_")}
     if content.get("type") == "quiz":
         content["items"] = [{"q": x["q"], "o": x["o"]} for x in content.get("items", [])]
     return {"id": str(block.id), **content}
