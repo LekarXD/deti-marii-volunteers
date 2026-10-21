@@ -10,3 +10,10 @@
 .time-text-field{position:relative}.time-text-field .input{padding-right:46px}.time-text-field>.ic{position:absolute;right:15px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--mute)}.choice-list>.input{margin:0 0 8px;min-height:44px}.choice-footer{padding:10px 4px 2px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}.choice-footer .btn{font-size:15px}.choice-footer a{font-size:15px;padding:10px 8px}.calendar-day.is-selected{background:var(--yellow);color:var(--ink)}
 
 @media(max-width:359px){.date-dialog .calendar-toolbar{grid-template-columns:minmax(0,1fr) 84px;gap:8px}.date-dialog .calendar-toolbar>.combobox{grid-column:1;grid-row:1}.date-dialog .calendar-toolbar>.calendar-year{grid-column:2;grid-row:1}.date-dialog .calendar-toolbar>.btn:first-child{grid-column:1;grid-row:2;justify-self:start}.date-dialog .calendar-toolbar>.btn:last-child{grid-column:2;grid-row:2;justify-self:end}.date-dialog .calendar-toolbar .choice-trigger>span{white-space:nowrap}}
+
+/* Opt-in editorial cards: content keeps its rhythm, actions share a baseline in grids. */
+.dm .action-card{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+.dm .action-card>h2,.dm .action-card>h3,.dm .action-card>p{margin:0}
+.dm .action-card>.actions{margin-top:auto;padding-top:12px;align-self:stretch}
+.dm .action-card>.actions>.btn{max-width:100%;white-space:normal;text-align:center;line-height:1.4}
+@media(max-width:720px){.dm .action-card>.actions{row-gap:12px}.dm .action-card>.actions>.btn{flex:0 1 auto}}

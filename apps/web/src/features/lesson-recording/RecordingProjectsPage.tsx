@@ -8,7 +8,7 @@ import './recording.css';
 export function RecordingProjectsPage() {
  const projects=useRecordingProjects(),tracks=useAuthorTracks(),command=useRecordingCommand<RecordingProject>(),navigate=useNavigate();
  const [creating,setCreating]=useState(false),[title,setTitle]=useState(''),[lesson,setLesson]=useState('');
- const targets=tracks.data?.filter(track=>!track.archived).flatMap(track=>track.lessons.filter(item=>!item.archived).map(item=>({value:item.id,label:`${track.title} · ${item.title}`})))??[];
+ const targets=tracks.data?.filter(track=>!track.archived).flatMap(track=>track.lessons.filter(item=>!item.archived).map(item=>({value:item.id,label:`${track.title}, ${item.title}`})))??[];
  async function create(event:FormEvent){event.preventDefault();try{const project=await command.mutateAsync({path:'/recording-projects',body:{title:title.trim(),target_lesson_id:lesson||null,mode:'solo'}});navigate(`/fund/recordings/${project.id}`);}catch{/* command error is visible in the form */}}
  return <div className="recording-page"><div className="head recording-heading"><h1 className="h1">Записи уроков</h1><Button onClick={()=>setCreating(true)}><Icon name="plus"/>Новая запись</Button></div>
  <Card tone="hero"><div className="hero-grid"><div className="hero-copy"><p className="eyebrow">Студия преподавателя</p><h2 className="hero-title">Твой урок — в удобное время</h2><p className="lead">Подготовь материалы и кадр, запиши дубль и посмотри результат перед передачей в урок.</p></div><span className="hero-art" aria-hidden="true"><Icon name="camera"/></span></div></Card>

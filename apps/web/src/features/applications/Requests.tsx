@@ -3,7 +3,7 @@ import {Button, Card, Combobox, Dialog, Field, Textarea, LoadingState, ErrorStat
 import {CandidateRequest, useCommand, useRequests} from './api';
 const kindLabels={question:'Вопрос координатору',alternate_time:'Другое время встречи',road_help:'Помощь с дорогой'};
 const states:Record<string,string>={open:'Ждёт ответа',answered:'Координатор ответил',resolved:'Вопрос решён'};
-export function RequestHistory({items}:{items:CandidateRequest[]}) {return <div className="ap-request-list">{items.map(item=><article className="ap-request" key={item.id}><div className="ap-row"><strong>{kindLabels[item.kind as keyof typeof kindLabels]||item.kind}</strong><span className="ap-tag">{states[item.state]}</span></div><p>{item.text}</p>{item.responses.map(reply=><div className="ap-public-reply" key={reply.id}><small>Ответ координатора · {new Date(reply.created_at).toLocaleDateString('ru')}</small><p>{reply.text}</p></div>)}</article>)}</div>;}
+export function RequestHistory({items}:{items:CandidateRequest[]}) {return <div className="ap-request-list">{items.map(item=><article className="ap-request" key={item.id}><div className="ap-row"><strong>{kindLabels[item.kind as keyof typeof kindLabels]||item.kind}</strong><span className="ap-tag">{states[item.state]}</span></div><p>{item.text}</p>{item.responses.map(reply=><div className="ap-public-reply" key={reply.id}><small>Ответ координатора, {new Date(reply.created_at).toLocaleDateString('ru')}</small><p>{reply.text}</p></div>)}</article>)}</div>;}
 export function CandidateRequestsPanel() {
   const requests=useRequests(), send=useCommand<CandidateRequest>('/api/v1/me/candidate-requests');
   const [open,setOpen]=useState(false),[kind,setKind]=useState('question'),[text,setText]=useState('');

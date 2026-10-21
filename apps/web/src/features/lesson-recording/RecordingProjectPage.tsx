@@ -33,7 +33,7 @@ function Project({project}:{project:RecordingProject}) {
 }
 function ProjectSettings({project,onSaved}:{project:RecordingProject;onSaved:()=>void}) {
  const tracks=useAuthorTracks(),command=useRecordingCommand<RecordingProject>(),[title,setTitle]=useState(project.title),[lesson,setLesson]=useState(project.target_lesson_id??'');
- const options=tracks.data?.filter(track=>!track.archived).flatMap(track=>track.lessons.filter(item=>!item.archived).map(item=>({value:item.id,label:`${track.title} · ${item.title}`})))??[];
+ const options=tracks.data?.filter(track=>!track.archived).flatMap(track=>track.lessons.filter(item=>!item.archived).map(item=>({value:item.id,label:`${track.title}, ${item.title}`})))??[];
  const selectedKnown=!lesson||options.some(item=>item.value===lesson);
  async function save(event:FormEvent){event.preventDefault();try{await command.mutateAsync({path:`/recording-projects/${project.id}`,method:'PATCH',body:{expected_version:project.version,title:title.trim(),target_lesson_id:lesson||null}});onSaved();}catch{}}
  return <form className="recording-form" onSubmit={save}><Field label="Название записи"><Input required maxLength={300} value={title} onChange={event=>setTitle(event.target.value)}/></Field><Combobox label="Урок в Академии" value={lesson} onChange={setLesson} options={[{value:'',label:'Без привязки к уроку'},...(!selectedKnown?[{value:lesson,label:'Текущий выбранный урок'}]:[]),...options]} disabled={tracks.isPending}/>{tracks.error&&<p className="meta">Список уроков недоступен. Текущая привязка сохранена.</p>}{command.error&&<ErrorState error={command.error}/>}<Button type="submit" loading={command.isPending} disabled={!title.trim()}>Сохранить</Button></form>;

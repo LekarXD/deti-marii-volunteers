@@ -21,7 +21,7 @@ export function OpportunityMatch({item}:{item:Opportunity}){
     <Link to="/profile">Уточнить профиль</Link>
     {!!match.evidence?.length&&<details><summary>Источники объяснения</summary>
       <p className="meta">Профиль: версия {match.context_versions?.profile??'не указана'}. Доступность: версия {match.context_versions?.availability??'не указана'}.</p>
-      {match.evidence.map((source,index)=><p className="meta activity-match-source" key={index}>{sourceLabels[source.field]??source.field} · версия {source.version} · {source.source_id}</p>)}
+      {match.evidence.map((source,index)=><p className="meta activity-match-source" key={index}>{sourceLabels[source.field]??source.field}, версия {source.version}, {source.source_id}</p>)}
     </details>}
   </section>;
 }

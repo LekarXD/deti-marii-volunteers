@@ -45,13 +45,13 @@ export function HomePage() {
         <h2 className="hero-when">Впереди новые встречи</h2>
         <p className="lead">На ближайшие 90 дней занятий пока нет. Посмотри, где сейчас нужна помощь.</p>
         <div className="home-actions"><Link className="btn btn-primary btn-lg" to="/opportunities">Где нужна помощь</Link><Link className="btn btn-secondary btn-lg" to="/my/assignments">Моё участие</Link></div>
-        <p className="p home-newcomer">Только знакомишься с фондом? <Link to="/application">Моя анкета</Link> · <Link to="/interviews">Знакомство с координатором</Link></p>
+        <p className="p home-newcomer">Только знакомишься с фондом? <Link to="/application">Моя анкета</Link>, <Link to="/interviews">Знакомство с координатором</Link></p>
       </div><span className="hero-art" aria-hidden="true"><Icon name="academy"/></span></div></Card>}
 
     {complete && invitations.length > 0 && <section className="section" aria-labelledby="home-invitations">
       <div className="section-head"><h2 className="h2" id="home-invitations">Тебя приглашают</h2><Link className="btn btn-ghost btn-sm" to="/my/assignments">Все приглашения</Link></div>
       <div className="grid-3">{invitations.slice(0, 3).map(item => <Link className="card match home-invitation" key={item.id} to={`/my/assignments/${item.id}`}>
-        <span className="art art-y" aria-hidden="true"><Icon name="calendar"/></span><span><span className="h3">{item.title}</span><span className="p home-line">{assignmentWhen(item, now).date} · {assignmentWhen(item, now).time}</span><span className="meta home-line">{item.timezone}</span></span><span className="match-foot"><span>Ответить на приглашение</span><Icon name="arrow-right"/></span>
+        <span className="art art-y" aria-hidden="true"><Icon name="calendar"/></span><span><span className="h3">{item.title}</span><span className="p home-line">{assignmentWhen(item, now).date}, {assignmentWhen(item, now).time}</span><span className="meta home-line">{item.timezone}</span></span><span className="match-foot"><span>Ответить на приглашение</span><Icon name="arrow-right"/></span>
       </Link>)}</div>
     </section>}
 
@@ -89,7 +89,7 @@ function NextAssignment({item, now}: {item: AssignmentParticipation; now: number
   return <Card tone="hero" aria-labelledby="home-next"><div className="hero-grid"><div className="home-hero-copy">
     <p className="eyebrow">{confirmed ? 'Ближайшее занятие' : 'Ближайшее приглашение'}</p>
     <h2 className="hero-when" id="home-next">{when.date}{' '}<span className="home-line">{when.time}</span></h2>
-    <p className="lead">{item.title}</p><p className="p">{[item.location, item.timezone].filter(Boolean).join(' · ')}</p>
+    <p className="lead">{item.title}</p><p className="p">{[item.location, item.timezone].filter(Boolean).join(', ')}</p>
     <div className="home-actions"><Link className="btn btn-primary btn-lg" to={`/my/assignments/${item.id}${confirmed ? '/preparation' : ''}`}>{confirmed ? 'Подготовиться к выходу' : 'Ответить на приглашение'}</Link><Link className="btn btn-secondary btn-lg" to="/my/assignments">Моё участие</Link></div>
     {confirmed && <div className="hero-note"><span className="row strong"><Icon name="check"/>Участие подтверждено</span></div>}
   </div><span className="hero-art" aria-hidden="true"><Icon name="palette"/></span></div></Card>;

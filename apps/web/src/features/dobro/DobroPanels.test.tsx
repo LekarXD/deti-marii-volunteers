@@ -40,7 +40,7 @@ describe('Dobro panels stay optional and truthful',()=>{
   render(<MemoryRouter><DobroSettingsPanel/></MemoryRouter>);
   expect((screen.getByRole('checkbox',{name:'Фонд верифицирован на Добро.рф'}) as HTMLInputElement).checked).toBe(false);
   expect((screen.getByRole('checkbox',{name:'Напоминать мне в Опоре о ежемесячном переносе и сроках'}) as HTMLInputElement).checked).toBe(false);
-  expect(screen.getByText('Без API · координатор переносит часы вручную')).toBeTruthy();
+  expect(screen.getByText('Без API, координатор переносит часы вручную')).toBeTruthy();
   expect(test.mutate).not.toHaveBeenCalled();
  });
 });
