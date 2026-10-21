@@ -1,0 +1,44 @@
+{
+  "source_commit": "978997a01d13eee0dfe56ae470d4151929e728da",
+  "source_snapshot": "/private/tmp/opora-integrated-978997a",
+  "result": "41 passed, 0 skipped, 0 failed",
+  "duration_seconds": 13.68,
+  "single_pytest_process": true,
+  "postgresql_version": "16.14",
+  "postgresql_port": 56149,
+  "database_names": [
+    "opora_knowledge_test",
+    "opora_learning_test",
+    "opora_participants_test",
+    "opora_recordings_test"
+  ],
+  "junit_xml": "/private/tmp/opora-integration-harness-978997a/result.xml",
+  "harness": "/private/tmp/opora-integration-harness-978997a/integration_bootstrap.py",
+  "test_arguments": [
+    "tests/knowledge",
+    "tests/learning",
+    "tests/followups/test_audio.py",
+    "tests/followups/test_audio_media.py",
+    "tests/followups/test_followups.py",
+    "tests/test_recordings.py"
+  ],
+  "coverage_counts": {
+    "knowledge": 7,
+    "profile_producer": 2,
+    "shared_transcription": 1,
+    "learning_introduction": 6,
+    "learning_recording_publication": 1,
+    "voice_audio": 6,
+    "audio_media": 3,
+    "followups": 11,
+    "recordings": 4
+  },
+  "runtime_setup": "Canonical source model_loader.load_models, worker.registry.load_extensions, assets.registry.load_asset_extensions; dedicated cluster with btree_gist and canonical Base metadata",
+  "network_boundary": "Python audit hook rejects socket.connect to every network destination except localhost port 56149",
+  "proof_limits": [
+    "ASR uses generated WAV and explicit httpx.MockTransport, no physical microphone or external provider",
+    "Recording suite uses synthetic DB media, transaction/review/renderer API; no real capture/encode claim",
+    "No production, root opora database, QA56148, or prior voice test database touched"
+  ],
+  "source_changes": []
+}
