@@ -44,7 +44,7 @@ class VolunteerRoleVersion(Base):
     snapshot: Mapped[dict] = mapped_column(JSONB)
     actor_id: Mapped[str] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
-    __table_args__ = (UniqueConstraint("role_id", "version"),)
+    __table_args__ = (UniqueConstraint("role_id", "version"), UniqueConstraint("id", "role_id"))
 
 
 class Opportunity(Base):
@@ -83,10 +83,11 @@ class OpportunityRoleLink(Base):
     opportunity_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True)
     role_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True)
     foundation_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True))
-    role_version_id: Mapped[UUID] = mapped_column(ForeignKey("volunteer_role_versions.id"))
+    role_version_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True))
     __table_args__ = (
         ForeignKeyConstraint(["opportunity_id", "foundation_id"], ["opportunities.id", "opportunities.foundation_id"]),
         ForeignKeyConstraint(["role_id", "foundation_id"], ["volunteer_roles.id", "volunteer_roles.foundation_id"]),
+        ForeignKeyConstraint(["role_version_id", "role_id"], ["volunteer_role_versions.id", "volunteer_role_versions.role_id"]),
     )
 
 

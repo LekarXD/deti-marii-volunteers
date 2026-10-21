@@ -156,3 +156,33 @@ async def test_cross_foundation_links_are_rejected_by_database(context):
         db.add(OpportunityRoleLink(opportunity_id=opp.id,foundation_id=context.foundation.id,role_id=other_role.id,role_version_id=revision.id))
         with pytest.raises(IntegrityError):await db.flush()
         await db.rollback()
+
+
+@pytest.mark.asyncio
+async def test_scoped_grant_never_escalates_to_foundation_role_directory(context):
+    async with context.db() as db:
+        for grant in context.grants:
+            row=await db.get(PermissionGrant,grant.id);row.scope_type='group';row.scope_id=uuid4()
+        await db.commit()
+    assert (await context.client.get('/api/v1/coord/roles')).status_code==403
+    assert (await context.client.get('/api/v1/coord/opportunities')).status_code==403
+    assert (await context.client.post('/api/v1/coord/roles',headers=headers(),json={'title':'Denied'})).status_code==403
+
+
+@pytest.mark.asyncio
+async def test_requirements_validation_and_archive_never_rewrites_links(context):
+    invalid=await context.client.post('/api/v1/coord/roles',headers=headers(),json={'title':'Роль','preparation_defaults':[{'key':'blank','title':'   '}]})
+    assert invalid.status_code==422
+    invalid=await context.client.post('/api/v1/coord/roles',headers=headers(),json={'title':'Роль','preparation_defaults':[{'key':'same','title':'Первое'},{'key':'same','title':'Второе'}]})
+    assert invalid.status_code==422
+    role=await post_role(context)
+    opportunity=await context.client.post('/api/v1/coord/opportunities',headers=headers(),json={'title':'Условие','role_ids':[role['id']]})
+    item=opportunity.json()
+    assert (await context.client.post(f"/api/v1/coord/roles/{role['id']}/archive",headers=headers(),json={'expected_version':1})).status_code==200
+    read=(await context.client.get(f"/api/v1/coord/opportunities/{item['id']}")).json()
+    assert read['role_ids']==[role['id']]
+    # Existing opportunity is editable even though its historical role is archived.
+    body={k:v for k,v in read.items() if k in OpportunityCreate.model_fields};body.update(title='Новое название',expected_version=1)
+    assert (await context.client.patch(f"/api/v1/coord/opportunities/{item['id']}",headers=headers(),json=body)).status_code==200
+    new=await context.client.post('/api/v1/coord/opportunities',headers=headers(),json={'title':'Недоступно','role_ids':[role['id']]})
+    assert new.status_code==422

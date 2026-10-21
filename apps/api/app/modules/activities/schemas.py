@@ -18,6 +18,14 @@ class PreparationRequirement(BaseModel):
     title: str = Field(min_length=1, max_length=500)
     level: Literal['recommended', 'mandatory'] = 'recommended'
 
+    @field_validator('key', 'title')
+    @classmethod
+    def not_blank(cls, value):
+        value = value.strip()
+        if not value:
+            raise ValueError('Укажите пункт подготовки.')
+        return value
+
 
 class RoleCreate(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -26,11 +34,18 @@ class RoleCreate(BaseModel):
     preparation_defaults: list[PreparationRequirement] = Field(default_factory=list, max_length=100)
     approval_policy: ApprovalPolicy = 'coordinator'
 
+    @field_validator('preparation_defaults')
+    @classmethod
+    def distinct_requirement_keys(cls, value):
+        if len({r.key for r in value}) != len(value):
+            raise ValueError('Пункты подготовки не должны повторяться.')
+        return value
+
     @field_validator('title')
     @classmethod
     def valid_title(cls, value):
         value = ' '.join(value.split())
-        if not normalized_title(value):
+        if not normalized_title(value) or len(normalized_title(value)) > 300:
             raise ValueError('Введите название роли.')
         return value
 
@@ -72,6 +87,13 @@ class OpportunityCreate(BaseModel):
         value = value.strip()
         if not value:
             raise ValueError('Введите название возможности.')
+        return value
+
+    @field_validator('preparation_requirements')
+    @classmethod
+    def distinct_requirement_keys(cls, value):
+        if value is not None and len({r.key for r in value}) != len(value):
+            raise ValueError('Пункты подготовки не должны повторяться.')
         return value
 
     @field_validator('role_ids')
