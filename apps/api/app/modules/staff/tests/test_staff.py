@@ -58,6 +58,9 @@ async def test_verified_accept_requires_actual_mfa_before_any_new_grants(world):
     from app.modules.auth.router import enroll,mfa_verify,MfaInput
     w=world;created,payload=await invitation(w);accepted=await accept(w,payload['token'])
     assert accepted['state']=='accepted_pending_mfa' and accepted['next_action']=='enroll_mfa'
+    assert await accept(w,payload['token'])==accepted
+    async with w.factory() as db:
+        with pytest.raises(ApiError):await r.invitation_self(UUID(created['id']),w.wrong,db)
     async with w.factory() as db:
         member=await db.get(StaffMembership,UUID(accepted['membership_id']));assert member.user_id==w.recipient.user_id
         assert await db.scalar(select(func.count()).select_from(PermissionGrant).where(PermissionGrant.membership_id==member.id))==0
@@ -125,6 +128,7 @@ async def test_delivery_is_canonical_and_unavailable_provider_does_not_enqueue(w
         assert 'token' not in created and payload['token'] not in json.dumps(created,default=str)
     async with w.factory() as db:await r.resend_invitation(UUID(created['id']),StaffVersionCommand(expected_version=1),w.admin,db,'resend')
     async with w.factory() as db:assert await delivery.validate(db,outbox,payload)=='suppressed_stale_invitation'
+    with pytest.raises(ApiError):await accept(w,payload['token'])
     monkeypatch.setattr(s,'readiness',lambda:{'state':'unavailable'})
     async with w.factory() as db:
         result=await r.invite(body('new@staff.example.test'),w.admin,db,'unavailable');assert result['delivery_state']=='unavailable'
