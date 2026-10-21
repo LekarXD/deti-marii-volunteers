@@ -30,6 +30,8 @@ def test_no_invented_age_certificate_gate():
     assert validate_answers(VALID,complete=True)["birthdate"]=="2012-01-01"
     with pytest.raises(ApiError) as error:validate_answers({**VALID,"directions":["Творчество","Пока не знаю"]},complete=True)
     assert "directions" in error.value.field_errors
+    changed=validate_answers({**VALID,"directions":["Как специалист"],"skills":["Керамика","IT","Свой навык"]},complete=True)
+    assert changed["skills"]==["IT","Свой навык"]
 
 
 @pytest_asyncio.fixture

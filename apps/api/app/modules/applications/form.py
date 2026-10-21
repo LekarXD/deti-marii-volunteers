@@ -72,6 +72,8 @@ def validate_answers(answers, *, complete=False):
             allowed = {v for group in groups for v in labels(group["options"])}
             if not field.get("allowOther") and any(v not in allowed for v in value):
                 errors[key] = "Выберите доступный навык"
+            known = {v for group in field.get("groups", []) for v in labels(group["options"])}
+            clean[key] = [v for v in value if v in allowed or (field.get("allowOther") and v not in known)]
         if key == "birthdate":
             try:
                 birth = date.fromisoformat(value) if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value) else datetime.strptime(value, "%d.%m.%Y").date()
