@@ -312,6 +312,8 @@ async def test_opt_in_reminders_real_worker_source_replay_and_revocation(world):
 @pytest.mark.asyncio
 async def test_own_export_is_scoped_and_excludes_staff_notes_and_snapshots(world):
     import json
+    import io
+    import zipfile
     from app.modules.dobro.data_export import own_export_section
     from app.modules.dobro.models import DobroProfile
     opportunity, activity = await link_fixture(world)
@@ -335,3 +337,13 @@ async def test_own_export_is_scoped_and_excludes_staff_notes_and_snapshots(world
     assert 'PRIVATE_COORDINATOR_NOTE_NOT_FOR_EXPORT' not in encoded
     assert 'STRANGER_DISPLAY_NAME' not in encoded and '/volunteers/999999' not in encoded
     assert 'snapshot_hash' not in encoded and 'actor_id' not in encoded
+    from app.modules.profile.data_requests import own_export
+    async with world[1]() as db:
+        archive_bytes = await own_export(db, world[5])
+    with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+        payload = json.loads(archive.read('my-data.json'))
+    assert 'dobro' in payload['included_sections']
+    assert payload['dobro']['current']['total_minutes'] == 125
+    assert payload['dobro']['transfers'][0]['hours_delta'] == 2
+    assert 'PRIVATE_COORDINATOR_NOTE_NOT_FOR_EXPORT' not in json.dumps(payload)
+    assert 'STRANGER_DISPLAY_NAME' not in json.dumps(payload)

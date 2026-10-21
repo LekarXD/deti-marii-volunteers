@@ -264,10 +264,12 @@ async def transfer_period(db, principal, period, only_user=None):
 
 async def mark_entered(db, principal, command):
     permission(principal, 'hours.review')
-    await foundation_lock(db, principal)
+    # Attendance writes take the minute-ledger subject lock before their Dobro
+    # mapping trigger takes the foundation lock. Preserve that order here too.
     for user_id in sorted({item.user_id for item in command.rows}, key=str):
         await user(db, principal, user_id)
         await subject_lock(db, principal.foundation_id, user_id)
+    await foundation_lock(db, principal)
     period = command.rows[0].period
     current = await transfer_period(db, principal, period)
     current_rows = {row.id: (group.activity, row) for group in current.groups for row in group.rows}
