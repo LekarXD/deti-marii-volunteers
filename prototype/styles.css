@@ -251,3 +251,17 @@ details.more-block[open]{padding-bottom:16px}
 
 .opt-groups{display:grid;gap:16px}
 .opt-group{display:grid;gap:6px}
+
+/* нумерованные правила */
+.list.numbered ol{list-style:none;counter-reset:n;padding:0;margin:0;display:grid;gap:10px}
+.list.numbered li{counter-increment:n;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.list.numbered li::before{content:counter(n);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--heart);color:#fff;font-family:var(--f-display);font-size:.9rem}
+
+/* дочитать до конца */
+.readbar{position:fixed;top:0;left:0;right:0;z-index:30;height:4px;background:transparent}
+.readbar i{display:block;height:100%;width:0;background:var(--heart);transition:width .1s linear}
+.btn[data-act="done"][disabled]{background:var(--line);color:var(--muted);opacity:1}
+.btn.unlocked{animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(.96)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.btn.unlocked{animation:none}}
+#read-end{height:1px}

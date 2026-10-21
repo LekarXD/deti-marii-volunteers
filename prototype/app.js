@@ -68,6 +68,14 @@
     const f = FORM.steps.flatMap(s => s.fields).find(x => x.type === "roles");
     return f ? f.groups.filter(g => g.roles.some(r => arr(roles).includes(r))).map(g => g.title) : [];
   };
+  const allFields = () => FORM.steps.flatMap(s => s.fields).concat(FORM.matching.fields);
+  // «Нет, не подходит» и «Пока не знаю» нельзя выбрать вместе с остальными вариантами
+  const withExclusive = (id, list, changed, added) => {
+    const f = allFields().find(x => x.id === id);
+    const ex = f ? (f.exclusive || []).concat(f.unsure ? [f.unsure] : []) : [];
+    if (!added || !ex.length) return list;
+    return ex.includes(changed) ? [changed] : list.filter(v => !ex.includes(v));
+  };
   const fullName = c => c.name || [c.firstName, c.lastName].filter(Boolean).join(" ");
   const openGroups = new Set();
 
@@ -244,7 +252,7 @@
       else if (el.type === "checkbox") {
         const set = new Set(arr(T[id]));
         el.checked ? set.add(el.value) : set.delete(el.value);
-        T[id] = [...set];
+        T[id] = withExclusive(id, [...set], el.value, el.checked);
       } else if (el.tagName === "SELECT") T[id] = el.value;
       else return;
       save();
@@ -257,7 +265,7 @@
       if (!b) return;
       const id = b.dataset.chip, T = tgt(), set = new Set(arr(T[id]));
       set.has(b.dataset.v) ? set.delete(b.dataset.v) : set.add(b.dataset.v);
-      T[id] = [...set]; save();
+      T[id] = withExclusive(id, [...set], b.dataset.v, set.has(b.dataset.v)); save();
       b.setAttribute("aria-pressed", set.has(b.dataset.v));
       if (b.hasAttribute("data-redraw")) rerender();
     });
@@ -358,7 +366,10 @@
       case "cards": return b.open
         ? `<div class="cards">${b.items.map(([t, d]) => `<div><h3>${esc(t)}</h3><p class="muted">${esc(d)}</p></div>`).join("")}</div>`
         : `<div><p class="muted" style="margin-bottom:10px;font-size:.9rem">Нажмите на карточку, чтобы прочитать</p><div class="cards">${b.items.map(([t, d], i) => `<button aria-expanded="false" data-card><span class="eyebrow">${String(i + 1).padStart(2, "0")}</span><h3>${esc(t)}</h3><p class="muted" hidden>${esc(d)}</p><span class="more">Подробнее</span></button>`).join("")}</div></div>`;
-      case "list": return `<div class="list">${b.title ? `<h3>${esc(b.title)}</h3>` : ""}<ul>${b.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`;
+      case "list": {
+        const tag = b.ordered ? "ol" : "ul";
+        return `<div class="list ${b.ordered ? "numbered" : ""}">${b.title ? `<h3>${esc(b.title)}</h3>` : ""}<${tag}>${b.items.map(i => `<li>${esc(i)}</li>`).join("")}</${tag}></div>`;
+      }
       case "steps": return `<div class="steps">${b.items.map(([t, d]) => `<div><h3>${esc(t)}</h3><p class="muted">${esc(d)}</p></div>`).join("")}</div>`;
       case "phrases": return `<div class="stack" style="gap:8px"><h3>${esc(b.title || "Как говорить")}</h3><div class="phrase-head"><span>Лучше так</span><span>Не так</span></div><div class="phrases">${b.items.map(([s, a, w]) => `<div><span class="say">${esc(s)}</span><span class="avoid">${esc(a)}</span><span class="why">${esc(w)}</span></div>`).join("")}</div></div>`;
       case "situations": return `<div class="stack" style="gap:8px"><h3>Если случилось…</h3>${b.items.map(s => `<details class="sit"><summary>${esc(s.title)}</summary><div class="body"><div class="do"><b>Что делать</b><ul>${s.do.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div><div class="dont"><b>Чего не делать</b><ul>${s.dont.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div></div></details>`).join("")}</div>`;
@@ -390,6 +401,7 @@
     if (i < 0) return viewHome();
     const m = ONB.modules[i], nxt = ONB.modules[i + 1];
     return chrome("vol", "Платформа волонтёров · знакомство с фондом") + `
+      <div class="readbar" aria-hidden="true"><i id="readbar"></i></div>
       <main><div class="wrap">
         <div class="mod-head">
           <div class="row" style="justify-content:space-between">
@@ -401,9 +413,10 @@
           ${m.draft ? `<p class="draft-note"><b>Черновик.</b> ${esc(m.source)}</p>` : `<p class="muted" style="font-size:.85rem">Источник: ${esc(m.source)}</p>`}
         </div>
         ${m.form ? matchingHtml() : `<div class="blocks">${m.blocks.map(blockHtml).join("")}</div>`}
+        <div id="read-end" aria-hidden="true"></div>
         <div class="mod-foot">
           ${i > 0 ? `<a class="btn sec" href="#/learn/${ONB.modules[i - 1].id}">← Назад</a>` : "<span></span>"}
-          <button class="btn" data-act="done" data-id="${m.id}">${nxt ? "Понятно, дальше →" : "Понятно, к тесту →"}</button>
+          <button class="btn" data-act="done" data-id="${m.id}" data-label="${nxt ? "Понятно, дальше →" : "Понятно, к тесту →"}" ${S.done[m.id] ? "" : "disabled"}>${S.done[m.id] ? (nxt ? "Понятно, дальше →" : "Понятно, к тесту →") : "Дочитайте до конца ↓"}</button>
         </div>
       </div></main>`;
   }
@@ -560,6 +573,39 @@
       </div></main>`;
   }
 
+  // ---------- дочитать до конца ----------
+  // Как с пользовательским соглашением: кнопка «дальше» откроется, когда человек долистает модуль до конца.
+  // Сверху — полоска прочитанного. Уже пройденные модули открыты сразу.
+  let readObserver = null;
+  function bindReading(id) {
+    if (readObserver) { readObserver.disconnect(); readObserver = null; }
+    const end = document.getElementById("read-end"), btn = document.querySelector('[data-act="done"]');
+    document.body.classList.toggle("reading", !!end);
+    updateReadbar();
+    if (!end || !btn || !btn.disabled) return;
+    readObserver = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) unlockReading(); });
+    readObserver.observe(end);
+  }
+  function unlockReading() {
+    const btn = document.querySelector('[data-act="done"]');
+    if (readObserver) { readObserver.disconnect(); readObserver = null; }
+    if (!btn || !btn.disabled) return;
+    btn.disabled = false;
+    btn.textContent = btn.dataset.label;
+    btn.classList.add("unlocked");
+  }
+  function updateReadbar() {
+    const bar = document.getElementById("readbar");
+    if (!bar) return;
+    const h = document.documentElement, max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max > 0 ? Math.min(100, 100 * h.scrollTop / max) : 100) + "%";
+    // запасной путь, если IntersectionObserver не сработал
+    const end = document.getElementById("read-end");
+    if (end && end.getBoundingClientRect().top <= innerHeight) unlockReading();
+  }
+  addEventListener("scroll", updateReadbar, { passive: true });
+  addEventListener("resize", updateReadbar);
+
   // ---------- роутер ----------
   function render() {
     const parts = location.hash.replace(/^#\/?/, "").split("/");
@@ -568,6 +614,7 @@
     const views = { apply: viewApply, sent: viewSent, home: viewHome, learn: () => viewLearn(parts[1]), test: viewTest, meet: viewMeet, profile: viewProfile, coord: () => viewCoord(parts[1]) };
     app.innerHTML = (views[route] || viewHome)();
     bindForm();
+    bindReading(route === "learn" ? parts[1] : null);
   }
 
   // ---------- действия ----------
