@@ -34,6 +34,6 @@ def render_document(snapshot):
     story.extend([Spacer(1,26),paragraph('Документ № '+snapshot['document_id'],'small'),paragraph('Сформирован: '+snapshot['issued_at'],'small'),paragraph('Электронная выписка из журнала волонтёрской помощи. Подпись и печать в этот файл не добавлены.','small')])
     def footer(canvas,doc):
         canvas.setStrokeColor(colors.HexColor('#deded8'));canvas.line(56,46,width-56,46)
-        canvas.setFont('OporaPDF',8);canvas.setFillColor(colors.HexColor('#646464'));canvas.drawString(56,30,'Опора · '+str(doc.page))
+        canvas.setFont('OporaPDF',8);canvas.setFillColor(colors.HexColor('#646464'));canvas.drawString(56,30,'Опора, страница '+str(doc.page))
     SimpleDocTemplate(output,pagesize=A4,rightMargin=56,leftMargin=56,topMargin=45,bottomMargin=65,title='Волонтёрская помощь',author=snapshot['foundation_name']).build(story,onFirstPage=footer,onLaterPages=footer)
     return output.getvalue()

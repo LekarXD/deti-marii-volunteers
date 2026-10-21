@@ -51,7 +51,7 @@ async def evaluate(db,foundation_id,row,authority,context):
             for item in observations:
                 if item['subject_user_id']:
                     if item['subject_user_id'] not in users:outcome['unknown']+=1;outcome['matched']-=1;continue
-                    item['title']=item['title']+' · '+users[item['subject_user_id']]
+                    item['title']=item['title']+': '+users[item['subject_user_id']]
                 source_hash=hashlib.sha256(json.dumps({key:value for key,value in item['details'].items() if key!='days'},sort_keys=True,separators=(',',':')).encode()).hexdigest();matched.add(item['entity_id']);signal=by_id.get(item['entity_id'])
                 if signal is None:signal=RuleSignal(foundation_id=foundation_id,settings_version=row.version,source_hash=source_hash,**item);db.add(signal)
                 else:

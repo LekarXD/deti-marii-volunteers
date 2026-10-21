@@ -44,16 +44,16 @@ def pdf_report(snapshot):
     title=ParagraphStyle('title',fontName='OporaReport',fontSize=28,leading=36,spaceAfter=24)
     small=ParagraphStyle('small',fontName='OporaReport',fontSize=8,leading=12,textColor=colors.HexColor('#646464'),spaceAfter=8)
     def p(text,style=body):return Paragraph(escape(str(text)).replace('\n','<br/>'),style)
-    story=[p(snapshot['title'],title),p('Период '+period(snapshot)),p('Область '+snapshot['metrics']['scope']['label']),p('Определения '+snapshot['definitions_version']+' · снимок '+snapshot['metrics']['generated_at'],small),p('Показатели',heading)]
+    story=[p(snapshot['title'],title),p('Период '+period(snapshot)),p('Область '+snapshot['metrics']['scope']['label']),p('Определения '+snapshot['definitions_version']+', снимок '+snapshot['metrics']['generated_at'],small),p('Показатели',heading)]
     table=[[p('Показатель'),p('Значение')]]+[[p(metric['label']),p(metric_value(metric))] for metric in snapshot['metrics']['metrics']]
     block=Table(table,colWidths=[315,168],repeatRows=1,hAlign='LEFT');block.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.HexColor('#FFEB7A')),('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),12),('RIGHTPADDING',(0,0),(-1,-1),12),('TOPPADDING',(0,0),(-1,-1),10),('BOTTOMPADDING',(0,0),(-1,-1),4),('LINEBELOW',(0,0),(-1,-1),.4,colors.HexColor('#deded8'))]));story.append(block)
     story.append(p('Как считаем',heading))
     for metric in snapshot['metrics']['metrics']:
         story.extend([p(metric['label']),p(metric['definition']+(' '+metric['reason'] if metric['reason'] else ''),small)])
     for section in snapshot['sections']:story.extend([p(section['title'],heading),p(section['text'])])
-    story.extend([Spacer(1,18),p(f"Отчёт {snapshot['id']} · версия {snapshot['version']}",small),p('Сформирован по подтверждённому снимку данных. Последующие исправления отражаются в новых версиях отчёта.',small)])
+    story.extend([Spacer(1,18),p(f"Отчёт {snapshot['id']}, версия {snapshot['version']}",small),p('Сформирован по подтверждённому снимку данных. Последующие исправления отражаются в новых версиях отчёта.',small)])
     output=io.BytesIO()
-    def footer(canvas,doc):canvas.setFont('OporaReport',8);canvas.drawString(56,30,f'Опора · {doc.page}')
+    def footer(canvas,doc):canvas.setFont('OporaReport',8);canvas.drawString(56,30,f'Опора, страница {doc.page}')
     SimpleDocTemplate(output,pagesize=A4,leftMargin=56,rightMargin=56,topMargin=45,bottomMargin=55,title=snapshot['title'],author='Опора').build(story,onFirstPage=footer,onLaterPages=footer)
     return output.getvalue()
 
@@ -92,8 +92,8 @@ def docx_report(snapshot):
     for metric in snapshot['metrics']['metrics']:
         document.add_paragraph(metric['label'],style='Heading 2');document.add_paragraph(metric['definition']+(' '+metric['reason'] if metric['reason'] else ''))
     for content in snapshot['sections']:document.add_heading(content['title'],level=1);document.add_paragraph(content['text'])
-    document.add_paragraph(f"Определения {snapshot['definitions_version']} · снимок {snapshot['metrics']['generated_at']}")
-    document.add_paragraph(f"Отчёт {snapshot['id']} · версия {snapshot['version']}")
+    document.add_paragraph(f"Определения {snapshot['definitions_version']}, снимок {snapshot['metrics']['generated_at']}")
+    document.add_paragraph(f"Отчёт {snapshot['id']}, версия {snapshot['version']}")
     for cell in document.sections:
         footer=cell.footer.paragraphs[0];footer.text='Опора';footer.style=document.styles['Normal']
         for run in footer.runs:run.font.size=Pt(8)
