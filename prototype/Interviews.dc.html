@@ -532,14 +532,14 @@ window.ONBOARDING = {
           { icon: "star", title: "Выпускники", text: "Те, кто уже вышел из детского дома и учится жить самостоятельно" }
         ] },
         { type: "icards", title: "Чем занимаемся", items: [
-          { icon: "palette", title: "Творчество", text: "Керамика, валяние, витражи, живопись, кулинария и шитьё" },
-          { icon: "book", title: "Обучение", text: "«Хочу больше знать»: школьные предметы и навыки для жизни" },
-          { icon: "smile", title: "Инклюзия", text: "Ребята с гостями рисуют и мастерят на открытых занятиях «Воображариум»" },
-          { icon: "hand", title: "Сопровождение", text: "Помогаем выпускникам с документами, работой и жизнью в городе" },
+          { icon: "palette", title: "Творчество", text: "Керамика, живопись, витражи, шитьё" },
+          { icon: "book", title: "Обучение", text: "Школьные предметы и навыки для жизни" },
+          { icon: "smile", title: "Инклюзия", text: "Наши ребята и гости рисуют вместе" },
+          { icon: "hand", title: "Сопровождение", text: "Помогаем с документами и работой" },
           { icon: "pin", title: "Выезды", text: "Арт-резиденция на Волге, Сорочаны, Беслан" }
         ] },
         { type: "icards", title: "Что важно знать", items: [
-          { icon: "clock", title: "Доверие строится месяцами", text: "Многие участники росли без постоянных взрослых и привыкли, что люди уходят. Поэтому важно, чтобы вы приходили регулярно: так вам начнут доверять." },
+          { icon: "clock", title: "Доверие строится месяцами", text: "Многие росли без постоянных взрослых. Приходите регулярно — так вам начнут доверять" },
           { icon: "heart", title: "Это не каприз", text: "Кто-то мало говорит, кто-то быстро устаёт от шума. Так проявляется особенность, обижаться не нужно." },
           { icon: "hand", title: "Не делаем за человека", text: "Помогаем ровно настолько, насколько нужно. Остальное человек делает сам." },
           { icon: "eye", title: "Диагнозы знать не нужно", text: "Педагог расскажет, что важно знать о группе" }
@@ -814,8 +814,9 @@ function onbTestVals(c,isTest){const s=c.state,pr=s.pr,T=ONB.test,N=T.questions.
    answered,sheetCls:'a-sheet-card '+(ok?'is-ok':'is-bad'),sheetMark:ok?'✓':'✕',explHead:ok?'Верно!':'Не совсем',expl:q?q.e:'',
    nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Завершить',
    nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;c.save({...pr,testDone:true,score:sc,best:Math.max(pr.best||0,sc),attempts:(pr.attempts||0)+1});}c.setState({run:r});onbScrollTop();},
-   resultNext:(()=>{const mt=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));return mt?.status==='booked'?'Ждём вас на встрече с координатором: '+interviewDay(mt.date)+', '+mt.start+'.':'Дальше — встреча с координатором. Выбрать время можно в личном кабинете.';})(),
-   testResult:showRes,scoreLine:'Правильных ответов: '+score+' из '+N};}
+   // Итог теста — коротко и по-доброму: оценка по числу верных ответов и обещание научить остальному
+   resultNext:(()=>{const mt=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));return mt?.status==='booked'?'Остальному научим. До встречи '+scheduleLabel(mt.date,{day:'numeric',month:'long'})+'!':'Остальному научим. Осталось выбрать время встречи';})(),
+   testResult:showRes,scoreLine:score+' из '+N+' — '+(score===N?'отлично!':score>=7?'хорошо!':score>=4?'неплохо!':'для начала нормально')};}
 
 // Shared browser demo registry for candidate progress, availability and interviews.
 // Stored locally on this origin; no real invitations or reminders are sent.

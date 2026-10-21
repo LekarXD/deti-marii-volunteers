@@ -158,5 +158,6 @@ function onbTestVals(c,isTest){const s=c.state,pr=s.pr,T=ONB.test,N=T.questions.
    answered,sheetCls:'a-sheet-card '+(ok?'is-ok':'is-bad'),sheetMark:ok?'✓':'✕',explHead:ok?'Верно!':'Не совсем',expl:q?q.e:'',
    nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Завершить',
    nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;c.save({...pr,testDone:true,score:sc,best:Math.max(pr.best||0,sc),attempts:(pr.attempts||0)+1});}c.setState({run:r});onbScrollTop();},
-   resultNext:(()=>{const mt=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));return mt?.status==='booked'?'Ждём вас на встрече с координатором: '+interviewDay(mt.date)+', '+mt.start+'.':'Дальше — встреча с координатором. Выбрать время можно в личном кабинете.';})(),
-   testResult:showRes,scoreLine:'Правильных ответов: '+score+' из '+N};}
+   // Итог теста — коротко и по-доброму: оценка по числу верных ответов и обещание научить остальному
+   resultNext:(()=>{const mt=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));return mt?.status==='booked'?'Остальному научим. До встречи '+scheduleLabel(mt.date,{day:'numeric',month:'long'})+'!':'Остальному научим. Осталось выбрать время встречи';})(),
+   testResult:showRes,scoreLine:score+' из '+N+' — '+(score===N?'отлично!':score>=7?'хорошо!':score>=4?'неплохо!':'для начала нормально')};}
