@@ -58,10 +58,18 @@ def pdf_report(snapshot):
     return output.getvalue()
 
 def docx_report(snapshot):
-    document=Document();section=document.sections[0];section.top_margin=Inches(.8);section.bottom_margin=Inches(.8);section.left_margin=Inches(.85);section.right_margin=Inches(.85)
+    document=Document();section=document.sections[0];section.top_margin=Inches(.8);section.bottom_margin=Inches(1.0);section.footer_distance=Inches(.35);section.left_margin=Inches(.85);section.right_margin=Inches(.85)
     normal=document.styles['Normal'];normal.font.name='DejaVu Sans';normal.font.size=Pt(10.5);normal.paragraph_format.space_after=Pt(8)
     for name in ('Title','Subtitle','Heading 1','Heading 2','Heading 3'):
         style=document.styles[name];style.font.name='DejaVu Sans';style.font.color.rgb=RGBColor(0,0,0)
+        ppr=style.element.find(qn('w:pPr'))
+        if ppr is not None:
+            for border in list(ppr.findall(qn('w:pBdr'))):ppr.remove(border)
+        rpr=style.element.find(qn('w:rPr'))
+        fonts=rpr.find(qn('w:rFonts')) if rpr is not None else None
+        if fonts is not None:
+            for attribute in list(fonts.attrib):
+                if attribute.endswith('Theme'):del fonts.attrib[attribute]
     document.add_paragraph(snapshot['title'],style='Title')
     document.add_paragraph('Период '+period(snapshot));document.add_paragraph('Область '+snapshot['metrics']['scope']['label'])
     document.add_paragraph('Отчёт содержит подтверждённые показатели и проверенные разделы за выбранный период. Ожидающие подтверждения часы в итог не входят.')
@@ -88,6 +96,7 @@ def docx_report(snapshot):
     document.add_paragraph(f"Отчёт {snapshot['id']} · версия {snapshot['version']}")
     for cell in document.sections:
         footer=cell.footer.paragraphs[0];footer.text='Опора';footer.style=document.styles['Normal']
+        for run in footer.runs:run.font.size=Pt(8)
     output=io.BytesIO();document.save(output);return output.getvalue()
 
 def render(snapshot,format):return {'csv':csv_report,'pdf':pdf_report,'docx':docx_report}[format](snapshot)
