@@ -1,7 +1,7 @@
 from typing import Literal
 from uuid import UUID
 from fastapi import APIRouter,Depends,Header,Query,Response
-from sqlalchemy import select
+from sqlalchemy import case,select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import Principal,get_principal,authz_guard
 from app.core.audit import audit
@@ -99,7 +99,7 @@ async def signals(state:Literal['open','in_progress','resolved','dismissed']|Non
     service.any_permission(principal,'followups.read')
     query=select(SupportSignal).where(service.scope(principal,'followups.read',SupportSignal),service.privacy(principal,SupportSignal))
     if state:query=query.where(SupportSignal.state==state)
-    rows=(await db.scalars(query.order_by(SupportSignal.created_at.desc(),SupportSignal.id).limit(limit))).all()
+    rows=(await db.scalars(query.order_by(case((SupportSignal.priority=='urgent',0),(SupportSignal.priority=='high',1),else_=2),SupportSignal.created_at.desc(),SupportSignal.id).limit(limit))).all()
     return {'items':[await service.signal_view(db,row,principal) for row in rows]}
 
 @router.get('/coord/signals/{signal_id}',response_model=SupportSignalView)
