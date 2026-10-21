@@ -42,4 +42,15 @@ describe('private capture controller privacy and epochs',()=>{
   state.rooms[0].emit(RoomEvent.Reconnecting);state.rooms[0].emit(RoomEvent.Reconnected);expect(controller.snapshot.status).toBe('blocked');expect(controller.snapshot.tracks).toHaveLength(0);expect(refresh).toHaveBeenCalledOnce();
   controller.updatePlan({...scene,take_id:'10000000-0000-4000-8000-000000000099'},{...plan,take_id:'10000000-0000-4000-8000-000000000099'});expect(controller.snapshot.status).toBe('blocked');await controller.disconnect();
  });
+ it.each(['unknown','blocked'] as const)('rejects %s privacy before creating a provider connection',async privacy_state=>{
+  const {scene,plan,grant}=fixture();const controller=new HiddenCaptureController({onChange:()=>{}});
+  await expect(controller.connect(grant,scene,{...plan,privacy_state})).rejects.toThrow('capture_scope_mismatch');expect(state.rooms).toHaveLength(0);
+ });
+ it('rejects policy mismatches before joining and unsubscribes immediately on unsafe plan update',async()=>{
+  const {scene,plan,grant}=fixture();const controller=new HiddenCaptureController({onChange:()=>{}});
+  await expect(controller.connect(grant,scene,{...plan,recording_policy_id:'10000000-0000-4000-8000-000000000088'})).rejects.toThrow('capture_scope_mismatch');expect(state.rooms).toHaveLength(0);
+  await controller.connect(grant,scene,plan);const publication={setSubscribed:vi.fn()};state.rooms[0].remoteParticipants.set('host',{trackPublications:new Map([['camera',publication]])});
+  controller.updatePlan(scene,{...plan,privacy_state:'unknown'});expect(publication.setSubscribed).toHaveBeenLastCalledWith(false);expect(controller.snapshot.tracks).toHaveLength(0);expect(controller.snapshot.status).toBe('blocked');await controller.disconnect();
+ });
+
 });

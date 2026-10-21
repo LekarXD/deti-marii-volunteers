@@ -63,7 +63,7 @@ export class RoomController {
  }
  protected async open(grant:CaptureJoinGrant,scene:StudioScene,plan:CapturePlan|null,signal?:AbortSignal){
   await this.disconnect();const epoch=++this.epoch;this.scene=parseStudioScene(scene);this.plan=plan?parseCapturePlan(plan):null;
-  if(grant.session_id!==scene.session_id||(plan&&(grant.generation!==plan.generation||plan.session_id!==scene.session_id||plan.foundation_id!==scene.foundation_id||plan.resource_id!==scene.resource_id||plan.take_id!==scene.take_id||plan.scene_revision!==scene.revision||plan.render_profile_version!==scene.render_profile_version)))throw new Error('capture_scope_mismatch');
+  if((plan&&(plan.privacy_state!=='approved'||plan.recording_policy_id!==scene.recording_policy_id))||grant.session_id!==scene.session_id||(plan&&(grant.generation!==plan.generation||plan.session_id!==scene.session_id||plan.foundation_id!==scene.foundation_id||plan.resource_id!==scene.resource_id||plan.take_id!==scene.take_id||plan.scene_revision!==scene.revision||plan.render_profile_version!==scene.render_profile_version)))throw new Error('capture_scope_mismatch');
   if(signal?.aborted)throw new DOMException('Aborted','AbortError');
   this.grant=grant;this.reconnectBlocked=false;this.emit({status:'connecting',error:null,tracks:[]});
   const room=new Room({adaptiveStream:false,dynacast:!this.hidden});this.room=room;
