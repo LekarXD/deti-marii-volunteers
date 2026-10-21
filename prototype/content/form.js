@@ -71,7 +71,7 @@ window.FORM = {
               options: [{ label: "Право", icon: "file" }, { label: "Маркетинг", icon: "chart" }, { label: "IT", icon: "screen" }, { label: "Финансы", icon: "database" }, { label: "Продажи", icon: "users" }] }
           ] },
         { id: "participation", label: "Как часто хотели бы помогать?", type: "select", required: true,
-          options: ["Каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"] },
+          options: ["Каждую неделю", "На отдельных событиях", "Пока не знаю"] },
         { id: "online", label: "Могу помогать и онлайн", type: "consent" }
       ]
     },

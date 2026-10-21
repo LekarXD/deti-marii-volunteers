@@ -431,7 +431,7 @@ window.FORM = {
               options: [{ label: "Право", icon: "file" }, { label: "Маркетинг", icon: "chart" }, { label: "IT", icon: "screen" }, { label: "Финансы", icon: "database" }, { label: "Продажи", icon: "users" }] }
           ] },
         { id: "participation", label: "Как часто хотели бы помогать?", type: "select", required: true,
-          options: ["Каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"] },
+          options: ["Каждую неделю", "На отдельных событиях", "Пока не знаю"] },
         { id: "online", label: "Могу помогать и онлайн", type: "consent" }
       ]
     },
@@ -491,6 +491,7 @@ window.FORM = {
     callout  { tone: "info" | "warn", text }
   Иконки: palette, book, users, heart, home, hand, shield, smile, star, camera, calendar, pin, message, mask, music, award, sparkle, eye, clock, phone, alert, check-circle.
 */
+/* mode — как показывать шаг: cards — один блок на экран с кнопкой «Дальше», feed — лентой с прокруткой */
 window.ONBOARDING = {
   title: "Знакомство с фондом",
   intro: "Четыре коротких шага и небольшой тест — около 20 минут. Можно прерваться и вернуться.",
@@ -498,6 +499,7 @@ window.ONBOARDING = {
   modules: [
     {
       id: "history",
+      mode: "cards",
       title: "История фонда",
       minutes: 3,
       source: "Сайт фонда, материал АСИ к 25-летию (Фёдор), презентация фонда для партнёров 2025",
@@ -511,13 +513,13 @@ window.ONBOARDING = {
           ["2021", "Наставники и сопровождение", "Появляются программа наставничества и сопровождение ребят, которые выходят из детских учреждений."],
           ["2026", "Сегодня", "Фонд объединился с АНО «Тверская 15». «Арт-лаборатория» получила Грант Мэра Москвы."]
         ] },
-        { type: "video", title: "Как всё начиналось", duration: "2–3 мин" },
-        { type: "callout", tone: "info", text: "Фонд вырос из волонтёрской идеи. Волонтёры здесь с первого дня." }
+        { type: "video", title: "Как всё начиналось", duration: "2–3 мин" }
       ]
     },
 
     {
       id: "people",
+      mode: "feed",
       title: "Кому мы помогаем",
       minutes: 4,
       source: "Сайт фонда, презентация фонда для партнёров 2025, книги из библиотеки фонда",
@@ -551,6 +553,7 @@ window.ONBOARDING = {
 
     {
       id: "ethics",
+      mode: "cards",
       title: "Кодекс этики",
       minutes: 5,
       source: "Кодекс этики и стандарты работы БФ «Дети Марии»; «уважать не жалея…» — сборник «Особенное тьюторство», 2025",
@@ -578,6 +581,7 @@ window.ONBOARDING = {
 
     {
       id: "talk",
+      mode: "feed",
       title: "Как общаться с участниками",
       minutes: 6,
       source: "Команда: кодекс этики, книги из библиотеки фонда («Жизнь как жизнь», Е. Заблоцкис, «Особенное тьюторство»), практики NSPCC и National Autistic Society. Заменить правилами коммуникации фонда, когда они будут",
@@ -804,16 +808,18 @@ function onbBlockView(b,mi,bi,quiz,setQuiz){const v={};BLOCK_FLAGS.forEach(k=>v[
     opts:x.o.map((o,j)=>({text:o,locked:answered,cls:'a-qopt'+(answered&&j===x.a?' is-right':'')+(answered&&j===ans&&!ok?' is-wrong':''),pick:()=>setQuiz({...quiz,[key]:j})}))};});
   else v.items=[];
   return v;}
+// Прокрутить к началу шага (под шапку платформы), а не к самому верху страницы
+const onbScrollTop = () => setTimeout(() => { const el = document.querySelector('.a-ohead'); if (el) el.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); }, 30);
 // Тест знакомства: общий для всех вариантов. c — компонент со state.run и state.pr и методом save
 function onbTestVals(c,isTest){const s=c.state,pr=s.pr,T=ONB.test,N=T.questions.length,run=s.run,inQ=!!run&&run.i<N,showRes=isTest&&((!run&&pr.testDone)||(!!run&&run.i>=N)),q=inQ?T.questions[run.i]:null,ans=inQ?run.answers[run.i]:null,answered=ans!=null,ok=answered&&ans===q.a;
   const score=run?run.answers.filter((a,k)=>a===T.questions[k].a).length:pr.score;
   return {
-   repeatTest:()=>c.setState({run:{i:0,answers:[]}}),testTitle:T.title,testText:T.intro,testIntro:isTest&&!run&&!pr.testDone,start:()=>c.setState({run:{i:0,answers:[]}}),
+   repeatTest:()=>{c.setState({run:{i:0,answers:[]}});onbScrollTop();},testTitle:T.title,testText:T.intro,testIntro:isTest&&!run&&!pr.testDone,start:()=>{c.setState({run:{i:0,answers:[]}});onbScrollTop();},
    testQuestion:isTest&&inQ,qNum:inQ?run.i+1:0,qTotal:N,qText:q?q.q:'',
    qOpts:q?q.o.map((o,j)=>({text:o,locked:answered,cls:'a-answer'+(answered&&j===q.a?' is-right':'')+(answered&&j===ans&&!ok?' is-wrong':''),pick:()=>{const answers=[...run.answers];answers[run.i]=j;c.setState({run:{...run,answers}});}})):[],
    answered,sheetCls:'a-sheet-card '+(ok?'is-ok':'is-bad'),sheetMark:ok?'✓':'✕',explHead:ok?'Верно!':'Не совсем',expl:q?q.e:'',
    nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Завершить',
-   nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;c.save({...pr,testDone:true,score:sc,best:Math.max(pr.best||0,sc),attempts:(pr.attempts||0)+1});}c.setState({run:r});window.scrollTo(0,0);},
+   nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;c.save({...pr,testDone:true,score:sc,best:Math.max(pr.best||0,sc),attempts:(pr.attempts||0)+1});}c.setState({run:r});onbScrollTop();},
    resultNext:(()=>{const mt=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));return mt?.status==='booked'?'Ждём вас на встрече с координатором: '+interviewDay(mt.date)+', '+mt.start+'.':'Дальше — встреча с координатором. Выбрать время можно в личном кабинете.';})(),
    testResult:showRes,scoreLine:'Правильных ответов: '+score+' из '+N};}
 

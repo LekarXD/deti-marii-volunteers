@@ -743,8 +743,7 @@ sc-if,sc-for{display:contents}
  .a-yes::before,.a-no::before{left:2px;top:0}
  .a-no::before{color:var(--red-ink)}
 }
-/* Знакомство, вариант 2 «Карточки»: один блок на экран */
-.c-wrap,.l-wrap{max-width:760px;margin:0 auto}
+/* Знакомство: шаги-карточки (история, кодекс) — один блок на экран */
 .c-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:8px 0 14px}
 .c-mod{margin:0;font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
 .c-card.card{min-height:360px;padding:28px}
@@ -754,31 +753,21 @@ sc-if,sc-for{display:contents}
 .c-nav{display:flex;gap:10px;margin-top:16px}
 .c-next{flex:1}
 @media (max-width:720px){.c-mod{font-size:24px}.c-card.card{min-height:58vh;padding:20px 18px}.c-card .a-icards{display:block;background:transparent;padding:0}.c-card .a-lead{font-size:20px}.c-nav{position:sticky;bottom:12px}}
-/* Знакомство, вариант 3 «Темы списком»: аккордеон, по одной теме */
-.l-list.card{padding:4px 24px;margin-top:20px}
-.l-item{border-top:1px solid var(--line)}
-.l-item:first-child{border-top:0}
-.l-head{width:100%;display:flex;align-items:center;gap:14px;min-height:64px;padding:12px 0;border:0;background:transparent;text-align:left;font-size:17px;font-weight:600;color:var(--ink)}
-.l-mark{flex:0 0 32px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-size:14px;color:var(--ink-2)}
-.l-item.is-seen .l-mark{background:var(--green);color:#fff}
-.l-title{flex:1}
-.l-chev .ic{transition:transform .2s}
-.l-item.is-open .l-chev .ic{transform:rotate(180deg)}
-.l-body{padding:0 0 22px 46px}
-.l-body .a-blocks{gap:16px}
-.l-body .a-icards{display:block;background:transparent;padding:0}
-.dm .l-body .a-icards .a-icard{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;padding:12px 0;border-radius:0;background:transparent;border-top:1px solid var(--line)}
-.l-body .a-icards .a-icard:first-child{border-top:0}
-.l-body .a-icard .a-ico{grid-row:span 2;width:40px;height:40px;border-radius:12px}
-.l-ok{margin-top:16px}
-@media (max-width:720px){.l-list.card{padding:2px 16px}.l-body{padding-left:0}.l-head{font-size:16px}}
-/* Переключатель вариантов знакомства в полосе прототипа */
-.a-var-cap{margin-left:8px}
-.a-var{height:34px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:14px;font-weight:500;color:var(--ink-2);text-decoration:none}
-.a-var:hover{text-decoration:none;background:rgba(255,255,255,.5)}
-.a-var.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
 .c-card.card{min-height:280px;display:flex;flex-direction:column;justify-content:center}
 @media (max-width:720px){.c-card.card{min-height:52vh}}
+/* Шаги-ленты на телефоне: наборы карточек — горизонтальной лентой (видна одна, следующая выглядывает) */
+@media (max-width:720px){
+ .dm .a-feed .a-icards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;background:transparent;padding:2px 16px 8px;margin:0 -16px;scrollbar-width:none}
+ .a-feed .a-icards::-webkit-scrollbar{display:none}
+ .dm .a-feed .a-icards .a-icard{flex:0 0 78%;display:grid;grid-template-columns:none;align-content:start;gap:8px;padding:18px;border-radius:20px;border-top:0;scroll-snap-align:start}
+ .dm .a-feed .a-icards .a-icard.a-ic-o{background:var(--orange-tint)}.dm .a-feed .a-icards .a-icard.a-ic-b{background:var(--blue-tint)}.dm .a-feed .a-icards .a-icard.a-ic-g{background:var(--green-tint)}.dm .a-feed .a-icards .a-icard.a-ic-v{background:var(--violet-tint)}.dm .a-feed .a-icards .a-icard.a-ic-y{background:var(--yellow-tint)}
+ .a-feed .a-icard .a-ico{grid-row:auto;background:rgba(255,255,255,.75)}
+ .a-feed .a-icards::after{content:"";flex:0 0 6px}
+}
+/* Лента карточек не должна раздвигать страницу по ширине */
+.a-feed,.a-feed .a-blocks,.a-feed .a-blocks>*,.a-feed section{min-width:0;max-width:100%}
+@media (max-width:720px){.dm .a-feed .a-icards{max-width:none;width:calc(100% + 32px)}}
+@media (max-width:720px){.dm .a-feed .a-icards{width:100%;margin:0;padding:2px 0 8px}.a-feed .a-icards::after{display:none}}
 
 </style>
 </helmet>
@@ -790,11 +779,12 @@ sc-if,sc-for{display:contents}
 <a class="candidate-profile" href="Apply.dc.html?edit=1" aria-label="Моя анкета: {{candidateName}}"><span class="avatar av-o">{{candidateInitials}}</span><span>Моя анкета</span></a>
 </header>
 
-<div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button type="button" onClick="{{restart}}">Начать сначала</button><span class="demo-cap a-var-cap">Вариант:</span><a class="a-var is-on" href="Onboarding.dc.html">1. Лента</a><a class="a-var" href="OnboardingCards.dc.html">2. Карточки</a><a class="a-var" href="OnboardingList.dc.html">3. Темы списком</a></div>
+<div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button type="button" onClick="{{restart}}">Начать сначала</button></div>
 <div class="a-readbar" aria-hidden="true"><i id="a-readbar"></i></div>
 <div class="a-ohead"><p class="eyebrow">{{stepLabel}}</p><div class="a-seg" aria-hidden="true"><sc-for list="{{segs}}" as="sg"><i class="{{sg.cls}}"></i></sc-for></div></div>
 
-<sc-if value="{{isModule}}"><h1 class="h1 a-modtitle">{{modTitle}}</h1>
+<sc-if value="{{isModule}}">
+<sc-if value="{{isFeed}}"><h1 class="h1 a-modtitle">{{modTitle}}</h1><div class="a-feed">
 <div class="a-blocks"><sc-for list="{{blocks}}" as="b">
 <sc-if value="{{b.isLead}}"><p class="a-lead a-reveal">{{b.text}}</p></sc-if>
 <sc-if value="{{b.isFacts}}"><div class="a-facts"><sc-for list="{{b.items}}" as="x"><div class="kpi a-reveal"><span class="blob blob-y"></span><span class="kpi-num a-count" data-to="{{x.to}}" data-suffix="{{x.suffix}}">{{x.n}}</span><span class="kpi-label">{{x.l}}</span></div></sc-for></div></sc-if>
@@ -808,15 +798,35 @@ sc-if,sc-for{display:contents}
 <sc-if value="{{b.isCallout}}"><p class="{{b.cls}}">{{b.text}}</p></sc-if>
 </sc-for></div>
 
+</div>
 <div id="a-read-end"></div>
 <div class="actions a-nav"><sc-if value="{{hasPrev}}"><button type="button" class="btn btn-ghost btn-lg" onClick="{{prev}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg> Назад</button></sc-if><span class="grow"></span><button type="button" class="{{doneCls}}" disabled="{{doneLocked}}" onClick="{{done}}">{{doneLabel}}</button></div>
+</sc-if>
+<sc-if value="{{isCards}}"><div class="c-top"><h1 class="c-mod">{{modTitle}}</h1><span class="meta num">{{cardCount}}</span></div>
+<div class="c-card card">
+<div class="a-blocks"><sc-for list="{{blocks}}" as="b">
+<sc-if value="{{b.isLead}}"><p class="a-lead a-reveal">{{b.text}}</p></sc-if>
+<sc-if value="{{b.isFacts}}"><div class="a-facts"><sc-for list="{{b.items}}" as="x"><div class="kpi a-reveal"><span class="blob blob-y"></span><span class="kpi-num a-count" data-to="{{x.to}}" data-suffix="{{x.suffix}}">{{x.n}}</span><span class="kpi-label">{{x.l}}</span></div></sc-for></div></sc-if>
+<sc-if value="{{b.isTimeline}}"><div class="a-timeline"><sc-for list="{{b.items}}" as="x"><div class="a-tl a-reveal"><span class="a-dotline" aria-hidden="true"></span><span class="a-year">{{x.y}}</span><div class="a-tlcard"><h3 class="h4">{{x.t}}</h3><p>{{x.d}}</p></div></div></sc-for></div></sc-if>
+<sc-if value="{{b.isIcards}}"><section><sc-if value="{{b.hasTitle}}"><h2 class="h3 a-bt">{{b.title}}</h2></sc-if><div class="a-icards"><sc-for list="{{b.items}}" as="x"><div class="{{x.cls}}"><span class="a-ico" aria-hidden="true"><sc-if value="{{x.ic_palette}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></sc-if><sc-if value="{{x.ic_book}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></sc-if><sc-if value="{{x.ic_users}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></sc-if><sc-if value="{{x.ic_user}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></sc-if><sc-if value="{{x.ic_heart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></sc-if><sc-if value="{{x.ic_home}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></sc-if><sc-if value="{{x.ic_hand}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></sc-if><sc-if value="{{x.ic_shield}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></sc-if><sc-if value="{{x.ic_smile}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if><sc-if value="{{x.ic_star}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if><sc-if value="{{x.ic_camera}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></sc-if><sc-if value="{{x.ic_calendar}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></sc-if><sc-if value="{{x.ic_pin}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_message}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></sc-if><sc-if value="{{x.ic_mask}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v6a8 8 0 0 1-16 0z"/><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"/></svg></sc-if><sc-if value="{{x.ic_music}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_award}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg></sc-if><sc-if value="{{x.ic_sparkle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></sc-if><sc-if value="{{x.ic_eye}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></sc-if><sc-if value="{{x.ic_clock}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></sc-if><sc-if value="{{x.ic_phone}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></sc-if><sc-if value="{{x.ic_alert}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></sc-if><sc-if value="{{x.ic_check_circle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></sc-if><sc-if value="{{x.ic_academy}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></sc-if><sc-if value="{{x.ic_pen}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/></svg></sc-if><sc-if value="{{x.ic_scissors}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8.2 20 18M8 15.8 20 6"/></svg></sc-if><sc-if value="{{x.ic_flame}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a7 7 0 0 0 7-7c0-4-3-6.5-4-9.5-1 2.5-2.5 3.5-3.5 3.5C11 6 10 4.5 10 3c-3 2-5 6-5 11a7 7 0 0 0 7 7z"/></svg></sc-if><sc-if value="{{x.ic_globe}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></sc-if><sc-if value="{{x.ic_dice}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01" stroke-width="2.6"/></svg></sc-if><sc-if value="{{x.ic_film}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4M3 12h18"/></svg></sc-if><sc-if value="{{x.ic_image}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="17" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-5-5-9 10"/></svg></sc-if><sc-if value="{{x.ic_file}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></sc-if><sc-if value="{{x.ic_chart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></sc-if><sc-if value="{{x.ic_screen}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 17v4"/></svg></sc-if><sc-if value="{{x.ic_database}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></sc-if><sc-if value="{{x.ic_send}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></sc-if><sc-if value="{{x.ic_inbox}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/></svg></sc-if><sc-if value="{{x.ic_settings}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></sc-if><sc-if value="{{x.ic_search}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></sc-if><sc-if value="{{x.ic_edit}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg></sc-if></span><h3 class="h4">{{x.title}}</h3><p>{{x.text}}</p></div></sc-for></div></section></sc-if>
+<sc-if value="{{b.isStory}}"><section class="a-story a-reveal"><h2 class="h3">{{b.title}}</h2><p class="a-storyintro">{{b.intro}}</p><div class="a-storyrow"><sc-for list="{{b.items}}" as="x"><div class="{{x.cls}}"><span class="a-ico" aria-hidden="true"><sc-if value="{{x.ic_palette}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></sc-if><sc-if value="{{x.ic_book}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></sc-if><sc-if value="{{x.ic_users}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></sc-if><sc-if value="{{x.ic_user}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></sc-if><sc-if value="{{x.ic_heart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></sc-if><sc-if value="{{x.ic_home}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></sc-if><sc-if value="{{x.ic_hand}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></sc-if><sc-if value="{{x.ic_shield}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></sc-if><sc-if value="{{x.ic_smile}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if><sc-if value="{{x.ic_star}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if><sc-if value="{{x.ic_camera}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></sc-if><sc-if value="{{x.ic_calendar}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></sc-if><sc-if value="{{x.ic_pin}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_message}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></sc-if><sc-if value="{{x.ic_mask}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v6a8 8 0 0 1-16 0z"/><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"/></svg></sc-if><sc-if value="{{x.ic_music}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_award}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg></sc-if><sc-if value="{{x.ic_sparkle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></sc-if><sc-if value="{{x.ic_eye}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></sc-if><sc-if value="{{x.ic_clock}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></sc-if><sc-if value="{{x.ic_phone}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></sc-if><sc-if value="{{x.ic_alert}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></sc-if><sc-if value="{{x.ic_check_circle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></sc-if><sc-if value="{{x.ic_academy}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></sc-if><sc-if value="{{x.ic_pen}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/></svg></sc-if><sc-if value="{{x.ic_scissors}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8.2 20 18M8 15.8 20 6"/></svg></sc-if><sc-if value="{{x.ic_flame}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a7 7 0 0 0 7-7c0-4-3-6.5-4-9.5-1 2.5-2.5 3.5-3.5 3.5C11 6 10 4.5 10 3c-3 2-5 6-5 11a7 7 0 0 0 7 7z"/></svg></sc-if><sc-if value="{{x.ic_globe}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></sc-if><sc-if value="{{x.ic_dice}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01" stroke-width="2.6"/></svg></sc-if><sc-if value="{{x.ic_film}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4M3 12h18"/></svg></sc-if><sc-if value="{{x.ic_image}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="17" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-5-5-9 10"/></svg></sc-if><sc-if value="{{x.ic_file}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></sc-if><sc-if value="{{x.ic_chart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></sc-if><sc-if value="{{x.ic_screen}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 17v4"/></svg></sc-if><sc-if value="{{x.ic_database}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></sc-if><sc-if value="{{x.ic_send}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></sc-if><sc-if value="{{x.ic_inbox}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/></svg></sc-if><sc-if value="{{x.ic_settings}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></sc-if><sc-if value="{{x.ic_search}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></sc-if><sc-if value="{{x.ic_edit}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg></sc-if></span><b class="a-stage-t">{{x.t}}</b><p>{{x.d}}</p></div></sc-for></div></section></sc-if>
+<sc-if value="{{b.isRules}}"><section class="card a-reveal"><sc-if value="{{b.hasTitle}}"><h2 class="h3 a-bt">{{b.title}}</h2></sc-if><div class="a-rules"><sc-for list="{{b.items}}" as="x"><div class="a-rule"><span class="a-rn">{{x.n}}</span><p>{{x.t}}</p></div></sc-for></div></section></sc-if>
+<sc-if value="{{b.isPhrases}}"><section><h2 class="h3 a-bt">{{b.title}}</h2><div class="a-phr-head" aria-hidden="true"><span>Так говорим</span><span>Так не говорим</span></div><sc-for list="{{b.items}}" as="x"><div class="a-phr a-reveal"><span class="a-yes">{{x.say}}</span><span class="a-no">{{x.avoid}}</span></div></sc-for></section></sc-if>
+<sc-if value="{{b.isQuiz}}"><section><h2 class="h3 a-bt">{{b.title}}</h2><sc-for list="{{b.items}}" as="x"><div class="card a-quiz a-reveal"><p class="a-q">{{x.q}}</p><div class="a-qopts"><sc-for list="{{x.opts}}" as="o"><button type="button" class="{{o.cls}}" disabled="{{o.locked}}" onClick="{{o.pick}}">{{o.text}}</button></sc-for></div><sc-if value="{{x.answered}}"><div class="{{x.fbCls}}" role="status"><b>{{x.fbHead}}</b><p>{{x.e}}</p></div></sc-if></div></sc-for></section></sc-if>
+<sc-if value="{{b.isVideo}}"><figure class="a-video a-reveal"><div class="a-vbox"><span class="a-play" aria-hidden="true">▶</span><span>Видео скоро появится</span></div><figcaption><b>{{b.title}}</b> <span class="meta">{{b.duration}}</span></figcaption></figure></sc-if>
+<sc-if value="{{b.isCallout}}"><p class="{{b.cls}}">{{b.text}}</p></sc-if>
+</sc-for></div>
+
+</div>
+<div class="c-nav"><sc-if value="{{hasBack}}"><button type="button" class="btn btn-secondary btn-lg" aria-label="Назад" onClick="{{back}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button></sc-if><button type="button" class="btn btn-primary btn-lg c-next" onClick="{{forward}}">{{nextLabel}}</button></div>
+</sc-if>
 </sc-if>
 
 <sc-if value="{{isTest}}"><h1 class="h1 a-modtitle">{{testTitle}}</h1>
 <sc-if value="{{testIntro}}"><section class="card-hero a-reveal"><p class="lead">{{testText}}</p><div class="actions"><button type="button" class="btn btn-dark btn-lg" onClick="{{start}}">Начать</button></div></section></sc-if>
 <sc-if value="{{testQuestion}}"><section class="card a-tq"><p class="eyebrow">Вопрос {{qNum}} из {{qTotal}}</p><h2 class="h2">{{qText}}</h2><div class="a-answers"><sc-for list="{{qOpts}}" as="o"><button type="button" class="{{o.cls}}" disabled="{{o.locked}}" onClick="{{o.pick}}">{{o.text}}</button></sc-for></div></section>
 <sc-if value="{{answered}}"><div class="a-sheet" role="dialog" aria-modal="false" aria-label="Пояснение к ответу"><div class="{{sheetCls}}"><span class="a-sheet-ico" aria-hidden="true">{{sheetMark}}</span><h3 class="h3">{{explHead}}</h3><p>{{expl}}</p><button type="button" class="btn btn-dark btn-lg btn-block" onClick="{{nextQ}}">{{nextQLabel}}</button></div></div></sc-if></sc-if>
-<sc-if value="{{testResult}}"><section class="card-hero a-reveal a-result"><div class="hero-grid"><div class="grow"><p class="eyebrow">Знакомство с фондом пройдено</p><h2 class="hero-title">{{scoreLine}}</h2><p class="lead">{{resultNext}}</p><div class="actions"><a class="btn btn-dark btn-lg" href="ApplicationStatus.dc.html">Перейти в личный кабинет</a><button type="button" class="btn btn-ghost" onClick="{{repeatTest}}">Пройти тест ещё раз</button></div></div><span class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></span></div></section></sc-if>
+<sc-if value="{{testResult}}"><section class="card-hero a-reveal a-result"><div class="hero-grid"><div class="grow"><p class="eyebrow">Знакомство с фондом пройдено</p><h2 class="hero-title">{{scoreLine}}</h2><p class="lead">{{resultNext}}</p><div class="actions"><a class="btn btn-dark btn-lg" href="ApplicationStatus.dc.html">Перейти в личный кабинет</a></div></div><span class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></span></div></section></sc-if>
 
 </sc-if>
 
@@ -907,7 +917,7 @@ window.FORM = {
               options: [{ label: "Право", icon: "file" }, { label: "Маркетинг", icon: "chart" }, { label: "IT", icon: "screen" }, { label: "Финансы", icon: "database" }, { label: "Продажи", icon: "users" }] }
           ] },
         { id: "participation", label: "Как часто хотели бы помогать?", type: "select", required: true,
-          options: ["Каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"] },
+          options: ["Каждую неделю", "На отдельных событиях", "Пока не знаю"] },
         { id: "online", label: "Могу помогать и онлайн", type: "consent" }
       ]
     },
@@ -967,6 +977,7 @@ window.FORM = {
     callout  { tone: "info" | "warn", text }
   Иконки: palette, book, users, heart, home, hand, shield, smile, star, camera, calendar, pin, message, mask, music, award, sparkle, eye, clock, phone, alert, check-circle.
 */
+/* mode — как показывать шаг: cards — один блок на экран с кнопкой «Дальше», feed — лентой с прокруткой */
 window.ONBOARDING = {
   title: "Знакомство с фондом",
   intro: "Четыре коротких шага и небольшой тест — около 20 минут. Можно прерваться и вернуться.",
@@ -974,6 +985,7 @@ window.ONBOARDING = {
   modules: [
     {
       id: "history",
+      mode: "cards",
       title: "История фонда",
       minutes: 3,
       source: "Сайт фонда, материал АСИ к 25-летию (Фёдор), презентация фонда для партнёров 2025",
@@ -987,13 +999,13 @@ window.ONBOARDING = {
           ["2021", "Наставники и сопровождение", "Появляются программа наставничества и сопровождение ребят, которые выходят из детских учреждений."],
           ["2026", "Сегодня", "Фонд объединился с АНО «Тверская 15». «Арт-лаборатория» получила Грант Мэра Москвы."]
         ] },
-        { type: "video", title: "Как всё начиналось", duration: "2–3 мин" },
-        { type: "callout", tone: "info", text: "Фонд вырос из волонтёрской идеи. Волонтёры здесь с первого дня." }
+        { type: "video", title: "Как всё начиналось", duration: "2–3 мин" }
       ]
     },
 
     {
       id: "people",
+      mode: "feed",
       title: "Кому мы помогаем",
       minutes: 4,
       source: "Сайт фонда, презентация фонда для партнёров 2025, книги из библиотеки фонда",
@@ -1027,6 +1039,7 @@ window.ONBOARDING = {
 
     {
       id: "ethics",
+      mode: "cards",
       title: "Кодекс этики",
       minutes: 5,
       source: "Кодекс этики и стандарты работы БФ «Дети Марии»; «уважать не жалея…» — сборник «Особенное тьюторство», 2025",
@@ -1054,6 +1067,7 @@ window.ONBOARDING = {
 
     {
       id: "talk",
+      mode: "feed",
       title: "Как общаться с участниками",
       minutes: 6,
       source: "Команда: кодекс этики, книги из библиотеки фонда («Жизнь как жизнь», Е. Заблоцкис, «Особенное тьюторство»), практики NSPCC и National Autistic Society. Заменить правилами коммуникации фонда, когда они будут",
@@ -1280,16 +1294,18 @@ function onbBlockView(b,mi,bi,quiz,setQuiz){const v={};BLOCK_FLAGS.forEach(k=>v[
     opts:x.o.map((o,j)=>({text:o,locked:answered,cls:'a-qopt'+(answered&&j===x.a?' is-right':'')+(answered&&j===ans&&!ok?' is-wrong':''),pick:()=>setQuiz({...quiz,[key]:j})}))};});
   else v.items=[];
   return v;}
+// Прокрутить к началу шага (под шапку платформы), а не к самому верху страницы
+const onbScrollTop = () => setTimeout(() => { const el = document.querySelector('.a-ohead'); if (el) el.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); }, 30);
 // Тест знакомства: общий для всех вариантов. c — компонент со state.run и state.pr и методом save
 function onbTestVals(c,isTest){const s=c.state,pr=s.pr,T=ONB.test,N=T.questions.length,run=s.run,inQ=!!run&&run.i<N,showRes=isTest&&((!run&&pr.testDone)||(!!run&&run.i>=N)),q=inQ?T.questions[run.i]:null,ans=inQ?run.answers[run.i]:null,answered=ans!=null,ok=answered&&ans===q.a;
   const score=run?run.answers.filter((a,k)=>a===T.questions[k].a).length:pr.score;
   return {
-   repeatTest:()=>c.setState({run:{i:0,answers:[]}}),testTitle:T.title,testText:T.intro,testIntro:isTest&&!run&&!pr.testDone,start:()=>c.setState({run:{i:0,answers:[]}}),
+   repeatTest:()=>{c.setState({run:{i:0,answers:[]}});onbScrollTop();},testTitle:T.title,testText:T.intro,testIntro:isTest&&!run&&!pr.testDone,start:()=>{c.setState({run:{i:0,answers:[]}});onbScrollTop();},
    testQuestion:isTest&&inQ,qNum:inQ?run.i+1:0,qTotal:N,qText:q?q.q:'',
    qOpts:q?q.o.map((o,j)=>({text:o,locked:answered,cls:'a-answer'+(answered&&j===q.a?' is-right':'')+(answered&&j===ans&&!ok?' is-wrong':''),pick:()=>{const answers=[...run.answers];answers[run.i]=j;c.setState({run:{...run,answers}});}})):[],
    answered,sheetCls:'a-sheet-card '+(ok?'is-ok':'is-bad'),sheetMark:ok?'✓':'✕',explHead:ok?'Верно!':'Не совсем',expl:q?q.e:'',
    nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Завершить',
-   nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;c.save({...pr,testDone:true,score:sc,best:Math.max(pr.best||0,sc),attempts:(pr.attempts||0)+1});}c.setState({run:r});window.scrollTo(0,0);},
+   nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;c.save({...pr,testDone:true,score:sc,best:Math.max(pr.best||0,sc),attempts:(pr.attempts||0)+1});}c.setState({run:r});onbScrollTop();},
    resultNext:(()=>{const mt=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));return mt?.status==='booked'?'Ждём вас на встрече с координатором: '+interviewDay(mt.date)+', '+mt.start+'.':'Дальше — встреча с координатором. Выбрать время можно в личном кабинете.';})(),
    testResult:showRes,scoreLine:'Правильных ответов: '+score+' из '+N};}
 
@@ -1421,7 +1437,7 @@ function interviewSubscribe(component){
 }
 
 class Component extends DCLogic {
- constructor(p){super(p);this.state={me:ensureCandidate(),pr:loadProgress(),view:null,read:{},quiz:{},run:null};this.onScroll=this.onScroll.bind(this);}
+ constructor(p){super(p);this.state={me:ensureCandidate(),pr:loadProgress(),view:null,k:0,read:{},quiz:{},run:null};this.onScroll=this.onScroll.bind(this);}
  componentDidMount(){window.addEventListener('scroll',this.onScroll,{passive:true});window.addEventListener('resize',this.onScroll);this.after();}
  componentDidUpdate(){this.after();}
  componentWillUnmount(){window.removeEventListener('scroll',this.onScroll);window.removeEventListener('resize',this.onScroll);if(this.io)this.io.disconnect();}
@@ -1440,17 +1456,26 @@ class Component extends DCLogic {
  // Без оглавления: открываем первый непройденный шаг, потом тест
  current(){const s=this.state,mods=ONB.modules;if(s.view==='test')return{test:true};if(s.view!=null)return{id:s.view,i:mods.findIndex(m=>m.id===s.view)};const i=mods.findIndex(m=>!s.pr.done[m.id]);return i<0?{test:true}:{id:mods[i].id,i};}
  save(pr){demoWrite('onboarding',pr);this.setState({pr});}
- open(view){this.setState({view});window.scrollTo(0,0);}
+ // Переход — к началу шага, а не к верху страницы: шапка платформы не мешает и не нужно листать обратно
+ open(view,k){this.setState({view,k:k||0});onbScrollTop();}
  blockView(b,mi,bi){return onbBlockView(b,mi,bi,this.state.quiz,quiz=>this.setState({quiz}));}
  renderVals(){const s=this.state,pr=s.pr,mods=ONB.modules,T=ONB.test,N=T.questions.length,cur=this.current(),total=mods.length+1;
-  const m=cur.test?null:mods[cur.i],stepN=cur.test?total:cur.i+1,unlocked=!!m&&(pr.done[m.id]||s.read[m.id]),nxt=m?mods[cur.i+1]:null;
-  return {candidateUnlocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status==='completed',candidateLocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status!=='completed',candidateSection:'Знакомство',candidateName:fullName(s.me),candidateInitials:fullName(s.me).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),repeatTest:()=>this.setState({run:{i:0,answers:[]}}),stepLabel:'Знакомство с фондом · шаг '+stepN+' из '+total,
-   segs:Array.from({length:total},(_,k)=>({cls:k<stepN-1?'is-done':(k===stepN-1?'is-on':'')})),
-   isModule:!!m,isTest:!!cur.test,modTitle:m?m.title:'',blocks:m?m.blocks.map((b,bi)=>this.blockView(b,cur.i,m.blocks.slice(0,bi).filter(x=>x.type==='icards').length+cur.i)):[],
-   hasPrev:!!m&&cur.i>0,prev:()=>this.open(mods[cur.i-1].id),
+  const m=cur.test?null:mods[cur.i],stepN=cur.test?total:cur.i+1,unlocked=!!m&&(pr.done[m.id]||s.read[m.id]),nxt=m?mods[cur.i+1]:null,prv=m?mods[cur.i-1]:null;
+  // История и кодекс — карточками по одному блоку, остальные шаги — лентой
+  const cards=!!m&&m.mode==='cards',n=m?m.blocks.length:0,k=cards?Math.min(s.k,n-1):0,last=cards&&k===n-1;
+  const tint=bi=>m.blocks.slice(0,bi).filter(x=>x.type==='icards').length+cur.i;
+  const toPrev=()=>this.open(prv.id,prv.mode==='cards'?prv.blocks.length-1:0);
+  const finish=()=>{this.save({...pr,done:{...pr.done,[m.id]:true}});this.open(nxt?nxt.id:'test');};
+  return {candidateUnlocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status==='completed',candidateLocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status!=='completed',candidateSection:'Знакомство',candidateName:fullName(s.me),candidateInitials:fullName(s.me).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),stepLabel:'Знакомство с фондом · шаг '+stepN+' из '+total,
+   segs:Array.from({length:total},(_,j)=>({cls:j<stepN-1?'is-done':(j===stepN-1?'is-on':'')})),
+   isModule:!!m,isTest:!!cur.test,isCards:cards,isFeed:!!m&&!cards,modTitle:m?m.title:'',
+   blocks:!m?[]:cards?[this.blockView(m.blocks[k],cur.i,tint(k))]:m.blocks.map((b,bi)=>this.blockView(b,cur.i,tint(bi))),
+   cardCount:cards?(k+1)+' / '+n:'',hasBack:cards&&(k>0||!!prv),back:()=>{if(k>0)this.open(m.id,k-1);else toPrev();},
+   nextLabel:!cards?'':(last?(nxt?'К следующему шагу':'К тесту'):'Дальше'),forward:()=>{if(!last)this.open(m.id,k+1);else finish();},
+   hasPrev:!!prv,prev:toPrev,
    doneLocked:!!m&&!unlocked,doneCls:'btn btn-lg '+(unlocked?'btn-primary a-unlocked':'btn-subtle'),doneLabel:!m?'':(unlocked?(nxt?'Понятно, дальше':'Понятно, к тесту'):'Дочитайте до конца ↓'),
-   done:()=>{if(!m)return;this.save({...pr,done:{...pr.done,[m.id]:true}});this.open(nxt?nxt.id:'test');},
-   restart:()=>{this.save(freshProgress());this.setState({view:null,read:{},quiz:{},run:null});window.scrollTo(0,0);},
+   done:()=>{if(m)finish();},
+   restart:()=>{this.save(freshProgress());this.setState({view:null,k:0,read:{},quiz:{},run:null});window.scrollTo(0,0);},
    ...onbTestVals(this,!!cur.test),
    };}
 }

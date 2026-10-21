@@ -1,5 +1,5 @@
 class Component extends DCLogic {
- constructor(p){super(p);this.state={me:ensureCandidate(),pr:loadProgress(),view:null,read:{},quiz:{},run:null};this.onScroll=this.onScroll.bind(this);}
+ constructor(p){super(p);this.state={me:ensureCandidate(),pr:loadProgress(),view:null,k:0,read:{},quiz:{},run:null};this.onScroll=this.onScroll.bind(this);}
  componentDidMount(){window.addEventListener('scroll',this.onScroll,{passive:true});window.addEventListener('resize',this.onScroll);this.after();}
  componentDidUpdate(){this.after();}
  componentWillUnmount(){window.removeEventListener('scroll',this.onScroll);window.removeEventListener('resize',this.onScroll);if(this.io)this.io.disconnect();}
@@ -18,17 +18,26 @@ class Component extends DCLogic {
  // Без оглавления: открываем первый непройденный шаг, потом тест
  current(){const s=this.state,mods=ONB.modules;if(s.view==='test')return{test:true};if(s.view!=null)return{id:s.view,i:mods.findIndex(m=>m.id===s.view)};const i=mods.findIndex(m=>!s.pr.done[m.id]);return i<0?{test:true}:{id:mods[i].id,i};}
  save(pr){demoWrite('onboarding',pr);this.setState({pr});}
- open(view){this.setState({view});window.scrollTo(0,0);}
+ // Переход — к началу шага, а не к верху страницы: шапка платформы не мешает и не нужно листать обратно
+ open(view,k){this.setState({view,k:k||0});onbScrollTop();}
  blockView(b,mi,bi){return onbBlockView(b,mi,bi,this.state.quiz,quiz=>this.setState({quiz}));}
  renderVals(){const s=this.state,pr=s.pr,mods=ONB.modules,T=ONB.test,N=T.questions.length,cur=this.current(),total=mods.length+1;
-  const m=cur.test?null:mods[cur.i],stepN=cur.test?total:cur.i+1,unlocked=!!m&&(pr.done[m.id]||s.read[m.id]),nxt=m?mods[cur.i+1]:null;
-  return {candidateUnlocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status==='completed',candidateLocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status!=='completed',candidateSection:'Знакомство',candidateName:fullName(s.me),candidateInitials:fullName(s.me).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),repeatTest:()=>this.setState({run:{i:0,answers:[]}}),stepLabel:'Знакомство с фондом · шаг '+stepN+' из '+total,
-   segs:Array.from({length:total},(_,k)=>({cls:k<stepN-1?'is-done':(k===stepN-1?'is-on':'')})),
-   isModule:!!m,isTest:!!cur.test,modTitle:m?m.title:'',blocks:m?m.blocks.map((b,bi)=>this.blockView(b,cur.i,m.blocks.slice(0,bi).filter(x=>x.type==='icards').length+cur.i)):[],
-   hasPrev:!!m&&cur.i>0,prev:()=>this.open(mods[cur.i-1].id),
+  const m=cur.test?null:mods[cur.i],stepN=cur.test?total:cur.i+1,unlocked=!!m&&(pr.done[m.id]||s.read[m.id]),nxt=m?mods[cur.i+1]:null,prv=m?mods[cur.i-1]:null;
+  // История и кодекс — карточками по одному блоку, остальные шаги — лентой
+  const cards=!!m&&m.mode==='cards',n=m?m.blocks.length:0,k=cards?Math.min(s.k,n-1):0,last=cards&&k===n-1;
+  const tint=bi=>m.blocks.slice(0,bi).filter(x=>x.type==='icards').length+cur.i;
+  const toPrev=()=>this.open(prv.id,prv.mode==='cards'?prv.blocks.length-1:0);
+  const finish=()=>{this.save({...pr,done:{...pr.done,[m.id]:true}});this.open(nxt?nxt.id:'test');};
+  return {candidateUnlocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status==='completed',candidateLocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status!=='completed',candidateSection:'Знакомство',candidateName:fullName(s.me),candidateInitials:fullName(s.me).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),stepLabel:'Знакомство с фондом · шаг '+stepN+' из '+total,
+   segs:Array.from({length:total},(_,j)=>({cls:j<stepN-1?'is-done':(j===stepN-1?'is-on':'')})),
+   isModule:!!m,isTest:!!cur.test,isCards:cards,isFeed:!!m&&!cards,modTitle:m?m.title:'',
+   blocks:!m?[]:cards?[this.blockView(m.blocks[k],cur.i,tint(k))]:m.blocks.map((b,bi)=>this.blockView(b,cur.i,tint(bi))),
+   cardCount:cards?(k+1)+' / '+n:'',hasBack:cards&&(k>0||!!prv),back:()=>{if(k>0)this.open(m.id,k-1);else toPrev();},
+   nextLabel:!cards?'':(last?(nxt?'К следующему шагу':'К тесту'):'Дальше'),forward:()=>{if(!last)this.open(m.id,k+1);else finish();},
+   hasPrev:!!prv,prev:toPrev,
    doneLocked:!!m&&!unlocked,doneCls:'btn btn-lg '+(unlocked?'btn-primary a-unlocked':'btn-subtle'),doneLabel:!m?'':(unlocked?(nxt?'Понятно, дальше':'Понятно, к тесту'):'Дочитайте до конца ↓'),
-   done:()=>{if(!m)return;this.save({...pr,done:{...pr.done,[m.id]:true}});this.open(nxt?nxt.id:'test');},
-   restart:()=>{this.save(freshProgress());this.setState({view:null,read:{},quiz:{},run:null});window.scrollTo(0,0);},
+   done:()=>{if(m)finish();},
+   restart:()=>{this.save(freshProgress());this.setState({view:null,k:0,read:{},quiz:{},run:null});window.scrollTo(0,0);},
    ...onbTestVals(this,!!cur.test),
    };}
 }

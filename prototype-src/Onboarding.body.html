@@ -1,11 +1,20 @@
-<div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button onClick="{{restart}}">Начать сначала</button><!--ONB_VARIANTS--></div>
+<div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button onClick="{{restart}}">Начать сначала</button></div>
 <div class="a-readbar" aria-hidden="true"><i id="a-readbar"></i></div>
 <div class="a-ohead"><p class="eyebrow">{{stepLabel}}</p><div class="a-seg" aria-hidden="true"><sc-for list="{{segs}}" as="sg"><i class="{{sg.cls}}"></i></sc-for></div></div>
 
-<sc-if value="{{isModule}}"><h1 class="h1 a-modtitle">{{modTitle}}</h1>
+<sc-if value="{{isModule}}">
+<sc-if value="{{isFeed}}"><h1 class="h1 a-modtitle">{{modTitle}}</h1><div class="a-feed">
 <!--ONB_BLOCKS-->
+</div>
 <div id="a-read-end"></div>
 <div class="actions a-nav"><sc-if value="{{hasPrev}}"><button class="btn btn-ghost btn-lg" onClick="{{prev}}">ICON_LEFT Назад</button></sc-if><span class="grow"></span><button class="{{doneCls}}" disabled="{{doneLocked}}" onClick="{{done}}">{{doneLabel}}</button></div>
+</sc-if>
+<sc-if value="{{isCards}}"><div class="c-top"><h1 class="c-mod">{{modTitle}}</h1><span class="meta num">{{cardCount}}</span></div>
+<div class="c-card card">
+<!--ONB_BLOCKS-->
+</div>
+<div class="c-nav"><sc-if value="{{hasBack}}"><button class="btn btn-secondary btn-lg" aria-label="Назад" onClick="{{back}}">ICON_LEFT</button></sc-if><button class="btn btn-primary btn-lg c-next" onClick="{{forward}}">{{nextLabel}}</button></div>
+</sc-if>
 </sc-if>
 
 <sc-if value="{{isTest}}"><h1 class="h1 a-modtitle">{{testTitle}}</h1>
