@@ -31,7 +31,7 @@ async def target(db,p,id):
     if lesson is None or not p.has_permission('learning.write'):raise ApiError(403,'lesson_target_unavailable','Выберите доступный урок')
 async def resource_authorizer(db,p,id,need_host=False):
     row=await project(db,p,id)
-    if row.state=='archived':deny()
+    if row.state=='archived' or row.mode!='solo':deny()
     return studio.ResourceContext(row.foundation_id,row.id,'lesson_recording_project',row.owner_user_id,row.title,row.recording_policy_id,False,True)
 async def take(db,p,id,lock=False):
     row=await db.get(RecordingTake,id)
