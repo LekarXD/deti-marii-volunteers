@@ -76,6 +76,12 @@ async def test_voluntary_help_review_public_decision_private_note_and_signal_his
     accepted=await mutate(x.specialist,f"/api/v1/coord/reflections/{data['id']}/review",review);assert accepted.status_code==200,accepted.text
     own=await x.first.get(x.root+'/reflection');assert 'INTERNAL' not in own.text and 'internal_note' not in own.text
     assert own.json()['review']['decision']=='next_date' and own.json()['review']['next_date']=='2028-01-12'
+    async with x.sessions() as db:
+        session=await db.scalar(select(Session).where(Session.user_id==x.users['admin']))
+        projection=await service.latest_reflection_for_user(db,x.foundation,x.users['volunteer'],await resolve_principal(db,session))
+        assert str(projection['id'])==data['id'] and projection['can_review'] is True
+        assert projection['review']['decision']=='next_date' and projection['review']['next_date']=='2028-01-12'
+        assert 'INTERNAL' not in str(projection) and 'internal_note' not in projection
     assert (await x.admin.get(f"/api/v1/coord/reflections/{data['id']}/private-notes")).status_code==403
     private=await x.specialist.get(f"/api/v1/coord/reflections/{data['id']}/private-notes");assert private.status_code==200 and private.json()[0]['text']=='INTERNAL SUPERVISION ONLY'
     row=(await x.admin.get('/api/v1/coord/signals')).json()['items'][0]

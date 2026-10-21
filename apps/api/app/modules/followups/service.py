@@ -179,7 +179,8 @@ async def latest_reflection_for_user(db,foundation_id,user_id,principal=None):
     if not any(p=='followups.read' for p,_,_ in principal.grants):return None
     row=await db.scalar(select(Reflection).where(Reflection.foundation_id==foundation_id,Reflection.user_id==user_id,Reflection.submitted_at.is_not(None),scope(principal,'followups.read',Reflection),privacy(principal,Reflection)).order_by(Reflection.submitted_at.desc(),Reflection.id.desc()).limit(1))
     if row is None:return None
-    return {'text':row.text,'unexpected':row.unexpected,'help':row.help,'continuation':row.continuation,'submitted_at':row.submitted_at}
+    review=await db.scalar(select(ReflectionReview).where(ReflectionReview.reflection_id==row.id).order_by(ReflectionReview.revision.desc()).limit(1))
+    return {'id':row.id,'assignment_id':row.assignment_id,'text':row.text,'unexpected':row.unexpected,'help':row.help,'continuation':row.continuation,'submitted_at':row.submitted_at,'can_review':has(principal,'followups.manage',row.group_id),'review':(await public_review(db,review)).model_dump(mode='json') if review else None}
 
 async def finish_task(db,principal,signal,state,reason):
     if not signal.follow_up_task_id:return
