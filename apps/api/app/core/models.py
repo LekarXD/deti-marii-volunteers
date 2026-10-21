@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 from sqlalchemy import BigInteger, Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, text
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID, ExcludeConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base
 from app.core.clock import utcnow
@@ -154,6 +154,7 @@ class ResourceReservation(IdentityMixin, Base):
     __table_args__ = (
         CheckConstraint("(user_id IS NULL) <> (registration_id IS NULL)", name="reservation_one_owner"),
         CheckConstraint("busy_until > starts_at", name="reservation_positive_range"),
+        ExcludeConstraint(("foundation_id", "="), ("owner_key", "="), (text("tstzrange(starts_at,busy_until,'[)')"), "&&"), where=text("active"), using="gist", name="reservation_no_overlap"),
         UniqueConstraint("source_type", "source_id"),
         Index("ix_reservation_owner", "foundation_id", "owner_key", "starts_at"),
     )
