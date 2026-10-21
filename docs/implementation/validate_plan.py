@@ -95,7 +95,7 @@ for path in docs.glob('*.md'):
             local_links += 1
             check((path.parent / unquote(target.split('#')[0])).exists(), f'Broken local link in {path.name}: {target}')
 manifest = load('reuse-source-snapshot.json')
-check(len(manifest['files']) == 58, 'Expected 58 source files')
+check(len(manifest['files']) == 59, 'Expected 59 reviewed source files, including worker drain')
 for sha, path, line in source_links:
     check(sha == manifest['git_head'], f'Source baseline mismatch: {path}')
     check(path in manifest['files'], f'Linked source missing in manifest: {path}')
