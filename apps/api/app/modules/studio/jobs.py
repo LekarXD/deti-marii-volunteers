@@ -15,7 +15,7 @@ from app.core.models import MediaAsset,User,Session
 from app.modules.assets.service import asset_path
 from app.worker.registry import register_handler
 from app.integrations.rtc.livekit import LiveKitAdapter,RevocationPolicy,identity
-from .models import StudioSession,WebinarEnrollment,SlideDeck,SlideDeckVersion,SlidePage
+from .models import StudioSession,Webinar,WebinarEnrollment,SlideDeck,SlideDeckVersion,SlidePage
 from .slides_convert import sniff,normalize_image,pdf_page_count,render_pdf_page,strip_external_links,soffice_command,converted_pdf,ConvertError,MAX_PAGES
 
 async def converted_pages(data,workdir):
@@ -83,7 +83,11 @@ async def close_studio(db,context):
     if not row or row.foundation_id!=context.foundation_id or row.generation!=context.payload['generation'] or row.state!='closing':return {'state':'superseded'}
     await LiveKitAdapter().close_room(row.room_name)
     await context.fence(db);await db.refresh(row,with_for_update=True)
-    if row.state=='closing':row.state='closed';row.closed_at=datetime.now(timezone.utc);row.version+=1
+    if row.state=='closing':
+        row.state='closed';row.closed_at=datetime.now(timezone.utc);row.version+=1
+        if row.resource_kind=='live_event':
+            event=await db.get(Webinar,row.resource_id,with_for_update=True)
+            if event and event.foundation_id==row.foundation_id and event.state=='published':event.state='ended';event.version+=1
     return {'state':row.state}
 
 async def revoke_studio(db,context):

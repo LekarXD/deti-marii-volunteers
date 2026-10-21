@@ -199,3 +199,25 @@ async def test_enrollment_roster_is_host_only_and_versions_survive_reload(world)
     async with w.factory() as db:await routes.withdraw(id,StudioVersionCommand(expected_version=1),db,w.viewer,uuid4().hex)
     async with w.factory() as db:
         own=await routes.webinar_detail(id,db,w.viewer);assert own['enrollment_version']==2 and own['enrollment_state']=='withdrawn'
+
+@pytest.mark.asyncio
+async def test_room_close_marks_event_ended_only_after_provider_and_worker_ack(world,monkeypatch):
+    from app.modules.studio.models import Webinar
+    from app.integrations.rtc.livekit import ProviderError
+    w=world;event=await webinar(w);prepared=await prepare(w,event);provider_down=True
+    async with w.factory() as db:
+        row=await db.get(StudioSession,UUID(prepared['id']));row.state='closing';await db.commit()
+    class Provider:
+        async def close_room(self,room):
+            if provider_down:raise ProviderError('DeleteRoom',503)
+    monkeypatch.setattr(jobs,'LiveKitAdapter',Provider)
+    fences=[]
+    async def fence(db):fences.append(True)
+    context=SimpleNamespace(foundation_id=w.foundation.id,payload={'session_id':prepared['id'],'generation':1},fence=fence)
+    async with w.factory() as db:
+        with pytest.raises(ProviderError):await jobs.close_studio(db,context)
+        assert (await db.get(Webinar,UUID(event['id']))).state=='published';assert not fences
+    provider_down=False
+    async with w.factory() as db:
+        assert await jobs.close_studio(db,context)=={'state':'closed'};await db.commit()
+        assert (await db.get(Webinar,UUID(event['id']))).state=='ended';assert fences==[True]
