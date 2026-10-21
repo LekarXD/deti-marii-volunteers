@@ -76,7 +76,9 @@ class ApplicationRevision(Base):
 class ConsentEvent(Base):
     __tablename__ = "consent_events"
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    application_id: Mapped[UUID] = mapped_column(ForeignKey("applications.id"), index=True)
+    application_id: Mapped[UUID | None] = mapped_column(ForeignKey("applications.id"), index=True)
+    subject_user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), index=True)
+    __table_args__ = (CheckConstraint("(application_id IS NULL) <> (subject_user_id IS NULL)", name="consent_one_subject"),)
     document: Mapped[str] = mapped_column(String(80))
     document_version: Mapped[str] = mapped_column(String(32))
     purpose: Mapped[str] = mapped_column(String(60))

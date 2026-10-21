@@ -70,7 +70,8 @@ async def application_view(db, application, *, coordinator=False):
     if revision is None:
         raise ApiError(409, "application_incomplete", "Анкета не завершена")
     history = (await db.execute(select(ApplicationReviewEvent).where(ApplicationReviewEvent.application_id == application.id).order_by(ApplicationReviewEvent.created_at, ApplicationReviewEvent.id))).scalars().all()
-    events = (await db.execute(select(ConsentEvent).where(ConsentEvent.application_id == application.id).order_by(ConsentEvent.created_at, ConsentEvent.id))).scalars().all()
+    from .consents import consent_events
+    events = await consent_events(db,application.foundation_id,user_id=application.user_id,application_id=application.id)
     consents = {event.purpose: event.granted for event in events}
     values = dict(id=application.id, version=application.version, submission_state=application.submission_state,
         review_state=application.review_state, submitted_at=application.submitted_at, revision=revision_view(revision),
