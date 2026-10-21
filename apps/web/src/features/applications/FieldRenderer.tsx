@@ -1,4 +1,5 @@
-import {Field, Input, Textarea} from '../../ui';
+import {Field, Input, Textarea, Icon} from '../../ui';
+import type {IconName} from '../../ui/Icon';
 import {FormField, Answers, label, visible, masked, displayDate} from './form';
 export function FieldRenderer({field,answers,onChange,error}:{field:FormField;answers:Answers;onChange:(id:string,value:Answers[string])=>void;error?:string}) {
   if(!visible(field.showIf,answers))return null;
@@ -8,7 +9,7 @@ export function FieldRenderer({field,answers,onChange,error}:{field:FormField;an
   const toggle=(item:string)=>{const old=Array.isArray(value)?value:[];
     onChange(field.id,selected(item)?old.filter(v=>v!==item):field.exclusive?.includes(item)?[item]:[...old.filter(v=>!field.exclusive?.includes(v)),item]);};
   const hint=field.why|| (field.optional?'По желанию':undefined);
-  const chips=(opts:typeof options)=><div role="group" aria-label={field.label} aria-invalid={!!error} aria-describedby={error?`${id}-error`:undefined} className={'ap-options '+(field.type==='tiles'?'ap-tiles':'')}>{opts.map(option=>{const text=label(option);return <button key={text} type="button" className={'ap-option '+(selected(text)||value===text?'is-on':'')} aria-pressed={selected(text)||value===text} onClick={()=>field.type==='select'?onChange(field.id,text):toggle(text)}>{text}</button>;})}</div>;
+  const chips=(opts:typeof options)=><div role="group" aria-label={field.label} aria-invalid={!!error} aria-describedby={error?`${id}-error`:undefined} className={'ap-options '+(field.type==='tiles'?'ap-tiles':'')}>{opts.map(option=>{const text=label(option);return <button key={text} type="button" className={'ap-option '+(selected(text)||value===text?'is-on':'')} aria-pressed={selected(text)||value===text} onClick={()=>field.type==='select'?onChange(field.id,text):toggle(text)}>{typeof option!=='string'&&option.icon&&<span className={field.type==='tiles'?'ap-tile-icon':undefined}><Icon name={option.icon as IconName}/></span>}{text}</button>;})}</div>;
   return <div className={field.half?'ap-field ap-half':'ap-field'} data-field={field.id}>
     <Field label={field.type==='consent'?<span className="sr-only">Согласие</span>:field.label+(field.required?' *':'')} htmlFor={id} hint={hint} error={error}>
       {field.type==='consent'?<label className="ap-check"><input id={id} type="checkbox" checked={value===true} onChange={e=>onChange(field.id,e.target.checked)}/><span>{field.label}</span></label>:
