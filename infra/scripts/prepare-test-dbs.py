@@ -27,6 +27,7 @@ targets = {
     "OPORA_DOBRO_TEST_DATABASE_URL": "opora_dobro_test",
     "OPORA_TELEGRAM_TEST_DATABASE_URL": "opora_telegram_test",
     "OPORA_STAGE_DEMO_TEST_DATABASE_URL": "opora_stage",
+    "OPORA_PASSWORD_TEST_DATABASE_URL": "opora_welcome_auth_test",
 }
 admin = base.set(drivername="postgresql", database="postgres").render_as_string(hide_password=False)
 with psycopg.connect(admin, autocommit=True) as db:

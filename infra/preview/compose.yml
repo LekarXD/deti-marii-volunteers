@@ -6,6 +6,7 @@ x-api-environment: &api-environment
   OPORA_APP_MOUNT_PREFIX: /deti-marii
   OPORA_COOKIE_SECURE: "true"
   OPORA_DEV_INBOX: "false"
+  OPORA_DEMO_EMAIL_CODES: ${OPORA_DEMO_EMAIL_CODES:-false}
   OPORA_TRUSTED_ORIGINS: '["https://www.odschool.ru"]'
   OPORA_SECRET_KEY: ${OPORA_SECRET_KEY:?private stage encryption key}
   OPORA_FOUNDATION_ID: ${OPORA_FOUNDATION_ID:?fictitious stage foundation}

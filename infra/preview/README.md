@@ -14,6 +14,15 @@ requires `--build-arg VITE_APP_BASE_PATH=/deti-marii`. Record image IDs/digests 
 `source_revision`, source path list/hash, Alembic head and live `/version.json`.
 An environment label alone is not source evidence.
 
+For a source-only API/media update on the space-constrained preview host,
+`runtime-source-overlay.Dockerfile` may reuse the currently deployed exact-SHA
+image. First verify its OCI revision and prove that `requirements.lock`,
+`pyproject.toml`, the original API/media Dockerfiles and media package lock files
+are unchanged between that revision and the new pushed source. Copy the complete
+app, migrations and studio-core trees from the new source archive, attach the new
+OCI revision, and record both base image ID and resulting image ID. Otherwise use
+the original full build. This avoids installing identical dependencies twice.
+
 `compose.yml` is standalone, not an override of the local Compose defaults.
 Use the same private `runtime.env` (0600) with `docker compose --env-file ... -f
 releases/<SHA>/infra/preview/compose.yml`. Keep `OPORA_STAGE_PRIVATE_DIR` set to

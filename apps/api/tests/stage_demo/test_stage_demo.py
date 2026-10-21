@@ -69,6 +69,39 @@ async def stage(monkeypatch,tmp_path):
     await engine.dispose();get_settings.cache_clear()
 
 @pytest.mark.asyncio
+async def test_passwords_only_for_exact_seeded_demo_people_without_mfa_changes(stage,monkeypatch):
+    from app.stage_demo.passwords import provision, ROLES
+    from app.modules.auth.password_models import PasswordCredential
+    from app.modules.auth.password import verify_password
+    factory,app,path=stage
+    output=path.parent/'passwords.json'
+    async with factory() as db:
+        await seed(db,path,CONFIRMATION)
+        factors_before=(await db.execute(select(MfaFactor.id,MfaFactor.secret_cipher,MfaFactor.confirmed_at))).all()
+        monkeypatch.setattr(get_settings(),'demo_email_codes',True)
+        result=await provision(db,path,output)
+        assert result['accounts']==4
+        saved=json.loads(output.read_text())
+        assert tuple(saved['accounts'])==ROLES
+        assert stat.S_IMODE(output.stat().st_mode)==0o600
+        assert (await provision(db,path,output))['status']=='already_provisioned'
+        assert (await db.execute(select(MfaFactor.id,MfaFactor.secret_cipher,MfaFactor.confirmed_at))).all()==factors_before
+        assert await db.scalar(select(func.count()).select_from(Session))==0
+        assert await db.scalar(select(func.count()).select_from(OutboxMessage))==0
+        for value in saved['accounts'].values():
+            from uuid import UUID
+            credential=await db.scalar(select(PasswordCredential).where(PasswordCredential.user_id==UUID(value['user_id'])))
+            assert credential.demo_created and verify_password(value['password'],credential.password_hash)
+        monkeypatch.setattr(get_settings(),'demo_email_codes',False)
+        with pytest.raises(RuntimeError):await provision(db,path,output)
+    async with AsyncClient(transport=ASGITransport(app=app),base_url='https://stage.example.test') as client:
+        session=(await client.get('/api/v1/auth/session')).json()
+        who=saved['accounts']['coordinator']
+        response=await client.post('/api/v1/auth/login',json={'email':who['email'],'password':who['password']},headers={'Origin':'https://stage.example.test','X-CSRF-Token':session['csrf_token']})
+        assert response.status_code==200,response.text
+        assert response.json()['mfa_required']
+
+@pytest.mark.asyncio
 async def test_seed_once_and_normal_api_email_mfa_without_public_inbox(stage):
     factory,app,credentials_path=stage
     async with factory() as db:

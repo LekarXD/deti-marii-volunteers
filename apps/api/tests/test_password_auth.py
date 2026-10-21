@@ -3,6 +3,7 @@ import asyncio,json,os
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from uuid import UUID,uuid4
+from urllib.parse import urlsplit
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI
@@ -32,7 +33,8 @@ FAKE_EMAIL='invented@fixture.example.test'
 async def env():
     url=os.environ.get('OPORA_PASSWORD_TEST_DATABASE_URL','')
     if not url:pytest.skip('Set OPORA_PASSWORD_TEST_DATABASE_URL to the owned disposable DB')
-    if not url.startswith('postgresql+psycopg://') or not url.endswith(':56158/opora_welcome_auth_test'):raise RuntimeError('Only owned isolated DB on56158 allowed')
+    parsed=urlsplit(url)
+    if parsed.scheme!='postgresql+psycopg' or parsed.hostname not in ('127.0.0.1','localhost') or parsed.path!='/opora_welcome_auth_test':raise RuntimeError('Only dedicated loopback password test DB allowed')
     load_models();engine=create_async_engine(url);factory=async_sessionmaker(engine,expire_on_commit=False)
     async with engine.begin() as c:
         await c.execute(text('CREATE EXTENSION IF NOT EXISTS btree_gist'))
