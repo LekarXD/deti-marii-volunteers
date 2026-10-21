@@ -32,13 +32,18 @@ to its actual target lesson with `recording_render_id`; A7's Builder revalidates
 result and explicitly imports it into the existing draft before review/publication.
 No recording-page action publishes a lesson automatically.
 
-Pending authoritative take-policy readback from A1: scoped approval from actual host
-tracks must be added before the full start journey is accepted. Capture capability is
-read from the server; UI shows its actual unavailable reason while retaining preparation.
+Take approval uses the generated policy command and authoritative take readback.
+The teacher explicitly agrees to the current published source inventory; the command
+binds both the take version and scene revision. Changed sources clear local consent,
+and Start requires the server-approved exact inventory plus active own narration.
+Optional muted sources remain listed without becoming required. Approval can be
+withdrawn explicitly during capture; the server owns stopping and revocation.
+Capture capability is read from the server while preparation remains available.
 Scene/slides can change during capturing, while device publication changes require the
 current take to finish. A7 owns the separate publish/withdraw adapter.
 
 Tests use actual generated DTO fixtures and sole-transport mocks. They verify real
 lesson selection/versions, unavailable capture, zero automatic device/start calls,
-explicit denied-camera recovery, versioned discard and stored-interval semantics.
+explicit denied-camera recovery, versioned discard, scoped source approval/withdrawal,
+stale-consent rejection and stored-interval semantics.
 Screenshots and actual browser media acceptance remain separate integration gates.
