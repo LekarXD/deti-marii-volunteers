@@ -112,7 +112,17 @@
       case "select":
         input = `<select id="${name}" data-f="${f.id}"><option value="">Выберите…</option>${f.options.map(o => `<option ${o === v ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
         break;
-      case "radio": case "checkbox":
+      case "checkbox":
+        if (f.groups) {
+          input = `<div class="opt-groups">${f.groups.filter(g => visible(g, data)).map(g => `<div class="opt-group">
+            <p class="eyebrow">${esc(g.title)}</p>
+            ${g.note ? `<p class="why">${esc(g.note)}</p>` : ""}
+            ${g.options.length ? `<div class="opts">${g.options.map(o => `<label class="opt-line"><input type="checkbox" name="${name}" data-f="${f.id}" value="${esc(o)}" ${arr(v).includes(o) ? "checked" : ""}><span>${esc(o)}</span></label>`).join("")}</div>` : ""}
+          </div>`).join("")}</div>`;
+          break;
+        }
+        // fall through
+      case "radio":
         input = `<div class="opts" role="${f.type === "radio" ? "radiogroup" : "group"}">${f.options.map(o => {
           const on = f.type === "radio" ? v === o : arr(v).includes(o);
           return `<label class="opt-line"><input type="${f.type}" name="${name}" data-f="${f.id}" value="${esc(o)}" ${on ? "checked" : ""}><span>${esc(o)}</span></label>`;
@@ -158,6 +168,7 @@
   function validate(fields, data) {
     const errs = {};
     fields.filter(f => visible(f, data)).forEach(f => {
+      if (f.groups && f.type === "checkbox") data[f.id] = arr(data[f.id]).filter(o => f.groups.some(g => visible(g, data) && g.options.includes(o)));
       const v = data[f.id];
       const empty = v == null || v === "" || v === false || (Array.isArray(v) && v.length === 0);
       if (f.required && empty) errs[f.id] = f.type === "consent" ? "Без согласия мы не сможем обработать заявку" : f.type === "roles" ? "Выберите хотя бы одну роль или «Пока не знаю»" : "Заполните, пожалуйста";

@@ -248,3 +248,6 @@ details.more-block[open]{padding-bottom:16px}
 .vbox.empty{background:var(--line);display:grid;place-items:center;align-content:center;gap:8px;color:var(--muted);font-size:.9rem}
 .vbox.empty .play{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--paper);color:var(--heart);font-size:1.3rem}
 .vmeta{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+
+.opt-groups{display:grid;gap:16px}
+.opt-group{display:grid;gap:6px}
