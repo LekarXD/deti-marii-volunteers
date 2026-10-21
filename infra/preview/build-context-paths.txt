@@ -3,6 +3,7 @@ apps/api/requirements.lock
 apps/api/alembic.ini
 apps/api/app
 apps/api/scripts
+apps/api/tests/fixtures/recording-jcs.json
 apps/api/migrations
 apps/web/package.json
 apps/web/index.html

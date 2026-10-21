@@ -9,6 +9,7 @@ RUN pnpm install --frozen-lockfile
 COPY apps/web/index.html apps/web/recorder.html apps/web/tsconfig.json apps/web/vite.config.ts apps/web/base-path.ts ./apps/web/
 COPY apps/web/src/ ./apps/web/src/
 COPY apps/web/scripts/ ./apps/web/scripts/
+COPY apps/api/tests/fixtures/recording-jcs.json ./apps/api/tests/fixtures/recording-jcs.json
 COPY packages/design-tokens/ ./packages/design-tokens/
 COPY packages/studio-core/ ./packages/studio-core/
 RUN pnpm --filter @opora/web build
