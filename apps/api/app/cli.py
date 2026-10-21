@@ -12,7 +12,7 @@ from app.core.db import SessionLocal
 from app.core.model_loader import load_models
 from app.core.models import Foundation, User, ContactChannel, StaffMembership, PermissionGrant, MfaFactor, OutboxMessage
 
-PERMISSIONS = ("staff.manage", "messaging.manage", "notifications.manage", "notifications.send", "integrations.manage", "assets.manage", "candidates.read", "candidates.review", "candidates.notes", "interviews.manage", "interviews.read", "roles.manage", "opportunities.manage", "events.manage", "schedule.read", "schedule.manage", "crm.read", "crm.write", "contacts.review", "studio.manage", "assignments.manage", "participants.read", "participants.write", "participants.private_notes", "groups.read", "groups.write", "learning.manage", "reports.read")
+PERMISSIONS = ("staff.manage", "messaging.manage", "notifications.manage", "notifications.send", "integrations.manage", "assets.manage", "candidates.read", "candidates.review", "candidates.notes", "interviews.manage", "interviews.read", "roles.manage", "opportunities.manage", "events.manage", "schedule.read", "schedule.manage", "crm.read", "crm.write", "contacts.review", "studio.manage", "followups.read", "followups.manage", "knowledge.read", "knowledge.write", "knowledge.publish", "knowledge.manage", "ai.manage", "simulator.manage", "hours.review", "profile.requests.review", "recognition.manage", "assignments.manage", "participants.read", "participants.write", "participants.private_notes", "groups.read", "groups.write", "learning.manage", "reports.read")
 
 async def fixtures():
     if get_settings().environment != "development":
@@ -25,7 +25,7 @@ async def fixtures():
             db.add(foundation)
             await db.flush()
         identities = {}
-        for name,email,staff in (("Координатор Тестовый", "coordinator@example.test", True),("Кандидат Первый", "candidate-one@example.test", False),("Кандидат Второй", "candidate-two@example.test", False)):
+        for name,email,permissions in (("Координатор Тестовый", "coordinator@example.test", PERMISSIONS),("Кандидат Первый", "candidate-one@example.test", ()),("Кандидат Второй", "candidate-two@example.test", ()),("Специалист Тестовый", "specialist@example.test", ("followups.read", "followups.manage", "signals.restricted", "followups.private_notes", "simulator.review"))):
             contact = await db.scalar(select(ContactChannel).where(ContactChannel.normalized_value == email))
             if contact:
                 user = await db.get(User, contact.user_id)
@@ -35,14 +35,14 @@ async def fixtures():
                 await db.flush()
                 db.add(ContactChannel(user_id=user.id, normalized_value=email, verified_at=utcnow()))
             identities[email] = {"user_id": str(user.id), "email": email}
-            if staff:
+            if permissions:
                 membership = await db.scalar(select(StaffMembership).where(StaffMembership.user_id == user.id))
                 if membership is None:
                     membership = StaffMembership(user_id=user.id, foundation_id=foundation.id)
                     db.add(membership)
                     await db.flush()
                 existing_permissions=set((await db.scalars(select(PermissionGrant.permission).where(PermissionGrant.membership_id==membership.id))).all())
-                db.add_all([PermissionGrant(membership_id=membership.id,permission=p) for p in PERMISSIONS if p not in existing_permissions])
+                db.add_all([PermissionGrant(membership_id=membership.id,permission=p) for p in permissions if p not in existing_permissions])
                 factor = await db.scalar(select(MfaFactor).where(MfaFactor.user_id == user.id))
                 if factor is None:
                     secret = pyotp.random_base32()
