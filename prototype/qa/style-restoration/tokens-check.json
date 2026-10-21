@@ -1,0 +1,29 @@
+{
+  "reference": {
+    "background": "rgb(255, 185, 63)",
+    "fontLoaded": true,
+    "h1": "40px",
+    "hero": {
+      "height": 522.9140625,
+      "width": 1216,
+      "x": 40,
+      "y": 331.1953125
+    },
+    "heroRadius": "32px",
+    "heroTitle": "48px"
+  },
+  "implementation": {
+    "background": "rgb(255, 185, 63)",
+    "documentWidth": 1296,
+    "fontLoaded": true,
+    "h1": "40px",
+    "hero": {
+      "height": 379.84375,
+      "width": 1216,
+      "x": 40,
+      "y": 185.1953125
+    },
+    "heroRadius": "32px",
+    "heroTitle": "52px"
+  }
+}

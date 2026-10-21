@@ -1,5 +1,5 @@
 class Component extends DCLogic {
- constructor(p){super(p);this.state={directory:readRoleDirectory(),roleOpen:false,roleQuery:'',roles:ROLES.map(x=>({...x})),sel:'assistant',edit:false,isNew:false,draft:{},query:'',filter:'all',all:true,saved:false,error:''};}
+ constructor(p){super(p);this.state={directory:readRoleDirectory(),roleOpen:false,roleQuery:'',roles:ROLES.map(x=>({...x})),sel:'assistant',edit:false,isNew:false,draft:{},query:'',filter:'all',all:false,saved:false,error:''};}
  editRole(r){this.setState({sel:r.id,edit:true,isNew:false,draft:{...r,roleId:r.roleId||r.id},roleOpen:false,saved:false,error:''});}
  renderVals(){const s=this.state,r=s.roles.find(x=>x.id===s.sel)||s.roles[0],d=s.draft;const change=k=>e=>this.setState({draft:{...this.state.draft,[k]:e.target.value}});const filtered=s.roles.filter(x=>(s.filter==='all'||x.status===s.filter)&&(`${x.title} ${x.program}`).toLowerCase().includes(s.query.toLowerCase()));return {
  isList:!s.edit,isEdit:s.edit,listDemo:s.edit?'':'is-on',editDemo:s.edit?'is-on':'',showList:()=>this.setState({edit:false,error:''}),selected:r,editSelected:()=>this.editRole(r),query:s.query,search:e=>this.setState({query:e.target.value,all:true}),

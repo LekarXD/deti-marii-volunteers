@@ -1,0 +1,170 @@
+[
+  {
+    "page": "Interviews",
+    "device": "desktop",
+    "documentWidth": 1296,
+    "unrendered": 0,
+    "width": 1296
+  },
+  {
+    "page": "Candidates",
+    "device": "desktop",
+    "documentWidth": 1296,
+    "unrendered": 0,
+    "width": 1296
+  },
+  {
+    "page": "Needs",
+    "device": "desktop",
+    "documentWidth": 1296,
+    "unrendered": 0,
+    "width": 1296
+  },
+  {
+    "page": "Roles",
+    "device": "desktop",
+    "documentWidth": 1296,
+    "unrendered": 0,
+    "width": 1296
+  },
+  {
+    "page": "Participants",
+    "device": "desktop",
+    "documentWidth": 1296,
+    "unrendered": 0,
+    "width": 1296
+  },
+  {
+    "page": "Groups",
+    "device": "desktop",
+    "documentWidth": 1296,
+    "unrendered": 0,
+    "width": 1296
+  },
+  {
+    "page": "VolunteerRecord",
+    "device": "desktop",
+    "documentWidth": 1296,
+    "unrendered": 0,
+    "width": 1296
+  },
+  {
+    "page": "Reserve",
+    "device": "desktop",
+    "documentWidth": 1296,
+    "unrendered": 0,
+    "width": 1296
+  },
+  {
+    "page": "Planning",
+    "device": "desktop",
+    "documentWidth": 1296,
+    "unrendered": 0,
+    "width": 1296
+  },
+  {
+    "page": "CoordHome",
+    "device": "desktop",
+    "documentWidth": 1296,
+    "unrendered": 0,
+    "width": 1296
+  },
+  {
+    "page": "Interviews",
+    "device": "mobile",
+    "documentWidth": 390,
+    "unrendered": 0,
+    "width": 390
+  },
+  {
+    "page": "Candidates",
+    "device": "mobile",
+    "documentWidth": 390,
+    "unrendered": 0,
+    "width": 390
+  },
+  {
+    "page": "Needs",
+    "device": "mobile",
+    "documentWidth": 390,
+    "unrendered": 0,
+    "width": 390
+  },
+  {
+    "page": "Roles",
+    "device": "mobile",
+    "documentWidth": 390,
+    "unrendered": 0,
+    "width": 390
+  },
+  {
+    "page": "Participants",
+    "device": "mobile",
+    "documentWidth": 390,
+    "unrendered": 0,
+    "width": 390
+  },
+  {
+    "page": "Groups",
+    "device": "mobile",
+    "documentWidth": 390,
+    "unrendered": 0,
+    "width": 390
+  },
+  {
+    "page": "VolunteerRecord",
+    "device": "mobile",
+    "documentWidth": 390,
+    "unrendered": 0,
+    "width": 390
+  },
+  {
+    "page": "Reserve",
+    "device": "mobile",
+    "documentWidth": 390,
+    "unrendered": 0,
+    "width": 390
+  },
+  {
+    "page": "Planning",
+    "device": "mobile",
+    "documentWidth": 390,
+    "unrendered": 0,
+    "width": 390
+  },
+  {
+    "page": "CoordHome",
+    "device": "mobile",
+    "documentWidth": 390,
+    "unrendered": 0,
+    "width": 390
+  },
+  {
+    "page": "Interviews",
+    "device": "narrow",
+    "documentWidth": 320,
+    "unrendered": 0,
+    "width": 320
+  },
+  {
+    "page": "Candidates",
+    "device": "narrow",
+    "documentWidth": 320,
+    "unrendered": 0,
+    "width": 320
+  },
+  {
+    "page": "Roles",
+    "device": "narrow",
+    "documentWidth": 320,
+    "unrendered": 0,
+    "width": 320
+  },
+  {
+    "page": "Planning",
+    "device": "narrow",
+    "documentWidth": 320,
+    "unrendered": 0,
+    "width": 320
+  }
+]

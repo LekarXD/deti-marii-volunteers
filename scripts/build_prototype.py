@@ -115,7 +115,7 @@ for name,(title,role,height) in SCREENS.items():
         calendar = re.sub(r'\{\{uiDate\.([\w.]+)\}\}', lambda m: '{{'+{'open':'datePicker','key':'dateKey'}.get(m[1],m[1])+'}}', (SRC/'date-picker.html').read_text())
         body = body.replace('UI_DATE_PICKER', calendar)
     icons = dict(re.findall(r'^([\w-]+):\s*(<svg[^\n]+)', (ROOT/'materials/04-дизайн/прототип-до-фактуры/kit/icons.html').read_text(), re.M))
-    for token,key in [('USERS','users'),('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('PLUS','plus'),('X','x')]:
+    for token,key in [('PHONE','phone'),('USERS','users'),('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('PLUS','plus'),('X','x')]:
         body = body.replace('ICON_'+token, icons[key])
     logic = (SRC/'date-utils.js').read_text() + '\n' + (SRC/'demo-store.js').read_text() + '\nconst ROLES = demoRead("roles", ' + (SRC/'roles.json').read_text().strip() + ');\nconst PEOPLE = demoRead("people", ' + (SRC/'participants.json').read_text().strip() + ');\n' + (SRC/'role-directory.js').read_text() + '\n' + ((SRC/'Planning.controls.js').read_text() + '\n' if name=='Planning' else '') + (((CONTENT/'form.js').read_text()+'\n'+(CONTENT/'onboarding.js').read_text()+'\n'+(SRC/'candidate-store.js').read_text()+'\n'+(SRC/'interview-store.js').read_text()+'\n') if name in ['Interviews','Candidates'] else '') + screen_logic
     h = helmet.replace('</style>',css+'\n</style>')

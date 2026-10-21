@@ -4,6 +4,7 @@ import re
 
 def work_frame(src, name, body):
     icons = dict(re.findall(r'^([\w-]+):\s*(<svg[^\n]+)', (src.parent/'materials/04-дизайн/прототип-до-фактуры/kit/icons.html').read_text(), re.M))
+    switch_icon = re.search(r'<a class="role"[^>]*>(<svg.*?</svg>)', (src/'coordinator-header.html').read_text(), re.S)[1]
     current = {'VolunteerRecord':'Volunteers','Shifts':'Planning','Pipeline':'Candidates'}.get(name,name)
     groups = [
         ('Волонтёры','users', [('Candidates','Кандидаты'),('Interviews','Собеседования'),('Volunteers','Волонтёры'),('Reserve','Проверка контактов')]),
@@ -26,8 +27,8 @@ def work_frame(src, name, body):
         nav+='<details class="work-dropdown'+(' is-current' if active else '')+'" name="coord-navigation"><summary>'+icons[icon]+'<span>'+title+'</span>'+icons['chevron-down']+'</summary><div class="work-dropdown-panel" aria-label="'+title+'">'+links+'</div></details>'
         mobile+='<section class="work-nav-group"><h2>'+title+'</h2>'+links+'</section>'
     brand='<a class="brand" href="CoordHome.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>команда фонда</small></span></a>'
-    header='<header class="work-header">'+brand+'<div class="work-header-end"><a class="btn btn-ghost btn-sm work-view" href="ApplicationStatus.dc.html">Вид волонтёра</a><details class="work-mobile-menu" name="coord-navigation"><summary>'+page_label+' '+icons['chevron-down']+'</summary><nav class="work-mobile-links" aria-label="Разделы фонда">'+mobile+'</nav></details></div><nav class="work-topnav" aria-label="Разделы фонда">'+nav+'</nav></header>'
-    return '<div class="dm work-app">'+header+'<main class="work-content"><p class="work-context">'+group_label+'</p>'+body+'</main></div>'
+    header='<header class="work-header">'+brand+'<div class="work-header-end"><a class="btn btn-ghost btn-sm work-view" href="ApplicationStatus.dc.html">' + switch_icon + 'Вид волонтёра</a><details class="work-mobile-menu" name="coord-navigation"><summary>'+page_label+' '+icons['chevron-down']+'</summary><nav class="work-mobile-links" aria-label="Разделы фонда">'+mobile+'</nav></details></div><nav class="work-topnav" aria-label="Разделы фонда">'+nav+'</nav></header>'
+    return '<div class="dm work-app">'+header+'<main class="work-content">'+body+'</main></div>'
 
 
 def wrap_original(doc, src, name):
