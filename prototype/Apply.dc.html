@@ -768,6 +768,39 @@ sc-if,sc-for{display:contents}
 .a-feed,.a-feed .a-blocks,.a-feed .a-blocks>*,.a-feed section{min-width:0;max-width:100%}
 @media (max-width:720px){.dm .a-feed .a-icards{max-width:none;width:calc(100% + 32px)}}
 @media (max-width:720px){.dm .a-feed .a-icards{width:100%;margin:0;padding:2px 0 8px}.a-feed .a-icards::after{display:none}}
+/* Запись на встречу внутри главной карточки (как в исходном экране «Моя заявка») */
+.a-meet .a-days{margin:28px 0 0}
+.a-meet .a-day{background:rgba(255,255,255,.6);min-width:68px;padding:10px 12px}
+.a-meet .a-day:hover{background:rgba(255,255,255,.88)}
+.a-meet .a-day.is-on{background:var(--ink);color:#fff}
+.a-meet .a-day.is-on .a-day-wd{color:rgba(255,255,255,.75)}
+.a-meet .a-day-wd{color:var(--ink-2)}
+.a-hero-slots.opts{margin-top:12px}
+.a-hero-checks{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:24px}
+.a-hero-checks .check{color:var(--ink)}
+/* Иллюстрация в главной карточке на телефоне — небольшим кругом в правом верхнем углу, а не под текстом */
+@media (max-width:720px){
+ .dm .card-hero{position:relative}
+ .dm .card-hero .hero-art{display:grid;position:absolute;top:22px;right:20px;width:60px;height:60px;flex:none}
+ .dm .card-hero .hero-art .ic{width:28px;height:28px;stroke-width:1.6}
+ .dm .card-hero .hero-grid>.grow>.eyebrow,.dm .card-hero .hero-title,.dm .card-hero .hero-when{padding-right:68px}
+ .dm .card-hero .hero-when{font-size:36px}
+ .a-meet .a-days{margin-top:22px}
+ .a-hero-actions .btn{flex:1 1 100%}
+}
+.a-fmt.seg{margin-top:28px;background:rgba(255,255,255,.6)}
+.a-fmt-where{margin:10px 0 0;font-size:16px;color:var(--ink)}
+.a-meet .a-days{margin-top:16px}
+.a-hero-slots .opt{padding:14px 18px}
+.a-hero-slots .opt-time{font-size:28px}
+@media (max-width:720px){
+ .dm .card-hero .hero-art{top:18px;right:18px;width:46px;height:46px}
+ .dm .card-hero .hero-art .ic{width:22px;height:22px}
+ .dm .card-hero .hero-title,.dm .card-hero .hero-when{padding-right:0;margin-top:14px}
+ .dm .card-hero .hero-grid>.grow>.eyebrow{padding-right:56px;min-height:24px}
+ .dm .card-hero .hero-title{font-size:32px;line-height:1.1}
+}
+.a-record{margin-top:12px}
 
 </style>
 </helmet>
@@ -917,13 +950,14 @@ window.FORM = {
           options: ["Да", "Нет"] },
         { id: "volExpText", label: "Где и что делали?", type: "textarea", optional: true,
           showIf: { field: "volExp", value: "Да" } },
-        { id: "specialExp", label: "Общались ли вы с людьми с особенностями развития?", type: "select", required: true,
-          options: ["Да", "Нет, но готов(а) попробовать", "Хочу обсудить на встрече"] },
+        { id: "specialExp", label: "Вы работали с детьми с особенностями развития?", type: "select", required: true,
+          options: ["Да", "Нет"] },
         { id: "specialExpText", label: "Расскажите коротко об этом опыте", type: "textarea", optional: true,
           showIf: { field: "specialExp", value: "Да" } },
-        { id: "record", label: "Для работы с детьми нужна справка о несудимости. Готовы её получить?", type: "select", required: true,
-          options: ["Да", "Справка уже есть", "Хочу обсудить"],
-          why: "Заказать можно бесплатно на Госуслугах — это займёт минуту." },
+        /* Ссылку на Госуслуги в анкете не даём — человек уйдёт и не вернётся. Она появится в кабинете после отправки. */
+        { id: "record", label: "Для работы с детьми нужна справка о несудимости. Она у вас есть?", type: "select", required: true,
+          options: ["Справка уже есть", "Получу её"],
+          why: "Если нет — ссылку на Госуслуги дадим сразу после анкеты." },
         { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
           options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья", "Мероприятие фонда", "Другое"] },
         { id: "consentPD", label: "Я согласен(на) на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
@@ -1123,7 +1157,7 @@ window.ONBOARDING = {
 
   meeting: {
     title: "Встреча с координатором",
-    text: "Знакомство на 30 минут: расскажем о программах и вместе решим, с чего вам начать.",
+    text: "30 минут: расскажем о программах и решим, с чего начать.",
     coordinator: "Алевтина, координатор волонтёров",
     slots: [
       { day: "Чт, 23 октября", time: "18:30", where: "Онлайн, Яндекс Телемост" },
@@ -1257,7 +1291,7 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
 const freshProgress = () => ({ done: {}, testDone: false, score: null, road: false, tg: false });
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
-const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творчество', 'Помощь на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творчество', 'Помощь на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Получу её', consentPD: true, submittedAt: new Date().toISOString() };
 
 // Иконки по имени из контента (сборщик подставляет svg через ICONSWITCH)
 const ICON_KEYS = ['palette','book','users','user','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle','academy','pen','scissors','flame','globe','dice','film','image','file','chart','screen','database','send','inbox','settings','search','edit'];

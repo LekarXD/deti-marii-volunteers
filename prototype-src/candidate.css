@@ -462,3 +462,36 @@
 .a-feed,.a-feed .a-blocks,.a-feed .a-blocks>*,.a-feed section{min-width:0;max-width:100%}
 @media (max-width:720px){.dm .a-feed .a-icards{max-width:none;width:calc(100% + 32px)}}
 @media (max-width:720px){.dm .a-feed .a-icards{width:100%;margin:0;padding:2px 0 8px}.a-feed .a-icards::after{display:none}}
+/* Запись на встречу внутри главной карточки (как в исходном экране «Моя заявка») */
+.a-meet .a-days{margin:28px 0 0}
+.a-meet .a-day{background:rgba(255,255,255,.6);min-width:68px;padding:10px 12px}
+.a-meet .a-day:hover{background:rgba(255,255,255,.88)}
+.a-meet .a-day.is-on{background:var(--ink);color:#fff}
+.a-meet .a-day.is-on .a-day-wd{color:rgba(255,255,255,.75)}
+.a-meet .a-day-wd{color:var(--ink-2)}
+.a-hero-slots.opts{margin-top:12px}
+.a-hero-checks{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:24px}
+.a-hero-checks .check{color:var(--ink)}
+/* Иллюстрация в главной карточке на телефоне — небольшим кругом в правом верхнем углу, а не под текстом */
+@media (max-width:720px){
+ .dm .card-hero{position:relative}
+ .dm .card-hero .hero-art{display:grid;position:absolute;top:22px;right:20px;width:60px;height:60px;flex:none}
+ .dm .card-hero .hero-art .ic{width:28px;height:28px;stroke-width:1.6}
+ .dm .card-hero .hero-grid>.grow>.eyebrow,.dm .card-hero .hero-title,.dm .card-hero .hero-when{padding-right:68px}
+ .dm .card-hero .hero-when{font-size:36px}
+ .a-meet .a-days{margin-top:22px}
+ .a-hero-actions .btn{flex:1 1 100%}
+}
+.a-fmt.seg{margin-top:28px;background:rgba(255,255,255,.6)}
+.a-fmt-where{margin:10px 0 0;font-size:16px;color:var(--ink)}
+.a-meet .a-days{margin-top:16px}
+.a-hero-slots .opt{padding:14px 18px}
+.a-hero-slots .opt-time{font-size:28px}
+@media (max-width:720px){
+ .dm .card-hero .hero-art{top:18px;right:18px;width:46px;height:46px}
+ .dm .card-hero .hero-art .ic{width:22px;height:22px}
+ .dm .card-hero .hero-title,.dm .card-hero .hero-when{padding-right:0;margin-top:14px}
+ .dm .card-hero .hero-grid>.grow>.eyebrow{padding-right:56px;min-height:24px}
+ .dm .card-hero .hero-title{font-size:32px;line-height:1.1}
+}
+.a-record{margin-top:12px}

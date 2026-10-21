@@ -443,13 +443,14 @@ window.FORM = {
           options: ["Да", "Нет"] },
         { id: "volExpText", label: "Где и что делали?", type: "textarea", optional: true,
           showIf: { field: "volExp", value: "Да" } },
-        { id: "specialExp", label: "Общались ли вы с людьми с особенностями развития?", type: "select", required: true,
-          options: ["Да", "Нет, но готов(а) попробовать", "Хочу обсудить на встрече"] },
+        { id: "specialExp", label: "Вы работали с детьми с особенностями развития?", type: "select", required: true,
+          options: ["Да", "Нет"] },
         { id: "specialExpText", label: "Расскажите коротко об этом опыте", type: "textarea", optional: true,
           showIf: { field: "specialExp", value: "Да" } },
-        { id: "record", label: "Для работы с детьми нужна справка о несудимости. Готовы её получить?", type: "select", required: true,
-          options: ["Да", "Справка уже есть", "Хочу обсудить"],
-          why: "Заказать можно бесплатно на Госуслугах — это займёт минуту." },
+        /* Ссылку на Госуслуги в анкете не даём — человек уйдёт и не вернётся. Она появится в кабинете после отправки. */
+        { id: "record", label: "Для работы с детьми нужна справка о несудимости. Она у вас есть?", type: "select", required: true,
+          options: ["Справка уже есть", "Получу её"],
+          why: "Если нет — ссылку на Госуслуги дадим сразу после анкеты." },
         { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
           options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья", "Мероприятие фонда", "Другое"] },
         { id: "consentPD", label: "Я согласен(на) на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
@@ -649,7 +650,7 @@ window.ONBOARDING = {
 
   meeting: {
     title: "Встреча с координатором",
-    text: "Знакомство на 30 минут: расскажем о программах и вместе решим, с чего вам начать.",
+    text: "30 минут: расскажем о программах и решим, с чего начать.",
     coordinator: "Алевтина, координатор волонтёров",
     slots: [
       { day: "Чт, 23 октября", time: "18:30", where: "Онлайн, Яндекс Телемост" },
@@ -783,7 +784,7 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
 const freshProgress = () => ({ done: {}, testDone: false, score: null, road: false, tg: false });
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
-const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творчество', 'Помощь на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творчество', 'Помощь на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Получу её', consentPD: true, submittedAt: new Date().toISOString() };
 
 // Иконки по имени из контента (сборщик подставляет svg через ICONSWITCH)
 const ICON_KEYS = ['palette','book','users','user','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle','academy','pen','scissors','flame','globe','dice','film','image','file','chart','screen','database','send','inbox','settings','search','edit'];

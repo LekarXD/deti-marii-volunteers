@@ -83,7 +83,7 @@ for name,(title,role,height) in SCREENS.items():
         body = re.sub(r'ICONSWITCH\((\w+)\)', iconswitch, body)
         body = re.sub(r'<button(?![^>]*\btype=)', '<button type="button"', body)
         body, candidate_logic = enhance_controls(body, (SRC/f'{name}.js').read_text(), SRC)
-        for token,key in [('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('CHECK','check-circle'),('SPARKLE','sparkle'),('CLOCKICO','clock'),('BOOKICO','book'),('MESSAGEICO','message'),('DOWN','chevron-down'),('X','x')]:
+        for token,key in [('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('CHECK','check-circle'),('SPARKLE','sparkle'),('CLOCKICO','clock'),('BOOKICO','book'),('MESSAGEICO','message'),('SHIELDICO','shield'),('DOWN','chevron-down'),('X','x')]:
             body = body.replace('ICON_'+token, icons[key])
         logic = (SRC/'date-utils.js').read_text() + '\n' + (SRC/'demo-store.js').read_text() + '\n' + (CONTENT/'form.js').read_text() + '\n' + (CONTENT/'onboarding.js').read_text() + '\n' + (SRC/'candidate-store.js').read_text() + '\n' + (SRC/'interview-store.js').read_text() + '\n' + candidate_logic
         h = helmet.replace('</style>', css + '\n' + (SRC/'candidate.css').read_text() + '\n</style>')
