@@ -355,3 +355,6 @@ async def webinar_participants(id:UUID,db:AsyncSession=Depends(get_db),p:Princip
     grants=dict((await db.execute(select(StudioBoardGrant.user_id,StudioBoardGrant.can_draw).where(StudioBoardGrant.session_id==current.id))).all()) if current else {}
     rows=(await db.execute(select(WebinarEnrollment,User.display_name).join(User,User.id==WebinarEnrollment.user_id).where(WebinarEnrollment.webinar_id==id,WebinarEnrollment.foundation_id==p.foundation_id).order_by(User.display_name,User.id))).all()
     return [{'user_id':enrollment.user_id,'display_name':name,'enrollment_state':enrollment.state,'enrollment_version':enrollment.version,'can_draw':grants.get(enrollment.user_id,False)} for enrollment,name in rows]
+
+from .summary_router import router as summary_router
+router.include_router(summary_router)
