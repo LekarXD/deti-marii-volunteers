@@ -231,3 +231,31 @@ async def respond_request(db, principal, request_id, command, *, resolve=False):
     request.version += 1
     await db.flush()
     return await request_view(db, request)
+
+
+async def claim_registration(db, registration_id, user_id):
+    """Called only inside P01's successful contact verification transaction.
+
+    A verified user keeps stable application UUID/history. An existing application
+    is never silently replaced by a new registration's answers.
+    """
+    from app.core.models import RegistrationSession, User
+    registration = await db.get(RegistrationSession, registration_id)
+    user = await db.get(User, user_id)
+    if not registration or not user or registration.foundation_id != user.foundation_id:
+        raise ApiError(409, "registration_scope_conflict", "Не удалось перенести анкету в аккаунт")
+    for owner in sorted((str(registration_id), str(user_id))):
+        key = f"application:{registration.foundation_id}:{owner}"
+        await db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"), {"key": key})
+    for model in (Application, ApplicationDraft):
+        source = (await db.execute(select(model).where(model.foundation_id == registration.foundation_id,
+            model.registration_id == registration_id).with_for_update())).scalar_one_or_none()
+        if not source:
+            continue
+        target = (await db.execute(select(model).where(model.foundation_id == registration.foundation_id,
+            model.user_id == user_id).with_for_update())).scalar_one_or_none()
+        if target:
+            raise ApiError(409, "registration_application_conflict", "В аккаунте уже есть анкета. Новый черновик сохранён; обратитесь к координатору")
+        source.user_id = user_id
+        source.registration_id = None
+    await db.flush()

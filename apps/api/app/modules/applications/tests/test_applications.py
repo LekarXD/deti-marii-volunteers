@@ -126,3 +126,25 @@ async def test_concurrent_submissions_and_missing_consent(env):
 
     finally:
         await candidate.aclose()
+
+@pytest.mark.asyncio
+async def test_verified_registration_claim_preserves_identity_and_rejects_overwrite(env):
+    from app.modules.applications.service import claim_registration
+    from app.core.models import RegistrationSession
+    app,factory=env
+    candidate=await actor(app)
+    try:
+        submitted=(await post(candidate,'/applications/submit',body())).json()
+        async with factory() as db:
+            application=await db.get(Application,submitted['id'])
+            original_id=application.id;registration_id=application.registration_id
+            user=User(foundation_id=get_settings().foundation_id,display_name='Анна');db.add(user);await db.flush()
+            await claim_registration(db,registration_id,user.id);await db.commit()
+            await db.refresh(application)
+            assert application.id==original_id and application.user_id==user.id and application.registration_id is None
+            another_registration=RegistrationSession(foundation_id=user.foundation_id,expires_at=utcnow()+timedelta(days=1));db.add(another_registration);await db.flush()
+            other_application=Application(foundation_id=user.foundation_id,registration_id=another_registration.id);db.add(other_application);await db.flush()
+            with pytest.raises(ApiError) as error:await claim_registration(db,another_registration.id,user.id)
+            assert error.value.code=='registration_application_conflict'
+            await db.rollback()
+    finally:await candidate.aclose()
