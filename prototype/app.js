@@ -290,7 +290,7 @@
       { t: "Знакомство с фондом", s: `${n} из ${total} шагов`, done: n === total },
       { t: "Тест", s: S.test.best == null ? "не пройден" : `${S.test.best} из ${ONB.test.questions.length}${testPassed() ? " — пройден" : ""}`, done: testPassed() },
       { t: "Встреча с координатором", s: S.meeting ? `${S.meeting.day}, ${S.meeting.time}` : "после теста", done: !!S.meeting },
-      { t: "Первая смена", s: "подберём на встрече", done: false }
+      { t: "Первое занятие", s: "подберём на встрече", done: false }
     ];
   }
 
@@ -332,7 +332,7 @@
         <section class="card stack" style="gap:10px">
           <div class="row" style="justify-content:space-between"><h3>Ваш профиль</h3><a href="#/profile" class="btn sec small">Открыть</a></div>
           <p class="muted">${esc(arr(S.me.roles).join(" · ") || "Роли не выбраны")}</p>
-          <p class="muted" style="font-size:.85rem">После встречи с координатором здесь появятся занятия и смены, подобранные под ваши навыки и время.</p>
+          <p class="muted" style="font-size:.85rem">После встречи с координатором здесь появятся занятия и мероприятия, подобранные под ваши навыки и время.</p>
         </section>
       </div></main>`;
   }
@@ -352,8 +352,25 @@
       case "phrases": return `<div class="stack" style="gap:8px"><h3>Как говорить</h3><div class="phrase-head"><span>Лучше так</span><span>Не так</span></div><div class="phrases">${b.items.map(([s, a, w]) => `<div><span class="say">${esc(s)}</span><span class="avoid">${esc(a)}</span><span class="why">${esc(w)}</span></div>`).join("")}</div></div>`;
       case "situations": return `<div class="stack" style="gap:8px"><h3>Если случилось…</h3>${b.items.map(s => `<details class="sit"><summary>${esc(s.title)}</summary><div class="body"><div class="do"><b>Что делать</b><ul>${s.do.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div><div class="dont"><b>Чего не делать</b><ul>${s.dont.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div></div></details>`).join("")}</div>`;
       case "callout": return `<div class="callout ${b.tone === "warn" ? "warn" : ""}">${esc(b.text)}</div>`;
+      case "pillars": return `<div class="pillars">${b.items.map(x => `<div class="pillar"><h3>${esc(x.title)}</h3><p class="muted">${esc(x.text)}</p><p class="eyebrow">На занятии это значит</p><ul>${x.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul><p class="from">Из кодекса: ${esc(x.from)}</p></div>`).join("")}</div>`;
+      case "check": return `<div class="stack" style="gap:8px"><h3>${esc(b.title)}</h3>${b.intro ? `<p class="muted">${esc(b.intro)}</p>` : ""}${b.items.map(x => `<details class="sit check"><summary>${esc(x.q)}</summary><div class="ans"><p>${esc(x.a)}</p><p class="from">${esc(x.p)}</p></div></details>`).join("")}</div>`;
+      case "more": return `<details class="more-block"><summary>${esc(b.title)}</summary><div class="blocks">${b.blocks.map(blockHtml).join("")}</div></details>`;
+      case "video": return videoHtml(b);
       default: return "";
     }
+  }
+
+  function videoHtml(b) {
+    const head = `<div class="vmeta"><b>${esc(b.title)}</b>${b.duration ? `<span class="muted">${esc(b.duration)}</span>` : ""}</div>`;
+    if (!b.src) return `<figure class="video"><div class="vbox empty"><span class="play">▶</span><span>Видео появится здесь</span></div>${head}${b.note ? `<figcaption class="draft-note">${esc(b.note)}</figcaption>` : ""}</figure>`;
+    let src = b.src, m;
+    if ((m = src.match(/(?:youtu\.be\/|v=)([\w-]{11})/))) src = `https://www.youtube.com/embed/${m[1]}`;
+    else if ((m = src.match(/rutube\.ru\/video\/([\w]+)/))) src = `https://rutube.ru/play/embed/${m[1]}`;
+    else if ((m = src.match(/vk(?:video)?\.(?:com|ru)\/video(-?\d+)_(\d+)/))) src = `https://vk.com/video_ext.php?oid=${m[1]}&id=${m[2]}&hd=2`;
+    const player = /\.(mp4|webm)(\?|$)/i.test(src)
+      ? `<video class="vbox" src="${esc(src)}" controls preload="metadata"></video>`
+      : `<iframe class="vbox" src="${esc(src)}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="${esc(b.title)}"></iframe>`;
+    return `<figure class="video">${player}${head}</figure>`;
   }
 
   function viewLearn(id) {
@@ -493,7 +510,7 @@
       if (/^Постоянно/.test(c.participation || "")) out.push('<span class="badge ok">постоянно</span>');
       if (/^Разово/.test(c.participation || "")) out.push('<span class="badge">разово</span>');
       if (age(c.birthdate) != null && age(c.birthdate) < 18) out.push('<span class="badge draft">16–17 лет</span>');
-      if (arr(c.comfort).length) out.push('<span class="badge wait">доступность</span>');
+      if (arr(c.comfort).length) out.push('<span class="badge wait">помощь с дорогой</span>');
       if (c.record === "Хочу сначала обсудить") out.push('<span class="badge draft">справка?</span>');
       return out.join("");
     };

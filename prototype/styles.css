@@ -230,3 +230,21 @@ dl.answers dd{margin:0}
 .rhead span:first-child{display:grid;gap:2px}
 .rhead small{color:var(--muted);font-size:.8rem}
 .rgroup .chips{padding:0 14px 14px}
+
+/* кодекс: опоры, ситуации, полный текст; видео */
+.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.pillar{background:var(--paper);border:1px solid var(--line);border-top:4px solid var(--heart);border-radius:14px;padding:16px;display:grid;gap:8px;align-content:start}
+.pillar:nth-child(2){border-top-color:var(--glass)}.pillar:nth-child(3){border-top-color:var(--felt)}.pillar:nth-child(4){border-top-color:var(--clay)}
+.pillar ul{margin:0;padding-left:1.1em;display:grid;gap:4px}
+.from{font-size:.78rem;color:var(--muted)}
+details.check .ans{padding:0 16px 16px;display:grid;gap:6px}
+details.check summary::after{content:"Ответ";font-family:var(--f-body);font-size:.8rem;font-weight:600}
+details.check[open] summary::after{content:"Скрыть"}
+details.more-block{border:1px dashed var(--line);border-radius:14px;padding:0 16px}
+details.more-block summary{cursor:pointer;padding:14px 0;font-weight:600;color:var(--muted)}
+details.more-block[open]{padding-bottom:16px}
+.video{margin:0;display:grid;gap:8px}
+.vbox{width:100%;aspect-ratio:16/9;border:0;border-radius:14px;background:#000}
+.vbox.empty{background:var(--line);display:grid;place-items:center;align-content:center;gap:8px;color:var(--muted);font-size:.9rem}
+.vbox.empty .play{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--paper);color:var(--heart);font-size:1.3rem}
+.vmeta{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
