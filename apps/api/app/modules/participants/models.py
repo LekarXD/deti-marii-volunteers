@@ -12,6 +12,7 @@ class Participant(Base):
     __tablename__ = "participants"
     __table_args__ = (
         UniqueConstraint("foundation_id", "id", name="uq_participants_scope_id"),
+        ForeignKeyConstraint(["photo_asset_id", "foundation_id"], ["media_assets.id", "media_assets.foundation_id"], name="fk_participant_photo_scope"),
         CheckConstraint("lifecycle IN ('active', 'archived')", name="ck_participants_lifecycle"),
         CheckConstraint("birth_year IS NULL OR birth_year BETWEEN 1900 AND 2200", name="ck_participants_birth_year"),
         Index("ix_participants_scope_lifecycle_name", "foundation_id", "lifecycle", "display_name", "id"),
@@ -22,7 +23,7 @@ class Participant(Base):
     birth_year: Mapped[int | None]
     lifecycle: Mapped[str] = mapped_column(String(20), default="active")
     about: Mapped[str] = mapped_column(Text, default="")
-    photo_asset_id: Mapped[UUID | None] = mapped_column(ForeignKey("media_assets.id"))
+    photo_asset_id: Mapped[UUID | None]
     version: Mapped[int] = mapped_column(BigInteger, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -55,6 +56,8 @@ class ParticipantGroup(Base):
     __tablename__ = "participant_groups"
     __table_args__ = (
         UniqueConstraint("foundation_id", "id", name="uq_participant_groups_scope_id"),
+        ForeignKeyConstraint(["leader_id", "foundation_id"], ["users.id", "users.foundation_id"], name="fk_group_leader_scope"),
+        ForeignKeyConstraint(["coordinator_id", "foundation_id"], ["users.id", "users.foundation_id"], name="fk_group_coordinator_scope"),
         CheckConstraint("lifecycle IN ('active', 'archived')", name="ck_participant_groups_lifecycle"),
         Index("ix_participant_groups_scope_lifecycle_title", "foundation_id", "lifecycle", "title", "id"),
     )
@@ -63,8 +66,8 @@ class ParticipantGroup(Base):
     title: Mapped[str] = mapped_column(String(200))
     schedule: Mapped[str] = mapped_column(Text, default="")
     location: Mapped[str] = mapped_column(Text, default="")
-    leader_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
-    coordinator_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
+    leader_id: Mapped[UUID | None]
+    coordinator_id: Mapped[UUID | None]
     lifecycle: Mapped[str] = mapped_column(String(20), default="active")
     version: Mapped[int] = mapped_column(BigInteger, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
