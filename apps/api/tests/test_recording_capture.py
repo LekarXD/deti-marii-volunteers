@@ -178,3 +178,58 @@ async def test_failure_cleanup_removes_only_fenced_exact_private_identity(app,mo
             with pytest.raises(LeaseLost):await remove_private_participants(db,Stale(),row)
             assert len(removed)==1
             await db.rollback()
+
+@pytest.mark.asyncio
+async def test_completed_source_encoder_retry_is_bounded_and_never_recaptures(app,monkeypatch,tmp_path):
+    from app.modules.recordings import jobs
+    from app.modules.recordings.checkpoint import CompletedCapture
+    from app.modules.recordings.capture import MediaValidationError
+    from types import SimpleNamespace
+    monkeypatch.setattr(CaptureSettings,'configured',classmethod(lambda cls,**kwargs:object()))
+    monkeypatch.setattr('app.modules.recordings.checkpoint.get_settings',lambda:SimpleNamespace(asset_root=str(tmp_path)))
+    calls=[]
+    async def timeout(*arguments):calls.append(True);raise MediaValidationError('media_command_timeout')
+    monkeypatch.setattr(jobs,'encode_and_validate',timeout)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as client:
+        me,headers,post,take=await prepared(client)
+        async with SessionLocal() as db:
+            row=await db.get(RecordingTake,UUID(take['id']));owner=await db.get(RecordingProject,row.project_id)
+            owner.privacy_state='approved';row.projection={**row.projection,'capture_plan':{**row.projection['capture_plan'],'privacy_state':'approved','allowed_tracks':[{'identity':identity(UUID(me['user_id'])),'track_id':'TR_encoder_fixture','source':'microphone','kind':'audio','required':True}]}}
+            await db.commit()
+        started=await post(f"/recording-takes/{take['id']}/start",{'expected_version':1});assert started.status_code==200
+        async with SessionLocal() as db:
+            row=await db.get(RecordingTake,UUID(take['id']));owner=await db.get(RecordingProject,row.project_id)
+            row.state='stopping';row.started_at=utcnow();row.capture_phase='encoding';row.capture_checkpoint={'phase':'encoding','start':{'fixture':'completed-source'}}
+            job=await db.get(Job,row.capture_job_id);job.kind='capture.encoder.'+uuid4().hex;await db.commit()
+            for attempt in range(1,4):
+                job=await claim(db,kinds=[job.kind]);await db.commit();context=JobContext(job.id,job.claim_token,job.foundation_id,job.payload)
+                if attempt==1:
+                    with CompletedCapture(owner,row,context) as checkpoint:
+                        checkpoint.source.write_bytes(b'Synthetic completed source, encoder not invoked on real media in this unit fixture')
+                        checkpoint.commit(row,row.capture_checkpoint['start'],{'duration_ms':1000,'size':checkpoint.source.stat().st_size,'sha256':checkpoint.digest(checkpoint.source)})
+                if attempt<3:
+                    with pytest.raises(jobs.CompletedSourceRetry):await capture_take(db,context)
+                    await db.rollback();row=await db.get(RecordingTake,row.id,populate_existing=True)
+                    assert row.state=='stopping' and row.capture_phase=='encoding_retry'
+                    job=await db.get(Job,context.job_id);job.lease_until=utcnow()-timedelta(seconds=1);await db.commit()
+                else:
+                    result=await capture_take(db,context);await db.commit()
+                    assert result=={'state':'failed','error_code':'media_command_timeout'}
+                    assert not await db.scalar(select(RecordingRenderVersion.id).where(RecordingRenderVersion.take_id==row.id))
+            assert len(calls)==3 and checkpoint.source.exists()
+
+@pytest.mark.asyncio
+async def test_committed_capture_receipt_recovery_does_not_require_live_authority(app,monkeypatch):
+    from app.core.models import Session
+    from app.modules.recordings.models import StudioCaptureSession
+    monkeypatch.setattr(CaptureSettings,'configured',classmethod(lambda cls,**kwargs:object()))
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as client:
+        me,headers,post,take=await prepared(client)
+        async with SessionLocal() as db:
+            row=await db.get(RecordingTake,UUID(take['id']));row.state='captured'
+            from app.worker.queue import enqueue_job
+            job=enqueue_job(db,UUID(me['foundation_id']),'capture.receipt.'+uuid4().hex,{'take_id':str(row.id),'generation':row.generation});await db.flush();row.capture_job_id=job.id
+            capture=await db.get(StudioCaptureSession,row.capture_session_id);login=await db.get(Session,capture.host_auth_session_id);login.revoked_at=utcnow();await db.commit()
+            job=await claim(db,kinds=[job.kind]);await db.commit()
+            assert await capture_take(db,JobContext(job.id,job.claim_token,job.foundation_id,job.payload))=={'state':'captured'}
+            await db.rollback()

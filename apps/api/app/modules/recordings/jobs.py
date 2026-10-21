@@ -4,7 +4,6 @@ import hashlib
 import json
 import os
 import signal
-import tempfile
 from datetime import datetime,timedelta,timezone
 from pathlib import Path
 from uuid import UUID,uuid4
@@ -12,14 +11,16 @@ from sqlalchemy import select,update
 from app.core.auth import resolve_principal,authz_guard
 from app.core.clock import utcnow
 from app.core.errors import ApiError
-from app.core.models import Session,MediaAsset
+from app.core.models import Session,MediaAsset,Job
 from app.modules.assets.service import asset_path
 from app.modules.studio.models import StudioSession
 from app.worker.registry import register_handler
 from . import service
-from .capture import CaptureSettings,encode_and_validate,verify_provider_scope,MAX_CAPTURE_SECONDS
+from .capture import CaptureSettings,encode_and_validate,verify_provider_scope,MAX_CAPTURE_SECONDS,MediaValidationError
 from .models import RecordingTake,RecordingProject,StudioCaptureSession,RecordingRendererGrant,RecordingStageEvent,RecordingSourceFile,RecordingRenderVersion
 from .renderer import issue_renderer_ticket
+
+class CompletedSourceRetry(RuntimeError):pass
 
 class CaptureFailure(Exception):
     def __init__(self,code):self.code=code
@@ -69,17 +70,38 @@ async def capture_take(db,context):
     settings=CaptureSettings.configured(require_executables=True);process=None;row=None
     try:
         if settings is None:raise CaptureFailure('capture_unavailable')
+        # Domain success may have committed just before queue receipt/cleanup crashed.
+        # Finish that receipt without reopening media or requiring a still-live room.
+        await context.fence(db)
+        terminal=await db.get(RecordingTake,UUID(context.payload['take_id']),populate_existing=True)
+        if terminal and terminal.capture_job_id==context.job_id and terminal.generation==context.payload['generation'] and terminal.state in ('captured','failed','discarded'):
+            terminal_owner=await db.get(RecordingProject,terminal.project_id)
+            if terminal_owner.foundation_id!=context.foundation_id:raise CaptureFailure('capture_superseded')
+            if terminal.state=='captured':
+                from .checkpoint import CompletedCapture
+                with CompletedCapture(terminal_owner,terminal,context) as checkpoint:checkpoint.purge()
+            return {'state':terminal.state}
         row,owner=await checked_take(db,context)
         if row.state in ('captured','failed','discarded'):return {'state':row.state}
-        # No in-memory browser survives a worker restart. Existing intent/checkpoint is an
-        # unknown capture outcome; create a retake instead of silently replacing sources.
-        if row.capture_checkpoint:raise CaptureFailure('capture_interrupted')
+        # Completed immutable source is reusable; active capture is never re-recorded.
+        if row.capture_checkpoint:
+            from .checkpoint import CompletedCapture,run_io
+            with CompletedCapture(owner,row,context) as checkpoint:
+                saved=await run_io(checkpoint.completed,row)
+                if not saved:raise CaptureFailure('capture_interrupted')
+                await db.execute(update(RecordingRendererGrant).where(RecordingRendererGrant.take_id==row.id,RecordingRendererGrant.revoked_at.is_(None)).values(revoked_at=utcnow()))
+                await remove_private_participants(db,context,row)
+                await db.commit()
+                result=await finish_completed_source(db,context,settings,checkpoint.source,checkpoint.output,saved['start'],saved['final'])
+                await context.fence(db);await db.commit();checkpoint.purge()
+                return result
         if row.state!='starting':raise CaptureFailure('capture_stopped_before_start')
         ticket=await issue_renderer_ticket(db,row,context=context)
         row.capture_phase='launching';row.capture_checkpoint={'schema_version':1,'job_id':str(context.job_id),'generation':row.generation,'phase':'launching'}
         await db.commit()
-        with tempfile.TemporaryDirectory(prefix='opora-capture-') as directory:
-            os.chmod(directory,0o700);source=Path(directory)/'capture.webm';output=Path(directory)/'output.mp4'
+        from .checkpoint import CompletedCapture,run_io
+        with CompletedCapture(owner,row,context) as checkpoint:
+            source=checkpoint.source;output=checkpoint.output
             script=Path(__file__).with_name('capture_runner.cjs')
             environment={'PATH':os.environ.get('PATH','/usr/bin:/bin'),'LANG':'C.UTF-8'}
             process=await asyncio.create_subprocess_exec(settings.node,str(script),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,env=environment,start_new_session=True,limit=16384)
@@ -133,6 +155,7 @@ async def capture_take(db,context):
             if final.get('event')!='finalized' or process.returncode not in (None,0) or source.stat().st_size!=final.get('size') or await asyncio.to_thread(hash_path,source)!=final.get('sha256'):raise CaptureFailure('capture_source_invalid')
             row,owner=await checked_take(db,context)
             if not service.capture_ready(row):raise CaptureFailure('capture_readiness_lost')
+            await run_io(checkpoint.commit,row,started,final)
             row.stopped_at=row.started_at+timedelta(milliseconds=final['duration_ms']);row.capture_phase='closing_browser'
             row.capture_checkpoint={**row.capture_checkpoint,'phase':'closing_browser','source_sha256':final['sha256'],'duration_ms':final['duration_ms']}
             # Revoke only after final frame; closing the browser correctly withdraws its
@@ -145,37 +168,24 @@ async def capture_take(db,context):
                 if closed.get('event')!='closed' or closed.get('browser_process_exited') is not True:raise CaptureFailure('capture_browser_close_timeout')
                 await asyncio.wait_for(process.wait(),5)
             except TimeoutError:raise CaptureFailure('capture_browser_close_timeout') from None
-            row,owner=await checked_take(db,context);row.capture_phase='encoding';row.capture_checkpoint={**row.capture_checkpoint,'phase':'encoding'};await db.commit()
-            profile=await encode_and_validate(settings,source,output,final['duration_ms'])
-            row,owner=await checked_take(db,context)
-            events=(await db.scalars(select(RecordingStageEvent).where(RecordingStageEvent.take_id==row.id).order_by(RecordingStageEvent.sequence))).all()
-            if not events or any(event.sequence!=index+1 or service.stable_hash(event.projection)!=event.projection_hash for index,event in enumerate(events)) or events[-1].projection_hash!=row.projection_hash:raise CaptureFailure('capture_journal_invalid')
-            journal=[]
-            for event in events:
-                if event.created_at<=row.started_at:clock=0
-                elif event.media_time_ms is not None:clock=event.media_time_ms
-                else:raise CaptureFailure('capture_journal_frame_unconfirmed')
-                if clock>final['duration_ms']+1000:raise CaptureFailure('capture_journal_clock_invalid')
-                event.media_time_ms=min(clock,final['duration_ms']);journal.append({'sequence':event.sequence,'renderer_state_version':event.renderer_state_version,'projection_hash':event.projection_hash,'media_time_ms':event.media_time_ms})
-            content_hash=await asyncio.to_thread(hash_path,output);size=output.stat().st_size
-            if size>500*1024*1024:raise CaptureFailure('capture_output_quota')
-            manifest={'schema_version':1,'take_id':str(row.id),'generation':row.generation,'render_profile_version':'opora-stage/1','kind':'validated_browser_composite','raw_fallback':'forbidden','source_sha256':final['sha256'],'output_sha256':content_hash,'media':profile,'start':started,'stop':final,'stage_events':journal,'journal_hash':service.stable_hash(journal)}
-            render=RecordingRenderVersion(id=uuid4(),project_id=owner.id,take_id=row.id,generation=row.generation,state='preview_ready',job_id=context.job_id,manifest=manifest,render_hash=service.stable_hash(manifest),content_hash=content_hash,duration_ms=profile['duration_ms'],quality='verified')
-            await context.fence(db)
-            db.add(render);await db.flush()
-            capture=await db.get(StudioCaptureSession,row.capture_session_id)
-            host=await db.get(Session,capture.host_auth_session_id)
-            principal=await resolve_principal(db,host)
-            from app.modules.assets.registry import create_generated_asset_from_file
-            asset=await create_generated_asset_from_file(db,principal,content_type='video/mp4',source_path=output,expected_checksum=content_hash,purpose='recording.output',resource_type='recording_render',resource_id=render.id)
-            render.asset_id=asset.id
-            db.add(RecordingSourceFile(take_id=row.id,asset_id=asset.id,kind='validated_composite',content_hash=content_hash,manifest=manifest,duration_ms=profile['duration_ms'],retained_until=utcnow()+timedelta(days=30)))
-            row.state='captured';row.capture_phase='complete';row.version+=1;row.error_code=None;row.readiness_state='blocked';row.capture_checkpoint={'schema_version':1,'phase':'complete','render_id':str(render.id),'content_hash':content_hash,'stop_reason':row.capture_checkpoint.get('stop_reason','owner_requested')}
-            await db.flush();return {'state':'captured','render_id':str(render.id)}
+            result=await finish_completed_source(db,context,settings,source,output,started,final)
+            await context.fence(db);await db.commit();checkpoint.purge()
+            return result
     except (CaptureFailure,ValueError,TimeoutError,OSError,KeyError,TypeError) as exc:
         await db.rollback();await context.fence(db)
         row=await db.get(RecordingTake,UUID(context.payload['take_id']),populate_existing=True)
         code=getattr(exc,'code','capture_media_failed')
+        if row and isinstance(exc,MediaValidationError) and code in ('media_command_timeout','media_command_failed'):
+            job=await db.get(Job,context.job_id,populate_existing=True)
+            from .checkpoint import CompletedCapture,run_io
+            with CompletedCapture(await db.get(RecordingProject,row.project_id),row,context) as checkpoint:
+                reusable=await run_io(checkpoint.completed,row)
+            if reusable and job.attempts<job.max_attempts:
+                row.capture_phase='encoding_retry'
+                row.capture_checkpoint={**row.capture_checkpoint,'phase':'encoding_retry','last_encoder_error':code}
+                await db.commit()
+                # Queue owns bounded retry/backoff; never restart a browser here.
+                raise CompletedSourceRetry() from None
         if row and row.capture_job_id==context.job_id and row.generation==context.payload['generation'] and row.state not in ('captured','discarded'):
             row.state='failed';row.capture_phase='failed';row.error_code=code;row.version+=1;row.readiness_state='blocked'
             if getattr(exc,'diagnostics',None):row.capture_checkpoint={**(row.capture_checkpoint or {}),'media_validation':exc.diagnostics}
@@ -211,5 +221,35 @@ async def remove_private_participants(db,context,row):
         except (ProviderError,ApiError):
             row.capture_checkpoint={**(row.capture_checkpoint or {}),'renderer_cleanup_pending':True}
             break
+
+
+async def finish_completed_source(db,context,settings,source,output,started,final):
+    row,owner=await checked_take(db,context);row.capture_phase='encoding';row.capture_checkpoint={**row.capture_checkpoint,'phase':'encoding'};await db.commit()
+    profile=await encode_and_validate(settings,source,output,final['duration_ms'])
+    row,owner=await checked_take(db,context)
+    events=(await db.scalars(select(RecordingStageEvent).where(RecordingStageEvent.take_id==row.id).order_by(RecordingStageEvent.sequence))).all()
+    if not events or any(event.sequence!=index+1 or service.stable_hash(event.projection)!=event.projection_hash for index,event in enumerate(events)) or events[-1].projection_hash!=row.projection_hash:raise CaptureFailure('capture_journal_invalid')
+    journal=[]
+    for event in events:
+        if event.created_at<=row.started_at:clock=0
+        elif event.media_time_ms is not None:clock=event.media_time_ms
+        else:raise CaptureFailure('capture_journal_frame_unconfirmed')
+        if clock>final['duration_ms']+1000:raise CaptureFailure('capture_journal_clock_invalid')
+        event.media_time_ms=min(clock,final['duration_ms']);journal.append({'sequence':event.sequence,'renderer_state_version':event.renderer_state_version,'projection_hash':event.projection_hash,'media_time_ms':event.media_time_ms})
+    content_hash=await asyncio.to_thread(hash_path,output);size=output.stat().st_size
+    if size>500*1024*1024:raise CaptureFailure('capture_output_quota')
+    manifest={'schema_version':1,'take_id':str(row.id),'generation':row.generation,'render_profile_version':'opora-stage/1','kind':'validated_browser_composite','raw_fallback':'forbidden','source_sha256':final['sha256'],'output_sha256':content_hash,'media':profile,'start':started,'stop':final,'stage_events':journal,'journal_hash':service.stable_hash(journal)}
+    render=RecordingRenderVersion(id=uuid4(),project_id=owner.id,take_id=row.id,generation=row.generation,state='preview_ready',job_id=context.job_id,manifest=manifest,render_hash=service.stable_hash(manifest),content_hash=content_hash,duration_ms=profile['duration_ms'],quality='verified')
+    await context.fence(db)
+    db.add(render);await db.flush()
+    capture=await db.get(StudioCaptureSession,row.capture_session_id)
+    host=await db.get(Session,capture.host_auth_session_id)
+    principal=await resolve_principal(db,host)
+    from app.modules.assets.registry import create_generated_asset_from_file
+    asset=await create_generated_asset_from_file(db,principal,content_type='video/mp4',source_path=output,expected_checksum=content_hash,purpose='recording.output',resource_type='recording_render',resource_id=render.id)
+    render.asset_id=asset.id
+    db.add(RecordingSourceFile(take_id=row.id,asset_id=asset.id,kind='validated_composite',content_hash=content_hash,manifest=manifest,duration_ms=profile['duration_ms'],retained_until=utcnow()+timedelta(days=30)))
+    row.state='captured';row.capture_phase='complete';row.version+=1;row.error_code=None;row.readiness_state='blocked';row.capture_checkpoint={'schema_version':1,'phase':'complete','render_id':str(render.id),'content_hash':content_hash,'stop_reason':row.capture_checkpoint.get('stop_reason','owner_requested')}
+    await db.flush();return {'state':'captured','render_id':str(render.id)}
 
 register_handler('recording.capture',capture_take,lease_seconds=120,heartbeat_seconds=10,timeout_seconds=1600,workload='media')

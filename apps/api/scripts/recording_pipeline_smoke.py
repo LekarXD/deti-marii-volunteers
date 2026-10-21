@@ -13,9 +13,9 @@ os.environ['OPORA_CAPTURE_ENABLED']='true'
 if not os.environ.get('OPORA_CAPTURE_CHROME_PATH'):raise RuntimeError('Official Chrome path required')
 DIST=Path(os.environ['OPORA_RECORDING_SMOKE_DIST']).resolve()
 SCENARIO=os.getenv('OPORA_RECORDING_SMOKE_SCENARIO','success')
-if SCENARIO not in ('success','presentation','privacy-revoke','auth-revoke','unknown-participant','lease-restart','auto-stop','live-presentation','live-unknown','live-host-revoke','live-enrollment-revoke'):raise ValueError('Unknown smoke scenario')
+if SCENARIO not in ('success','presentation','privacy-revoke','auth-revoke','unknown-participant','lease-restart','auto-stop','live-presentation','live-unknown','live-host-revoke','live-enrollment-revoke','live-encode-restart'):raise ValueError('Unknown smoke scenario')
 LIVE=SCENARIO.startswith('live-')
-PRESENTATION=SCENARIO in ('presentation','live-presentation')
+PRESENTATION=SCENARIO in ('presentation','live-presentation','live-encode-restart')
 SMOKE_SECONDS=int(os.getenv('OPORA_RECORDING_SMOKE_SECONDS','6'))
 if not 3<=SMOKE_SECONDS<=120:raise ValueError('Smoke duration must be 3..120 seconds')
 def port():
@@ -126,6 +126,13 @@ async def main():
      print(json.dumps({'event':'existing_live_room_bound','same_studio_session':True,'enrolled_subscriber_tracks':0}),flush=True)
     tid=await post(f"/recording-takes/{tid['id']}/policy",{'expected_version':tid['version'],'expected_scene_revision':revision,'approved':True,'tracks':pub['tracks']})
     tid=await post(f"/recording-takes/{tid['id']}/start",{'expected_version':tid['version']});assert tid['state']=='starting'
+    if SCENARIO=='live-encode-restart':
+     import app.modules.recordings.jobs as recording_jobs
+     resume_encoder=recording_jobs.encode_and_validate
+     async def interrupted_after_finalized_source(*arguments,**options):
+      assert Path(arguments[1]).is_file() and Path(arguments[1]).with_name('completed.json').is_file()
+      raise asyncio.CancelledError()
+     recording_jobs.encode_and_validate=interrupted_after_finalized_source
     if SCENARIO=='auto-stop':
      import app.modules.recordings.jobs as recording_jobs
      recording_jobs.MAX_CAPTURE_SECONDS=5
@@ -178,7 +185,7 @@ async def main():
      await asyncio.sleep(max(0,began+SMOKE_SECONDS-asyncio.get_running_loop().time()))
      current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json();assert current['state']=='capturing',current
     if SCENARIO=='success' and SMOKE_SECONDS>6:await asyncio.sleep(max(0,began+SMOKE_SECONDS-asyncio.get_running_loop().time()))
-    if SCENARIO not in ('success','presentation','live-presentation','auto-stop'):
+    if SCENARIO not in ('success','presentation','live-presentation','live-encode-restart','auto-stop'):
      if SCENARIO=='lease-restart':
       from app.core.clock import utcnow
       from datetime import timedelta
@@ -218,7 +225,20 @@ async def main():
      return
     if SCENARIO!='auto-stop':
      current=await post(f"/recording-takes/{tid['id']}/stop",{'expected_version':current['version']});assert current['state']=='stopping'
-    await asyncio.wait_for(work,max(60,SMOKE_SECONDS*2))
+    if SCENARIO=='live-encode-restart':
+     try:await asyncio.wait_for(work,60)
+     except asyncio.CancelledError:pass
+     else:raise AssertionError('Synthetic encoding interruption was not reached')
+     from datetime import timedelta
+     from app.core.clock import utcnow
+     async with SessionLocal() as db:
+      row=await db.get(RecordingTake,UUID(tid['id']));assert row.state=='stopping' and row.capture_phase=='encoding'
+      job=await db.get(Job,UUID(tid['capture_job_id']));job.lease_until=utcnow()-timedelta(seconds=1);await db.commit()
+     recording_jobs.encode_and_validate=resume_encoder
+     await run_once([proof_kind])
+     assert len(capture_children)==1 and all(child.returncode is not None for child in capture_children)
+     print(json.dumps({'event':'completed_source_reused','new_browser_launched':False,'original_capture_children':len(capture_children)}),flush=True)
+    else:await asyncio.wait_for(work,max(60,SMOKE_SECONDS*2))
     current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json()
     if SCENARIO=='auto-stop':assert current['stop_reason']=='duration_limit',current
     if current['state']!='captured':raise RuntimeError('capture final '+json.dumps(current))
