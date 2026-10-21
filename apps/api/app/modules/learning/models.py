@@ -138,3 +138,31 @@ class AssessmentAnswer(Base):
     question_id: Mapped[UUID] = mapped_column(ForeignKey("assessment_questions.id"))
     selected_option: Mapped[int] = mapped_column(Integer)
     answered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class LessonDraft(Base):
+    __tablename__ = "lesson_drafts"
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    lesson_id: Mapped[UUID] = mapped_column(ForeignKey("lessons.id"), unique=True)
+    foundation_id: Mapped[UUID] = mapped_column(ForeignKey("foundations.id"), index=True)
+    title: Mapped[str] = mapped_column(String(300))
+    minutes: Mapped[int] = mapped_column(Integer, default=0)
+    source: Mapped[str] = mapped_column(String(3000), default="")
+    blocks: Mapped[list] = mapped_column(JSONB, default=list)
+    version: Mapped[int] = mapped_column(BigInteger, default=1)
+    status: Mapped[str] = mapped_column(String(20), default="draft")
+    reviewed_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class AssessmentDraft(Base):
+    __tablename__ = "assessment_drafts"
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    track_id: Mapped[UUID] = mapped_column(ForeignKey("learning_tracks.id"), unique=True)
+    foundation_id: Mapped[UUID] = mapped_column(ForeignKey("foundations.id"), index=True)
+    title: Mapped[str] = mapped_column(String(300))
+    intro: Mapped[str] = mapped_column(String(3000), default="")
+    questions: Mapped[list] = mapped_column(JSONB, default=list)
+    version: Mapped[int] = mapped_column(BigInteger, default=1)
+    status: Mapped[str] = mapped_column(String(20), default="draft")
+    reviewed_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)

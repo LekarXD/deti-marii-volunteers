@@ -164,3 +164,88 @@ async def test_verified_identity_claim_preserves_progress_and_rejects_collision(
             await claim_registration(db, duplicate.registration_id, user.id)
         assert rejected.value.code == 'learning_history_conflict'
         await db.rollback()
+
+
+@pytest.mark.asyncio
+async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
+    from app.core.models import PermissionGrant, StaffMembership, User
+    client, factory, foundation_id = setup
+    original = (await client.get('/api/v1/me/preparation')).json()['assignments'][0]
+    # Draft access never follows from being a learner or knowing an ID.
+    assert (await client.get('/api/v1/coord/learning/tracks')).status_code == 403
+    async with factory() as db:
+        registration_id = (await db.get(LearningAssignment, UUID(original['id']))).registration_id
+        user = User(foundation_id=foundation_id, display_name='Builder fixture')
+        db.add(user)
+        await db.flush()
+        membership = StaffMembership(foundation_id=foundation_id, user_id=user.id)
+        db.add(membership)
+        await db.flush()
+        for permission in ['learning.read','learning.write','learning.publish']:
+            db.add(PermissionGrant(membership_id=membership.id, permission=permission))
+        db.add(Session(foundation_id=foundation_id, user_id=user.id, token_hash=digest('staff'+str(foundation_id)), csrf_hash=digest('csrf'), csrf_cipher='fixture', expires_at=datetime.now(timezone.utc)+timedelta(days=1), mfa_at=datetime.now(timezone.utc)))
+        await db.commit()
+    client.cookies.set('opora_session','staff'+str(foundation_id))
+    track = (await post(client, '/coord/learning/tracks', {'key':'fixture-academy','title':'Fixture track'})).json()
+    lesson_response = await post(client, '/coord/learning/lessons', {'track_id':track['id'],'key':'module','title':'Fixture lesson'})
+    assert lesson_response.status_code == 200, lesson_response.text
+    lesson = lesson_response.json()
+    blocks = [{'type':'text','title':'Fixture heading','text':'Approved fixture content'}, {'type':'quiz','items':[{'q':'Fixture quiz?','o':['Yes','No'],'a':0,'e':'Fixture explanation'}]}]
+    body = {'expected_version':lesson['draft']['version'],'title':'Fixture lesson','minutes':3,'source':'Fixture evidence','blocks':blocks}
+    saved = await client.put(f"/api/v1/coord/learning/lessons/{lesson['id']}/draft", json=body, headers={'Idempotency-Key':str(uuid4())})
+    assert saved.status_code == 200, saved.text
+    lesson = saved.json()
+    conflict = await client.put(f"/api/v1/coord/learning/lessons/{lesson['id']}/draft", json=body, headers={'Idempotency-Key':str(uuid4())})
+    assert conflict.status_code == 409
+    validation = (await post(client, f"/coord/learning/lessons/{lesson['id']}/validate")).json()
+    assert validation['valid'] is True
+    preview = (await client.get(f"/api/v1/coord/learning/lessons/{lesson['id']}/preview")).json()
+    assert preview['blocks'][1]['items'] == [{'q':'Fixture quiz?','o':['Yes','No']}]
+    track = (await client.get(f"/api/v1/coord/learning/tracks/{track['id']}")).json()
+    publish = {'expected_version':track['version'],'lesson_ids':[lesson['id']],'lesson_draft_versions':{lesson['id']:lesson['draft']['version']},'lesson_publication_revisions':{lesson['id']:lesson['publication_revision']},'intro':'Fixture release'}
+    assert (await post(client, f"/coord/learning/tracks/{track['id']}/publish", publish)).status_code == 409
+    reviewed = await post(client, f"/coord/learning/lessons/{lesson['id']}/review", {'expected_version':lesson['draft']['version']})
+    assert reviewed.status_code == 200, reviewed.text
+    lesson = reviewed.json()
+    publish['lesson_draft_versions'][lesson['id']] = lesson['draft']['version']
+    published = await post(client, f"/coord/learning/tracks/{track['id']}/publish", publish, key='publish-fixture')
+    assert published.status_code == 200, published.text
+    track = published.json()
+    release_id = track['current_release_id']
+    replay = await post(client, f"/coord/learning/tracks/{track['id']}/publish", publish, key='publish-fixture')
+    assert replay.json()['current_release_id'] == release_id
+    old_version = track['lessons'][0]['current_version_id']
+    assigned = await post(client, '/coord/learning/assignments', {'release_id':release_id,'registration_id':str(registration_id)})
+    assert assigned.status_code == 200, assigned.text
+    client.cookies.set('opora_session','one'+str(foundation_id))
+    assert (await client.get(f"/api/v1/coord/learning/lessons/{lesson['id']}")).status_code == 403
+    detail = await client.get(f'/api/v1/learning/lessons/{old_version}')
+    assert detail.status_code == 200 and detail.json()['blocks'][0]['text']=='Approved fixture content'
+    assignment_id = assigned.json()['id']
+    await post(client, f'/learning/progress/{old_version}/complete', {'assignment_id':assignment_id})
+    await post(client, '/policy-acknowledgements', {'assignment_id':assignment_id})
+    prep = (await client.get('/api/v1/me/preparation')).json()
+    assert prep['introduction_completed'] is False # completed academy is not introduction
+    assert next(item for item in prep['assignments'] if item['id']==assignment_id)['completed'] is True
+    client.cookies.set('opora_session','staff'+str(foundation_id))
+    lesson = (await client.get(f"/api/v1/coord/learning/lessons/{lesson['id']}")).json()
+    body['expected_version']=lesson['draft']['version']
+    body['blocks'][0]['text']='Second version; first snapshot must survive'
+    lesson = (await client.put(f"/api/v1/coord/learning/lessons/{lesson['id']}/draft", json=body, headers={'Idempotency-Key':str(uuid4())})).json()
+    lesson = (await post(client, f"/coord/learning/lessons/{lesson['id']}/review", {'expected_version':lesson['draft']['version']})).json()
+    publish.update(expected_version=track['version'], lesson_draft_versions={lesson['id']:lesson['draft']['version']},lesson_publication_revisions={lesson['id']:lesson['publication_revision']})
+    new = await post(client, f"/coord/learning/tracks/{track['id']}/publish", publish)
+    assert new.status_code == 200, new.text
+    new = new.json()
+    assert new['current_release_id'] != release_id and len(new['releases']) == 2
+    # Stale release publication revision cannot overwrite the new version.
+    assert (await post(client, f"/coord/learning/tracks/{track['id']}/publish", publish)).status_code == 409
+    client.cookies.set('opora_session','one'+str(foundation_id))
+    assert (await client.get(f'/api/v1/learning/lessons/{old_version}')).json()['blocks'][0]['text']=='Approved fixture content'
+    # New unassigned version is not publicly readable.
+    assert (await client.get(f"/api/v1/learning/lessons/{new['lessons'][0]['current_version_id']}")).status_code == 404
+    client.cookies.set('opora_session','staff'+str(foundation_id))
+    rolled = await post(client, f"/coord/learning/tracks/{track['id']}/rollback", {'expected_version':new['version'],'release_id':release_id})
+    assert rolled.status_code == 200 and rolled.json()['current_release_id']==release_id
+    archived = await post(client, f"/coord/learning/tracks/{track['id']}/archive", {'expected_version':rolled.json()['version']})
+    assert archived.status_code == 200 and archived.json()['archived'] is True

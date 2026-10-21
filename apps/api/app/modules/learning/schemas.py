@@ -60,6 +60,8 @@ class LessonSummary(BaseModel):
 
 class AssignmentView(BaseModel):
     id: UUID
+    track_id: UUID
+    track_key: str
     release_id: UUID
     release_number: int
     title: str
@@ -88,3 +90,72 @@ class LessonView(BaseModel):
 
 class ProgressInput(Command):
     assignment_id: UUID
+
+
+class TrackCreate(Command):
+    key: str = Field(min_length=1, max_length=100, pattern=r"^[a-z0-9_-]+$")
+    title: str = Field(min_length=1, max_length=300)
+
+
+class LessonCreate(TrackCreate):
+    track_id: UUID
+
+
+class DraftSave(Command):
+    expected_version: int = Field(ge=0)
+    title: str = Field(min_length=1, max_length=300)
+    minutes: int = Field(ge=0, le=600)
+    source: str = Field(default="", max_length=3000)
+    blocks: list[dict[str, Any]] = Field(max_length=100)
+
+
+class VersionCommand(Command):
+    expected_version: int = Field(ge=0)
+
+
+class AssessmentSave(Command):
+    expected_version: int = Field(ge=0)
+    title: str = Field(min_length=1, max_length=300)
+    intro: str = Field(default="", max_length=3000)
+    questions: list[dict[str, Any]] = Field(max_length=100)
+
+
+class ReleasePublish(VersionCommand):
+    lesson_draft_versions: dict[UUID, int]
+    lesson_publication_revisions: dict[UUID, int]
+    intro: str = Field(default="", max_length=3000)
+    lesson_ids: list[UUID] = Field(min_length=1, max_length=100)
+    reacknowledgement_required: bool = False
+    changed_required_items: list[str] = Field(default_factory=list, max_length=100)
+
+
+class ReleaseRollback(VersionCommand):
+    release_id: UUID
+
+
+class AssignmentCreate(Command):
+    release_id: UUID
+    user_id: UUID | None = None
+    registration_id: UUID | None = None
+
+
+class AuthorLessonView(BaseModel):
+    id: UUID
+    track_id: UUID
+    key: str
+    current_version_id: UUID | None
+    publication_revision: int
+    archived: bool
+    draft: dict[str, Any] | None
+
+
+class TrackView(BaseModel):
+    id: UUID
+    key: str
+    title: str
+    version: int
+    archived: bool
+    current_release_id: UUID | None
+    lessons: list[AuthorLessonView]
+    assessment: dict[str, Any] | None
+    releases: list[dict[str, Any]]

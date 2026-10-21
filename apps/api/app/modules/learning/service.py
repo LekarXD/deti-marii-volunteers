@@ -32,7 +32,7 @@ async def assignment(db: AsyncSession, principal: Principal, assignment_id: UUID
 async def ensure_introduction(db: AsyncSession, principal: Principal):
     track = await db.scalar(select(LearningTrack).where(LearningTrack.foundation_id == principal.foundation_id, LearningTrack.key == "introduction", LearningTrack.archived.is_(False)))
     if not track or not track.current_release_id:
-        raise ApiError(503, "learning_unavailable", "Материалы знакомства ещё не опубликованы", retryable=True)
+        return
     values = dict(id=uuid4(), foundation_id=principal.foundation_id, release_id=track.current_release_id, user_id=principal.user_id, registration_id=None if principal.user_id else principal.registration_id)
     owner_scope(principal)
     await db.execute(insert(LearningAssignment).values(**values).on_conflict_do_nothing())
@@ -42,8 +42,11 @@ async def preparation(db: AsyncSession, principal: Principal):
     await ensure_introduction(db, principal)
     assignments = list((await db.scalars(select(LearningAssignment).where(LearningAssignment.foundation_id == principal.foundation_id, owner_scope(principal)).order_by(LearningAssignment.assigned_at.desc(), LearningAssignment.id))).all())
     views = []
+    introduction_completed = False
     for item in assignments:
         release = await db.get(LearningRelease, item.release_id)
+        track = await db.get(LearningTrack, release.track_id)
+        introduction_completed = introduction_completed or (track.key == "introduction" and item.completed_at is not None)
         completed_versions = set((await db.scalars(select(LessonProgress.lesson_version_id).where(LessonProgress.assignment_id == item.id))).all())
         lessons = []
         for version_id in release.lesson_version_ids:
@@ -51,8 +54,8 @@ async def preparation(db: AsyncSession, principal: Principal):
             lesson = await db.get(Lesson, version.lesson_id)
             lessons.append(dict(id=version.id, lesson_id=lesson.id, key=lesson.key, title=version.title, minutes=version.minutes, completed=version.id in completed_versions))
         latest = await db.scalar(select(AssessmentAttempt).where(AssessmentAttempt.assignment_id == item.id).order_by(AssessmentAttempt.started_at.desc(), AssessmentAttempt.id.desc()).limit(1))
-        views.append(dict(id=item.id, release_id=release.id, release_number=release.number, title=release.title, intro=release.intro, lessons=lessons, assessment_version_id=release.assessment_version_id, completed=item.completed_at is not None, acknowledged=item.acknowledged_at is not None, latest_attempt_id=latest.id if latest else None, latest_attempt_state=("submitted" if latest.submitted_at else "active") if latest else None, reacknowledgement_required=release.reacknowledgement_required))
-    return dict(assignments=views, introduction_completed=any(item.completed_at is not None for item in assignments), booking_requires_introduction=False)
+        views.append(dict(id=item.id, track_id=track.id, track_key=track.key, release_id=release.id, release_number=release.number, title=release.title, intro=release.intro, lessons=lessons, assessment_version_id=release.assessment_version_id, completed=item.completed_at is not None, acknowledged=item.acknowledged_at is not None, latest_attempt_id=latest.id if latest else None, latest_attempt_state=("submitted" if latest.submitted_at else "active") if latest else None, reacknowledgement_required=release.reacknowledgement_required))
+    return dict(assignments=views, introduction_completed=introduction_completed, booking_requires_introduction=False)
 
 
 def learner_block(block: LessonBlock):
