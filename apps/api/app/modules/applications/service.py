@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import Principal
 from app.core.errors import ApiError
-from .form import FORM, validate_answers
+from .form import FORM, FORM_VERSION, FORM_VERSIONS, validate_answers
 from .models import (Application, ApplicationDraft, ApplicationRevision, FormVersion, ConsentEvent,
     ApplicationReviewEvent, ApplicationPrivateNote, CandidateRequest, CandidateRequestResponse, now)
 from .schemas import (ApplicationSelfView, CandidateView, DraftView, FormView, RevisionView,
@@ -25,12 +25,13 @@ async def owner_lock(db, principal):
     await db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"), {"key": key})
 
 
-async def current_form(db, foundation_id, *, create=False):
-    form_id = uuid5(NAMESPACE_URL, f"opora:{foundation_id}:application-form:4")
+async def current_form(db, foundation_id, *, create=False, version=FORM_VERSION):
+    content=FORM_VERSIONS[version]
+    form_id = uuid5(NAMESPACE_URL, f"opora:{foundation_id}:application-form:{version}")
     if create:
-        await db.execute(insert(FormVersion).values(id=form_id, foundation_id=foundation_id, version=4, content=FORM).on_conflict_do_nothing(index_elements=["foundation_id", "version"]))
-    stored = (await db.execute(select(FormVersion).where(FormVersion.foundation_id == foundation_id, FormVersion.version == 4))).scalar_one_or_none()
-    return stored or FormVersion(id=form_id, foundation_id=foundation_id, version=4, content=FORM)
+        await db.execute(insert(FormVersion).values(id=form_id, foundation_id=foundation_id, version=version, content=content).on_conflict_do_nothing(index_elements=["foundation_id", "version"]))
+    stored = (await db.execute(select(FormVersion).where(FormVersion.foundation_id == foundation_id, FormVersion.version == version))).scalar_one_or_none()
+    return stored or FormVersion(id=form_id, foundation_id=foundation_id, version=version, content=content)
 
 
 async def own_application(db: AsyncSession, principal: Principal, lock=False, required=True):
@@ -83,7 +84,12 @@ async def application_view(db, application, *, coordinator=False):
 
 async def get_draft(db, principal):
     draft = (await db.execute(select(ApplicationDraft).where(ApplicationDraft.foundation_id == principal.foundation_id, owner_condition(ApplicationDraft, principal)))).scalar_one_or_none()
-    form = await current_form(db, principal.foundation_id)
+    if draft:
+        form=await db.get(FormVersion,draft.form_version_id)
+    else:
+        application=await own_application(db,principal,required=False)
+        revision=await db.get(ApplicationRevision,application.submitted_revision_id) if application else None
+        form=await db.get(FormVersion,revision.form_version_id) if revision else await current_form(db,principal.foundation_id)
     return DraftView(id=draft.id if draft else None, version=draft.version if draft else 0, step=draft.step if draft else 0,
         answers=draft.answers if draft else {}, form=FormView(id=form.id, version=form.version, content=form.content))
 
@@ -95,7 +101,10 @@ async def save_draft(db, principal, command):
     # Drafts permit incomplete/malformed text to survive a reload. The submit schema validates strictly.
     if len(str(command.answers)) > 50000 or set(command.answers) - {f['id'] for step in FORM['steps'] for f in step['fields']}:
         raise ApiError(422, "validation_error", "Не удалось сохранить поля анкеты")
-    form = await current_form(db, principal.foundation_id, create=True)
+    if draft is None:
+        prior=await get_draft(db,principal)
+        form=await current_form(db,principal.foundation_id,create=True,version=prior.form.version)
+    else:form=await db.get(FormVersion,draft.form_version_id)
     if draft is None:
         draft = ApplicationDraft(foundation_id=principal.foundation_id, user_id=principal.user_id,
             registration_id=None if principal.user_id else principal.registration_id, form_version_id=form.id, version=0)
@@ -118,12 +127,17 @@ async def submit(db, principal, command, *, revision=False):
     check_version(application.version if application else 0, command.expected_version)
     if application and application.submission_state == "withdrawn":
         raise ApiError(409, "application_withdrawn", "Анкета отозвана. Свяжитесь с координатором")
-    answers = validate_answers(command.answers, complete=True)
+    draft=await db.scalar(select(ApplicationDraft).where(ApplicationDraft.foundation_id==principal.foundation_id,owner_condition(ApplicationDraft,principal)))
+    if draft:form=await db.get(FormVersion,draft.form_version_id)
+    elif application:
+        prior_revision=await db.get(ApplicationRevision,application.submitted_revision_id)
+        form=await db.get(FormVersion,prior_revision.form_version_id)
+    else:form=await current_form(db,principal.foundation_id,create=True)
+    answers = validate_answers(command.answers, complete=True,form=form.content)
     answers.pop("consentPD", None)
     answers.pop("consentNews", None)
     if not command.consents.personal_data:
         raise ApiError(422, "consent_required", "Для отправки анкеты нужно согласие на обработку персональных данных", field_errors={"consentPD": "Подтвердите согласие"})
-    form = await current_form(db, principal.foundation_id, create=True)
     if application is None:
         application = Application(foundation_id=principal.foundation_id, user_id=principal.user_id,
             registration_id=None if principal.user_id else principal.registration_id, version=0)

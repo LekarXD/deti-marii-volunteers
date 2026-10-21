@@ -1,11 +1,13 @@
-"""Version 4 source content and server validation, without an invented age gate."""
+"""Versioned source content and server validation, without an invented age gate."""
 import json
 import re
 from datetime import date, datetime
 from pathlib import Path
 from app.core.errors import ApiError
 
-FORM = json.loads(Path(__file__).with_name("form_v4.json").read_text())
+FORM_VERSION = 5
+FORM_VERSIONS = {version:json.loads(Path(__file__).with_name(f"form_v{version}.json").read_text()) for version in (4,5)}
+FORM = FORM_VERSIONS[FORM_VERSION]
 FIELDS = {field["id"]: field for step in FORM["steps"] for field in step["fields"]}
 
 
@@ -23,14 +25,15 @@ def labels(options):
     return [value["label"] if isinstance(value, dict) else value for value in options]
 
 
-def validate_answers(answers, *, complete=False):
+def validate_answers(answers, *, complete=False, form=None):
+    fields = {field["id"]:field for step in (form or FORM)["steps"] for field in step["fields"]}
     errors = {}
     clean = {}
     for key, value in answers.items():
-        if key not in FIELDS:
+        if key not in fields:
             errors[key] = "Неизвестное поле"
             continue
-        field = FIELDS[key]
+        field = fields[key]
         kind = field["type"]
         if kind in ("tiles", "chips"):
             if not isinstance(value, list) or len(value) > 80 or any(not isinstance(v, str) or len(v) > 200 for v in value):
@@ -47,7 +50,7 @@ def validate_answers(answers, *, complete=False):
                 continue
             value = value.strip()
         clean[key] = value
-    for key, field in FIELDS.items():
+    for key, field in fields.items():
         if not visible(field.get("showIf"), clean):
             clean.pop(key, None)
             continue

@@ -6,7 +6,7 @@ import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from app.core.db import Base, get_db
 from app.core.config import get_settings
@@ -21,7 +21,7 @@ from app.modules.applications.form import validate_answers
 
 VALID = dict(firstName="Анна",lastName="Тестовая",birthdate="2012-01-01",phone="+7 (999) 123-45-67",
     email="anna@example.test",area="Другой город",directions=["Творчество"],participation="Каждую неделю",volExp="Нет",
-    specialExp="Хочу обсудить на встрече",record="Хочу обсудить",source="Друзья")
+    specialExp="Нет",record="Хочу обсудить",source="Друзья")
 
 def body(answers=None, version=0):
     return dict(expected_version=version, answers=answers or VALID, consents=dict(personal_data=True,news=False,document_version="4"))
@@ -30,7 +30,7 @@ def test_no_invented_age_certificate_gate():
     assert validate_answers(VALID,complete=True)["birthdate"]=="2012-01-01"
     with pytest.raises(ApiError) as error:validate_answers({**VALID,"directions":["Творчество","Пока не знаю"]},complete=True)
     assert "directions" in error.value.field_errors
-    changed=validate_answers({**VALID,"directions":["Как специалист"],"skills":["Керамика","IT","Свой навык"]},complete=True)
+    changed=validate_answers({**VALID,"directions":["Юрист, IT, маркетинг"],"skills":["Керамика","IT","Свой навык"]},complete=True)
     assert changed["skills"]==["IT","Свой навык"]
 
 
@@ -39,9 +39,12 @@ async def env():
     url=os.environ.get("OPORA_CANDIDATES_TEST_DATABASE_URL","")
     if not url:pytest.skip("Set OPORA_CANDIDATES_TEST_DATABASE_URL to a disposable dedicated database")
     if not url.endswith("/opora_candidates_test"):raise RuntimeError("Dedicated candidate test DB required")
+    from app.core.model_loader import load_models
+    load_models()
     engine=create_async_engine(url)
     factory=async_sessionmaker(engine,expire_on_commit=False)
     async with engine.begin() as conn:
+        await conn.execute(text('CREATE EXTENSION IF NOT EXISTS btree_gist'))
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     async with factory() as db:
@@ -175,3 +178,30 @@ async def test_recipient_boundary_checks_scope_and_never_returns_contact_match(e
             with pytest.raises(ApiError) as error:await learning_recipient_options(db,principal)
             assert error.value.status_code==403
     finally:await candidate.aclose()
+
+@pytest.mark.asyncio
+async def test_new_source_form_is_versioned_and_old_draft_edits_keep_identity(env):
+    from app.core.models import Session
+    from app.core.crypto import digest
+    from app.modules.applications.models import ApplicationDraft
+    from app.modules.applications.service import current_form
+    from app.modules.applications.form import FORM_VERSIONS
+    app,factory=env;old=await actor(app);fresh=await actor(app)
+    legacy={**VALID,'directions':['Как специалист'],'skills':['IT'],'participation':'Иногда, когда получится','specialExp':'Хочу обсудить на встрече','record':'Да'}
+    try:
+        async with factory() as db:
+            session=await db.scalar(select(Session).where(Session.token_hash==digest(old.cookies.get('opora_session'))))
+            form=await current_form(db,session.foundation_id,create=True,version=4)
+            draft=ApplicationDraft(foundation_id=session.foundation_id,registration_id=session.registration_id,form_version_id=form.id,answers=legacy,version=1,step=2);db.add(draft);await db.commit()
+        pinned=(await old.get('/api/v1/registration/draft')).json();assert pinned['form']['version']==4 and pinned['answers']==legacy
+        new=(await fresh.get('/api/v1/registration/draft')).json();assert new['form']['version']==5
+        fields={field['id']:field for step in new['form']['content']['steps'] for field in step['fields']}
+        assert 'Юрист, IT, маркетинг' in [option['label'] for option in fields['directions']['options']]
+        assert fields['specialExp']['options']==['Да','Нет'] and 'желательно' in fields['record']['label']
+        submitted=await post(old,'/applications/submit',body(legacy));assert submitted.status_code==200,submitted.text
+        first=submitted.json();assert first['revision']['form_version_id']==str(form.id)
+        assert (await old.get('/api/v1/registration/draft')).json()['form']['version']==4
+        revised=await post(old,'/me/application/revisions',body({**legacy,'lastName':'Новая фамилия'},version=first['version']));assert revised.status_code==200,revised.text
+        assert revised.json()['id']==first['id'] and revised.json()['revision']['form_version_id']==str(form.id)
+        assert revised.json()['revision']['answers']['participation']=='Иногда, когда получится'
+    finally:await old.aclose();await fresh.aclose()

@@ -57,7 +57,7 @@ export function ApplyPage() {
   }
   return <div className="ap-page">
     {edit&&<Link className="ap-back" to="/application"><Icon name="chevron-left"/>Вернуться в личный кабинет</Link>}
-    <div className="head ap-heading"><div><h1 className="h1">{edit?'Моя анкета':form.title}</h1><p className="lead">{edit?'Измените ответы. Знакомство с фондом и запись на встречу сохранятся.':form.intro}</p></div></div>
+    <div className="head ap-heading"><div><h1 className="h1">{edit?'Моя анкета':form.title}</h1>{(edit||form.intro)&&<p className="lead">{edit?'Измените ответы. Знакомство с фондом и запись на встречу сохранятся.':form.intro}</p>}</div></div>
     <div className="ap-layout"><form className="ap-apply-main" noValidate onSubmit={event=>{event.preventDefault();void next();}}>
       <Card className="ap-form-card"><div className="ap-stephead"><p className="eyebrow">Шаг {step+1} из {form.steps.length}</p><h2 className="h2">{form.steps[step].title}</h2><div className="ap-progress" role="progressbar" aria-label={`Шаг ${step+1} из ${form.steps.length}`} aria-valuenow={step+1} aria-valuemax={form.steps.length}><span style={{width:`${100*(step+1)/form.steps.length}%`}}/></div></div>
       <fieldset disabled={submit.isPending} className="ap-fields">{fields.map(field=><FieldRenderer key={field.id} field={field} answers={answers} onChange={update} error={errors[field.id]}/>)}</fieldset>
