@@ -1,0 +1,18 @@
+{
+  "runtime_source_sha": "b82a350d21552670d1f752d4fbde3ff3634f08ff",
+  "proof": "recording_range_smoke.py",
+  "boundary": "Local prefixed ASGI application, existing generated synthetic MP4, normal HTTP login and MFA; not public Nginx",
+  "app_mount_prefix": "/deti-marii",
+  "asset_bytes": 306897,
+  "asset_sha256": "bd6620c8bbebdc3bc73930f936513a836d63ab6b5ad0d22ce9eb8df19f852995",
+  "checks": {
+    "begin": {"status": 206, "content_range": "bytes 0-1023/306897", "exact_bytes": true},
+    "tail": {"status": 206, "content_range": "bytes 306385-306896/306897", "exact_bytes": true},
+    "middle": {"status": 206, "content_range": "bytes 1000-1999/306897", "exact_bytes": true},
+    "out_of_bounds": {"status": 416, "content_range": "*/306897"},
+    "foreign_authenticated_user": 404,
+    "anonymous": 401,
+    "cache_control_contains_no_store": true
+  },
+  "unproven": ["Public gateway Range behavior", "Large slow-client proxy temporary-file capacity"]
+}
