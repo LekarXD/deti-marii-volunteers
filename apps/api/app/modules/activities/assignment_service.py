@@ -73,7 +73,7 @@ async def assignment_view(db,item,principal):
         if principal.user_id==item.user_id:actions.append('cancel')
         if staff(principal):
             actions+=['cancel']
-            if event.starts_at<=utcnow():actions.append('correct-attendance' if attendance else 'attendance')
+            if event.ends_at<=utcnow():actions.append('correct-attendance' if attendance else 'attendance')
     return AssignmentParticipationView(id=item.id,version=item.version,user_id=item.user_id,display_name=user.display_name,
         occurrence_id=item.occurrence_id,staffing_need_id=item.staffing_need_id,title=event.title,role_title=revision.snapshot['title'],
         starts_at=event.starts_at,ends_at=event.ends_at,timezone=event.timezone,location=event.location,status=item.status,approved_at=item.approved_at,
@@ -170,7 +170,7 @@ async def review_requirement(db,principal,id,body):
 async def record_attendance(db,principal,id,body,correction=False):
     item,event,need=await locked_assignment(db,principal,id);check_version(item,body.expected_version)
     if item.status!='confirmed' or event.status=='cancelled':raise ApiError(409,'attendance_not_available','Факт можно отметить только по подтверждённому участию.')
-    if event.starts_at>utcnow():raise ApiError(409,'attendance_in_future','Нельзя отмечать участие до начала занятия.')
+    if event.ends_at>utcnow():raise ApiError(409,'attendance_not_finished','Нельзя отмечать факт участия до окончания занятия.')
     attendance=await db.scalar(select(Attendance).where(Attendance.assignment_id==id).with_for_update())
     if attendance is not None and not correction:raise ApiError(409,'attendance_already_recorded','Факт уже отмечен. Используйте коррекцию.')
     if attendance is None and correction:raise ApiError(409,'attendance_not_recorded','Сначала отметьте факт участия.')

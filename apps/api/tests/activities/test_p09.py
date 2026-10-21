@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import func,select,update
 from app.core.clock import utcnow
 from app.core.crypto import digest
-from app.core.models import PermissionGrant,ResourceReservation,Session,User
+from app.core.models import AuditEvent,MutationReceipt,PermissionGrant,ResourceReservation,Session,User
 from app.modules.activities.assignment_models import Assignment,AssignmentEvent,Attendance,AttendanceEvent
 from app.modules.activities.calendar_models import EventOccurrence
 from app.modules.participants.models import GroupMembership,Participant,ParticipantGroup
@@ -165,3 +165,37 @@ async def test_response_review_withdraw_resubmit_and_owner_boundaries(context):
     assert other.status_code==404
     again=await context.client.post(f"/api/v1/responses/{response['id']}/resubmit",headers=user_headers(),json={'expected_version':3})
     assert again.status_code==200 and again.json()['state']=='submitted' and len(again.json()['history'])==4
+
+
+@pytest.mark.asyncio
+async def test_ongoing_activity_never_exposes_or_accepts_attendance(context):
+    event,need,user1,user2,_=await setup(context)
+    item=await invite_approve(context,need,user1)
+    confirmed=await context.client.post(f"/api/v1/assignments/{item['id']}/confirm",headers=user_headers(),json={'expected_version':item['version']})
+    item=confirmed.json()
+    async with context.db() as db:
+        event_row=await db.get(EventOccurrence,UUID(event['id']))
+        event_row.starts_at=utcnow()-timedelta(minutes=1)
+        event_row.ends_at=utcnow()+timedelta(hours=1)
+        await db.commit()
+    async with context.db() as db:
+        receipts_before=await db.scalar(select(func.count()).select_from(MutationReceipt))
+        audit_before=await db.scalar(select(func.count()).select_from(AuditEvent))
+    view=(await context.client.get(f"/api/v1/assignments/{item['id']}")).json()
+    assert 'attendance' not in view['allowed_actions'] and 'correct-attendance' not in view['allowed_actions']
+    denied=await context.client.post(f"/api/v1/coord/assignments/{item['id']}/attendance",headers=headers(),json={'expected_version':item['version'],'outcome':'attended','minutes':60,'reason':'Ещё идёт занятие.'})
+    assert denied.status_code==409 and denied.json()['code']=='attendance_not_finished'
+    async with context.db() as db:
+        assert await db.scalar(select(func.count()).select_from(Attendance))==0
+        assert await db.scalar(select(func.count()).select_from(AttendanceEvent))==0
+        assert await db.scalar(select(func.count()).select_from(MutationReceipt))==receipts_before
+        assert await db.scalar(select(func.count()).select_from(AuditEvent))==audit_before
+        assert (await db.get(Assignment,UUID(item['id']))).version==item['version']
+        event_row=await db.get(EventOccurrence,UUID(event['id']))
+        event_row.ends_at=utcnow()-timedelta(microseconds=1)
+        await db.commit()
+    allowed=await context.client.post(f"/api/v1/coord/assignments/{item['id']}/attendance",headers=headers(),json={'expected_version':item['version'],'outcome':'attended','minutes':1,'reason':'Занятие завершилось.'})
+    assert allowed.status_code==200,allowed.text
+    async with context.db() as db:
+        assert await db.scalar(select(func.count()).select_from(Attendance))==1
+        assert await db.scalar(select(func.count()).select_from(AttendanceEvent))==1
