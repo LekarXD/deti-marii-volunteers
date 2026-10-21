@@ -1,0 +1,125 @@
+// @vitest-environment jsdom
+import React from 'react';
+import {afterEach, beforeEach, describe, expect, it, vi, type MockInstance} from 'vitest';
+import {cleanup, render, screen, waitFor, within} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {MemoryRouter} from 'react-router-dom';
+import * as transport from '../../api/transport';
+import type {components} from '../../api/generated/schema';
+import type {AssignmentParticipation} from '../activities/participationApi';
+import type {Preparation, Assignment} from '../learning/api';
+import {HomePage} from './HomePage';
+import {assignmentWhen, learningDestination, upcomingAssignments} from './model';
+
+const now = Date.parse('2026-10-21T22:00:00Z');
+const assignment = (changes: Partial<AssignmentParticipation> = {}): AssignmentParticipation => ({
+  id:'first', user_id:'volunteer', display_name:'Тестовый волонтёр', occurrence_id:'event', staffing_need_id:'need',
+  title:'Мастерская', role_title:'Помощь на занятии', status:'confirmed', approved_at:null, confirmed_at:null,
+  starts_at:'2026-10-22T09:00:00Z', ends_at:'2026-10-22T11:00:00Z', timezone:'Europe/Moscow', location:'Мастерская фонда',
+  readiness:[], history:[], allowed_actions:[], conditions_version:1, version:1, ...changes,
+});
+const track: Assignment = {id:'learning', track_id:'track', track_key:'intro', release_id:'release', release_number:1,
+  title:'Подготовка к занятию', intro:'Полезные материалы', acknowledged:false, completed:false,
+  assessment_version_id:null, latest_attempt_id:null, latest_attempt_state:null, reacknowledgement_required:false,
+  lessons:[{id:'read',key:'read',lesson_id:'read-source',minutes:5,title:'Знакомство',completed:true},{id:'next',key:'next',lesson_id:'next-source',minutes:10,title:'На занятии',completed:false}]};
+const learning: Preparation = {assignments:[track], introduction_completed:false, booking_requires_introduction:false};
+const preparation: components['schemas']['AssignmentPreparationView'] = {
+  assignment_id:'first', assignment_version:1, title:'Мастерская', status:'confirmed', starts_at:'2026-10-22T09:00:00Z', ends_at:'2026-10-22T11:00:00Z',
+  timezone:'Europe/Moscow', location:'Вход со двора', role_title:'Помощник', tasks:'Помочь разложить материалы', group_briefing_available:true,
+  contacts:[{role:'Ведущий занятия',display_name:'Тестовый ведущий'}],
+  checklist:[{key:'read',title:'Прочитать памятку',checked:true},{key:'bring',title:'Взять сменную обувь',checked:false}],
+  checklist_version:1, questions:[], allowed_actions:[], version:1,
+};
+let rows: AssignmentParticipation[];
+let nextRows: AssignmentParticipation[] | undefined;
+let learningError: Error | undefined;
+let assignmentsError: Error | undefined;
+let nextPageError: Error | undefined;
+let apiSpy: MockInstance<typeof transport.api>;
+const clients: QueryClient[] = [];
+beforeEach(() => {
+  vi.spyOn(Date, 'now').mockReturnValue(now);
+  rows = []; nextRows = undefined; learningError = undefined; assignmentsError = undefined; nextPageError = undefined;
+  apiSpy = vi.spyOn(transport, 'api').mockImplementation(async <T,>(path: string): Promise<T> => {
+    if(path.startsWith('/me/assignments?')) {
+      if (assignmentsError) throw assignmentsError;
+      if (path.includes('cursor=next') && nextPageError) throw nextPageError;
+      return (path.includes('cursor=next') ? {items:nextRows ?? [],next_cursor:null} : {items:rows,next_cursor:nextRows ? 'next' : null}) as T;
+    }
+    if (path === '/api/v1/me/preparation') {if(learningError) throw learningError; return learning as T;}
+    if (path === '/me/assignments/first/preparation') return preparation as T;
+    throw new Error(`Unexpected home API: ${path}`);
+  });
+});
+afterEach(() => {cleanup(); clients.forEach(client => client.clear()); clients.length = 0; vi.restoreAllMocks();});
+function view() {
+  const client = new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});clients.push(client);
+  return render(<QueryClientProvider client={client}><MemoryRouter><HomePage/></MemoryRouter></QueryClientProvider>);
+}
+describe('home projection', () => {
+  it('chooses active invitations and confirmed events by actual start time, excluding history and cancelled items', () => {
+    const values = [assignment({id:'later',starts_at:'2026-10-23T09:00:00Z'}),assignment({id:'cancelled',status:'cancelled'}),
+      assignment({id:'attended',attendance:{outcome:'attended',minutes:60,ledger_state:'recorded'} as AssignmentParticipation['attendance']}),
+      assignment({id:'expired',ends_at:'2026-10-20T11:00:00Z'}),assignment({id:'invitation',status:'invited',starts_at:'2026-10-22T08:00:00Z'}),
+      assignment({id:'ongoing',starts_at:'2026-10-21T21:00:00Z',ends_at:'2026-10-21T23:00:00Z'}),assignment({id:'invalid',starts_at:'not a date'})];
+    expect(upcomingAssignments(values, now).map(item=>item.id)).toEqual(['ongoing','invitation','later']);
+    expect(values[0].id).toBe('later');
+  });
+  it('labels today in the event timezone rather than the browser date, and does not invent a learning lesson', () => {
+    const value = assignmentWhen(assignment(), now);
+    expect(value).toEqual({today:true,date:'Сегодня',time:'12:00–14:00'});
+    expect(learningDestination({...track,lessons:[]})).toBe('/academy');
+    expect(learningDestination({...track,lessons:[],assessment_version_id:'assessment'})).toBe('/academy/lessons/assessment?assignment=learning');
+  });
+});
+describe('volunteer home', () => {
+  it('loads all assignment pages before choosing the nearest hero and uses the existing preparation/learning APIs', async () => {
+    rows=[assignment({id:'later',title:'Позже',starts_at:'2026-10-23T09:00:00Z',ends_at:'2026-10-23T11:00:00Z'})];nextRows=[assignment()];
+    view();
+    await screen.findByRole('heading',{name:/Сегодня 12:00–14:00/});
+    expect(screen.getByRole('link',{name:'Подготовиться к выходу'}).getAttribute('href')).toBe('/my/assignments/first/preparation');
+    await screen.findByText('Тестовый ведущий');
+    expect(screen.getByText('Вход со двора')).toBeTruthy();
+    expect(screen.getByText('Перед выходом: 1 из 2 пунктов выполнено')).toBeTruthy();
+    expect(screen.getByText('Взять сменную обувь')).toBeTruthy();
+    const progress=screen.getByRole('progressbar',{name:'Пройдено уроков'}) as HTMLProgressElement;
+    expect([progress.value,progress.max]).toEqual([1,2]);
+    expect(screen.getByRole('link',{name:'Продолжить обучение'}).getAttribute('href')).toBe('/academy/lessons/next?assignment=learning');
+    expect(apiSpy.mock.calls.some(call=>String(call[0]).includes('cursor=next'))).toBe(true);
+    expect(apiSpy.mock.calls.every(call=>!call[1] || !call[1].method || call[1].method==='GET')).toBe(true);
+  });
+  it('keeps invitations actionable through existing participation controls and does not expose unconfirmed preparation', async () => {
+    rows=[assignment({status:'invited'})];view();
+    const invitations=await screen.findByRole('region',{name:'Тебя приглашают'});
+    expect(within(invitations).getByRole('link',{name:/Ответить на приглашение/}).getAttribute('href')).toBe('/my/assignments/first');
+    expect(screen.queryByText('Участие подтверждено')).toBeNull();
+    expect(apiSpy.mock.calls.some(call=>String(call[0]).includes('/first/preparation'))).toBe(false);
+    expect(screen.queryByRole('button',{name:/приду/})).toBeNull();
+  });
+  it('shows the genuine newcomer path without invented identity, hours or matching scores', async () => {
+    view();await screen.findByRole('heading',{name:'Начнём знакомство'});
+    expect(screen.getByRole('link',{name:'Моя анкета'}).getAttribute('href')).toBe('/application');
+    expect(screen.getByRole('link',{name:'Знакомство с координатором'}).getAttribute('href')).toBe('/interviews');
+    expect(screen.getByRole('link',{name:'Посмотреть возможности'}).getAttribute('href')).toBe('/opportunities');
+    expect(screen.queryByText(/Анна|недель подряд|Совпадение|Подобрано для тебя/)).toBeNull();
+  });
+  it('retains the confirmed assignment when learning fails and retries only the failed read', async () => {
+    rows=[assignment()];learningError=new Error('Обучение временно недоступно');view();
+    await screen.findByText('Обучение временно недоступно');
+    expect(await screen.findByText('Участие подтверждено')).toBeTruthy();
+    learningError=undefined;
+    await userEvent.setup().click(screen.getByRole('button',{name:'Попробовать ещё раз'}));
+    await waitFor(()=>expect(screen.queryByText('Обучение временно недоступно')).toBeNull());
+    expect(screen.getByRole('link',{name:'Продолжить обучение'})).toBeTruthy();
+  });
+  it('does not misrepresent a failed list or missing pagination page as an empty/newcomer result', async () => {
+    rows=[assignment({id:'later'})];nextRows=[assignment()];nextPageError=new Error('Приглашения временно недоступны');view();
+    await screen.findByText('Приглашения временно недоступны');
+    expect(screen.queryByRole('heading',{name:'Начнём знакомство'})).toBeNull();
+    expect(screen.queryByText('Ближайшее занятие')).toBeNull();
+    nextPageError=undefined;
+    await userEvent.setup().click(screen.getByRole('button',{name:'Попробовать ещё раз'}));
+    expect(await screen.findByText('Участие подтверждено')).toBeTruthy();
+  });
+});
