@@ -75,7 +75,22 @@ class ApplicationSelfView(BaseModel):
     history: list[ReviewEventView]
     consents: dict[str, bool]
 
+class IntroductionProgressView(BaseModel):
+    status: Literal["unavailable", "not_started", "in_progress", "completed"]
+    completed_lessons: int = 0
+    total_lessons: int = 0
+
+class InterviewProgressView(BaseModel):
+    status: Literal["unavailable", "none", "booked", "completed", "missed", "cancelled"]
+    starts_at: datetime | None = None
+
+class CandidateProgressView(BaseModel):
+    introduction: IntroductionProgressView
+    interview: InterviewProgressView
+
+
 class CandidateView(ApplicationSelfView):
+    progress: CandidateProgressView
     assigned_coordinator_id: UUID | None
     revisions: list[RevisionView]
 

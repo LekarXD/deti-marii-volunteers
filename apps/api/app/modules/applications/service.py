@@ -76,7 +76,7 @@ async def application_view(db, application, *, coordinator=False):
         review_state=application.review_state, submitted_at=application.submitted_at, revision=revision_view(revision),
         history=[ReviewEventView(id=e.id, kind=e.kind, state=e.state, public_message=e.public_message, created_at=e.created_at) for e in history], consents=consents)
     if coordinator:
-        return CandidateView(**values, assigned_coordinator_id=application.assigned_coordinator_id, revisions=[revision_view(r) for r in revisions])
+        return CandidateView(**values, assigned_coordinator_id=application.assigned_coordinator_id, progress=await candidate_progress(db,application), revisions=[revision_view(r) for r in revisions])
     return ApplicationSelfView(**values)
 
 
@@ -259,3 +259,27 @@ async def claim_registration(db, registration_id, user_id):
         source.user_id = user_id
         source.registration_id = None
     await db.flush()
+
+
+async def candidate_progress(db, application):
+    """Compose independent read-only projections; unavailable is never zero progress."""
+    introduction = dict(status="unavailable", completed_lessons=0, total_lessons=0)
+    interview = dict(status="unavailable", starts_at=None)
+    try:
+        from app.modules.learning.service import candidate_progress as learning_progress
+    except ModuleNotFoundError as error:
+        if not (error.name or "").startswith("app.modules.learning"):
+            raise
+    else:
+        progress = await learning_progress(db, application.foundation_id, user_id=application.user_id, registration_id=application.registration_id)
+        if progress.get("available", True):
+            introduction = dict(status="completed" if progress["completed"] else "in_progress" if progress["completed_lessons"] else "not_started",
+                completed_lessons=progress["completed_lessons"], total_lessons=progress["total_lessons"])
+    try:
+        from app.modules.interviews.service import candidate_progress as interview_progress
+    except ModuleNotFoundError as error:
+        if not (error.name or "").startswith("app.modules.interviews"):
+            raise
+    else:
+        interview = await interview_progress(db, application.foundation_id, application.id)
+    return dict(introduction=introduction, interview=interview)
