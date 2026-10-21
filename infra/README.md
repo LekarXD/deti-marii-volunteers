@@ -108,6 +108,17 @@ exact database names are asserted by the domain suites. The CI pytest plugin
 rejects skipped checks; an unset URL is a gate failure, never a passing test run.
 `prepare-test-dbs.py` refuses existing databases and never drops one.
 
+For repeated integration checks on the specifically assigned QA cluster, the
+explicit command below resets only the ten allowlisted disposable fixture schemas
+and migrates them from empty. It fixes test-only `create_all`/Alembic stamp drift
+after new models arrive. The script pins loopback port 56148, verifies the exact
+QA data directory and database names, and cannot target proof/restore/G1 databases.
+It is unnecessary in fresh CI and must not be used for development or staging data.
+
+```sh
+python infra/scripts/reset-qa-test-schemas.py --reset-disposable-test-schemas --api-source "$PWD/apps/api"
+```
+
 ## Separate board runtime gate
 
 The board sidecar has its own Starlette/CRDT environment. Do not install its
@@ -120,8 +131,9 @@ python3.12 -m venv /tmp/opora-board-venv
 OPORA_SIDECAR_PYTHON=/tmp/opora-board-venv/bin/python sh infra/scripts/verify-sidecar.sh
 ```
 
-These tests cover viewer/drawer authorization, persisted Yjs state after restart
-and invalid grants on loopback. They do not prove browser camera/microphone,
+Install the web workspace dependencies and use Node 26 before this gate.
+These tests cover viewer/drawer authorization, persisted Yjs state after restart,
+invalid grants and the installed JS y-websocket/Yjs client on loopback. They do not prove browser camera/microphone,
 external media, deployment or strict revocation of an already issued LiveKit JWT.
 
 ## Isolated private-image restore drill (P20 subset)

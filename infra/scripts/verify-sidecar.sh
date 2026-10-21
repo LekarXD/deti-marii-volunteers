@@ -6,3 +6,5 @@ cd "$(dirname "$0")/../.."
 api_dir="${OPORA_SIDECAR_API_DIR:-$PWD/apps/api}"
 export PYTHONPATH="$api_dir:$api_dir/app/integrations/rtc/sidecar/tests:$PWD${PYTHONPATH:+:$PYTHONPATH}"
 "$OPORA_SIDECAR_PYTHON" -m pytest -p infra.pytest_no_skips -c "$api_dir/pyproject.toml" "$api_dir/app/integrations/rtc/sidecar/tests" -q
+# Real installed JS client compatibility is distinct from the Python transport tests.
+"$OPORA_SIDECAR_PYTHON" "$api_dir/app/integrations/rtc/sidecar/tests/js_protocol_smoke.py"
