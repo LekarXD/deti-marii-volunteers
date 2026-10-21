@@ -1,0 +1,8 @@
+# Isolated process/environment, never install these Starlette versions into the main API.
+starlette==1.7.0
+uvicorn[standard]==0.54.0
+pycrdt==0.14.8
+pycrdt-websocket==0.16.5
+PyJWT==2.15.1
+anyio==4.15.1
+httpx==0.28.1
