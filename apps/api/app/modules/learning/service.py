@@ -182,3 +182,16 @@ async def claim_registration(db: AsyncSession, registration_id: UUID, user_id: U
     for item in items:
         item.user_id, item.registration_id = user_id, None
     await db.flush()
+
+
+async def candidate_progress(db: AsyncSession, foundation_id: UUID, user_id: UUID | None = None, registration_id: UUID | None = None):
+    """Read-only projection for scoped candidate review; never assigns a course."""
+    track = await db.scalar(select(LearningTrack).where(LearningTrack.foundation_id == foundation_id, LearningTrack.key == "introduction"))
+    if track is None or track.current_release_id is None:
+        return dict(completed=False, completed_lessons=0, total_lessons=0, available=False)
+    release = await db.get(LearningRelease, track.current_release_id)
+    scope = LearningAssignment.user_id == user_id if user_id else LearningAssignment.registration_id == registration_id
+    item = await db.scalar(select(LearningAssignment).where(LearningAssignment.foundation_id == foundation_id, LearningAssignment.release_id == release.id, scope)) if (user_id or registration_id) else None
+    progress = list((await db.scalars(select(LessonProgress.lesson_version_id).where(LessonProgress.assignment_id == item.id))).all()) if item else []
+    count = len(set(map(str, progress)).intersection(release.lesson_version_ids))
+    return dict(completed=bool(item and item.completed_at), completed_lessons=count, total_lessons=len(release.lesson_version_ids), available=True)
