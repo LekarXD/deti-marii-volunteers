@@ -50,7 +50,7 @@ async def application_options(q:str=Query(default='',max_length=200),principal:P
 @router.get('/coord/crm/staff',response_model=list[StaffOptionView])
 async def staff_options(principal:Principal=Depends(require_permission('crm.read')),db:AsyncSession=Depends(get_db)):
     users=(await db.scalars(select(User).join(StaffMembership,StaffMembership.user_id==User.id).where(StaffMembership.foundation_id==principal.foundation_id,
-        StaffMembership.revoked_at.is_(None),User.account_state=='active').order_by(User.display_name,User.id))).all()
+        StaffMembership.revoked_at.is_(None),User.foundation_id==principal.foundation_id,User.account_state=='active').order_by(User.display_name,User.id))).all()
     return [StaffOptionView(id=user.id,display_name=user.display_name) for user in users]
 
 

@@ -116,7 +116,7 @@ async def volunteer_view(db,volunteer,detail=False):
 
 async def valid_owner(db,foundation_id,user_id):
     membership=await db.scalar(select(StaffMembership).join(User,StaffMembership.user_id==User.id).where(StaffMembership.foundation_id==foundation_id,
-        StaffMembership.user_id==user_id,StaffMembership.revoked_at.is_(None),User.account_state=='active'))
+        StaffMembership.user_id==user_id,StaffMembership.revoked_at.is_(None),User.foundation_id==foundation_id,User.account_state=='active'))
     if not membership:raise ApiError(422,'invalid_task_owner','Выберите сотрудника фонда, который отвечает за следующий шаг')
 
 
@@ -254,7 +254,8 @@ async def update_task(db,principal,task_id,command):
 
 
 async def schedule_follow_up(db,foundation_id,application_id,assigned_user_id,due_on,source_type,source_id,source_revision,actor_id,title='Связаться с волонтёром',*,user_id=None):
-    """P06 integration boundary, in caller's transaction; never sends a message."""
+    """Caller takes contact_guard before domain locks; this keeps stand-alone calls ordered."""
+    await contact_guard(db,foundation_id)
     await db.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'follow-up:{foundation_id}:{source_type}:{source_id}'})
     from app.core.idempotency import payload_hash
     fingerprint=payload_hash(dict(application_id=application_id,user_id=user_id,assigned_user_id=assigned_user_id,due_on=due_on,title=title))
