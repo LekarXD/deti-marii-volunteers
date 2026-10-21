@@ -123,7 +123,7 @@ services:
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     tmpfs: ["/tmp:rw,nosuid,nodev,size=33554432,mode=1777"]
-    networks: [private]
+    networks: [private, egress]
     ports: ["18084:18084/udp", "18085:18085/tcp"]
     restart: unless-stopped
     mem_limit: 192m
