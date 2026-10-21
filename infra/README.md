@@ -25,7 +25,7 @@ until adapters and credentials are configured and tested.
 
 `docker compose --env-file infra/.env -f infra/compose.yaml logs migrate api worker`
 shows startup issues without HTTP payload/access logs. `down` preserves the
-PostgreSQL volume. `down -v` destroys local data and is not part of validation.
+PostgreSQL and private-asset volumes. `down -v` destroys local data and is not part of validation.
 
 ## Native PostgreSQL (Docker unavailable)
 

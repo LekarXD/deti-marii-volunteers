@@ -21,6 +21,8 @@ services:
       OPORA_DATABASE_URL: postgresql+psycopg://opora:${OPORA_POSTGRES_PASSWORD}@postgres:5432/opora
       OPORA_TRUSTED_ORIGINS: '["http://localhost:8080","http://127.0.0.1:8080"]'
       OPORA_COOKIE_SECURE: "false"
+      OPORA_RELEASE: ${OPORA_RELEASE:-development}
+      OPORA_ASSET_ROOT: /var/lib/opora/assets
       OPORA_DELIVERY_PROVIDER: unavailable
       OPORA_AI_PROVIDER: unavailable
       OPORA_RTC_PROVIDER: unavailable
@@ -31,6 +33,7 @@ services:
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--no-access-log"]
     environment: *api-environment
     ports: ["127.0.0.1:8001:8001"]
+    volumes: ["asset-data:/var/lib/opora/assets"]
     depends_on:
       migrate: {condition: service_completed_successfully}
     healthcheck:
@@ -42,6 +45,7 @@ services:
     build: {context: .., dockerfile: infra/docker/api.Dockerfile}
     command: ["python", "-m", "app.worker.main"]
     environment: *api-environment
+    volumes: ["asset-data:/var/lib/opora/assets"]
     depends_on:
       migrate: {condition: service_completed_successfully}
   web:
@@ -55,3 +59,4 @@ services:
     ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
 volumes:
   postgres-data:
+  asset-data:
