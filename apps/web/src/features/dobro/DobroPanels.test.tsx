@@ -17,6 +17,9 @@ describe('Dobro panels stay optional and truthful',()=>{
  it('records only the volunteer declaration and never blocks participation',async()=>{
   test.data={profile_url:'',profile_version:0,registration_url:'',verified_organization:false,total_minutes:120,entered_hours:0,hours_due:2,rules_note:'Перенос вручную',activities:[{activity,state:'none',enrollment_version:0,eligible_minutes:120,entered_hours:0,hours_due:2,carry_minutes:0,can_apply:true}]};
   render(<MemoryRouter><DobroMyPath/></MemoryRouter>);
+  expect(test.mutate).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button',{name:/Вымышленное дело — Нужен отклик/}));
+  expect(screen.getByRole('dialog')).toBeTruthy();
   expect(screen.getByText(/Участие в занятиях доступно независимо/)).toBeTruthy();
   expect(screen.getByRole('link',{name:'Откликнуться на Добро.рф'}).getAttribute('href')).toBe('https://dobro.ru/');
   expect(screen.queryByText('Выгрузить')).toBeNull();
