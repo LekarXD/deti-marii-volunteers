@@ -228,3 +228,49 @@ async def test_queued_permission_revocation_wins_before_grant_reauthorization(wo
     async with w.factory() as db:
         assert await db.scalar(select(func.count()).select_from(PermissionGrant).where(PermissionGrant.permission=='roles.manage'))==0
         assert await db.scalar(select(func.count()).select_from(MutationReceipt).where(MutationReceipt.key=='queued-grant'))==0
+
+
+@pytest.mark.asyncio
+async def test_http_catalog_assigns_reporting_and_recording_capabilities_with_real_scopes(world,monkeypatch):
+    import httpx
+    from fastapi import FastAPI
+    from app.core.db import get_db
+    from app.core.errors import install_error_handlers
+    from app.modules.participants.models import ParticipantGroup
+    w=world;monkeypatch.setattr(get_settings(),'trusted_origins',['http://testserver'])
+    async with w.factory() as db:
+        session=await db.get(Session,w.admin.session_id);session.token_hash=digest('capability-admin');session.csrf_hash=digest('capability-csrf')
+        recipient_session=await db.get(Session,w.recipient.session_id);recipient_session.mfa_at=utcnow()
+        own=ParticipantGroup(foundation_id=w.foundation.id,title='Own report group');other=ParticipantGroup(foundation_id=w.foundation.id,title='Other report group');foreign=ParticipantGroup(foundation_id=w.foreign.id,title='Foreign report group')
+        db.add_all([own,other,foreign]);await db.commit()
+    app=FastAPI();install_error_handlers(app);app.include_router(r.router)
+    async def database():
+        async with w.factory() as db:yield db
+    app.dependency_overrides[get_db]=database
+    report_permissions=('reports.read','reports.write','reports.export')
+    recording_permissions=('recordings.manage','recordings.review','recordings.publish')
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver',cookies={'opora_session':'capability-admin'}) as client:
+        items=(await client.get('/api/v1/coord/staff/permission-catalog')).json()['items'];catalog={item['permission']:item for item in items}
+        assert all(catalog[name]['scope_types']==['foundation','group'] for name in report_permissions)
+        assert all(catalog[name]['scope_types']==['foundation'] for name in recording_permissions)
+        async def grant(name,kind='foundation',id=None):
+            return await client.post('/api/v1/coord/staff/grants',json={'user_id':str(w.recipient.user_id),'permission':name,'scope_type':kind,'scope_id':str(id) if id else None},headers={'Origin':'http://testserver','X-CSRF-Token':'capability-csrf','Idempotency-Key':uuid4().hex})
+        for name in report_permissions:
+            response=await grant(name,'group',own.id);assert response.status_code==200,response.text
+            for bad in (foreign.id,uuid4()):
+                response=await grant(name,'group',bad);assert response.status_code==422 and response.json()['code']=='invalid_scope'
+            response=await grant(name,'foundation',own.id);assert response.status_code==422
+        for name in recording_permissions:
+            response=await grant(name);assert response.status_code==200,response.text
+            response=await grant(name,'group',own.id);assert response.status_code==422 and response.json()['code']=='invalid_permission'
+    async with w.factory() as db:
+        principal=await resolve_principal(db,await db.get(Session,w.recipient.session_id))
+        for name in report_permissions:
+            assert principal.has_permission(name,'group',own.id)
+            assert not principal.has_permission(name)
+            assert not principal.has_permission(name,'group',other.id)
+            assert not principal.has_permission(name,'group',foreign.id)
+        assert all(principal.has_permission(name) for name in recording_permissions)
+        assert not principal.has_permission('followups.private_notes','group',own.id)
+        assert not principal.has_permission('signals.restricted')
+        assert not principal.has_permission('staff.manage')
