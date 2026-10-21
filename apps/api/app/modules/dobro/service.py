@@ -31,6 +31,15 @@ async def user(db, principal, user_id=None):
     if result is None: raise ApiError(404, 'volunteer_not_found', 'Человек не найден.')
     return result
 
+async def crm_identity(db, principal, volunteer_id):
+    from app.modules.crm.service import scoped_volunteer
+    permission(principal, 'crm.read')
+    volunteer = await scoped_volunteer(db, principal.foundation_id, volunteer_id)
+    if not volunteer.user_id:
+        raise ApiError(409, 'dobro_account_unlinked', 'У этого контакта ещё нет связанного аккаунта Опоры. Профиль Добро.рф можно добавить после подтверждения аккаунта; исторический контакт не становится волонтёром автоматически.')
+    await user(db, principal, volunteer.user_id)
+    return volunteer.user_id
+
 def version(actual, expected):
     if actual != expected: raise ApiError(409, 'version_conflict', 'Данные изменились. Обновите страницу и проверьте изменения.')
 
