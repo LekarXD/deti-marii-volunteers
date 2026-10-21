@@ -33,7 +33,7 @@ def expand(series, start: date, end: date, exceptions=()):
                 while minute + series.duration_minutes <= last:
                     a = local_instant(day, minute, series.timezone)
                     b = local_instant(day, minute + series.duration_minutes, series.timezone)
-                    if a is not None and b is not None and b > a:
+                    if a is not None and b is not None and b - a == timedelta(minutes=series.duration_minutes):
                         yield day, minute, a, b, b + timedelta(minutes=series.buffer_after_minutes)
                     minute += series.duration_minutes + series.buffer_after_minutes
         day += timedelta(days=1)

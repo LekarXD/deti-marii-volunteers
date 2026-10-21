@@ -88,4 +88,5 @@ class BookingView(BaseModel):
     result: dict | None = None
     events: list[dict] = Field(default_factory=list)
 class StaffBookingView(BookingView):
+    candidate_name: str
     private_note: str | None = None

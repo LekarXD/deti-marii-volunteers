@@ -123,3 +123,44 @@ def test_multiweek_exceptions_buffer_and_dst():
     assert (slots[1][2]-slots[0][2]).total_seconds()==40*60
     assert local_instant(date(2026,3,29),150,'Europe/Berlin') is None
     assert local_instant(date(2026,10,25),150,'Europe/Berlin').hour==0
+
+@pytest.mark.asyncio
+async def test_edit_exception_rejects_affected_booking_and_zone_boundaries(world):
+    from app.modules.interviews.schemas import ExceptionCommand,WindowUpdate
+    w=world;day=date.today()+timedelta(days=18)
+    window=await create_window(w,day,start_minute=30,end_minute=90,duration_minutes=30,buffer_after_minutes=0)
+    # 00:30 Moscow belongs to the previous Berlin local day.
+    async with w.factory() as db:
+        berlin=await service.materialize(db,w.staff,day-timedelta(days=1),day-timedelta(days=1),'Europe/Berlin');await db.commit()
+        assert len(berlin)==2
+    choices=await slots(w,day);booking=await book(w,w.candidates[0],choices[0])
+    async with w.factory() as db:
+        with pytest.raises(ApiError) as affected:
+            await handlers.exception(window['id'],ExceptionCommand(expected_version=1,origin_date=day,kind='skip'),db,w.staff,uuid4().hex)
+        assert affected.value.code=='affected_bookings'
+    async with w.factory() as db:
+        preserved=await db.get(InterviewBooking,booking['id']);series=await db.get(AvailabilitySeries,window['id'])
+        assert preserved.status=='booked' and series.version==1
+    body=WindowUpdate(**{k:v for k,v in window.items() if k not in {'id','version','coordinator_id','exceptions'}},expected_version=1)
+    body.venue='New room'
+    async with w.factory() as db:
+        with pytest.raises(ApiError) as affected:
+            await handlers.edit_window(window['id'],body,db,w.staff,uuid4().hex)
+        assert affected.value.code=='affected_bookings'
+    # A separate open slot can be selected and changes retain one stable booking ID.
+    async with w.factory() as db:
+        moved=await handlers.move(booking['id'],MoveInput(slot_id=choices[1]['id'],slot_version=choices[1]['version'],expected_version=1),db,w.candidates[0],uuid4().hex)
+        assert moved['id']==booking['id'] and moved['version']==2 and moved['slot_id']==choices[1]['id']
+
+@pytest.mark.asyncio
+async def test_revoked_staff_cannot_replay_or_change_availability(world):
+    from sqlalchemy import update
+    w=world;day=date.today()+timedelta(days=19)
+    async with w.factory() as db:
+        body=WindowInput(local_start_date=day,start_minute=600,end_minute=660,venue='Room')
+        result=await handlers.create_window(body,db,w.staff,'staff-replay')
+    async with w.factory() as db:
+        await db.execute(update(PermissionGrant).values(revoked_at=datetime.now(timezone.utc)));await db.commit()
+    async with w.factory() as db:
+        with pytest.raises(ApiError) as denied:await handlers.create_window(body,db,w.staff,'staff-replay')
+        assert denied.value.status_code==403

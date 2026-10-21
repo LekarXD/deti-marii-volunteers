@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import insert
 from app.core.errors import ApiError
 from app.core.audit import audit
 from app.worker.queue import enqueue_outbox
-from app.modules.applications.models import Application
+from app.modules.applications.models import Application, ApplicationRevision
 from .models import AvailabilitySeries, AvailabilityException, InterviewSlot, InterviewBooking, BookingEvent, InterviewResult, InterviewPrivateNote
 from .recurrence import expand, local_instant, matches
 from .schemas import WindowView
@@ -73,7 +73,7 @@ async def validate_windows(db, row):
             day += timedelta(days=1)
     for other in others:
         start = max(row.local_start_date, other.local_start_date) - timedelta(days=1)
-        end = start + timedelta(weeks=lcm(row.interval_weeks, other.interval_weeks) + 2)
+        end = start + timedelta(weeks=max(106,lcm(row.interval_weeks, other.interval_weeks) + 54))
         limits = [s.last_date for s in (row,other) if s.last_date]
         if row.recurrence == "once": limits.append(row.local_start_date)
         if other.recurrence == "once": limits.append(other.local_start_date)
@@ -141,6 +141,10 @@ async def booking_view(db,row,staff=False):
     out["result"]={"outcome":result.outcome,"public_agreement":result.public_agreement,"next_contact_date":result.next_contact_date} if result else None
     out["events"]=[{"kind":e.kind,"created_at":e.created_at,"before":e.before,"after":e.after} for e in events]
     if staff:
+        app=await db.get(Application,row.application_id)
+        revision=await db.get(ApplicationRevision,app.submitted_revision_id) if app and app.submitted_revision_id else None
+        answers=revision.answers if revision else {}
+        out["candidate_name"]=" ".join(str(answers.get(k,"")).strip() for k in ("firstName","lastName")).strip() or "Кандидат"
         note=await db.scalar(select(InterviewPrivateNote).where(InterviewPrivateNote.booking_id==row.id))
         out["private_note"]=note.text if note else None
     return out
@@ -176,3 +180,9 @@ async def claim_registration(db, registration_id, user_id):
     for reservation in reservations:
         reservation.registration_id=None;reservation.user_id=user_id;reservation.owner_key="user:"+str(user_id)
     await db.flush()
+
+async def candidate_progress(db, foundation_id, application_id):
+    """Small public progress projection for P05; never projects private notes."""
+    rows=(await db.scalars(select(InterviewBooking).where(InterviewBooking.foundation_id==foundation_id,InterviewBooking.application_id==application_id).order_by(InterviewBooking.created_at.desc()))).all()
+    row=next((b for b in rows if b.status=="booked"),rows[0] if rows else None)
+    return {"status":row.status if row else "none","starts_at":row.starts_at.isoformat() if row else None}
