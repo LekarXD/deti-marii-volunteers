@@ -157,6 +157,15 @@ class SimulatorCharacterOutput(BaseModel):
     content: str = Field(min_length=1, max_length=5000)
 
 
+class SimulatorAppealView(BaseModel):
+    id: UUID
+    version: int
+    state: str
+    text: str
+    response: str | None = None
+    corrected_result: SimulatorAssessmentOutput | None = None
+
+
 class SimulatorEvaluationView(BaseModel):
     id: UUID
     version: int
@@ -165,7 +174,7 @@ class SimulatorEvaluationView(BaseModel):
     prompt_version: str
     model: str
     result: SimulatorAssessmentOutput | None
-    appeal: dict | None = None
+    appeal: SimulatorAppealView | None = None
 
 
 class SimulatorSessionView(BaseModel):

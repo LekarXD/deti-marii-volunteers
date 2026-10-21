@@ -214,6 +214,9 @@ async def session_view(db, entity):
         if evaluation and evaluation.state in ('unavailable', 'failed', 'unknown', 'budget_exceeded', 'cancelled'): actions.append('retry-evaluation')
         if evaluation and evaluation.state == 'ready' and appeal is None: actions.append('appeal')
     elif entity.state == 'stopped': actions += ['retry']
+    scenario = await db.get(SimulatorScenario, publication.scenario_id)
+    if publication.withdrawn_at or scenario.archived_at:
+        actions = [action for action in actions if action != 'retry']
     return SimulatorSessionView(id=entity.id, version=entity.version, state=entity.state, scenario=await public_view(db, publication), rubric_version_id=entity.rubric_version_id,
         turns=[SimulatorTurnView(id=turn.id, ordinal=turn.ordinal, speaker=turn.speaker, content=turn.content, source=turn.source, created_at=turn.created_at) for turn in turns],
         evaluation=SimulatorEvaluationView(id=evaluation.id, version=evaluation.version, state=evaluation.state, rubric_version_id=evaluation.rubric_version_id,
