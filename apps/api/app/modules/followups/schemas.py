@@ -78,6 +78,7 @@ class ReflectionReviewCommand(FollowupCommand):
     @model_validator(mode='after')
     def follow_up_date(self):
         if self.decision in ('next_date','other_role','discussion') and self.next_date is None:raise ValueError('Укажите дату следующего действия')
+        if self.decision=='finish' and self.next_date is not None:raise ValueError('Для завершения участия не указывайте дату контакта')
         if not self.public_message.strip():raise ValueError('Напишите договорённость для волонтёра')
         return self
 

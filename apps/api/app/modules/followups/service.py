@@ -104,12 +104,13 @@ async def save_checklist(db,principal,id,body):
     row.checked_keys=body.checked_keys;row.updated_at=utcnow();await db.flush()
     return await preparation(db,principal,id)
 
-async def new_signal(db,principal,*,reflection=None,question=None,owner,priority='normal'):
+async def new_signal(db,principal,*,reflection=None,question=None,owner,priority='normal',schedule=True):
     source=reflection or question
     signal=SupportSignal(foundation_id=source.foundation_id,reflection_id=reflection.id if reflection else None,question_id=question.id if question else None,subject_user_id=source.user_id,group_id=source.group_id,restricted=source.restricted,priority=priority,assigned_user_id=owner)
     db.add(signal);await db.flush()
-    task=await schedule_user_follow_up(db,source.foundation_id,source.user_id,owner,today(),'support_signal',signal.id,signal.version,principal.actor_id,title='Связаться с волонтёром')
-    signal.follow_up_task_id=task.id if task else None
+    if schedule:
+        task=await schedule_user_follow_up(db,source.foundation_id,source.user_id,owner,today(),'support_signal',signal.id,signal.version,principal.actor_id,title='Связаться с волонтёром')
+        signal.follow_up_task_id=task.id if task else None
     db.add(SupportSignalEvent(signal_id=signal.id,revision=signal.version,action='created',reason='Обращение волонтёра',author_id=principal.actor_id));await db.flush()
     return signal
 
@@ -179,3 +180,71 @@ async def latest_reflection_for_user(db,foundation_id,user_id,principal=None):
     row=await db.scalar(select(Reflection).where(Reflection.foundation_id==foundation_id,Reflection.user_id==user_id,Reflection.submitted_at.is_not(None),scope(principal,'followups.read',Reflection),privacy(principal,Reflection)).order_by(Reflection.submitted_at.desc(),Reflection.id.desc()).limit(1))
     if row is None:return None
     return {'text':row.text,'unexpected':row.unexpected,'help':row.help,'continuation':row.continuation,'submitted_at':row.submitted_at}
+
+async def finish_task(db,principal,signal,state,reason):
+    if not signal.follow_up_task_id:return
+    from app.modules.crm.service import update_task
+    from app.modules.crm.schemas import TaskUpdateCommand
+    task=await db.get(FollowUpTask,signal.follow_up_task_id)
+    if task and task.state=='open':await update_task(db,principal,task.id,TaskUpdateCommand(expected_version=task.version,state=state,reason=reason[:4000]))
+
+async def review_reflection(db,principal,id,body):
+    row=await staff_reflection(db,principal,id,'followups.manage',True);check_version(row,body.expected_version)
+    if not await owner_eligible(db,principal.foundation_id,body.assigned_user_id,row.group_id,row.restricted):raise ApiError(422,'invalid_support_owner','Выберите действующего сотрудника с доступом к обращению.')
+    if body.internal_note.strip() and not has(principal,'followups.private_notes',row.group_id):denied()
+    from app.modules.crm.service import ensure_user_volunteer,first_visit_outcome
+    from app.modules.crm.schemas import FirstVisitOutcomeCommand
+    volunteer=await ensure_user_volunteer(db,principal.foundation_id,row.user_id)
+    outcomes={'next_date':'next_activity','other_role':'different_role','discussion':'preparation','pause':'pause','finish':'finish'}
+    # CRM's broadly visible agreement must not become a second copy of a restricted case.
+    note='Согласован следующий шаг.' if row.restricted else body.public_message.strip()
+    await first_visit_outcome(db,principal,volunteer.id,FirstVisitOutcomeCommand(expected_version=volunteer.version,outcome=outcomes[body.decision],note=note,due_on=None))
+    signal=await db.scalar(select(SupportSignal).where(SupportSignal.reflection_id==row.id).with_for_update())
+    if signal is None:signal=await new_signal(db,principal,reflection=row,owner=body.assigned_user_id,schedule=False)
+    signal.version+=1;signal.assigned_user_id=body.assigned_user_id;signal.updated_at=utcnow()
+    signal.state='resolved' if body.decision=='finish' or body.decision=='pause' and body.next_date is None else 'in_progress'
+    task=await schedule_user_follow_up(db,principal.foundation_id,row.user_id,body.assigned_user_id,body.next_date,'support_signal',signal.id,signal.version,principal.actor_id,title='Связаться с волонтёром')
+    signal.follow_up_task_id=task.id if task else None
+    row.version+=1;row.updated_at=utcnow()
+    review=ReflectionReview(foundation_id=row.foundation_id,reflection_id=row.id,revision=row.version,decision=body.decision,public_message=body.public_message.strip(),next_date=body.next_date,assigned_user_id=body.assigned_user_id,follow_up_task_id=task.id if task else None,author_id=principal.user_id)
+    db.add(review);await db.flush()
+    if body.internal_note.strip():db.add(ReflectionReviewNote(review_id=review.id,text=body.internal_note.strip(),author_id=principal.user_id))
+    db.add(SupportSignalEvent(signal_id=signal.id,revision=signal.version,action='reviewed',reason='Согласован следующий шаг',author_id=principal.actor_id));await db.flush()
+    return await reflection_view(db,principal,row.assignment_id,staff_row=row)
+
+async def signal_action(db,principal,id,body,action):
+    row=await staff_signal(db,principal,id,'followups.manage',True);check_version(row,body.expected_version)
+    reason=body.reason.strip()
+    if not reason:raise ApiError(422,'reason_required','Укажите причину действия.')
+    if action in ('assign','resolve','dismiss') and row.state not in ('open','in_progress') or action=='reopen' and row.state not in ('resolved','dismissed'):raise ApiError(409,'signal_state_conflict','Состояние сигнала уже изменилось.')
+    owner=body.assigned_user_id or row.assigned_user_id
+    if action in ('assign','reopen'):
+        if owner is None or not await owner_eligible(db,principal.foundation_id,owner,row.group_id,row.restricted):raise ApiError(422,'invalid_support_owner','Выберите действующего сотрудника с доступом к обращению.')
+        row.assigned_user_id=owner
+    row.version+=1;row.updated_at=utcnow()
+    if body.priority is not None:row.priority=body.priority
+    row.state={'assign':'in_progress','resolve':'resolved','dismiss':'dismissed','reopen':'open'}[action]
+    if action in ('assign','reopen'):
+        task=await schedule_user_follow_up(db,row.foundation_id,row.subject_user_id,owner,today(),'support_signal',row.id,row.version,principal.actor_id,title='Связаться с волонтёром')
+        row.follow_up_task_id=task.id if task else None
+    else:await finish_task(db,principal,row,'done' if action=='resolve' else 'cancelled','Обращение разобрано' if action=='resolve' else 'Обращение закрыто с причиной')
+    db.add(SupportSignalEvent(signal_id=row.id,revision=row.version,action=action,reason=reason,author_id=principal.actor_id));await db.flush()
+    return await signal_view(db,row)
+
+async def staff_question(db,principal,id,lock=False):
+    any_permission(principal,'followups.manage')
+    query=select(AssignmentQuestion).where(AssignmentQuestion.id==id,scope(principal,'followups.manage',AssignmentQuestion),privacy(principal,AssignmentQuestion))
+    row=await db.scalar(query.with_for_update() if lock else query)
+    if row is None:raise ApiError(404,'question_not_found','Вопрос не найден или недоступен.')
+    return row
+
+async def answer_question(db,principal,id,body):
+    row=await staff_question(db,principal,id,True);check_version(row,body.expected_version)
+    if not body.public_answer.strip():raise ApiError(422,'answer_empty','Напишите ответ для волонтёра.')
+    row.public_answer=body.public_answer.strip();row.answered_at=utcnow();row.answered_by=principal.user_id;row.version+=1
+    signal=await db.scalar(select(SupportSignal).where(SupportSignal.question_id==row.id).with_for_update())
+    if signal:
+        signal.state='resolved';signal.version+=1;signal.updated_at=utcnow()
+        await finish_task(db,principal,signal,'done','Ответ сохранён для волонтёра')
+        db.add(SupportSignalEvent(signal_id=signal.id,revision=signal.version,action='answered',reason='Ответ сохранён для волонтёра',author_id=principal.actor_id))
+    await db.flush();return await question_view(row)
