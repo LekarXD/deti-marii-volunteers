@@ -1,0 +1,9 @@
+.DS_Store
+~$*
+*.tmp
+.env
+.env.*
+node_modules/
+__pycache__/
+.venv/
+.claude/launch.json

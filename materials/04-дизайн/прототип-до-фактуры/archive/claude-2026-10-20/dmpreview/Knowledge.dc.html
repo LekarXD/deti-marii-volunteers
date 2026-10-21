@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>База знаний — Опора</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FFFEFA}
+.dm{--page:#FFFEFA;--paper:#FFFFFF;--soft:#F6F6F6;--soft-2:#EEEDE8;--line:#ECE9E2;--line-2:#DEDAD1;--ink:#12141A;--ink-2:#3F424A;--mute:#646464;--quiet:#8C8C8C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFEDE2;--yellow:#FFB03B;--yellow-ink:#8A5A00;--yellow-tint:#FFF3D6;--blue:#0F3DA7;--blue-tint:#E9EDF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DFF0E3;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE7E4;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE6EE;--shadow:0 4px 12px rgba(18,20,26,.05);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,176,59,.4)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:16px;height:16px}.ic-lg{width:24px;height:24px}.ic-xl{width:32px;height:32px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+/* layout */
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 72px}
+.shell-wide{max-width:1440px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-bottom:36px}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:12px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--yellow);color:var(--ink)}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.nav a.is-active .count{background:var(--paper)}
+.top-end{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--ink-2);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.role:hover{background:var(--soft-2);text-decoration:none;color:var(--ink)}
+.avatar{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:32px;height:32px;flex-basis:32px;font-size:12px}
+.avatar-lg{width:64px;height:64px;flex-basis:64px;font-size:22px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+/* type */
+.display{margin:0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:36px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:26px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:10px 0 0;font-size:17px;line-height:1.55;color:var(--ink-2);max-width:62ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:13px;line-height:1.4;color:var(--mute)}
+.eyebrow{font-size:13px;font-weight:600;color:var(--mute)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:40px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:14px}
+/* surfaces */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px 28px}
+.card-soft{background:var(--soft);border-radius:24px;padding:22px 28px}
+.card-hero{background:linear-gradient(160deg,#FFF9EF 0%,#FFEED6 100%);border:1px solid #F5E2C4;border-radius:28px;padding:32px 36px}
+.card-tight{padding:16px 20px;border-radius:18px}
+.ai-box{background:#F8F5FF;border:1px solid #E4DBFA;border-radius:20px;padding:18px 22px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.divider{height:1px;background:var(--line);border:0;margin:16px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:999px;border:1px solid transparent;font-size:15px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--orange);color:var(--ink)}
+.btn-primary:hover{background:#FF7535}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:36px;padding:0 14px;font-size:13px}
+.btn-lg{height:52px;padding:0 26px;font-size:16px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft);color:var(--quiet);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:500;white-space:nowrap;background:var(--soft);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:12px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--quiet);flex:0 0 8px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:14px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{border-color:var(--ink-2);color:var(--ink)}
+.chip.is-on{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--soft)}
+.seg button{height:38px;padding:0 16px;border:0;border-radius:999px;background:transparent;font-size:14px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{height:46px;padding:0 16px;border:0;background:transparent;font-size:15px;font-weight:600;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--orange)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.label{font-size:14px;font-weight:500;color:var(--ink-2)}
+.input,.textarea,.select{width:100%;min-height:48px;padding:12px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:120px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:13px;color:var(--mute)}
+.err{font-size:13px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:var(--ink-2)}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--orange);flex:0 0 20px}
+.toggle{position:relative;width:44px;height:26px;flex:0 0 44px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:21px}
+/* data */
+.kpi{position:relative;display:flex;flex-direction:column;gap:6px;padding:22px 24px;border-radius:24px;background:var(--paper);border:1px solid var(--line);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:38px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{font-size:14px;color:var(--ink-2)}
+.kpi-delta{font-size:13px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:58px;height:52px;left:12px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%;opacity:.9}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:8px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}
+.tbl{display:grid;border-top:1px solid var(--line)}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:14px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-head{font-size:13px;font-weight:600;color:var(--mute);padding-top:10px;padding-bottom:10px}
+.scroll-x{overflow-x:auto}
+.art{width:56px;height:56px;flex:0 0 56px;border-radius:18px;display:grid;place-items:center}
+.art-lg{width:100%;height:132px;border-radius:20px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+/* chat */
+.bubble{max-width:72%;padding:12px 16px;border-radius:20px;background:var(--soft);color:var(--ink);font-size:15px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F8F5FF;border:1px solid #E4DBFA}
+.cite{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:13px;color:var(--ink-2)}
+/* demo-only switcher */
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 24px;padding:8px 10px;border:1px dashed var(--line-2);border-radius:16px;background:var(--page)}
+.demo-cap{font-size:13px;font-weight:600;color:var(--mute);padding:0 6px}
+.demo button{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:13px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--ink);border-color:var(--ink);color:#fff}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:48px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:38px}.h1{font-size:28px}.card,.card-soft{padding:18px 18px;border-radius:20px}.card-hero{padding:22px 20px}.top-end{margin-left:0}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+.bt{width:44px;height:44px;flex:0 0 44px;border-radius:14px;background:var(--soft);color:var(--ink-2);display:grid;place-items:center}
+.src-cols{grid-template-columns:minmax(0,2.3fr) minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.5fr)}
+.tbl-min{min-width:760px}
+.err-row{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 16px;border-radius:14px;background:var(--red-tint);color:var(--red-ink)}
+.sub-list{grid-column:1/-1;padding:0 0 0 56px}
+.notice{display:flex;align-items:flex-start;gap:10px;margin-top:14px;padding:12px 16px;border-radius:14px;background:var(--green-tint);color:var(--green-ink)}
+.hl{background:var(--yellow-tint);color:var(--ink);padding:1px 4px;border-radius:6px}
+.frag{padding:14px 0;border-top:1px solid var(--line)}
+.frag:first-child{border-top:0;padding-top:6px}
+.ask-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.ask-row .input{flex:1 1 320px;width:auto}
+.ok-line{display:flex;align-items:flex-start;gap:10px;padding:8px 0;color:var(--ink-2)}
+.ok-line .ic{margin-top:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>команда фонда</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="CoordHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Обзор</a>
+    <a href="Pipeline.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/></svg>Заявки<span class="count">7</span></a>
+    <a href="Volunteers.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg>Волонтёры</a>
+    <a href="Shifts.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Смены<span class="count">2</span></a>
+    <a href="Signals.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg>Сигналы<span class="count">4</span></a>
+    <a class="is-active" aria-current="page" href="Builder.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Обучение</a>
+    <a href="Reports.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Отчёты</a>
+    <a href="Admin.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Настройки</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="Home.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид волонтёра</a>
+    <div class="pillbox">
+      <button class="iconbtn" type="button" aria-label="Уведомления, 5 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <span class="avatar av-b" aria-label="Ольга Лебедева, координатор волонтёров">ОЛ</span>
+    </div>
+  </div>
+</header>
+
+<nav class="chips" aria-label="Обучение" style="margin:-12px 0 28px">
+  <a class="chip" href="Builder.dc.html">Уроки и треки</a>
+  <a class="chip is-on" aria-current="page" href="Knowledge.dc.html">База знаний</a>
+  <a class="chip" href="Scenarios.dc.html">Сценарии тренажёра</a>
+  <a class="chip" href="Studio.dc.html">Вебинары</a>
+</nav>
+
+<div class="demo" role="group" aria-label="Состояния для показа">
+  <span class="demo-cap">Показать:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<div class="head">
+  <div>
+    <p class="eyebrow" style="margin:0 0 8px">Инструктор: Ольга Лебедева</p>
+    <h1 class="h1">База знаний</h1>
+    <p class="lead">ИИ-наставник отвечает волонтёрам только по этим материалам. Нет ответа — передаёт вопрос координатору.</p>
+  </div>
+  <a class="btn btn-secondary" href="Mentor.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>Наставник глазами волонтёра</a>
+</div>
+
+<div class="grid-3">
+  <div class="kpi"><span class="blob blob-v" aria-hidden="true"></span><span class="kpi-num">57</span><span class="kpi-label">вопросов волонтёров за неделю</span></div>
+  <div class="kpi"><span class="blob blob-g" aria-hidden="true"></span><span class="kpi-num">91%</span><span class="kpi-label">ответов нашлось в базе</span></div>
+  <div class="kpi"><span class="blob blob-o" aria-hidden="true"></span><span class="kpi-num">5</span><span class="kpi-label">вопросов передано координатору</span></div>
+</div>
+
+<div class="split section">
+  <div class="main-col stack" style="gap:24px">
+
+    <!-- ═══ Редактор ответа ═══ -->
+    <sc-if value="{{qaOpen}}" hint-placeholder-val="{{false}}">
+      <section class="card" aria-labelledby="qa-title">
+        <div class="row" style="justify-content:space-between">
+          <h2 class="h3" id="qa-title">Ответ для наставника</h2>
+          <button type="button" class="iconbtn" aria-label="Закрыть редактор ответа" onClick="{{closeQa}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+
+        <sc-if value="{{qaEdit}}" hint-placeholder-val="{{true}}">
+          <div class="stack" style="gap:16px;margin-top:12px">
+            <div class="field">
+              <label class="label" for="qa-q">Вопрос</label>
+              <input id="qa-q" class="input" type="text" value="{{qaQ}}" onChange="{{onQaQ}}">
+            </div>
+            <div class="field">
+              <div class="row" style="justify-content:space-between">
+                <label class="label" for="qa-a">Ответ</label>
+                <sc-if value="{{hasDraft}}" hint-placeholder-val="{{true}}">
+                  <button type="button" class="btn btn-ai btn-sm" onClick="{{aiDraft}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>Набросать по документам</button>
+                </sc-if>
+              </div>
+              <textarea id="qa-a" class="textarea" placeholder="Коротко и по делу, как сказали бы волонтёру лично" value="{{qaA}}" onChange="{{onQaA}}" aria-invalid="{{qaInvalid}}"></textarea>
+              <sc-if value="{{qaErr}}" hint-placeholder-val="{{false}}"><span class="p" role="alert" style="color:var(--red-ink)">Напишите ответ: без него наставнику нечего сказать.</span></sc-if>
+              <sc-if value="{{hasQaSrc}}" hint-placeholder-val="{{false}}">
+                <div class="row wrap" style="gap:8px;margin-top:4px">
+                  <span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span>
+                  <span class="p">Черновик по документам:</span>
+                  <sc-for list="{{qaSrc}}" as="qs" hint-placeholder-count="2"><span class="cite">{{qs}}</span></sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <div class="field">
+              <span class="label" id="qa-roles-label">К каким ролям относится</span>
+              <div class="chips" role="group" aria-labelledby="qa-roles-label">
+                <sc-for list="{{qaRoles}}" as="rl" hint-placeholder-count="4">
+                  <button type="button" class="{{rl.cls}}" aria-pressed="{{rl.pressed}}" onClick="{{rl.toggle}}">{{rl.label}}</button>
+                </sc-for>
+              </div>
+            </div>
+            <sc-if value="{{qaSafety}}" hint-placeholder-val="{{true}}">
+              <p class="row p" style="align-items:flex-start;margin:0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--violet);margin-top:2px"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg>Тема о безопасности детей: прежде чем наставник начнёт так отвечать, ответ проверит Ирина Власова.</p>
+            </sc-if>
+            <div class="row wrap">
+              <button type="button" class="btn btn-primary" onClick="{{reviewQa}}">Проверить и опубликовать</button>
+              <button type="button" class="btn btn-ghost" onClick="{{closeQa}}">Отмена</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{qaReview}}" hint-placeholder-val="{{false}}">
+          <div class="ai-box" style="margin-top:12px">
+            <div class="row wrap" style="justify-content:space-between">
+              <span class="h3">Так ответит наставник</span>
+              <span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span>
+            </div>
+            <p class="strong" style="margin:12px 0 8px">{{qaQ}}</p>
+            <div class="bubble bubble-ai" style="max-width:none;background:var(--paper)">{{qaA}}</div>
+            <div class="list" style="margin-top:10px">
+              <div class="ok-line"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--green-ink)"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>Не противоречит документам базы: Кодекс волонтёра, Памятка «Границы»</span></div>
+              <div class="ok-line"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--green-ink)"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>{{rolesLine}}</span></div>
+              <sc-if value="{{qaSafety}}" hint-placeholder-val="{{true}}">
+                <div class="ok-line"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--violet)"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg><span>Сначала проверит Ирина Власова. До её решения наставник отвечает «передал координатору».</span></div>
+              </sc-if>
+            </div>
+            <div class="row wrap" style="margin-top:14px">
+              <button type="button" class="btn btn-primary" onClick="{{publishQa}}">Опубликовать</button>
+              <button type="button" class="btn btn-ghost" onClick="{{backQa}}">Исправить</button>
+            </div>
+          </div>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <!-- ═══ Источники ═══ -->
+    <section aria-labelledby="src-title">
+      <div class="section-head" style="align-items:center">
+        <h2 class="h2" id="src-title">Источники</h2>
+        <div class="row wrap" style="gap:8px">
+          <button type="button" class="{{uploadCls}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3.5M7 8.5l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Загрузить файлы</button>
+          <button type="button" class="btn btn-secondary" aria-expanded="{{linkExpanded}}" onClick="{{toggleLink}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>Вставить ссылку</button>
+          <button type="button" class="btn btn-secondary" onClick="{{newAnswer}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg>Написать ответ</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <sc-if value="{{linkOpen}}" hint-placeholder-val="{{false}}">
+          <div class="row wrap" style="align-items:flex-end;padding-bottom:16px;margin-bottom:8px;border-bottom:1px solid var(--line)">
+            <div class="field grow" style="flex:1 1 320px">
+              <label class="label" for="kb-link">Ссылка на страницу или документ</label>
+              <input id="kb-link" class="input" type="url" placeholder="https://" value="{{link}}" onChange="{{onLink}}">
+            </div>
+            <button type="button" class="btn btn-secondary" onClick="{{addLink}}">Добавить</button>
+            <button type="button" class="btn btn-ghost" onClick="{{toggleLink}}">Отмена</button>
+          </div>
+        </sc-if>
+
+        <div class="scroll-x">
+          <div class="tbl tbl-min" style="border-top:0">
+            <div class="tbl-row tbl-head src-cols"><span>Источник</span><span>Статус</span><span>Обновлено</span><span>Отвечает</span></div>
+            <sc-for list="{{sources}}" as="sr" hint-placeholder-count="6">
+              <div class="tbl-row src-cols">
+                <div class="row" style="gap:12px">
+                  <span class="bt" aria-hidden="true">
+                    <sc-if value="{{sr.isFile}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></sc-if>
+                    <sc-if value="{{sr.isAcademy}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></sc-if>
+                    <sc-if value="{{sr.isMsg}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></sc-if>
+                    <sc-if value="{{sr.isBook}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></sc-if>
+                    <sc-if value="{{sr.isLink}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg></sc-if>
+                  </span>
+                  <div class="grow">
+                    <span class="li-title" style="display:block;overflow-wrap:anywhere">{{sr.name}}</span>
+                    <span class="meta">{{sr.kind}}</span>
+                  </div>
+                </div>
+                <span class="{{sr.dotCls}}">{{sr.statusLabel}}</span>
+                <span class="p num">{{sr.date}}</span>
+                <span class="row" style="gap:10px"><span class="{{sr.avCls}}" aria-hidden="true">{{sr.ini}}</span><span class="p">{{sr.owner}}</span></span>
+
+                <sc-if value="{{sr.isError}}" hint-placeholder-val="{{false}}">
+                  <div class="err-row" role="alert">
+                    <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg>
+                    <span class="grow" style="flex:1 1 300px">{{sr.reason}}</span>
+                    <button type="button" class="btn btn-secondary btn-sm" onClick="{{sr.retry}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3.5M7 8.5l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Загрузить заново</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{sr.hasList}}" hint-placeholder-val="{{false}}">
+                  <div class="sub-list">
+                    <button type="button" class="btn btn-ghost btn-sm" style="margin-left:-14px" aria-expanded="{{sr.listExpanded}}" onClick="{{sr.toggleList}}">{{sr.listLabel}}</button>
+                    <sc-if value="{{sr.listOpen}}" hint-placeholder-val="{{false}}">
+                      <div class="list">
+                        <sc-for list="{{sr.items}}" as="it" hint-placeholder-count="3">
+                          <div class="li" style="padding:10px 0;gap:12px">
+                            <span class="grow">{{it.q}}</span>
+                            <sc-if value="{{it.isNew}}" hint-placeholder-val="{{false}}"><span class="{{it.dotCls}}">{{it.status}}</span></sc-if>
+                            <span class="meta num">{{it.date}}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                      <p class="meta" style="margin:4px 0 0">{{sr.moreLabel}}</p>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Проверка ответа ═══ -->
+    <section aria-labelledby="check-title">
+      <div class="section-head">
+        <div class="row" style="gap:10px"><h2 class="h2" id="check-title">Проверка ответа</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+      </div>
+      <div class="card">
+        <p class="p">Спросите как волонтёр — увидите ответ наставника и фрагменты базы, из которых он собран.</p>
+        <div class="ask-row">
+          <label for="check-q" class="sr">Вопрос волонтёра</label>
+          <input id="check-q" class="input" type="text" placeholder="Что делать, если ребёнок…" value="{{checkText}}" onChange="{{onCheck}}">
+          <button type="button" class="btn btn-ai" onClick="{{ask}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Спросить как волонтёр</button>
+        </div>
+        <div class="chips" role="group" aria-label="Примеры вопросов" style="margin-top:10px">
+          <sc-for list="{{checkPrompts}}" as="cp" hint-placeholder-count="3">
+            <button type="button" class="{{cp.cls}}" aria-pressed="{{cp.pressed}}" onClick="{{cp.pick}}">{{cp.label}}</button>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{checkRan}}" hint-placeholder-val="{{true}}">
+          <hr class="divider" style="margin:22px 0">
+          <sc-if value="{{hasAnswer}}" hint-placeholder-val="{{true}}">
+            <div class="split" style="gap:24px 32px">
+              <div class="main-col" style="flex-basis:380px">
+                <p class="eyebrow" style="margin:0 0 10px">Ответ наставника</p>
+                <div class="bubble bubble-ai" style="max-width:none">{{answerText}}</div>
+                <div class="row wrap" style="margin-top:14px">
+                  <sc-if value="{{verdictNone}}" hint-placeholder-val="{{true}}">
+                    <button type="button" class="btn btn-secondary btn-sm" onClick="{{markOk}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Ответ верный</button>
+                    <button type="button" class="btn btn-ghost btn-sm" onClick="{{fixAnswer}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg>Исправить ответ</button>
+                  </sc-if>
+                  <sc-if value="{{verdictOk}}" hint-placeholder-val="{{false}}"><span class="dot dot-green">Отмечено: ответ верный</span></sc-if>
+                </div>
+              </div>
+              <div class="side-col" style="flex-basis:280px">
+                <p class="eyebrow" style="margin:0 0 4px">Из каких фрагментов</p>
+                <div class="list">
+                  <sc-for list="{{fragments}}" as="fr" hint-placeholder-count="3">
+                    <div class="frag">
+                      <div class="row wrap" style="gap:4px 10px"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--mute)"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span class="strong">{{fr.doc}}</span><span class="meta">{{fr.where}}</span></div>
+                      <p class="p" style="margin-top:6px">{{fr.pre}}<mark class="hl">{{fr.hl}}</mark>{{fr.post}}</p>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{noAnswer}}" hint-placeholder-val="{{false}}">
+            <div class="row wrap" style="align-items:flex-start">
+              <svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--orange-ink)"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/></svg>
+              <div class="grow" style="flex:1 1 320px">
+                <span class="li-title" style="display:block">В базе нет ответа</span>
+                <span class="p">Наставник скажет волонтёру, что передал вопрос координатору.</span>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onClick="{{writeFromCheck}}">Написать ответ</button>
+            </div>
+          </sc-if>
+        </sc-if>
+      </div>
+    </section>
+  </div>
+
+  <aside class="side-col stack" style="gap:24px" aria-label="Пробелы базы и настройки">
+    <!-- ═══ Вопросы без ответа ═══ -->
+    <section class="card" aria-labelledby="gaps-title" style="padding:22px 24px">
+      <div class="row wrap" style="justify-content:space-between">
+        <h2 class="h3" id="gaps-title">Вопросы без ответа</h2>
+        <span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span>
+      </div>
+      <p class="p" style="margin-top:4px">Наставник не нашёл ответа в базе и передал их координатору. За 30 дней.</p>
+      <sc-if value="{{hasFlash}}" hint-placeholder-val="{{false}}">
+        <div class="notice" role="status"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="margin-top:2px"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg><span>{{flash}}</span></div>
+      </sc-if>
+      <div class="list" style="margin-top:6px">
+        <sc-for list="{{gaps}}" as="g" hint-placeholder-count="3">
+          <div class="li" style="flex-direction:column;align-items:stretch;gap:8px">
+            <span class="li-title">{{g.q}}</span>
+            <div class="row wrap" style="justify-content:space-between;gap:8px">
+              <span class="p num">{{g.timesLabel}}</span>
+              <sc-if value="{{g.canWrite}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-subtle btn-sm" onClick="{{g.write}}">Написать ответ</button></sc-if>
+              <sc-if value="{{g.writing}}" hint-placeholder-val="{{false}}"><span class="dot dot-blue">Пишете ответ</span></sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{noGaps}}" hint-placeholder-val="{{false}}">
+        <div class="empty" style="padding:24px 8px 8px">
+          <svg class="ic ic-xl" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--green-ink)"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>
+          <p class="p">На все вопросы есть ответы.</p>
+        </div>
+      </sc-if>
+    </section>
+
+    <!-- ═══ Настройки ═══ -->
+    <section class="card" aria-labelledby="set-title" style="padding:22px 24px">
+      <h2 class="h3" id="set-title">Кто может править</h2>
+      <div class="list" style="margin-top:6px">
+        <div class="li">
+          <span class="avatar avatar-sm av-b" aria-hidden="true">ОЛ</span>
+          <div class="grow"><span class="li-title" style="display:block">Координаторы</span><span class="p">Ольга Лебедева</span></div>
+          <span class="p">Всегда</span>
+        </div>
+        <sc-for list="{{editors}}" as="ed" hint-placeholder-count="2">
+          <div class="li">
+            <span class="{{ed.avCls}}" aria-hidden="true">{{ed.ini}}</span>
+            <div class="grow"><span class="li-title" style="display:block">{{ed.role}}</span><span class="p">{{ed.name}}</span></div>
+            <button type="button" class="{{ed.cls}}" aria-pressed="{{ed.pressed}}" aria-label="{{ed.aria}}" onClick="{{ed.toggle}}"></button>
+          </div>
+        </sc-for>
+      </div>
+      <hr class="divider">
+      <div class="row" style="align-items:flex-start">
+        <div class="grow">
+          <span class="li-title" style="display:block">Темы о безопасности детей</span>
+          <span class="p">Новые ответы сначала проверяет психолог</span>
+        </div>
+        <button type="button" class="{{psychCls}}" aria-pressed="{{psychPressed}}" aria-label="Новые ответы о безопасности детей проверяет психолог" onClick="{{togglePsych}}"></button>
+      </div>
+    </section>
+  </aside>
+</div>
+
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = this.fresh('sources');
+  }
+  gapsDef() {
+    return [
+      { id: 'museum', q: 'Можно ли взять детей из группы в музей в выходной?', times: 4, safety: true,
+        draft: 'Только как выезд фонда, не самому. Предложи идею координатору: выезды согласуют с ЦССУ и планируют заранее. С группой едут минимум два взрослых, список детей и телефоны сопровождающих — у координатора.',
+        src: ['Кодекс волонтёра.pdf', 'Памятка «Границы».pdf'] },
+      { id: 'sick', q: 'Что делать, если ребёнок пришёл больной?', times: 3, safety: true,
+        draft: 'Не лечи сам и не давай лекарств. Скажи ведущему: он решит, остаётся ли ребёнок на занятии, и свяжется с сопровождающим. Если ребёнку плохо прямо сейчас — зови ведущего, при угрозе жизни звони 112.',
+        src: ['Кодекс волонтёра.pdf', 'Ответы координаторов'] },
+      { id: 'gift', q: 'Можно ли дарить детям подарки на день рождения?', times: 2, safety: false,
+        draft: 'Личные подарки отдельным детям не дарим. Другим детям обидно, а подарок от одного взрослого создаёт особую связь. Поздравляем всей группой: открыткой или общим праздником на занятии. Идею обсуди с ведущим.',
+        src: ['Памятка «Границы».pdf'] }
+    ];
+  }
+  answersDef() {
+    return {
+      phone: {
+        text: 'Скажи честно и тепло: «У нас правило для всех взрослых — личные номера детям не даём». Признай, что ребёнку важно не потерять связь, и предложи разрешённый путь: открытку через координатора. Если просьба повторяется, расскажи координатору.',
+        frags: [
+          { doc: 'Памятка «Границы».pdf', where: 'с. 2', pre: '', hl: 'Личные номера телефонов и страницы в соцсетях детям не даём', post: ' — это правило для всех взрослых фонда, без исключений.' },
+          { doc: 'Кодекс волонтёра.pdf', where: 'раздел 4', pre: 'Переписка с ребёнком возможна ', hl: 'только в каналах фонда, где её видит второй взрослый', post: '.' },
+          { doc: 'Ответы координаторов', where: '14 окт.', pre: 'Если ребёнок просит контакт, ', hl: 'предложи передать открытку через координатора', post: ' и скажи, когда придёшь в следующий раз.' }
+        ]
+      },
+      hug: {
+        text: 'Можно, если ребёнок сам просит: коротко, сбоку и на виду у других взрослых. Если ребёнок отстраняется, не настаивай.',
+        frags: [
+          { doc: 'Памятка «Границы».pdf', where: 'с. 3', pre: 'Объятия — ', hl: 'только по инициативе ребёнка, коротко и сбоку', post: '. Детей на колени не сажаем.' },
+          { doc: 'Кодекс волонтёра.pdf', where: 'раздел 2', pre: 'Любое общение с ребёнком ', hl: 'проходит на виду у других взрослых', post: '.' }
+        ]
+      }
+    };
+  }
+  fresh(mode) {
+    const base = {
+      mode: 'sources', linkOpen: false, link: '', extra: [], seq: 1, regStatus: 'error',
+      qaOpen: false, qaGap: '', qaQ: '', qaA: '', qaSrc: [], qaRoles: { all: true }, qaStep: 'edit', qaErr: false,
+      answered: [], qaListOpen: false, psych: true, psyEdit: true, headEdit: false, flash: '',
+      checkText: 'Ребёнок просит мой номер телефона. Что ответить?', checkKey: 'phone', ranKey: '', checkRan: false, verdict: ''
+    };
+    if (mode === 'gaps') {
+      const g = this.gapsDef()[0];
+      return { ...base, mode: 'gaps', qaOpen: true, qaGap: g.id, qaQ: g.q };
+    }
+    if (mode === 'check') return { ...base, mode: 'check', checkRan: true, ranKey: 'phone' };
+    return base;
+  }
+  renderVals() {
+    const s = this.state;
+    const plural = (n, a, b, c) => {
+      const m10 = n % 10, m100 = n % 100;
+      return m10 === 1 && m100 !== 11 ? a : (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? b : c);
+    };
+    const gapsAll = this.gapsDef();
+    const gap = gapsAll.find((g) => g.id === s.qaGap) || null;
+    const openQa = (patch) => this.setState({ qaOpen: true, qaGap: '', qaQ: '', qaA: '', qaSrc: [], qaRoles: { all: true }, qaStep: 'edit', qaErr: false, flash: '', ...patch });
+
+    const modeDefs = [
+      { id: 'sources', label: 'Источники' },
+      { id: 'gaps', label: 'Вопросы без ответа' },
+      { id: 'check', label: 'Проверка ответа' }
+    ];
+
+    // Источники
+    const qaTotal = 36 + s.answered.length;
+    const qaItems = s.answered.map((a) => ({
+      q: a.q, isNew: true, date: 'Сегодня',
+      status: a.pending ? 'На проверке у психолога' : 'Новый',
+      dotCls: a.pending ? 'dot dot-yellow' : 'dot dot-green'
+    })).concat([
+      { q: 'Можно ли фотографировать детей на занятии?', isNew: false, status: '', dotCls: 'dot', date: '15 окт.' },
+      { q: 'Ребёнок просит мой номер телефона', isNew: false, status: '', dotCls: 'dot', date: '14 окт.' },
+      { q: 'Как отменить смену, если заболел?', isNew: false, status: '', dotCls: 'dot', date: '9 окт.' }
+    ]);
+    const src = [
+      { name: 'Кодекс волонтёра.pdf', kind: 'PDF', icon: 'file', status: 'ok', date: '2 окт.', owner: 'Наталья Гордеева', ini: 'НГ', av: 'av-y' },
+      { name: 'Памятка «Границы».pdf', kind: 'PDF', icon: 'file', status: 'ok', date: '18 сент.', owner: 'Ирина Власова', ini: 'ИВ', av: 'av-v' },
+      { name: 'Регламент выездов в ЦССУ.docx', kind: 'Документ Word', icon: 'file', status: s.regStatus, date: s.regStatus === 'error' ? '20 окт.' : 'Сегодня', owner: 'Ольга Лебедева', ini: 'ОЛ', av: 'av-b',
+        reason: 'Внутри только сканы страниц, текст не распознать. Загрузите файл с текстом.' },
+      { name: 'Уроки Академии', kind: '12 уроков', icon: 'academy', status: 'updating', date: 'Сегодня, 10:40', owner: 'Ольга Лебедева', ini: 'ОЛ', av: 'av-b' },
+      { name: 'Ответы координаторов', kind: qaTotal + ' ' + plural(qaTotal, 'вопрос-ответ', 'вопроса-ответа', 'вопросов-ответов'), icon: 'message', status: 'ok',
+        date: s.answered.length ? 'Сегодня' : '19 окт.', owner: 'Ольга Лебедева', ini: 'ОЛ', av: 'av-b', list: true },
+      { name: 'Частые вопросы', kind: 'Вопросы-ответы', icon: 'book', status: 'ok', date: '1 окт.', owner: 'Ольга Лебедева', ini: 'ОЛ', av: 'av-b' }
+    ].concat(s.extra);
+    const statusMap = {
+      ok: { dot: 'dot dot-green', label: 'Проиндексировано' },
+      updating: { dot: 'dot dot-yellow', label: 'Обновляется' },
+      error: { dot: 'dot dot-red', label: 'Ошибка чтения' }
+    };
+    const sources = src.map((r) => ({
+      name: r.name, kind: r.kind, date: r.date, owner: r.owner, ini: r.ini, avCls: 'avatar avatar-sm ' + r.av,
+      isFile: r.icon === 'file', isAcademy: r.icon === 'academy', isMsg: r.icon === 'message', isBook: r.icon === 'book', isLink: r.icon === 'link',
+      dotCls: statusMap[r.status].dot, statusLabel: statusMap[r.status].label,
+      isError: r.status === 'error', reason: r.reason || '',
+      retry: () => this.setState({ regStatus: 'updating' }),
+      hasList: !!r.list, listOpen: s.qaListOpen, listExpanded: s.qaListOpen ? 'true' : 'false',
+      listLabel: s.qaListOpen ? 'Скрыть вопросы' : 'Показать вопросы',
+      toggleList: () => this.setState({ qaListOpen: !s.qaListOpen }),
+      items: r.list ? qaItems : [],
+      moreLabel: 'И ещё 33 в базе'
+    }));
+
+    // Вопросы без ответа
+    const gaps = gapsAll.filter((g) => !s.answered.some((a) => a.id === g.id)).map((g) => {
+      const writing = s.qaOpen && s.qaGap === g.id;
+      return {
+        q: g.q,
+        timesLabel: 'Спрашивали ' + g.times + ' ' + plural(g.times, 'раз', 'раза', 'раз'),
+        writing, canWrite: !writing,
+        write: () => openQa({ qaGap: g.id, qaQ: g.q })
+      };
+    });
+
+    // Редактор ответа
+    const roleDefs = [['all', 'Все волонтёры'], ['assist', 'Ассистенты мастерских'], ['lead', 'Ведущие'], ['cand', 'Кандидаты']];
+    const chosenRoles = roleDefs.filter((r) => s.qaRoles[r[0]]).map((r) => r[1]);
+    const qaSafety = !!(s.psych && gap && gap.safety);
+
+    // Проверка ответа
+    const answers = this.answersDef();
+    const giftAns = s.answered.find((a) => a.id === 'gift');
+    let res = null;
+    if (s.ranKey === 'phone' || s.ranKey === 'hug') res = answers[s.ranKey];
+    if (s.ranKey === 'gift' && giftAns && !giftAns.pending) {
+      const cut = giftAns.a.indexOf('. ');
+      res = {
+        text: giftAns.a,
+        frags: [{ doc: 'Ответы координаторов', where: 'сегодня', pre: '', hl: cut > 0 ? giftAns.a.slice(0, cut + 1) : giftAns.a, post: cut > 0 ? giftAns.a.slice(cut + 1) : '' }]
+      };
+    }
+    const prompts = [
+      { key: 'phone', label: 'Просит номер телефона', text: 'Ребёнок просит мой номер телефона. Что ответить?' },
+      { key: 'hug', label: 'Можно ли обнять', text: 'Можно ли обнять ребёнка, если он сам просит?' },
+      { key: 'gift', label: 'Подарки на день рождения', text: 'Можно ли дарить детям подарки на день рождения?' }
+    ];
+
+    return {
+      modes: modeDefs.map((m) => ({
+        ...m,
+        cls: m.id === s.mode ? 'is-on' : '',
+        pressed: m.id === s.mode ? 'true' : 'false',
+        pick: () => this.setState(this.fresh(m.id))
+      })),
+
+      uploadCls: s.qaOpen ? 'btn btn-secondary' : 'btn btn-primary',
+      linkOpen: s.linkOpen,
+      linkExpanded: s.linkOpen ? 'true' : 'false',
+      toggleLink: () => this.setState({ linkOpen: !s.linkOpen, link: '' }),
+      link: s.link,
+      onLink: (e) => this.setState({ link: e.target.value }),
+      addLink: () => this.setState({
+        extra: s.extra.concat([{ name: s.link.trim() || 'Ссылка без названия', kind: 'Ссылка', icon: 'link', status: 'updating', date: 'Сегодня', owner: 'Ольга Лебедева', ini: 'ОЛ', av: 'av-b' }]),
+        linkOpen: false, link: ''
+      }),
+      newAnswer: () => openQa({}),
+      sources,
+
+      gaps,
+      noGaps: gaps.length === 0,
+      hasFlash: !!s.flash,
+      flash: s.flash,
+
+      qaOpen: s.qaOpen,
+      qaEdit: s.qaStep === 'edit',
+      qaReview: s.qaStep === 'review',
+      qaQ: s.qaQ,
+      qaA: s.qaA,
+      onQaQ: (e) => this.setState({ qaQ: e.target.value }),
+      onQaA: (e) => this.setState({ qaA: e.target.value, qaErr: false }),
+      qaErr: s.qaErr,
+      qaInvalid: s.qaErr ? 'true' : 'false',
+      hasDraft: !!gap,
+      aiDraft: () => { if (gap) this.setState({ qaA: gap.draft, qaSrc: gap.src, qaErr: false }); },
+      hasQaSrc: s.qaSrc.length > 0,
+      qaSrc: s.qaSrc,
+      qaRoles: roleDefs.map((r) => ({
+        label: r[1],
+        cls: s.qaRoles[r[0]] ? 'chip is-on' : 'chip',
+        pressed: s.qaRoles[r[0]] ? 'true' : 'false',
+        toggle: () => this.setState({ qaRoles: { ...s.qaRoles, [r[0]]: !s.qaRoles[r[0]] } })
+      })),
+      rolesLine: chosenRoles.length ? 'Видят: ' + chosenRoles.join(', ').toLowerCase() : 'Роли не выбраны: ответ увидят все волонтёры',
+      qaSafety,
+      reviewQa: () => {
+        if (!s.qaA.trim()) this.setState({ qaErr: true });
+        else this.setState({ qaStep: 'review', qaErr: false });
+      },
+      backQa: () => this.setState({ qaStep: 'edit' }),
+      closeQa: () => this.setState({ qaOpen: false, qaStep: 'edit', qaErr: false }),
+      publishQa: () => {
+        const id = s.qaGap || ('c' + s.seq);
+        const pending = qaSafety;
+        this.setState({
+          answered: [{ id, q: s.qaQ.trim() || 'Вопрос без названия', a: s.qaA.trim(), pending }].concat(s.answered),
+          seq: s.seq + 1, qaOpen: false, qaStep: 'edit', qaListOpen: true,
+          flash: pending
+            ? 'Ответ ушёл Ирине Власовой на проверку. Вопрос перенесён в «Ответы координаторов».'
+            : 'Ответ опубликован. Наставник отвечает так с этой минуты.'
+        });
+      },
+
+      editors: [
+        { key: 'psyEdit', role: 'Психолог фонда', name: 'Ирина Власова', ini: 'ИВ', av: 'av-v' },
+        { key: 'headEdit', role: 'Руководитель программ', name: 'Наталья Гордеева', ini: 'НГ', av: 'av-y' }
+      ].map((e) => ({
+        role: e.role, name: e.name, ini: e.ini, avCls: 'avatar avatar-sm ' + e.av,
+        cls: s[e.key] ? 'toggle is-on' : 'toggle',
+        pressed: s[e.key] ? 'true' : 'false',
+        aria: e.role + ' может править базу',
+        toggle: () => this.setState({ [e.key]: !s[e.key] })
+      })),
+      psychCls: s.psych ? 'toggle is-on' : 'toggle',
+      psychPressed: s.psych ? 'true' : 'false',
+      togglePsych: () => this.setState({ psych: !s.psych }),
+
+      checkText: s.checkText,
+      onCheck: (e) => this.setState({ checkText: e.target.value, checkKey: 'custom' }),
+      checkPrompts: prompts.map((p) => ({
+        label: p.label,
+        cls: s.checkKey === p.key ? 'chip is-on' : 'chip',
+        pressed: s.checkKey === p.key ? 'true' : 'false',
+        pick: () => this.setState({ checkText: p.text, checkKey: p.key })
+      })),
+      ask: () => this.setState({ checkRan: true, ranKey: s.checkKey, verdict: '' }),
+      checkRan: s.checkRan,
+      hasAnswer: s.checkRan && !!res,
+      noAnswer: s.checkRan && !res,
+      answerText: res ? res.text : '',
+      fragments: res ? res.frags : [],
+      verdictNone: s.verdict === '',
+      verdictOk: s.verdict === 'ok',
+      markOk: () => this.setState({ verdict: 'ok' }),
+      fixAnswer: () => openQa({ qaQ: s.checkText, qaA: res ? res.text : '' }),
+      writeFromCheck: () => openQa({ qaQ: s.checkText, qaGap: s.ranKey === 'gift' ? 'gift' : '' })
+    };
+  }
+}
+</script>
+</body>
+</html>

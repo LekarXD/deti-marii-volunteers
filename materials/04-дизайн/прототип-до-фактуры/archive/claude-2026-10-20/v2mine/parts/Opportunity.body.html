@@ -1,0 +1,127 @@
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<section class="card-hero" aria-labelledby="opp-title">
+  <div class="hero-grid">
+    <div class="grow">
+      <h1 class="hero-title" id="opp-title">Ассистент в мастерской живописи</h1>
+      <p class="hero-day">Каждую субботу, 12:00–14:00</p>
+      <p class="lead">Мастерская на Дмитровке, «Подсолнухи», 8–11 лет</p>
+
+      <sc-if value="{{showSignup}}" hint-placeholder-val="{{true}}">
+        <button type="button" class="btn btn-primary btn-lg" style="margin-top:28px" onClick="{{startPick}}">Записаться</button>
+      </sc-if>
+
+      <sc-if value="{{showPick}}" hint-placeholder-val="{{false}}">
+        <h2 class="h3" id="pick-title" style="margin-top:28px">С какой субботы начнёшь?</h2>
+        <div class="chips" role="radiogroup" aria-labelledby="pick-title" style="margin-top:12px">
+          <sc-for list="{{dates}}" as="d" hint-placeholder-count="3">
+            <button type="button" role="radio" aria-checked="{{d.checked}}" class="{{d.cls}}" onClick="{{d.pick}}">{{d.title}}</button>
+          </sc-for>
+        </div>
+        <div class="row wrap" style="margin-top:20px">
+          <button type="button" class="btn btn-primary btn-lg" onClick="{{confirm}}">Подтвердить</button>
+          <button type="button" class="btn btn-ghost btn-lg" onClick="{{back}}">Назад</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showDone}}" hint-placeholder-val="{{false}}">
+        <div class="hero-note" role="status">
+          <span class="row strong grow"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>{{doneText}}</span>
+          <a class="btn btn-secondary btn-sm" href="Schedule.dc.html">Мои смены</a>
+          <button type="button" class="btn btn-ghost btn-sm" onClick="{{startPick}}">Изменить</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showWaitOffer}}" hint-placeholder-val="{{false}}">
+        <p class="hero-line">Все 4 места заняты</p>
+        <button type="button" class="btn btn-primary btn-lg" style="margin-top:20px" onClick="{{joinWait}}">Встать в лист ожидания</button>
+      </sc-if>
+
+      <sc-if value="{{showWaiting}}" hint-placeholder-val="{{false}}">
+        <div class="hero-note" role="status">
+          <span class="row strong grow"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Ты в листе ожидания</span>
+          <button type="button" class="btn btn-ghost btn-sm" onClick="{{leaveWait}}">Выйти из листа</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showLocked}}" hint-placeholder-val="{{false}}">
+        <p class="hero-line" id="lock-why"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>Запись откроется после «Первых шагов»</p>
+        <a class="btn btn-primary btn-lg" href="Academy.dc.html" style="margin-top:20px">Продолжить обучение</a>
+      </sc-if>
+    </div>
+    <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="do-title">
+  <div class="section-head"><h2 class="h2" id="do-title">Что будешь делать</h2></div>
+  <div class="grid-3">
+    <div class="card do-card">
+      <span class="art art-y" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg></span>
+      <h3 class="h3">Готовить мастерскую к занятию</h3>
+    </div>
+    <div class="card do-card">
+      <span class="art art-o" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></span>
+      <h3 class="h3">Помогать детям, кому нужна рука рядом</h3>
+    </div>
+    <div class="card do-card">
+      <span class="art art-b" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></span>
+      <h3 class="h3">Звать в работу тех, кто в стороне</h3>
+    </div>
+  </div>
+  <div class="reqs" role="list" aria-label="Что нужно для записи">
+    <sc-for list="{{reqs}}" as="r" hint-placeholder-count="3">
+      <span class="req" role="listitem">
+        <sc-if value="{{r.ok}}" hint-placeholder-val="{{true}}"><span class="req-ic req-ok" role="img" aria-label="Есть"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span></sc-if>
+        <sc-if value="{{r.notOk}}" hint-placeholder-val="{{false}}"><span class="req-ic req-wait" role="img" aria-label="Ещё нет"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></sc-if>
+        {{r.text}}
+      </span>
+    </sc-for>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="why-title">
+  <div class="section-head">
+    <div class="row" style="gap:12px"><h2 class="h2" id="why-title">Почему тебе подходит</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+    <button type="button" class="btn btn-ghost btn-sm" aria-expanded="{{partsExpanded}}" onClick="{{toggleParts}}">{{partsLabel}}</button>
+  </div>
+  <div class="ai-box why">
+    <div class="why-score" role="img" aria-label="Совпадение 94 из 100"><b>94</b><span>из 100</span></div>
+    <ul class="why-list">
+      <sc-for list="{{reasons}}" as="r" hint-placeholder-count="3">
+        <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>{{r}}</li>
+      </sc-for>
+    </ul>
+    <sc-if value="{{showParts}}" hint-placeholder-val="{{false}}">
+      <div class="parts">
+        <sc-for list="{{parts}}" as="p" hint-placeholder-count="6">
+          <div class="part">
+            <span class="strong">{{p.label}}</span>
+            <div class="bar bar-violet" aria-hidden="true"><i style="{{p.style}}"></i></div>
+            <span class="num">{{p.val}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="team-title">
+  <div class="section-head">
+    <h2 class="h2" id="team-title">Команда</h2>
+    <a class="btn btn-ghost btn-sm" href="Messages.dc.html">Написать Ольге</a>
+  </div>
+  <div class="card team">
+    <sc-for list="{{team}}" as="u" hint-placeholder-count="3">
+      <div class="person">
+        <span class="{{u.av}}" aria-hidden="true">{{u.ini}}</span>
+        <span><span class="strong" style="display:block">{{u.name}}</span><span class="p">{{u.role}}</span></span>
+      </div>
+    </sc-for>
+  </div>
+</section>

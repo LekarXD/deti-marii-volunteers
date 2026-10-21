@@ -1,0 +1,28 @@
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-title{margin:0;font-size:48px;font-weight:600;line-height:1.04;letter-spacing:-.035em;text-wrap:balance}
+.hero-day{margin:16px 0 0;font-size:30px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center;color:var(--ink)}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.hero-note{margin-top:28px;padding:18px 22px;border-radius:22px;background:rgba(255,255,255,.7);display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.hero-line{display:flex;align-items:center;gap:10px;margin:24px 0 0;font-size:18px;font-weight:600}
+.do-card{display:flex;flex-direction:column;gap:18px}
+.do-card .h3{font-size:20px}
+.reqs{display:flex;flex-wrap:wrap;align-items:center;gap:14px 32px;margin-top:24px}
+.req{display:inline-flex;align-items:center;gap:12px;font-size:17px;color:var(--ink)}
+.req-ic{width:36px;height:36px;flex:0 0 36px;border-radius:50%;display:grid;place-items:center}
+.req-ok{background:var(--green-tint);color:var(--green-ink)}
+.req-wait{background:var(--orange-tint);color:var(--orange-ink)}
+.why{display:flex;flex-wrap:wrap;align-items:center;gap:24px 48px;padding:32px 36px}
+.why-score{display:flex;align-items:baseline;gap:10px}
+.why-score b{font-size:72px;font-weight:600;line-height:1;letter-spacing:-.04em;color:var(--violet);font-variant-numeric:tabular-nums}
+.why-score span{font-size:18px;color:var(--ink-2)}
+.why-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;flex:1 1 360px}
+.why-list li{display:flex;align-items:center;gap:12px;font-size:18px;color:var(--ink)}
+.why-list .ic{color:var(--violet)}
+.parts{display:flex;flex-direction:column;gap:12px;flex:1 1 100%;padding-top:20px;border-top:1px solid #E4DBFA}
+.part{display:grid;grid-template-columns:150px minmax(0,1fr) 84px;align-items:center;gap:16px}
+.part .num{text-align:right}
+.bar-violet > i{background:var(--violet)}
+.team{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px}
+.person{display:flex;align-items:center;gap:16px;min-width:0}
+@media (max-width:720px){.hero-art{display:none}.hero-title{font-size:34px}.hero-day{font-size:24px}.why{padding:24px 22px}.part{grid-template-columns:110px minmax(0,1fr) 72px;gap:10px}}

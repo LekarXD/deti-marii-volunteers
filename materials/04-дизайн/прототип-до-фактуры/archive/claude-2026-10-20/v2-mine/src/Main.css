@@ -1,0 +1,16 @@
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-title{margin:10px 0 0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center;color:var(--ink)}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.cols-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.cols-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.step{display:flex;flex-direction:column;gap:28px;color:inherit;text-decoration:none}
+.step-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.step-n{font-size:52px;font-weight:600;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums}
+.tile{display:flex;align-items:center;gap:20px;color:inherit;text-decoration:none}
+.tile .h3{font-size:22px}
+.step:hover,.tile:hover{text-decoration:none;box-shadow:inset 0 0 0 1px var(--line-2)}
+.step:hover .h3,.tile:hover .h3{color:var(--blue)}
+.go{margin-left:auto;color:var(--quiet)}
+@media (max-width:900px){.cols-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:720px){.cols-2,.cols-3{grid-template-columns:minmax(0,1fr)}.hero-title{font-size:38px}.hero-art{display:none}}

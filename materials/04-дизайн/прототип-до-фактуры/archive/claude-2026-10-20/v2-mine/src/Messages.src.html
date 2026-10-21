@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сообщения — Опора</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--HELMET-->
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>волонтёры «Дети Марии»</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="Home.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>Главная</a>
+    <a href="Catalog.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Возможности</a>
+    <a href="Schedule.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Мои смены</a>
+    <a href="Academy.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Академия</a>
+    <a class="is-active" aria-current="page" href="Messages.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Сообщения<span class="count">3</span></a>
+    <a href="Hours.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg>Мой путь</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="CoordHome.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид координатора</a>
+    <div class="pillbox">
+      <a class="iconbtn" href="Mentor.dc.html" aria-label="ИИ-наставник"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></a>
+      <button class="iconbtn" type="button" aria-label="Уведомления, 2 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <a href="Profile.dc.html" class="avatar av-o" aria-label="Профиль: Анна Соколова">АС</a>
+    </div>
+  </div>
+</header>
+
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="md" hint-placeholder-count="3">
+    <button type="button" class="{{md.cls}}" aria-pressed="{{md.pressed}}" onClick="{{md.pick}}">{{md.label}}</button>
+  </sc-for>
+</div>
+
+<h1 class="h1" style="margin-bottom:24px">Сообщения</h1>
+
+<div class="chat-layout">
+  <nav class="card dlg-card" aria-label="Диалоги">
+    <sc-for list="{{dialogs}}" as="d" hint-placeholder-count="4">
+      <button type="button" class="{{d.cls}}" aria-current="{{d.current}}" onClick="{{d.pick}}">
+        <sc-if value="{{d.isPerson}}" hint-placeholder-val="{{true}}"><span class="{{d.avc}}" aria-hidden="true">{{d.av}}</span></sc-if>
+        <sc-if value="{{d.isGroup}}" hint-placeholder-val="{{false}}"><span class="art art-o art-sm" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></span></sc-if>
+        <sc-if value="{{d.isChannel}}" hint-placeholder-val="{{false}}"><span class="art art-b art-sm" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></span></sc-if>
+        <span class="dlg-name">{{d.name}}</span>
+        <sc-if value="{{d.hasUnread}}" hint-placeholder-val="{{false}}"><span class="unread" aria-label="{{d.unreadAria}}">{{d.unread}}</span></sc-if>
+      </button>
+    </sc-for>
+  </nav>
+
+  <div class="stack" style="gap:16px">
+    <sc-if value="{{showSummary}}" hint-placeholder-val="{{true}}">
+      <section class="ai-box" aria-labelledby="sum-title">
+        <div class="row" style="gap:12px"><h2 class="h3" id="sum-title">Пока тебя не было</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+        <div style="margin-top:6px">
+          <div class="sum-row"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg><span class="strong">Занятие 31 октября начнётся в 11:00, а не в 12:00</span></div>
+          <div class="sum-row"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="17" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-5-5-9 10"/></svg><span class="strong">Елена просит помочь с рамками в субботу после занятия</span></div>
+          <div class="sum-row"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg><span class="strong">В субботу акварель по-сырому — нужен фартук</span></div>
+        </div>
+        <div class="row wrap" style="margin-top:12px;gap:8px 16px">
+          <sc-if value="{{notHelped}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary btn-sm" onClick="{{helpFrames}}">Я помогу с рамками</button></sc-if>
+          <sc-if value="{{helped}}" hint-placeholder-val="{{false}}"><span class="row strong" role="status"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Ответила в чат</span></sc-if>
+          <sc-if value="{{notCal}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-ghost btn-sm" onClick="{{addCal}}">Перенос — в календарь</button></sc-if>
+          <sc-if value="{{calDone}}" hint-placeholder-val="{{false}}"><span class="row strong" role="status"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>В календаре</span></sc-if>
+        </div>
+      </section>
+    </sc-if>
+
+    <section class="card chat" aria-labelledby="chat-title">
+      <div class="chat-head">
+        <sc-if value="{{chatIsPerson}}" hint-placeholder-val="{{false}}"><span class="{{chatAvc}}" aria-hidden="true">{{chatAv}}</span></sc-if>
+        <sc-if value="{{chatIsGroup}}" hint-placeholder-val="{{true}}"><span class="art art-o art-sm" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></span></sc-if>
+        <sc-if value="{{chatIsChannel}}" hint-placeholder-val="{{false}}"><span class="art art-b art-sm" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></span></sc-if>
+        <h2 class="h3 grow" id="chat-title">{{chatName}}</h2>
+        <sc-if value="{{chatIsGroup}}" hint-placeholder-val="{{true}}">
+          <span class="team" aria-label="Елена Карпова, Лиля Миронова, Ольга Лебедева и ты"><span class="avatar avatar-sm av-y" aria-hidden="true">ЕК</span><span class="avatar avatar-sm av-g" aria-hidden="true">ЛМ</span><span class="avatar avatar-sm av-b" aria-hidden="true">ОЛ</span><span class="avatar avatar-sm av-o" aria-hidden="true">АС</span></span>
+        </sc-if>
+      </div>
+
+      <div class="chat-body">
+        <sc-for list="{{msgs}}" as="m" hint-placeholder-count="5">
+          <sc-if value="{{m.isMore}}" hint-placeholder-val="{{false}}"><button type="button" class="btn btn-ghost btn-sm more-btn" onClick="{{m.showMore}}">{{m.text}}</button></sc-if>
+          <sc-if value="{{m.isDiv}}" hint-placeholder-val="{{false}}"><div class="msg-div" role="separator"><span>{{m.text}}</span></div></sc-if>
+          <sc-if value="{{m.isThem}}" hint-placeholder-val="{{true}}">
+            <div class="msg">
+              <span class="{{m.avc}}" aria-hidden="true">{{m.av}}</span>
+              <div class="msg-body">
+                <span class="msg-meta"><span class="msg-who">{{m.who}}</span><span class="meta">{{m.time}}</span></span>
+                <div class="bubble bubble-them">{{m.text}}</div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{m.isMe}}" hint-placeholder-val="{{false}}">
+            <div class="msg msg-me">
+              <div class="msg-body">
+                <span class="meta">{{m.time}}</span>
+                <div class="bubble bubble-me">{{m.text}}</div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{m.isPhoto}}" hint-placeholder-val="{{false}}">
+            <div class="msg msg-me">
+              <div class="msg-body">
+                <span class="meta">{{m.time}}</span>
+                <div class="photo-blur" role="img" aria-label="Фото с занятия, лица детей размыты">
+                  <svg class="ic ic-xl" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="17" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-5-5-9 10"/></svg>
+                  <span>Лица размыты</span>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{canWrite}}" hint-placeholder-val="{{true}}">
+        <div class="composer">
+          <sc-if value="{{hasPhoto}}" hint-placeholder-val="{{false}}">
+            <section class="warn" role="alert" aria-labelledby="warn-title">
+              <div class="warn-title"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg><h3 class="h3" id="warn-title">На фото видны лица детей</h3></div>
+              <p class="p" style="margin-top:8px">Фото детей в чатах не публикуем, даже в команде.</p>
+              <div class="row wrap" style="margin-top:14px">
+                <button type="button" class="btn btn-secondary" onClick="{{photoBlur}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>Размыть лица и отправить</button>
+                <button type="button" class="btn btn-ghost" onClick="{{cancelPhoto}}">Не отправлять</button>
+              </div>
+            </section>
+          </sc-if>
+          <div class="composer-row">
+            <button type="button" class="iconbtn" aria-label="Прикрепить фото" onClick="{{attachPhoto}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="17" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-5-5-9 10"/></svg></button>
+            <label class="sr" for="msg-input">{{composerPh}}</label>
+            <textarea id="msg-input" class="textarea" rows="1" placeholder="{{composerPh}}" value="{{draft}}" onChange="{{onDraft}}"></textarea>
+            <button type="button" class="btn btn-primary" aria-disabled="{{sendDisabled}}" onClick="{{send}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>Отправить</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{readOnly}}" hint-placeholder-val="{{false}}">
+        <div class="readonly">
+          <span class="p">Канал фонда, только чтение</span>
+          <button type="button" class="btn btn-subtle btn-sm" onClick="{{toOlga}}">Написать Ольге</button>
+        </div>
+      </sc-if>
+    </section>
+  </div>
+</div>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1370}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      mode: 'team', chat: 'team',
+      drafts: {}, sent: { team: [], olga: [], svet: [] },
+      readTeam: false, summary: true, helped: false, cal: false, earlier: false, photo: false
+    };
+  }
+  renderVals() {
+    const s = this.state;
+    const EK = { who: 'Елена Карпова', av: 'ЕК', avc: 'avatar avatar-sm av-y' };
+    const LM = { who: 'Лиля Миронова', av: 'ЛМ', avc: 'avatar avatar-sm av-g' };
+    const OL = { who: 'Ольга Лебедева', av: 'ОЛ', avc: 'avatar avatar-sm av-b' };
+    const SK = { who: 'Светлана Ким', av: 'СК', avc: 'avatar avatar-sm av-v' };
+    const FUND = { who: 'Фонд «Дети Марии»', av: 'ДМ', avc: 'avatar avatar-sm av-o' };
+    const them = (p, text, time) => ({ k: 'them', who: p.who, av: p.av, avc: p.avc, text, time });
+    const me = (text, time) => ({ k: 'me', text, time });
+
+    const base = {
+      team: [
+        them(EK, 'Спасибо всем за субботу! Рисунки сохнут на стеллаже, в следующий раз доделаем фон.', 'сб, 15:20'),
+        me('Спасибо! Миша сам попросил оставить рисунок до следующего раза — кажется, ему понравилось.', 'сб, 15:34'),
+        them(LM, 'В пятницу заеду на Дмитровку за новыми кистями. Если что-то ещё нужно — пишите.', 'сб, 16:02'),
+        { k: 'div', text: 'Новые' },
+        them(OL, 'Коллеги, занятие 31 октября начнём в 11:00 вместо 12:00. Закончим в 13:00.', 'вчера, 12:40'),
+        them(EK, 'К выставке нужно оформить рисунки в рамки. Кто сможет остаться после занятия в субботу минут на сорок?', '9:15'),
+        them(EK, 'И про фартуки: в субботу акварель по-сырому, брызги гарантированы.', '9:16')
+      ],
+      olga: [
+        them(OL, 'Анна, привет! Девять недель без пропусков — «Подсолнухи» к тебе очень привыкли. Спасибо.', 'вчера, 18:10'),
+        them(OL, 'Театру к премьере нужна афиша, а ты дизайнер. Посмотришь? Это онлайн, около 6 часов, до 9 ноября.', 'вчера, 18:11'),
+        me('Спасибо! Да, интересно. А можно посмотреть прошлые афиши?', 'вчера, 19:02'),
+        them(OL, 'Конечно, пришлю в четверг. Если решишься — запишись в «Возможностях».', '10:02')
+      ],
+      svet: [
+        them(SK, 'Анна, привет! Как прошло в субботу? Миша опять уходил рисовать в угол?', 'вс, 20:14'),
+        me('Привет! Да, но я села рядом и тоже рисовала, как ты советовала. Через полчаса он сам показал мне рисунок.', 'вс, 20:30'),
+        them(SK, 'Вот это да. Это и есть доверие, не торопи его. Если захочешь разобрать такие случаи — в четверг супервизия у Ирины Власовой.', 'вс, 20:41')
+      ],
+      news: [
+        them(FUND, 'Спасибо всем, кто был с детьми в сентябре: 1 048 часов на занятиях и выездах.', '1 окт'),
+        them(FUND, 'Супервизия с психологом — чт, 22 октября, 19:00, онлайн. Ведёт Ирина Власова.', 'пн, 10:00'),
+        them(FUND, 'Осенняя ярмарка — вс, 8 ноября, 12:00–17:00. Ищем фотографа и помощников на мастер-классы.', 'пн, 10:05')
+      ]
+    };
+    const all = (id) => {
+      const list = base[id].concat(s.sent[id] || []);
+      return id === 'team' && s.readTeam ? list.filter((x) => x.k !== 'div') : list;
+    };
+
+    const chatDefs = [
+      { id: 'team', name: '«Подсолнухи»', kind: 'group', ph: 'Написать в «Подсолнухи»' },
+      { id: 'olga', name: 'Ольга Лебедева', kind: 'person', av: 'ОЛ', avc: 'avatar av-b', ph: 'Написать Ольге' },
+      { id: 'svet', name: 'Светлана Ким', kind: 'person', av: 'СК', avc: 'avatar av-v', ph: 'Написать Светлане' },
+      { id: 'news', name: 'Объявления фонда', kind: 'channel', ph: '' }
+    ];
+    const open = (id) => this.setState({ chat: id, photo: false, readTeam: s.readTeam || (s.chat === 'team' && id !== 'team') });
+    const dialogs = chatDefs.map((c) => {
+      const unread = c.id === 'team' && !s.readTeam ? 3 : 0;
+      const on = c.id === s.chat;
+      return {
+        name: c.name, av: c.av || '', avc: c.avc || '',
+        isPerson: c.kind === 'person', isGroup: c.kind === 'group', isChannel: c.kind === 'channel',
+        hasUnread: unread > 0, unread, unreadAria: unread + ' непрочитанных',
+        cls: on ? 'dlg is-on' : 'dlg', current: on ? 'true' : 'false',
+        pick: () => open(c.id)
+      };
+    });
+
+    const chat = chatDefs.find((c) => c.id === s.chat) || chatDefs[0];
+    let visible = all(chat.id);
+    if (chat.id === 'team' && !s.earlier) visible = [{ k: 'more', text: 'Сообщения за субботу' }].concat(visible.slice(3));
+    const msgs = visible.map((m) => ({
+      who: m.who || '', av: m.av || '', avc: m.avc || '', text: m.text || '', time: m.time || '',
+      isThem: m.k === 'them', isMe: m.k === 'me', isDiv: m.k === 'div', isPhoto: m.k === 'photo',
+      isMore: m.k === 'more', showMore: () => this.setState({ earlier: true })
+    }));
+    const push = (items, extra) => this.setState({ sent: { ...s.sent, [chat.id]: (s.sent[chat.id] || []).concat(items) }, ...extra });
+    const draft = s.drafts[chat.id] || '';
+    const isTeam = chat.id === 'team';
+    const canWrite = chat.kind !== 'channel';
+
+    const modes = [
+      { id: 'team', label: 'Чат команды' },
+      { id: 'olga', label: 'Личный с координатором' },
+      { id: 'photo', label: 'Фото детей' }
+    ].map((m) => ({
+      ...m,
+      cls: m.id === s.mode ? 'is-on' : '',
+      pressed: m.id === s.mode ? 'true' : 'false',
+      pick: () => {
+        if (m.id === 'team') this.setState({ mode: 'team', chat: 'team', photo: false, summary: true, earlier: false });
+        else if (m.id === 'olga') this.setState({ mode: 'olga', chat: 'olga', photo: false });
+        else this.setState({ mode: 'photo', chat: 'team', photo: true, summary: false, earlier: false });
+      }
+    }));
+
+    return {
+      modes, dialogs,
+      chatName: chat.name,
+      chatIsPerson: chat.kind === 'person', chatIsGroup: chat.kind === 'group', chatIsChannel: chat.kind === 'channel',
+      chatAv: chat.av || '', chatAvc: chat.avc || '',
+
+      showSummary: isTeam && s.summary,
+      helped: s.helped, notHelped: !s.helped,
+      helpFrames: () => this.setState({
+        sent: { ...s.sent, team: (s.sent.team || []).concat([me('Я смогу остаться после занятия и помочь с рамками.', 'сейчас')]) },
+        helped: true, readTeam: true
+      }),
+      calDone: s.cal, notCal: !s.cal,
+      addCal: () => this.setState({ cal: true }),
+
+      msgs,
+      canWrite, readOnly: !canWrite,
+      toOlga: () => open('olga'),
+      composerPh: chat.ph || 'Сообщение',
+      draft,
+      onDraft: (e) => this.setState({ drafts: { ...s.drafts, [chat.id]: e.target.value } }),
+      hasPhoto: s.photo,
+      attachPhoto: () => this.setState({ photo: true }),
+      cancelPhoto: () => this.setState({ photo: false }),
+      photoBlur: () => push([{ k: 'photo', time: 'сейчас' }], { photo: false }),
+      sendDisabled: s.photo ? 'true' : 'false',
+      send: () => {
+        if (s.photo) return;
+        const t = draft.trim();
+        if (!t) return;
+        push([me(t, 'сейчас')], { drafts: { ...s.drafts, [chat.id]: '' }, readTeam: isTeam ? true : s.readTeam });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

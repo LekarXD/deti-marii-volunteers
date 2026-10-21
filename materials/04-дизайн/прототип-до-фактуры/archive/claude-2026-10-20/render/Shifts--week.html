@@ -1,0 +1,762 @@
+<!doctype html><html lang=ru><head><meta charset=utf-8><meta name=viewport content='width=device-width, initial-scale=1'>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FFFEFA}
+.dm{--page:#FFFEFA;--paper:#FFFFFF;--soft:#F6F6F6;--soft-2:#EEEDE8;--line:#ECE9E2;--line-2:#DEDAD1;--ink:#12141A;--ink-2:#3F424A;--mute:#646464;--quiet:#8C8C8C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFEDE2;--yellow:#FFB03B;--yellow-ink:#8A5A00;--yellow-tint:#FFF3D6;--blue:#0F3DA7;--blue-tint:#E9EDF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DFF0E3;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE7E4;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE6EE;--shadow:0 4px 12px rgba(18,20,26,.05);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,176,59,.4)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:16px;height:16px}.ic-lg{width:24px;height:24px}.ic-xl{width:32px;height:32px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+/* layout */
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 72px}
+.shell-wide{max-width:1440px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-bottom:36px}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:12px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--yellow);color:var(--ink)}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.nav a.is-active .count{background:var(--paper)}
+.top-end{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--ink-2);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.role:hover{background:var(--soft-2);text-decoration:none;color:var(--ink)}
+.avatar{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:32px;height:32px;flex-basis:32px;font-size:12px}
+.avatar-lg{width:64px;height:64px;flex-basis:64px;font-size:22px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+/* type */
+.display{margin:0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:36px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:26px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:10px 0 0;font-size:17px;line-height:1.55;color:var(--ink-2);max-width:62ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:13px;line-height:1.4;color:var(--mute)}
+.eyebrow{font-size:13px;font-weight:600;color:var(--mute)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:40px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:14px}
+/* surfaces */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px 28px}
+.card-soft{background:var(--soft);border-radius:24px;padding:22px 28px}
+.card-hero{background:linear-gradient(160deg,#FFF9EF 0%,#FFEED6 100%);border:1px solid #F5E2C4;border-radius:28px;padding:32px 36px}
+.card-tight{padding:16px 20px;border-radius:18px}
+.ai-box{background:#F8F5FF;border:1px solid #E4DBFA;border-radius:20px;padding:18px 22px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.divider{height:1px;background:var(--line);border:0;margin:16px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:999px;border:1px solid transparent;font-size:15px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--orange);color:var(--ink)}
+.btn-primary:hover{background:#FF7535}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:36px;padding:0 14px;font-size:13px}
+.btn-lg{height:52px;padding:0 26px;font-size:16px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft);color:var(--quiet);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:500;white-space:nowrap;background:var(--soft);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:12px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--quiet);flex:0 0 8px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:14px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{border-color:var(--ink-2);color:var(--ink)}
+.chip.is-on{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--soft)}
+.seg button{height:38px;padding:0 16px;border:0;border-radius:999px;background:transparent;font-size:14px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{height:46px;padding:0 16px;border:0;background:transparent;font-size:15px;font-weight:600;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--orange)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.label{font-size:14px;font-weight:500;color:var(--ink-2)}
+.input,.textarea,.select{width:100%;min-height:48px;padding:12px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:120px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:13px;color:var(--mute)}
+.err{font-size:13px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:var(--ink-2)}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--orange);flex:0 0 20px}
+.toggle{position:relative;width:44px;height:26px;flex:0 0 44px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:21px}
+/* data */
+.kpi{position:relative;display:flex;flex-direction:column;gap:6px;padding:22px 24px;border-radius:24px;background:var(--paper);border:1px solid var(--line);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:38px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{font-size:14px;color:var(--ink-2)}
+.kpi-delta{font-size:13px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:58px;height:52px;left:12px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%;opacity:.9}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:8px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}
+.tbl{display:grid;border-top:1px solid var(--line)}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:14px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-head{font-size:13px;font-weight:600;color:var(--mute);padding-top:10px;padding-bottom:10px}
+.scroll-x{overflow-x:auto}
+.art{width:56px;height:56px;flex:0 0 56px;border-radius:18px;display:grid;place-items:center}
+.art-lg{width:100%;height:132px;border-radius:20px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+/* chat */
+.bubble{max-width:72%;padding:12px 16px;border-radius:20px;background:var(--soft);color:var(--ink);font-size:15px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F8F5FF;border:1px solid #E4DBFA}
+.cite{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:13px;color:var(--ink-2)}
+/* demo-only switcher */
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 24px;padding:8px 10px;border:1px dashed var(--line-2);border-radius:16px;background:var(--page)}
+.demo-cap{font-size:13px;font-weight:600;color:var(--mute);padding:0 6px}
+.demo button{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:13px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--ink);border-color:var(--ink);color:#fff}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:48px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:38px}.h1{font-size:28px}.card,.card-soft{padding:18px 18px;border-radius:20px}.card-hero{padding:22px 20px}.top-end{margin-left:0}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+/* Shifts */
+.art-sm{width:40px;height:40px;flex:0 0 40px;border-radius:12px}
+.wk{display:grid;grid-template-columns:180px repeat(7,minmax(0,1fr));min-width:960px}
+.wk-corner{border-bottom:1px solid var(--line-2)}
+.wk-day{display:flex;flex-direction:column;padding:0 8px 10px;line-height:1.3;border-bottom:1px solid var(--line-2)}
+.wk-day b{font-weight:600;color:var(--ink)}
+.wk-label{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 0;border-bottom:1px solid var(--line);font-weight:600;color:var(--ink);min-width:0}
+.wk-cell{display:flex;flex-direction:column;gap:6px;padding:8px 4px;border-bottom:1px solid var(--line);min-height:64px;min-width:0}
+.slot{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:8px 10px;border-radius:12px;border:1px solid var(--line-2);background:var(--paper);text-align:left}
+.slot:hover{border-color:var(--ink-2)}
+.slot.is-sel{background:var(--yellow-tint);border-color:var(--yellow)}
+.slot b{font-weight:600;font-size:15px;color:var(--ink);line-height:1.3}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px}
+.cbx{width:26px;height:26px;flex:0 0 26px;border-radius:8px;border:1.5px solid var(--line-2);background:var(--paper);display:grid;place-items:center;padding:0;color:var(--ink);margin-top:7px}
+.cbx.is-on{background:var(--orange);border-color:var(--orange)}
+.cand{align-items:flex-start}
+.ai-box .li{border-top-color:#E4DBFA}
+.pros{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:4px}
+.pros span{display:inline-flex;align-items:center;gap:6px;font-size:15px;color:var(--ink-2)}
+.pros .ic{color:var(--green-ink)}
+.pros span.con{color:var(--mute)}
+.pros span.con .ic{color:var(--mute)}
+.score{display:inline-grid;place-items:center;min-width:48px;height:48px;padding:0 8px;border-radius:14px;background:var(--paper);border:1px solid #E4DBFA;color:var(--violet);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.side-status{flex:0 0 auto;min-width:130px;display:flex;justify-content:flex-end;padding-top:12px}
+.send-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:14px;padding-top:16px;border-top:1px solid #E4DBFA}
+.done-box{display:flex;gap:12px;align-items:center;margin-bottom:16px;padding:16px 20px;border-radius:18px;background:var(--green-tint);color:var(--green-ink);font-weight:600}
+.att{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.hours-grid{grid-template-columns:repeat(auto-fit,minmax(min(460px,100%),1fr))}
+.att-h{flex:0 0 52px;text-align:right;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+@media (max-width:720px){.side-status{min-width:0;padding-top:0}.cand{flex-wrap:wrap}}
+</style>
+<style>sc-for,sc-if{display:contents}</style></head><body>
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>команда фонда</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="CoordHome.dc.html"><svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"></path></svg>Обзор</a>
+    <a href="Pipeline.dc.html"><svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1.5"></rect><rect x="10" y="4" width="5" height="10" rx="1.5"></rect><rect x="17" y="4" width="4" height="13" rx="1.5"></rect></svg>Заявки<span class="count">7</span></a>
+    <a href="Volunteers.dc.html"><svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0"></path><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"></path></svg>Волонтёры</a>
+    <a class="is-active" aria-current="page" href="Shifts.dc.html"><svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg>Смены<span class="count">2</span></a>
+    <a href="Signals.dc.html"><svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"></path></svg>Сигналы<span class="count">4</span></a>
+    <a href="Builder.dc.html"><svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"></path><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"></path></svg>Обучение</a>
+    <a href="Reports.dc.html"><svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h6"></path></svg>Отчёты</a>
+    <a href="Admin.dc.html"><svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>Настройки</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="Home.dc.html"><svg class="ic ic-sm" viewbox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"></path></svg>Вид волонтёра</a>
+    <div class="pillbox">
+      <button class="iconbtn" type="button" aria-label="Уведомления, 5 новых"><svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"></path><path d="M10 21a2 2 0 0 0 4 0"></path></svg><span class="pip"></span></button>
+      <span class="avatar av-b" aria-label="Ольга Лебедева, координатор волонтёров">ОЛ</span>
+    </div>
+  </div>
+</header>
+
+<div class="demo" role="group" aria-label="Состояния для показа">
+  <span class="demo-cap">Показать:</span>
+  
+    <button type="button" class="is-on" aria-pressed="true">Неделя</button>
+  
+    <button type="button" class="" aria-pressed="false">Кого позвать</button>
+  
+    <button type="button" class="" aria-pressed="false">Подтверждение часов</button>
+  
+</div>
+
+<div class="head">
+  <div>
+    <h1 class="h1">Смены</h1>
+    <p class="lead">Неделя 27 октября – 2 ноября. Не хватает людей на 3 сменах.</p>
+  </div>
+</div>
+
+<div class="tabs" role="tablist" aria-label="Разделы смен" style="margin-bottom:24px">
+  
+    <button type="button" role="tab" class="is-on" aria-selected="true">Неделя</button>
+  
+    <button type="button" role="tab" class="" aria-selected="false">Кого позвать</button>
+  
+    <button type="button" role="tab" class="" aria-selected="false">Подтверждение часов</button>
+  
+</div>
+
+
+
+  <section class="card" aria-labelledby="wk-title">
+    <div class="section-head">
+      <h2 class="h3" id="wk-title">27 октября – 2 ноября</h2>
+      <div class="legend" aria-label="Обозначения"><span class="dot dot-green">все на месте</span><span class="dot dot-orange">не хватает</span><span class="dot dot-red">никого</span></div>
+    </div>
+    <div class="scroll-x">
+      <div class="wk">
+        <div class="wk-corner"></div>
+        
+          <div class="wk-day"><span class="meta">пн</span><b>27 окт</b></div>
+        
+          <div class="wk-day"><span class="meta">вт</span><b>28 окт</b></div>
+        
+          <div class="wk-day"><span class="meta">ср</span><b>29 окт</b></div>
+        
+          <div class="wk-day"><span class="meta">чт</span><b>30 окт</b></div>
+        
+          <div class="wk-day"><span class="meta">пт</span><b>31 окт</b></div>
+        
+          <div class="wk-day"><span class="meta">сб</span><b>1 ноя</b></div>
+        
+          <div class="wk-day"><span class="meta">вс</span><b>2 ноя</b></div>
+        
+        
+          <div class="wk-label">
+            <span class="art art-sm art-o" aria-hidden="true">
+              <svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"></path><circle cx="7.5" cy="11" r="1"></circle><circle cx="10" cy="7" r="1"></circle><circle cx="15" cy="7" r="1"></circle></svg>
+              
+              
+              
+              
+              
+              
+              
+            </span>
+            <span>Живопись</span>
+          </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Живопись, пн 27 октября, 16:00, записано 2 из 2"><b>16:00</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Живопись, ср 29 октября, 16:00, записано 2 из 2"><b>16:00</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Живопись, сб 1 ноября, 12:00, записано 2 из 2"><b>12:00</b><span class="dot dot-green">2/2</span></button>
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Живопись, сб 1 ноября, 15:00, записано 2 из 2"><b>15:00</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+        
+          <div class="wk-label">
+            <span class="art art-sm art-p" aria-hidden="true">
+              
+              <svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v6a8 8 0 0 1-16 0z"></path><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"></path></svg>
+              
+              
+              
+              
+              
+              
+            </span>
+            <span>Театр</span>
+          </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot is-sel" aria-pressed="true" aria-label="Театр, вт 28 октября, 17:00, записано 1 из 3"><b>17:00</b><span class="dot dot-orange">1/3</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Театр, чт 30 октября, 17:00, записано 2 из 2"><b>17:00</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+        
+          <div class="wk-label">
+            <span class="art art-sm art-v" aria-hidden="true">
+              
+              
+              <svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"></path><circle cx="6.5" cy="18" r="2.5"></circle><circle cx="17.5" cy="16" r="2.5"></circle></svg>
+              
+              
+              
+              
+              
+            </span>
+            <span>Музыка</span>
+          </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Музыка, пн 27 октября, 17:00, записано 2 из 2"><b>17:00</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Музыка, чт 30 октября, 17:00, записано 2 из 2"><b>17:00</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+        
+          <div class="wk-label">
+            <span class="art art-sm art-y" aria-hidden="true">
+              
+              
+              
+              <svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6.5" r="2.5"></circle><circle cx="6" cy="17.5" r="2.5"></circle><path d="M8 8.2 20 18M8 15.8 20 6"></path></svg>
+              
+              
+              
+              
+            </span>
+            <span>Валяние</span>
+          </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Валяние, ср 29 октября, 16:00, записано 2 из 2"><b>16:00</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Валяние, сб 1 ноября, 11:00, записано 0 из 3"><b>11:00</b><span class="dot dot-red">0/3</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+        
+          <div class="wk-label">
+            <span class="art art-sm art-g" aria-hidden="true">
+              
+              
+              
+              
+              <svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"></path></svg>
+              
+              
+              
+            </span>
+            <span>Керамика</span>
+          </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Керамика, ср 29 октября, 12:00, записано 2 из 2"><b>12:00</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Керамика, вс 2 ноября, 12:00, записано 2 из 2"><b>12:00</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+        
+          <div class="wk-label">
+            <span class="art art-sm art-v" aria-hidden="true">
+              
+              
+              
+              
+              
+              <svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg>
+              
+              
+            </span>
+            <span>Витраж</span>
+          </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Витраж, пн 27 октября, 16:00, записано 1 из 1"><b>16:00</b><span class="dot dot-green">1/1</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+        
+          <div class="wk-label">
+            <span class="art art-sm art-b" aria-hidden="true">
+              
+              
+              
+              
+              
+              
+              <svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.5"></rect><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4M3 12h18"></path></svg>
+              
+            </span>
+            <span>Киноклуб</span>
+          </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Киноклуб, пт 31 октября, 19:00, записано 0 из 1"><b>19:00</b><span class="dot dot-red">0/1</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+        
+          <div class="wk-label">
+            <span class="art art-sm art-b" aria-hidden="true">
+              
+              
+              
+              
+              
+              
+              
+              <svg class="ic" viewbox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"></rect><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01" stroke-width="2.6"></path></svg>
+            </span>
+            <span>Настольные игры</span>
+          </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Настольные игры, ср 29 октября, 18:30, записано 2 из 2"><b>18:30</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+                <button type="button" class="slot" aria-pressed="false" aria-label="Настольные игры, сб 1 ноября, 14:00, записано 2 из 2"><b>14:00</b><span class="dot dot-green">2/2</span></button>
+              
+            </div>
+          
+            <div class="wk-cell">
+              
+            </div>
+          
+        
+      </div>
+    </div>
+  </section>
+
+  <div class="split section" style="margin-top:24px">
+    <section class="main-col card" aria-labelledby="det-title">
+      <div class="row" style="align-items:flex-start;gap:16px">
+        <span class="art art-p" aria-hidden="true">
+          
+          <svg class="ic ic-lg" viewbox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v6a8 8 0 0 1-16 0z"></path><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"></path></svg>
+          
+          
+          
+          
+          
+          
+        </span>
+        <div class="grow">
+          <h2 class="h3" id="det-title">Театр, вт 28 октября</h2>
+          <p class="p">17:00–19:00, Мастерская на Дмитровке</p>
+          <p class="p">Инклюзивная группа, готовит спектакль к декабрю</p>
+        </div>
+        <span class="dot dot-orange" style="flex:0 0 auto;margin-top:4px">Записано 1 из 3</span>
+      </div>
+      <div class="list" style="margin-top:10px">
+        
+          <div class="li" style="padding:12px 0">
+            
+              <span class="avatar avatar-sm av-p" aria-hidden="true">ДО</span>
+              <div class="grow"><span class="li-title" style="display:block">Дмитрий Орлов</span><span class="dot dot-red">Два пропуска подряд, смену не подтвердил</span></div>
+            
+            
+            
+          </div>
+        
+          <div class="li" style="padding:12px 0">
+            
+            
+              <span class="avatar avatar-sm" style="background:var(--soft);color:var(--quiet)" aria-hidden="true"><svg class="ic ic-sm" viewbox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>
+              <span class="p grow">Свободное место</span>
+            
+            
+          </div>
+        
+          <div class="li" style="padding:12px 0">
+            
+            
+              <span class="avatar avatar-sm" style="background:var(--soft);color:var(--quiet)" aria-hidden="true"><svg class="ic ic-sm" viewbox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>
+              <span class="p grow">Свободное место</span>
+            
+            
+          </div>
+        
+      </div>
+      
+      
+        <div class="row wrap" style="margin-top:14px">
+          <button type="button" class="btn btn-secondary"><svg class="ic ic-sm" viewbox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"></path></svg>Кого позвать</button>
+        </div>
+      
+    </section>
+
+    <section class="side-col card" aria-labelledby="gaps-title">
+      <div class="section-head" style="margin-bottom:4px"><h2 class="h3" id="gaps-title">Не хватает людей</h2></div>
+      
+        <div class="list">
+          
+            <div class="li" style="display:block">
+              <span class="li-title" style="display:block">Театр, вт 28 окт, 17:00</span>
+              <div class="row" style="justify-content:space-between;margin-top:6px">
+                <span class="dot dot-orange">1 из 3</span>
+                <button type="button" class="btn btn-primary btn-sm">Кого позвать</button>
+              </div>
+            </div>
+          
+            <div class="li" style="display:block">
+              <span class="li-title" style="display:block">Валяние, сб 1 ноя, 11:00</span>
+              <div class="row" style="justify-content:space-between;margin-top:6px">
+                <span class="dot dot-red">0 из 3</span>
+                <button type="button" class="btn btn-secondary btn-sm">Кого позвать</button>
+              </div>
+            </div>
+          
+            <div class="li" style="display:block">
+              <span class="li-title" style="display:block">Киноклуб, пт 31 окт, 19:00</span>
+              <div class="row" style="justify-content:space-between;margin-top:6px">
+                <span class="dot dot-red">0 из 1</span>
+                <button type="button" class="btn btn-secondary btn-sm">Кого позвать</button>
+              </div>
+            </div>
+          
+        </div>
+      
+      
+    </section>
+  </div>
+
+
+
+
+
+
+
+
+</div></div>
+</body></html>

@@ -1,0 +1,178 @@
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>команда фонда</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="CoordHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Обзор</a>
+    <a href="Pipeline.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/></svg>Заявки<span class="count">7</span></a>
+    <a class="is-active" aria-current="page" href="Volunteers.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg>Волонтёры</a>
+    <a href="Shifts.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Смены<span class="count">3</span></a>
+    <a href="Signals.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg>Сигналы<span class="count">4</span></a>
+    <a href="Builder.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Обучение</a>
+    <a href="Reports.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Отчёты</a>
+    <a href="Admin.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Настройки</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="Home.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид волонтёра</a>
+    <div class="pillbox">
+      <button class="iconbtn" type="button" aria-label="Уведомления, 5 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <span class="avatar av-b" aria-label="Ольга Лебедева, координатор волонтёров">ОЛ</span>
+    </div>
+  </div>
+</header>
+
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<h1 class="h1" style="margin-bottom:24px">Волонтёры</h1>
+
+<div class="filters">
+  <div class="search">
+    <label class="sr" for="q">Поиск по имени</label>
+    <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" class="input" type="search" placeholder="Имя или фамилия" value="{{query}}" onChange="{{typeQuery}}">
+  </div>
+  <div class="chips" role="group" aria-label="Кого показать">
+    <sc-for list="{{chips}}" as="c" hint-placeholder-count="3">
+      <button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.label}}</button>
+    </sc-for>
+  </div>
+</div>
+
+<div class="split">
+  <section class="main-col" aria-label="Список волонтёров">
+    <sc-if value="{{hasRows}}" hint-placeholder-val="{{true}}">
+      <div class="card vlist">
+        <div class="tbl">
+          <div class="tbl-row tbl-head vcols"><span>Волонтёр</span><span>Мастерская</span><span>Октябрь</span><span></span></div>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+            <button type="button" class="{{r.cls}}" aria-pressed="{{r.pressed}}" onClick="{{r.pick}}">
+              <span class="who"><span class="{{r.avCls}}" aria-hidden="true">{{r.ini}}</span><span>{{r.name}}</span></span>
+              <span>{{r.ws}}</span>
+              <span class="num">{{r.oct}}</span>
+              <span><sc-if value="{{r.hasDot}}" hint-placeholder-val="{{false}}"><span class="{{r.dotCls}}">{{r.dot}}</span></sc-if></span>
+            </button>
+          </sc-for>
+        </div>
+        <sc-if value="{{hasMore}}" hint-placeholder-val="{{true}}">
+          <button type="button" class="btn btn-ghost btn-sm" style="margin:12px 0 0" aria-expanded="{{moreExpanded}}" onClick="{{toggleMore}}">{{moreLabel}}</button>
+        </sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{noRows}}" hint-placeholder-val="{{false}}">
+      <div class="card empty">
+        <span class="art art-b" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+        <span class="h3">Никого не нашли</span>
+        <button type="button" class="btn btn-secondary" onClick="{{resetFilters}}">Сбросить поиск</button>
+      </div>
+    </sc-if>
+  </section>
+
+  <sc-if value="{{hasSel}}" hint-placeholder-val="{{true}}">
+    <aside class="side-col vcard card" aria-labelledby="v-name">
+      <div class="row" style="align-items:flex-start;justify-content:space-between">
+        <span class="{{v.avCls}}" aria-hidden="true">{{v.ini}}</span>
+        <div class="row" style="gap:4px">
+          <button type="button" class="iconbtn" aria-label="{{v.writeLabel}}" onClick="{{v.write}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></button>
+          <button type="button" class="iconbtn" aria-label="Закрыть карточку" onClick="{{closePane}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+      </div>
+      <h2 class="v-name" id="v-name">{{v.name}}</h2>
+      <p class="v-role">{{v.role}}</p>
+      <sc-if value="{{v.isPaused}}" hint-placeholder-val="{{false}}"><p class="dot" style="margin:10px 0 0">Пауза до декабря</p></sc-if>
+      <sc-if value="{{v.wroteNow}}" hint-placeholder-val="{{false}}"><p class="done-line" style="margin:6px 0 0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Сообщение отправлено</p></sc-if>
+
+      <sc-if value="{{v.hasPlaque}}" hint-placeholder-val="{{true}}">
+        <div class="plaque">
+          <p class="plaque-t"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg>{{v.plaque}}</p>
+          <div class="plaque-acts">
+            <sc-for list="{{v.actions}}" as="a" hint-placeholder-count="2">
+              <sc-if value="{{a.open}}" hint-placeholder-val="{{true}}"><button type="button" class="{{a.cls}}" onClick="{{a.run}}">{{a.label}}</button></sc-if>
+              <sc-if value="{{a.done}}" hint-placeholder-val="{{false}}"><span class="done-line"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>{{a.doneLabel}}</span></sc-if>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <div class="tabs" role="tablist" aria-label="Разделы карточки">
+        <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+          <button type="button" role="tab" class="{{t.cls}}" aria-selected="{{t.selected}}" onClick="{{t.pick}}">{{t.label}}</button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{tabOverview}}" hint-placeholder-val="{{true}}">
+        <div style="margin-top:8px">
+          <sc-for list="{{v.ov}}" as="o" hint-placeholder-count="4">
+            <div class="irow">
+              <sc-if value="{{o.isCal}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></sc-if>
+              <sc-if value="{{o.isStar}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if>
+              <sc-if value="{{o.isClock}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></sc-if>
+              <sc-if value="{{o.isUsers}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></sc-if>
+              <sc-if value="{{o.isPin}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></sc-if>
+              <span>{{o.t}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{tabHours}}" hint-placeholder-val="{{false}}">
+        <div class="bigs">
+          <div><span class="bign">{{v.total}}</span><span class="p">всего</span></div>
+          <div><span class="bign">{{v.oct}}</span><span class="p">в октябре</span></div>
+        </div>
+        <sc-if value="{{v.hasShifts}}" hint-placeholder-val="{{true}}">
+          <sc-for list="{{v.shifts}}" as="sh" hint-placeholder-count="4">
+            <div class="shrow">
+              <span class="meta">{{sh.d}}</span>
+              <span>{{sh.w}}</span>
+              <sc-if value="{{sh.miss}}" hint-placeholder-val="{{false}}"><span class="dot dot-red">пропуск</span></sc-if>
+              <sc-if value="{{sh.ok}}" hint-placeholder-val="{{true}}"><b>{{sh.h}}</b></sc-if>
+            </div>
+          </sc-for>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{tabLearn}}" hint-placeholder-val="{{false}}">
+        <div style="margin-top:8px">
+          <sc-for list="{{v.tracks}}" as="tr" hint-placeholder-count="2">
+            <div class="trow">
+              <div class="trow-h">{{tr.t}}<span>{{tr.p}}</span></div>
+              <div class="{{tr.barCls}}"><i class="{{tr.wCls}}"></i></div>
+            </div>
+          </sc-for>
+          <sc-if value="{{v.hasTrainer}}" hint-placeholder-val="{{true}}">
+            <div class="irow" style="border-top:1px solid var(--line)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg><span>{{v.trainer}}</span></div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{tabRefl}}" hint-placeholder-val="{{false}}">
+        <sc-if value="{{v.hasRefl}}" hint-placeholder-val="{{true}}">
+          <div style="margin-top:8px">
+            <sc-for list="{{v.refl}}" as="rf" hint-placeholder-count="3">
+              <div class="irow">
+                <span class="{{rf.moodCls}}" role="img" aria-label="{{rf.moodLabel}}">
+                  <sc-if value="{{rf.isSmile}}" hint-placeholder-val="{{true}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if>
+                  <sc-if value="{{rf.isMeh}}" hint-placeholder-val="{{false}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 15h7M9 9.5h.01M15 9.5h.01"/></svg></sc-if>
+                  <sc-if value="{{rf.isFrown}}" hint-placeholder-val="{{false}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 16a4.5 4.5 0 0 1 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if>
+                </span>
+                <div class="grow">
+                  <span class="meta">{{rf.d}}</span>
+                  <p class="p" style="color:var(--ink)">{{rf.text}}</p>
+                  <sc-if value="{{rf.hasFlag}}" hint-placeholder-val="{{false}}"><span class="dot" style="margin-top:6px">{{rf.flag}}</span></sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{v.noRefl}}" hint-placeholder-val="{{false}}"><p class="p" style="margin-top:18px">Пока нет.</p></sc-if>
+      </sc-if>
+    </aside>
+  </sc-if>
+</div>
+
+</div></div>

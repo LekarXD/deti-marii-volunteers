@@ -1,0 +1,957 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мой путь — Опора</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FFFEFA}
+.dm{--page:#FFFEFA;--paper:#FFFFFF;--soft:#F6F6F6;--soft-2:#EEEDE8;--line:#ECE9E2;--line-2:#DEDAD1;--ink:#12141A;--ink-2:#3F424A;--mute:#646464;--quiet:#8C8C8C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFEDE2;--yellow:#FFB03B;--yellow-ink:#8A5A00;--yellow-tint:#FFF3D6;--blue:#0F3DA7;--blue-tint:#E9EDF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DFF0E3;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE7E4;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE6EE;--shadow:0 4px 12px rgba(18,20,26,.05);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,176,59,.4)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:16px;height:16px}.ic-lg{width:24px;height:24px}.ic-xl{width:32px;height:32px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+/* layout */
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 72px}
+.shell-wide{max-width:1440px}
+.top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand . end" "nav nav nav";align-items:center;gap:14px 16px;margin-bottom:36px}
+.top > .brand{grid-area:brand;justify-self:start}
+.top > .nav{grid-area:nav;justify-self:start}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:12px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--yellow);color:var(--ink)}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.nav a.is-active .count{background:var(--paper)}
+.top-end{grid-area:end;justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--ink-2);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.role:hover{background:var(--soft-2);text-decoration:none;color:var(--ink)}
+.avatar{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:32px;height:32px;flex-basis:32px;font-size:12px}
+.avatar-lg{width:64px;height:64px;flex-basis:64px;font-size:22px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+/* type */
+.display{margin:0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:36px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:26px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:10px 0 0;font-size:17px;line-height:1.55;color:var(--ink-2);max-width:62ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:13px;line-height:1.4;color:var(--mute)}
+.eyebrow{font-size:13px;font-weight:600;color:var(--mute)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:40px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:14px}
+/* surfaces */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px 28px}
+.card-soft{background:var(--soft);border-radius:24px;padding:22px 28px}
+.card-hero{background:linear-gradient(160deg,#FFF9EF 0%,#FFEED6 100%);border:1px solid #F5E2C4;border-radius:28px;padding:32px 36px}
+.card-tight{padding:16px 20px;border-radius:18px}
+.ai-box{background:#F8F5FF;border:1px solid #E4DBFA;border-radius:20px;padding:18px 22px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.divider{height:1px;background:var(--line);border:0;margin:16px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:999px;border:1px solid transparent;font-size:15px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--orange);color:var(--ink)}
+.btn-primary:hover{background:#FF7535}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:36px;padding:0 14px;font-size:13px}
+.btn-lg{height:52px;padding:0 26px;font-size:16px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft);color:var(--quiet);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:500;white-space:nowrap;background:var(--soft);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:12px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--quiet);flex:0 0 8px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:14px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{border-color:var(--ink-2);color:var(--ink)}
+.chip.is-on{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--soft)}
+.seg button{height:38px;padding:0 16px;border:0;border-radius:999px;background:transparent;font-size:14px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{height:46px;padding:0 16px;border:0;background:transparent;font-size:15px;font-weight:600;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--orange)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.label{font-size:14px;font-weight:500;color:var(--ink-2)}
+.input,.textarea,.select{width:100%;min-height:48px;padding:12px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:120px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:13px;color:var(--mute)}
+.err{font-size:13px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:var(--ink-2)}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--orange);flex:0 0 20px}
+.toggle{position:relative;width:44px;height:26px;flex:0 0 44px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:21px}
+/* data */
+.kpi{position:relative;display:flex;flex-direction:column;gap:6px;padding:22px 24px;border-radius:24px;background:var(--paper);border:1px solid var(--line);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:38px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{font-size:14px;color:var(--ink-2)}
+.kpi-delta{font-size:13px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:58px;height:52px;left:12px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%;opacity:.9}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:8px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}
+.tbl{display:grid;border-top:1px solid var(--line)}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:14px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-head{font-size:13px;font-weight:600;color:var(--mute);padding-top:10px;padding-bottom:10px}
+.scroll-x{overflow-x:auto}
+.art{width:56px;height:56px;flex:0 0 56px;border-radius:18px;display:grid;place-items:center}
+.art-lg{width:100%;height:132px;border-radius:20px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+/* chat */
+.bubble{max-width:72%;padding:12px 16px;border-radius:20px;background:var(--soft);color:var(--ink);font-size:15px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F8F5FF;border:1px solid #E4DBFA}
+.cite{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:13px;color:var(--ink-2)}
+/* demo-only switcher */
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 24px;padding:8px 10px;border:1px dashed var(--line-2);border-radius:16px;background:var(--page)}
+.demo-cap{font-size:13px;font-weight:600;color:var(--mute);padding:0 6px}
+.demo button{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:13px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--ink);border-color:var(--ink);color:#fff}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:48px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:38px}.h1{font-size:28px}.card,.card-soft{padding:18px 18px;border-radius:20px}.card-hero{padding:22px 20px}.top{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "end" "nav"}.top-end{justify-self:start;flex-wrap:wrap}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+.principle{display:flex;align-items:center;gap:10px;margin:16px 0 0;color:var(--ink-2)}
+.principle .ic{color:var(--green-ink)}
+.heat-months{display:grid;grid-template-columns:28px repeat(26,minmax(0,1fr));gap:4px;margin-bottom:6px;font-size:13px;line-height:1.2;color:var(--mute)}
+.heat-grid{grid-template-columns:28px repeat(26,minmax(0,1fr));grid-template-rows:repeat(7,auto);grid-auto-flow:column}
+.heat-grid .hd{font-size:13px;line-height:1;color:var(--mute);align-self:center}
+.heat i.plan{background:var(--paper);box-shadow:inset 0 0 0 2px var(--orange)}
+.heat i.fut{background:var(--paper);box-shadow:inset 0 0 0 1px var(--line-2)}
+.legend{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--mute)}
+.legend i{width:14px;height:14px;border-radius:4px;background:var(--soft-2)}
+.legend i.l1{background:#FFE0C9}.legend i.l2{background:#FFB98F}.legend i.l3{background:#FF8A4C}.legend i.l4{background:var(--orange)}
+.legend span{margin:0 4px}
+.lvl{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:grid;place-items:center}
+.lvl-done{background:var(--green-tint);color:var(--green-ink)}
+.lvl-now{background:var(--yellow);color:var(--ink)}
+.lvl-next{background:var(--soft);color:var(--mute)}
+.ms-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:24px 20px}
+@media (max-width:1100px){.ms-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}}
+.ms{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+.ms .art{width:48px;height:48px;flex-basis:48px;border-radius:16px;margin-bottom:4px}
+.ms .bar{width:100%;max-width:220px}
+.art-q{background:var(--soft);color:var(--quiet)}
+.ms-future .li-title{color:var(--ink-2)}
+.sheet{background:var(--paper);border:1px solid var(--line-2);border-radius:10px;padding:22px 22px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.sheet-head{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.sheet-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:6px}
+.sign{display:block;width:120px;height:26px;border-bottom:1px solid var(--ink-2);margin-bottom:6px}
+.qr-box{display:flex;flex-direction:column;align-items:center;gap:4px}
+.qr{width:84px;height:84px;stroke-width:1.5;color:var(--ink)}
+.doc-split{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;margin-top:14px}
+.doc-split > .sheet{flex:1 1 300px}
+.doc-split > .doc-side{flex:1 1 220px;min-width:0}
+.docs{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.docs > .card{flex:6 1 520px;min-width:0}
+.docs > .ai-box{flex:5 1 400px;min-width:0}
+.letter{background:var(--paper);border:1px solid #E4DBFA;border-radius:14px;padding:16px 18px;margin-top:14px;color:var(--ink)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px 16px}
+.form-grid .full{grid-column:1/-1}
+.add-form{margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
+.tbl-row.is-new{background:var(--yellow-tint)}
+.tbl-total{font-weight:600;color:var(--ink)}
+.quote{margin:4px 0 0;color:var(--ink-2)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>волонтёры «Дети Марии»</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="Home.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>Главная</a>
+    <a href="Catalog.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Возможности</a>
+    <a href="Schedule.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Мои смены</a>
+    <a href="Academy.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Академия</a>
+    <a href="Messages.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Сообщения<span class="count">3</span></a>
+    <a class="is-active" aria-current="page" href="Hours.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg>Мой путь</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="CoordHome.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид координатора</a>
+    <div class="pillbox">
+      <a class="iconbtn" href="Mentor.dc.html" aria-label="ИИ-наставник"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></a>
+      <button class="iconbtn" type="button" aria-label="Уведомления, 2 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <a href="Profile.dc.html" class="avatar av-o" aria-label="Профиль: Анна Соколова">АС</a>
+    </div>
+  </div>
+</header>
+
+<div class="demo" role="group" aria-label="Состояния для показа">
+  <span class="demo-cap">Показать:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<!-- ═══ Обычно ═══ -->
+<sc-if value="{{isUsual}}" hint-placeholder-val="{{true}}">
+  <div class="head">
+    <div>
+      <h1 class="h1">Мой путь</h1>
+      <p class="lead">Ассистент в мастерской живописи у «Подсолнухов».</p>
+    </div>
+    <button type="button" class="btn btn-primary btn-lg" onClick="{{openCert}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Скачать справку</button>
+  </div>
+
+  <div class="grid-4">
+    <div class="kpi"><span class="blob blob-y" aria-hidden="true"></span><span class="kpi-num">46 ч</span><span class="kpi-label">с детьми</span><span class="kpi-delta">11 ч в октябре</span></div>
+    <div class="kpi"><span class="blob blob-o" aria-hidden="true"></span><span class="kpi-num">19</span><span class="kpi-label">занятий с «Подсолнухами»</span></div>
+    <div class="kpi"><span class="blob blob-g" aria-hidden="true"></span><span class="kpi-num">9 недель</span><span class="kpi-label">подряд без пропусков</span></div>
+    <div class="kpi"><span class="blob blob-b" aria-hidden="true"></span><span class="kpi-num">4 месяца</span><span class="kpi-label">в фонде, с 14 июня</span></div>
+  </div>
+  <p class="principle"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg>Мы не сравниваем волонтёров между собой — для детей важнее, что ты приходишь регулярно.</p>
+
+  <div class="split section">
+    <section class="main-col card" aria-labelledby="heat-title">
+      <div class="section-head">
+        <h2 class="h3" id="heat-title">Регулярность за полгода</h2>
+        <span class="legend" aria-hidden="true"><span>меньше</span><i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i><span>больше</span></span>
+      </div>
+      <div class="heat-months" aria-hidden="true">
+        <span style="grid-column:3/span 4">май</span>
+        <span style="grid-column:7/span 5">июнь</span>
+        <span style="grid-column:12/span 4">июль</span>
+        <span style="grid-column:16/span 4">август</span>
+        <span style="grid-column:20/span 5">сентябрь</span>
+        <span style="grid-column:25/span 3">октябрь</span>
+      </div>
+      <div class="heat heat-grid" role="img" aria-label="Занятия по дням за 26 недель: почти каждая суббота с 21 июня, последние 9 недель без пропусков">
+        <span class="hd">Пн</span><span class="hd"></span><span class="hd">Ср</span><span class="hd"></span><span class="hd"></span><span class="hd">Сб</span><span class="hd"></span>
+        <sc-for list="{{heat}}" as="c" hint-placeholder-count="182"><i class="{{c.cls}}" title="{{c.title}}"></i></sc-for>
+      </div>
+      <div class="row" style="margin-top:20px;gap:14px;align-items:flex-start">
+        <span class="art art-o" aria-hidden="true" style="width:48px;height:48px;flex-basis:48px;border-radius:16px"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a7 7 0 0 0 7-7c0-4-3-6.5-4-9.5-1 2.5-2.5 3.5-3.5 3.5C11 6 10 4.5 10 3c-3 2-5 6-5 11a7 7 0 0 0 7 7z"/></svg></span>
+        <div class="grow">
+          <span class="li-title" style="display:block">9 недель подряд</span>
+          <span class="p">Следующая суббота — 25 октября. Если не получится, предупреди заранее: серия не прервётся.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="side-col card" aria-labelledby="lvl-title">
+      <h2 class="h3" id="lvl-title" style="margin-bottom:4px">Уровень</h2>
+      <div class="list">
+        <div class="li" style="align-items:flex-start">
+          <span class="lvl lvl-done" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+          <div class="grow">
+            <span class="li-title" style="display:block">Новичок</span>
+            <span class="p">«Первые шаги» и первые занятия</span>
+          </div>
+        </div>
+        <div class="li" style="align-items:flex-start">
+          <span class="lvl lvl-now" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></span>
+          <div class="grow">
+            <span class="li-title" style="display:block">Постоянный волонтёр <span class="tag t-yellow" style="margin-left:4px">Сейчас</span></span>
+            <span class="p">Своя группа, задачи по навыкам, трек «Ассистент мастерской»</span>
+          </div>
+        </div>
+        <div class="li" style="align-items:flex-start">
+          <span class="lvl lvl-next" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></span>
+          <div class="grow">
+            <span class="li-title" style="display:block">Наставник</span>
+            <span class="p">Ведёшь новичков, открыт трек «Ведущий»</span>
+            <div class="bar bar-yellow" style="margin-top:12px"><i style="width:70%"></i></div>
+            <p class="meta" style="margin:6px 0 0">С 14 декабря, через 54 дня</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="section card" aria-labelledby="ms-title">
+    <div class="section-head"><h2 class="h3" id="ms-title">Вехи</h2></div>
+    <div class="ms-grid">
+      <sc-for list="{{milestones}}" as="m" hint-placeholder-count="7">
+        <div class="{{m.cls}}">
+          <span class="{{m.art}}" aria-hidden="true">
+            <sc-if value="{{m.isStar}}" hint-placeholder-val="{{false}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if>
+            <sc-if value="{{m.isHeart}}" hint-placeholder-val="{{false}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></sc-if>
+            <sc-if value="{{m.isFlame}}" hint-placeholder-val="{{false}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a7 7 0 0 0 7-7c0-4-3-6.5-4-9.5-1 2.5-2.5 3.5-3.5 3.5C11 6 10 4.5 10 3c-3 2-5 6-5 11a7 7 0 0 0 7 7z"/></svg></sc-if>
+            <sc-if value="{{m.isAward}}" hint-placeholder-val="{{true}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg></sc-if>
+            <sc-if value="{{m.isPalette}}" hint-placeholder-val="{{false}}"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></sc-if>
+          </span>
+          <span class="li-title">{{m.title}}</span>
+          <sc-if value="{{m.isNext}}" hint-placeholder-val="{{false}}"><div class="bar bar-yellow"><i style="width:70%"></i></div></sc-if>
+          <span class="meta">{{m.date}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="docs-title">
+    <div class="section-head"><h2 class="h2" id="docs-title">Документы</h2></div>
+    <div class="docs">
+      <div class="card">
+        <h3 class="h3">Справка о часах</h3>
+        <div class="doc-split">
+          <div class="sheet" role="img" aria-label="Предпросмотр справки о часах">
+            <div class="sheet-head"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="strong">Благотворительный фонд «Дети Марии»</span></div>
+            <span class="h3">Справка о волонтёрской деятельности</span>
+            <p class="p">Выдана Соколовой Анне в том, что {{sheet.period}} она участвовала в программе фонда как ассистент мастерской живописи.</p>
+            <p class="p">Подтверждено: <span class="strong">{{sheet.total}}</span>.</p>
+            <span class="meta">{{sheet.forLine}}</span>
+            <div class="sheet-foot">
+              <div><span class="meta" style="display:block">Руководитель программ</span><span class="sign" aria-hidden="true"></span><span class="p">Н. Гордеева</span></div>
+              <div class="qr-box"><svg class="ic qr" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><path d="M13.5 13.5h3v3h-3zM20.5 13.5v3M13.5 20.5h7"/></svg><span class="meta">Проверка по QR</span></div>
+            </div>
+          </div>
+          <div class="doc-side stack">
+            <p class="p">Для вуза или работы. Подлинность проверяется по QR.</p>
+            <sc-if value="{{pdfIdle}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary" onClick="{{downloadPdf}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Скачать PDF</button></sc-if>
+            <sc-if value="{{pdfDone}}" hint-placeholder-val="{{false}}"><span class="dot dot-green">PDF скачан</span></sc-if>
+            <button type="button" class="btn btn-ghost" style="justify-content:flex-start;padding-left:0" onClick="{{openCert}}">Выбрать период</button>
+            <hr class="divider" style="margin:8px 0">
+            <div class="row" style="gap:12px">
+              <span class="art art-b" aria-hidden="true" style="width:44px;height:44px;flex-basis:44px;border-radius:14px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
+              <div class="grow"><span class="li-title" style="display:block">Добро.рф</span><span class="meta">{{dobroStatus}}</span></div>
+            </div>
+            <sc-if value="{{dobroIdle}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary btn-sm" onClick="{{exportDobro}}">Выгрузить часы в Добро.рф</button></sc-if>
+            <sc-if value="{{dobroDone}}" hint-placeholder-val="{{false}}"><span class="dot dot-green">Выгружено 46 ч</span></sc-if>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-box" style="padding:22px 26px">
+        <div class="row wrap" style="justify-content:space-between">
+          <h3 class="h3">Благодарственное письмо</h3>
+          <span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span>
+        </div>
+        <p class="p" style="margin-top:6px">Черновик по твоим сменам. Подписывает руководитель программ Наталья Гордеева.</p>
+        <sc-if value="{{letterShow}}" hint-placeholder-val="{{true}}"><div class="letter pre">{{letterText}}</div></sc-if>
+        <sc-if value="{{letterEdit}}" hint-placeholder-val="{{false}}">
+          <div class="field" style="margin-top:14px">
+            <label class="label" for="letter-edit">Текст письма</label>
+            <textarea id="letter-edit" class="textarea" style="min-height:260px" value="{{letterText}}" onChange="{{typeLetter}}"></textarea>
+          </div>
+        </sc-if>
+        <p class="meta" style="margin:14px 0 8px">Факты взяты из истории смен</p>
+        <div class="chips">
+          <span class="cite"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>19 занятий с «Подсолнухами»</span>
+          <span class="cite"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>выставка рисунков, 15–18 октября</span>
+          <span class="cite"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>9 недель без пропусков</span>
+        </div>
+        <sc-if value="{{letterIdle}}" hint-placeholder-val="{{true}}">
+          <div class="row wrap" style="margin-top:16px">
+            <button type="button" class="btn btn-ai" onClick="{{requestLetter}}">Запросить у фонда</button>
+            <button type="button" class="btn btn-ghost" onClick="{{editLetter}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg>Исправить</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{letterEdit}}" hint-placeholder-val="{{false}}">
+          <div class="row wrap" style="margin-top:16px">
+            <button type="button" class="btn btn-secondary" onClick="{{saveLetter}}">Сохранить</button>
+            <button type="button" class="btn btn-ghost" onClick="{{cancelLetter}}">Отмена</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{letterSent}}" hint-placeholder-val="{{false}}">
+          <div class="row wrap" style="margin-top:16px;justify-content:space-between">
+            <span class="dot dot-blue">Отправлено Наталье Гордеевой, 21 октября</span>
+            <button type="button" class="btn btn-ghost btn-sm" onClick="{{withdrawLetter}}">Отозвать</button>
+          </div>
+          <p class="p" style="margin-top:6px">Подписанное письмо придёт в «Сообщения».</p>
+        </sc-if>
+      </div>
+    </div>
+  </section>
+
+  <div class="split section">
+    <section class="main-col card" aria-labelledby="log-title">
+      <div class="section-head">
+        <h2 class="h3" id="log-title">Журнал часов</h2>
+        <div class="seg" role="group" aria-label="Месяц">
+          <sc-for list="{{months}}" as="mo" hint-placeholder-count="2">
+            <button type="button" class="{{mo.cls}}" aria-pressed="{{mo.pressed}}" onClick="{{mo.pick}}">{{mo.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <p class="p">{{monthSummary}}</p>
+      <div class="scroll-x">
+        <div class="tbl" style="min-width:620px;margin-top:12px">
+          <div class="tbl-row tbl-head" style="grid-template-columns:76px minmax(0,1fr) 48px 220px"><span>Дата</span><span>Что</span><span>Часы</span><span>Статус</span></div>
+          <sc-for list="{{logRows}}" as="r" hint-placeholder-count="5">
+            <div class="{{r.cls}}" style="grid-template-columns:76px minmax(0,1fr) 48px 220px">
+              <span class="num">{{r.date}}</span>
+              <span>{{r.what}}</span>
+              <span class="num strong">{{r.hoursLabel}}</span>
+              <span class="{{r.dotCls}}">{{r.status}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <sc-if value="{{justAdded}}" hint-placeholder-val="{{false}}">
+        <p class="dot dot-orange" style="margin:14px 0 0">Отправили Ольге Лебедевой. Часы войдут в итог после подтверждения.</p>
+      </sc-if>
+      <sc-if value="{{addClosed}}" hint-placeholder-val="{{true}}">
+        <div class="row wrap" style="margin-top:18px">
+          <button type="button" class="btn btn-secondary" onClick="{{openAdd}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Добавить часы вручную</button>
+          <span class="meta">Для онлайн-задач</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{addOpen}}" hint-placeholder-val="{{false}}">
+        <div class="add-form">
+          <h3 class="h3">Добавить часы</h3>
+          <p class="p" style="margin-top:4px">Для онлайн-задач. Подтвердит координатор Ольга Лебедева.</p>
+          <div class="form-grid" style="margin-top:14px">
+            <div class="field full">
+              <label class="label" for="add-what">Что делала</label>
+              <input id="add-what" class="input" type="text" placeholder="Например, макет афиши спектакля" value="{{draft.what}}" onChange="{{typeWhat}}">
+              <sc-if value="{{errWhat}}" hint-placeholder-val="{{false}}"><span class="err">Напиши, что делала</span></sc-if>
+            </div>
+            <div class="field">
+              <label class="label" for="add-date">Дата</label>
+              <input id="add-date" class="input" type="date" value="{{draft.date}}" onChange="{{typeDate}}">
+            </div>
+            <div class="field">
+              <label class="label" for="add-hours">Часы</label>
+              <input id="add-hours" class="input" type="number" min="0.5" max="12" step="0.5" value="{{draft.hours}}" onChange="{{typeHours}}">
+              <sc-if value="{{errHours}}" hint-placeholder-val="{{false}}"><span class="err">Укажи от 0,5 до 12 часов</span></sc-if>
+            </div>
+            <div class="field full">
+              <label class="label" for="add-note">Комментарий для координатора</label>
+              <textarea id="add-note" class="textarea" style="min-height:96px" placeholder="Ссылка на результат или пара слов" value="{{draft.note}}" onChange="{{typeNote}}"></textarea>
+            </div>
+          </div>
+          <div class="row wrap" style="margin-top:16px">
+            <button type="button" class="btn btn-dark" onClick="{{submitAdd}}">Отправить на подтверждение</button>
+            <button type="button" class="btn btn-ghost" onClick="{{closeAdd}}">Отмена</button>
+          </div>
+        </div>
+      </sc-if>
+    </section>
+
+    <section class="side-col card" aria-labelledby="thanks-title">
+      <h2 class="h3" id="thanks-title" style="margin-bottom:4px">Благодарности</h2>
+      <div class="list">
+        <div class="li" style="align-items:flex-start">
+          <span class="art art-y" aria-hidden="true" style="width:48px;height:48px;flex-basis:48px;border-radius:16px"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></span>
+          <div class="grow">
+            <span class="li-title" style="display:block">Открытка от «Подсолнухов»</span>
+            <span class="p" style="display:block">Нарисовали всей группой после выставки</span>
+            <span class="meta">18 октября</span>
+          </div>
+        </div>
+        <div class="li" style="align-items:flex-start">
+          <span class="avatar av-y" style="width:48px;height:48px;flex-basis:48px" aria-hidden="true">ЕК</span>
+          <div class="grow">
+            <span class="li-title" style="display:block">Елена Карпова, ведущая</span>
+            <p class="quote">«С Анной группа спокойнее: она замечает, кому нужна помощь»</p>
+            <span class="meta">11 октября</span>
+          </div>
+        </div>
+        <div class="li" style="align-items:flex-start">
+          <span class="art art-b" aria-hidden="true" style="width:48px;height:48px;flex-basis:48px;border-radius:16px"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
+          <div class="grow">
+            <span class="li-title" style="display:block">Письмо фонда</span>
+            <span class="p" style="display:block">Спасибо за лето с «Подсолнухами»</span>
+            <sc-if value="{{fundOpen}}" hint-placeholder-val="{{false}}">
+              <p class="quote" style="margin-top:8px">Анна, спасибо, что всё лето приходили к «Подсолнухам». Дети ждут субботу — и вас тоже. Наталья Гордеева, руководитель программ</p>
+            </sc-if>
+            <div class="row" style="justify-content:space-between;margin-top:4px">
+              <span class="meta">1 сентября</span>
+              <button type="button" class="btn btn-ghost btn-sm" aria-expanded="{{fundExpanded}}" onClick="{{toggleFund}}">{{fundLabel}}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</sc-if>
+
+<!-- ═══ Запрос справки ═══ -->
+<sc-if value="{{isCert}}" hint-placeholder-val="{{false}}">
+  <div class="head">
+    <div>
+      <button type="button" class="btn btn-ghost btn-sm" style="margin:0 0 10px -14px" onClick="{{backUsual}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>Мой путь</button>
+      <h1 class="h1">Справка о часах</h1>
+      <p class="lead">Часы и занятия подставим из истории смен. Подлинность проверяется по QR.</p>
+    </div>
+  </div>
+
+  <section class="card-hero" aria-label="Параметры справки">
+    <div class="split">
+      <div class="main-col stack" style="gap:22px">
+        <div class="field">
+          <span class="label" id="for-label">Для кого</span>
+          <div class="chips" role="group" aria-labelledby="for-label">
+            <sc-for list="{{certFors}}" as="f" hint-placeholder-count="3">
+              <button type="button" class="{{f.cls}}" aria-pressed="{{f.pressed}}" onClick="{{f.pick}}">{{f.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div class="field" style="max-width:520px">
+          <label class="label" for="cert-org">Название организации, если нужно</label>
+          <input id="cert-org" class="input" type="text" placeholder="Например, деканат факультета дизайна" value="{{certOrg}}" onChange="{{typeOrg}}">
+        </div>
+        <div class="field">
+          <span class="label" id="period-label">Период</span>
+          <div class="chips" role="group" aria-labelledby="period-label">
+            <sc-for list="{{certPeriods}}" as="pe" hint-placeholder-count="3">
+              <button type="button" class="{{pe.cls}}" aria-pressed="{{pe.pressed}}" onClick="{{pe.pick}}">{{pe.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+        <p class="h3">В справку войдёт: {{sheet.total}}</p>
+        <sc-if value="{{certIdle}}" hint-placeholder-val="{{true}}">
+          <div class="row wrap">
+            <button type="button" class="btn btn-primary btn-lg" onClick="{{downloadCert}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Скачать PDF</button>
+            <button type="button" class="btn btn-ghost btn-lg" onClick="{{backUsual}}">Отмена</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{certDone}}" hint-placeholder-val="{{false}}">
+          <div class="row wrap">
+            <span class="dot dot-green" style="font-size:16px">PDF скачан</span>
+            <button type="button" class="btn btn-ghost btn-sm" onClick="{{resetCert}}">Сделать ещё одну</button>
+          </div>
+        </sc-if>
+      </div>
+      <div class="side-col" style="flex-basis:400px">
+        <div class="sheet" role="img" aria-label="Предпросмотр справки о часах">
+          <div class="sheet-head"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="strong">Благотворительный фонд «Дети Марии»</span></div>
+          <span class="h3">Справка о волонтёрской деятельности</span>
+          <p class="p">Выдана Соколовой Анне в том, что {{sheet.period}} она участвовала в программе фонда как ассистент мастерской живописи.</p>
+          <p class="p">Подтверждено: <span class="strong">{{sheet.total}}</span>.</p>
+          <span class="meta">{{sheet.forLine}}</span>
+          <div class="sheet-foot">
+            <div><span class="meta" style="display:block">Руководитель программ</span><span class="sign" aria-hidden="true"></span><span class="p">Н. Гордеева</span></div>
+            <div class="qr-box"><svg class="ic qr" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><path d="M13.5 13.5h3v3h-3zM20.5 13.5v3M13.5 20.5h7"/></svg><span class="meta">Проверка по QR</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section card" aria-labelledby="cert-rows-title">
+    <div class="section-head"><h2 class="h3" id="cert-rows-title">Что войдёт в справку</h2></div>
+    <div class="scroll-x">
+      <div class="tbl" style="min-width:520px">
+        <div class="tbl-row tbl-head" style="grid-template-columns:minmax(0,1fr) 110px 90px 260px"><span>Месяц</span><span>Занятий</span><span>Часов</span><span>Подтверждение</span></div>
+        <sc-for list="{{certMonths}}" as="cm" hint-placeholder-count="5">
+          <div class="tbl-row" style="grid-template-columns:minmax(0,1fr) 110px 90px 260px">
+            <span class="strong">{{cm.label}}</span>
+            <span class="num">{{cm.n}}</span>
+            <span class="num">{{cm.h}}</span>
+            <span class="dot dot-green">Подтвердила ведущая</span>
+          </div>
+        </sc-for>
+        <div class="tbl-row tbl-total" style="grid-template-columns:minmax(0,1fr) 110px 90px 260px"><span>Итого</span><span class="num">{{certN}}</span><span class="num">{{certH}}</span><span></span></div>
+      </div>
+    </div>
+    <p class="p" style="margin-top:16px">Ещё 2 ч онлайн-задачи ждут подтверждения. Войдут в справку, когда их подтвердит Ольга Лебедева.</p>
+  </section>
+</sc-if>
+
+<!-- ═══ Новичок без часов ═══ -->
+<sc-if value="{{isNew}}" hint-placeholder-val="{{false}}">
+  <div class="head">
+    <div>
+      <h1 class="h1">Мой путь</h1>
+      <p class="lead">Здесь будут твои часы, вехи и документы. Первые появятся после первого занятия.</p>
+    </div>
+  </div>
+
+  <section class="card-hero" aria-labelledby="new-title">
+    <div class="split" style="align-items:center">
+      <div class="main-col">
+        <p class="eyebrow" style="margin:0 0 8px">Сейчас</p>
+        <h2 class="h1" id="new-title">Новичок</h2>
+        <p class="lead">Чтобы записаться на первое занятие, пройди «Первые шаги». Осталось четыре модуля, около полутора часов.</p>
+        <div class="row" style="gap:14px;margin-top:18px;max-width:520px"><div class="bar grow"><i style="width:20%"></i></div><span class="meta num">1 из 5</span></div>
+        <div class="row wrap" style="margin-top:22px">
+          <a class="btn btn-primary btn-lg" href="Lesson.dc.html">Продолжить «Первые шаги»</a>
+        </div>
+      </div>
+      <div class="side-col">
+        <div class="list">
+          <div class="li" style="align-items:flex-start">
+            <span class="lvl lvl-now" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></span>
+            <div class="grow"><span class="li-title" style="display:block">Новичок</span><span class="p">«Первые шаги» и первые занятия рядом с ведущим</span></div>
+          </div>
+          <div class="li" style="align-items:flex-start">
+            <span class="lvl lvl-next" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+            <div class="grow"><span class="li-title" style="display:block">Постоянный волонтёр</span><span class="p">Своя группа и задачи по навыкам</span></div>
+          </div>
+          <div class="li" style="align-items:flex-start">
+            <span class="lvl lvl-next" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+            <div class="grow"><span class="li-title" style="display:block">Наставник</span><span class="p">Через полгода в фонде</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <p class="principle"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg>Мы не сравниваем волонтёров между собой — для детей важнее, что ты приходишь регулярно.</p>
+
+  <div class="split section">
+    <section class="main-col card" aria-labelledby="heat-new-title">
+      <div class="section-head"><h2 class="h3" id="heat-new-title">Регулярность</h2></div>
+      <div class="heat heat-grid" role="img" aria-label="Пока нет занятий">
+        <span class="hd">Пн</span><span class="hd"></span><span class="hd">Ср</span><span class="hd"></span><span class="hd"></span><span class="hd">Сб</span><span class="hd"></span>
+        <sc-for list="{{heatNew}}" as="c" hint-placeholder-count="182"><i class="{{c.cls}}" title="{{c.title}}"></i></sc-for>
+      </div>
+      <p class="p" style="margin-top:16px">Каждое занятие закрасит клетку. Считаем недели подряд, а не часы.</p>
+    </section>
+    <section class="side-col card" aria-labelledby="doc-new-title">
+      <h2 class="h3" id="doc-new-title">Справка о часах</h2>
+      <p class="p" style="margin-top:6px">Появится после первого подтверждённого занятия.</p>
+      <div class="row wrap" style="margin-top:14px">
+        <button type="button" class="btn btn-secondary" aria-disabled="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Скачать справку</button>
+      </div>
+      <hr class="divider">
+      <div class="row" style="gap:14px">
+        <span class="art art-q" aria-hidden="true" style="width:48px;height:48px;flex-basis:48px;border-radius:16px"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></span>
+        <div class="grow"><span class="li-title" style="display:block">Первая веха</span><span class="p">«Первое занятие»</span></div>
+      </div>
+    </section>
+  </div>
+</sc-if>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2700}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.letterDefault = 'Уважаемая Анна!\n\nФонд «Дети Марии» благодарит вас за работу в мастерской живописи. С 21 июня вы провели 19 занятий с группой «Подсолнухи», помогли детям подготовить выставку рисунков и девять недель подряд приходили без пропусков.\n\nДетям важно, что рядом есть взрослый, который приходит каждую неделю. Спасибо вам за это.\n\nНаталья Гордеева,\nруководитель программ фонда «Дети Марии»';
+    this.emptyDraft = { what: '', date: '2026-10-21', hours: '2', note: '' };
+    this.state = {
+      mode: 'usual',
+      month: 'oct',
+      addOpen: false,
+      draft: Object.assign({}, this.emptyDraft),
+      draftErr: '',
+      added: [],
+      justAdded: false,
+      pdf: false,
+      dobro: false,
+      letter: 'idle',
+      letterText: this.letterDefault,
+      letterBackup: '',
+      fund: false,
+      certFor: 'any',
+      certOrg: '',
+      certPeriod: 'all',
+      certDone: false
+    };
+  }
+
+  plural(n, one, few, many) {
+    const a = Math.abs(n) % 100;
+    const b = a % 10;
+    if (a > 10 && a < 20) return many;
+    if (b > 1 && b < 5) return few;
+    if (b === 1) return one;
+    return many;
+  }
+
+  fmtHours(h) {
+    return String(h).replace('.', ',') + ' ч';
+  }
+
+  heatCells(empty) {
+    const months = [['апр', 30], ['мая', 31], ['июн', 30], ['июл', 31], ['авг', 31], ['сен', 30], ['окт', 31]];
+    const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    const hours = {};
+    for (let w = 7; w <= 24; w++) hours[w + '-5'] = 2;
+    delete hours['15-5'];
+    hours['11-5'] = 4;
+    hours['24-5'] = 4;
+    hours['12-6'] = 5;
+    hours['24-2'] = 3;
+    const today = 25 * 7 + 1;
+    const out = [];
+    let d = 28;
+    let m = 0;
+    for (let i = 0; i < 182; i++) {
+      const w = Math.floor(i / 7);
+      const wd = i % 7;
+      const label = days[wd] + ', ' + d + ' ' + months[m][0];
+      const h = empty ? 0 : (hours[w + '-' + wd] || 0);
+      let cls = '';
+      let title = label;
+      if (i > today) {
+        if (!empty && w === 25 && wd === 5) { cls = 'plan'; title = label + ': запланировано занятие'; } else { cls = 'fut'; }
+      } else if (h >= 4) { cls = 'h4'; title = label + ': ' + h + ' ч'; }
+      else if (h === 3) { cls = 'h3'; title = label + ': 3 ч'; }
+      else if (h === 2) { cls = 'h2'; title = label + ': 2 ч'; }
+      else if (h === 1) { cls = 'h1'; title = label + ': 1 ч'; }
+      out.push({ cls: cls, title: title });
+      d += 1;
+      if (d > months[m][1]) { d = 1; m += 1; }
+    }
+    return out;
+  }
+
+  setDraft(key, val) {
+    const next = Object.assign({}, this.state.draft);
+    next[key] = val;
+    this.setState({ draft: next, draftErr: '' });
+  }
+
+  submitAdd() {
+    const d = this.state.draft;
+    const what = String(d.what || '').trim();
+    const h = parseFloat(String(d.hours || '').replace(',', '.'));
+    if (!what) { this.setState({ draftErr: 'what' }); return; }
+    if (!(h > 0 && h <= 12)) { this.setState({ draftErr: 'hours' }); return; }
+    const parts = String(d.date || '').split('-');
+    const mi = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    const names = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+    const label = day && mi ? day + ' ' + names[mi - 1] : '21 окт';
+    const month = mi === 9 ? 'sep' : 'oct';
+    const row = { date: label, what: what, hours: h, ok: false, isNew: true, month: month };
+    this.setState({
+      added: [row].concat(this.state.added),
+      addOpen: false,
+      justAdded: true,
+      month: month,
+      draft: Object.assign({}, this.emptyDraft),
+      draftErr: ''
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const modeDefs = [
+      { id: 'usual', label: 'Обычно' },
+      { id: 'cert', label: 'Запрос справки' },
+      { id: 'new', label: 'Новичок без часов' }
+    ];
+    const paint = 'Живопись с «Подсолнухами»';
+    const base = {
+      oct: [
+        { date: '20 окт', what: 'Онлайн: каталог рисунков выставки для сайта фонда', hours: 2, ok: false },
+        { date: '18 окт', what: paint + ' и открытие выставки рисунков', hours: 4, ok: true },
+        { date: '15 окт', what: 'Выставка рисунков: готовили и развешивали работы с детьми', hours: 3, ok: true },
+        { date: '11 окт', what: paint, hours: 2, ok: true },
+        { date: '4 окт', what: paint, hours: 2, ok: true }
+      ],
+      sep: [
+        { date: '27 сен', what: paint, hours: 2, ok: true },
+        { date: '20 сен', what: paint, hours: 2, ok: true },
+        { date: '13 сен', what: paint, hours: 2, ok: true },
+        { date: '6 сен', what: paint, hours: 2, ok: true }
+      ]
+    };
+    const rows = s.added.filter((r) => r.month === s.month).concat(base[s.month]);
+    const conf = rows.filter((r) => r.ok).reduce((a, r) => a + r.hours, 0);
+    const pend = rows.filter((r) => !r.ok).reduce((a, r) => a + r.hours, 0);
+    const monthSummary = this.fmtHours(conf) + ' подтверждено' + (pend ? ', ' + this.fmtHours(pend) + ' ждут подтверждения' : '');
+
+    const periods = [
+      { id: 'all', label: 'Всё время, с 14 июня', h: 46, n: 19, line: 'с 14 июня по 21 октября 2026 года', months: ['jun', 'jul', 'aug', 'sep', 'oct'] },
+      { id: 'year', label: 'С 1 сентября', h: 19, n: 8, line: 'с 1 сентября по 21 октября 2026 года', months: ['sep', 'oct'] },
+      { id: 'oct', label: 'Октябрь', h: 11, n: 4, line: 'с 1 по 21 октября 2026 года', months: ['oct'] }
+    ];
+    const fors = [
+      { id: 'uni', label: 'Вуз', line: 'Для предъявления в вуз' },
+      { id: 'work', label: 'Работа', line: 'Для предъявления по месту работы' },
+      { id: 'any', label: 'По месту требования', line: 'Для предъявления по месту требования' }
+    ];
+    const monthStats = [
+      { id: 'jun', label: 'Июнь', n: 2, h: 4 },
+      { id: 'jul', label: 'Июль', n: 5, h: 15 },
+      { id: 'aug', label: 'Август', n: 4, h: 8 },
+      { id: 'sep', label: 'Сентябрь', n: 4, h: 8 },
+      { id: 'oct', label: 'Октябрь', n: 4, h: 11 }
+    ];
+    const p = periods.filter((x) => x.id === s.certPeriod)[0] || periods[0];
+    const f = fors.filter((x) => x.id === s.certFor)[0] || fors[2];
+    const org = String(s.certOrg || '').trim();
+    const sheet = {
+      period: p.line,
+      total: p.h + ' ' + this.plural(p.h, 'час', 'часа', 'часов') + ', ' + p.n + ' ' + this.plural(p.n, 'занятие', 'занятия', 'занятий') + ' с детьми',
+      forLine: f.line + (org ? ': ' + org : '')
+    };
+
+    const ms = [
+      { title: 'Прошла «Первые шаги»', date: '19 июня', icon: 'star', st: 'got', art: 'art art-v' },
+      { title: 'Первое занятие', date: '21 июня', icon: 'heart', st: 'got', art: 'art art-o' },
+      { title: 'Месяц без пропусков', date: '19 июля', icon: 'flame', st: 'got', art: 'art art-y' },
+      { title: '10 занятий', date: '23 августа', icon: 'award', st: 'got', art: 'art art-g' },
+      { title: 'Полгода с нами', date: '14 декабря, через 54 дня', icon: 'award', st: 'next', art: 'art art-y' },
+      { title: 'Год с фондом', date: '14 июня 2027', icon: 'star', st: 'future', art: 'art art-q' },
+      { title: 'Провела мастер-класс', date: 'Когда проведёшь свой первый', icon: 'palette', st: 'future', art: 'art art-q' }
+    ];
+
+    return {
+      isUsual: s.mode === 'usual',
+      isCert: s.mode === 'cert',
+      isNew: s.mode === 'new',
+      modes: modeDefs.map((m) => ({
+        label: m.label,
+        cls: m.id === s.mode ? 'is-on' : '',
+        pressed: m.id === s.mode ? 'true' : 'false',
+        pick: () => this.setState({ mode: m.id, certDone: false })
+      })),
+      openCert: () => this.setState({ mode: 'cert', certDone: false }),
+      backUsual: () => this.setState({ mode: 'usual' }),
+
+      heat: this.heatCells(false),
+      heatNew: this.heatCells(true),
+
+      milestones: ms.map((m) => ({
+        title: m.title,
+        date: m.date,
+        art: m.art,
+        cls: 'ms' + (m.st === 'future' ? ' ms-future' : ''),
+        isNext: m.st === 'next',
+        isStar: m.icon === 'star',
+        isHeart: m.icon === 'heart',
+        isFlame: m.icon === 'flame',
+        isAward: m.icon === 'award',
+        isPalette: m.icon === 'palette'
+      })),
+
+      sheet: sheet,
+      pdfIdle: !s.pdf,
+      pdfDone: s.pdf,
+      downloadPdf: () => this.setState({ pdf: true }),
+      dobroIdle: !s.dobro,
+      dobroDone: s.dobro,
+      dobroStatus: s.dobro ? 'Последняя выгрузка сегодня, 21 октября' : 'Последняя выгрузка 1 октября',
+      exportDobro: () => this.setState({ dobro: true }),
+
+      letterText: s.letterText,
+      letterShow: s.letter !== 'edit',
+      letterIdle: s.letter === 'idle',
+      letterEdit: s.letter === 'edit',
+      letterSent: s.letter === 'sent',
+      requestLetter: () => this.setState({ letter: 'sent' }),
+      withdrawLetter: () => this.setState({ letter: 'idle' }),
+      editLetter: () => this.setState({ letter: 'edit', letterBackup: this.state.letterText }),
+      typeLetter: (e) => this.setState({ letterText: e.target.value }),
+      saveLetter: () => this.setState({ letter: 'idle' }),
+      cancelLetter: () => this.setState({ letter: 'idle', letterText: this.state.letterBackup }),
+
+      fundOpen: s.fund,
+      fundExpanded: s.fund ? 'true' : 'false',
+      fundLabel: s.fund ? 'Свернуть' : 'Прочитать',
+      toggleFund: () => this.setState({ fund: !this.state.fund }),
+
+      months: [{ id: 'oct', label: 'Октябрь' }, { id: 'sep', label: 'Сентябрь' }].map((mo) => ({
+        label: mo.label,
+        cls: mo.id === s.month ? 'is-on' : '',
+        pressed: mo.id === s.month ? 'true' : 'false',
+        pick: () => this.setState({ month: mo.id })
+      })),
+      monthSummary: monthSummary,
+      logRows: rows.map((r) => ({
+        date: r.date,
+        what: r.what,
+        hoursLabel: this.fmtHours(r.hours),
+        cls: 'tbl-row' + (r.isNew ? ' is-new' : ''),
+        dotCls: r.ok ? 'dot dot-green' : 'dot dot-orange',
+        status: r.ok ? 'Подтвердила Елена Карпова' : 'Ждёт подтверждения'
+      })),
+      justAdded: s.justAdded && !s.addOpen,
+      addOpen: s.addOpen,
+      addClosed: !s.addOpen,
+      openAdd: () => this.setState({ addOpen: true, justAdded: false, draftErr: '' }),
+      closeAdd: () => this.setState({ addOpen: false, draftErr: '' }),
+      draft: s.draft,
+      errWhat: s.draftErr === 'what',
+      errHours: s.draftErr === 'hours',
+      typeWhat: (e) => this.setDraft('what', e.target.value),
+      typeDate: (e) => this.setDraft('date', e.target.value),
+      typeHours: (e) => this.setDraft('hours', e.target.value),
+      typeNote: (e) => this.setDraft('note', e.target.value),
+      submitAdd: () => this.submitAdd(),
+
+      certFors: fors.map((x) => ({
+        label: x.label,
+        cls: x.id === s.certFor ? 'chip is-on' : 'chip',
+        pressed: x.id === s.certFor ? 'true' : 'false',
+        pick: () => this.setState({ certFor: x.id, certDone: false })
+      })),
+      certPeriods: periods.map((x) => ({
+        label: x.label,
+        cls: x.id === s.certPeriod ? 'chip is-on' : 'chip',
+        pressed: x.id === s.certPeriod ? 'true' : 'false',
+        pick: () => this.setState({ certPeriod: x.id, certDone: false })
+      })),
+      certOrg: s.certOrg,
+      typeOrg: (e) => this.setState({ certOrg: e.target.value, certDone: false }),
+      certMonths: monthStats.filter((m) => p.months.indexOf(m.id) !== -1).map((m) => ({ label: m.label, n: String(m.n), h: m.h + ' ч' })),
+      certN: String(p.n),
+      certH: p.h + ' ч',
+      certIdle: !s.certDone,
+      certDone: s.certDone,
+      downloadCert: () => this.setState({ certDone: true }),
+      resetCert: () => this.setState({ certDone: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

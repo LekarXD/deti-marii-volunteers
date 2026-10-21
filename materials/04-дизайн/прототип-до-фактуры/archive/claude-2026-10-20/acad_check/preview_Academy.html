@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Академия — Опора</title>
+
+<script>
+(function () {
+  const HOLE = /\{\{([\w$.]+)\}\}/g;
+  function get(scope, path) { return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), scope); }
+  function single(str) { const m = (str || '').match(/^\{\{([\w$.]+)\}\}$/); return m ? m[1] : null; }
+  function lit(scope, p) { if (p === 'true') return true; if (p === 'false') return false; return get(scope, p); }
+  function subst(str, scope) { return str.replace(HOLE, (m, p) => { const v = lit(scope, p); return v == null ? '' : String(v); }); }
+  let inst, tplNodes, mount, pending = false;
+  window.__dcErrors = [];
+  function renderNode(node, scope, out) {
+    if (node.nodeType === 3) { out.appendChild(document.createTextNode(subst(node.textContent, scope))); return; }
+    if (node.nodeType !== 1) return;
+    const tag = node.tagName.toLowerCase();
+    if (tag === 'sc-if') { if (lit(scope, single(node.getAttribute('value')))) node.childNodes.forEach((c) => renderNode(c, scope, out)); return; }
+    if (tag === 'sc-for') {
+      const arr = get(scope, single(node.getAttribute('list'))) || [];
+      const as = node.getAttribute('as');
+      arr.forEach((item) => { const sc = Object.create(scope); sc[as] = item; node.childNodes.forEach((c) => renderNode(c, sc, out)); });
+      return;
+    }
+    const el = node.namespaceURI === 'http://www.w3.org/2000/svg' ? document.createElementNS(node.namespaceURI, node.tagName) : document.createElement(node.tagName);
+    for (const a of Array.from(node.attributes)) {
+      const n = a.name.toLowerCase();
+      if (n === 'onclick' || n === 'onchange') {
+        const fn = get(scope, single(a.value));
+        if (typeof fn !== 'function') { window.__dcErrors.push('no fn ' + a.value); continue; }
+        el.addEventListener(n === 'onclick' ? 'click' : 'input', (e) => { fn(e); schedule(); });
+        continue;
+      }
+      const v = subst(a.value, scope);
+      if (n === 'value' && (tag === 'input' || tag === 'textarea')) { el.value = v; continue; }
+      el.setAttribute(a.name, v);
+    }
+    node.childNodes.forEach((c) => renderNode(c, scope, el));
+    if (tag === 'textarea') { const vv = node.getAttribute('value'); if (vv) el.value = subst(vv, scope); }
+    out.appendChild(el);
+  }
+  function rerender() {
+    pending = false;
+    const vals = inst.renderVals();
+    const frag = document.createDocumentFragment();
+    tplNodes.forEach((n) => renderNode(n, vals, frag));
+    mount.replaceChildren(frag);
+  }
+  function schedule() { if (!pending) { pending = true; Promise.resolve().then(rerender); } }
+  window.DCLogic = class { constructor(p) { this.props = p; this.state = {}; } setState(p) { this.state = Object.assign({}, this.state, p); schedule(); } };
+  document.addEventListener('DOMContentLoaded', () => {
+    const xdc = document.querySelector('x-dc');
+    const code = document.querySelector('script[data-dc-script]').textContent;
+    const Comp = new Function('DCLogic', code + '\nreturn Component;')(window.DCLogic);
+    inst = new Comp({});
+    const root = xdc.querySelector('.dm');
+    tplNodes = [root.cloneNode(true)];
+    mount = document.createElement('div');
+    root.replaceWith(mount);
+    rerender();
+    window.__dc = inst;
+  });
+})();
+</script>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#FFFEFA}
+.dm{--page:#FFFEFA;--paper:#FFFFFF;--soft:#F6F6F6;--soft-2:#EEEDE8;--line:#ECE9E2;--line-2:#DEDAD1;--ink:#12141A;--ink-2:#3F424A;--mute:#646464;--quiet:#8C8C8C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFEDE2;--yellow:#FFB03B;--yellow-ink:#8A5A00;--yellow-tint:#FFF3D6;--blue:#0F3DA7;--blue-tint:#E9EDF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DFF0E3;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE7E4;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE6EE;--shadow:0 4px 12px rgba(18,20,26,.05);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,176,59,.4)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:16px;height:16px}.ic-lg{width:24px;height:24px}.ic-xl{width:32px;height:32px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+/* layout */
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 72px}
+.shell-wide{max-width:1440px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-bottom:36px}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:12px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--yellow);color:var(--ink)}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.nav a.is-active .count{background:var(--paper)}
+.top-end{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--ink-2);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.role:hover{background:var(--soft-2);text-decoration:none;color:var(--ink)}
+.avatar{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:inline-grid;place-items:center;font-size:14px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:32px;height:32px;flex-basis:32px;font-size:12px}
+.avatar-lg{width:64px;height:64px;flex-basis:64px;font-size:22px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+/* type */
+.display{margin:0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:36px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:26px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:10px 0 0;font-size:17px;line-height:1.55;color:var(--ink-2);max-width:62ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:13px;line-height:1.4;color:var(--mute)}
+.eyebrow{font-size:13px;font-weight:600;color:var(--mute)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:40px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:14px}
+/* surfaces */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px 28px}
+.card-soft{background:var(--soft);border-radius:24px;padding:22px 28px}
+.card-hero{background:linear-gradient(160deg,#FFF9EF 0%,#FFEED6 100%);border:1px solid #F5E2C4;border-radius:28px;padding:32px 36px}
+.card-tight{padding:16px 20px;border-radius:18px}
+.ai-box{background:#F8F5FF;border:1px solid #E4DBFA;border-radius:20px;padding:18px 22px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.divider{height:1px;background:var(--line);border:0;margin:16px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:999px;border:1px solid transparent;font-size:15px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--orange);color:var(--ink)}
+.btn-primary:hover{background:#FF7535}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:36px;padding:0 14px;font-size:13px}
+.btn-lg{height:52px;padding:0 26px;font-size:16px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft);color:var(--quiet);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:500;white-space:nowrap;background:var(--soft);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:12px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--quiet);flex:0 0 8px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:14px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{border-color:var(--ink-2);color:var(--ink)}
+.chip.is-on{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--soft)}
+.seg button{height:38px;padding:0 16px;border:0;border-radius:999px;background:transparent;font-size:14px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{height:46px;padding:0 16px;border:0;background:transparent;font-size:15px;font-weight:600;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--orange)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.label{font-size:14px;font-weight:500;color:var(--ink-2)}
+.input,.textarea,.select{width:100%;min-height:48px;padding:12px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:120px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:13px;color:var(--mute)}
+.err{font-size:13px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:var(--ink-2)}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--orange);flex:0 0 20px}
+.toggle{position:relative;width:44px;height:26px;flex:0 0 44px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:21px}
+/* data */
+.kpi{position:relative;display:flex;flex-direction:column;gap:6px;padding:22px 24px;border-radius:24px;background:var(--paper);border:1px solid var(--line);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:38px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{font-size:14px;color:var(--ink-2)}
+.kpi-delta{font-size:13px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:58px;height:52px;left:12px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%;opacity:.9}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:8px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}
+.tbl{display:grid;border-top:1px solid var(--line)}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:14px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-head{font-size:13px;font-weight:600;color:var(--mute);padding-top:10px;padding-bottom:10px}
+.scroll-x{overflow-x:auto}
+.art{width:56px;height:56px;flex:0 0 56px;border-radius:18px;display:grid;place-items:center}
+.art-lg{width:100%;height:132px;border-radius:20px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+/* chat */
+.bubble{max-width:72%;padding:12px 16px;border-radius:20px;background:var(--soft);color:var(--ink);font-size:15px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F8F5FF;border:1px solid #E4DBFA}
+.cite{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:13px;color:var(--ink-2)}
+/* demo-only switcher */
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 24px;padding:8px 10px;border:1px dashed var(--line-2);border-radius:16px;background:var(--page)}
+.demo-cap{font-size:13px;font-weight:600;color:var(--mute);padding:0 6px}
+.demo button{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:13px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--ink);border-color:var(--ink);color:#fff}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:48px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:38px}.h1{font-size:28px}.card,.card-soft{padding:18px 18px;border-radius:20px}.card-hero{padding:22px 20px}.top-end{margin-left:0}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.dm a.ink{color:var(--ink)}
+.w20{width:20%}.w50{width:50%}.w60{width:60%}.w100{width:100%}
+.act{font-style:italic;color:var(--ink-2)}
+.bubble-paper{background:var(--paper);border:1px solid #F5E2C4}
+.mod{align-items:flex-start}
+.mod.is-now{background:var(--yellow-tint);border-top-color:transparent;border-radius:18px;margin:4px -14px;padding:14px}
+.mod.is-now + .mod{border-top-color:transparent}
+.mod-n{width:36px;height:36px;flex:0 0 36px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--ink-2);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.mod-n.is-done{background:var(--green-tint);color:var(--green-ink)}
+.mod-n.is-now{background:var(--yellow);color:var(--ink)}
+.mod-type{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:4px;color:var(--ink-2)}
+.mod-type > span{display:inline-flex;align-items:center;gap:6px}
+.mod-end{flex:0 0 auto;margin-top:6px}
+.cond{align-items:flex-start}
+.cond-ic{width:28px;height:28px;flex:0 0 28px;border-radius:50%;display:grid;place-items:center;margin-top:1px}
+.cond-ok{background:var(--green-tint);color:var(--green-ink)}
+.cond-wait{background:var(--soft);color:var(--mute)}
+.date{width:64px;height:72px;flex:0 0 64px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.1}
+.date b{font-size:24px;font-weight:600;letter-spacing:-.02em}
+.date span{font-size:13px}
+.date-v{background:var(--violet-tint);color:var(--violet)}
+.date-y{background:var(--yellow-tint);color:var(--yellow-ink)}
+.thumb{position:relative;width:104px;height:64px;flex:0 0 104px;border-radius:16px;background:var(--blue-tint);color:var(--blue);display:grid;place-items:center}
+.thumb .dur{position:absolute;right:6px;bottom:6px;padding:0 7px;border-radius:999px;background:var(--paper);color:var(--ink-2);font-size:13px;line-height:20px}
+.rec{align-items:flex-start}
+.points{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.points li{display:flex;gap:10px;align-items:flex-start;color:var(--ink-2)}
+.points .ic{color:var(--violet);margin-top:2px}
+.lib{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));column-gap:40px}
+.lib .li{border-top:0;border-bottom:1px solid var(--line)}
+.art-sm{width:44px;height:44px;flex:0 0 44px;border-radius:14px}
+@media (max-width:720px){.lib{grid-template-columns:1fr}.mod.is-now{margin:4px -10px;padding:14px 10px}}
+</style>
+</helmet>
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>волонтёры «Дети Марии»</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="Home.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>Главная</a>
+    <a href="Catalog.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Возможности</a>
+    <a href="Schedule.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Мои смены</a>
+    <a class="is-active" aria-current="page" href="Academy.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Академия</a>
+    <a href="Messages.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Сообщения<span class="count">3</span></a>
+    <a href="Hours.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg>Мой путь</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="CoordHome.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид координатора</a>
+    <div class="pillbox">
+      <a class="iconbtn" href="Mentor.dc.html" aria-label="ИИ-наставник"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></a>
+      <button class="iconbtn" type="button" aria-label="Уведомления, 2 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <a href="Profile.dc.html" class="avatar av-o" aria-label="Профиль: Анна Соколова">АС</a>
+    </div>
+  </div>
+</header>
+
+<div class="demo" role="group" aria-label="Состояния для показа">
+  <span class="demo-cap">Показать:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="2">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<div class="head">
+  <div>
+    <h1 class="h1">Академия</h1>
+    <p class="lead">Обучение по ролям: от первых шагов до ведущего мастерской. Можно частями, прогресс сохраняется.</p>
+  </div>
+  <a class="btn btn-ai" href="Mentor.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg>Спросить наставника</a>
+</div>
+
+<!-- ═══ Герой: Анна ═══ -->
+<sc-if value="{{isAnna}}" hint-placeholder-val="{{true}}">
+  <section class="card-hero" aria-labelledby="hero-title">
+    <div class="split" style="align-items:center;gap:32px">
+      <div class="main-col">
+        <p class="eyebrow" style="margin:0 0 8px">Продолжить: «Ассистент мастерской», модуль 4 из 5</p>
+        <h2 class="h1" id="hero-title">Тренажёр: трудные ситуации на занятии</h2>
+        <p class="lead">Миша не хочет рисовать, и нужно найти слова. Ребёнка играет ИИ, после диалога — разбор по критериям. Около 10–15 минут.</p>
+        <div class="row" style="gap:14px;margin-top:18px;max-width:520px"><div class="bar grow"><i class="w60"></i></div><span class="meta num">3 из 5</span></div>
+        <div class="row wrap" style="margin-top:22px">
+          <a class="btn btn-primary btn-lg" href="Simulator.dc.html">Начать тренажёр</a>
+          <a class="btn btn-ghost btn-lg" href="Lesson.dc.html">Повторить урок про инклюзию</a>
+        </div>
+      </div>
+      <div class="side-col">
+        <div class="row" style="gap:10px">
+          <span class="avatar avatar-sm av-o" aria-hidden="true">М</span>
+          <span class="strong">Миша, 9 лет</span>
+          <span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span>
+        </div>
+        <p class="bubble bubble-them bubble-paper" style="margin:10px 0 0;max-width:100%"><em class="act">[натягивает капюшон, отодвигает лист]</em> Не буду я ничего рисовать. Это тупо.</p>
+        <div class="row" style="gap:10px;margin-top:16px">
+          <span class="avatar avatar-sm av-v" aria-hidden="true">ИВ</span>
+          <span class="p">Сценарий одобрила психолог фонда Ирина Власова</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<!-- ═══ Герой: новичок Егор ═══ -->
+<sc-if value="{{isNew}}" hint-placeholder-val="{{false}}">
+  <section class="card-hero" aria-labelledby="hero-new-title">
+    <div class="split" style="align-items:center;gap:32px">
+      <div class="main-col">
+        <p class="eyebrow" style="margin:0 0 8px">Обязательный трек</p>
+        <h2 class="h1" id="hero-new-title">Первые шаги</h2>
+        <p class="lead">Пять коротких модулей, около двух часов, можно частями. После них откроется запись на занятия.</p>
+        <div class="row" style="gap:14px;margin-top:18px;max-width:520px"><div class="bar grow"><i class="w20"></i></div><span class="meta num">1 из 5</span></div>
+        <div class="row wrap" style="margin-top:22px">
+          <a class="btn btn-primary btn-lg" href="Lesson.dc.html">Продолжить: правила безопасности</a>
+          <a class="btn btn-ghost btn-lg" href="Studio.dc.html">Вводная встреча, сб 16:00</a>
+        </div>
+      </div>
+      <div class="side-col">
+        <p class="eyebrow" style="margin:0 0 4px">Что откроется после</p>
+        <div class="list">
+          <div class="li">
+            <span class="art art-sm art-o" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></span>
+            <span class="grow"><span class="li-title" style="display:block">Запись на занятия</span><span class="p">Уже подобрали клуб настольных игр</span></span>
+          </div>
+          <div class="li">
+            <span class="art art-sm art-v" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></span>
+            <span class="grow"><span class="li-title" style="display:block">Трек «Ассистент мастерской»</span><span class="p">Пять модулей, в том числе тренажёр</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<!-- ═══ Треки ═══ -->
+<section class="section" aria-labelledby="tracks-title">
+  <div class="section-head"><h2 class="h2" id="tracks-title">Треки</h2></div>
+  <div class="split">
+
+    <div class="main-col stack">
+    <section class="card" aria-labelledby="cur-track">
+      <div class="row" style="gap:14px;align-items:flex-start">
+        <span class="art art-v" aria-hidden="true"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></span>
+        <div class="grow">
+          <div class="row wrap" style="gap:8px 12px;justify-content:space-between">
+            <h3 class="h3" id="cur-track">{{trackTitle}}</h3>
+            <span class="tag t-yellow">Сейчас</span>
+          </div>
+          <p class="p">{{trackSub}}</p>
+        </div>
+      </div>
+      <div class="row" style="gap:14px;margin:18px 0 8px"><div class="bar grow"><i class="{{barCls}}"></i></div><span class="meta num">{{trackCount}}</span></div>
+      <div class="list">
+        <sc-for list="{{modules}}" as="m" hint-placeholder-count="5">
+          <div class="{{m.rowCls}}">
+            <span class="{{m.numCls}}" aria-hidden="true">
+              <sc-if value="{{m.isDone}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if>
+              <sc-if value="{{m.isLocked}}" hint-placeholder-val="{{false}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></sc-if>
+              <sc-if value="{{m.showNum}}" hint-placeholder-val="{{true}}">{{m.n}}</sc-if>
+            </span>
+            <div class="grow">
+              <sc-if value="{{m.hasLink}}" hint-placeholder-val="{{false}}"><a class="li-title ink" href="{{m.href}}">{{m.title}}</a></sc-if>
+              <sc-if value="{{m.noLink}}" hint-placeholder-val="{{true}}"><span class="li-title">{{m.title}}</span></sc-if>
+              <div class="mod-type">
+                <span>
+                  <sc-if value="{{m.isArticle}}" hint-placeholder-val="{{true}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></sc-if>
+                  <sc-if value="{{m.isVideo}}" hint-placeholder-val="{{false}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="13" height="12" rx="3"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg></sc-if>
+                  <sc-if value="{{m.isSim}}" hint-placeholder-val="{{false}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></sc-if>
+                  <sc-if value="{{m.isTask}}" hint-placeholder-val="{{false}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 11l1.5 1.5L13 10M9 16h6"/></svg></sc-if>
+                  <sc-if value="{{m.isTest}}" hint-placeholder-val="{{false}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></sc-if>
+                  {{m.typeLabel}}
+                </span>
+                <sc-if value="{{m.hasDur}}" hint-placeholder-val="{{false}}"><span class="meta num">{{m.dur}}</span></sc-if>
+                <sc-if value="{{m.ai}}" hint-placeholder-val="{{false}}"><span><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span>{{m.aiNote}}</span></sc-if>
+              </div>
+            </div>
+            <span class="mod-end">
+              <sc-if value="{{m.isDone}}" hint-placeholder-val="{{false}}"><span class="dot dot-green">Пройден</span></sc-if>
+              <sc-if value="{{m.isNow}}" hint-placeholder-val="{{false}}"><span class="dot dot-yellow">Дальше</span></sc-if>
+              <sc-if value="{{m.isLocked}}" hint-placeholder-val="{{false}}"><span class="p">{{m.lockReason}}</span></sc-if>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="t-pro">
+      <div class="row wrap" style="gap:16px;align-items:flex-start">
+        <span class="art art-o" aria-hidden="true"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="17" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-5-5-9 10"/></svg></span>
+        <div class="grow" style="flex-basis:320px">
+          <div class="row wrap" style="gap:8px"><h3 class="h3" id="t-pro">Помощь по профессии</h3><span class="tag">Необязательный</span></div>
+          <p class="p">Для дизайнеров, фотографов и водителей: как фонд ставит задачи, согласует работу и бережёт приватность детей.</p>
+          <sc-if value="{{isAnna}}" hint-placeholder-val="{{true}}">
+            <p class="p" style="margin-top:4px">Пригодится для задачи <a href="Opportunity.dc.html">«Дизайн афиши спектакля»</a>.</p>
+          </sc-if>
+        </div>
+        <div class="row" style="gap:4px;flex:0 0 auto">
+          <sc-if value="{{proIdle}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary btn-sm" onClick="{{startPro}}">Добавить в мои треки</button></sc-if>
+          <sc-if value="{{proOn}}" hint-placeholder-val="{{false}}"><span class="dot dot-green">Добавлен в твои треки</span><button type="button" class="btn btn-ghost btn-sm" onClick="{{stopPro}}">Убрать</button></sc-if>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <div class="side-col stack">
+      <!-- Анна: пройденный трек и закрытый «Ведущий» -->
+      <sc-if value="{{isAnna}}" hint-placeholder-val="{{true}}">
+        <section class="card" aria-labelledby="t-first">
+          <div class="row" style="gap:14px;align-items:flex-start">
+            <span class="art art-g" aria-hidden="true"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg></span>
+            <div class="grow">
+              <h3 class="h3" id="t-first">Первые шаги</h3>
+              <span class="dot dot-green">Пройден, 5 из 5</span>
+            </div>
+          </div>
+          <div class="row wrap" style="margin-top:14px;gap:8px">
+            <a class="btn btn-secondary btn-sm" href="Hours.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Сертификат</a>
+            <button type="button" class="btn btn-ghost btn-sm" aria-expanded="{{firstExpanded}}" onClick="{{toggleFirst}}">{{firstLabel}}</button>
+          </div>
+          <sc-if value="{{firstOpen}}" hint-placeholder-val="{{false}}">
+            <div class="list" style="margin-top:8px">
+              <sc-for list="{{firstDone}}" as="f" hint-placeholder-count="5">
+                <div class="li" style="gap:12px;padding:10px 0">
+                  <span class="cond-ic cond-ok" aria-hidden="true"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+                  <span class="grow p">{{f.title}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </section>
+
+        <section class="card" aria-labelledby="t-lead">
+          <div class="row" style="gap:14px;align-items:flex-start">
+            <span class="art art-b" aria-hidden="true"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+            <div class="grow">
+              <h3 class="h3" id="t-lead">Ведущий</h3>
+              <p class="p">Вести занятие самой, с ассистентом рядом</p>
+            </div>
+          </div>
+          <div class="row" style="gap:14px;margin:16px 0 4px"><div class="bar bar-green grow"><i class="w50"></i></div><span class="meta num">1 из 2 условий</span></div>
+          <div class="list">
+            <div class="li cond">
+              <span class="cond-ic cond-ok" aria-hidden="true"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+              <span class="grow"><span class="li-title" style="display:block">3 месяца ассистентом</span><span class="p">У тебя 4 месяца</span></span>
+            </div>
+            <div class="li cond">
+              <span class="cond-ic cond-wait" aria-hidden="true"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+              <span class="grow">
+                <span class="li-title" style="display:block">Рекомендация координатора</span>
+                <span class="p" style="display:block">Пока нет. Ольга даёт её после разговора о твоих занятиях.</span>
+                <a class="btn btn-subtle btn-sm" href="Messages.dc.html" style="margin-top:10px">Написать Ольге</a>
+              </span>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- Новичок: всё дальше закрыто -->
+      <sc-if value="{{isNew}}" hint-placeholder-val="{{false}}">
+        <section class="card" aria-labelledby="t-asst">
+          <div class="row" style="gap:14px;align-items:flex-start">
+            <span class="art art-v" aria-hidden="true"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+            <div class="grow">
+              <h3 class="h3" id="t-asst">Ассистент мастерской</h3>
+              <p class="p">Откроется после «Первых шагов». Пять модулей, в том числе тренажёр трудных ситуаций.</p>
+            </div>
+          </div>
+        </section>
+        <section class="card" aria-labelledby="t-lead-new">
+          <div class="row" style="gap:14px;align-items:flex-start">
+            <span class="art art-b" aria-hidden="true"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+            <div class="grow">
+              <h3 class="h3" id="t-lead-new">Ведущий</h3>
+              <p class="p">Откроется после трёх месяцев ассистентом и рекомендации координатора.</p>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Вебинары ═══ -->
+<section class="section" aria-labelledby="web-title">
+  <div class="section-head"><h2 class="h2" id="web-title">Вебинары</h2></div>
+  <div class="grid-2" style="gap:24px;align-items:start">
+
+    <section class="card" aria-labelledby="web-next">
+      <h3 class="h3" id="web-next">Ближайшие</h3>
+      <div class="list" style="margin-top:6px">
+        <div class="li">
+          <span class="date date-v" aria-hidden="true"><span>чт</span><b>23</b><span>окт</span></span>
+          <div class="grow">
+            <a class="li-title ink" href="Studio.dc.html">Супервизия с психологом</a>
+            <p class="p">19:00, онлайн. Ведёт Ирина Власова</p>
+          </div>
+          <sc-if value="{{supOpen}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary btn-sm" onClick="{{joinSup}}">Записаться</button></sc-if>
+          <sc-if value="{{supJoined}}" hint-placeholder-val="{{false}}"><span class="row" style="gap:4px;flex:0 0 auto"><span class="dot dot-green">{{joinedWord}}</span><button type="button" class="btn btn-ghost btn-sm" onClick="{{leaveSup}}">Отменить</button></span></sc-if>
+        </div>
+        <div class="li">
+          <span class="date date-y" aria-hidden="true"><span>сб</span><b>25</b><span>окт</span></span>
+          <div class="grow">
+            <span class="li-title" style="display:block">Вводная встреча для новичков</span>
+            <p class="p">16:00, онлайн. Ведёт Ольга Лебедева</p>
+          </div>
+          <sc-if value="{{introOpen}}" hint-placeholder-val="{{true}}"><button type="button" class="btn btn-secondary btn-sm" onClick="{{joinIntro}}">Записаться</button></sc-if>
+          <sc-if value="{{introJoined}}" hint-placeholder-val="{{false}}"><span class="row" style="gap:4px;flex:0 0 auto"><span class="dot dot-green">{{joinedWord}}</span><button type="button" class="btn btn-ghost btn-sm" onClick="{{leaveIntro}}">Отменить</button></span></sc-if>
+        </div>
+      </div>
+      <p class="meta" style="margin-top:8px">Напомним за час до начала. Ссылка на студию придёт в сообщения.</p>
+    </section>
+
+    <section class="card" aria-labelledby="web-rec">
+      <div class="row wrap" style="justify-content:space-between;gap:8px">
+        <h3 class="h3" id="web-rec">Записи</h3>
+        <span class="row" style="gap:8px"><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span><span class="meta">конспект и тест, ведущий проверил</span></span>
+      </div>
+      <div class="list" style="margin-top:6px">
+        <sc-for list="{{records}}" as="r" hint-placeholder-count="3">
+          <div class="li rec">
+            <span class="thumb" aria-hidden="true"><svg class="ic ic-lg ic-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span class="dur num">{{r.dur}}</span></span>
+            <div class="grow">
+              <a class="li-title ink" href="Studio.dc.html">{{r.title}}</a>
+              <p class="p">{{r.when}}. {{r.host}}</p>
+              <div class="row wrap" style="gap:4px;margin:6px 0 0 -10px">
+                <button type="button" class="btn btn-ghost btn-sm" aria-expanded="{{r.expanded}}" onClick="{{r.toggle}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Конспект</button>
+                <a class="btn btn-ghost btn-sm" href="Lesson.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>Тест, 3 вопроса</a>
+              </div>
+              <sc-if value="{{r.open}}" hint-placeholder-val="{{false}}">
+                <ul class="points">
+                  <sc-for list="{{r.points}}" as="pt" hint-placeholder-count="3">
+                    <li><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>{{pt}}</span></li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- ═══ Библиотека ═══ -->
+<section class="section" aria-labelledby="lib-title">
+  <div class="section-head"><h2 class="h2" id="lib-title">Библиотека</h2><span class="meta num">{{libCount}}</span></div>
+  <div class="chips" role="group" aria-label="Тип материала" style="margin-bottom:12px">
+    <sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+      <button type="button" class="{{f.cls}}" aria-pressed="{{f.pressed}}" onClick="{{f.pick}}">{{f.label}}</button>
+    </sc-for>
+  </div>
+  <div class="card" style="padding-top:8px;padding-bottom:8px">
+    <div class="lib">
+      <sc-for list="{{library}}" as="it" hint-placeholder-count="6">
+        <div class="li">
+          <span class="{{it.art}}" aria-hidden="true">
+            <sc-if value="{{it.isArticle}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></sc-if>
+            <sc-if value="{{it.isVideo}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="13" height="12" rx="3"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg></sc-if>
+            <sc-if value="{{it.isSim}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></sc-if>
+            <sc-if value="{{it.isMemo}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></sc-if>
+          </span>
+          <div class="grow">
+            <sc-if value="{{it.hasLink}}" hint-placeholder-val="{{true}}"><a class="li-title ink" href="{{it.href}}">{{it.title}}</a></sc-if>
+            <sc-if value="{{it.noLink}}" hint-placeholder-val="{{false}}"><span class="li-title">{{it.title}}</span></sc-if>
+            <span class="meta num" style="display:block">{{it.meta}}</span>
+          </div>
+          <sc-if value="{{it.isMemo}}" hint-placeholder-val="{{false}}"><button type="button" class="iconbtn" aria-label="{{it.dlLabel}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5V15M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></button></sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2700}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'anna', lib: 'all', sup: false, intro: false, rec: '', first: false, pro: false };
+  }
+  renderVals() {
+    const s = this.state;
+    const anna = s.mode === 'anna';
+    const modeDefs = [
+      { id: 'anna', label: 'Анна' },
+      { id: 'new', label: 'Новичок (Егор: Первые шаги 1/5)' }
+    ];
+    const assistant = [
+      { n: 1, title: 'Как устроено занятие', kind: 'article', typeLabel: 'Статья', st: 'done' },
+      { n: 2, title: 'Работа с группой', kind: 'video', typeLabel: 'Видео', st: 'done' },
+      { n: 3, title: 'Инклюзия: дети с особенностями развития', kind: 'article', typeLabel: 'Статья, видео, упражнение, тест', dur: '12 мин', href: 'Lesson.dc.html', st: 'done' },
+      { n: 4, title: 'Тренажёр: трудные ситуации на занятии', kind: 'sim', typeLabel: 'Тренажёр, диалог с ребёнком', dur: '10–15 мин', href: 'Simulator.dc.html', st: 'now' },
+      { n: 5, title: 'Практика: план своего мастер-класса', kind: 'task', typeLabel: 'Задание с проверкой', ai: true, aiNote: 'и координатор', st: 'locked', lockReason: 'После тренажёра' }
+    ];
+    const firstSteps = [
+      { n: 1, title: 'О фонде и наших детях', kind: 'article', typeLabel: 'Статья', dur: '8 мин', st: 'done' },
+      { n: 2, title: 'Правила безопасности и границы', kind: 'video', typeLabel: 'Видео и памятка PDF', dur: '12 мин', href: 'Lesson.dc.html', st: 'now' },
+      { n: 3, title: 'Как говорить с ребёнком из учреждения', kind: 'article', typeLabel: 'Статья и тренажёр', st: 'next' },
+      { n: 4, title: 'Если ребёнок рассказывает о насилии', kind: 'video', typeLabel: 'Видео и тренажёр', st: 'next' },
+      { n: 5, title: 'Итоговый тест', kind: 'test', typeLabel: '12 вопросов, порог 70%', st: 'next' }
+    ];
+    const modules = (anna ? assistant : firstSteps).map((m) => ({
+      ...m,
+      rowCls: m.st === 'now' ? 'li mod is-now' : 'li mod',
+      numCls: 'mod-n' + (m.st === 'done' ? ' is-done' : (m.st === 'now' ? ' is-now' : '')),
+      isDone: m.st === 'done',
+      isNow: m.st === 'now',
+      isLocked: m.st === 'locked',
+      showNum: m.st === 'now' || m.st === 'next',
+      hasLink: !!m.href,
+      noLink: !m.href,
+      href: m.href || '',
+      hasDur: !!m.dur,
+      dur: m.dur || '',
+      ai: !!m.ai,
+      aiNote: m.aiNote || '',
+      lockReason: m.lockReason || '',
+      isArticle: m.kind === 'article',
+      isVideo: m.kind === 'video',
+      isSim: m.kind === 'sim',
+      isTask: m.kind === 'task',
+      isTest: m.kind === 'test'
+    }));
+    const recDefs = [
+      { id: 'r1', title: 'Супервизия: когда ребёнок закрывается', when: '25 сентября', host: 'Ирина Власова', dur: '58 мин',
+        points: ['Сначала контакт, потом просьба: сесть рядом и назвать то, что видишь.', 'Не спрашивать «почему»: для ребёнка это звучит как допрос.', 'Дать два приемлемых выбора: посмотреть или выбрать краски для фона.'] },
+      { id: 'r2', title: 'Вводная встреча для новичков', when: '27 сентября', host: 'Ольга Лебедева', dur: '46 мин',
+        points: ['Как устроены мастерские фонда и кто за что отвечает.', 'С ребёнком не остаёмся наедине, личные контакты детям не даём.', 'Не можешь прийти — скажи Ольге заранее, она найдёт замену.'] },
+      { id: 'r3', title: 'Супервизия: прощания и паузы', when: '28 августа', host: 'Ирина Власова', dur: '1 ч 04 мин',
+        points: ['О паузе говорить заранее и называть дату возвращения.', 'Не обещать «я никогда не уйду».', 'Последнюю встречу планировать вместе с координатором.'] }
+    ];
+    const libDefs = [
+      { k: 'article', title: 'О фонде и наших детях', meta: 'Статья, 8 мин', href: 'Lesson.dc.html' },
+      { k: 'article', title: 'Как говорить с ребёнком из учреждения', meta: 'Статья', href: 'Lesson.dc.html' },
+      { k: 'article', title: 'Инклюзия: дети с особенностями развития', meta: 'Статья и видео, 12 мин', href: 'Lesson.dc.html' },
+      { k: 'video', title: 'Правила безопасности и границы', meta: 'Видео, 12 мин', href: 'Lesson.dc.html' },
+      { k: 'video', title: 'Если ребёнок рассказывает о насилии', meta: 'Видео', href: 'Lesson.dc.html' },
+      { k: 'video', title: 'Сенсорная нагрузка на занятии', meta: 'Видео, 8:40', href: 'Lesson.dc.html' },
+      { k: 'sim', title: 'Отказывается участвовать', meta: 'Тренажёр, 10–15 мин', href: 'Simulator.dc.html' },
+      { k: 'sim', title: 'Ты придёшь ещё? Дай свой телефон', meta: 'Тренажёр, 10–15 мин', href: 'Simulator.dc.html' },
+      { k: 'sim', title: 'Подросток грубит и провоцирует', meta: 'Тренажёр, 10–15 мин', href: 'Simulator.dc.html' },
+      { k: 'memo', title: 'Памятка: инклюзивное занятие', meta: 'PDF, 1,2 МБ' },
+      { k: 'memo', title: 'Памятка «Границы»', meta: 'PDF' },
+      { k: 'memo', title: 'Кодекс волонтёра', meta: 'PDF' }
+    ];
+    const artFor = { article: 'art art-sm art-b', video: 'art art-sm art-v', sim: 'art art-sm art-o', memo: 'art art-sm art-y' };
+    const library = libDefs
+      .filter((x) => s.lib === 'all' || x.k === s.lib)
+      .map((x) => ({
+        ...x,
+        art: artFor[x.k],
+        isArticle: x.k === 'article',
+        isVideo: x.k === 'video',
+        isSim: x.k === 'sim',
+        isMemo: x.k === 'memo',
+        hasLink: !!x.href,
+        noLink: !x.href,
+        href: x.href || '',
+        dlLabel: 'Скачать: ' + x.title
+      }));
+    const n = library.length;
+    const word = n % 10 === 1 && n % 100 !== 11 ? 'материал' : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'материала' : 'материалов');
+    const filterDefs = [
+      { id: 'all', label: 'Все' },
+      { id: 'article', label: 'Статьи' },
+      { id: 'video', label: 'Видео' },
+      { id: 'sim', label: 'Тренажёры' },
+      { id: 'memo', label: 'Памятки' }
+    ];
+    return {
+      modes: modeDefs.map((m) => ({
+        ...m,
+        cls: m.id === s.mode ? 'is-on' : '',
+        pressed: m.id === s.mode ? 'true' : 'false',
+        pick: () => this.setState({ mode: m.id, first: false })
+      })),
+      isAnna: anna,
+      isNew: !anna,
+      trackTitle: anna ? 'Ассистент мастерской' : 'Первые шаги',
+      trackSub: anna ? 'Помогать ведущей на занятиях в мастерской' : 'Обязательный трек для всех волонтёров',
+      trackCount: anna ? '3 из 5' : '1 из 5',
+      barCls: anna ? 'w60' : 'w20',
+      modules,
+      firstOpen: s.first,
+      firstExpanded: s.first ? 'true' : 'false',
+      firstLabel: s.first ? 'Скрыть модули' : 'Модули',
+      toggleFirst: () => this.setState({ first: !s.first }),
+      firstDone: firstSteps.map((f) => ({ title: f.title })),
+      proIdle: !s.pro,
+      proOn: s.pro,
+      startPro: () => this.setState({ pro: true }),
+      stopPro: () => this.setState({ pro: false }),
+      supOpen: !s.sup,
+      supJoined: s.sup,
+      joinSup: () => this.setState({ sup: true }),
+      leaveSup: () => this.setState({ sup: false }),
+      introOpen: !s.intro,
+      introJoined: s.intro,
+      joinedWord: anna ? 'Ты записана' : 'Ты записан',
+      joinIntro: () => this.setState({ intro: true }),
+      leaveIntro: () => this.setState({ intro: false }),
+      records: recDefs.map((r) => ({
+        ...r,
+        open: s.rec === r.id,
+        expanded: s.rec === r.id ? 'true' : 'false',
+        toggle: () => this.setState({ rec: s.rec === r.id ? '' : r.id })
+      })),
+      filters: filterDefs.map((f) => ({
+        ...f,
+        cls: f.id === s.lib ? 'chip is-on' : 'chip',
+        pressed: f.id === s.lib ? 'true' : 'false',
+        pick: () => this.setState({ lib: f.id })
+      })),
+      library,
+      libCount: n + ' ' + word
+    };
+  }
+}
+</script>
+</body>
+</html>

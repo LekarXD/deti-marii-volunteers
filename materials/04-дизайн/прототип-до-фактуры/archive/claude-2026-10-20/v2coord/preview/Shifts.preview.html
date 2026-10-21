@@ -1,0 +1,681 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=1440">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F0ECE3}
+.dm{--page:#F0ECE3;--paper:#FFFFFF;--soft:#F6F3EE;--soft-2:#E8E3D8;--line:#E9E4DA;--line-2:#D6D0C3;--ink:#12141A;--ink-2:#3B3E46;--mute:#5E5A52;--quiet:#8C877C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFE9DC;--yellow:#FFB93F;--yellow-ink:#7A4E00;--yellow-tint:#FFF1D2;--blue:#0F3DA7;--blue-tint:#E7ECF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DDF0E2;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE5E1;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE4ED;--shadow:0 4px 14px rgba(18,20,26,.06);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,185,63,.45)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:18px;height:18px}.ic-lg{width:26px;height:26px}.ic-xl{width:36px;height:36px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 80px}
+.top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand . end" "nav nav nav";align-items:center;gap:14px 16px;margin-bottom:40px}
+.top > .brand{grid-area:brand;justify-self:start}
+.top > .nav{grid-area:nav;justify-self:start}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:13px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--ink);color:#fff}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.top-end{grid-area:end;justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:9px;height:9px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink-2);font-size:15px;font-weight:500;text-decoration:none;white-space:nowrap}
+.role:hover{color:var(--ink);text-decoration:none}
+.avatar{width:44px;height:44px;flex:0 0 44px;border-radius:50%;display:inline-grid;place-items:center;font-size:15px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:36px;height:36px;flex-basis:36px;font-size:13px}
+.avatar-lg{width:72px;height:72px;flex-basis:72px;font-size:24px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+.display{margin:0;font-size:56px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:40px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:28px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:12px 0 0;font-size:18px;line-height:1.5;color:var(--ink-2);max-width:60ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:15px;line-height:1.45;color:var(--mute)}
+.eyebrow{font-size:15px;font-weight:600;color:var(--ink-2)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:56px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:18px}
+.card{background:var(--paper);border-radius:28px;padding:28px 32px}
+.card-soft{background:var(--soft);border-radius:28px;padding:28px 32px}
+.card-hero{background:var(--yellow);border-radius:32px;padding:40px 44px;color:var(--ink)}
+.card-hero .lead,.card-hero .p{color:var(--ink)}
+.card-hero .meta{color:var(--ink-2)}
+.card-hero .btn-secondary{background:transparent;border-color:rgba(18,20,26,.35)}
+.card-hero .btn-secondary:hover{border-color:var(--ink)}
+.card-hero .btn-ghost{color:var(--ink)}
+.card-hero .btn-ghost:hover{background:rgba(255,255,255,.35)}
+.card-hero .bar{background:rgba(18,20,26,.14)}
+.card-hero .bar > i{background:var(--ink)}
+.card-dark{background:var(--ink);color:#fff;border-radius:32px;padding:40px 44px}
+.card-tight{padding:18px 22px;border-radius:22px}
+.ai-box{background:#F3EFFD;border-radius:24px;padding:22px 26px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.divider{height:1px;background:var(--line);border:0;margin:20px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:18px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;border:1px solid transparent;font-size:16px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:#2B2E37}
+.btn-accent{background:var(--orange);color:var(--ink)}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:40px;padding:0 16px;font-size:15px}
+.btn-lg{height:56px;padding:0 28px;font-size:17px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft-2);color:var(--mute);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;font-size:14px;font-weight:500;white-space:nowrap;background:var(--soft-2);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:14px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:var(--ink-2)}
+.dot::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--quiet);flex:0 0 9px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:0;background:var(--paper);font-size:15px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.chip.is-on{background:var(--ink);color:#fff}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--paper)}
+.seg button{height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:15px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line-2);overflow-x:auto}
+.tabs button{height:50px;padding:0 18px;border:0;background:transparent;font-size:16px;font-weight:600;color:var(--mute);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.label{font-size:15px;font-weight:600;color:var(--ink)}
+.input,.textarea,.select{width:100%;min-height:52px;padding:13px 16px;border-radius:14px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:140px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:15px;color:var(--mute)}
+.err{font-size:15px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:16px;color:var(--ink-2)}
+.check input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--ink);flex:0 0 22px}
+.toggle{position:relative;width:48px;height:28px;flex:0 0 48px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:23px}
+.kpi{position:relative;display:flex;flex-direction:column;gap:8px;padding:26px 28px;border-radius:28px;background:var(--paper);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{position:relative;font-size:16px;color:var(--ink-2);z-index:1}
+.kpi-delta{font-size:15px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:72px;height:64px;left:14px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:10px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}.bar-ink > i{background:var(--ink)}
+.tbl{display:grid}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:16px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-row:last-child{border-bottom:0}
+.tbl-head{font-size:15px;font-weight:600;color:var(--mute);padding-top:8px;padding-bottom:12px}
+.scroll-x{overflow-x:auto}
+.art{width:60px;height:60px;flex:0 0 60px;border-radius:20px;display:grid;place-items:center}
+.art .ic{width:26px;height:26px}
+.art-lg{width:100%;height:150px;border-radius:24px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+.bubble{max-width:72%;padding:14px 18px;border-radius:22px;background:var(--soft);color:var(--ink);font-size:16px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F3EFFD}
+.cite{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:15px;color:var(--ink-2)}
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:0 0 32px;padding:6px;border-radius:999px;background:#E3DDD0}
+.demo-cap{font-size:14px;font-weight:600;color:var(--mute);padding:0 8px 0 10px}
+.demo button{height:34px;padding:0 14px;border-radius:999px;border:0;background:transparent;font-size:14px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:40px}.h1{font-size:30px}.h2{font-size:24px}.card,.card-soft{padding:22px 20px;border-radius:24px}.card-hero,.card-dark{padding:28px 22px;border-radius:26px}.top{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "end" "nav"}.top-end{justify-self:start;flex-wrap:wrap}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-title{margin:10px 0 0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center;color:var(--ink)}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.page-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+.art-sm{width:40px;height:40px;flex:0 0 40px;border-radius:12px}
+.art-sm .ic{width:20px;height:20px}
+.wk{display:grid;grid-template-columns:200px repeat(7,minmax(0,1fr));min-width:980px}
+.wk-corner{border-bottom:1px solid var(--line-2)}
+.wk-day{display:flex;align-items:baseline;gap:8px;padding:0 8px 14px;border-bottom:1px solid var(--line-2)}
+.wk-day span{font-size:15px;color:var(--mute)}
+.wk-day b{font-size:20px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.wk-label{display:flex;align-items:center;gap:12px;padding:10px 10px 10px 0;border-bottom:1px solid var(--line);font-size:16px;font-weight:600;color:var(--ink);min-width:0}
+.wk-cell{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;padding:8px 4px;border-bottom:1px solid var(--line);min-height:64px;min-width:0}
+.slot{display:inline-flex;align-items:center;gap:8px;padding:0 8px;font-size:15px;color:var(--mute);white-space:nowrap}
+.slot b{font-size:16px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.slot-bad{height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--soft)}
+.slot-bad::before{content:"";width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:var(--orange)}
+.slot-bad.is-zero::before{background:var(--red)}
+.slot-bad:hover{background:var(--soft-2)}
+.slot-bad.is-sel{background:var(--yellow)}
+.inv-shift{margin:0 0 6px;font-size:20px;font-weight:600;color:var(--ink)}
+.inv-row{display:grid;grid-template-columns:28px 44px minmax(150px,200px) minmax(0,1fr) 56px;align-items:center;gap:14px;padding:14px 0;border-top:1px solid #E4DBFA}
+.inv-row:first-child{border-top:0}
+.inv-name{font-size:17px;font-weight:600;color:var(--ink)}
+.inv-why{font-size:16px;color:var(--ink-2)}
+.inv-score{font-size:26px;font-weight:600;line-height:1;letter-spacing:-.02em;color:var(--violet);text-align:right;font-variant-numeric:tabular-nums}
+.cbx{width:26px;height:26px;flex:0 0 26px;border-radius:8px;border:1.5px solid #C9BDF0;background:var(--paper);display:grid;place-items:center;padding:0;color:#fff}
+.cbx.is-on{background:var(--ink);border-color:var(--ink)}
+.resp{display:grid;place-items:center;width:26px;height:26px}
+.resp-yes{color:var(--green-ink)}.resp-wait{color:var(--yellow-ink)}.resp-no{color:var(--mute)}
+.inv-foot{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;margin-top:18px}
+.done-line{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
+.done-line .ic{color:var(--green-ink)}
+.hrow{display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.hrow:first-of-type{border-top:0}
+.hrow .li-title{flex:1 1 auto;min-width:0}
+.hrow-h{flex:0 0 52px;text-align:right;font-size:17px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+@media (max-width:720px){.hero-title{font-size:38px}.inv-row{grid-template-columns:28px 44px minmax(0,1fr) 44px}.inv-row .inv-why{grid-column:3 / 5;grid-row:2}}
+.hours-grid{grid-template-columns:repeat(auto-fit,minmax(min(460px,100%),1fr))}
+</style>
+</head><body><div id="__root"></div><template id="__tpl">
+
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>команда фонда</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="CoordHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Обзор</a>
+    <a href="Pipeline.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/></svg>Заявки<span class="count">7</span></a>
+    <a href="Volunteers.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg>Волонтёры</a>
+    <a class="is-active" aria-current="page" href="Shifts.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Смены<span class="count">3</span></a>
+    <a href="Signals.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg>Сигналы<span class="count">4</span></a>
+    <a href="Builder.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Обучение</a>
+    <a href="Reports.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Отчёты</a>
+    <a href="Admin.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Настройки</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="Home.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид волонтёра</a>
+    <div class="pillbox">
+      <button class="iconbtn" type="button" aria-label="Уведомления, 5 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <span class="avatar av-b" aria-label="Ольга Лебедева, координатор волонтёров">ОЛ</span>
+    </div>
+  </div>
+</header>
+
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<div class="page-head">
+  <h1 class="h1">Смены</h1>
+  <div class="seg" role="tablist" aria-label="Разделы смен">
+    <sc-for list="{{views}}" as="t" hint-placeholder-count="2">
+      <button type="button" role="tab" class="{{t.cls}}" aria-selected="{{t.selected}}" onClick="{{t.pick}}">{{t.label}}</button>
+    </sc-for>
+  </div>
+</div>
+
+<!-- ═══ Неделя ═══ -->
+<sc-if value="{{isWeek}}" hint-placeholder-val="{{true}}">
+  <section class="card-hero" aria-labelledby="gap-title">
+    <div class="hero-grid">
+      <div class="grow">
+        <p class="eyebrow" style="margin:0">Неделя 26 октября – 1 ноября</p>
+        <h2 class="hero-title" id="gap-title">{{heroTitle}}</h2>
+        <p class="lead">{{heroLead}}</p>
+        <sc-if value="{{heroCanOpen}}" hint-placeholder-val="{{true}}">
+          <button type="button" class="btn btn-primary btn-lg" style="margin-top:28px" onClick="{{openInvite}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>Кого позвать</button>
+        </sc-if>
+        <sc-if value="{{inviteOpen}}" hint-placeholder-val="{{false}}">
+          <button type="button" class="btn btn-secondary btn-lg" style="margin-top:28px" onClick="{{closeInvite}}">Свернуть подбор</button>
+        </sc-if>
+      </div>
+      <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></div>
+    </div>
+  </section>
+
+  <sc-if value="{{inviteOpen}}" hint-placeholder-val="{{false}}">
+    <section class="section" aria-labelledby="inv-title">
+      <div class="section-head">
+        <div class="row" style="gap:12px"><h2 class="h2" id="inv-title">Кого позвать</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+      </div>
+      <div class="ai-box" style="padding:28px 32px">
+        <p class="inv-shift">{{inv.shift}}</p>
+        <div>
+          <sc-for list="{{inv.cands}}" as="c" hint-placeholder-count="5">
+            <div class="inv-row">
+              <sc-if value="{{c.canPick}}" hint-placeholder-val="{{true}}">
+                <button type="button" role="checkbox" class="{{c.cbxCls}}" aria-checked="{{c.checked}}" aria-label="{{c.cbxLabel}}" onClick="{{c.toggle}}"><sc-if value="{{c.isChecked}}" hint-placeholder-val="{{true}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></sc-if></button>
+              </sc-if>
+              <sc-if value="{{c.isYes}}" hint-placeholder-val="{{false}}"><span class="resp resp-yes" role="img" aria-label="{{c.respLabel}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></span></sc-if>
+              <sc-if value="{{c.isWait}}" hint-placeholder-val="{{false}}"><span class="resp resp-wait" role="img" aria-label="{{c.respLabel}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></sc-if>
+              <sc-if value="{{c.isNo}}" hint-placeholder-val="{{false}}"><span class="resp resp-no" role="img" aria-label="{{c.respLabel}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></span></sc-if>
+              <span class="{{c.avCls}}" aria-hidden="true">{{c.ini}}</span>
+              <span class="inv-name">{{c.name}}</span>
+              <span class="inv-why">{{c.why}}</span>
+              <span class="inv-score" aria-label="{{c.scoreLabel}}">{{c.score}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div class="inv-foot">
+          <sc-if value="{{inv.canSend}}" hint-placeholder-val="{{true}}">
+            <button type="button" class="btn btn-primary" onClick="{{inv.send}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>{{inv.sendLabel}}</button>
+          </sc-if>
+          <sc-if value="{{inv.cantSend}}" hint-placeholder-val="{{false}}">
+            <span class="btn" aria-disabled="true">Пригласить выбранных</span><span class="p">{{inv.cantReason}}</span>
+          </sc-if>
+          <sc-if value="{{inv.hasSummary}}" hint-placeholder-val="{{false}}">
+            <span class="done-line"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>{{inv.summary}}</span>
+          </sc-if>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+
+  <section class="section" aria-labelledby="wk-title">
+    <div class="section-head"><h2 class="h2" id="wk-title">Расписание</h2></div>
+    <div class="card" style="padding:28px 28px 16px">
+      <div class="scroll-x">
+        <div class="wk">
+          <div class="wk-corner"></div>
+          <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+            <div class="wk-day"><span>{{d.d}}</span><b>{{d.n}}</b></div>
+          </sc-for>
+          <sc-for list="{{wkRows}}" as="r" hint-placeholder-count="8">
+            <div class="wk-label">
+              <span class="{{r.artCls}}" aria-hidden="true">
+                <sc-if value="{{r.isPaint}}" hint-placeholder-val="{{true}}"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></sc-if>
+                <sc-if value="{{r.isTheatre}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v6a8 8 0 0 1-16 0z"/><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"/></svg></sc-if>
+                <sc-if value="{{r.isMusic}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></sc-if>
+                <sc-if value="{{r.isFelt}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8.2 20 18M8 15.8 20 6"/></svg></sc-if>
+                <sc-if value="{{r.isCer}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></sc-if>
+                <sc-if value="{{r.isVitr}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg></sc-if>
+                <sc-if value="{{r.isFilm}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4M3 12h18"/></svg></sc-if>
+                <sc-if value="{{r.isGames}}" hint-placeholder-val="{{false}}"><svg class="ic" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01" stroke-width="2.6"/></svg></sc-if>
+              </span>
+              <span>{{r.name}}</span>
+            </div>
+            <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="7">
+              <div class="wk-cell">
+                <sc-for list="{{c.slots}}" as="sl" hint-placeholder-count="1">
+                  <sc-if value="{{sl.ok}}" hint-placeholder-val="{{true}}"><span class="slot" aria-label="{{sl.aria}}">{{sl.time}}<b>{{sl.fill}}</b></span></sc-if>
+                  <sc-if value="{{sl.bad}}" hint-placeholder-val="{{false}}"><button type="button" class="{{sl.cls}}" aria-pressed="{{sl.pressed}}" aria-label="{{sl.aria}}" onClick="{{sl.pick}}">{{sl.time}}<b>{{sl.fill}}</b></button></sc-if>
+                </sc-for>
+              </div>
+            </sc-for>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<!-- ═══ Подтверждение часов ═══ -->
+<sc-if value="{{isHours}}" hint-placeholder-val="{{false}}">
+  <section class="card-hero" aria-labelledby="hrs-title">
+    <div class="hero-grid">
+      <div class="grow">
+        <p class="eyebrow" style="margin:0">Прошедшие смены</p>
+        <h2 class="hero-title" id="hrs-title">{{hoursTitle}}</h2>
+        <p class="lead">{{hoursLead}}</p>
+        <sc-if value="{{canConfirmAll}}" hint-placeholder-val="{{true}}">
+          <button type="button" class="btn btn-primary btn-lg" style="margin-top:28px" onClick="{{confirmAll}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Подтвердить всё</button>
+        </sc-if>
+      </div>
+      <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+    </div>
+  </section>
+
+  <section class="section" aria-label="Смены">
+    <div class="grid-2 hours-grid">
+      <sc-for list="{{past}}" as="ps" hint-placeholder-count="4">
+        <div class="card">
+          <div class="row" style="justify-content:space-between;align-items:flex-start">
+            <div>
+              <h3 class="h3">{{ps.title}}</h3>
+              <p class="meta" style="margin:4px 0 0">{{ps.when}}</p>
+            </div>
+            <sc-if value="{{ps.isConfirmed}}" hint-placeholder-val="{{false}}"><span class="resp resp-yes" role="img" aria-label="Подтверждено"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></span></sc-if>
+          </div>
+          <div style="margin-top:10px">
+            <sc-for list="{{ps.people}}" as="pp" hint-placeholder-count="2">
+              <div class="hrow">
+                <span class="{{pp.avCls}}" aria-hidden="true">{{pp.ini}}</span>
+                <span class="li-title">{{pp.name}}</span>
+                <sc-if value="{{pp.editable}}" hint-placeholder-val="{{true}}"><button type="button" class="{{pp.tglCls}}" aria-pressed="{{pp.pressed}}" aria-label="{{pp.tglAria}}" onClick="{{pp.toggle}}"></button></sc-if>
+                <span class="hrow-h">{{pp.hours}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</sc-if>
+
+</div></div>
+</template><script>
+class DCLogic { constructor(props){ this.props = props || {}; this.state = {}; } setState(p){ Object.assign(this.state, p); __render(); } }
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = this.initial('week');
+  }
+  initial(mode) {
+    return {
+      view: mode === 'hours' ? 'hours' : 'week',
+      inviteOpen: mode === 'invite',
+      inviteFor: 't1',
+      picked: { t1: ['polina', 'sveta'], f2: ['polina', 'sveta', 'vera'], k1: ['kirill'] },
+      invited: { t1: [], f2: [], k1: [] },
+      att: {},
+      confirmed: false
+    };
+  }
+  renderVals() {
+    const s = this.state;
+    const P = {
+      anna: { name: 'Анна Соколова', ini: 'АС', av: 'av-o', f: true },
+      dima: { name: 'Дмитрий Орлов', ini: 'ДО', av: 'av-p', f: false },
+      sveta: { name: 'Светлана Ким', ini: 'СК', av: 'av-g', f: true },
+      polina: { name: 'Полина Зайцева', ini: 'ПЗ', av: 'av-v', f: true },
+      timur: { name: 'Тимур Ахмедов', ini: 'ТА', av: 'av-b', f: false },
+      vera: { name: 'Вера Новикова', ini: 'ВН', av: 'av-o', f: true },
+      kirill: { name: 'Кирилл Смирнов', ini: 'КС', av: 'av-y', f: false }
+    };
+    const WS = [
+      { key: 'paint', name: 'Живопись', art: 'art-o' },
+      { key: 'theatre', name: 'Театр', art: 'art-p' },
+      { key: 'music', name: 'Музыка', art: 'art-v' },
+      { key: 'felt', name: 'Валяние', art: 'art-y' },
+      { key: 'cer', name: 'Керамика', art: 'art-g' },
+      { key: 'vitr', name: 'Витраж', art: 'art-v' },
+      { key: 'film', name: 'Киноклуб', art: 'art-b' },
+      { key: 'games', name: 'Настольные игры', art: 'art-b' }
+    ];
+    const DAYS = [
+      { d: 'пн', n: '26', full: 'понедельник 26 октября' },
+      { d: 'вт', n: '27', full: 'вторник 27 октября' },
+      { d: 'ср', n: '28', full: 'среда 28 октября' },
+      { d: 'чт', n: '29', full: 'четверг 29 октября' },
+      { d: 'пт', n: '30', full: 'пятница 30 октября' },
+      { d: 'сб', n: '31', full: 'суббота 31 октября' },
+      { d: 'вс', n: '1', full: 'воскресенье 1 ноября' }
+    ];
+    const SL = [
+      { id: 'p1', ws: 'paint', day: 0, time: '16:00', need: 2, base: 2 },
+      { id: 'p2', ws: 'paint', day: 2, time: '16:00', need: 2, base: 2 },
+      { id: 'p3', ws: 'paint', day: 5, time: '12:00', need: 2, base: 2 },
+      { id: 'p4', ws: 'paint', day: 5, time: '15:00', need: 2, base: 2 },
+      { id: 't1', ws: 'theatre', day: 1, time: '17:00', need: 3, base: 1, gap: true },
+      { id: 't2', ws: 'theatre', day: 3, time: '17:00', need: 2, base: 2 },
+      { id: 'm1', ws: 'music', day: 0, time: '17:00', need: 2, base: 2 },
+      { id: 'm2', ws: 'music', day: 3, time: '17:00', need: 2, base: 2 },
+      { id: 'f1', ws: 'felt', day: 2, time: '16:00', need: 2, base: 2 },
+      { id: 'f2', ws: 'felt', day: 5, time: '11:00', need: 3, base: 0, gap: true },
+      { id: 'c1', ws: 'cer', day: 2, time: '12:00', need: 2, base: 2 },
+      { id: 'c2', ws: 'cer', day: 6, time: '12:00', need: 2, base: 2 },
+      { id: 'v1', ws: 'vitr', day: 0, time: '16:00', need: 1, base: 1 },
+      { id: 'k1', ws: 'film', day: 4, time: '19:00', need: 1, base: 0, gap: true },
+      { id: 'g1', ws: 'games', day: 2, time: '18:30', need: 2, base: 2 },
+      { id: 'g2', ws: 'games', day: 5, time: '14:00', need: 2, base: 2 }
+    ];
+    const C = {
+      t1: [
+        { id: 'polina', score: 88, why: 'знает группу, подменяла 13 октября', resp: 'yes' },
+        { id: 'sveta', score: 81, why: 'свободна во вторник, прошла «Инклюзию»', resp: 'wait' },
+        { id: 'kirill', score: 70, why: 'свободен во вторник, ведёт подростков', resp: 'no' },
+        { id: 'vera', score: 58, why: 'свободна, но без «Инклюзии»', resp: 'wait' },
+        { id: 'timur', score: 52, why: 'свободен, с детьми пока не занимался', resp: 'wait' }
+      ],
+      f2: [
+        { id: 'polina', score: 92, why: 'ассистент в валянии', resp: 'yes' },
+        { id: 'sveta', score: 78, why: 'суббота днём свободна, работает руками', resp: 'yes' },
+        { id: 'vera', score: 64, why: 'выходные свободны, валяние не вела', resp: 'wait' }
+      ],
+      k1: [
+        { id: 'kirill', score: 68, why: 'свободен в пятницу, ведёт подростков', resp: 'wait' }
+      ]
+    };
+    const slotById = {};
+    SL.forEach((x) => { slotById[x.id] = x; });
+    const wsName = (k) => WS.filter((w) => w.key === k)[0].name;
+    const invitedOf = (sid) => s.invited[sid] || [];
+    const pickedOf = (sid) => s.picked[sid] || [];
+    const filled = (sid) => {
+      const yes = (C[sid] || []).filter((c) => invitedOf(sid).indexOf(c.id) >= 0 && c.resp === 'yes').length;
+      return slotById[sid].base + yes;
+    };
+    const gapIds = ['t1', 'k1', 'f2'].filter((sid) => filled(sid) < slotById[sid].need);
+    const sid = s.inviteFor;
+    const word = (n) => (n === 1 ? 'смена' : (n >= 2 && n <= 4 ? 'смены' : 'смен'));
+    const leadNames = { t1: 'театр во вторник', k1: 'киноклуб в пятницу', f2: 'валяние в субботу' };
+    const heroLead = gapIds.map((g) => leadNames[g]).join(', ');
+
+    const viewDefs = [{ id: 'week', label: 'Неделя' }, { id: 'hours', label: 'Подтверждение часов' }];
+    const modeNow = s.view === 'hours' ? 'hours' : (s.inviteOpen ? 'invite' : 'week');
+    const modeDefs = [{ id: 'week', label: 'Неделя' }, { id: 'invite', label: 'Кого позвать' }, { id: 'hours', label: 'Подтверждение часов' }];
+
+    const wkRows = WS.map((w) => ({
+      name: w.name,
+      artCls: 'art art-sm ' + w.art,
+      isPaint: w.key === 'paint', isTheatre: w.key === 'theatre', isMusic: w.key === 'music', isFelt: w.key === 'felt',
+      isCer: w.key === 'cer', isVitr: w.key === 'vitr', isFilm: w.key === 'film', isGames: w.key === 'games',
+      cells: DAYS.map((d, i) => ({
+        slots: SL.filter((x) => x.ws === w.key && x.day === i).map((x) => {
+          const f = filled(x.id);
+          const bad = f < x.need;
+          const sel = s.inviteOpen && x.id === sid;
+          return {
+            time: x.time,
+            fill: f + '/' + x.need,
+            ok: !bad, bad: bad,
+            cls: 'slot slot-bad' + (f === 0 ? ' is-zero' : '') + (sel ? ' is-sel' : ''),
+            pressed: sel ? 'true' : 'false',
+            aria: w.name + ', ' + d.full + ', ' + x.time + ', записано ' + f + ' из ' + x.need,
+            pick: () => this.setState({ inviteOpen: true, inviteFor: x.id })
+          };
+        })
+      }))
+    }));
+
+    const isl = slotById[sid];
+    const inv = invitedOf(sid);
+    const pk = pickedOf(sid);
+    const toInvite = pk.filter((id) => inv.indexOf(id) < 0);
+    const left = isl.need - filled(sid);
+    const leftWord = left <= 0 ? 'Все места заняты' : (left === 1 ? 'Нужен ещё один' : 'Нужны ещё ' + (left === 2 ? 'двое' : 'трое'));
+    const cands = (C[sid] || []).map((c) => {
+      const p = P[c.id];
+      const invited = inv.indexOf(c.id) >= 0;
+      const checked = pk.indexOf(c.id) >= 0;
+      const respLabel = c.resp === 'yes' ? (p.f ? 'согласилась' : 'согласился') : (c.resp === 'no' ? (p.f ? 'отказалась' : 'отказался') : 'ждём ответа');
+      return {
+        name: p.name, ini: p.ini, avCls: 'avatar ' + p.av, why: c.why,
+        score: c.score, scoreLabel: 'Совпадение ' + c.score + ' из 100',
+        canPick: !invited,
+        isYes: invited && c.resp === 'yes', isWait: invited && c.resp === 'wait', isNo: invited && c.resp === 'no',
+        respLabel: p.name + ': ' + respLabel,
+        isChecked: checked,
+        checked: checked ? 'true' : 'false',
+        cbxCls: checked ? 'cbx is-on' : 'cbx',
+        cbxLabel: 'Пригласить: ' + p.name,
+        toggle: () => {
+          const np = { ...s.picked };
+          np[sid] = checked ? pk.filter((x) => x !== c.id) : pk.concat([c.id]);
+          this.setState({ picked: np });
+        }
+      };
+    });
+
+    const PAST = [
+      { id: 's1', title: 'Живопись', when: 'сб 17 октября, 12:00–14:00', h: 2, people: [['anna', true], ['vera', true]] },
+      { id: 's2', title: 'Валяние', when: 'сб 17 октября, 11:00–14:00', h: 3, people: [['polina', true], ['sveta', true]] },
+      { id: 's3', title: 'Настольные игры', when: 'ср 14 октября, 18:30–20:00', h: 1.5, people: [['kirill', true], ['timur', true]] },
+      { id: 's4', title: 'Театр', when: 'вт 13 октября, 17:00–19:00', h: 2, people: [['dima', false], ['polina', true]] }
+    ];
+    const fmt = (x) => String(x).replace('.', ',') + ' ч';
+    let pendPeople = 0;
+    let pendHours = 0;
+    const past = PAST.map((ps) => {
+      const people = ps.people.map((row) => {
+        const pid = row[0];
+        const p = P[pid];
+        const k = ps.id + ':' + pid;
+        const was = Object.prototype.hasOwnProperty.call(s.att, k) ? s.att[k] : row[1];
+        if (was) { pendPeople += 1; pendHours += ps.h; }
+        return {
+          name: p.name, ini: p.ini, avCls: 'avatar ' + p.av,
+          editable: !s.confirmed,
+          tglCls: was ? 'toggle is-on' : 'toggle',
+          pressed: was ? 'true' : 'false',
+          tglAria: p.name + (was ? (p.f ? ': была' : ': был') : (p.f ? ': не была' : ': не был')),
+          hours: was ? fmt(ps.h) : '0 ч',
+          toggle: () => { const na = { ...s.att }; na[k] = !was; this.setState({ att: na }); }
+        };
+      });
+      return { title: ps.title, when: ps.when, isConfirmed: s.confirmed, people: people };
+    });
+    const peopleWord = (n) => ((n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? 'человека' : 'человек');
+
+    return {
+      modes: modeDefs.map((m) => ({
+        ...m,
+        cls: m.id === modeNow ? 'is-on' : '',
+        pressed: m.id === modeNow ? 'true' : 'false',
+        pick: () => this.setState(this.initial(m.id))
+      })),
+      views: viewDefs.map((t) => ({
+        ...t,
+        cls: t.id === s.view ? 'is-on' : '',
+        selected: t.id === s.view ? 'true' : 'false',
+        pick: () => this.setState({ view: t.id })
+      })),
+      isWeek: s.view === 'week',
+      isHours: s.view === 'hours',
+      heroTitle: gapIds.length === 0 ? 'Все смены закрыты' : gapIds.length + ' ' + word(gapIds.length) + ' без людей',
+      heroLead: gapIds.length === 0 ? 'На этой неделе всем хватает взрослых' : heroLead.charAt(0).toUpperCase() + heroLead.slice(1),
+      heroCanOpen: !s.inviteOpen && gapIds.length > 0,
+      inviteOpen: s.inviteOpen,
+      openInvite: () => this.setState({ inviteOpen: true, inviteFor: gapIds[0] || 't1' }),
+      closeInvite: () => this.setState({ inviteOpen: false }),
+      days: DAYS,
+      wkRows: wkRows,
+      inv: {
+        shift: wsName(isl.ws) + ', ' + DAYS[isl.day].full + ', ' + isl.time + '. ' + leftWord + '.',
+        cands: cands,
+        canSend: toInvite.length > 0,
+        cantSend: toInvite.length === 0 && inv.length === 0,
+        cantReason: 'Отметьте, кого позвать',
+        sendLabel: 'Пригласить выбранных: ' + toInvite.length,
+        send: () => { const ni = { ...s.invited }; ni[sid] = inv.concat(toInvite); this.setState({ invited: ni }); },
+        hasSummary: inv.length > 0 && toInvite.length === 0,
+        summary: 'Смена теперь ' + filled(sid) + ' из ' + isl.need
+      },
+      past: past,
+      canConfirmAll: !s.confirmed,
+      confirmAll: () => this.setState({ confirmed: true }),
+      hoursTitle: s.confirmed ? 'Часы подтверждены' : '4 смены ждут подтверждения',
+      hoursLead: s.confirmed ? 'Они уже в «Моём пути» у волонтёров' : pendPeople + ' ' + peopleWord(pendPeople) + ', ' + fmt(pendHours)
+    };
+  }
+}
+
+const __comp = new Component({});
+function __lookup(scope, path){
+  path = path.trim();
+  if (path === 'true') return true; if (path === 'false') return false;
+  if (/^\d+$/.test(path)) return +path;
+  const parts = path.split('.'); let v = scope[parts[0]];
+  for (let i = 1; i < parts.length; i++) v = (v == null) ? undefined : v[parts[i]];
+  return v;
+}
+function __interp(str, scope){
+  const m = str.match(/^\{\{([^}]*)\}\}$/);
+  if (m) return __lookup(scope, m[1]);
+  return str.replace(/\{\{([^}]*)\}\}/g, (_, p) => { const v = __lookup(scope, p); return v == null ? '' : String(v); });
+}
+function __walk(src, scope, parent){
+  for (const n of src.childNodes){
+    if (n.nodeType === 3){ parent.appendChild(document.createTextNode(__interp(n.nodeValue, scope))); continue; }
+    if (n.nodeType !== 1) continue;
+    const tag = n.localName;
+    if (tag === 'sc-for'){
+      const list = __lookup(scope, n.getAttribute('list').replace(/[{}]/g,'')) || [];
+      const as = n.getAttribute('as');
+      list.forEach((item) => { const s2 = Object.create(scope); s2[as] = item; __walk(n, s2, parent); });
+      continue;
+    }
+    if (tag === 'sc-if'){
+      if (__lookup(scope, n.getAttribute('value').replace(/[{}]/g,''))) __walk(n, scope, parent);
+      continue;
+    }
+    const el = n.namespaceURI && n.namespaceURI !== 'http://www.w3.org/1999/xhtml' ? document.createElementNS(n.namespaceURI, tag) : document.createElement(tag);
+    for (const a of n.attributes){
+      if (/^on/i.test(a.name)){
+        const fn = __interp(a.value, scope);
+        let ev = a.name.slice(2).toLowerCase();
+        if (ev === 'change' && (tag === 'input' || tag === 'textarea')) ev = 'input';
+        if (typeof fn === 'function') el.addEventListener(ev, fn);
+        continue;
+      }
+      if (a.name.startsWith('hint-')) continue;
+      const v = __interp(a.value, scope);
+      if (a.name === 'value' && (tag === 'input' || tag === 'textarea')) { el.value = v == null ? '' : v; continue; }
+      el.setAttribute(a.name, v == null ? '' : String(v));
+    }
+    __walk(tag === 'template' ? n.content : n, scope, el);
+    parent.appendChild(el);
+  }
+}
+function __render(){
+  const ae = document.activeElement; const aid = ae && ae.id; const sel = ae && ae.selectionStart;
+  const vals = __comp.renderVals();
+  const root = document.getElementById('__root'); root.innerHTML = '';
+  __walk(document.getElementById('__tpl').content, vals, root);
+  if (aid){ const e = document.getElementById(aid); if (e){ e.focus(); try { e.setSelectionRange(sel, sel); } catch(_){} } }
+}
+__render();
+</script></body></html>

@@ -1,0 +1,246 @@
+<title>CJM новичка «Дети Марии»</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: шапка с персоной и легендой → широкая карта «этапы × слои» в своём горизонтальном скролле, колонка слоёв закреплена слева; критический этап подсвечен */
+:root{
+  --bg:#f4f6f5; --paper:#ffffff; --ink:#1d2b2a; --muted:#5d6b69; --line:#d9e0de;
+  --accent:#e26a1f; --accent-soft:#fde9dc;
+  --fact:#1f6f64; --fact-soft:#e2f1ee;
+  --hyp:#6a55b5; --hyp-soft:#ece8f8;
+  --gap:#9a7b12; --gap-soft:#fbf3d6;
+  --f-display:"Unbounded","Golos Text",system-ui,sans-serif;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a19; --paper:#1c2423; --ink:#e7eeec; --muted:#9aa9a6; --line:#2e3a38;
+  --accent:#f08a45; --accent-soft:#3a2518;
+  --fact:#6fc9b9; --fact-soft:#1b302c;
+  --hyp:#b4a5ef; --hyp-soft:#272240;
+  --gap:#e2c25a; --gap-soft:#332c12; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a19; --paper:#1c2423; --ink:#e7eeec; --muted:#9aa9a6; --line:#2e3a38;
+  --accent:#f08a45; --accent-soft:#3a2518;
+  --fact:#6fc9b9; --fact-soft:#1b302c;
+  --hyp:#b4a5ef; --hyp-soft:#272240;
+  --gap:#e2c25a; --gap-soft:#332c12; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px;max-width:1500px;margin:0 auto;display:grid;gap:24px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,3.2vw,34px);line-height:1.15;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-family:var(--f-display);font-weight:500;font-size:17px;margin:0;text-wrap:balance}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lead{max-width:68ch;color:var(--muted);margin:0}
+.head{display:grid;gap:10px}
+.top{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.box{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:8px;align-content:start;min-width:0}
+.box p{margin:0}
+.box ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.chip[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.chip:focus-visible,.cell:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.dot.fact{background:var(--fact)} .dot.hyp{background:var(--hyp)} .dot.gap{background:var(--gap)}
+.src{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px}
+.keys b{font-family:var(--f-mono);font-weight:500;font-size:12px}
+
+.mapbox{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+.map{display:grid;grid-template-columns:150px repeat(7,minmax(220px,1fr));min-width:1700px}
+.map > div{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:10px;min-width:0}
+.lane{position:sticky;left:0;z-index:2;background:var(--paper);font-weight:600;font-size:13px;display:grid;gap:4px;align-content:start}
+.lane small{font-weight:400;color:var(--muted);font-size:12px}
+.stage{background:var(--paper);display:grid;gap:4px;align-content:start;padding-block:14px !important}
+.stage .n{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.stage .t{font-family:var(--f-display);font-weight:500;font-size:14px;line-height:1.25}
+.crit{background:var(--accent-soft) !important}
+.critflag{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
+.corner{position:sticky;left:0;z-index:3;background:var(--paper)}
+.cellwrap{display:grid;gap:6px;align-content:start}
+.cell{border-radius:7px;padding:7px 9px;font-size:13px;line-height:1.4;display:grid;gap:3px;border:1px solid transparent}
+.cell.fact{background:var(--fact-soft);border-color:color-mix(in srgb,var(--fact) 25%,transparent)}
+.cell.hyp{background:var(--hyp-soft);border:1px dashed color-mix(in srgb,var(--hyp) 55%,transparent)}
+.cell.gap{background:var(--gap-soft);border:1px dashed color-mix(in srgb,var(--gap) 60%,transparent)}
+.cell.gap::before{content:"Выяснить";font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;color:var(--gap)}
+.cell.dim{opacity:.18}
+.foot{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.hint{font-size:12px;color:var(--muted);margin:0}
+@media (prefers-reduced-motion:no-preference){.cell{transition:opacity .15s}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <span class="eyebrow">Кейс 3 · «Дети Марии» · рабочая версия 21.10.2026</span>
+    <h1>Путь нового волонтёра: от первого контакта до регулярной помощи</h1>
+    <p class="lead">Карта текущего пути, собранная по брифу с фондом, анкете и постам ВК. Интервью с волонтёрами ещё не было, поэтому слой «мысли и чувства» оставлен вопросами, а гипотезы отделены от фактов.</p>
+  </header>
+
+  <section class="top">
+    <div class="box">
+      <span class="eyebrow">Кого картируем</span>
+      <p><b>Новичок, который думает о регулярной помощи на занятиях.</b> Первая смена — помощник руководителя мастерской.</p>
+      <p class="hint">Выбран по выраженности проблемы: фонду нужно постоянство ради доверия подопечных, а уходят чаще всего после пробной смены. Это выбор команды, а не доказанно самый большой сегмент.</p>
+    </div>
+    <div class="box">
+      <span class="eyebrow">Что показывать</span>
+      <div class="legend" role="group" aria-label="Фильтр карточек">
+        <button class="chip" id="f-all" data-f="all" aria-pressed="true">Всё</button>
+        <button class="chip" id="f-fact" data-f="fact" aria-pressed="false"><span class="dot fact"></span>Известно</button>
+        <button class="chip" id="f-hyp" data-f="hyp" aria-pressed="false"><span class="dot hyp"></span>Гипотеза / предложение</button>
+        <button class="chip" id="f-gap" data-f="gap" aria-pressed="false"><span class="dot gap"></span>Выяснить</button>
+      </div>
+      <p class="hint">Пунктир — то, что ещё не подтверждено.</p>
+    </div>
+    <div class="box">
+      <span class="eyebrow">Источники</span>
+      <div class="keys">
+        <b>Б1–Б14</b><span>бриф с фондом (реестр в «CJM — после брифа фонда»)</span>
+        <b>А</b><span>анкета волонтёра в Яндекс Формах</span>
+        <b>ВК</b><span>40 постов группы, 12 авг – 20 окт 2026</span>
+        <b>Р</b><span>описания ролей от фонда</span>
+        <b>Г</b><span>гипотеза или предложение команды</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="mapbox" tabindex="0" aria-label="Карта пути, прокручивается по горизонтали">
+    <div class="map" id="map"></div>
+  </div>
+  <p class="hint">На телефоне карту можно листать вбок, колонка слоёв остаётся на месте.</p>
+
+  <section class="foot">
+    <div class="box">
+      <h2>Главный разрыв</h2>
+      <p>После пробной смены у волонтёра нет известного следующего шага. По ощущению фонда из 10 новых остаются 1–2. Остаются те, кто сам выходит на связь (гипотеза команды). Решение, которое проверяем: подготовка под конкретную роль, встречающий на смене, разговор после неё и согласованный следующий шаг.</p>
+    </div>
+    <div class="box">
+      <h2>За границей карты</h2>
+      <ul>
+        <li>200+ волонтёров времён ковида: нужен отдельный сценарий возврата, актуальность контактов неизвестна.</li>
+        <li>Разовая помощь (ярмарки и маркеты, 5 событий за 2 месяца по ВК) и профессиональная помощь: отдельные ветки.</li>
+        <li>Проект в Осетии: местные процессы не исследованы.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>Чем заполнить пробелы</h2>
+      <ul>
+        <li>Разговор с человеком, который ушёл после пробы, и с новичком, который остался.</li>
+        <li>С координатором восстановить одного недавнего новичка по датам.</li>
+        <li>Попросить у фонда материалы 30-минутной встречи.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+const stages=[
+ "Узнаёт о фонде","Заполняет анкету","Ждёт ответа и знакомится","Договаривается о первой смене","Пробная смена","Решает, продолжать ли","Встраивается в регулярную помощь"];
+const CRIT=5;
+const lanes=[
+ {k:"goal",t:"Цель волонтёра",s:"чего хочет добиться"},
+ {k:"do",t:"Что делает",s:"действия на этапе"},
+ {k:"tp",t:"Точки контакта",s:"где встречается с фондом"},
+ {k:"feel",t:"Мысли и чувства",s:"не исследовано"},
+ {k:"pain",t:"Барьеры",s:"где путь ломается"},
+ {k:"back",t:"Фонд за сценой",s:"координатор, мастерская"},
+ {k:"opp",t:"Возможности",s:"что предлагаем"},
+ {k:"kpi",t:"Как измерить",s:"метрика этапа"}];
+// [kind, text, source]
+const D={
+goal:[
+ [["hyp","Найти, где можно помогать детям и взрослым, и понять, подойдёт ли это мне","Г"]],
+ [["hyp","Быстро заявить о себе и получить ответ","Г"]],
+ [["hyp","Понять, что именно придётся делать и с кем","Г"]],
+ [["hyp","Получить конкретную дату и понять, что меня ждут","Г"]],
+ [["hyp","Справиться с задачей и не растеряться в общении с участниками","Г"]],
+ [["hyp","Понять, моё ли это и какую нагрузку я потяну","Г"]],
+ [["hyp","Помогать в удобном ритме и видеть, что это нужно","Г"]]],
+do:[
+ [["fact","Находит фонд сам (фонд на слуху), через Добро.РФ, ВК или Telegram","Б14, Б13"],["fact","Пост «Быть рядом» 1 октября ведёт на анкету","ВК"]],
+ [["fact","Заполняет анкету около 10 минут: контакты, удобный канал, опыт, опыт с особенностями развития, направления, очно или онлайн, регулярность","А"],["fact","Может ответить «хочу обсудить на встрече» почти в каждом блоке","А"]],
+ [["fact","Анкета обещает, что с ним свяжутся и договорятся о встрече-знакомстве","А"],["fact","Встреча около 30 минут, рассказывают о фонде","Б8"]],
+ [["gap","Кто предлагает дату, объясняет роль и подтверждает, что новичка ждут?","?"]],
+ [["fact","Выходит помощником руководителя мастерской","Б7"],["gap","Что реально пришлось делать и кто помогал?","?"]],
+ [["fact","Часть новых остаётся, большинство не возвращается","Б7"]],
+ [["fact","Около 20 постоянных и около 30 «друзей», готовых подключиться","Б2"],["fact","Занятия и мастерские идут 7 дней в неделю","ВК"]]],
+tp:[
+ [["fact","ВК (анонсы, отчёты, истории), Telegram, сайт, Добро.РФ, знакомые","Б13, ВК"]],
+ [["fact","Яндекс Форма","А"]],
+ [["fact","Выбранный канал: WhatsApp, Telegram, Max, почта или звонок","А"],["fact","Встреча-знакомство","Б8"]],
+ [["hyp","Личная переписка с координатором: в ВК запросов на смены нет","ВК, Г"]],
+ [["fact","Мастерская, руководитель занятия, участники","Б7"]],
+ [["gap","Есть ли контакт после смены и кто его начинает?","?"]],
+ [["gap","Как сейчас договариваются о датах, переносах и паузах?","?"]]],
+feel:[
+ [["gap","Где впервые увидел фонд, что искал и чего не нашёл?","?"]],
+ [["gap","Было ли понятно, что будет после отправки и когда ответят?","?"]],
+ [["gap","Что стало понятно после встречи, что осталось неясным?","?"]],
+ [["gap","Ждал ли ответа, приходилось ли напоминать о себе?","?"]],
+ [["gap","Какой эпизод оказался неожиданным или трудным?","?"]],
+ [["gap","Что повлияло на решение остаться или не вернуться?","?"]],
+ [["gap","Что помогает оставаться, что утомляет?","?"]]],
+pain:[
+ [["fact","В постах нет запросов на конкретные смены: неясно, какая помощь нужна сейчас","ВК"],["fact","Сайт местами устарел","Б13"]],
+ [["fact","В анкете нет вопросов про дни и время, район и посильные физические задачи, поэтому фонду сложно понять, что предложить","А, Б9, Б11"]],
+ [["fact","Встреча про фонд в целом, а не про конкретную смену","Б8"],["fact","Новичкам трудно общаться с участниками; оценки онбординга у сотрудников расходятся","Б8"]],
+ [["hyp","Путь требует собственной настойчивости: «побеждает сильнейший»","Б10, Г"],["fact","Смены закрываются ситуативно","Б12"]],
+ [["fact","Трудности общения с участниками","Б8"],["hyp","Руководитель может не знать, что человек новый","Г"]],
+ [["fact","Критическая точка: из 10 новых остаются 1–2, около 15% (оценка фонда, не расчёт)","Б7"],["hyp","Возможные причины: ожидания не совпали, не хватило поддержки, расписание, дорога, никто не пригласил снова","Г"]],
+ [["fact","Сотрудники сами выходят на незакрытые смены, команда устала","Б12"]]],
+back:[
+ [["fact","Анонсы выходят за 1–2 недели, события известны примерно на 1,5 месяца","ВК, Б12"]],
+ [["gap","Кто и как часто разбирает анкеты, где хранятся ответы?","?"]],
+ [["fact","Работает один координатор, должность появилась недавно","Б4"]],
+ [["gap","Как координатор и руководитель мастерской договариваются о месте для новичка?","?"]],
+ [["gap","Как руководитель передаёт итог смены координатору?","?"]],
+ [["gap","Есть ли у координатора список новичков после первой смены?","?"]],
+ [["fact","Для части смен важны физические возможности, например помощь человеку на коляске","Б11"]]],
+opp:[
+ [["hyp","Публиковать конкретные возможности: роль, что делать, где, когда, какая регулярность","Г, Р"]],
+ [["hyp","Добавить в анкету дни и время, район и ограничения","Г"],["hyp","Координатор может внести заявку сам, если человеку неудобна форма","Г, Б3"]],
+ [["hyp","Подготовка под конкретную роль: материал плюс разбор ситуаций общения","Г"],["hyp","Отдельные отметки «материал просмотрен» и «готовность обсуждена»","Г"]],
+ [["hyp","Подтверждение первого выхода: дата, место, задачи, длительность, имя встречающего, как отменить","Г"]],
+ [["hyp","Встречающий на месте; руководитель заранее знает о новичке","Г"]],
+ [["hyp","Разговор после смены в течение 1–2 дней и следующий шаг: дата, другая роль, пауза","Г"]],
+ [["hyp","Расписание с незакрытыми местами, история участия, добровольно указанные причины пауз","Г"]]],
+kpi:[
+ [["hyp","Откуда пришли: вопрос анкеты «Откуда вы узнали о фонде»","А, Г"]],
+ [["hyp","Время от анкеты до первого контакта","Г"]],
+ [["hyp","Доля анкет, дошедших до знакомства","Г"]],
+ [["hyp","Время от знакомства до первой смены","Г"]],
+ [["hyp","Доля назначенных смен, на которые человек пришёл","Г"]],
+ [["hyp","Доля новичков со второй сменой в согласованное окно","Г"]],
+ [["hyp","Подтверждённые места к нужным на будущих сменах","Г"]]]
+};
+const map=document.getElementById("map");
+const el=(cls,html)=>{const d=document.createElement("div");if(cls)d.className=cls;if(html!=null)d.innerHTML=html;return d};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+map.appendChild(el("corner",""));
+stages.forEach((s,i)=>{
+  const d=el("stage"+(i===CRIT?" crit":""),`<span class="n">${String(i+1).padStart(2,"0")}</span><span class="t">${esc(s)}</span>${i===CRIT?'<span class="critflag">Здесь теряем больше всего</span>':""}`);
+  map.appendChild(d);
+});
+lanes.forEach(l=>{
+  map.appendChild(el("lane",`${esc(l.t)}<small>${esc(l.s)}</small>`));
+  D[l.k].forEach((items,i)=>{
+    const w=el("cellwrap"+(i===CRIT?" crit":""));
+    items.forEach(([kind,text,src])=>{
+      const c=el("cell "+kind);c.dataset.kind=kind;
+      c.innerHTML=`<span>${esc(text)}</span>`+(src&&src!=="?"?`<span class="src">${esc(src)}</span>`:"");
+      w.appendChild(c);
+    });
+    map.appendChild(w);
+  });
+});
+const chips=[...document.querySelectorAll(".chip")];
+function apply(f){
+  chips.forEach(c=>c.setAttribute("aria-pressed",String(c.dataset.f===f)));
+  document.querySelectorAll(".cell").forEach(c=>c.classList.toggle("dim",f!=="all"&&c.dataset.kind!==f));
+  try{localStorage.setItem("cjm-filter",f)}catch(e){}
+}
+chips.forEach(c=>c.addEventListener("click",()=>apply(c.dataset.f)));
+let saved="all";try{saved=localStorage.getItem("cjm-filter")||"all"}catch(e){}
+apply(saved);
+</script>

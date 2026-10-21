@@ -1,0 +1,418 @@
+/* Opportunity */
+sc-if,sc-for{display:contents}
+.dm a.btn{color:var(--ink)}
+.dm a.btn:hover{text-decoration:none}
+.dm a.btn-ghost{color:var(--ink-2)}
+.dm a.btn-subtle{color:var(--blue)}
+.dm a.btn-ai{color:var(--violet)}
+.dm a.btn-dark{color:#fff}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 18px;font-size:15px;color:var(--mute)}
+.crumbs .ic{color:var(--quiet)}
+.facts{display:flex;flex-wrap:wrap;gap:10px 24px;margin-top:16px}
+.facts span{display:inline-flex;align-items:center;gap:8px;color:var(--ink-2)}
+.seats{display:flex;flex-direction:column;gap:8px}
+.score{display:inline-grid;place-items:center;min-width:52px;height:52px;padding:0 10px;border-radius:16px;background:var(--violet-tint);color:var(--violet);font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.score-lg{min-width:76px;height:76px;border-radius:22px;font-size:30px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:12px;max-width:640px}
+.opt{display:flex;align-items:center;gap:12px;min-height:66px;padding:12px 16px;border-radius:16px;border:1px solid var(--line-2);background:var(--paper);text-align:left;color:var(--ink-2)}
+.opt:hover{border-color:var(--ink-2)}
+.opt.is-on{border-color:var(--yellow);background:var(--yellow-tint);color:var(--ink)}
+.radio{width:20px;height:20px;flex:0 0 20px;border-radius:50%;border:2px solid var(--line-2);background:var(--paper)}
+.opt.is-on .radio{border:6px solid var(--yellow)}
+.ok-ic{width:48px;height:48px;flex:0 0 48px;border-radius:50%;display:grid;place-items:center;background:var(--green-tint);color:var(--green-ink)}
+.n{width:32px;height:32px;flex:0 0 32px;border-radius:50%;display:grid;place-items:center;background:var(--yellow-tint);color:var(--yellow-ink);font-size:15px;font-weight:600}
+.st{width:32px;height:32px;flex:0 0 32px;border-radius:50%;display:grid;place-items:center}
+.st-ok{background:var(--green-tint);color:var(--green-ink)}
+.st-wait{background:var(--orange-tint);color:var(--orange-ink)}
+.parts{display:flex;flex-direction:column;gap:14px;margin-top:18px}
+.bar-violet > i{background:var(--violet)}
+.ai-li{border-top-color:#E4DBFA}
+.ai-divider{height:1px;border:0;background:#E4DBFA;margin:18px 0 14px}
+.sticky{position:sticky;top:20px}
+.map{position:relative;height:200px;border-radius:18px;background:var(--soft-2);overflow:hidden;margin-top:14px}
+.map .streets{position:absolute;inset:0;width:100%;height:100%}
+.map .streets path{fill:none;stroke:var(--paper);stroke-width:14;stroke-linecap:round}
+.map-pin{position:absolute;left:52%;top:42%;transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px 0 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:15px;font-weight:600;color:var(--ink);white-space:nowrap}
+.map-pin .ic{color:var(--orange-ink)}
+.map-metro{position:absolute;left:20%;top:76%;transform:translate(-50%,-50%)}
+</style>
+</helmet>
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>волонтёры «Дети Марии»</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="Home.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>Главная</a>
+    <a class="is-active" aria-current="page" href="Catalog.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Возможности</a>
+    <a href="Schedule.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Мои смены</a>
+    <a href="Academy.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Академия</a>
+    <a href="Messages.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Сообщения<span class="count">3</span></a>
+    <a href="Hours.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg>Мой путь</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="CoordHome.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид координатора</a>
+    <div class="pillbox">
+      <a class="iconbtn" href="Mentor.dc.html" aria-label="ИИ-наставник"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></a>
+      <button class="iconbtn" type="button" aria-label="Уведомления, 2 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <a href="Profile.dc.html" class="avatar av-o" aria-label="Профиль: Анна Соколова">АС</a>
+    </div>
+  </div>
+</header>
+
+<div class="demo" role="group" aria-label="Состояния для показа">
+  <span class="demo-cap">Показать:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<nav class="crumbs" aria-label="Путь">
+  <a href="Catalog.dc.html">Возможности</a>
+  <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+  <span aria-current="page">Ассистент в мастерской живописи</span>
+</nav>
+
+<section class="card-hero" aria-labelledby="opp-title">
+  <div class="split">
+    <div class="main-col">
+      <p class="eyebrow" style="margin:0 0 8px">Регулярное занятие</p>
+      <h1 class="h1" id="opp-title">Ассистент в мастерской живописи</h1>
+      <div class="facts">
+        <span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Сб, 12:00–14:00, каждую неделю</span>
+        <span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Мастерская на Дмитровке</span>
+        <span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg>Группа «Подсолнухи», 8–11 лет, 9 детей</span>
+      </div>
+      <div class="seats" style="margin-top:20px;max-width:440px">
+        <span class="strong">{{seatsLabel}}</span>
+        <div class="bar bar-blue" aria-hidden="true"><i style="{{seatStyle}}"></i></div>
+      </div>
+
+      <sc-if value="{{showSignup}}" hint-placeholder-val="{{true}}">
+        <div class="row wrap" style="margin-top:24px">
+          <button type="button" class="btn btn-primary btn-lg" onClick="{{startPick}}">Записаться</button>
+          <button type="button" class="btn btn-ghost btn-lg" aria-expanded="{{askExpanded}}" onClick="{{toggleAsk}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Задать вопрос координатору</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showPick}}" hint-placeholder-val="{{false}}">
+        <div style="margin-top:24px">
+          <h2 class="h3" id="pick-title">С какой субботы начнёшь?</h2>
+          <div class="opts" role="radiogroup" aria-labelledby="pick-title">
+            <sc-for list="{{dates}}" as="d" hint-placeholder-count="3">
+              <button type="button" role="radio" aria-checked="{{d.checked}}" class="{{d.cls}}" onClick="{{d.pick}}"><span class="radio" aria-hidden="true"></span><span><span class="strong" style="display:block">{{d.title}}</span><span class="meta">12:00–14:00</span></span></button>
+            </sc-for>
+          </div>
+          <div class="row wrap" style="margin-top:16px">
+            <button type="button" class="btn btn-primary btn-lg" onClick="{{confirm}}">Подтвердить</button>
+            <button type="button" class="btn btn-ghost btn-lg" onClick="{{back}}">Назад</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showDone}}" hint-placeholder-val="{{false}}">
+        <div class="row" style="gap:14px;align-items:flex-start;margin-top:24px">
+          <span class="ok-ic" aria-hidden="true"><svg class="ic ic-lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></span>
+          <div class="grow">
+            <h2 class="h2">Ты в команде</h2>
+            <p class="lead" style="margin-top:6px">Ольга добавит тебя в чат «Подсолнухи». Первое занятие — {{chosenLong}}, 12:00.</p>
+            <div class="row wrap" style="margin-top:16px">
+              <a class="btn btn-secondary" href="Schedule.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Мои смены</a>
+              <a class="btn btn-ghost" href="Messages.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Сообщения</a>
+              <button type="button" class="btn btn-ghost" onClick="{{startPick}}">Изменить дату</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showWaitOffer}}" hint-placeholder-val="{{false}}">
+        <p class="p" style="margin-top:20px;max-width:56ch">Сейчас все места заняты. Встань в лист ожидания — напишем, как только место освободится.</p>
+        <div class="row wrap" style="margin-top:14px">
+          <button type="button" class="btn btn-primary btn-lg" onClick="{{joinWait}}">Встать в лист ожидания</button>
+          <button type="button" class="btn btn-ghost btn-lg" aria-expanded="{{askExpanded}}" onClick="{{toggleAsk}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Задать вопрос координатору</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showWaiting}}" hint-placeholder-val="{{false}}">
+        <div class="row wrap" style="margin-top:20px">
+          <span class="dot dot-green" style="font-size:16px">Ты в листе ожидания. Напишем в Сообщения, как только место освободится</span>
+          <button type="button" class="btn btn-ghost btn-sm" onClick="{{leaveWait}}">Выйти из листа</button>
+        </div>
+        <p class="p" style="margin-top:12px">Пока ждёшь: <a href="Catalog.dc.html">мастер-класс по валянию, сб 31 октября</a> — там не хватает трёх человек.</p>
+      </sc-if>
+
+      <sc-if value="{{showLocked}}" hint-placeholder-val="{{false}}">
+        <div class="row" style="gap:10px;align-items:flex-start;margin-top:20px;max-width:640px">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--orange-ink);margin-top:2px"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+          <p class="p" id="lock-why">Запись откроется после трека «Первые шаги». Пройден 1 модуль из 5, осталось: правила безопасности, как говорить с ребёнком, что делать при тревожном разговоре и итоговый тест.</p>
+        </div>
+        <div class="row wrap" style="margin-top:16px">
+          <a class="btn btn-primary btn-lg" href="Academy.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Продолжить «Первые шаги»</a>
+          <button type="button" class="btn btn-lg" aria-disabled="true" aria-describedby="lock-why">Записаться</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{askOpen}}" hint-placeholder-val="{{false}}">
+        <div class="field" style="margin-top:20px;max-width:640px">
+          <label class="label" for="ask-q">Вопрос Ольге Лебедевой, координатору</label>
+          <textarea id="ask-q" class="textarea" style="min-height:96px" placeholder="Например: что взять с собой на первое занятие?" value="{{askText}}" onChange="{{typeAsk}}"></textarea>
+        </div>
+        <div class="row wrap" style="margin-top:10px">
+          <button type="button" class="btn btn-secondary" onClick="{{sendAsk}}">Отправить</button>
+          <button type="button" class="btn btn-ghost" onClick="{{toggleAsk}}">Отмена</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{askSent}}" hint-placeholder-val="{{false}}">
+        <p class="dot dot-green" style="margin:16px 0 0;font-size:15px">Вопрос у Ольги. Ответ придёт в Сообщения</p>
+      </sc-if>
+    </div>
+
+    <div class="side-col">
+      <div class="art art-lg art-o" style="height:200px" aria-hidden="true">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:72px;height:72px;stroke-width:1.3"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg>
+      </div>
+      <div class="row" style="gap:14px;margin-top:16px">
+        <span class="score" aria-label="Совпадение 94 из 100">94</span>
+        <p class="p">из 100 по навыкам, времени и дороге. <a href="#why">Почему</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="split section">
+  <div class="main-col stack" style="gap:16px">
+    <section class="card" aria-labelledby="do-title">
+      <h2 class="h3" id="do-title">Что ты будешь делать</h2>
+      <div class="list" style="margin-top:4px">
+        <sc-for list="{{duties}}" as="t" hint-placeholder-count="5">
+          <div class="li"><span class="n num" aria-hidden="true">{{t.n}}</span><p class="p">{{t.text}}</p></div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="need-title">
+      <h2 class="h3" id="need-title">Что нужно</h2>
+      <div class="list" style="margin-top:4px">
+        <sc-for list="{{needs}}" as="n" hint-placeholder-count="3">
+          <div class="li" style="align-items:flex-start">
+            <sc-if value="{{n.ok}}" hint-placeholder-val="{{true}}"><span class="st st-ok" role="img" aria-label="Готово"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span></sc-if>
+            <sc-if value="{{n.notOk}}" hint-placeholder-val="{{false}}"><span class="st st-wait" role="img" aria-label="Ещё нет"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></sc-if>
+            <div class="grow">
+              <span class="li-title" style="display:block">{{n.title}}</span>
+              <p class="p">{{n.text}}</p>
+            </div>
+            <sc-if value="{{n.hasLink}}" hint-placeholder-val="{{false}}"><a class="btn btn-secondary btn-sm" href="Academy.dc.html">В Академию</a></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="team-title">
+      <h2 class="h3" id="team-title">Команда</h2>
+      <div class="list" style="margin-top:4px">
+        <sc-for list="{{team}}" as="u" hint-placeholder-count="3">
+          <div class="li">
+            <span class="{{u.av}}" aria-hidden="true">{{u.ini}}</span>
+            <div class="grow"><span class="li-title" style="display:block">{{u.name}}</span><span class="p">{{u.role}}</span></div>
+            <sc-if value="{{u.isMe}}" hint-placeholder-val="{{false}}"><span class="dot dot-green">в команде</span></sc-if>
+            <sc-if value="{{u.canWrite}}" hint-placeholder-val="{{false}}"><a class="btn btn-ghost btn-sm" href="Messages.dc.html">Написать</a></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section class="card-soft" aria-labelledby="place-title">
+      <h2 class="h3" id="place-title">Место</h2>
+      <div class="map" role="img" aria-label="Схема: мастерская в пяти минутах от метро">
+        <svg class="streets" viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true"><path d="M-10 128 L610 92"/><path d="M-10 36 L610 58"/><path d="M190 -10 L250 210"/><path d="M430 -10 L392 210"/><path d="M120 150 L60 210"/></svg>
+        <span class="map-pin"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Мастерская на Дмитровке</span>
+        <span class="tag t-blue map-metro">метро</span>
+      </div>
+      <p class="strong" style="margin:14px 0 0">Мастерская на Дмитровке, 5 минут от метро</p>
+      <p class="p">Точный адрес и как пройти пришлём после записи.</p>
+    </section>
+  </div>
+
+  <aside class="side-col">
+    <section class="ai-box sticky" id="why" aria-labelledby="why-title">
+      <div class="row wrap" style="justify-content:space-between">
+        <h2 class="h3" id="why-title">Почему тебе подходит</h2>
+        <span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span>
+      </div>
+      <div class="row" style="gap:16px;margin-top:14px">
+        <span class="score score-lg" aria-label="Совпадение 94 из 100">94</span>
+        <div>
+          <span class="strong" style="display:block">из 100</span>
+          <span class="p">Лучшее совпадение среди всех возможностей</span>
+        </div>
+      </div>
+      <div class="parts">
+        <sc-for list="{{parts}}" as="p" hint-placeholder-count="6">
+          <div>
+            <div class="row" style="justify-content:space-between"><span class="strong">{{p.label}}</span><span class="meta num">{{p.val}}</span></div>
+            <div class="bar bar-violet" style="margin-top:6px" aria-hidden="true"><i style="{{p.style}}"></i></div>
+            <p class="p" style="margin-top:6px">{{p.why}}</p>
+          </div>
+        </sc-for>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:12px" aria-expanded="{{howExpanded}}" onClick="{{toggleHow}}">{{howLabel}}</button>
+      <sc-if value="{{showHow}}" hint-placeholder-val="{{false}}">
+        <p class="p" style="margin-top:8px">Сначала проверяем обязательное, потом считаем баллы:</p>
+        <div class="list">
+          <sc-for list="{{gates}}" as="g" hint-placeholder-count="4">
+            <div class="li ai-li" style="padding:10px 0">
+              <span class="grow">{{g.label}}</span>
+              <span class="{{g.dotCls}}">{{g.note}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <p class="p" style="margin-top:10px">Интересы по смыслу сравнивает нейросеть с твоим «о себе». Остальное считает формула, она работает и без нейросети.</p>
+      </sc-if>
+      <hr class="ai-divider">
+      <sc-if value="{{fbNone}}" hint-placeholder-val="{{true}}">
+        <p class="p">Подсказка точная? Решаешь ты, состав группы согласует Ольга.</p>
+        <div class="row wrap" style="margin-top:10px">
+          <button type="button" class="btn btn-secondary btn-sm" onClick="{{fbYes}}">Да, всё так</button>
+          <button type="button" class="btn btn-ghost btn-sm" onClick="{{fbNo}}">Не совсем</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{fbOk}}" hint-placeholder-val="{{false}}">
+        <p class="dot dot-green" style="margin:0;font-size:15px">Спасибо, учтём в подборе</p>
+      </sc-if>
+      <sc-if value="{{fbFix}}" hint-placeholder-val="{{false}}">
+        <p class="p" id="fix-l">Что не так?</p>
+        <div class="chips" role="group" aria-labelledby="fix-l" style="margin-top:10px">
+          <sc-for list="{{fixChips}}" as="c" hint-placeholder-count="4">
+            <button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.label}}</button>
+          </sc-for>
+        </div>
+        <p class="p" style="margin-top:10px">Учтём в следующем подборе. Навыки и время можно поправить в <a href="Profile.dc.html">профиле</a>.</p>
+      </sc-if>
+    </section>
+  </aside>
+</div>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'open', step: 'idle', date: 'd25', ask: 'closed', askText: '', how: false, fb: 'none', fix: [] };
+  }
+  renderVals() {
+    const s = this.state;
+    const isOpen = s.mode === 'open';
+    const isFull = s.mode === 'full';
+    const isUntrained = s.mode === 'untrained';
+    const joined = isOpen && s.step === 'done';
+    const free = isFull ? 0 : (joined ? 1 : 2);
+    const seatsLabel = free === 0 ? 'Мест нет: все 4 заняты' : (free === 1 ? 'Свободно 1 место из 4' : 'Свободно 2 места из 4');
+    const dates = [
+      { id: 'd25', title: 'Сб, 24 октября', long: 'сб, 24 октября', short: '24 октября' },
+      { id: 'd01', title: 'Сб, 31 октября', long: 'сб, 31 октября', short: '31 октября' },
+      { id: 'd08', title: 'Сб, 7 ноября', long: 'сб, 7 ноября', short: '7 ноября' }
+    ];
+    const chosen = dates.filter((d) => d.id === s.date)[0] || dates[0];
+    const modeDefs = [
+      { id: 'open', label: 'Можно записаться' },
+      { id: 'full', label: 'Нет мест — лист ожидания' },
+      { id: 'untrained', label: 'Не пройдено обучение' }
+    ];
+    const parts = [
+      { label: 'Навыки', got: 33, max: 35, why: 'рисуешь акварелью, была вожатой у детей 8–12' },
+      { label: 'Интересы', got: 18, max: 20, why: 'в «о себе» — живопись и младшие школьники' },
+      { label: 'Время', got: 15, max: 15, why: 'суббота днём — твоё свободное время' },
+      { label: 'Дорога', got: 8, max: 10, why: 'от Савёловского района недалеко' },
+      { label: 'Срочность', got: 10, max: 10, why: 'в группе свободно 2 места из 4' },
+      { label: 'Непрерывность', got: 10, max: 10, why: 'ты уже знаешь группу' }
+    ];
+    const gates = [
+      { label: 'Обучение «Первые шаги»', ok: !isUntrained, yes: 'пройдено', no: 'ещё нет' },
+      { label: 'Справка о несудимости', ok: true, yes: 'проверена', no: '' },
+      { label: 'Время совпадает', ok: true, yes: 'да', no: '' },
+      { label: 'Есть места', ok: !isFull, yes: 'да', no: 'нет, есть лист ожидания' }
+    ];
+    const fixDefs = ['дорога дольше', 'время поменялось', 'хочу другое занятие', 'другое'];
+    return {
+      modes: modeDefs.map((m) => ({
+        label: m.label,
+        cls: m.id === s.mode ? 'is-on' : '',
+        pressed: m.id === s.mode ? 'true' : 'false',
+        pick: () => this.setState({ mode: m.id, step: 'idle', ask: 'closed', fb: 'none', fix: [], how: false })
+      })),
+      seatsLabel,
+      seatStyle: 'width: ' + ((4 - free) / 4) * 100 + '%',
+      showSignup: isOpen && s.step === 'idle',
+      showPick: isOpen && s.step === 'pick',
+      showDone: joined,
+      showWaitOffer: isFull && s.step === 'idle',
+      showWaiting: isFull && s.step === 'wait',
+      showLocked: isUntrained,
+      startPick: () => this.setState({ step: 'pick', ask: 'closed' }),
+      back: () => this.setState({ step: 'idle' }),
+      confirm: () => this.setState({ step: 'done' }),
+      joinWait: () => this.setState({ step: 'wait', ask: 'closed' }),
+      leaveWait: () => this.setState({ step: 'idle' }),
+      dates: dates.map((d) => ({
+        title: d.title,
+        cls: d.id === s.date ? 'opt is-on' : 'opt',
+        checked: d.id === s.date ? 'true' : 'false',
+        pick: () => this.setState({ date: d.id })
+      })),
+      chosenLong: chosen.long,
+      team: [
+        { av: 'avatar av-y', ini: 'ЕК', name: 'Елена Карпова', role: 'Ведущая мастерской, художник', me: false, write: false, show: true },
+        { av: 'avatar av-g', ini: 'ЛМ', name: 'Лиля Миронова', role: 'Волонтёр-ассистент', me: false, write: false, show: true },
+        { av: 'avatar av-o', ini: 'АС', name: 'Анна Соколова', role: 'Это ты, с ' + chosen.short, me: true, write: false, show: joined },
+        { av: 'avatar av-b', ini: 'ОЛ', name: 'Ольга Лебедева', role: 'Координатор волонтёров, отвечает на вопросы о группе', me: false, write: true, show: true }
+      ].filter((u) => u.show).map((u) => ({ av: u.av, ini: u.ini, name: u.name, role: u.role, isMe: u.me, canWrite: u.write })),
+      askOpen: s.ask === 'open' && s.step !== 'pick',
+      askSent: s.ask === 'sent',
+      askExpanded: s.ask === 'open' ? 'true' : 'false',
+      askText: s.askText,
+      toggleAsk: () => this.setState({ ask: s.ask === 'open' ? 'closed' : 'open' }),
+      typeAsk: (e) => this.setState({ askText: e.target.value }),
+      sendAsk: () => this.setState({ ask: 'sent', askText: '' }),
+      duties: [
+        'До занятия вместе с ведущей разложить краски, бумагу и воду.',
+        'Помогать детям, которым нужна рука рядом: показать приём, подать кисть, подбодрить.',
+        'Замечать, кто остался в стороне, и мягко звать в работу.',
+        'В конце убрать мастерскую вместе с детьми.',
+        'После занятия — минута рефлексии: как прошло и что нужно.'
+      ].map((t, i) => ({ n: String(i + 1), text: t })),
+      needs: [
+        { title: 'Трек «Первые шаги»', text: isUntrained ? 'Пройден 1 модуль из 5' : 'Пройден', ok: !isUntrained, link: isUntrained },
+        { title: 'Справка о несудимости', text: 'Проверена', ok: true, link: false },
+        { title: 'Приходить регулярно от 3 месяцев', text: 'Детям важно видеть тех же взрослых. Суббота днём есть в твоём графике', ok: true, link: false }
+      ].map((n) => ({ title: n.title, text: n.text, ok: n.ok, notOk: !n.ok, hasLink: n.link })),
+      parts: parts.map((p) => ({
+        label: p.label,
+        why: p.why,
+        val: p.got + ' из ' + p.max,
+        style: 'width: ' + Math.round((p.got / p.max) * 100) + '%'
+      })),
+      showHow: s.how,
+      howExpanded: s.how ? 'true' : 'false',
+      howLabel: s.how ? 'Скрыть, как считаем' : 'Как считаем',
+      toggleHow: () => this.setState({ how: !s.how }),
+      gates: gates.map((g) => ({ label: g.label, note: g.ok ? g.yes : g.no, dotCls: g.ok ? 'dot dot-green' : 'dot dot-orange' })),
+      fbNone: s.fb === 'none',
+      fbOk: s.fb === 'ok',
+      fbFix: s.fb === 'fix',
+      fbYes: () => this.setState({ fb: 'ok' }),
+      fbNo: () => this.setState({ fb: 'fix' }),
+      fixChips: fixDefs.map((f) => {
+        const on = s.fix.indexOf(f) >= 0;
+        return {
+          label: f,
+          cls: on ? 'chip is-on' : 'chip',
+          pressed: on ? 'true' : 'false',
+          pick: () => this.setState({ fix: on ? s.fix.filter((x) => x !== f) : s.fix.concat([f]) })
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

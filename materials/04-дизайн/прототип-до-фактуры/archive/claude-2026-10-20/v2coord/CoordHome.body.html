@@ -1,0 +1,158 @@
+<div class="dm"><div class="shell">
+
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>команда фонда</small></span></a>
+  <nav class="nav" aria-label="Разделы">
+    <a class="is-active" aria-current="page" href="CoordHome.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Обзор</a>
+    <a href="Pipeline.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/></svg>Заявки<span class="count">7</span></a>
+    <a href="Volunteers.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg>Волонтёры</a>
+    <a href="Shifts.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Смены<span class="count">3</span></a>
+    <a href="Signals.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg>Сигналы<span class="count">4</span></a>
+    <a href="Builder.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg>Обучение</a>
+    <a href="Reports.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Отчёты</a>
+    <a href="Admin.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Настройки</a>
+  </nav>
+  <div class="top-end">
+    <a class="role" href="Home.dc.html"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>Вид волонтёра</a>
+    <div class="pillbox">
+      <button class="iconbtn" type="button" aria-label="Уведомления, 5 новых"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span class="pip"></span></button>
+      <span class="{{meAvCls}}" aria-label="{{meLabel}}">{{meInitials}}</span>
+    </div>
+  </div>
+</header>
+
+<div class="demo" role="group" aria-label="Состояния прототипа">
+  <span class="demo-cap">Прототип:</span>
+  <sc-for list="{{modes}}" as="m" hint-placeholder-count="2">
+    <button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button>
+  </sc-for>
+</div>
+
+<sc-if value="{{isCoord}}" hint-placeholder-val="{{true}}">
+  <h1 class="h1" style="margin-bottom:24px">Доброе утро, Ольга</h1>
+
+  <section class="card-hero" aria-labelledby="att-title">
+    <h2 class="hero-title" id="att-title">Нужно внимание</h2>
+    <div class="att">
+      <div class="att-row">
+        <span class="att-ic" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v6a8 8 0 0 1-16 0z"/><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"/></svg></span>
+        <span class="att-text">Театр 27 октября: 1 взрослый из 3</span>
+        <a class="btn btn-primary" href="Shifts.dc.html">Найти замену</a>
+      </div>
+      <div class="att-row">
+        <span class="att-ic" aria-hidden="true">МБ</span>
+        <span class="att-text">Марине Беловой тяжело с группой</span>
+        <sc-if value="{{notCalled}}" hint-placeholder-val="{{true}}">
+          <button type="button" class="btn btn-secondary" onClick="{{call}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Позвонить</button>
+        </sc-if>
+        <sc-if value="{{called}}" hint-placeholder-val="{{false}}">
+          <span class="att-done"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Звонок отмечен</span>
+        </sc-if>
+      </div>
+      <div class="att-row">
+        <span class="att-ic" aria-hidden="true">ЕМ</span>
+        <span class="att-text">Егор Мельников 16 дней стоит в обучении</span>
+        <sc-if value="{{notWrote}}" hint-placeholder-val="{{true}}">
+          <button type="button" class="btn btn-secondary" onClick="{{write}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg>Написать</button>
+        </sc-if>
+        <sc-if value="{{wrote}}" hint-placeholder-val="{{false}}">
+          <span class="att-done"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Позвали на вводную</span>
+        </sc-if>
+      </div>
+      <div class="att-row">
+        <span class="att-ic" aria-hidden="true">АФ</span>
+        <span class="att-text">Алина Фёдорова ждёт ответа 4 дня</span>
+        <a class="btn btn-secondary" href="Pipeline.dc.html">Открыть заявку</a>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{isLead}}" hint-placeholder-val="{{false}}">
+  <h1 class="h1" style="margin-bottom:24px">Доброе утро, Наталья</h1>
+
+  <section class="card-hero" aria-labelledby="rep-title">
+    <div class="hero-grid">
+      <div class="grow">
+        <p class="eyebrow" style="margin:0">Фонд президентских грантов</p>
+        <h2 class="hero-title" id="rep-title" style="margin-top:10px">Отчёт за октябрь</h2>
+        <p class="lead">Готов к проверке</p>
+        <a class="btn btn-primary btn-lg" href="Reports.dc.html" style="margin-top:28px">Открыть отчёт</a>
+      </div>
+      <div class="hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></div>
+    </div>
+  </section>
+</sc-if>
+
+<section class="section" aria-labelledby="kpi-title">
+  <div class="section-head"><h2 class="h2" id="kpi-title">Октябрь</h2></div>
+  <div class="grid-4">
+    <div class="kpi"><span class="blob blob-y" aria-hidden="true"></span><span class="kpi-num kpi-big">84</span><span class="kpi-label">активных волонтёров</span></div>
+    <div class="kpi"><span class="blob blob-o" aria-hidden="true"></span><span class="kpi-num kpi-big">612</span><span class="kpi-label">часов с детьми</span></div>
+    <div class="kpi"><span class="blob blob-g" aria-hidden="true"></span><span class="kpi-num kpi-big">94%</span><span class="kpi-label">смен закрыто</span></div>
+    <div class="kpi"><span class="blob blob-b" aria-hidden="true"></span><span class="kpi-num kpi-big">19</span><span class="kpi-label">дней до первого занятия</span></div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="sum-title">
+  <div class="section-head">
+    <div class="row" style="gap:12px"><h2 class="h2" id="sum-title">Сводка недели</h2><span class="ai-tag"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/></svg>ИИ</span></div>
+    <span class="meta">12–18 октября</span>
+  </div>
+  <div class="ai-box sum" style="padding:28px 32px">
+    <sc-if value="{{showParas}}" hint-placeholder-val="{{true}}">
+      <sc-for list="{{summary}}" as="s" hint-placeholder-count="3">
+        <p><span class="strong">{{s.lead}}</span> {{s.text}}</p>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{showCustom}}" hint-placeholder-val="{{false}}">
+      <p class="pre">{{custom}}</p>
+    </sc-if>
+    <sc-if value="{{editing}}" hint-placeholder-val="{{false}}">
+      <label class="label" for="sum-edit" style="display:block;margin-bottom:8px">Текст сводки</label>
+      <textarea id="sum-edit" class="textarea" style="min-height:220px" value="{{draft}}" onChange="{{typeDraft}}"></textarea>
+      <div class="sum-acts">
+        <button type="button" class="btn btn-secondary" onClick="{{saveEdit}}">Сохранить</button>
+        <button type="button" class="btn btn-ghost" onClick="{{cancelEdit}}">Отмена</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{canSend}}" hint-placeholder-val="{{true}}">
+      <div class="sum-acts">
+        <button type="button" class="btn btn-secondary" onClick="{{send}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>Отправить руководителю</button>
+        <button type="button" class="btn btn-ghost" onClick="{{startEdit}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg>Исправить</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{showSent}}" hint-placeholder-val="{{false}}">
+      <div class="sum-acts"><span class="done-line"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Отправлено Наталье Гордеевой</span></div>
+    </sc-if>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="chart-title">
+  <div class="section-head">
+    <h2 class="h2" id="chart-title">{{chartTitle}}</h2>
+    <button type="button" class="btn btn-ghost btn-sm" onClick="{{toggleChart}}"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>{{chartOther}}</button>
+  </div>
+  <div class="card" style="padding:32px 36px">
+    <sc-if value="{{isHours}}" hint-placeholder-val="{{true}}">
+      <div class="chart" role="img" aria-label="Часы волонтёров по неделям с конца июля по 18 октября. Летом меньше, с сентября больше. Недели октября выделены.">
+        <i style="height:47%"></i><i style="height:41%"></i><i style="height:38%"></i><i style="height:44%"></i><i style="height:60%"></i><i style="height:85%"></i><i style="height:94%"></i><i style="height:98%"></i><i style="height:100%"></i><i style="height:94%"></i><i class="now" style="height:89%"></i><i class="now" style="height:83%"></i>
+      </div>
+      <div class="months" aria-hidden="true">
+        <span style="grid-column:1 / span 1">июль</span>
+        <span style="grid-column:2 / span 4">август</span>
+        <span style="grid-column:6 / span 5">сентябрь</span>
+        <span class="now" style="grid-column:11 / span 2">октябрь</span>
+      </div>
+    </sc-if>
+    <sc-if value="{{isFunnel}}" hint-placeholder-val="{{false}}">
+      <div class="frow"><span>Новая</span><div class="bar bar-blue"><i style="width:78%"></i></div><b>7</b></div>
+      <div class="frow"><span>Собеседование</span><div class="bar bar-blue"><i style="width:56%"></i></div><b>5</b></div>
+      <div class="frow"><span>Документы</span><div class="bar bar-blue"><i style="width:44%"></i></div><b>4</b></div>
+      <div class="frow"><span>Обучение</span><div class="bar bar-blue"><i style="width:100%"></i></div><b>9</b></div>
+      <div class="frow"><span>Допущен</span><div class="bar bar-green"><i style="width:67%"></i></div><b>6</b></div>
+    </sc-if>
+  </div>
+</section>
+
+</div></div>
