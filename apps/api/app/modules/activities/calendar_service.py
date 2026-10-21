@@ -30,14 +30,16 @@ async def validate_group(db,principal,group_id):
 
 async def series(db,principal,id,lock=False):
     query=select(EventSeries).where(EventSeries.id==id,EventSeries.foundation_id==principal.foundation_id)
-    entity=await db.scalar(query.with_for_update() if lock else query)
+    # Pre-lock reads may be in this identity map while another command commits.
+    entity=await db.scalar(query.with_for_update().execution_options(populate_existing=True) if lock else query)
     if entity is None:raise ApiError(404,'series_not_found','Серия не найдена.')
     return entity
 
 
 async def occurrence(db,principal,id,lock=False):
     query=select(EventOccurrence).where(EventOccurrence.id==id,EventOccurrence.foundation_id==principal.foundation_id)
-    entity=await db.scalar(query.with_for_update() if lock else query)
+    # Pre-lock reads may be in this identity map while another command commits.
+    entity=await db.scalar(query.with_for_update().execution_options(populate_existing=True) if lock else query)
     if entity is None:raise ApiError(404,'occurrence_not_found','Занятие не найдено.')
     return entity
 

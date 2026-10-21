@@ -29,7 +29,8 @@ def staff(principal):return principal.has_permission('assignments.manage')
 async def assignment(db,principal,id,lock=False,own=False):
     query=select(Assignment).where(Assignment.id==id,Assignment.foundation_id==principal.foundation_id)
     if own or not staff(principal):query=query.where(Assignment.user_id==principal.user_id)
-    item=await db.scalar(query.with_for_update() if lock else query)
+    # Recheck committed state/version after waiting for the parent or row lock.
+    item=await db.scalar(query.with_for_update().execution_options(populate_existing=True) if lock else query)
     if item is None:raise ApiError(404,'assignment_not_found','Назначение не найдено.')
     return item
 
@@ -95,7 +96,7 @@ async def invite(db,principal,need_id,body):
     before=await db.get(StaffingNeed,need_id)
     if before is None or before.foundation_id!=principal.foundation_id:raise ApiError(404,'need_not_found','Потребность не найдена.')
     event=await occurrence(db,principal,before.occurrence_id,True)
-    need=await db.scalar(select(StaffingNeed).where(StaffingNeed.id==need_id).with_for_update())
+    need=await db.scalar(select(StaffingNeed).where(StaffingNeed.id==need_id).with_for_update().execution_options(populate_existing=True))
     check_version(need,body.expected_version)
     if event.status!='scheduled' or event.ends_at<=utcnow() or need.capacity_required==0:raise ApiError(409,'event_not_open','Набор на занятие закрыт.')
     user=await db.get(User,body.user_id)

@@ -118,5 +118,5 @@ async def test_local_edit_and_staffing_are_atomic_and_dst_gap_is_rejected(contex
     successful=await context.client.patch(f"/api/v1/coord/event-occurrences/{first['id']}",json={**mutation,'staffing_needs':[{'role_id':first['staffing_needs'][0]['role_id'],'capacity_required':3}]},headers=headers())
     assert successful.status_code==200,successful.text
     saved=successful.json()
-    assert saved['version']==2 and saved['starts_at']=='2028-01-05T13:00:00Z' and saved['staffing_needs'][0]['required']==3
+    assert saved['version']==2 and datetime.fromisoformat(saved['starts_at'])==datetime(2028,1,5,13,tzinfo=timezone.utc) and saved['staffing_needs'][0]['required']==3
     assert saved['origin_local_date']==first['origin_local_date']
