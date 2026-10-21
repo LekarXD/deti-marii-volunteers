@@ -21,12 +21,12 @@ async def own_user(db,principal,lock=False):
     if lock:
         await db.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'profile:{principal.foundation_id}:{user_id}'})
         statement=statement.with_for_update()
-    user=await db.scalar(statement)
+    user=await db.scalar(statement.execution_options(populate_existing=True))
     if user is None:raise ApiError(404,'user_not_found','Пользователь не найден')
     return user
 
 async def profile_view(db,principal):
-    user=await own_user(db,principal);profile=await db.get(VolunteerProfile,user.id)
+    user=await own_user(db,principal);profile=await db.get(VolunteerProfile,user.id,populate_existing=True)
     pairs=(await db.execute(select(ProfileTag,ProfileTagLink.level).join(ProfileTagLink,ProfileTagLink.tag_id==ProfileTag.id).where(ProfileTagLink.user_id==user.id,ProfileTag.foundation_id==principal.foundation_id).order_by(ProfileTag.kind,ProfileTag.label))).all()
     contacts=(await db.scalars(select(ContactChannel).where(ContactChannel.user_id==user.id).order_by(ContactChannel.type,ContactChannel.id))).all()
     revisions=(await db.scalars(select(ProfileRevision).where(ProfileRevision.user_id==user.id,ProfileRevision.foundation_id==principal.foundation_id).order_by(ProfileRevision.number.desc()).limit(100))).all()
@@ -78,14 +78,31 @@ async def public_snapshot(db,principal):
 def suggestion_view(row):
     return ProfileSuggestionView(id=row.id,base_version=row.base_version,before=row.before,patch=row.patch,source_refs=row.source_refs,producer=row.producer,state=row.state,applied_revision_id=row.applied_revision_id,reverted_revision_id=row.reverted_revision_id,created_at=row.created_at)
 
+async def suggestion_for_run(db,principal,run_id):
+    await own_user(db,principal)
+    row=await db.scalar(select(ProfileChangeSuggestion).where(ProfileChangeSuggestion.foundation_id==principal.foundation_id,ProfileChangeSuggestion.user_id==principal.user_id,ProfileChangeSuggestion.producer['run_id'].astext==str(run_id)))
+    return suggestion_view(row) if row else None
+
+async def ai_snapshot(db,principal,lock=False):
+    if lock:await own_user(db,principal,True)
+    return await public_snapshot(db,principal)
+
 async def create_suggestion(db,principal,*,expected_profile_version,patch,source_refs,producer):
-    await own_user(db,principal,True);view=await profile_view(db,principal);check_version(view.version,expected_profile_version)
+    await own_user(db,principal,True)
+    run_id=producer.get('run_id') if isinstance(producer,dict) else None
+    if isinstance(run_id,str) and run_id:
+        prior=await db.scalar(select(ProfileChangeSuggestion).where(ProfileChangeSuggestion.foundation_id==principal.foundation_id,ProfileChangeSuggestion.user_id==principal.user_id,ProfileChangeSuggestion.producer['run_id'].astext==run_id))
+        if prior:
+            if prior.base_version!=expected_profile_version or prior.patch!=patch or prior.source_refs!=source_refs or prior.producer!=producer:raise ApiError(409,'suggestion_run_payload_conflict','Этот запуск уже создал другое предложение')
+            return suggestion_view(prior)
+    view=await profile_view(db,principal);check_version(view.version,expected_profile_version)
     allowed={'about':view.ai_about,'skills':view.ai_skills,'interests':view.ai_interests}
     if not patch or set(patch)-set(allowed) or any(not allowed[key] for key in patch):raise ApiError(422,'suggestion_fields_forbidden','Предложение затрагивает поля без разрешения')
     if 'about' in patch and (not isinstance(patch['about'],str) or len(patch['about'])>8000):raise ApiError(422,'invalid_suggestion','Некорректный текст предложения')
     for key in ('skills','interests'):
         if key in patch and (not isinstance(patch[key],list) or len(patch[key])>40 or any(not isinstance(v,str) or not v.strip() or len(v)>120 for v in patch[key])):raise ApiError(422,'invalid_suggestion','Некорректные навыки или интересы')
     if not source_refs or len(source_refs)>100 or any(not isinstance(ref,dict) or not {'source_id','version','fragment'}<=ref.keys() or len(str(ref['fragment']))>2000 for ref in source_refs):raise ApiError(422,'suggestion_sources_required','У предложения должны быть проверяемые источники')
+    if any(ref['fragment']=='public_profile' and (str(ref['source_id'])!=str(principal.user_id) or ref['version']!=view.version) for ref in source_refs):raise ApiError(403,'suggestion_source_scope_denied','Источник предложения не относится к текущей версии вашего профиля')
     if not isinstance(producer,dict) or not {'model','prompt_version','run_id'}<=producer.keys():raise ApiError(422,'suggestion_producer_required','Не указан источник предложения')
     row=ProfileChangeSuggestion(foundation_id=principal.foundation_id,user_id=view.user_id,base_version=view.version,before=snapshot(view),patch=patch,source_refs=source_refs,producer=producer,state='proposed')
     db.add(row);await db.flush();return suggestion_view(row)

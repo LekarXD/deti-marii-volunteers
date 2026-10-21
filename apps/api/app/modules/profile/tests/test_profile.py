@@ -238,3 +238,39 @@ def test_profile_calendar_day_uses_moscow_at_utc_boundary(monkeypatch):
     from app.modules.profile import dates
     monkeypatch.setattr(dates,'utcnow',lambda:datetime(2026,10,20,22,30,tzinfo=timezone.utc))
     assert dates.local_today()==date(2026,10,21)
+
+@pytest.mark.asyncio
+async def test_producer_run_is_idempotent_and_never_recreates_rejected_proposal(env):
+    from app.modules.profile.service import ai_snapshot,suggestion_for_run
+    app,factory=env;own=await volunteer(app,factory)
+    try:
+        assert (await put(own,update())).status_code==200
+        p=await principal_for(own,factory);run_id=str(uuid4());payload=dict(expected_profile_version=1,patch={'about':'Предложенный текст'},source_refs=[dict(source_id=str(uuid4()),version=1,fragment='Источник')],producer=dict(run_id=run_id,model='contract-fixture',prompt_version='1'))
+        async def deliver():
+            async with factory() as db:
+                proposal=await create_suggestion(db,p,**payload);await db.commit();return proposal
+        one,two=await asyncio.gather(deliver(),deliver());assert one.id==two.id
+        rejected=await post(own,f'/me/profile/suggestions/{one.id}/decision',dict(expected_version=1,decision='reject'));assert rejected.status_code==200
+        assert (await put(own,update(1))).status_code==200
+        async with factory() as db:
+            assert (await ai_snapshot(db,p,lock=True))['version']==2
+            replay=await create_suggestion(db,p,**payload);assert replay.id==one.id and replay.state=='rejected'
+            assert (await suggestion_for_run(db,p,run_id)).id==one.id
+            assert await db.scalar(select(func.count()).select_from(ProfileChangeSuggestion))==1
+            with pytest.raises(ApiError):await create_suggestion(db,p,**dict(payload,patch={'about':'Подменённый результат'}))
+    finally:await own.aclose()
+
+@pytest.mark.asyncio
+async def test_ai_snapshot_refreshes_cached_profile_after_owner_lock(env):
+    from app.modules.profile.service import ai_snapshot
+    from app.modules.profile.models import VolunteerProfile
+    app,factory=env;own=await volunteer(app,factory)
+    try:
+        assert (await put(own,update())).status_code==200
+        p=await principal_for(own,factory)
+        async with factory() as db:
+            cached=await db.get(VolunteerProfile,p.user_id);assert cached.version==1
+            changed=update(1);changed['about']='Новый текст после сохранения';assert (await put(own,changed)).status_code==200
+            fresh=await ai_snapshot(db,p,lock=True);assert fresh['version']==2 and fresh['fields']['about']=='Новый текст после сохранения'
+            with pytest.raises(ApiError):await create_suggestion(db,p,expected_profile_version=2,patch={'about':'Предложение'},source_refs=[dict(source_id=str(uuid4()),version=2,fragment='public_profile')],producer=dict(run_id=str(uuid4()),model='contract-fixture',prompt_version='1'))
+    finally:await own.aclose()
