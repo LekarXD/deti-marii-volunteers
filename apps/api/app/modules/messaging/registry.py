@@ -10,7 +10,7 @@ def register_notice_source(kind,validate,*,lock_subjects=None):
     LOCK_SUBJECTS[kind]=lock_subjects
 
 def notice_source(kind):
-    for module in ('app.modules.reporting.notifications',):
+    for module in ('app.modules.reporting.notifications','app.modules.studio.summary_notifications'):
         try:importlib.import_module(module)
         except ModuleNotFoundError as error:
             if error.name not in (module,module.rsplit('.',1)[0]):raise
