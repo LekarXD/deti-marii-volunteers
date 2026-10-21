@@ -118,7 +118,7 @@ async def test_published_search_acl_unknown_question_human_answer_and_withdrawal
     assert (await client.get('/api/v1/knowledge/search',params={'q':'секретный регламент'})).json()==[]
     unavailable=(await post(client,'/mentor/runs',{'question':'Можно давать личные контакты?'})).json()
     assert unavailable['state']=='unavailable' and unavailable['answer'] is None and unavailable['fragments']
-    unknown=(await post(client,'/mentor/runs',{'question':'Несуществующий вопрос zzzzz?'})).json()
+    unknown=(await post(client,'/mentor/runs',{'question':'Несуществующий вопрос zzzzz?'},key='unknown-original')).json()
     assert unknown['state']=='unknown' and unknown['question_id']
     async with factory() as db:
         assert await db.scalar(select(func.count()).select_from(OutboxMessage).where(OutboxMessage.foundation_id==foundation,OutboxMessage.channel=='in_app'))>=1
@@ -141,6 +141,28 @@ async def test_published_search_acl_unknown_question_human_answer_and_withdrawal
     assert edited.status_code==200
     client.cookies.set('opora_session','one'+str(foundation))
     assert (await client.get(f"/api/v1/mentor/runs/{unknown['id']}")).json()['answer']=='Уточните вопрос у координатора на встрече.'
+    # Republishing the linked answer source as staff-only must suppress the body,
+    # not just remove citations. History and old ask receipts share this boundary.
+    client.cookies.set('opora_session','staff'+str(foundation))
+    answer_source_id=result.json()['source_id']
+    answer_source=(await client.get(f'/api/v1/coord/knowledge/sources/{answer_source_id}')).json()
+    private=await client.put(f'/api/v1/coord/knowledge/sources/{answer_source_id}',json={'title':answer_source['title'],'body':'PRIVATE fixture: never visible to candidate','visibility':'staff','expected_version':answer_source['version']},headers={'Idempotency-Key':str(uuid4())})
+    assert private.status_code==200,private.text
+    await post(client,f'/coord/knowledge/sources/{answer_source_id}/review',{'expected_version':private.json()['version']})
+    assert (await post(client,f'/coord/knowledge/sources/{answer_source_id}/publish',{'expected_version':private.json()['version']})).status_code==200
+    await process_index(factory,foundation)
+    client.cookies.set('opora_session','one'+str(foundation))
+    protected=(await client.get(f"/api/v1/mentor/runs/{unknown['id']}")).json()
+    assert protected['state']=='sources_unavailable' and protected['answer'] is None and protected['citations']==[]
+    assert 'PRIVATE fixture' not in json.dumps((await client.get('/api/v1/mentor/runs')).json())
+    replay=(await post(client,'/mentor/runs',{'question':'Несуществующий вопрос zzzzz?'},key='unknown-original')).json()
+    assert replay['state']=='sources_unavailable' and replay['answer'] is None
+    report=await post(client,f"/mentor/runs/{unknown['id']}/report")
+    assert report.status_code==200
+    async with factory() as db:
+        evidence=(await db.get(KnowledgeQuestion,UUID(report.json()['question_id']))).report_evidence
+        assert evidence['answer'] is None
+
     client.cookies.set('opora_session','staff'+str(foundation))
     archive=await post(client,f"/coord/knowledge/sources/{source['id']}/archive",{'expected_version':source['version']})
     assert archive.status_code==200

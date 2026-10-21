@@ -242,11 +242,15 @@ async def mentor_view(db,principal,run_id):
         approved=await db.scalar(select(ApprovedAnswer).where(ApprovedAnswer.question_id==item.question_id,ApprovedAnswer.published_source_id.is_not(None)))
         if approved:
             published=await db.get(KnowledgeSource,approved.published_source_id)
-            if published and not published.archived and published.index_state=='ready':
-                version=await db.get(SourceVersion,published.current_version_id)
+            # A coordinator answer uses the same current-publication ACL as search.
+            # Never project its body first and merely drop invisible citations.
+            rows=(await db.execute(visible_query(principal).where(KnowledgeSource.id==published.id))).all() if published else []
+            if rows:
+                version=rows[0][1]
                 state,answer='answered_by_coordinator',version.body
-                rows=(await db.execute(visible_query(principal).where(SourceVersion.id==version.id))).all()
                 citations=[fragment_view(chunk,source_version) for chunk,source_version in rows]
+            else:
+                state,answer,citations='sources_unavailable',None,[]
     return dict(id=item.id,question=item.question,state=state,answer=answer,fragments=fragments,citations=citations,question_id=item.question_id,error_code=run.error_code if run else None,model=run.model if run else None,prompt_version=run.prompt_version if run else None)
 
 async def mentor_history(db,principal):
