@@ -656,6 +656,62 @@ sc-if,sc-for{display:contents}
 .a-onb.is-nudge{box-shadow:inset 0 0 0 2px var(--orange)}
 @media (max-width:720px){.a-hero-title{font-size:32px}.card-hero .hero-when{font-size:36px}.a-hero-actions .btn{flex:1 1 auto}.a-onb.card{flex-direction:column;align-items:stretch;gap:16px}.a-onb .btn{width:100%}.a-book.card{padding:4px 20px}}
 @media (max-width:720px){.a-tiles{grid-template-columns:1fr;gap:8px}.a-tile{flex-direction:row;align-items:center;min-height:60px;padding:10px 48px 10px 10px}.a-tile.is-on::after{top:50%;transform:translateY(-50%)}}
+/* Направления — компактные плитки в строку: иконка + короткое название */
+.a-tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.a-tile{flex-direction:row;align-items:center;gap:12px;min-height:60px;padding:10px 40px 10px 10px;border-radius:16px;font-size:15px}
+.a-tile-ico{flex:0 0 36px;width:36px;height:36px;border-radius:10px}
+.a-tile.is-on::after{top:50%;right:12px;transform:translateY(-50%);width:22px;height:22px;font-size:12px}
+.a-form{gap:24px 20px}
+@media (max-width:720px){.a-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.a-tile{min-height:52px;gap:8px;padding:8px 30px 8px 8px;font-size:14px;line-height:1.25}.a-tile-ico{flex-basis:30px;width:30px;height:30px}.a-tile-ico .ic{width:17px;height:17px}.a-tile.is-on::after{right:8px;width:18px;height:18px;font-size:10px}.a-path-card.card{display:none}}
+/* На телефоне направления — лёгкие «таблетки» в несколько строк, а не сетка карточек */
+@media (max-width:720px){
+ .a-tiles{display:flex;flex-wrap:wrap;gap:8px}
+ .a-tile{min-height:44px;padding:0 14px 0 6px;border-radius:999px;gap:8px;font-size:14px;font-weight:500;line-height:1.2}
+ .a-tile-ico{flex-basis:32px;width:32px;height:32px;border-radius:50%}
+ .a-tile.is-on{background:var(--ink);color:#fff;box-shadow:none}
+ .a-tile.is-on .a-tile-ico{background:rgba(255,255,255,.16);color:#fff}
+ .a-tile.is-on::after{display:none}
+ .a-chips .chip,.a-rchips .chip{min-height:40px;padding:8px 14px;font-size:14px;gap:6px}
+ .a-chips .chip .ic{width:16px;height:16px}
+}
+/* Выбор встречи: сначала день (лента), потом время этого дня */
+.a-days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;margin:0 -2px 16px;scrollbar-width:none}
+.a-days::-webkit-scrollbar{display:none}
+.a-day{flex:0 0 auto;min-width:84px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 10px;border:0;border-radius:18px;background:var(--paper);color:var(--ink)}
+.a-day b{font-size:24px;line-height:1.1}
+.a-day-wd{font-size:14px;color:var(--mute)}
+.a-day small{font-size:13px;color:var(--mute)}
+.a-day.is-on{background:var(--ink);color:#fff}
+.a-day.is-on .a-day-wd,.a-day.is-on small{color:rgba(255,255,255,.75)}
+.a-day-slots{margin-bottom:4px}
+/* Большая круглая иконка на телефоне не помещается рядом с текстом — прячем */
+@media (max-width:720px){.dm .card-hero .hero-art{display:none}.a-day-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.a-picker .actions .btn{width:100%}}
+.a-day-where{margin:0 0 10px;font-size:15px;color:var(--mute)}
+.a-day-slots .i-slot span:empty{display:none}
+.a-day-slots .i-slot{align-items:center;text-align:center}
+.a-picker .section-head{align-items:center}
+.a-static .a-reveal{opacity:1;transform:none;transition:none}
+/* Знакомство на телефоне: вместо стопки больших карточек — один список, пары фраз — одной карточкой */
+@media (max-width:720px){
+ .a-icards{display:block;background:var(--paper);border-radius:22px;padding:2px 16px}
+ .dm .a-icards .a-icard{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;align-items:start;padding:14px 0;border-radius:0;background:transparent;border-top:1px solid var(--line)}
+ .a-icards .a-icard:first-child{border-top:0}
+ .a-icard .a-ico{grid-row:span 2;width:40px;height:40px;border-radius:12px}
+ .a-icard .a-ico .ic{width:20px;height:20px}
+ .a-icard h3{margin:0;font-size:16px;line-height:1.3}
+ .a-icard p{font-size:15px;line-height:1.45}
+ .a-ic-o .a-ico{background:var(--orange-tint)}.a-ic-b .a-ico{background:var(--blue-tint)}.a-ic-g .a-ico{background:var(--green-tint)}.a-ic-v .a-ico{background:var(--violet-tint)}.a-ic-y .a-ico{background:var(--yellow-tint)}
+ .a-storyrow{gap:8px}
+ .a-stage{grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;padding:14px}
+ .a-stage .a-ico{grid-row:span 2;width:40px;height:40px}
+ .a-stage-t{font-size:16px}
+ .a-stage:not(:last-child)::after{display:none}
+ .a-phr{display:block;background:var(--paper);border-radius:18px;padding:12px 14px;margin-bottom:8px}
+ .a-yes,.a-no{display:block;padding:0 0 0 26px;border-radius:0;background:transparent;font-size:15px;line-height:1.4}
+ .a-no{margin-top:6px;color:var(--mute);text-decoration:line-through;text-decoration-color:rgba(179,18,10,.5)}
+ .a-yes::before,.a-no::before{left:2px;top:0}
+ .a-no::before{color:var(--red-ink)}
+}
 
 </style>
 </helmet>
@@ -691,9 +747,9 @@ sc-if,sc-for{display:contents}
 
 <sc-if value="{{completed}}"><section class="card-hero"><p class="eyebrow" style="margin:0">Встреча состоялась</p><h2 class="a-hero-title">{{result}}</h2><p class="lead">{{publicNote}}</p><sc-if value="{{hasNextContact}}"><p class="p a-hero-small">Следующий контакт: {{nextContact}}</p></sc-if></section></sc-if>
 
-<sc-if value="{{showPicker}}"><section class="section a-picker" id="a-picker"><div class="section-head"><h2 class="h2">{{pickerTitle}}</h2><button type="button" class="btn btn-ghost btn-sm" onClick="{{closePicker}}">{{closeLabel}}</button></div><p class="p a-picker-sub">{{coordinator}} · московское время · только свободные места</p><div class="i-period"><div class="toolbar"><button type="button" class="iconbtn p-arrow" aria-label="Предыдущая неделя" onClick="{{previous}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><button type="button" class="iconbtn p-arrow" aria-label="Следующая неделя" onClick="{{next}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><span>{{periodLabel}}</span><button type="button" class="btn btn-ghost btn-sm" onClick="{{today}}">Сегодня</button></div><div class="field"><label class="sr-only" for="candidate-week">Перейти к дате</label><button type="button" class="input c-trigger" id="candidate-week" aria-haspopup="dialog" onClick="{{ui_candidate_week.open}}"><span>{{ui_candidate_week.title}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></button></div></div><div class="card i-slot-days" role="radiogroup" aria-label="Свободное время встречи"><sc-for list="{{slotDays}}" as="d"><div class="i-slot-day"><h3 class="h3">{{d.dateLabel}}</h3><div class="i-slots"><sc-for list="{{d.slots}}" as="sl"><button type="button" class="{{sl.cls}}" role="radio" aria-checked="{{sl.checked}}" onClick="{{sl.pick}}"><b>{{sl.label}}</b><span>{{sl.where}}</span></button></sc-for></div></div></sc-for><sc-if value="{{emptySlots}}"><div class="empty"><h3 class="h3">На этой неделе свободного времени нет</h3><p>Посмотрите следующую неделю или напишите, когда вам удобно.</p></div></sc-if></div>
+<sc-if value="{{showPicker}}"><section class="section a-picker" id="a-picker"><div class="section-head"><h2 class="h2">{{pickerTitle}}</h2><button type="button" class="btn btn-ghost btn-sm" onClick="{{closePicker}}">{{closeLabel}}</button></div><p class="p a-picker-sub">{{coordinator}} · московское время · только свободные места</p><div class="a-days" role="group" aria-label="День встречи"><sc-for list="{{days}}" as="d"><button type="button" class="{{d.cls}}" aria-pressed="{{d.pressed}}" onClick="{{d.pick}}"><span class="a-day-wd">{{d.wd}}</span><b>{{d.num}}</b><small>{{d.n}}</small></button></sc-for></div><sc-if value="{{emptySlots}}"><div class="card empty"><h3 class="h3">Свободного времени пока нет</h3><p>Напишите, когда вам удобно, — координатор предложит время.</p></div></sc-if><sc-if value="{{hasDayWhere}}"><p class="a-day-where">{{dayWhere}}</p></sc-if><div class="i-slots a-day-slots" role="radiogroup" aria-label="{{dayLabel}}"><sc-for list="{{daySlots}}" as="sl"><button type="button" class="{{sl.cls}}" role="radio" aria-checked="{{sl.checked}}" onClick="{{sl.pick}}"><b>{{sl.label}}</b><span>{{sl.where}}</span></button></sc-for></div>
 <div class="card a-book"><label class="a-book-row"><span class="grow"><b>Напомнить в Telegram</b><small>Бот пришлёт напоминание накануне и за час до встречи</small></span><button type="button" class="{{remindCls}}" role="switch" aria-checked="{{remindOn}}" aria-label="Напомнить в Telegram" onClick="{{toggleRemind}}"></button></label><label class="a-book-row"><span class="grow"><b>Нужна помощь с дорогой</b><small>Координатор подскажет, как добраться</small></span><button type="button" class="{{roadCls}}" role="switch" aria-checked="{{road}}" aria-label="Нужна помощь с дорогой" onClick="{{toggleRoad}}"></button></label></div>
-<div class="actions"><button type="button" class="btn btn-primary btn-lg" disabled="{{cantBook}}" onClick="{{book}}">{{bookLabel}}</button><button type="button" class="btn btn-ghost btn-lg" onClick="{{startRequest}}">Ни одно время не подходит</button></div><sc-if value="{{rescheduling}}"><p class="hint">Прежняя запись сохранится до подтверждения переноса.</p></sc-if></section></sc-if>
+<div class="actions"><button type="button" class="btn btn-primary btn-lg" disabled="{{cantBook}}" onClick="{{book}}">{{bookLabel}}</button><button type="button" class="btn btn-secondary btn-lg" onClick="{{startRequest}}">Ни одно время не подходит</button></div><sc-if value="{{rescheduling}}"><p class="hint">Прежняя запись сохранится до подтверждения переноса.</p></sc-if></section></sc-if>
 <sc-if value="{{requesting}}"><section class="card" style="margin-top:24px"><div class="field"><label class="label" for="meeting-request">Когда вам удобно встретиться?</label><textarea class="textarea" id="meeting-request" value="{{requestText}}" onChange="{{changeRequest}}"></textarea></div><div class="actions"><button type="button" class="btn btn-primary" onClick="{{sendRequest}}">Передать координатору</button><button type="button" class="btn btn-ghost" onClick="{{cancelRequest}}">Отмена</button></div></section></sc-if>
 <sc-if value="{{cancelling}}"><section class="card" style="margin-top:24px"><h2 class="h2">Отменить запись?</h2><div class="field" style="margin-top:20px"><label class="label" for="candidate-cancel-reason">Причина отмены</label><textarea class="textarea" id="candidate-cancel-reason" value="{{cancelReason}}" onChange="{{changeCancelReason}}"></textarea></div><div class="actions"><button type="button" class="btn btn-danger" onClick="{{cancelMeeting}}">Да, отменить запись</button><button type="button" class="btn btn-ghost" onClick="{{keepMeeting}}">Оставить встречу</button></div></section></sc-if>
 
@@ -702,8 +758,6 @@ sc-if,sc-for{display:contents}
 </section>
 
 <sc-if value="{{notice}}"><div class="p-notice" role="status">{{notice}}<button type="button" class="iconbtn" aria-label="Закрыть уведомление" onClick="{{dismissNotice}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></sc-if><sc-if value="{{hasError}}"><div class="p-notice i-error-note" role="alert">{{error}}<button type="button" class="iconbtn" aria-label="Закрыть сообщение об ошибке" onClick="{{dismissError}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></sc-if>
-
-<sc-if value="{{uiDate.open}}"><div class="c-date-overlay" onKeyDown="{{uiDate.key}}"><section class="c-date-dialog card" role="dialog" aria-modal="true" aria-labelledby="ui-date-picker-title"><div class="section-head"><h2 class="h3" id="ui-date-picker-title">{{uiDate.pickerTitle}}</h2><button class="iconbtn" aria-label="Закрыть календарь" autofocus="true" onClick="{{uiDate.closeDatePicker}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="c-date-toolbar"><button class="iconbtn" aria-label="Предыдущий месяц" onClick="{{uiDate.pickerPrevious}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><button class="c-month-label" aria-label="Выбрать месяц" onClick="{{uiDate.pickerMonths}}">{{uiDate.pickerLabel}}</button><label class="sr-only" for="ui-picker-year">Год</label><input class="input c-year" type="number" id="ui-picker-year" min="1900" max="9999" value="{{uiDate.pickerYear}}" onChange="{{uiDate.changePickerYear}}"><button class="iconbtn" aria-label="Следующий месяц" onClick="{{uiDate.pickerNext}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></div><sc-if value="{{uiDate.pickerDayView}}"><div class="c-date-week"><sc-for list="{{uiDate.pickerWeekdays}}" as="w"><span>{{w.label}}</span></sc-for></div><div class="c-date-grid"><sc-for list="{{uiDate.pickerDays}}" as="d"><button class="{{d.cls}}" aria-label="{{d.aria}}" aria-pressed="{{d.pressed}}" onClick="{{d.pick}}">{{d.label}}</button></sc-for></div></sc-if><sc-if value="{{uiDate.pickerMonthView}}"><div class="c-month-grid"><sc-for list="{{uiDate.pickerMonthOptions}}" as="m"><button class="{{m.cls}}" onClick="{{m.pick}}">{{m.label}}</button></sc-for></div></sc-if><sc-if value="{{uiDate.pickerError}}"><p class="error" role="alert">{{uiDate.pickerError}}</p></sc-if><div class="c-date-foot"><button class="btn btn-ghost btn-sm" onClick="{{uiDate.pickerToday}}">Сегодня</button><sc-if value="{{uiDate.clearDateAllowed}}"><button class="btn btn-ghost btn-sm" onClick="{{uiDate.clearDate}}">Убрать дату</button></sc-if><button class="btn btn-secondary btn-sm" onClick="{{uiDate.closeDatePicker}}">Закрыть</button></div></section></div></sc-if>
 
 </div></div>
 </x-dc>
@@ -747,58 +801,50 @@ window.FORM = {
       id: "about",
       title: "О вас",
       fields: [
-        { type: "section", id: "s-who", title: "Кто вы", icon: "user" },
         { id: "firstName", label: "Имя", type: "text", required: true, mask: "name", half: true,
           placeholder: "Михаил", autocomplete: "given-name" },
         { id: "lastName", label: "Фамилия", type: "text", required: true, mask: "name", half: true,
           placeholder: "Михайлов", autocomplete: "family-name" },
         { id: "birthdate", label: "Дата рождения", type: "date", required: true, half: true },
-        { id: "area", label: "Где вы живёте?", type: "select", required: true,
-          options: ["Центр Москвы", "Север", "Восток", "Юг", "Запад", "Новая Москва", "Московская область", "Другой город"] },
-        { type: "section", id: "s-contact", title: "Как с вами связаться", icon: "message" },
         { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel", half: true,
           placeholder: "+7 (999) 123-45-67" },
         { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email", half: true,
           placeholder: "name@mail.ru" },
-        { id: "channels", label: "Где удобнее отвечать?", type: "chips", required: true,
-          options: [{ label: "Telegram", icon: "send" }, { label: "WhatsApp", icon: "message" }, { label: "Max", icon: "message" }, { label: "Почта", icon: "inbox" }, { label: "Звонок", icon: "phone" }] },
-        { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username", half: true,
-          showIf: { field: "channels", value: "Telegram" } }
+        { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username", half: true, optional: true },
+        { id: "area", label: "Где вы живёте?", type: "select", required: true,
+          options: ["Центр Москвы", "Север", "Восток", "Юг", "Запад", "Новая Москва", "Московская область", "Другой город"] }
       ]
     },
     {
       id: "help",
       title: "Чем хотите помогать",
       fields: [
-        { type: "section", id: "s-dir", title: "Что вам интересно", icon: "sparkle" },
-        { id: "directions", label: "Направления", type: "tiles", required: true,
+        { id: "directions", label: "Что вам интересно?", type: "tiles", required: true,
           options: [
-            { label: "Творческие занятия и мастер-классы", icon: "palette" },
-            { label: "Помогать на занятиях", icon: "hand" },
-            { label: "Обучение и репетиторство", icon: "academy" },
-            { label: "Помощь психолога или логопеда", icon: "heart" },
+            { label: "Творчество", icon: "palette" },
+            { label: "Помощь на занятиях", icon: "hand" },
+            { label: "Обучение", icon: "academy" },
+            { label: "Психолог, логопед", icon: "heart" },
             { label: "Фото, видео, соцсети", icon: "camera" },
-            { label: "Мероприятия и выезды", icon: "star" },
-            { label: "Ярмарки и магазин фонда", icon: "home" },
-            { label: "Помощь фонду как специалист", icon: "settings" },
+            { label: "Мероприятия", icon: "star" },
+            { label: "Ярмарки", icon: "home" },
+            { label: "Как специалист", icon: "settings" },
             { label: "Пока не знаю", icon: "search" }
           ],
           exclusive: ["Пока не знаю"] },
         /* Навыки показываем только по выбранным направлениям, чтобы не смешивать шитьё и IT */
-        { id: "skills", label: "Что вы умеете или любите делать?", type: "chips", optional: true, allowOther: true,
-          showIf: { field: "directions", value: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Фото, видео, соцсети", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Помощь фонду как специалист", "Пока не знаю"] },
+        { id: "skills", label: "Что умеете или любите делать?", type: "chips", optional: true, allowOther: true,
+          showIf: { field: "directions", value: ["Творчество", "Помощь на занятиях", "Обучение", "Психолог, логопед", "Фото, видео, соцсети", "Мероприятия", "Ярмарки", "Как специалист", "Пока не знаю"] },
           groups: [
-            { title: "Творчество", showIf: { field: "directions", value: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Пока не знаю"] },
+            { title: "Творчество", showIf: { field: "directions", value: ["Творчество", "Помощь на занятиях", "Мероприятия", "Ярмарки", "Пока не знаю"] },
               options: [{ label: "Керамика", icon: "palette" }, { label: "Живопись и рисунок", icon: "pen" }, { label: "Валяние", icon: "hand" }, { label: "Шитьё и вышивка", icon: "scissors" }, { label: "Кулинария", icon: "flame" }, { label: "Музыка и вокал", icon: "music" }, { label: "Театр", icon: "mask" }] },
-            { title: "Обучение и игры", showIf: { field: "directions", value: ["Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Мероприятия и выезды", "Пока не знаю"] },
+            { title: "Обучение и игры", showIf: { field: "directions", value: ["Помощь на занятиях", "Обучение", "Психолог, логопед", "Мероприятия", "Пока не знаю"] },
               options: [{ label: "Педагогика", icon: "academy" }, { label: "Психология", icon: "heart" }, { label: "Школьные предметы", icon: "book" }, { label: "Английский", icon: "globe" }, { label: "Спорт и игры", icon: "dice" }] },
-            { title: "Медиа", showIf: { field: "directions", value: ["Фото, видео, соцсети", "Помощь фонду как специалист", "Пока не знаю"] },
+            { title: "Медиа", showIf: { field: "directions", value: ["Фото, видео, соцсети", "Как специалист", "Пока не знаю"] },
               options: [{ label: "Фотография", icon: "camera" }, { label: "Видео и монтаж", icon: "film" }, { label: "Дизайн", icon: "image" }, { label: "Соцсети", icon: "message" }] },
-            { title: "Работа фонда", showIf: { field: "directions", value: ["Помощь фонду как специалист", "Ярмарки и магазин фонда", "Пока не знаю"] },
+            { title: "Работа фонда", showIf: { field: "directions", value: ["Ярмарки", "Как специалист", "Пока не знаю"] },
               options: [{ label: "Право", icon: "file" }, { label: "Маркетинг", icon: "chart" }, { label: "IT", icon: "screen" }, { label: "Финансы", icon: "database" }, { label: "Продажи", icon: "users" }] }
           ] },
-        { type: "section", id: "s-time", title: "Время и формат", icon: "clock",
-          note: "Участникам важны знакомые лица: доверие строится месяцами." },
         { id: "participation", label: "Как часто хотели бы помогать?", type: "select", required: true,
           options: ["Каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"] },
         { id: "online", label: "Могу помогать и онлайн", type: "consent" }
@@ -808,7 +854,6 @@ window.FORM = {
       id: "final",
       title: "Опыт и документы",
       fields: [
-        { type: "section", id: "s-exp", title: "Ваш опыт", icon: "award" },
         { id: "volExp", label: "Вы раньше были волонтёром?", type: "select", required: true,
           options: ["Да", "Нет"] },
         { id: "volExpText", label: "Где и что делали?", type: "textarea", optional: true,
@@ -817,11 +862,9 @@ window.FORM = {
           options: ["Да", "Нет, но готов(а) попробовать", "Хочу обсудить на встрече"] },
         { id: "specialExpText", label: "Расскажите коротко об этом опыте", type: "textarea", optional: true,
           showIf: { field: "specialExp", value: "Да" } },
-        { type: "section", id: "s-doc", title: "Справка о несудимости", icon: "shield",
-          note: "Нужна для работы с детьми. Заказать можно бесплатно на Госуслугах — это займёт минуту." },
-        { id: "record", label: "Готовы её получить?", type: "select", required: true,
-          options: ["Да", "Справка уже есть", "Хочу обсудить"] },
-        { type: "section", id: "s-last", title: "И последнее", icon: "check-circle" },
+        { id: "record", label: "Для работы с детьми нужна справка о несудимости. Готовы её получить?", type: "select", required: true,
+          options: ["Да", "Справка уже есть", "Хочу обсудить"],
+          why: "Заказать можно бесплатно на Госуслугах — это займёт минуту." },
         { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
           options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья", "Мероприятие фонда", "Другое"] },
         { id: "consentPD", label: "Я согласен(на) на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
@@ -1119,7 +1162,7 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
     const warn = shortHint(f, v);
     return {
       id: f.id, label: f.label || f.title, req: !!f.required,
-      isSection: t === 'section', note: f.note || '', hasNote: !!f.note, ...icoFlags(f.icon || ''), showLabel: !['consent', 'section', 'tiles'].includes(t) && !f.hideLabel,
+      isSection: t === 'section', note: f.note || '', hasNote: !!f.note, ...icoFlags(f.icon || ''), showLabel: !['consent', 'section'].includes(t) && !f.hideLabel,
       isTiles: t === 'tiles', opt: !!f.optional, why: f.why || '', hasWhy: !!f.why,
       cls: (t === 'section' ? 'a-sec a-sec-' + (sec++ % 4) : 'field a-field') + (f.half ? ' a-half' : '') + (errs[f.id] ? ' a-bad' : ''),
       err: errs[f.id] || '', hasErr: !!errs[f.id], warn, hasWarn: !!warn,
@@ -1151,7 +1194,7 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
 const freshProgress = () => ({ done: {}, testDone: false, score: null, road: false, tg: false });
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
-const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творчество', 'Помощь на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
 
 // Иконки по имени из контента (сборщик подставляет svg через ICONSWITCH)
 const ICON_KEYS = ['palette','book','users','user','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle','academy','pen','scissors','flame','globe','dice','film','image','file','chart','screen','database','send','inbox','settings','search','edit'];
@@ -1285,121 +1328,7 @@ function interviewSubscribe(component){
   return ()=>{window.removeEventListener('storage',storage);window.removeEventListener('focus',refresh);window.removeEventListener('opora-interviews-change',refresh);};
 }
 
-const UI_FIELDS = [{"key": "ui_candidate_week", "id": "candidate-week", "label": "Перейти к дате", "value": "focus", "change": "changeFocus", "kind": "date"}];
-// Shared select/date behavior. Screen handlers remain the source of form values.
-class FormControls extends DCLogic {
-  uiPatch(patch) {
-    this.setState({_ui: {...(this.state._ui || {}), ...patch}});
-  }
-  uiFocus(id) {
-    if (typeof document !== 'undefined') document.getElementById(id)?.focus();
-  }
-  uiDispatch(field, value) {
-    const values = this.screenVals();
-    const handler = field.change.split('.').reduce((value, key) => value?.[key], values);
-    handler({target: {value}});
-  }
-  uiSelectKey(event, field) {
-    const box = event.currentTarget;
-    const options = Array.from(box.querySelectorAll('[role=option]'));
-    const key = event.key;
-    if (key === 'Escape') {
-      event.preventDefault(); event.stopPropagation();
-      this.uiPatch({choice: ''}); this.uiFocus(field.id);
-      return;
-    }
-    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) return;
-    event.preventDefault();
-    if (!options.length) {
-      this.uiPatch({choice: field.id});
-      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => {
-        const items = Array.from(box.querySelectorAll('[role=option]'));
-        const selected = items.find(o => o.getAttribute('aria-selected') === 'true');
-        (selected || items[key === 'ArrowUp' || key === 'End' ? items.length - 1 : 0])?.focus();
-      });
-      return;
-    }
-    const i = options.indexOf(event.target);
-    const next = key === 'Home' ? 0 : key === 'End' ? options.length - 1 : i < 0 ? (key === 'ArrowDown' ? 0 : options.length - 1) : (i + (key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
-    options[next].focus();
-  }
-  uiOpenDate(field, value) {
-    const date = scheduleValid(value) ? value : '2026-10-21';
-    this.uiPatch({date: field.id, month: date.slice(0, 7) + '-01', year: date.slice(0, 4), months: false, error: '', choice: ''});
-  }
-  uiChooseDate(value) {
-    const ui = this.state._ui || {};
-    if (ui.error) return;
-    const field = UI_FIELDS.find(f => f.id === ui.date);
-    this.uiDispatch(field, value);
-    this.uiPatch({date: ''});
-    this.uiFocus(field.id);
-  }
-  uiDateValues(values) {
-    const ui = this.state._ui || {};
-    const field = UI_FIELDS.find(f => f.id === ui.date);
-    if (!field) return {open: false};
-    const current = field ? field.value.split('.').reduce((v, k) => v?.[k], values) : '';
-    const date = scheduleValid(ui.month) ? ui.month : '2026-10-01';
-    const month = scheduleDate(date), from = scheduleMonday(date);
-    const close = () => {this.uiPatch({date: ''}); if (field) this.uiFocus(field.id);};
-    const move = delta => () => {
-      const next = scheduleISO(new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + delta, 1, 12)));
-      this.uiPatch({month: next, year: next.slice(0, 4), error: ''});
-    };
-    return {
-      open: !!field, pickerTitle: field?.label || '', pickerLabel: scheduleLabel(date, {month: 'long'}), pickerYear: ui.year ?? '2026',
-      pickerDayView: !ui.months, pickerMonthView: !!ui.months, pickerPrevious: move(-1), pickerNext: move(1), pickerMonths: () => this.uiPatch({months: !ui.months}),
-      changePickerYear: event => {
-        const text = event.target.value, year = Number(text);
-        const valid = /^\d{4}$/.test(text) && year >= 1900 && year <= 9999;
-        this.uiPatch({year: text, ...(valid ? {month: text + date.slice(4)} : {}), error: valid ? '' : 'Год: от 1900 до 9999.'});
-      },
-      pickerWeekdays: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(label => ({label})),
-      pickerDays: Array.from({length: 42}, (_, i) => {
-        const value = scheduleAdd(from, i);
-        return {label: scheduleDate(value).getUTCDate(), aria: scheduleLabel(value, {day:'numeric',month:'long',year:'numeric'}), cls: 'c-date' + (value === current ? ' is-on' : '') + (value.slice(0,7) !== date.slice(0,7) ? ' is-outside' : '') + (value === '2026-10-21' ? ' is-today' : ''), pressed: value === current ? 'true' : 'false', pick: () => this.uiChooseDate(value)};
-      }),
-      pickerMonthOptions: Array.from({length: 12}, (_, i) => {
-        const value = scheduleISO(new Date(Date.UTC(month.getUTCFullYear(), i, 1, 12)));
-        return {label: scheduleLabel(value, {month:'short'}).replace('.',''), cls: 'c-month' + (i === month.getUTCMonth() ? ' is-on' : ''), pick: () => this.uiPatch({month: value, months: false})};
-      }),
-      pickerError: ui.error || '', closeDatePicker: close, clearDateAllowed: false, clearDate: () => this.uiChooseDate(''), pickerToday: () => this.uiChooseDate('2026-10-21'),
-      key: event => {
-        if (event.key === 'Escape') {event.preventDefault(); event.stopPropagation(); close(); return;}
-        if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key) && event.target.classList.contains('c-date')) {
-          const days = Array.from(event.currentTarget.querySelectorAll('.c-date')), i = days.indexOf(event.target), step = {ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7}[event.key];
-          event.preventDefault(); days[Math.max(0,Math.min(days.length-1,i+step))].focus();
-        }
-        if (event.key === 'Tab') {
-          const items = Array.from(event.currentTarget.querySelectorAll('button,input')).filter(x => !x.disabled && x.getClientRects().length);
-          if (event.shiftKey && event.target === items[0]) {event.preventDefault(); items[items.length-1].focus();}
-          else if (!event.shiftKey && event.target === items[items.length-1]) {event.preventDefault(); items[0].focus();}
-        }
-      }
-    };
-  }
-  renderVals() {
-    const values = this.screenVals(), ui = this.state._ui || {};
-    for (const field of UI_FIELDS) {
-      const value = field.value.split('.').reduce((v, k) => v?.[k], values);
-      if (field.kind === 'date') {
-        values[field.key] = {title: scheduleValid(value) ? scheduleLabel(value, {day:'numeric',month:'long',year:'numeric'}) : 'Выбрать дату', open: () => this.uiOpenDate(field, value)};
-        continue;
-      }
-      values[field.key] = {
-        title: field.options.find(o => String(o.id) === String(value))?.title || 'Выбрать', open: ui.choice === field.id, expanded: ui.choice === field.id ? 'true' : 'false',
-        toggle: () => this.uiPatch({choice: ui.choice === field.id ? '' : field.id}), key: event => this.uiSelectKey(event, field),
-        blur: event => {if (!event.currentTarget.contains(event.relatedTarget)) this.uiPatch({choice: ''});},
-        options: field.options.map(o => ({...o, cls:'c-option' + (String(o.id) === String(value) ? ' is-on' : ''), selected: String(o.id) === String(value) ? 'true' : 'false', pick: () => {this.uiDispatch(field,o.id); this.uiPatch({choice:''}); this.uiFocus(field.id);}}))
-      };
-    }
-    values.uiDate = this.uiDateValues(values);
-    return values;
-  }
-}
-
-class Component extends FormControls {
+class Component extends DCLogic {
  constructor(p){super(p);interviewImportLegacy();const me=ensureCandidate();interviewSync();this.state={me,pr:loadProgress(),remind:null,picking:false,picked:'',focus:INTERVIEW_TODAY,rescheduling:false,cancelling:false,cancelReason:'',requesting:false,requestText:'',error:'',notice:''};}
  componentDidMount(){this.unsubscribe=interviewSubscribe(this);}
  componentWillUnmount(){this.unsubscribe?.();}
@@ -1413,15 +1342,20 @@ class Component extends FormControls {
  demo(pr,withMeeting){const id=interviewIdentity(this.state.me),data=interviewRead();data.bookings=data.bookings.filter(b=>b.candidateId!==id);data.profiles=data.profiles.map(p=>p.id===id?{...p,request:null}:p);interviewWrite(data);this.save(pr);
   if(withMeeting){const slot=interviewSlots(interviewRead(),INTERVIEW_TODAY,scheduleAdd(INTERVIEW_TODAY,13)).find(sl=>!sl.busy&&interviewFuture(sl.date,sl.start));if(slot)interviewBook(id,slot.id,'','Волонтёр');}
   this.setState({remind:null,picking:false,rescheduling:false,cancelling:false,requesting:false,picked:'',error:'',notice:''});}
- screenVals(){const s=this.state,me=s.me,pr=s.pr,data=interviewRead(),id=interviewIdentity(me),meeting=interviewCurrent(data,id),active=meeting?.status==='booked',completed=meeting?.status==='completed';
+ renderVals(){const s=this.state,me=s.me,pr=s.pr,data=interviewRead(),id=interviewIdentity(me),meeting=interviewCurrent(data,id),active=meeting?.status==='booked',completed=meeting?.status==='completed';
   const total=ONB.modules.length,n=ONB.modules.filter(m=>pr.done[m.id]).length,onboarded=!!pr.testDone;
   const allDone={};ONB.modules.forEach(m=>allDone[m.id]=true);
   const meetWhen=meeting?interviewDay(meeting.date)+', '+meeting.start:'';
   // Записался, но не знакомился с фондом — после подключения уведомлений подталкиваем к знакомству
   const showNudge=active&&!onboarded&&!!pr.tg;
   const showPicker=!completed&&((!meeting&&s.picking)||(active&&s.rescheduling));
-  const from=scheduleMonday(s.focus),to=scheduleAdd(from,6),available=interviewSlots(data,from,to,s.rescheduling&&active?meeting.id:'').filter(sl=>!sl.busy&&interviewFuture(sl.date,sl.start)&&sl.id!==meeting?.slotId);
+  // Две недели вперёд одной лентой дней — без переключения недель
+  const from=INTERVIEW_TODAY,to=scheduleAdd(from,13),available=interviewSlots(data,from,to,s.rescheduling&&active?meeting.id:'').filter(sl=>!sl.busy&&interviewFuture(sl.date,sl.start)&&sl.id!==meeting?.slotId);
   const last=data.bookings.filter(b=>b.candidateId===id).slice(-1)[0];
+  const places=k=>k+' '+(k%10===1&&k%100!==11?'место':[2,3,4].includes(k%10)&&![12,13,14].includes(k%100)?'места':'мест');
+  const dates=[...new Set(available.map(sl=>sl.date))],day=dates.includes(s.day)?s.day:dates[0];
+  // Если в этот день все встречи в одном месте — пишем место один раз над временем
+  const wh=[...new Set(available.filter(sl=>sl.date===day).map(sl=>sl.where))],sameWhere=wh.length===1?wh[0]:'';
   const meetDay=meeting?scheduleLabel(meeting.date,{day:'numeric',month:'long'}):'';
   const big=meeting?scheduleLabel(meeting.date,{weekday:'short',day:'numeric',month:'long'})+', '+meeting.start:'';
   const mode=!meeting&&!n&&!onboarded?'fresh':active&&!onboarded&&pr.tg?'booked':active&&onboarded?'all':'';
@@ -1447,8 +1381,12 @@ class Component extends FormControls {
    cancelMeeting:()=>{const r=interviewCancel(meeting?.id,s.cancelReason,'Волонтёр');this.setState(r.error?{error:r.error}:{cancelling:false,rescheduling:false,picked:'',notice:'Запись отменена. Можно выбрать другое время.',error:''});},
    showPicker,rescheduling:!!active&&s.rescheduling,pickerTitle:s.rescheduling?'Выберите другое время':'Выберите время встречи',
    closePicker:()=>this.setState({picking:false,rescheduling:false,picked:'',error:''}),closeLabel:s.rescheduling?'Оставить прежнее время':'Свернуть',
-   focus:s.focus,changeFocus:e=>{if(scheduleValid(e.target.value))this.setState({focus:e.target.value,picked:'',error:''});},periodLabel:interviewDay(from)+' — '+scheduleLabel(to,{day:'numeric',month:'long'}),previous:()=>this.setState({focus:scheduleAdd(s.focus,-7),picked:''}),next:()=>this.setState({focus:scheduleAdd(s.focus,7),picked:''}),today:()=>this.setState({focus:INTERVIEW_TODAY,picked:''}),
-   slotDays:[...new Set(available.map(sl=>sl.date))].map(date=>({dateLabel:interviewDay(date),slots:available.filter(sl=>sl.date===date).map(sl=>({...sl,label:sl.start+'–'+sl.end,cls:'i-slot'+(s.picked===sl.id?' is-on':''),checked:s.picked===sl.id?'true':'false',pick:()=>this.setState({picked:sl.id,error:''})}))})),emptySlots:!available.length,cantBook:!available.some(sl=>sl.id===s.picked),book:()=>this.book(),bookLabel:s.rescheduling?'Подтвердить перенос':'Записаться',
+   focus:s.focus,changeFocus:e=>{if(scheduleValid(e.target.value))this.setState({focus:e.target.value,picked:'',error:''});},periodLabel:interviewDay(from)+' — '+scheduleLabel(to,{day:'numeric',month:'long'}),previous:()=>this.setState({focus:scheduleAdd(s.focus,-7),picked:'',day:''}),next:()=>this.setState({focus:scheduleAdd(s.focus,7),picked:'',day:''}),today:()=>this.setState({focus:INTERVIEW_TODAY,picked:''}),
+   // Сначала день, потом время — на телефоне не нужно листать все слоты недели
+   days:dates.map(date=>{const d=scheduleDate(date),on=date===day;return {wd:scheduleLabel(date,{weekday:'short'}),num:String(d.getUTCDate()),n:places(available.filter(sl=>sl.date===date).length),cls:'a-day'+(on?' is-on':''),pressed:on?'true':'false',pick:()=>this.setState({day:date,picked:'',error:''})};}),
+   dayLabel:day?scheduleLabel(day,{weekday:'long',day:'numeric',month:'long'}):'',
+   dayWhere:sameWhere,hasDayWhere:!!sameWhere,
+   daySlots:available.filter(sl=>sl.date===day).map(sl=>({...sl,where:sameWhere?'':sl.where,label:sl.start+'–'+sl.end,cls:'i-slot'+(s.picked===sl.id?' is-on':''),checked:s.picked===sl.id?'true':'false',pick:()=>this.setState({picked:sl.id,error:''})})),emptySlots:!available.length,cantBook:!available.some(sl=>sl.id===s.picked),book:()=>this.book(),bookLabel:s.rescheduling?'Подтвердить перенос':'Записаться',
    requesting:s.requesting,requestText:s.requestText,startRequest:()=>this.setState({requesting:true,error:''}),changeRequest:e=>this.setState({requestText:e.target.value,error:''}),cancelRequest:()=>this.setState({requesting:false,error:''}),
    sendRequest:()=>{if(!s.requestText.trim()){this.setState({error:'Напишите, когда вам удобно встретиться.'});return;}const fresh=interviewRead();fresh.profiles=fresh.profiles.map(p=>p.id===id?{...p,request:{text:s.requestText,status:'new'}}:p);interviewWrite(fresh);this.setState({requesting:false,picking:false,requestText:'',notice:'Ваш запрос появился у координатора',error:''});},
    tgOn:!!pr.tg,tgOff:!pr.tg,

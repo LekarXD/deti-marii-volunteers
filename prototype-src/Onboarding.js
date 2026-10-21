@@ -9,7 +9,8 @@ class Component extends DCLogic {
  // Блоки появляются при прокрутке, числа «набегают». Всё, что уже выше края экрана, показываем сразу —
  // даже если пролистали очень быстро.
  showEl(el){if(el.classList.contains('is-in'))return;el.classList.add('is-in');if(this.io)this.io.unobserve(el);const c=el.querySelector('.a-count');if(!c||c.dataset.done)return;c.dataset.done='1';const to=+c.dataset.to,suf=c.dataset.suffix||'';if(this.reduce||!to)return;const t0=performance.now(),dur=1200;const f=t=>{const k=Math.min(1,(t-t0)/dur);c.textContent=Math.round(to*(1-Math.pow(1-k,3)))+suf;if(k<1)requestAnimationFrame(f);};c.textContent='0'+suf;requestAnimationFrame(f);}
- reveal(){this.reduce=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+ // Анимация появления — только на первом шаге (история фонда); дальше блоки видны сразу, без «всплываний»
+ reveal(){const cur=this.current();this.reduce=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)||cur.test||cur.i>0;document.body.classList.toggle('a-static',this.reduce);
   if(!this.io)this.io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)this.showEl(e.target);}),{threshold:.15,rootMargin:'0px 0px -40px 0px'});
   document.querySelectorAll('.a-reveal:not(.is-in)').forEach(el=>{if(this.reduce)el.classList.add('is-in');else this.io.observe(el);});this.catchUp();}
  catchUp(){document.querySelectorAll('.a-reveal:not(.is-in)').forEach(el=>{if(el.getBoundingClientRect().top<window.innerHeight*.92)this.showEl(el);});}

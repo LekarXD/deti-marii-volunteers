@@ -9,7 +9,7 @@ class Component extends DCLogic {
   const me={...data,name:[data.firstName,data.lastName].filter(Boolean).join(' '),submittedAt:new Date().toISOString()};
   demoWrite('candidate',me);demoWrite('onboarding',freshProgress());demoWrite('apply-draft',{step:0,data:{}});location.href='ApplicationStatus.dc.html';}
  renderVals(){const s=this.state,step=FORM.steps[s.step],last=s.step===FORM.steps.length-1;
-  return {eyebrow:'Стать волонтёром',title:FORM.title,intro:FORM.intro,
+  return {title:FORM.title,intro:FORM.intro,
    stepTitle:step.title,path:FORM.path.map((x,i)=>({...x,...icoFlags(x.icon),cls:i===0?'is-now':''})),pathNote:FORM.pathNote,
    progressLabel:'Шаг '+(s.step+1)+' из '+FORM.steps.length,barStyle:'width:'+Math.round(100*(s.step+1)/FORM.steps.length)+'%',
    fields:fieldViews(step.fields,s.data,s.errs,(id,v)=>this.update(id,v),s.ui,k=>this.setState({ui:{...this.state.ui,[k]:!this.state.ui[k]}})),

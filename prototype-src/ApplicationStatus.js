@@ -19,8 +19,13 @@ class Component extends DCLogic {
   // Записался, но не знакомился с фондом — после подключения уведомлений подталкиваем к знакомству
   const showNudge=active&&!onboarded&&!!pr.tg;
   const showPicker=!completed&&((!meeting&&s.picking)||(active&&s.rescheduling));
-  const from=scheduleMonday(s.focus),to=scheduleAdd(from,6),available=interviewSlots(data,from,to,s.rescheduling&&active?meeting.id:'').filter(sl=>!sl.busy&&interviewFuture(sl.date,sl.start)&&sl.id!==meeting?.slotId);
+  // Две недели вперёд одной лентой дней — без переключения недель
+  const from=INTERVIEW_TODAY,to=scheduleAdd(from,13),available=interviewSlots(data,from,to,s.rescheduling&&active?meeting.id:'').filter(sl=>!sl.busy&&interviewFuture(sl.date,sl.start)&&sl.id!==meeting?.slotId);
   const last=data.bookings.filter(b=>b.candidateId===id).slice(-1)[0];
+  const places=k=>k+' '+(k%10===1&&k%100!==11?'место':[2,3,4].includes(k%10)&&![12,13,14].includes(k%100)?'места':'мест');
+  const dates=[...new Set(available.map(sl=>sl.date))],day=dates.includes(s.day)?s.day:dates[0];
+  // Если в этот день все встречи в одном месте — пишем место один раз над временем
+  const wh=[...new Set(available.filter(sl=>sl.date===day).map(sl=>sl.where))],sameWhere=wh.length===1?wh[0]:'';
   const meetDay=meeting?scheduleLabel(meeting.date,{day:'numeric',month:'long'}):'';
   const big=meeting?scheduleLabel(meeting.date,{weekday:'short',day:'numeric',month:'long'})+', '+meeting.start:'';
   const mode=!meeting&&!n&&!onboarded?'fresh':active&&!onboarded&&pr.tg?'booked':active&&onboarded?'all':'';
@@ -46,8 +51,12 @@ class Component extends DCLogic {
    cancelMeeting:()=>{const r=interviewCancel(meeting?.id,s.cancelReason,'Волонтёр');this.setState(r.error?{error:r.error}:{cancelling:false,rescheduling:false,picked:'',notice:'Запись отменена. Можно выбрать другое время.',error:''});},
    showPicker,rescheduling:!!active&&s.rescheduling,pickerTitle:s.rescheduling?'Выберите другое время':'Выберите время встречи',
    closePicker:()=>this.setState({picking:false,rescheduling:false,picked:'',error:''}),closeLabel:s.rescheduling?'Оставить прежнее время':'Свернуть',
-   focus:s.focus,changeFocus:e=>{if(scheduleValid(e.target.value))this.setState({focus:e.target.value,picked:'',error:''});},periodLabel:interviewDay(from)+' — '+scheduleLabel(to,{day:'numeric',month:'long'}),previous:()=>this.setState({focus:scheduleAdd(s.focus,-7),picked:''}),next:()=>this.setState({focus:scheduleAdd(s.focus,7),picked:''}),today:()=>this.setState({focus:INTERVIEW_TODAY,picked:''}),
-   slotDays:[...new Set(available.map(sl=>sl.date))].map(date=>({dateLabel:interviewDay(date),slots:available.filter(sl=>sl.date===date).map(sl=>({...sl,label:sl.start+'–'+sl.end,cls:'i-slot'+(s.picked===sl.id?' is-on':''),checked:s.picked===sl.id?'true':'false',pick:()=>this.setState({picked:sl.id,error:''})}))})),emptySlots:!available.length,cantBook:!available.some(sl=>sl.id===s.picked),book:()=>this.book(),bookLabel:s.rescheduling?'Подтвердить перенос':'Записаться',
+   focus:s.focus,changeFocus:e=>{if(scheduleValid(e.target.value))this.setState({focus:e.target.value,picked:'',error:''});},periodLabel:interviewDay(from)+' — '+scheduleLabel(to,{day:'numeric',month:'long'}),previous:()=>this.setState({focus:scheduleAdd(s.focus,-7),picked:'',day:''}),next:()=>this.setState({focus:scheduleAdd(s.focus,7),picked:'',day:''}),today:()=>this.setState({focus:INTERVIEW_TODAY,picked:''}),
+   // Сначала день, потом время — на телефоне не нужно листать все слоты недели
+   days:dates.map(date=>{const d=scheduleDate(date),on=date===day;return {wd:scheduleLabel(date,{weekday:'short'}),num:String(d.getUTCDate()),n:places(available.filter(sl=>sl.date===date).length),cls:'a-day'+(on?' is-on':''),pressed:on?'true':'false',pick:()=>this.setState({day:date,picked:'',error:''})};}),
+   dayLabel:day?scheduleLabel(day,{weekday:'long',day:'numeric',month:'long'}):'',
+   dayWhere:sameWhere,hasDayWhere:!!sameWhere,
+   daySlots:available.filter(sl=>sl.date===day).map(sl=>({...sl,where:sameWhere?'':sl.where,label:sl.start+'–'+sl.end,cls:'i-slot'+(s.picked===sl.id?' is-on':''),checked:s.picked===sl.id?'true':'false',pick:()=>this.setState({picked:sl.id,error:''})})),emptySlots:!available.length,cantBook:!available.some(sl=>sl.id===s.picked),book:()=>this.book(),bookLabel:s.rescheduling?'Подтвердить перенос':'Записаться',
    requesting:s.requesting,requestText:s.requestText,startRequest:()=>this.setState({requesting:true,error:''}),changeRequest:e=>this.setState({requestText:e.target.value,error:''}),cancelRequest:()=>this.setState({requesting:false,error:''}),
    sendRequest:()=>{if(!s.requestText.trim()){this.setState({error:'Напишите, когда вам удобно встретиться.'});return;}const fresh=interviewRead();fresh.profiles=fresh.profiles.map(p=>p.id===id?{...p,request:{text:s.requestText,status:'new'}}:p);interviewWrite(fresh);this.setState({requesting:false,picking:false,requestText:'',notice:'Ваш запрос появился у координатора',error:''});},
    tgOn:!!pr.tg,tgOff:!pr.tg,
