@@ -75,7 +75,8 @@ export OPORA_REPORTING_TEST_DATABASE_URL='postgresql+psycopg://opora:local-passw
 export OPORA_ADMIN_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_admin_test'
 export OPORA_DOBRO_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_dobro_test'
 export OPORA_TELEGRAM_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_telegram_test'
-# Only for a fresh local PostgreSQL instance, creates/migrates the fourteen dedicated fixture DBs:
+export OPORA_STAGE_DEMO_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_stage'
+# Only for a fresh local PostgreSQL instance, creates/migrates the fifteen dedicated fixture DBs:
 python infra/scripts/prepare-test-dbs.py
 export OPORA_ASSET_ROOT="${TMPDIR:-/tmp}/opora-private-test-assets"
 export OPORA_ENVIRONMENT=development
@@ -145,13 +146,13 @@ It forwards quoted pytest arguments, for example `sh infra/scripts/run-g1.sh -k
 the HTTP G1 database; its ordinary server limits remain active across requests.
 
 Domain test fixtures deliberately drop/recreate their model tables. Keep their
-fourteen fixture URLs separate from development/staging and the external G1 database. Their
+fifteen fixture URLs separate from development/staging and the external G1 database. Their
 exact database names are asserted by the domain suites. The CI pytest plugin
 rejects skipped checks; an unset URL is a gate failure, never a passing test run.
 `prepare-test-dbs.py` refuses existing databases and never drops one.
 
 For repeated integration checks on the specifically assigned QA cluster, the
-explicit command below resets only the fifteen allowlisted disposable fixture schemas
+explicit command below resets only the sixteen allowlisted disposable fixture schemas
 and migrates them from empty. It fixes test-only `create_all`/Alembic stamp drift
 after new models arrive. The script pins loopback port 56148, verifies the exact
 QA data directory and database names, and cannot target proof/restore/G1 databases.
@@ -269,3 +270,7 @@ Native workers must each receive a distinct `OPORA_WORKER_RUNTIME_DIR`, for exam
 A second worker using an occupied directory fails startup rather than overwriting
 another lane's heartbeat. Native control/health commands must use that same
 lane-specific environment. Containers already isolate the default `/tmp` path.
+
+The stage-demo test URL must target the exact disposable loopback `opora_stage`
+fixture. It is separate from any remotely deployed stage database; the QA reset
+helper additionally pins its own port and data directory.
