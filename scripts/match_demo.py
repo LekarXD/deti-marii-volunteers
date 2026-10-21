@@ -1,161 +1,183 @@
-"""Прототип подбора волонтёров на мероприятие: жёсткие фильтры + взвешенная оценка + причины.
+"""Прототип подбора волонтёров на смены. Без ИИ и без персональных данных: только признаки.
 
-Работает на синтетических волонтёрах (scripts/generate_synthetic_volunteers.py) и нескольких
-реальных мероприятиях из базы ВК. Без ИИ: каждое решение можно объяснить строкой «почему».
+Две стороны одного расчёта:
+1. Координатор открывает смену → видит, кого позвать, почему, и видел ли человек эту смену в своей подборке.
+2. Волонтёр открывает ленту → наверху смены, которые ему подходят и которые срочно нужно закрыть.
+
+Смены — как их заполняет координатор в планировании (Planning.js): серия, роль, дата, время, место,
+сколько человек нужно, сколько уже подтвердили. Волонтёры — scripts/generate_synthetic_volunteers.py.
 
     python3 scripts/match_demo.py
 """
 import json
 import pathlib
-from datetime import date
+from datetime import date, timedelta
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DATA = json.loads((ROOT / 'materials/05-продукт/данные/synthetic-volunteers.json').read_text())
 VOL, SERIES = DATA['volunteers'], DATA['series']
+ROLES = {r['id']: r for r in json.loads((ROOT / 'prototype-src/roles.json').read_text())}
+TODAY = date.fromisoformat(DATA['generated_for'])
 WEEK = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
+# Роли, которых нет в справочнике, но которые есть в планировании
+ROLE_EXTRA = {'escort': {'title': 'Сопровождающий на выезде', 'certificate': True, 'format': 'Очно'},
+              'event': {'title': 'Помощь на мероприятии', 'certificate': False, 'format': 'Очно'}}
 
-# Мероприятия из каталога за год (посты ВК указаны). need — сколько нужно, roles — что делать.
-EVENTS = [
-    dict(id='bazar', title='Шерстяной Базар, зимний', series='fair', date='2026-12-12', slot='день', zone='Юг',
-         need=4, skills=['Продажи', 'Соцсети'], certificate=False, physical=False, children=False, src='7507'),
-    dict(id='art-sat', title='Арт-суббота, 24 октября', series='art-sat', date='2026-10-24', slot='день', zone='Московская область',
-         need=3, skills=['Живопись и рисунок', 'Керамика'], certificate=False, physical=True, children=False, src='7495',
-         note='В группе Павел на коляске — нужен хотя бы один, кто может помочь физически'),
-    dict(id='art-lab', title='Арт-лаборатория, 27 октября', series='art-lab', date='2026-10-27', slot='день', zone='Центр Москвы',
-         need=2, skills=['Живопись и рисунок', 'Керамика', 'Валяние'], certificate=True, physical=False, children=True, src='7348'),
-    dict(id='sorochany', title='Зимняя неделя в Сорочанах', series='sorochany', date='2027-02-01', slot='неделя', zone='Московская область',
-         need=5, skills=['Спорт и игры'], certificate=True, physical=True, children=True, src='7357'),
+# Ближайшие смены из планирования координатора: need — сколько нужно, confirmed — сколько уже подтвердили.
+SHIFTS = [
+    dict(id='art@2026-10-24', series='art', date='2026-10-24', time='14:00–18:00', need=3, confirmed=['anna']),
+    dict(id='lab@2026-10-29', series='lab', date='2026-10-29', time='13:30–16:00', need=1, confirmed=[]),
+    dict(id='pack@2026-10-23', series='pack', date='2026-10-23', time='15:00–18:00', need=2, confirmed=['polina']),
+    dict(id='study@2026-10-26', series='study', date='2026-10-26', time='18:00–20:00', need=2, confirmed=['artem']),
+    dict(id='life@2026-10-28', series='life', date='2026-10-28', time='12:00–15:00', need=2, confirmed=[]),
+    dict(id='event@2026-10-26', series='event', date='2026-10-26', time='18:00–21:00', need=2, confirmed=[], title='Открытие выставки «Невидимый труд»'),
+    dict(id='fair@2026-12-12', series='fair', date='2026-12-12', time='12:00–20:00', need=4, confirmed=[], title='Шерстяной Базар, зимний'),
 ]
 
-# Насколько далеко ехать: одна и та же зона — 1, соседние — 0.6, остальное — 0.3
-NEAR = {('Центр Москвы', x): 0.8 for x in ['Север', 'Восток', 'Юг', 'Запад']}
-WEIGHTS = {'skills': 0.30, 'group': 0.25, 'reliability': 0.20, 'time': 0.15, 'distance': 0.10}
+# Вес признаков в оценке «насколько подходит». Настраиваются; позже — по решениям координатора.
+WEIGHTS = {'interest': 0.30, 'group': 0.25, 'time': 0.20, 'reliability': 0.15, 'distance': 0.10}
 READY = {'regular', 'occasional', 'first_shift_done', 'meeting_done', 'reserve'}
+# Какие направления из анкеты подходят роли
+ROLE_DIRS = {'assistant': {'Помощь на занятиях', 'Творчество'}, 'teacher': {'Творчество'}, 'tutor': {'Обучение'},
+             'life': {'Помощь на занятиях', 'Творчество'}, 'packing': {'Творчество', 'Ярмарки'}, 'fair': {'Ярмарки', 'Мероприятия'},
+             'event': {'Мероприятия', 'Фото, видео, соцсети'}, 'escort': {'Мероприятия', 'Помощь на занятиях'}}
 
 
-def distance(area, zone):
-    if area == zone:
-        return 1.0
-    if zone == 'Московская область' and area in ('Московская область', 'Новая Москва'):
-        return 0.9
-    return NEAR.get((zone, area)) or NEAR.get((area, zone)) or 0.3
+def role(sid):
+    r = SERIES[sid]['role']
+    return ROLES.get(r) or ROLE_EXTRA[r]
 
 
-def times_word(n):
+def times(n):
     return 'раза' if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14) else 'раз'
 
 
-def check(v, e):
-    """Жёсткие фильтры: если хоть один не пройден — человека не предлагаем, но пишем почему."""
-    a, ab = v['anketa'], v['abilities']
-    d = date.fromisoformat(e['date'])
+def blocked(v, sh):
+    """Жёсткие фильтры: кого точно нельзя звать. Возвращает причину или None."""
+    s, a, p = SERIES[sh['series']], v['anketa'], v['profile']
+    if v['id'] in sh['confirmed']:
+        return 'уже записан'
     if v['stage'] not in READY:
         return 'ещё не прошёл знакомство и встречу'
-    if v['reserve_status'] in ('unverified', 'awaiting_reply', 'paused', 'no_invites', 'unreachable'):
-        return 'в резерве: ' + {'unverified': 'актуальность не проверена', 'awaiting_reply': 'ждём ответа', 'paused': 'на паузе',
-                                'no_invites': 'не хочет приглашений', 'unreachable': 'не дозвонились'}[v['reserve_status']]
-    if v['paused_until'] and e['date'] < v['paused_until']:
-        return 'на паузе до ' + v['paused_until']
-    if ab['online_only']:
-        return 'помогает только онлайн'
-    if e['certificate'] and a['record'] != 'Справка уже есть':
-        return 'нет справки о несудимости'
-    if e['children'] and ab['minor']:
-        return 'младше 18 — не работает с детьми'
-    av = v['availability']
-    # На многодневный выезд день недели не важен: смотрим, ездил ли человек на такие выезды раньше
-    if e['slot'] != 'неделя' and av and WEEK[d.weekday()] not in av:
-        return 'в этот день недели не может'
+    if v['reserve_status'] and v['reserve_status'] != 'ready':
+        return 'в резерве, актуальность не подтверждена'
+    if p['paused_until'] and sh['date'] < p['paused_until']:
+        return 'на паузе'
+    if role(sh['series']).get('certificate') and a['record'] != 'Справка уже есть':
+        return 'нужна справка о несудимости'
+    if v['age'] < 18 and s['ages'] and s['ages'] != 'Взрослые':
+        return 'младше 18 — не на занятия с детьми'
+    if a['area'] == 'Другой город' and s['zone'] != 'Другой город':
+        return 'живёт в другом городе'
+    day = WEEK[date.fromisoformat(sh['date']).weekday()]
+    if p['availability'] and day not in p['availability']:
+        return f'в {day} не может (по профилю)'
     return None
 
 
-def score(v, e):
-    a, s, ab = v['anketa'], v['stats'], v['abilities']
-    d = date.fromisoformat(e['date'])
+def fit(v, sh):
+    """Оценка 0…1 и причины, которые увидит координатор."""
+    s, a, p, st = SERIES[sh['series']], v['anketa'], v['profile'], v['stats']
     why = []
-    sk = len(set(a['skills']) & set(e['skills'])) / max(1, len(e['skills']))
-    sk = min(1.0, sk * 2)
-    if sk:
-        why.append('умеет: ' + ', '.join(sorted(set(a['skills']) & set(e['skills']))))
-    group = SERIES[e['series']]['group']
-    times = sum(1 for r in v['participation_12m'] if r['series'] == e['series'] and r['status'] == 'attended')
-    gr = 1.0 if times >= 3 else 0.7 if times else (0.5 if group in s['groups_known'] else 0.0)
-    if times:
-        why.append(f'был на «{SERIES[e["series"]]["title"]}» {times} {times_word(times)} за год')
-    elif group in s['groups_known']:
-        why.append('знает эту группу')
-    # Надёжность со «сглаживанием»: у новичка без истории не ноль, а осторожные 0.75
-    rel = (s['attended_12m'] + 3) / (s['confirmed_12m'] + 4)
-    if s['confirmed_12m'] >= 5 and s['reliability'] and s['reliability'] >= 0.9:
-        why.append(f'приходит, когда обещал ({s["attended_12m"]} из {s["confirmed_12m"]})')
-    if s['late_cancel_12m'] >= 3:
-        why.append(f'{s["late_cancel_12m"]} отмены в последний момент')
-    av = v['availability']
-    day = WEEK[d.weekday()] if e['slot'] != 'неделя' else None
-    if e['slot'] == 'неделя':
-        tm = 1.0 if e['series'] in v['preferred_series'] else 0.3
+    skills = set(a['skills']) & set(s['skills'])
+    interest = min(1.0, 0.5 * len(skills) + (0.5 if ROLE_DIRS[s['role']] & set(a['directions']) else 0))
+    if skills:
+        why.append('умеет: ' + ', '.join(sorted(skills)))
+    n = st['series_attended'].get(sh['series'], 0)
+    before = st.get('series_attended_before', {}).get(sh['series'], 0)
+    group = 1.0 if n >= 3 else 0.7 if n else 0.5 if before else 0.0
+    if n:
+        why.append(f'был на «{s["title"]}» {n} {times(n)} за год')
+    elif before:
+        why.append(f'ходил на «{s["title"]}» раньше')
+    day = WEEK[date.fromisoformat(sh['date']).weekday()]
+    if p['availability']:
+        tm = 1.0 if s['part'] in p['availability'].get(day, []) else 0.7
+        if tm == 1.0:
+            why.append(f'свободен: {day}, {s["part"]}')
     else:
-        tm = 0.5 if not av else (1.0 if day and e['slot'] in av.get(day, []) else 0.7)
-    if day and e['slot'] in av.get(day, []):
-        why.append(f'обычно свободен: {day}, {e["slot"]}')
-    dist = distance(a['area'], e['zone'])
-    total = (WEIGHTS['skills'] * sk + WEIGHTS['group'] * gr + WEIGHTS['reliability'] * rel
-             + WEIGHTS['time'] * tm + WEIGHTS['distance'] * dist)
-    if e['physical'] and ab['physical_help']:
-        why.append('может помочь физически')
-    if ab['car'] and e['zone'] == 'Московская область':
-        why.append('на машине')
+        tm = 0.5
+        why.append('время в профиле не указано')
+    rel = (st['attended_12m'] + 3) / (st['confirmed_12m'] + 4)   # у новичка без истории — осторожные 0,75
+    if st['confirmed_12m'] >= 5 and st['attended_12m'] / st['confirmed_12m'] >= 0.9:
+        why.append(f'приходит, когда обещал ({st["attended_12m"]} из {st["confirmed_12m"]})')
+    if st['late_cancel_12m'] >= 3:
+        k = st['late_cancel_12m']
+        why.append(f'{k} {"отмены" if k % 10 in (2, 3, 4) and k % 100 not in (12, 13, 14) else "отмен"} в последний момент')
+    dist = 1.0 if a['area'] == s['zone'] else 0.8 if 'Москв' in a['area'] + s['zone'] else 0.4
     if v['stage'] == 'first_shift_done':
-        why.append('новичок: второй выход, позвать вместе с наставником')
+        why.append('новичок: позвать вместе с наставником')
+    if v['reserve_status'] == 'ready':
+        why.append('из резерва, готов вернуться')
+    total = (WEIGHTS['interest'] * interest + WEIGHTS['group'] * group + WEIGHTS['time'] * tm
+             + WEIGHTS['reliability'] * rel + WEIGHTS['distance'] * dist)
     return round(total, 2), why
 
 
-def pick(e):
-    """Топ по оценке, но так, чтобы закрыть обязательные потребности (физическая помощь) и не позвать двух новичков сразу."""
-    ok, out = [], []
+def urgency(sh):
+    """Насколько срочно закрыть смену: сколько мест пусто и сколько дней осталось."""
+    gap = max(0, sh['need'] - len(sh['confirmed'])) / max(1, sh['need'])
+    days = (date.fromisoformat(sh['date']) - TODAY).days
+    soon = 1.0 if days <= 7 else 0.7 if days <= 14 else 0.4 if days <= 30 else 0.2
+    return round(gap * soon, 2), days
+
+
+def coordinator_view(sh):
+    ok, out = [], {}
     for v in VOL:
-        reason = check(v, e)
-        if reason:
-            out.append((v, reason))
+        r = blocked(v, sh)
+        if r:
+            out.setdefault(r, []).append(v['name'].split()[0])
         else:
-            ok.append((v, *score(v, e)))
+            ok.append((v, *fit(v, sh)))
     ok.sort(key=lambda x: -x[1])
-    chosen = []
-    if e['physical']:
-        strong = [x for x in ok if x[0]['abilities']['physical_help']]
-        if strong:
-            chosen.append(strong[0])
-    for x in ok:
-        if len(chosen) >= e['need']:
-            break
-        if x in chosen:
+    s = SERIES[sh['series']]
+    u, days = urgency(sh)
+    left = sh['need'] - len(sh['confirmed'])
+    print(f'\n### {sh.get("title", s["title"])}, {sh["date"]} {sh["time"]} — {role(sh["series"])["title"]}')
+    print(f'    Нужно {sh["need"]}, записались {len(sh["confirmed"])}; до смены {days} дн.; подходят {len(ok)} из {len(VOL)}')
+    if sum(1 for x in ok if x[1] >= 0.6) < left:
+        print('    ⚠ Хорошо подходящих меньше, чем свободных мест: позвать резерв или открыть смену всем')
+    for v, sc, why in ok[:max(3, left + 2)]:
+        seen = 'видел в подборке' if v['activity']['feed_views_30d'] else 'подборку не открывал'
+        bot = 'бот' if v['activity']['telegram_bot'] else 'без бота'
+        print(f'    {sc:.2f} {v["name"]:20} [{seen}, {bot}] {"; ".join(why)}')
+    for r, names in sorted(out.items(), key=lambda x: -len(x[1]))[:4]:
+        print(f'    ✕ {r}: {", ".join(names)}')
+
+
+def volunteer_feed(vid):
+    v = next(x for x in VOL if x['id'] == vid)
+    items = []
+    for sh in SHIFTS:
+        if blocked(v, sh):
             continue
-        if x[0]['stage'] == 'first_shift_done' and any(c[0]['stage'] == 'first_shift_done' for c in chosen):
+        f, why = fit(v, sh)
+        if f < 0.45:      # срочность не повод показывать то, что человеку совсем не подходит
             continue
-        chosen.append(x)
-    reserve = [x for x in ok if x not in chosen][:3]
-    return chosen, reserve, ok, out
+        u, days = urgency(sh)
+        score = 0.6 * f + 0.4 * u     # порядок в ленте: подходит + срочно нужно
+        left = sh['need'] - len(sh['confirmed'])
+        label = (f'Срочно: нужно ещё {left}' if u >= 0.6 else
+                 'Вы здесь уже были' if v['stats']['series_attended'].get(sh['series']) else
+                 'Вам подходит' if f >= 0.6 else '')
+        items.append((score, sh, label))
+    items.sort(key=lambda x: -x[0])
+    print(f'\n### Лента: {v["name"]} ({v["segment_label"].split(":")[0]})')
+    if not v['profile']['availability']:
+        print('    Подсказка: «Отметьте, когда вам удобно, — покажем смены в эти дни»')
+    for score, sh, label in items[:4]:
+        s = SERIES[sh['series']]
+        print(f'    {sh.get("title", s["title"]):34} {sh["date"]} {sh["time"]:12} {label}')
 
 
 def main():
-    for e in EVENTS:
-        chosen, reserve, ok, out = pick(e)
-        print(f'\n### {e["title"]} — нужно {e["need"]} (пост {e["src"]})')
-        if e.get('note'):
-            print('   ', e['note'])
-        good = sum(1 for x in ok if x[1] >= 0.6)
-        print(f'    Подходят по фильтрам: {len(ok)} из {len(VOL)}, хорошо подходят (≥ 0.6): {good}')
-        if good < e['need']:
-            print(f'    ⚠ Хорошо подходящих меньше, чем нужно: позвать резерв или открыть набор')
-        for v, sc, why in chosen:
-            print(f'    ✓ {v["name"]:22} {sc:.2f}  {"; ".join(why)}')
-        for v, sc, why in reserve:
-            print(f'    · запас: {v["name"]:15} {sc:.2f}  {"; ".join(why[:2])}')
-        reasons = {}
-        for v, r in out:
-            reasons.setdefault(r, []).append(v['name'].split()[0])
-        for r, names in sorted(reasons.items(), key=lambda x: -len(x[1]))[:5]:
-            print(f'    ✕ {r}: {", ".join(names)}')
+    print('=== Координатор: кого позвать ===')
+    for sh in SHIFTS:
+        coordinator_view(sh)
+    print('\n=== Волонтёр: что показать наверху ленты ===')
+    for vid in ['anna', 'maxim', 'nikolay', 'vera']:
+        volunteer_feed(vid)
 
 
 if __name__ == '__main__':
