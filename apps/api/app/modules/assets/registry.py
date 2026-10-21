@@ -29,11 +29,11 @@ def register_asset_purpose(name,*,content_types,max_bytes,authorize,validate,pro
     PURPOSES[name]=AssetPurpose(frozenset(content_types),max_bytes,authorize,validate,processor_kind)
 
 def load_asset_extensions():
-    for name in ("app.modules.studio.assets",):
+    for name in ("app.modules.studio.assets","app.modules.profile.assets"):
         try:
             importlib.import_module(name)
         except ModuleNotFoundError as exc:
-            if exc.name not in (name,"app.modules.studio"):
+            if exc.name not in (name,name.rsplit(".",1)[0]):
                 raise
 
 def purpose_for(name):
@@ -58,5 +58,44 @@ async def create_upload_intent(db,principal,*,content_type,expected_size,checksu
     await policy.authorize(db,principal,resource_type,resource_id)
     asset=MediaAsset(foundation_id=principal.foundation_id,owner_user_id=principal.user_id,owner_registration_id=principal.registration_id,storage_key=uuid4().hex,content_type=content_type,expected_size=expected_size,checksum=checksum,purpose=purpose,resource_type=resource_type,resource_id=resource_id)
     db.add(asset)
+    await db.flush()
+    return asset
+
+async def create_generated_asset(db,principal,*,content_type,data,purpose,resource_type,resource_id):
+    """One private asset lifecycle for generated documents; caller owns its resource.
+
+    Call context.fence(db) immediately before invoking from a durable worker.
+    The source file is private and unreferenced until the caller commits the
+    resource update and job completion. An aborted transaction may leave an
+    unreferenced private file, never a published document.
+    """
+    import asyncio
+    import hashlib
+    import os
+    from app.core.auth import authz_guard
+    from app.modules.assets.service import asset_path
+    await authz_guard(db,principal)
+    policy=purpose_for(purpose)
+    if not isinstance(data,bytes) or not 0<len(data)<=policy.max_bytes or content_type not in policy.content_types:
+        raise ApiError(422,"generated_asset_invalid","Проверьте формат и размер документа")
+    if not await asyncio.to_thread(policy.validate,data,content_type):
+        raise ApiError(422,"generated_asset_invalid","Документ не прошёл проверку")
+    asset=await create_upload_intent(db,principal,content_type=content_type,expected_size=len(data),checksum=hashlib.sha256(data).hexdigest(),purpose=purpose,resource_type=resource_type,resource_id=resource_id)
+    path=asset_path(asset)
+    def write():
+        path.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
+        temporary=path.with_name(path.name+"."+uuid4().hex+".tmp")
+        try:
+            with temporary.open("xb") as output:
+                os.chmod(temporary,0o600)
+                output.write(data)
+                output.flush()
+                os.fsync(output.fileno())
+            os.replace(temporary,path)
+        finally:
+            temporary.unlink(missing_ok=True)
+    await asyncio.to_thread(write)
+    asset.received_size=len(data)
+    asset.state="ready"
     await db.flush()
     return asset

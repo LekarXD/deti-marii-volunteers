@@ -113,7 +113,7 @@ async def send(db,principal,conversation_id,body,key):
     for aid in body.asset_ids:
         asset=await require_asset(db,principal,aid)
         # Domain-bound participant photos cannot be forwarded through a chat.
-        if asset.access_permission:
+        if asset.access_permission or asset.purpose != "generic":
             raise ApiError(403,"asset_not_shareable","Для сообщения загрузите отдельный файл")
         if asset.content_type.startswith("image/") and body.photo_policy != "no_people":
             raise ApiError(422,"photo_privacy_clearance_required","Фото людей в чат не отправляем. Подтвердите, что на изображении нет людей, либо выберите другой файл")
