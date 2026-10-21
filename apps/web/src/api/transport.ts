@@ -12,6 +12,8 @@ export interface ApiOptions extends Omit<RequestInit, 'body' | 'credentials'> {
   retries?: number;
   timeoutMs?: number;
   responseType?: 'json' | 'blob' | 'text';
+  /** A rejected password does not invalidate the anonymous CSRF session. */
+  retainSessionOnUnauthorized?: boolean;
 }
 let session: Session | null = null;
 let generation = 0;
@@ -57,7 +59,7 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
   const safe = ['GET','HEAD','OPTIONS'].includes(method);
   await initializeSession();
   const epoch = generation; const principal = getPrincipalKey();
-  const {body, idempotencyKey, retries = safe ? 1 : 0, timeoutMs = safe ? 12000 : 30000, responseType = 'json', ...request} = options;
+  const {body, idempotencyKey, retries = safe ? 1 : 0, timeoutMs = safe ? 12000 : 30000, responseType = 'json', retainSessionOnUnauthorized = false, ...request} = options;
   const budget = Math.min(Math.max(retries, 0), 2);
   for (let attempt = 0; ; attempt++) {
     if (epoch !== generation || principal !== getPrincipalKey()) throw new ApiError(0, 'principal_changed', 'Сессия изменилась. Повторите действие.');
@@ -74,7 +76,7 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
       if (body !== undefined && !isRaw) headers.set('Content-Type','application/json');
       const response = await fetch(url, {...request, method, headers, body:body === undefined ? undefined : isRaw ? body as BodyInit : JSON.stringify(body), credentials:'same-origin', cache:'no-store', signal:controller.signal});
       if (epoch !== generation) throw new ApiError(0, 'principal_changed', 'Сессия изменилась.');
-      if (response.status === 401) { clearSession(); throw await failure(response); }
+      if (response.status === 401) { if (!retainSessionOnUnauthorized) clearSession(); throw await failure(response); }
       if (!response.ok) {
         const error = await failure(response);
         const retryAfter = response.headers.get('Retry-After');

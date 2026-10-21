@@ -1,7 +1,7 @@
 import {Field, Input, Textarea, Icon} from '../../ui';
 import type {IconName} from '../../ui/Icon';
 import {FormField, Answers, label, visible, masked, displayDate} from './form';
-export function FieldRenderer({field,answers,onChange,error}:{field:FormField;answers:Answers;onChange:(id:string,value:Answers[string])=>void;error?:string}) {
+export function FieldRenderer({field,answers,onChange,error,readOnly=false}:{field:FormField;answers:Answers;onChange:(id:string,value:Answers[string])=>void;error?:string;readOnly?:boolean}) {
   if(!visible(field.showIf,answers))return null;
   const value=answers[field.id], id='application-'+field.id;
   const options=field.options||[];
@@ -16,7 +16,7 @@ export function FieldRenderer({field,answers,onChange,error}:{field:FormField;an
        field.type==='textarea'?<Textarea id={id} value={String(value||'')} onChange={e=>onChange(field.id,e.target.value)} maxLength={4000}/>:
        ['select','tiles'].includes(field.type)?chips(options):
        field.type==='chips'?<><div className="ap-skill-groups">{field.groups?.filter(group=>visible(group.showIf,answers)).map(group=><div key={group.title}><p className="ap-group-title">{group.title}</p>{chips(group.options)}</div>)}</div>{field.allowOther&&<Input id={id} aria-label="Другой навык" placeholder="Другой навык — введите и нажмите Enter" onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();const text=e.currentTarget.value.trim();if(text){toggle(text);e.currentTarget.value='';}}}}/>}{Array.isArray(value)&&value.filter(item=>!field.groups?.some(group=>group.options.map(label).includes(item))).map(item=><button className="ap-option is-on" key={item} type="button" onClick={()=>toggle(item)}>{item} ×</button>)}</>:
-       <Input id={id} name={field.id} type={field.type==='email'?'email':'text'} inputMode={field.type==='date'?'numeric':field.type==='tel'?'tel':undefined} autoComplete={field.autocomplete} placeholder={field.type==='date'?'ДД.ММ.ГГГГ':field.placeholder} value={field.type==='date'?displayDate(String(value||'')):String(value||'')} onChange={e=>onChange(field.id,masked(e.target.value,field.type==='date'?'date':field.mask))} aria-invalid={!!error}/>}
+       <Input id={id} name={field.id} readOnly={readOnly} type={field.type==='email'?'email':'text'} inputMode={field.type==='date'?'numeric':field.type==='tel'?'tel':undefined} autoComplete={field.autocomplete} placeholder={field.type==='date'?'ДД.ММ.ГГГГ':field.placeholder} value={field.type==='date'?displayDate(String(value||'')):String(value||'')} onChange={e=>{if(!readOnly)onChange(field.id,masked(e.target.value,field.type==='date'?'date':field.mask));}} aria-invalid={!!error}/>}
     </Field>
   </div>;
 }

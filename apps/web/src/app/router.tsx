@@ -4,6 +4,7 @@ import {createBrowserRouter,Navigate,Outlet,useLocation,Link} from 'react-router
 import {AppProviders,CandidateLayout,CoordinatorLayout,useSession} from './layouts';
 import {PublicLayout} from './PublicLayout';
 import {Card} from '../ui';
+import {VerifiedBoundary} from '../features/auth/VerifiedBoundary';
 function page(load:()=>Promise<Record<string,unknown>>,name:string){return async()=>({Component:(await load())[name] as ComponentType});}
 const application=(name:string)=>page(()=>import('../features/applications'),name);
 const interview=(name:string)=>page(()=>import('../features/interviews'),name);
@@ -20,20 +21,19 @@ const recording=(name:string)=>page(()=>import('../features/lesson-recording'),n
 const messages=(name:string)=>page(()=>import('../features/messaging'),name);
 function StaffBoundary(){const {session}=useSession();const location=useLocation();return session?.is_staff?<Outlet/>:<Navigate to={'/login?next='+encodeURIComponent(location.pathname+location.search)} replace/>;}
 async function staffWebinars(){const {WebinarsPage}=await import('../features/studio');return {Component:()=> <WebinarsPage staff/>};}
-async function entry(){const {ApplicationEntryPage}=await import('../features/applications/ApplicationEntryPage');return {Component:function Entry(){const {session}=useSession();return session?.is_staff?<Navigate to="/fund" replace/>:session?.mfa_required?<Navigate to="/login?next=%2Ffund" replace/>:session?.user_id?<Navigate to="/home" replace/>:<ApplicationEntryPage/>;}};}
+async function entry(){const {WelcomePage}=await import('../features/auth/WelcomePage');const {ApplicationEntryPage}=await import('../features/applications/ApplicationEntryPage');return {Component:function Entry(){const {session}=useSession();return session?.mfa_required?<Navigate to="/login?next=%2Ffund" replace/>:session?.is_staff?<Navigate to="/fund" replace/>:session?.user_id?<ApplicationEntryPage/>:<WelcomePage/>;}};}
 function NotFound(){return <Card><h1 className="h1">Страница не найдена</h1><Link className="btn btn-primary" to="/">На главную</Link></Card>;}
 function LegacyGroup(){const location=useLocation();return <Navigate to={'/me/group'+location.search} replace/>;}
 export const router=createBrowserRouter([{
  element:<AppProviders><Outlet/></AppProviders>,children:[
-  {index:true,lazy:entry},
-  {element:<PublicLayout/>,children:[{path:'apply',lazy:application('ApplyPage')},{path:'login',lazy:page(()=>import('../features/auth'),'LoginPage')}]},
+  {element:<PublicLayout/>,children:[{index:true,lazy:entry},{element:<VerifiedBoundary/>,children:[{path:'apply',lazy:application('ApplyPage')}]},{path:'login',lazy:page(()=>import('../features/auth'),'LoginPage')},{path:'register',lazy:page(()=>import('../features/auth'),'RegisterPage')},{path:'forgot-password',lazy:page(()=>import('../features/auth'),'ResetPasswordPage')}]},
   {element:<CandidateLayout/>,children:[
    {path:'profile',lazy:profile('ProfilePage')},
    {path:'hours',lazy:profile('HoursPage')},
    {path:'hours/documents',lazy:profile('CertificatesPage')},
    {path:'home',lazy:page(()=>import('../features/home'),'HomePage')},
    {path:'application',lazy:application('ApplicationPage')},
-   {path:'application/edit',lazy:application('ApplyPage')},
+   {element:<VerifiedBoundary/>,children:[{path:'application/edit',lazy:application('ApplyPage')}]},
    {path:'onboarding',lazy:learning('OnboardingPage')},
    {path:'onboarding/cards',element:<Navigate to="/onboarding" replace/>},
    {path:'onboarding/list',element:<Navigate to="/onboarding" replace/>},
