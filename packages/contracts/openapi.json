@@ -3902,9 +3902,63 @@
         "title": "DobroActivityCommand",
         "type": "object"
       },
+      "DobroActivityUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_version": {
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "kind": {
+            "default": "long_term",
+            "enum": [
+              "long_term",
+              "one_off"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 1500,
+            "title": "Url",
+            "type": "string"
+          },
+          "valid_from": {
+            "format": "date",
+            "title": "Valid From",
+            "type": "string"
+          },
+          "valid_until": {
+            "format": "date",
+            "title": "Valid Until",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "title",
+          "valid_from",
+          "valid_until",
+          "expected_version"
+        ],
+        "title": "DobroActivityUpdate",
+        "type": "object"
+      },
       "DobroActivityView": {
         "additionalProperties": false,
         "properties": {
+          "can_edit": {
+            "default": false,
+            "title": "Can Edit",
+            "type": "boolean"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -4227,6 +4281,39 @@
         "title": "DobroOwnView",
         "type": "object"
       },
+      "DobroPreparationView": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "key": {
+            "enum": [
+              "publish_activity",
+              "enter_hours"
+            ],
+            "title": "Key",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "date",
+          "note"
+        ],
+        "title": "DobroPreparationView",
+        "type": "object"
+      },
       "DobroPreviewView": {
         "properties": {
           "mapping": {
@@ -4415,6 +4502,11 @@
             "title": "Reminder Template",
             "type": "string"
           },
+          "reminders_enabled": {
+            "default": false,
+            "title": "Reminders Enabled",
+            "type": "boolean"
+          },
           "risk_days": {
             "default": 7,
             "maximum": 60.0,
@@ -4466,6 +4558,11 @@
             "default": "{имя}, чтобы мы внесли твои часы в электронную книжку Добро.рф, откликнись один раз на доброе дело: {ссылка}. Потом нажми «Я откликнулся» в Опоре.",
             "title": "Reminder Template",
             "type": "string"
+          },
+          "reminders_enabled": {
+            "default": false,
+            "title": "Reminders Enabled",
+            "type": "boolean"
           },
           "risk_days": {
             "default": 7,
@@ -4553,6 +4650,13 @@
               "$ref": "#/components/schemas/DobroTeamPersonView"
             },
             "title": "People",
+            "type": "array"
+          },
+          "preparation": {
+            "items": {
+              "$ref": "#/components/schemas/DobroPreparationView"
+            },
+            "title": "Preparation",
             "type": "array"
           }
         },
@@ -51567,6 +51671,155 @@
           }
         },
         "summary": "Create Link",
+        "tags": [
+          "dobro"
+        ]
+      }
+    },
+    "/api/v1/fund/opportunities/{opportunity_id}/dobro/{activity_id}": {
+      "put": {
+        "operationId": "edit_link_api_v1_fund_opportunities__opportunity_id__dobro__activity_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "opportunity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Opportunity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "idempotency-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DobroActivityUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DobroActivityView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Edit Link",
         "tags": [
           "dobro"
         ]

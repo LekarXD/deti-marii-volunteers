@@ -88,7 +88,7 @@ services:
       retries: 3
       start_period: 15s
     build: {context: .., dockerfile: infra/docker/api.Dockerfile, labels: {org.opencontainers.image.revision: "${OPORA_RELEASE:-development}"}}
-    command: ["python", "-m", "app.worker.main", "--kind", "studio.close", "--kind", "studio.revoke", "--kind", "studio.reconcile_participant", "--kind", "knowledge.index", "--kind", "knowledge.ingest", "--kind", "ai.generate", "--kind", "reporting.digest", "--kind", "followups.rules"]
+    command: ["python", "-m", "app.worker.main", "--kind", "studio.close", "--kind", "studio.revoke", "--kind", "studio.reconcile_participant", "--kind", "knowledge.index", "--kind", "knowledge.ingest", "--kind", "ai.generate", "--kind", "reporting.digest", "--kind", "followups.rules", "--kind", "dobro.reminders.scan"]
     environment: *api-environment
     volumes: ["asset-data:/var/lib/opora/assets"]
     depends_on:

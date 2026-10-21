@@ -3740,6 +3740,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/fund/opportunities/{opportunity_id}/dobro/{activity_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edit Link */
+        put: operations["edit_link_api_v1_fund_opportunities__opportunity_id__dobro__activity_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/fund/volunteers/{user_id}/external-profiles/dobro": {
         parameters: {
             query?: never;
@@ -7841,8 +7858,38 @@ export interface components {
              */
             valid_until: string;
         };
+        /** DobroActivityUpdate */
+        DobroActivityUpdate: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Kind
+             * @default long_term
+             * @enum {string}
+             */
+            kind: "long_term" | "one_off";
+            /** Title */
+            title: string;
+            /** Url */
+            url: string;
+            /**
+             * Valid From
+             * Format: date
+             */
+            valid_from: string;
+            /**
+             * Valid Until
+             * Format: date
+             */
+            valid_until: string;
+        };
         /** DobroActivityView */
         DobroActivityView: {
+            /**
+             * Can Edit
+             * @default false
+             */
+            can_edit: boolean;
             /**
              * Id
              * Format: uuid
@@ -7998,6 +8045,23 @@ export interface components {
              */
             verified_organization: boolean;
         };
+        /** DobroPreparationView */
+        DobroPreparationView: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "publish_activity" | "enter_hours";
+            /** Note */
+            note: string;
+            /** Title */
+            title: string;
+        };
         /** DobroPreviewView */
         DobroPreviewView: {
             /** Mapping */
@@ -8094,6 +8158,11 @@ export interface components {
             /** Reminder Template */
             reminder_template: string;
             /**
+             * Reminders Enabled
+             * @default false
+             */
+            reminders_enabled: boolean;
+            /**
              * Risk Days
              * @default 7
              */
@@ -8136,6 +8205,11 @@ export interface components {
              * @default {имя}, чтобы мы внесли твои часы в электронную книжку Добро.рф, откликнись один раз на доброе дело: {ссылка}. Потом нажми «Я откликнулся» в Опоре.
              */
             reminder_template: string;
+            /**
+             * Reminders Enabled
+             * @default false
+             */
+            reminders_enabled: boolean;
             /**
              * Risk Days
              * @default 7
@@ -8186,6 +8260,8 @@ export interface components {
             activity?: components["schemas"]["DobroActivityView"] | null;
             /** People */
             people?: components["schemas"]["DobroTeamPersonView"][];
+            /** Preparation */
+            preparation?: components["schemas"]["DobroPreparationView"][];
         };
         /** DobroTransferGroupView */
         DobroTransferGroupView: {
@@ -38379,6 +38455,107 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["DobroActivityCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DobroActivityView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+        };
+    };
+    edit_link_api_v1_fund_opportunities__opportunity_id__dobro__activity_id__put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "idempotency-key"?: string | null;
+            };
+            path: {
+                opportunity_id: string;
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DobroActivityUpdate"];
             };
         };
         responses: {
