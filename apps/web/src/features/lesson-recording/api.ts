@@ -18,3 +18,4 @@ export function useRecordingCommand<T=unknown>() {
   catch(error){if(error instanceof ApiError&&error.status>=400&&error.status<500&&![408,429].includes(error.status))pending.current.delete(signature);throw error;}
  },onSuccess:async()=>{await Promise.all(['recordings','recording-takes','recording-renders','studio-sessions'].map(domain=>client.invalidateQueries({queryKey:keys.all(domain)})));}});
 }
+export const useRecordingRenders=(projectId:string)=>useInfiniteQuery({queryKey:keys.list('recording-renders',{projectId}),initialPageParam:'',queryFn:({signal,pageParam})=>api<components['schemas']['RecordingRenderPage']>(`/recording-projects/${projectId}/renders?limit=20${pageParam?`&cursor=${pageParam}`:''}`,{signal}),getNextPageParam:page=>page.next_cursor??undefined,refetchInterval:3000});

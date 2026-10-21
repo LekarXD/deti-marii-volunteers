@@ -24,11 +24,19 @@ Server capability flags gate capture; a `capturing` state is not presented as a
 confirmed recording until `started_at` exists. There is no fake running timer,
 progress percentage, raw fallback, preview URL or success receipt.
 
-Pending the tested A1 contract: scoped take-policy approval from actual host tracks,
-render discovery and private preview. The kernel currently reports capture unavailable;
-UI shows that reason while retaining project/material preparation. A7 owns the separate
-publish/withdraw adapter. These pending producer paths must be integrated before the
-complete record → review → publish journey is accepted.
+Render discovery uses the actual project render page. Ready/degraded files open only
+on an explicit private-preview action through the existing authorized asset content
+endpoint; video never autoplays. Review requires permission and a manual image/audio
+check, then sends the exact version and render hash. An approved result links directly
+to its actual target lesson with `recording_render_id`; A7's Builder revalidates the
+result and explicitly imports it into the existing draft before review/publication.
+No recording-page action publishes a lesson automatically.
+
+Pending authoritative take-policy readback from A1: scoped approval from actual host
+tracks must be added before the full start journey is accepted. Capture capability is
+read from the server; UI shows its actual unavailable reason while retaining preparation.
+Scene/slides can change during capturing, while device publication changes require the
+current take to finish. A7 owns the separate publish/withdraw adapter.
 
 Tests use actual generated DTO fixtures and sole-transport mocks. They verify real
 lesson selection/versions, unavailable capture, zero automatic device/start calls,
