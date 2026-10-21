@@ -105,6 +105,7 @@ async def verify(body: VerifyInput, response: Response, principal: Principal = D
 
 @router.post("/logout", operation_id="auth_logout")
 async def logout(response: Response, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
+    await authz_guard(db, principal)
     row = await db.get(Session, principal.session_id)
     row.revoked_at = utcnow()
     audit(db, principal, "auth.logout", "session", row.id)

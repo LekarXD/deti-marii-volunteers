@@ -20,13 +20,14 @@ class GrantInput(BaseModel):
     scope_id: UUID | None = None
 
 async def grant_guard(db, principal, target):
+    from hashlib import sha256
+    subjects = (principal.user_id or principal.registration_id, target)
+    keys = sorted({int.from_bytes(sha256(f"authz:{principal.foundation_id}:{subject}".encode()).digest()[:8], "big", signed=True) for subject in subjects})
+    for key in keys:
+        await db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": key})
     await authz_guard(db, principal)
     if not principal.has_permission("staff.manage") or not principal.mfa_at or principal.mfa_at < utcnow()-timedelta(minutes=10):
         raise ApiError(403, "step_up_required", "Подтвердите вход перед изменением доступа")
-    # Same lock protocol as sensitive commands, for the grant target.
-    from hashlib import sha256
-    key = int.from_bytes(sha256(f"authz:{principal.foundation_id}:{target}".encode()).digest()[:8], "big", signed=True)
-    await db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": key})
 
 @router.post("/grants", operation_id="staff_grant")
 async def grant(body: GrantInput, request: Request, principal: Principal = Depends(require_permission("staff.manage")), db: AsyncSession = Depends(get_db)):
