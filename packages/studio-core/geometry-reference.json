@@ -1,0 +1,496 @@
+[
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "side",
+      "ratio": 1.7777777777777777,
+      "cameraSize": 22,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "column",
+      "visible": 1872,
+      "scene": {
+        "x": 24,
+        "y": 136,
+        "w": 1872,
+        "h": 809
+      },
+      "content": {
+        "x": 40,
+        "y": 152,
+        "w": 1381,
+        "h": 777
+      },
+      "camera": {
+        "x": 1437,
+        "y": 152,
+        "w": 443,
+        "h": 777
+      },
+      "foot": null
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "side",
+      "ratio": 1.7777777777777777,
+      "cameraSize": 28,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "column",
+      "visible": 1872,
+      "scene": {
+        "x": 24,
+        "y": 163,
+        "w": 1872,
+        "h": 754
+      },
+      "content": {
+        "x": 40,
+        "y": 179,
+        "w": 1283,
+        "h": 722
+      },
+      "camera": {
+        "x": 1339,
+        "y": 179,
+        "w": 541,
+        "h": 722
+      },
+      "foot": null
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "side",
+      "ratio": 1.7777777777777777,
+      "cameraSize": 36,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "column",
+      "visible": 1872,
+      "scene": {
+        "x": 24,
+        "y": 194,
+        "w": 1872,
+        "h": 691
+      },
+      "content": {
+        "x": 40,
+        "y": 210,
+        "w": 1172,
+        "h": 659
+      },
+      "camera": {
+        "x": 1228,
+        "y": 210,
+        "w": 652,
+        "h": 659
+      },
+      "foot": null
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "side",
+      "ratio": 1.3333333333333333,
+      "cameraSize": 22,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "column",
+      "visible": 1872,
+      "scene": {
+        "x": 24,
+        "y": 45,
+        "w": 1872,
+        "h": 990
+      },
+      "content": {
+        "x": 40,
+        "y": 61,
+        "w": 1278,
+        "h": 958
+      },
+      "camera": {
+        "x": 1334,
+        "y": 61,
+        "w": 546,
+        "h": 958
+      },
+      "foot": null
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "side",
+      "ratio": 1.3333333333333333,
+      "cameraSize": 28,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "column",
+      "visible": 1872,
+      "scene": {
+        "x": 24,
+        "y": 86,
+        "w": 1872,
+        "h": 908
+      },
+      "content": {
+        "x": 40,
+        "y": 102,
+        "w": 1167,
+        "h": 876
+      },
+      "camera": {
+        "x": 1223,
+        "y": 102,
+        "w": 657,
+        "h": 876
+      },
+      "foot": null
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "side",
+      "ratio": 1.3333333333333333,
+      "cameraSize": 36,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "column",
+      "visible": 1872,
+      "scene": {
+        "x": 24,
+        "y": 131,
+        "w": 1872,
+        "h": 817
+      },
+      "content": {
+        "x": 40,
+        "y": 147,
+        "w": 1047,
+        "h": 785
+      },
+      "camera": {
+        "x": 1103,
+        "y": 147,
+        "w": 777,
+        "h": 785
+      },
+      "foot": null
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "overlay",
+      "ratio": 1.7777777777777777,
+      "cameraSize": 22,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "window",
+      "visible": 1872,
+      "scene": {
+        "x": 55,
+        "y": 24,
+        "w": 1810,
+        "h": 1032
+      },
+      "content": {
+        "x": 71,
+        "y": 40,
+        "w": 1778,
+        "h": 1000
+      },
+      "foot": null,
+      "pip": {
+        "x": 1588,
+        "y": 887,
+        "w": 247,
+        "h": 139,
+        "beside": false
+      }
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "overlay",
+      "ratio": 1.7777777777777777,
+      "cameraSize": 28,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "window",
+      "visible": 1872,
+      "scene": {
+        "x": 55,
+        "y": 24,
+        "w": 1810,
+        "h": 1032
+      },
+      "content": {
+        "x": 71,
+        "y": 40,
+        "w": 1778,
+        "h": 1000
+      },
+      "foot": null,
+      "pip": {
+        "x": 1521,
+        "y": 849,
+        "w": 314,
+        "h": 177,
+        "beside": false
+      }
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "overlay",
+      "ratio": 1.7777777777777777,
+      "cameraSize": 36,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "window",
+      "visible": 1872,
+      "scene": {
+        "x": 55,
+        "y": 24,
+        "w": 1810,
+        "h": 1032
+      },
+      "content": {
+        "x": 71,
+        "y": 40,
+        "w": 1778,
+        "h": 1000
+      },
+      "foot": null,
+      "pip": {
+        "x": 1435,
+        "y": 801,
+        "w": 400,
+        "h": 225,
+        "beside": false
+      }
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "overlay",
+      "ratio": 1.3333333333333333,
+      "cameraSize": 22,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "window",
+      "visible": 1872,
+      "scene": {
+        "x": 146,
+        "y": 24,
+        "w": 1628,
+        "h": 1032
+      },
+      "content": {
+        "x": 162,
+        "y": 40,
+        "w": 1333,
+        "h": 1000
+      },
+      "foot": null,
+      "pip": {
+        "x": 1511,
+        "y": 901,
+        "w": 247,
+        "h": 139,
+        "beside": true
+      }
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "overlay",
+      "ratio": 1.3333333333333333,
+      "cameraSize": 28,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "window",
+      "visible": 1872,
+      "scene": {
+        "x": 112,
+        "y": 24,
+        "w": 1695,
+        "h": 1032
+      },
+      "content": {
+        "x": 128,
+        "y": 40,
+        "w": 1333,
+        "h": 1000
+      },
+      "foot": null,
+      "pip": {
+        "x": 1477,
+        "y": 863,
+        "w": 314,
+        "h": 177,
+        "beside": true
+      }
+    }
+  },
+  {
+    "options": {
+      "stageW": 1920,
+      "stageH": 1080,
+      "layout": "overlay",
+      "ratio": 1.3333333333333333,
+      "cameraSize": 36,
+      "margin": 24
+    },
+    "expected": {
+      "mode": "window",
+      "visible": 1872,
+      "scene": {
+        "x": 69,
+        "y": 24,
+        "w": 1781,
+        "h": 1032
+      },
+      "content": {
+        "x": 85,
+        "y": 40,
+        "w": 1333,
+        "h": 1000
+      },
+      "foot": null,
+      "pip": {
+        "x": 1434,
+        "y": 815,
+        "w": 400,
+        "h": 225,
+        "beside": true
+      }
+    }
+  },
+  {
+    "options": {
+      "stageW": 1280,
+      "stageH": 720,
+      "layout": "side",
+      "ratio": 1.3333333333333333,
+      "camera": false
+    },
+    "expected": {
+      "mode": "none",
+      "visible": 1280,
+      "scene": {
+        "x": 165,
+        "y": 0,
+        "w": 949,
+        "h": 720
+      },
+      "content": {
+        "x": 181,
+        "y": 16,
+        "w": 917,
+        "h": 688
+      },
+      "foot": null
+    }
+  },
+  {
+    "options": {
+      "stageW": 390,
+      "stageH": 600,
+      "layout": "overlay",
+      "cameraSize": 28
+    },
+    "expected": {
+      "mode": "window",
+      "visible": 390,
+      "scene": {
+        "x": 0,
+        "y": 183,
+        "w": 390,
+        "h": 233
+      },
+      "content": {
+        "x": 16,
+        "y": 199,
+        "w": 358,
+        "h": 201
+      },
+      "foot": null,
+      "pip": {
+        "x": 286,
+        "y": 344,
+        "w": 74,
+        "h": 42,
+        "beside": false
+      }
+    }
+  },
+  {
+    "options": {
+      "stageW": 844,
+      "stageH": 390,
+      "layout": "overlay",
+      "cameraSize": 28,
+      "compact": true,
+      "occlude": 200
+    },
+    "expected": {
+      "mode": "window",
+      "visible": 644,
+      "scene": {
+        "x": 0,
+        "y": 7,
+        "w": 644,
+        "h": 376
+      },
+      "content": {
+        "x": 16,
+        "y": 23,
+        "w": 612,
+        "h": 344
+      },
+      "foot": null,
+      "pip": {
+        "x": 497,
+        "y": 287,
+        "w": 117,
+        "h": 66,
+        "beside": false
+      }
+    }
+  }
+]

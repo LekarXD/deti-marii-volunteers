@@ -1,0 +1,363 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:opora:studio-scene:1",
+  "title": "Immutable StudioScene v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "foundation_id",
+    "resource_id",
+    "session_id",
+    "recording_policy_id",
+    "take_id",
+    "deck_version_id",
+    "slide_id",
+    "board_snapshot_id",
+    "schema_version",
+    "revision",
+    "resource_kind",
+    "render_profile_version",
+    "content_kind",
+    "content_asset",
+    "presenter_identity",
+    "presenter_display_name",
+    "presenter_camera",
+    "screen_track_id",
+    "content_ratio",
+    "layout",
+    "presenter_size",
+    "theme_id"
+  ],
+  "properties": {
+    "foundation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "resource_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "session_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recording_policy_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "take_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "deck_version_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "slide_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "board_snapshot_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "resource_kind": {
+      "enum": [
+        "live_event",
+        "lesson_recording_project"
+      ]
+    },
+    "render_profile_version": {
+      "const": "opora-stage/1"
+    },
+    "content_kind": {
+      "enum": [
+        "slides",
+        "screen",
+        "board",
+        "camera"
+      ]
+    },
+    "content_asset": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "asset_id",
+            "sha256",
+            "width",
+            "height"
+          ],
+          "properties": {
+            "asset_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16384
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16384
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "presenter_identity": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "presenter_display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "presenter_camera": {
+      "type": "boolean"
+    },
+    "screen_track_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "content_ratio": {
+      "type": "number",
+      "minimum": 0.1,
+      "maximum": 10
+    },
+    "layout": {
+      "enum": [
+        "side",
+        "overlay",
+        "camera_only"
+      ]
+    },
+    "presenter_size": {
+      "type": "number",
+      "minimum": 22,
+      "maximum": 36
+    },
+    "theme_id": {
+      "const": "opora-warm"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "content_kind": {
+            "const": "slides"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "deck_version_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "slide_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "content_asset": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "board_snapshot_id": {
+            "type": "null"
+          },
+          "screen_track_id": {
+            "type": "null"
+          },
+          "layout": {
+            "enum": [
+              "side",
+              "overlay"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "content_kind": {
+            "const": "board"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "board_snapshot_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "content_asset": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "deck_version_id": {
+            "type": "null"
+          },
+          "slide_id": {
+            "type": "null"
+          },
+          "screen_track_id": {
+            "type": "null"
+          },
+          "layout": {
+            "enum": [
+              "side",
+              "overlay"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "content_kind": {
+            "const": "screen"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "screen_track_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "deck_version_id": {
+            "type": "null"
+          },
+          "slide_id": {
+            "type": "null"
+          },
+          "board_snapshot_id": {
+            "type": "null"
+          },
+          "content_asset": {
+            "type": "null"
+          },
+          "layout": {
+            "enum": [
+              "side",
+              "overlay"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "content_kind": {
+            "const": "camera"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "deck_version_id": {
+            "type": "null"
+          },
+          "slide_id": {
+            "type": "null"
+          },
+          "board_snapshot_id": {
+            "type": "null"
+          },
+          "content_asset": {
+            "type": "null"
+          },
+          "screen_track_id": {
+            "type": "null"
+          },
+          "layout": {
+            "const": "camera_only"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resource_kind": {
+            "const": "lesson_recording_project"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "take_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052",
+  "sources": [
+    {
+      "path": "apps/web/src/pages/learn/studio/stageComposition.js",
+      "sha256": "9c651749bb37fefd9c126ef3c3f9d1adb3063e00f0fca250f539f7de2cbce419"
+    },
+    {
+      "path": "apps/web/src/pages/learn/studio/stageGeometry.js",
+      "sha256": "3c8055416e4ea171279e9fc91bf3bf29ad9331cefff9e5699dda9994b5ffcc8d"
+    },
+    {
+      "path": "apps/web/src/pages/learn/studio/cameraLayout.js",
+      "sha256": "54f76cf20a8f6c76b77a66df45386faa999acf21dd90add40121f477fce33943"
+    },
+    {
+      "path": "apps/web/src/pages/learn/studio/recording/RecordingStage.jsx",
+      "sha256": "4eb2b8b983dfe7b5a3be842e287af97c4d405ced3f6a01ff8ccd44f01071eccb"
+    },
+    {
+      "path": "apps/web/src/pages/learn/studio/stageGeometry.mobile.test.js",
+      "sha256": "e6fc8d782f7efc3b362ba008d9326bdecf0ac741b37bbdd978e36303cda09128"
+    },
+    {
+      "path": "apps/web/src/pages/learn/studio/StudioStage.test.jsx",
+      "sha256": "dca1c8d4bd450ce8c12ea7ed523403a88d424aad9412789ed9f83ad06964514a"
+    }
+  ],
+  "ported": "Pure side/overlay fit, margin, presenter size and pip functions; screen/board/slides priority. School arch, theme and audience rendering excluded. Camera-only rect matches source RecordingStage. Canonical virtual 1920x1080 scene scales uniformly for preview; no mobile reflow affects captured composition. No SDK/provider imports.",
+  "dependencies": [],
+  "tests": "Pinned source golden geometry matrix; immutable schema/serialization; explicit track/audio allowlist and scope readiness; one renderer fixture for live and solo."
+}

@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:opora:capture-plan:1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "foundation_id",
+    "resource_id",
+    "session_id",
+    "recording_policy_id",
+    "schema_version",
+    "take_id",
+    "generation",
+    "scene_revision",
+    "render_profile_version",
+    "privacy_state",
+    "raw_fallback",
+    "allowed_tracks"
+  ],
+  "properties": {
+    "foundation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "resource_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "session_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recording_policy_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "take_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "scene_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "render_profile_version": {
+      "const": "opora-stage/1"
+    },
+    "privacy_state": {
+      "enum": [
+        "approved",
+        "unknown",
+        "blocked"
+      ]
+    },
+    "raw_fallback": {
+      "const": "forbidden"
+    },
+    "allowed_tracks": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identity",
+          "track_id",
+          "source",
+          "kind",
+          "required"
+        ],
+        "properties": {
+          "identity": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "track_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "source": {
+            "enum": [
+              "camera",
+              "screen",
+              "microphone",
+              "screen_audio"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "video",
+              "audio"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "source": {
+                  "enum": [
+                    "camera",
+                    "screen"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "kind": {
+                  "const": "video"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "kind": {
+                  "const": "audio"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
