@@ -179,7 +179,11 @@ async def main():
     grant=join_token(RtcSettings.from_env(),room=room,participant_identity=identity(UUID(me['user_id'])),name='Synthetic presenter',host=True,policy=RevocationPolicy(),auth_session_id=auth_id)
     from app.modules.recordings.jobs import browser_environment
     publisher_environment=browser_environment()
-    publisher=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(SCRIPT.with_name('recording_synthetic_publisher.cjs')),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True,env=publisher_environment);processes.append(publisher)
+    async def spawn_publisher():
+     fixture_socket=os.getenv('OPORA_RECORDING_SMOKE_PUBLISHER_SOCKET')
+     arguments=([sys.executable,str(SCRIPT.with_name('recording_publisher_fixture.py')),'--client',fixture_socket] if fixture_socket else [__import__('shutil').which('node'),str(SCRIPT.with_name('recording_synthetic_publisher.cjs'))])
+     return await asyncio.create_subprocess_exec(*arguments,stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True,env=publisher_environment)
+    publisher=await spawn_publisher();processes.append(publisher)
     publisher.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}{MOUNT}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant})+'\n').encode());await publisher.stdin.drain();grant=None
     pub=json.loads(await asyncio.wait_for(publisher.stdout.readline(),30));assert pub['state']=='published',pub
     from app.integrations.rtc.livekit import LiveKitAdapter
@@ -190,7 +194,7 @@ async def main():
       viewer_login=Session(foundation_id=viewer.foundation_id,user_id=viewer.id,token_hash=uuid4().hex*2,csrf_hash='x'*64,csrf_cipher='synthetic',expires_at=utcnow()+timedelta(hours=1));db.add(viewer_login);await db.flush()
       enrollment=WebinarEnrollment(foundation_id=viewer.foundation_id,webinar_id=webinar_id,user_id=viewer.id);db.add(enrollment);await db.commit();viewer_id=viewer.id;viewer_session_id=viewer_login.id;enrollment_id=enrollment.id
      grant=join_token(RtcSettings.from_env(),room=room,participant_identity=identity(viewer_id),name='Synthetic enrolled subscriber',host=False,policy=RevocationPolicy(),auth_session_id=viewer_session_id)
-     spectator=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(SCRIPT.with_name('recording_synthetic_publisher.cjs')),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True,env=publisher_environment);processes.append(spectator)
+     spectator=await spawn_publisher();processes.append(spectator)
      spectator.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}{MOUNT}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant,'publish':False})+'\n').encode());await spectator.stdin.drain();grant=None
      spectator_receipt=json.loads(await asyncio.wait_for(spectator.stdout.readline(),30));assert spectator_receipt=={'state':'published','tracks':[]}
      provider_participants=await LiveKitAdapter().participants(room)
@@ -289,7 +293,7 @@ async def main():
        host=await db.get(Session,auth_id);host.revoked_at=utcnow();await db.commit()
      else:
       grant=join_token(RtcSettings.from_env(),room=room,participant_identity='synthetic-outsider-'+uuid4().hex,name='Synthetic unapproved participant',host=True,policy=RevocationPolicy())
-      outsider=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(SCRIPT.with_name('recording_synthetic_publisher.cjs')),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True,env=publisher_environment);processes.append(outsider)
+      outsider=await spawn_publisher();processes.append(outsider)
       outsider.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}{MOUNT}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant})+'\n').encode());await outsider.stdin.drain();grant=None
       # Revocation may terminate renderer before outsider has published all tracks.
       await asyncio.wait_for(outsider.stdout.readline(),30)
