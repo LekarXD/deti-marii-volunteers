@@ -522,6 +522,25 @@ sc-if,sc-for{display:contents}
  .a-sheet-card{padding:22px 20px}
 }
 .a-stage .tag{justify-self:start}
+/* выравнивание ленты истории: заголовок карточки на одной линии с годом и точкой */
+.a-blocks h3,.a-blocks h2{margin:0}
+.a-tlcard{padding:20px 24px}
+.a-tlcard h3{font-size:20px;font-weight:600;line-height:28px}
+.a-tlcard p{margin:6px 0 0}
+.a-year{padding-top:20px;line-height:28px}
+.a-dotline{top:26px}
+.a-icard h3{font-size:18px;font-weight:600}
+@media (max-width:720px){.a-year{padding-top:0}.a-dotline{top:6px}}
+/* карточки: белые, цвет — только у иконки; у каждого блока свой цвет */
+.a-icard,.a-icard.a-ic-o,.a-icard.a-ic-b,.a-icard.a-ic-g,.a-icard.a-ic-v,.a-icard.a-ic-y{background:var(--paper)}
+.a-ic-o .a-ico{background:var(--orange-tint)}.a-ic-b .a-ico{background:var(--blue-tint)}.a-ic-g .a-ico{background:var(--green-tint)}.a-ic-v .a-ico{background:var(--violet-tint)}.a-ic-y .a-ico{background:var(--yellow-tint)}
+/* история Вовы: иконки вместо цветных плашек */
+.a-stage .a-ico{width:44px;height:44px;border-radius:14px;background:var(--paper)}
+.a-stage .a-ico .ic{width:22px;height:22px}
+.a-stage-t{font-size:18px}
+.a-stage.a-ic-b .a-ico{color:var(--blue)}.a-stage.a-ic-y .a-ico{color:var(--yellow-ink)}.a-stage.a-ic-g .a-ico{color:var(--green-ink)}
+.a-stage.a-ic-b,.a-stage.a-ic-y,.a-stage.a-ic-g{background:var(--soft)}
+.a-stage:not(:last-child)::after{color:var(--ink-2)}
 
 </style>
 </helmet>
@@ -669,7 +688,7 @@ window.FORM = {
     facts    { items: [[число, подпись], …] }           — числа «набегают» при появлении
     timeline { items: [[год, заголовок, текст], …] }    — годы появляются по одному
     icards   { title, items: [{ icon, title, text }] }  — карточки с иконкой
-    story    { title, intro, items: [[заголовок, текст], …] } — история по шагам
+    story    { title, intro, items: [[заголовок, текст, иконка], …] } — история по шагам
     rules    { title, items: [строка, …] }              — нумерованные правила
     phrases  { title, items: [[так, не так], …] }       — «Так говорим / Так не говорим»
     quiz     { title, intro, items: [{ q, o: […], a, e }] } — выбор ответа, сразу зелёная или красная карточка с объяснением
@@ -722,9 +741,9 @@ window.ONBOARDING = {
           { icon: "pin", title: "Выезды", text: "Арт-резиденция на Волге, Сорочаны, Беслан" }
         ] },
         { type: "story", title: "История Вовы", intro: "Так выглядит регулярная помощь — много маленьких шагов.", items: [
-          ["Было", "Вова жил в социальном доме и впервые пришёл в фонд на занятия керамикой."],
-          ["Четыре года", "Каждую неделю: творчество, математика, логопед, куратор."],
-          ["Стало", "Своя квартира с сопровождением, работа, кот и гитара."]
+          ["Было", "Вова жил в социальном доме и впервые пришёл в фонд на занятия керамикой.", "home"],
+          ["Четыре года", "Каждую неделю: творчество, математика, логопед, куратор.", "calendar"],
+          ["Стало", "Своя квартира с сопровождением, работа, кот и гитара.", "star"]
         ] },
         { type: "icards", title: "Что важно знать", items: [
           { icon: "clock", title: "Доверие строится месяцами", text: "Многие росли без постоянных взрослых. Важно приходить снова и снова." },

@@ -20,13 +20,13 @@ class Component extends DCLogic {
  current(){const s=this.state,mods=ONB.modules;if(s.view==='test')return{test:true};if(s.view!=null)return{id:s.view,i:mods.findIndex(m=>m.id===s.view)};const i=mods.findIndex(m=>!s.pr.done[m.id]);return i<0?{test:true}:{id:mods[i].id,i};}
  save(pr){demoWrite('onboarding',pr);this.setState({pr});}
  open(view){this.setState({view});window.scrollTo(0,0);}
- blockView(b,mi){const v={};BLOCK_FLAGS.forEach(k=>v[k]=false);v['is'+b.type[0].toUpperCase()+b.type.slice(1)]=true;
+ blockView(b,mi,bi){const v={};BLOCK_FLAGS.forEach(k=>v[k]=false);v['is'+b.type[0].toUpperCase()+b.type.slice(1)]=true;
   v.text=b.text||'';v.title=b.title||'';v.hasTitle=!!b.title;v.intro=b.intro||'';v.duration=b.duration||'';v.cls=(b.tone==='warn'?'error':'hint')+' a-reveal';
   const it=b.items||[];
   if(b.type==='facts')v.items=it.map(([n,l])=>({n,l,to:parseInt(n,10)||0,suffix:String(n).replace(/^\d+/,'')}));
   else if(b.type==='timeline')v.items=it.map(([y,t,d])=>({y,t,d}));
-  else if(b.type==='icards')v.items=it.map((x,k)=>({...x,...icoFlags(x.icon),cls:'a-icard a-reveal '+CARD_TINTS[k%CARD_TINTS.length]}));
-  else if(b.type==='story')v.items=it.map(([t,d])=>({t,d}));
+  else if(b.type==='icards')v.items=it.map(x=>({...x,...icoFlags(x.icon),cls:'a-icard a-reveal '+CARD_TINTS[(bi||0)%CARD_TINTS.length]}));
+  else if(b.type==='story')v.items=it.map(([t,d,icon],k)=>({t,d,...icoFlags(icon),cls:'a-stage a-reveal '+['a-ic-b','a-ic-y','a-ic-g'][k%3]}));
   else if(b.type==='rules')v.items=it.map((t,k)=>({t,n:k+1}));
   else if(b.type==='phrases')v.items=it.map(([say,avoid])=>({say,avoid}));
   else if(b.type==='quiz')v.items=it.map((x,k)=>{const key=mi+'-'+k,ans=this.state.quiz[key],answered=ans!=null,ok=ans===x.a;
@@ -40,7 +40,7 @@ class Component extends DCLogic {
   const score=pr.testDone?pr.score:(run?run.answers.filter((a,k)=>a===T.questions[k].a).length:0);
   return {stepLabel:'Знакомство с фондом · шаг '+stepN+' из '+total,
    segs:Array.from({length:total},(_,k)=>({cls:k<stepN-1?'is-done':(k===stepN-1?'is-on':'')})),
-   isModule:!!m,isTest:!!cur.test,modTitle:m?m.title:'',blocks:m?m.blocks.map(b=>this.blockView(b,cur.i)):[],
+   isModule:!!m,isTest:!!cur.test,modTitle:m?m.title:'',blocks:m?m.blocks.map((b,bi)=>this.blockView(b,cur.i,m.blocks.slice(0,bi).filter(x=>x.type==='icards').length+cur.i)):[],
    hasPrev:!!m&&cur.i>0,prev:()=>this.open(mods[cur.i-1].id),
    doneLocked:!!m&&!unlocked,doneCls:'btn btn-lg '+(unlocked?'btn-primary a-unlocked':'btn-subtle'),doneLabel:!m?'':(unlocked?(nxt?'Понятно, дальше':'Понятно, к тесту'):'Дочитайте до конца ↓'),
    done:()=>{if(!m)return;this.save({...pr,done:{...pr.done,[m.id]:true}});this.open(nxt?nxt.id:'test');},
