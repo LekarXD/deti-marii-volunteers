@@ -248,6 +248,37 @@ async def respond_request(db, principal, request_id, command, *, resolve=False):
     return await request_view(db, request)
 
 
+async def initialize_registration_user(db, registration_id, user_id):
+    """Initialize only a newly-created verified identity before its owned claim.
+
+    P01 invokes this optional hook exclusively for the User it just created.
+    Neither contact text nor another application's answers can identify a source.
+    """
+    from app.core.models import RegistrationSession, User
+    from app.modules.profile.models import VolunteerProfile, ProfileRevision
+    registration = await db.get(RegistrationSession, registration_id)
+    user = await db.scalar(select(User).where(User.id == user_id).with_for_update())
+    if not registration or not user or registration.foundation_id != user.foundation_id:
+        raise ApiError(409, "registration_scope_conflict", "Не удалось перенести анкету в аккаунт")
+    if registration.claimed_user_id != user_id or not registration.verified_email:
+        raise ApiError(409, "registration_not_verified", "Сначала подтвердите свою сессию регистрации")
+    # Even an explicit new-user callback must not replace an already chosen name
+    # or a profile's manual history (including a deliberately chosen placeholder).
+    if user.display_name not in ("Волонтёр", ""):
+        return
+    if await db.scalar(select(VolunteerProfile.user_id).where(VolunteerProfile.user_id == user_id)) or await db.scalar(select(ProfileRevision.id).where(ProfileRevision.user_id == user_id).limit(1)):
+        return
+    revision = await db.scalar(select(ApplicationRevision).join(Application, (Application.submitted_revision_id == ApplicationRevision.id) & (ApplicationRevision.application_id == Application.id)).where(Application.foundation_id == user.foundation_id, Application.registration_id == registration_id, Application.submission_state == "submitted"))
+    if revision is None:
+        return
+    parts = [revision.answers.get(key) for key in ("firstName", "lastName")]
+    if any(not isinstance(value, str) or not value.strip() for value in parts):
+        return
+    name = " ".join(" ".join(value.split()) for value in parts)
+    user.display_name = name[:User.__table__.c.display_name.type.length].rstrip()
+    await db.flush()
+
+
 async def claim_registration(db, registration_id, user_id):
     """Called only inside P01's successful contact verification transaction.
 
