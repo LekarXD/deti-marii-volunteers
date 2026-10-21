@@ -78,6 +78,7 @@ export const router=createBrowserRouter([{
    {path:'recordings/:id',lazy:recording('RecordingProjectPage')},
    {path:'notifications',lazy:notification('NotificationAdminPage')},
    {path:'reports',lazy:page(()=>import('../features/reporting'),'ReportsPage')},
+   {path:'integrations/dobro/transfers',lazy:page(()=>import('../features/dobro-transfer'),'DobroTransferPage')},
    {path:'admin',lazy:page(()=>import('../features/admin'),'AdminPage')},
    {path:'scenarios',lazy:simulator('ScenariosPage')},
    {path:'simulator/review',lazy:simulator('SimulatorReviewPage')},
