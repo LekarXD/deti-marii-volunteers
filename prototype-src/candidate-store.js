@@ -2,6 +2,8 @@
 // Тексты анкеты и онбординга — в prototype/content/form.js и onboarding.js (FORM, ONBOARDING).
 const FORM = window.FORM, ONB = window.ONBOARDING;
 const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
+// Вариант ответа — строка или { label, icon }
+const optLabel = o => typeof o === 'string' ? o : o.label;
 const cap = w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w;
 const ageOf = d => { const b = new Date(d); if (isNaN(b)) return null; const n = new Date(); let a = n.getFullYear() - b.getFullYear(); if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--; return a; };
 const fullName = c => (c && (c.name || [c.firstName, c.lastName].filter(Boolean).join(' '))) || '';
@@ -56,6 +58,7 @@ function validateFields(fields, data) {
   const errs = {};
   fields.filter(f => visibleFor(f, data)).forEach(f => {
     if (f.groups && f.type === 'checkbox') data[f.id] = arr(data[f.id]).filter(o => f.groups.some(g => visibleFor(g, data) && g.options.includes(o)));
+    if (f.groups && f.type === 'chips') data[f.id] = arr(data[f.id]).filter(o => f.groups.some(g => visibleFor(g, data) && g.options.map(optLabel).includes(o)));
     const v = data[f.id];
     const empty = v == null || v === '' || v === false || (Array.isArray(v) && v.length === 0);
     if (f.required && empty) errs[f.id] = f.type === 'consent' ? 'Без согласия мы не сможем обработать заявку' : f.type === 'roles' ? 'Выберите хотя бы одну роль или «Пока не знаю»' : 'Заполните, пожалуйста';
@@ -71,6 +74,7 @@ function validateFields(fields, data) {
 
 // Поля формы → данные для шаблона. update(id, value) меняет ответ; ui — раскрытые группы ролей.
 function fieldViews(fields, data, errs, update, ui, setUi) {
+  let sec = 0;
   return fields.filter(f => visibleFor(f, data)).map(f => {
     const v = data[f.id];
     const t = f.type;
@@ -81,11 +85,13 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
       on ? set.add(o) : set.delete(o);
       update(f.id, withExclusive(f, [...set], o, on));
     };
-    const optView = o => { const on = (t === 'radio' || t === 'select') ? v === o : arr(v).includes(o); return { label: o, checked: on, pressed: on, cls: on ? 'chip is-on' : 'chip', lineCls: on ? 'a-line is-on' : 'a-line', toggle: (t === 'radio' || t === 'select') ? () => update(f.id, o) : toggleIn(o) }; };
+    const optView = opt => { const o = optLabel(opt), icon = typeof opt === 'string' ? '' : opt.icon || '', on = (t === 'radio' || t === 'select') ? v === o : arr(v).includes(o); return { label: o, ...icoFlags(icon), hasIcon: !!icon, checked: on, pressed: on, cls: on ? 'chip is-on' : 'chip', lineCls: on ? 'a-line is-on' : 'a-line', tileCls: on ? 'a-tile is-on' : 'a-tile', toggle: (t === 'radio' || t === 'select') ? () => update(f.id, o) : toggleIn(o) }; };
     const warn = shortHint(f, v);
     return {
-      id: f.id, label: f.label, req: !!f.required, opt: !!f.optional, why: f.why || '', hasWhy: !!f.why,
-      cls: 'field a-field' + (f.half ? ' a-half' : '') + (errs[f.id] ? ' a-bad' : ''),
+      id: f.id, label: f.label || f.title, req: !!f.required,
+      isSection: t === 'section', note: f.note || '', hasNote: !!f.note, ...icoFlags(f.icon || ''), showLabel: !['consent', 'section', 'tiles'].includes(t) && !f.hideLabel,
+      isTiles: t === 'tiles', opt: !!f.optional, why: f.why || '', hasWhy: !!f.why,
+      cls: (t === 'section' ? 'a-sec a-sec-' + (sec++ % 4) : 'field a-field') + (f.half ? ' a-half' : '') + (errs[f.id] ? ' a-bad' : ''),
       err: errs[f.id] || '', hasErr: !!errs[f.id], warn, hasWarn: !!warn,
       isConsent: t === 'consent', notConsent: t !== 'consent',
       isInput, inputType: t === 'date' ? 'text' : t, inputMode: t === 'date' ? 'numeric' : t === 'email' ? 'email' : t === 'tel' ? 'tel' : 'text', value: t === 'date' ? birthdateDisplay(v) : v == null ? '' : v, placeholder: t === 'date' ? 'ДД.ММ.ГГГГ' : f.placeholder || '', autocomplete: f.autocomplete || 'off',
@@ -96,7 +102,9 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
       isChoice: (t === 'radio' || t === 'checkbox') && !f.groups, choiceType: t, options: (f.options || []).map(optView),
       isGroups: t === 'checkbox' && !!f.groups,
       groups: (t === 'checkbox' && f.groups ? f.groups : []).filter(g => visibleFor(g, data)).map(g => ({ title: g.title, note: g.note || '', hasNote: !!g.note, hasOptions: g.options.length > 0, options: g.options.map(optView) })),
-      isChips: t === 'chips', hasOther: !!f.allowOther, other: data[f.id + 'Other'] || '', changeOther: e => update(f.id + 'Other', e.target.value),
+      isChips: t === 'chips' && !f.groups, isChipGroups: t === 'chips' && !!f.groups,
+      chipGroups: (t === 'chips' && f.groups ? f.groups : []).filter(g => visibleFor(g, data)).map(g => ({ title: g.title, options: g.options.map(optView) })),
+      hasOther: !!f.allowOther, other: data[f.id + 'Other'] || '', changeOther: e => update(f.id + 'Other', e.target.value),
       isGrid: t === 'grid', cols: f.cols || [],
       rows: (f.rows || []).map(r => ({ label: r, cells: (f.cols || []).map(c => { const k = r + '·' + c, on = arr(v).includes(k); return { cls: on ? 'a-cell is-on' : 'a-cell', pressed: on, aria: r + ', ' + c, toggle: toggleIn(k) }; }) })),
       isRoles: t === 'roles',
@@ -113,10 +121,10 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
 const freshProgress = () => ({ done: {}, testDone: false, score: null, road: false, tg: false });
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
-const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Регулярно, каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
 
 // Иконки по имени из контента (сборщик подставляет svg через ICONSWITCH)
-const ICON_KEYS = ['palette','book','users','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle'];
+const ICON_KEYS = ['palette','book','users','user','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle','academy','pen','scissors','flame','globe','dice','film','image','file','chart','screen','database','send','inbox','settings','search','edit'];
 const icoFlags = name => { const o = {}; ICON_KEYS.forEach(k => { o['ic_' + k.replace('-', '_')] = k === name; }); return o; };
 // В прототипе без анкеты показываем всё на демо-кандидате, чтобы ничего не заполнять руками
 const ensureCandidate = () => { const me = loadCandidate(); if (me) return me; demoWrite('candidate', DEMO_CANDIDATE); return DEMO_CANDIDATE; };

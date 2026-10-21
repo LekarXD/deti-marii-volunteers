@@ -624,6 +624,69 @@ sc-if,sc-for{display:contents}
 .candidate-mobile-menu{display:none}.candidate-mobile-links a,.candidate-mobile-links .is-locked{display:block;padding:12px 16px;color:var(--ink);border-radius:14px;font-size:16px}.candidate-mobile-links a.is-active{background:var(--soft);font-weight:600}.candidate-mobile-links .is-locked{opacity:.45}.candidate-mobile-links a:hover{text-decoration:none;background:var(--soft)}
 @media(max-width:1000px){.candidate-top{flex-wrap:nowrap;gap:8px}.candidate-top .candidate-nav{display:none}.candidate-mobile-menu{display:block;position:relative;margin-left:auto;min-width:0}.candidate-mobile-menu>summary{display:flex;align-items:center;gap:8px;list-style:none;background:var(--paper);border-radius:999px;padding:12px 14px;min-height:48px;font-size:15px;cursor:pointer;white-space:nowrap}.candidate-mobile-menu>summary::-webkit-details-marker{display:none}.candidate-mobile-menu .ic{width:16px;height:16px}.candidate-mobile-menu[open]>summary .ic{transform:rotate(180deg)}.candidate-mobile-links{position:absolute;right:0;top:calc(100% + 10px);background:var(--paper);box-shadow:0 12px 40px rgba(18,20,26,.12);padding:8px;width:260px;border:1px solid var(--line);border-radius:22px;z-index:100}.candidate-profile{margin-left:0}.candidate-top .brand{gap:8px;height:48px;padding:0 12px 0 8px}.candidate-top .brand small{display:none}.candidate-top .brand b{font-size:17px}.candidate-top .brand .mark{transform:scale(.85)}.candidate-profile>span:last-child{display:none}.candidate-profile{padding:4px}}
 @media(max-width:360px){.candidate-mobile-menu>summary{padding:12px 10px;gap:5px;font-size:14px}.candidate-top .brand{gap:4px;padding-right:10px}.candidate-profile .avatar{width:34px;height:34px}.candidate-top .brand b{font-size:16px}.candidate-top .brand .mark{width:30px;flex-basis:30px;transform-origin:left center}}
+/* Анкета v4: форма слева, путь кандидата справа; блоки с иконками */
+.a-apply{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.a-apply-main{min-width:0}
+.a-form-card.card{padding:36px 40px}
+.a-stephead .h2{margin:6px 0 18px}
+.a-stephead .a-bar{margin:0}
+.a-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 20px;margin-top:8px}
+.a-form>.a-sec{grid-column:1/-1;display:flex;gap:14px;align-items:center;margin-top:10px;padding-top:28px;border-top:1px solid var(--line)}
+.a-form>.a-sec:first-child{margin-top:20px;padding-top:0;border-top:0}
+.a-sec .h3{margin:0}
+.a-sec .a-why{margin-top:2px}
+.a-sec-ico{width:44px;height:44px;flex:0 0 44px;border-radius:14px;display:grid;place-items:center}
+.a-sec-0 .a-sec-ico{background:var(--yellow-tint);color:var(--yellow-ink)}
+.a-sec-1 .a-sec-ico{background:var(--blue-tint);color:var(--blue)}
+.a-sec-2 .a-sec-ico{background:var(--green-tint);color:var(--green-ink)}
+.a-sec-3 .a-sec-ico{background:var(--orange-tint);color:var(--orange-ink)}
+.a-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.a-tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-height:112px;padding:16px;border:0;border-radius:20px;background:var(--soft);text-align:left;font-size:15px;font-weight:600;line-height:1.3;color:var(--ink)}
+.a-tile:hover{box-shadow:inset 0 0 0 1px var(--line-2)}
+.a-tile-ico{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:var(--paper);display:grid;place-items:center}
+.a-tile.is-on{background:var(--yellow-tint);box-shadow:inset 0 0 0 2px var(--ink)}
+.a-tile.is-on::after{content:"✓";position:absolute;top:14px;right:14px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;display:grid;place-items:center}
+.a-chips .chip .ic{width:18px;height:18px}
+.a-cgroups{display:grid;gap:16px}
+.a-cgroup-t{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--mute)}
+.a-cgroup .a-chips{margin:0}
+.a-other{margin-top:14px}
+.a-errs{margin:12px 0 0}
+.a-path-card.card{position:sticky;top:24px;padding:28px}
+.a-pathlist{list-style:none;margin:16px 0;padding:0;display:grid;gap:4px}
+.a-pathlist li{display:flex;gap:14px;align-items:center;padding:12px;border-radius:18px}
+.a-pathlist li.is-now{background:var(--yellow-tint)}
+.a-pathlist b{display:block;font-size:16px;line-height:1.3}
+.a-pathlist small{display:block;font-size:14px;color:var(--mute);line-height:1.35}
+.a-path-ico{width:40px;height:40px;flex:0 0 40px;border-radius:12px;background:var(--soft);display:grid;place-items:center}
+.a-pathlist li.is-now .a-path-ico{background:var(--yellow)}
+.a-path-card .meta{margin:0}
+@media (max-width:1000px){.a-apply{grid-template-columns:1fr}.a-path-card.card{position:static}}
+@media (max-width:720px){.a-form-card.card{padding:24px 20px}.a-form{grid-template-columns:1fr}.a-form>.a-half{grid-column:1/-1}.a-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.a-tile{min-height:100px;padding:14px}.a-sec-ico{width:40px;height:40px;flex-basis:40px}}
+/* Кабинет кандидата в стиле главной «Опоры»: герой-карточка встречи, ниже — знакомство с фондом */
+.a-cab-head{margin-bottom:24px}
+.a-status{margin:12px 0 0}
+.a-hero-title{margin:10px 0 0;font-size:44px;font-weight:600;line-height:1.05;letter-spacing:-.03em;text-wrap:balance}
+.a-hero-small{margin:12px 0 0}
+.a-hero-actions{gap:12px;margin-top:28px}
+.a-hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.card-hero .hero-note .ic{width:20px;height:20px;color:var(--green-ink)}
+.a-demo-link{height:34px;display:inline-flex;align-items:center;padding:0 14px;font-size:14px;font-weight:500}
+.a-picker-sub{margin:-8px 0 0}
+.a-book.card{margin-top:16px;padding:8px 28px}
+.a-book-row{display:flex;align-items:center;gap:16px;padding:16px 0;cursor:pointer}
+.a-book-row+.a-book-row{border-top:1px solid var(--line)}
+.a-book-row b{display:block;font-size:16px}
+.a-book-row small{display:block;font-size:15px;color:var(--mute)}
+.a-picker .actions{margin-top:20px}
+.a-onb.card{display:flex;align-items:center;gap:24px}
+.a-onb .art{align-self:flex-start}
+.a-onb-title{gap:12px}
+.a-onb .p{margin-top:6px;max-width:62ch}
+.a-onb-bar{gap:14px;margin-top:16px;max-width:420px}
+.a-onb.is-nudge{box-shadow:inset 0 0 0 2px var(--orange)}
+@media (max-width:720px){.a-hero-title{font-size:32px}.card-hero .hero-when{font-size:36px}.a-hero-actions .btn{flex:1 1 auto}.a-onb.card{flex-direction:column;align-items:stretch;gap:16px}.a-onb .btn{width:100%}.a-book.card{padding:4px 20px}}
+@media (max-width:720px){.a-tiles{grid-template-columns:1fr;gap:8px}.a-tile{flex-direction:row;align-items:center;min-height:60px;padding:10px 48px 10px 10px}.a-tile.is-on::after{top:50%;transform:translateY(-50%)}}
 
 </style>
 </helmet>
@@ -643,8 +706,8 @@ sc-if,sc-for{display:contents}
 <sc-if value="{{b.isLead}}"><p class="a-lead a-reveal">{{b.text}}</p></sc-if>
 <sc-if value="{{b.isFacts}}"><div class="a-facts"><sc-for list="{{b.items}}" as="x"><div class="kpi a-reveal"><span class="blob blob-y"></span><span class="kpi-num a-count" data-to="{{x.to}}" data-suffix="{{x.suffix}}">{{x.n}}</span><span class="kpi-label">{{x.l}}</span></div></sc-for></div></sc-if>
 <sc-if value="{{b.isTimeline}}"><div class="a-timeline"><sc-for list="{{b.items}}" as="x"><div class="a-tl a-reveal"><span class="a-dotline" aria-hidden="true"></span><span class="a-year">{{x.y}}</span><div class="a-tlcard"><h3 class="h4">{{x.t}}</h3><p>{{x.d}}</p></div></div></sc-for></div></sc-if>
-<sc-if value="{{b.isIcards}}"><section><sc-if value="{{b.hasTitle}}"><h2 class="h3 a-bt">{{b.title}}</h2></sc-if><div class="a-icards"><sc-for list="{{b.items}}" as="x"><div class="{{x.cls}}"><span class="a-ico" aria-hidden="true"><sc-if value="{{x.ic_palette}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></sc-if><sc-if value="{{x.ic_book}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></sc-if><sc-if value="{{x.ic_users}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></sc-if><sc-if value="{{x.ic_heart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></sc-if><sc-if value="{{x.ic_home}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></sc-if><sc-if value="{{x.ic_hand}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></sc-if><sc-if value="{{x.ic_shield}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></sc-if><sc-if value="{{x.ic_smile}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if><sc-if value="{{x.ic_star}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if><sc-if value="{{x.ic_camera}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></sc-if><sc-if value="{{x.ic_calendar}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></sc-if><sc-if value="{{x.ic_pin}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_message}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></sc-if><sc-if value="{{x.ic_mask}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v6a8 8 0 0 1-16 0z"/><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"/></svg></sc-if><sc-if value="{{x.ic_music}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_award}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg></sc-if><sc-if value="{{x.ic_sparkle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></sc-if><sc-if value="{{x.ic_eye}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></sc-if><sc-if value="{{x.ic_clock}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></sc-if><sc-if value="{{x.ic_phone}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></sc-if><sc-if value="{{x.ic_alert}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></sc-if><sc-if value="{{x.ic_check_circle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></sc-if></span><h3 class="h4">{{x.title}}</h3><p>{{x.text}}</p></div></sc-for></div></section></sc-if>
-<sc-if value="{{b.isStory}}"><section class="a-story a-reveal"><h2 class="h3">{{b.title}}</h2><p class="a-storyintro">{{b.intro}}</p><div class="a-storyrow"><sc-for list="{{b.items}}" as="x"><div class="{{x.cls}}"><span class="a-ico" aria-hidden="true"><sc-if value="{{x.ic_palette}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></sc-if><sc-if value="{{x.ic_book}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></sc-if><sc-if value="{{x.ic_users}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></sc-if><sc-if value="{{x.ic_heart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></sc-if><sc-if value="{{x.ic_home}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></sc-if><sc-if value="{{x.ic_hand}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></sc-if><sc-if value="{{x.ic_shield}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></sc-if><sc-if value="{{x.ic_smile}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if><sc-if value="{{x.ic_star}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if><sc-if value="{{x.ic_camera}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></sc-if><sc-if value="{{x.ic_calendar}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></sc-if><sc-if value="{{x.ic_pin}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_message}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></sc-if><sc-if value="{{x.ic_mask}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v6a8 8 0 0 1-16 0z"/><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"/></svg></sc-if><sc-if value="{{x.ic_music}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_award}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg></sc-if><sc-if value="{{x.ic_sparkle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></sc-if><sc-if value="{{x.ic_eye}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></sc-if><sc-if value="{{x.ic_clock}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></sc-if><sc-if value="{{x.ic_phone}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></sc-if><sc-if value="{{x.ic_alert}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></sc-if><sc-if value="{{x.ic_check_circle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></sc-if></span><b class="a-stage-t">{{x.t}}</b><p>{{x.d}}</p></div></sc-for></div></section></sc-if>
+<sc-if value="{{b.isIcards}}"><section><sc-if value="{{b.hasTitle}}"><h2 class="h3 a-bt">{{b.title}}</h2></sc-if><div class="a-icards"><sc-for list="{{b.items}}" as="x"><div class="{{x.cls}}"><span class="a-ico" aria-hidden="true"><sc-if value="{{x.ic_palette}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></sc-if><sc-if value="{{x.ic_book}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></sc-if><sc-if value="{{x.ic_users}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></sc-if><sc-if value="{{x.ic_user}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></sc-if><sc-if value="{{x.ic_heart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></sc-if><sc-if value="{{x.ic_home}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></sc-if><sc-if value="{{x.ic_hand}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></sc-if><sc-if value="{{x.ic_shield}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></sc-if><sc-if value="{{x.ic_smile}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if><sc-if value="{{x.ic_star}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if><sc-if value="{{x.ic_camera}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></sc-if><sc-if value="{{x.ic_calendar}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></sc-if><sc-if value="{{x.ic_pin}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_message}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></sc-if><sc-if value="{{x.ic_mask}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v6a8 8 0 0 1-16 0z"/><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"/></svg></sc-if><sc-if value="{{x.ic_music}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_award}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg></sc-if><sc-if value="{{x.ic_sparkle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></sc-if><sc-if value="{{x.ic_eye}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></sc-if><sc-if value="{{x.ic_clock}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></sc-if><sc-if value="{{x.ic_phone}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></sc-if><sc-if value="{{x.ic_alert}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></sc-if><sc-if value="{{x.ic_check_circle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></sc-if><sc-if value="{{x.ic_academy}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></sc-if><sc-if value="{{x.ic_pen}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/></svg></sc-if><sc-if value="{{x.ic_scissors}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8.2 20 18M8 15.8 20 6"/></svg></sc-if><sc-if value="{{x.ic_flame}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a7 7 0 0 0 7-7c0-4-3-6.5-4-9.5-1 2.5-2.5 3.5-3.5 3.5C11 6 10 4.5 10 3c-3 2-5 6-5 11a7 7 0 0 0 7 7z"/></svg></sc-if><sc-if value="{{x.ic_globe}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></sc-if><sc-if value="{{x.ic_dice}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01" stroke-width="2.6"/></svg></sc-if><sc-if value="{{x.ic_film}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4M3 12h18"/></svg></sc-if><sc-if value="{{x.ic_image}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="17" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-5-5-9 10"/></svg></sc-if><sc-if value="{{x.ic_file}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></sc-if><sc-if value="{{x.ic_chart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></sc-if><sc-if value="{{x.ic_screen}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 17v4"/></svg></sc-if><sc-if value="{{x.ic_database}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></sc-if><sc-if value="{{x.ic_send}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></sc-if><sc-if value="{{x.ic_inbox}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/></svg></sc-if><sc-if value="{{x.ic_settings}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></sc-if><sc-if value="{{x.ic_search}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></sc-if><sc-if value="{{x.ic_edit}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg></sc-if></span><h3 class="h4">{{x.title}}</h3><p>{{x.text}}</p></div></sc-for></div></section></sc-if>
+<sc-if value="{{b.isStory}}"><section class="a-story a-reveal"><h2 class="h3">{{b.title}}</h2><p class="a-storyintro">{{b.intro}}</p><div class="a-storyrow"><sc-for list="{{b.items}}" as="x"><div class="{{x.cls}}"><span class="a-ico" aria-hidden="true"><sc-if value="{{x.ic_palette}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg></sc-if><sc-if value="{{x.ic_book}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></sc-if><sc-if value="{{x.ic_users}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></sc-if><sc-if value="{{x.ic_user}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></sc-if><sc-if value="{{x.ic_heart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.7-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 5.9-8 10.6-8 10.6z"/></svg></sc-if><sc-if value="{{x.ic_home}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></sc-if><sc-if value="{{x.ic_hand}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7.5a1.5 1.5 0 0 0-3 0V11M15 10V4.5a1.5 1.5 0 0 0-3 0V10M12 10V5.5a1.5 1.5 0 0 0-3 0V12M9 12V8.5a1.5 1.5 0 0 0-3 0V15a7 7 0 0 0 7 7h1a6 6 0 0 0 6-6v-4a1.5 1.5 0 0 0-3 0"/></svg></sc-if><sc-if value="{{x.ic_shield}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></svg></sc-if><sc-if value="{{x.ic_smile}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></sc-if><sc-if value="{{x.ic_star}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></sc-if><sc-if value="{{x.ic_camera}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></sc-if><sc-if value="{{x.ic_calendar}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></sc-if><sc-if value="{{x.ic_pin}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_message}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></sc-if><sc-if value="{{x.ic_mask}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v6a8 8 0 0 1-16 0z"/><path d="M8.5 10h.01M15.5 10h.01M9 14.5a4 4 0 0 0 6 0"/></svg></sc-if><sc-if value="{{x.ic_music}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></sc-if><sc-if value="{{x.ic_award}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 21l5-2.5 5 2.5-1.5-7"/></svg></sc-if><sc-if value="{{x.ic_sparkle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.8 2.2 5.4 6 6-3.8.6-5.4 2.2-6 6-.6-3.8-2.2-5.4-6-6 3.8-.6 5.4-2.2 6-6z"/><path d="M19 15c.3 1.6 1 2.3 2.5 2.5-1.5.3-2.2 1-2.5 2.5-.3-1.5-1-2.2-2.5-2.5 1.5-.2 2.2-.9 2.5-2.5z"/></svg></sc-if><sc-if value="{{x.ic_eye}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></sc-if><sc-if value="{{x.ic_clock}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></sc-if><sc-if value="{{x.ic_phone}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></sc-if><sc-if value="{{x.ic_alert}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.01"/></svg></sc-if><sc-if value="{{x.ic_check_circle}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></sc-if><sc-if value="{{x.ic_academy}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9 12 4l10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></svg></sc-if><sc-if value="{{x.ic_pen}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/></svg></sc-if><sc-if value="{{x.ic_scissors}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8.2 20 18M8 15.8 20 6"/></svg></sc-if><sc-if value="{{x.ic_flame}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a7 7 0 0 0 7-7c0-4-3-6.5-4-9.5-1 2.5-2.5 3.5-3.5 3.5C11 6 10 4.5 10 3c-3 2-5 6-5 11a7 7 0 0 0 7 7z"/></svg></sc-if><sc-if value="{{x.ic_globe}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></sc-if><sc-if value="{{x.ic_dice}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01" stroke-width="2.6"/></svg></sc-if><sc-if value="{{x.ic_film}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4M3 12h18"/></svg></sc-if><sc-if value="{{x.ic_image}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3.5" width="18" height="17" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-5-5-9 10"/></svg></sc-if><sc-if value="{{x.ic_file}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></sc-if><sc-if value="{{x.ic_chart}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></sc-if><sc-if value="{{x.ic_screen}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 17v4"/></svg></sc-if><sc-if value="{{x.ic_database}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></sc-if><sc-if value="{{x.ic_send}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></sc-if><sc-if value="{{x.ic_inbox}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/></svg></sc-if><sc-if value="{{x.ic_settings}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></sc-if><sc-if value="{{x.ic_search}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></sc-if><sc-if value="{{x.ic_edit}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 7l3 3"/></svg></sc-if></span><b class="a-stage-t">{{x.t}}</b><p>{{x.d}}</p></div></sc-for></div></section></sc-if>
 <sc-if value="{{b.isRules}}"><section class="card a-reveal"><sc-if value="{{b.hasTitle}}"><h2 class="h3 a-bt">{{b.title}}</h2></sc-if><div class="a-rules"><sc-for list="{{b.items}}" as="x"><div class="a-rule"><span class="a-rn">{{x.n}}</span><p>{{x.t}}</p></div></sc-for></div></section></sc-if>
 <sc-if value="{{b.isPhrases}}"><section><h2 class="h3 a-bt">{{b.title}}</h2><div class="a-phr-head" aria-hidden="true"><span>Так говорим</span><span>Так не говорим</span></div><sc-for list="{{b.items}}" as="x"><div class="a-phr a-reveal"><span class="a-yes">{{x.say}}</span><span class="a-no">{{x.avoid}}</span></div></sc-for></section></sc-if>
 <sc-if value="{{b.isQuiz}}"><section><h2 class="h3 a-bt">{{b.title}}</h2><sc-for list="{{b.items}}" as="x"><div class="card a-quiz a-reveal"><p class="a-q">{{x.q}}</p><div class="a-qopts"><sc-for list="{{x.opts}}" as="o"><button type="button" class="{{o.cls}}" disabled="{{o.locked}}" onClick="{{o.pick}}">{{o.text}}</button></sc-for></div><sc-if value="{{x.answered}}"><div class="{{x.fbCls}}" role="status"><b>{{x.fbHead}}</b><p>{{x.e}}</p></div></sc-if></div></sc-for></section></sc-if>
@@ -677,11 +740,12 @@ const demoRead = (key, fallback) => {try {const raw = sessionStorage.getItem('op
 const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-v1:'+key,JSON.stringify(value));if(['candidate','onboarding'].includes(key)&&typeof interviewSync==='function')interviewSync();} catch (_) {}};
 
 /*
-  Анкета волонтёра, версия 2.
+  Анкета волонтёра, версия 4.
   Это данные, а не код: поля, варианты и подсказки можно править прямо здесь.
   Обоснование каждого поля — materials/05-продукт/Анкета v2.md
 
-  Типы полей: text, email, tel, date, textarea, select, radio, checkbox, chips, grid, roles, consent.
+  Типы полей: section (заголовок блока с иконкой), text, email, tel, date, textarea, select (чипы, один ответ),
+  chips (чипы, несколько; варианты могут быть { label, icon }, а groups — группы с showIf), tiles (плитки с иконками), radio, checkbox, grid, roles, consent.
   required — обязательное; optional — пометка «по желанию»; why — короткое «зачем спрашиваем» под полем;
   showIf — показывать, только если в другом поле выбран один из вариантов;
   exclusive — варианты, которые нельзя выбрать вместе с остальными (например, «Нет, не подходит»);
@@ -690,66 +754,96 @@ const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-
 */
 window.FORM = {
   title: "Анкета волонтёра",
-  intro: "Мы рады, что вы хотите помогать фонду «Дети Марии». Три коротких шага — около 5 минут. Остальное обсудим лично.",
+  intro: "Мы рады, что вы хотите помогать. Три коротких шага — около 5 минут.",
+  /* Путь кандидата — карточка справа от анкеты */
+  path: [
+    { icon: "edit", title: "Анкета", meta: "5 минут" },
+    { icon: "book", title: "Знакомство с фондом", meta: "онлайн, около 20 минут" },
+    { icon: "calendar", title: "Встреча с координатором", meta: "30 минут, онлайн или в студии" }
+  ],
+  pathNote: "После встречи откроется платформа: занятия, обучение и сообщения.",
   steps: [
     {
       id: "about",
-      title: "Знакомство",
+      title: "О вас",
       fields: [
+        { type: "section", id: "s-who", title: "Кто вы", icon: "user" },
         { id: "firstName", label: "Имя", type: "text", required: true, mask: "name", half: true,
           placeholder: "Михаил", autocomplete: "given-name" },
         { id: "lastName", label: "Фамилия", type: "text", required: true, mask: "name", half: true,
           placeholder: "Михайлов", autocomplete: "family-name" },
-        { id: "birthdate", label: "Дата рождения", type: "date", required: true },
-        { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel",
-          placeholder: "+7 (999) 123-45-67" },
-        { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email",
-          why: "Пришлём ссылку на личный кабинет." },
-        { id: "channels", label: "Как с вами удобнее связываться?", type: "checkbox", required: true,
-          options: ["Telegram", "WhatsApp", "Max", "Электронная почта", "SMS", "Телефонный звонок"] },
-        { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username",
-          showIf: { field: "channels", value: "Telegram" } },
+        { id: "birthdate", label: "Дата рождения", type: "date", required: true, half: true },
         { id: "area", label: "Где вы живёте?", type: "select", required: true,
-          options: ["Центр Москвы", "Север / Северо-Восток", "Восток / Юго-Восток", "Юг / Юго-Запад", "Запад / Северо-Запад", "Новая Москва", "Московская область", "Ярославская область", "Северная Осетия", "Другой город"] }
+          options: ["Центр Москвы", "Север", "Восток", "Юг", "Запад", "Новая Москва", "Московская область", "Другой город"] },
+        { type: "section", id: "s-contact", title: "Как с вами связаться", icon: "message" },
+        { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel", half: true,
+          placeholder: "+7 (999) 123-45-67" },
+        { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email", half: true,
+          placeholder: "name@mail.ru" },
+        { id: "channels", label: "Где удобнее отвечать?", type: "chips", required: true,
+          options: [{ label: "Telegram", icon: "send" }, { label: "WhatsApp", icon: "message" }, { label: "Max", icon: "message" }, { label: "Почта", icon: "inbox" }, { label: "Звонок", icon: "phone" }] },
+        { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username", half: true,
+          showIf: { field: "channels", value: "Telegram" } }
       ]
     },
     {
       id: "help",
-      title: "О вас",
+      title: "Чем хотите помогать",
       fields: [
-        { id: "directions", label: "Что вам было бы интересно?", type: "chips", required: true,
-          options: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Фото, видео, соцсети", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Профессиональная помощь фонду: юрист, маркетинг, IT", "Пока не знаю"],
-          exclusive: ["Пока не знаю"],
-          why: "Можно несколько. Это не обязательство — роль обсудим на встрече." },
-        { id: "skills", label: "Что вы умеете или любите делать?", type: "chips",
-          options: ["Керамика", "Живопись и рисунок", "Валяние", "Шитьё и вышивка", "Кулинария", "Музыка и вокал", "Театр", "Спорт и игры", "Фотография", "Видео и монтаж", "Дизайн", "Соцсети", "Педагогика", "Психология", "Школьные предметы", "Английский"],
-          allowOther: true },
-        { id: "sphere", label: "В какой сфере вы работаете или учитесь?", type: "select", optional: true,
-          options: ["Образование и педагогика", "Психология, медицина, соцработа", "Искусство и ремёсла", "Дизайн, фото, медиа", "IT", "Маркетинг и продажи", "Право", "Финансы и бизнес", "Учусь в школе или колледже", "Учусь в вузе", "На пенсии", "Другое"] },
-        { id: "volExp", label: "У вас есть опыт волонтёрства?", type: "radio", required: true,
-          options: ["Да", "Нет"] },
-        { id: "volExpText", label: "Расскажите коротко: где и что делали", type: "textarea",
-          showIf: { field: "volExp", value: "Да" } },
-        { id: "specialExp", label: "Был ли у вас опыт общения с людьми с особенностями развития или с детьми, оставшимися без попечения родителей?", type: "radio", required: true,
-          options: ["Да", "Нет, но готов(а) попробовать", "Нет, хочу сначала обсудить на встрече"] },
-        { id: "specialExpText", label: "Расскажите об этом опыте", type: "textarea",
-          showIf: { field: "specialExp", value: "Да" } }
+        { type: "section", id: "s-dir", title: "Что вам интересно", icon: "sparkle" },
+        { id: "directions", label: "Направления", type: "tiles", required: true,
+          options: [
+            { label: "Творческие занятия и мастер-классы", icon: "palette" },
+            { label: "Помогать на занятиях", icon: "hand" },
+            { label: "Обучение и репетиторство", icon: "academy" },
+            { label: "Помощь психолога или логопеда", icon: "heart" },
+            { label: "Фото, видео, соцсети", icon: "camera" },
+            { label: "Мероприятия и выезды", icon: "star" },
+            { label: "Ярмарки и магазин фонда", icon: "home" },
+            { label: "Помощь фонду как специалист", icon: "settings" },
+            { label: "Пока не знаю", icon: "search" }
+          ],
+          exclusive: ["Пока не знаю"] },
+        /* Навыки показываем только по выбранным направлениям, чтобы не смешивать шитьё и IT */
+        { id: "skills", label: "Что вы умеете или любите делать?", type: "chips", optional: true, allowOther: true,
+          showIf: { field: "directions", value: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Фото, видео, соцсети", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Помощь фонду как специалист", "Пока не знаю"] },
+          groups: [
+            { title: "Творчество", showIf: { field: "directions", value: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Пока не знаю"] },
+              options: [{ label: "Керамика", icon: "palette" }, { label: "Живопись и рисунок", icon: "pen" }, { label: "Валяние", icon: "hand" }, { label: "Шитьё и вышивка", icon: "scissors" }, { label: "Кулинария", icon: "flame" }, { label: "Музыка и вокал", icon: "music" }, { label: "Театр", icon: "mask" }] },
+            { title: "Обучение и игры", showIf: { field: "directions", value: ["Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Мероприятия и выезды", "Пока не знаю"] },
+              options: [{ label: "Педагогика", icon: "academy" }, { label: "Психология", icon: "heart" }, { label: "Школьные предметы", icon: "book" }, { label: "Английский", icon: "globe" }, { label: "Спорт и игры", icon: "dice" }] },
+            { title: "Медиа", showIf: { field: "directions", value: ["Фото, видео, соцсети", "Помощь фонду как специалист", "Пока не знаю"] },
+              options: [{ label: "Фотография", icon: "camera" }, { label: "Видео и монтаж", icon: "film" }, { label: "Дизайн", icon: "image" }, { label: "Соцсети", icon: "message" }] },
+            { title: "Работа фонда", showIf: { field: "directions", value: ["Помощь фонду как специалист", "Ярмарки и магазин фонда", "Пока не знаю"] },
+              options: [{ label: "Право", icon: "file" }, { label: "Маркетинг", icon: "chart" }, { label: "IT", icon: "screen" }, { label: "Финансы", icon: "database" }, { label: "Продажи", icon: "users" }] }
+          ] },
+        { type: "section", id: "s-time", title: "Время и формат", icon: "clock",
+          note: "Участникам важны знакомые лица: доверие строится месяцами." },
+        { id: "participation", label: "Как часто хотели бы помогать?", type: "select", required: true,
+          options: ["Каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"] },
+        { id: "online", label: "Могу помогать и онлайн", type: "consent" }
       ]
     },
     {
       id: "final",
-      title: "Последний шаг",
+      title: "Опыт и документы",
       fields: [
-        { id: "participation", label: "Как часто хотели бы помогать?", type: "radio", required: true,
-          options: ["Регулярно, каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"],
-          why: "Участникам важны знакомые лица: доверие строится месяцами." },
-        { id: "online", label: "Могу помогать и онлайн", type: "consent" },
-        { id: "motivation", label: "Почему вы хотите помогать именно нам?", type: "textarea", optional: true },
+        { type: "section", id: "s-exp", title: "Ваш опыт", icon: "award" },
+        { id: "volExp", label: "Вы раньше были волонтёром?", type: "select", required: true,
+          options: ["Да", "Нет"] },
+        { id: "volExpText", label: "Где и что делали?", type: "textarea", optional: true,
+          showIf: { field: "volExp", value: "Да" } },
+        { id: "specialExp", label: "Общались ли вы с людьми с особенностями развития?", type: "select", required: true,
+          options: ["Да", "Нет, но готов(а) попробовать", "Хочу обсудить на встрече"] },
+        { id: "specialExpText", label: "Расскажите коротко об этом опыте", type: "textarea", optional: true,
+          showIf: { field: "specialExp", value: "Да" } },
+        { type: "section", id: "s-doc", title: "Справка о несудимости", icon: "shield",
+          note: "Нужна для работы с детьми. Заказать можно бесплатно на Госуслугах — это займёт минуту." },
+        { id: "record", label: "Готовы её получить?", type: "select", required: true,
+          options: ["Да", "Справка уже есть", "Хочу обсудить"] },
+        { type: "section", id: "s-last", title: "И последнее", icon: "check-circle" },
         { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
-          options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья или знакомые", "Был(а) на мероприятии фонда", "Другое"] },
-        { id: "record", label: "Для работы с детьми нужна справка об отсутствии судимости. Готовы её получить?", type: "radio", required: true,
-          options: ["Да", "Справка уже есть", "Хочу сначала обсудить"],
-          why: "Заказать её можно бесплатно на Госуслугах — это займёт минуту." },
+          options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья", "Мероприятие фонда", "Другое"] },
         { id: "consentPD", label: "Я согласен(на) на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
         { id: "consentNews", label: "Хочу получать новости и приглашения фонда", type: "consent" }
       ]
@@ -958,6 +1052,8 @@ window.ONBOARDING = {
 // Тексты анкеты и онбординга — в prototype/content/form.js и onboarding.js (FORM, ONBOARDING).
 const FORM = window.FORM, ONB = window.ONBOARDING;
 const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
+// Вариант ответа — строка или { label, icon }
+const optLabel = o => typeof o === 'string' ? o : o.label;
 const cap = w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w;
 const ageOf = d => { const b = new Date(d); if (isNaN(b)) return null; const n = new Date(); let a = n.getFullYear() - b.getFullYear(); if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--; return a; };
 const fullName = c => (c && (c.name || [c.firstName, c.lastName].filter(Boolean).join(' '))) || '';
@@ -1012,6 +1108,7 @@ function validateFields(fields, data) {
   const errs = {};
   fields.filter(f => visibleFor(f, data)).forEach(f => {
     if (f.groups && f.type === 'checkbox') data[f.id] = arr(data[f.id]).filter(o => f.groups.some(g => visibleFor(g, data) && g.options.includes(o)));
+    if (f.groups && f.type === 'chips') data[f.id] = arr(data[f.id]).filter(o => f.groups.some(g => visibleFor(g, data) && g.options.map(optLabel).includes(o)));
     const v = data[f.id];
     const empty = v == null || v === '' || v === false || (Array.isArray(v) && v.length === 0);
     if (f.required && empty) errs[f.id] = f.type === 'consent' ? 'Без согласия мы не сможем обработать заявку' : f.type === 'roles' ? 'Выберите хотя бы одну роль или «Пока не знаю»' : 'Заполните, пожалуйста';
@@ -1027,6 +1124,7 @@ function validateFields(fields, data) {
 
 // Поля формы → данные для шаблона. update(id, value) меняет ответ; ui — раскрытые группы ролей.
 function fieldViews(fields, data, errs, update, ui, setUi) {
+  let sec = 0;
   return fields.filter(f => visibleFor(f, data)).map(f => {
     const v = data[f.id];
     const t = f.type;
@@ -1037,22 +1135,26 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
       on ? set.add(o) : set.delete(o);
       update(f.id, withExclusive(f, [...set], o, on));
     };
-    const optView = o => { const on = (t === 'radio' || t === 'select') ? v === o : arr(v).includes(o); return { label: o, checked: on, pressed: on, cls: on ? 'chip is-on' : 'chip', lineCls: on ? 'a-line is-on' : 'a-line', toggle: (t === 'radio' || t === 'select') ? () => update(f.id, o) : toggleIn(o) }; };
+    const optView = opt => { const o = optLabel(opt), icon = typeof opt === 'string' ? '' : opt.icon || '', on = (t === 'radio' || t === 'select') ? v === o : arr(v).includes(o); return { label: o, ...icoFlags(icon), hasIcon: !!icon, checked: on, pressed: on, cls: on ? 'chip is-on' : 'chip', lineCls: on ? 'a-line is-on' : 'a-line', tileCls: on ? 'a-tile is-on' : 'a-tile', toggle: (t === 'radio' || t === 'select') ? () => update(f.id, o) : toggleIn(o) }; };
     const warn = shortHint(f, v);
     return {
-      id: f.id, label: f.label, req: !!f.required, opt: !!f.optional, why: f.why || '', hasWhy: !!f.why,
-      cls: 'field a-field' + (f.half ? ' a-half' : '') + (errs[f.id] ? ' a-bad' : ''),
+      id: f.id, label: f.label || f.title, req: !!f.required,
+      isSection: t === 'section', note: f.note || '', hasNote: !!f.note, ...icoFlags(f.icon || ''), showLabel: !['consent', 'section', 'tiles'].includes(t) && !f.hideLabel,
+      isTiles: t === 'tiles', opt: !!f.optional, why: f.why || '', hasWhy: !!f.why,
+      cls: (t === 'section' ? 'a-sec a-sec-' + (sec++ % 4) : 'field a-field') + (f.half ? ' a-half' : '') + (errs[f.id] ? ' a-bad' : ''),
       err: errs[f.id] || '', hasErr: !!errs[f.id], warn, hasWarn: !!warn,
       isConsent: t === 'consent', notConsent: t !== 'consent',
       isInput, inputType: t === 'date' ? 'text' : t, inputMode: t === 'date' ? 'numeric' : t === 'email' ? 'email' : t === 'tel' ? 'tel' : 'text', value: t === 'date' ? birthdateDisplay(v) : v == null ? '' : v, placeholder: t === 'date' ? 'ДД.ММ.ГГГГ' : f.placeholder || '', autocomplete: f.autocomplete || 'off',
       change: e => { const raw = e.target.value; update(f.id, t === 'date' ? birthdateInput(raw) : f.mask ? MASK[f.mask](raw) : raw); },
-      focus: () => { if (f.mask === 'phone' && !data[f.id]) update(f.id, '+7 ('); if (f.mask === 'telegram' && !data[f.id]) update(f.id, '@'); },
+      focus: () => { if (f.mask === 'telegram' && !data[f.id]) update(f.id, '@'); },
       blur: () => { if (f.mask) update(f.id, FINAL[f.mask](String(data[f.id] || ''))); },
       isTextarea: t === 'textarea', isSelect: t === 'select',
       isChoice: (t === 'radio' || t === 'checkbox') && !f.groups, choiceType: t, options: (f.options || []).map(optView),
       isGroups: t === 'checkbox' && !!f.groups,
       groups: (t === 'checkbox' && f.groups ? f.groups : []).filter(g => visibleFor(g, data)).map(g => ({ title: g.title, note: g.note || '', hasNote: !!g.note, hasOptions: g.options.length > 0, options: g.options.map(optView) })),
-      isChips: t === 'chips', hasOther: !!f.allowOther, other: data[f.id + 'Other'] || '', changeOther: e => update(f.id + 'Other', e.target.value),
+      isChips: t === 'chips' && !f.groups, isChipGroups: t === 'chips' && !!f.groups,
+      chipGroups: (t === 'chips' && f.groups ? f.groups : []).filter(g => visibleFor(g, data)).map(g => ({ title: g.title, options: g.options.map(optView) })),
+      hasOther: !!f.allowOther, other: data[f.id + 'Other'] || '', changeOther: e => update(f.id + 'Other', e.target.value),
       isGrid: t === 'grid', cols: f.cols || [],
       rows: (f.rows || []).map(r => ({ label: r, cells: (f.cols || []).map(c => { const k = r + '·' + c, on = arr(v).includes(k); return { cls: on ? 'a-cell is-on' : 'a-cell', pressed: on, aria: r + ', ' + c, toggle: toggleIn(k) }; }) })),
       isRoles: t === 'roles',
@@ -1069,10 +1171,10 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
 const freshProgress = () => ({ done: {}, testDone: false, score: null, road: false, tg: false });
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
-const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Регулярно, каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
 
 // Иконки по имени из контента (сборщик подставляет svg через ICONSWITCH)
-const ICON_KEYS = ['palette','book','users','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle'];
+const ICON_KEYS = ['palette','book','users','user','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle','academy','pen','scissors','flame','globe','dice','film','image','file','chart','screen','database','send','inbox','settings','search','edit'];
 const icoFlags = name => { const o = {}; ICON_KEYS.forEach(k => { o['ic_' + k.replace('-', '_')] = k === name; }); return o; };
 // В прототипе без анкеты показываем всё на демо-кандидате, чтобы ничего не заполнять руками
 const ensureCandidate = () => { const me = loadCandidate(); if (me) return me; demoWrite('candidate', DEMO_CANDIDATE); return DEMO_CANDIDATE; };

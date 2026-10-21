@@ -624,6 +624,69 @@ sc-if,sc-for{display:contents}
 .candidate-mobile-menu{display:none}.candidate-mobile-links a,.candidate-mobile-links .is-locked{display:block;padding:12px 16px;color:var(--ink);border-radius:14px;font-size:16px}.candidate-mobile-links a.is-active{background:var(--soft);font-weight:600}.candidate-mobile-links .is-locked{opacity:.45}.candidate-mobile-links a:hover{text-decoration:none;background:var(--soft)}
 @media(max-width:1000px){.candidate-top{flex-wrap:nowrap;gap:8px}.candidate-top .candidate-nav{display:none}.candidate-mobile-menu{display:block;position:relative;margin-left:auto;min-width:0}.candidate-mobile-menu>summary{display:flex;align-items:center;gap:8px;list-style:none;background:var(--paper);border-radius:999px;padding:12px 14px;min-height:48px;font-size:15px;cursor:pointer;white-space:nowrap}.candidate-mobile-menu>summary::-webkit-details-marker{display:none}.candidate-mobile-menu .ic{width:16px;height:16px}.candidate-mobile-menu[open]>summary .ic{transform:rotate(180deg)}.candidate-mobile-links{position:absolute;right:0;top:calc(100% + 10px);background:var(--paper);box-shadow:0 12px 40px rgba(18,20,26,.12);padding:8px;width:260px;border:1px solid var(--line);border-radius:22px;z-index:100}.candidate-profile{margin-left:0}.candidate-top .brand{gap:8px;height:48px;padding:0 12px 0 8px}.candidate-top .brand small{display:none}.candidate-top .brand b{font-size:17px}.candidate-top .brand .mark{transform:scale(.85)}.candidate-profile>span:last-child{display:none}.candidate-profile{padding:4px}}
 @media(max-width:360px){.candidate-mobile-menu>summary{padding:12px 10px;gap:5px;font-size:14px}.candidate-top .brand{gap:4px;padding-right:10px}.candidate-profile .avatar{width:34px;height:34px}.candidate-top .brand b{font-size:16px}.candidate-top .brand .mark{width:30px;flex-basis:30px;transform-origin:left center}}
+/* Анкета v4: форма слева, путь кандидата справа; блоки с иконками */
+.a-apply{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.a-apply-main{min-width:0}
+.a-form-card.card{padding:36px 40px}
+.a-stephead .h2{margin:6px 0 18px}
+.a-stephead .a-bar{margin:0}
+.a-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 20px;margin-top:8px}
+.a-form>.a-sec{grid-column:1/-1;display:flex;gap:14px;align-items:center;margin-top:10px;padding-top:28px;border-top:1px solid var(--line)}
+.a-form>.a-sec:first-child{margin-top:20px;padding-top:0;border-top:0}
+.a-sec .h3{margin:0}
+.a-sec .a-why{margin-top:2px}
+.a-sec-ico{width:44px;height:44px;flex:0 0 44px;border-radius:14px;display:grid;place-items:center}
+.a-sec-0 .a-sec-ico{background:var(--yellow-tint);color:var(--yellow-ink)}
+.a-sec-1 .a-sec-ico{background:var(--blue-tint);color:var(--blue)}
+.a-sec-2 .a-sec-ico{background:var(--green-tint);color:var(--green-ink)}
+.a-sec-3 .a-sec-ico{background:var(--orange-tint);color:var(--orange-ink)}
+.a-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.a-tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-height:112px;padding:16px;border:0;border-radius:20px;background:var(--soft);text-align:left;font-size:15px;font-weight:600;line-height:1.3;color:var(--ink)}
+.a-tile:hover{box-shadow:inset 0 0 0 1px var(--line-2)}
+.a-tile-ico{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:var(--paper);display:grid;place-items:center}
+.a-tile.is-on{background:var(--yellow-tint);box-shadow:inset 0 0 0 2px var(--ink)}
+.a-tile.is-on::after{content:"✓";position:absolute;top:14px;right:14px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;display:grid;place-items:center}
+.a-chips .chip .ic{width:18px;height:18px}
+.a-cgroups{display:grid;gap:16px}
+.a-cgroup-t{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--mute)}
+.a-cgroup .a-chips{margin:0}
+.a-other{margin-top:14px}
+.a-errs{margin:12px 0 0}
+.a-path-card.card{position:sticky;top:24px;padding:28px}
+.a-pathlist{list-style:none;margin:16px 0;padding:0;display:grid;gap:4px}
+.a-pathlist li{display:flex;gap:14px;align-items:center;padding:12px;border-radius:18px}
+.a-pathlist li.is-now{background:var(--yellow-tint)}
+.a-pathlist b{display:block;font-size:16px;line-height:1.3}
+.a-pathlist small{display:block;font-size:14px;color:var(--mute);line-height:1.35}
+.a-path-ico{width:40px;height:40px;flex:0 0 40px;border-radius:12px;background:var(--soft);display:grid;place-items:center}
+.a-pathlist li.is-now .a-path-ico{background:var(--yellow)}
+.a-path-card .meta{margin:0}
+@media (max-width:1000px){.a-apply{grid-template-columns:1fr}.a-path-card.card{position:static}}
+@media (max-width:720px){.a-form-card.card{padding:24px 20px}.a-form{grid-template-columns:1fr}.a-form>.a-half{grid-column:1/-1}.a-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.a-tile{min-height:100px;padding:14px}.a-sec-ico{width:40px;height:40px;flex-basis:40px}}
+/* Кабинет кандидата в стиле главной «Опоры»: герой-карточка встречи, ниже — знакомство с фондом */
+.a-cab-head{margin-bottom:24px}
+.a-status{margin:12px 0 0}
+.a-hero-title{margin:10px 0 0;font-size:44px;font-weight:600;line-height:1.05;letter-spacing:-.03em;text-wrap:balance}
+.a-hero-small{margin:12px 0 0}
+.a-hero-actions{gap:12px;margin-top:28px}
+.a-hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.card-hero .hero-note .ic{width:20px;height:20px;color:var(--green-ink)}
+.a-demo-link{height:34px;display:inline-flex;align-items:center;padding:0 14px;font-size:14px;font-weight:500}
+.a-picker-sub{margin:-8px 0 0}
+.a-book.card{margin-top:16px;padding:8px 28px}
+.a-book-row{display:flex;align-items:center;gap:16px;padding:16px 0;cursor:pointer}
+.a-book-row+.a-book-row{border-top:1px solid var(--line)}
+.a-book-row b{display:block;font-size:16px}
+.a-book-row small{display:block;font-size:15px;color:var(--mute)}
+.a-picker .actions{margin-top:20px}
+.a-onb.card{display:flex;align-items:center;gap:24px}
+.a-onb .art{align-self:flex-start}
+.a-onb-title{gap:12px}
+.a-onb .p{margin-top:6px;max-width:62ch}
+.a-onb-bar{gap:14px;margin-top:16px;max-width:420px}
+.a-onb.is-nudge{box-shadow:inset 0 0 0 2px var(--orange)}
+@media (max-width:720px){.a-hero-title{font-size:32px}.card-hero .hero-when{font-size:36px}.a-hero-actions .btn{flex:1 1 auto}.a-onb.card{flex-direction:column;align-items:stretch;gap:16px}.a-onb .btn{width:100%}.a-book.card{padding:4px 20px}}
+@media (max-width:720px){.a-tiles{grid-template-columns:1fr;gap:8px}.a-tile{flex-direction:row;align-items:center;min-height:60px;padding:10px 48px 10px 10px}.a-tile.is-on::after{top:50%;transform:translateY(-50%)}}
 
 </style>
 </helmet>
@@ -635,29 +698,34 @@ sc-if,sc-for{display:contents}
 <a class="candidate-profile" href="Apply.dc.html?edit=1" aria-label="Моя анкета: {{candidateName}}"><span class="avatar av-o">{{candidateInitials}}</span><span>Моя анкета</span></a>
 </header>
 
-<details class="candidate-demo"><summary>Демонстрационные состояния</summary><div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button type="button" onClick="{{fillDemo}}">Демо-кандидат</button><button type="button" onClick="{{passAll}}">Знакомство пройдено</button><button type="button" onClick="{{reset}}">Сбросить</button><a href="Interviews.dc.html">Вид координатора</a></div></details>
-<sc-if value="{{welcome}}"><p class="hint a-welcome" role="status"><b>{{welcomeTitle}}. </b><span>{{welcomeText}}</span></p></sc-if>
 <sc-if value="{{noCandidate}}"><section class="card a-empty"><h1 class="h2">Заявки пока нет</h1><p class="lead">Сначала заполните анкету волонтёра — её ответы попадут сюда и к координатору.</p><div class="actions"><a class="btn btn-primary btn-lg" href="Apply.dc.html">Заполнить анкету</a><button type="button" class="btn btn-ghost" onClick="{{fillDemo}}">Показать на демо-кандидате</button></div></section></sc-if>
-<sc-if value="{{hasCandidate}}"><div class="head"><div><p class="eyebrow">Личный кабинет</p><h1 class="h1">Здравствуйте, {{first}}!</h1></div></div><sc-if value="{{showReview}}"><section class="card-soft a-review"><span class="a-review-ico" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div><h2 class="h3">{{reviewTitle}}</h2><p>{{reviewText}}</p></div></section></sc-if>
-<sc-if value="{{completed}}"><section class="card-hero"><p class="eyebrow">Встреча состоялась</p><h2 class="hero-title">{{result}}</h2><p class="lead">{{publicNote}}</p><sc-if value="{{hasNextContact}}"><p class="p">Следующий контакт: {{nextContact}}</p></sc-if></section></sc-if>
+<sc-if value="{{hasCandidate}}">
+<details class="candidate-demo"><summary>Демонстрационные состояния</summary><div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><sc-for list="{{modes}}" as="m"><button type="button" class="{{m.cls}}" aria-pressed="{{m.pressed}}" onClick="{{m.pick}}">{{m.label}}</button></sc-for><a class="a-demo-link" href="Interviews.dc.html">Вид координатора</a></div></details>
+<div class="head a-cab-head"><div><h1 class="h1">Здравствуйте, {{first}}!</h1><p class="a-status"><span class="{{statusCls}}">{{statusText}}</span></p></div></div>
 
-<div class="grid-2 a-two">
-<section class="{{onbCardCls}}"><div class="a-two-head"><span class="a-ico a-ico-b" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></span><sc-if value="{{onboarded}}"><span class="tag t-green">Пройдено</span></sc-if></div><sc-if value="{{showNudge}}"><p class="eyebrow a-nudge-e">До встречи {{meetWhen}} осталось познакомиться с фондом</p></sc-if><h2 class="h2">Познакомиться с фондом</h2><p>{{onbText}}</p><div class="actions"><a class="{{onbBtnCls}}" href="Onboarding.dc.html">{{onbButton}}</a></div></section>
+<sc-if value="{{heroInvite}}"><section class="card-hero" aria-labelledby="meet-title"><div class="hero-grid"><div class="grow"><p class="eyebrow" style="margin:0">Следующий шаг</p><h2 class="a-hero-title" id="meet-title">Встреча с координатором</h2><p class="lead">{{meetText}} Проводит {{coordinator}}.</p><sc-if value="{{hasCancellation}}"><p class="p a-hero-small">Прошлая встреча отменена: {{cancellationText}}</p></sc-if><sc-if value="{{canOpenPicker}}"><div class="row wrap a-hero-actions"><button type="button" class="btn btn-primary btn-lg" onClick="{{openPicker}}">Выбрать время</button></div></sc-if></div><div class="hero-art a-hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></div></div></section></sc-if>
 
-<section class="{{meetCardCls}}"><div class="a-two-head"><span class="a-ico a-ico-y" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></span><sc-if value="{{booked}}"><span class="tag t-green">Вы записаны</span></sc-if></div><h2 class="h2">Встреча с координатором</h2>
-<sc-if value="{{notBooked}}"><p>{{meetText}} Проводит {{coordinator}}.</p><sc-if value="{{hasCancellation}}"><p class="a-why">Прошлая встреча отменена: {{cancellationText}}</p></sc-if><sc-if value="{{canOpenPicker}}"><div class="actions"><button type="button" class="btn btn-dark btn-lg" onClick="{{openPicker}}">Записаться на встречу</button></div></sc-if></sc-if>
-<sc-if value="{{booked}}"><p class="a-when">{{meetWhen}}</p><p>{{meetWhere}} · {{coordinator}}</p><sc-if value="{{road}}"><p>Координатор подскажет, как добраться.</p></sc-if><sc-if value="{{hasMeetingLink}}"><a class="btn btn-secondary" href="{{meetingLink}}" target="_blank" rel="noopener noreferrer">Открыть встречу</a></sc-if><div class="actions"><button type="button" class="btn btn-ghost" onClick="{{reschedule}}">Перенести</button><button type="button" class="btn btn-ghost" onClick="{{askQuestion}}">Задать вопрос координатору</button><button type="button" class="btn btn-ghost" onClick="{{askCancel}}">Отменить запись</button></div></sc-if>
-<sc-if value="{{completed}}"><p class="a-when">{{meetWhen}}</p><p>{{coordinator}}</p></sc-if>
+<sc-if value="{{booked}}"><section class="card-hero" aria-labelledby="meet-when"><div class="hero-grid"><div class="grow"><p class="eyebrow" style="margin:0">Встреча с координатором</p><p class="hero-when" id="meet-when">{{meetWhenBig}}</p><p class="lead">{{meetWhere}} · {{coordinator}}</p><sc-if value="{{road}}"><p class="p a-hero-small">Координатор подскажет, как добраться.</p></sc-if><div class="row wrap a-hero-actions"><sc-if value="{{hasMeetingLink}}"><a class="btn btn-primary btn-lg" href="{{meetingLink}}" target="_blank" rel="noopener noreferrer">Открыть встречу</a></sc-if><button type="button" class="btn btn-secondary btn-lg" onClick="{{reschedule}}">Перенести</button><button type="button" class="btn btn-ghost btn-lg" onClick="{{askCancel}}">Отменить</button></div>
+<sc-if value="{{tgOn}}"><div class="hero-note"><span class="row strong grow"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg> Напомним в Telegram накануне и за час до встречи</span></div></sc-if>
+<sc-if value="{{tgOff}}"><div class="hero-note"><span class="strong grow">Напомнить о встрече в Telegram?</span><button type="button" class="btn btn-primary btn-sm" onClick="{{connectTg}}">Подключить бота</button></div></sc-if>
+</div><div class="hero-art a-hero-art" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></div></div></section></sc-if>
+
+<sc-if value="{{completed}}"><section class="card-hero"><p class="eyebrow" style="margin:0">Встреча состоялась</p><h2 class="a-hero-title">{{result}}</h2><p class="lead">{{publicNote}}</p><sc-if value="{{hasNextContact}}"><p class="p a-hero-small">Следующий контакт: {{nextContact}}</p></sc-if></section></sc-if>
+
+<sc-if value="{{showPicker}}"><section class="section a-picker" id="a-picker"><div class="section-head"><h2 class="h2">{{pickerTitle}}</h2><button type="button" class="btn btn-ghost btn-sm" onClick="{{closePicker}}">{{closeLabel}}</button></div><p class="p a-picker-sub">{{coordinator}} · московское время · только свободные места</p><div class="i-period"><div class="toolbar"><button type="button" class="iconbtn p-arrow" aria-label="Предыдущая неделя" onClick="{{previous}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><button type="button" class="iconbtn p-arrow" aria-label="Следующая неделя" onClick="{{next}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><span>{{periodLabel}}</span><button type="button" class="btn btn-ghost btn-sm" onClick="{{today}}">Сегодня</button></div><div class="field"><label class="sr-only" for="candidate-week">Перейти к дате</label><button type="button" class="input c-trigger" id="candidate-week" aria-haspopup="dialog" onClick="{{ui_candidate_week.open}}"><span>{{ui_candidate_week.title}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></button></div></div><div class="local-tabs" role="tablist" aria-label="День встречи"><sc-for list="{{dayTabs}}" as="d"><button type="button" class="{{d.cls}}" role="tab" aria-selected="{{d.selected}}" onClick="{{d.pick}}">{{d.label}}</button></sc-for></div><div class="card i-slot-days" role="radiogroup" aria-label="Свободное время встречи"><sc-for list="{{slotDays}}" as="d"><sc-if value="{{d.visible}}"><div class="i-slot-day"><h3 class="h3">{{d.dateLabel}}</h3><div class="i-slots"><sc-for list="{{d.slots}}" as="sl"><button type="button" class="{{sl.cls}}" role="radio" aria-checked="{{sl.checked}}" onClick="{{sl.pick}}"><b>{{sl.label}}</b><span>{{sl.where}}</span></button></sc-for></div></div></sc-if></sc-for><sc-if value="{{emptySlots}}"><div class="empty"><h3 class="h3">На этой неделе свободного времени нет</h3><p>Посмотрите следующую неделю или напишите, когда вам удобно.</p></div></sc-if></div>
+<div class="a-selected-time"><b>{{pickedSummary}}</b><p class="meta">{{pickedWhere}}</p></div><div class="card a-book"><label class="a-book-row"><span class="grow"><b>Напомнить в Telegram</b><small>Бот пришлёт напоминание накануне и за час до встречи</small></span><button type="button" class="{{remindCls}}" role="switch" aria-checked="{{remindOn}}" aria-label="Напомнить в Telegram" onClick="{{toggleRemind}}"></button></label><sc-if value="{{showRoad}}"><label class="a-book-row"><span class="grow"><b>Нужна помощь с дорогой</b><small>Координатор подскажет, как добраться</small></span><button type="button" class="{{roadCls}}" role="switch" aria-checked="{{road}}" aria-label="Нужна помощь с дорогой" onClick="{{toggleRoad}}"></button></label></sc-if></div>
+<div class="actions"><button type="button" class="btn btn-primary btn-lg" disabled="{{cantBook}}" onClick="{{book}}">{{bookLabel}}</button><button type="button" class="btn btn-ghost btn-lg" onClick="{{startRequest}}">Ни одно время не подходит</button></div><sc-if value="{{rescheduling}}"><p class="hint">Прежняя запись сохранится до подтверждения переноса.</p></sc-if></section></sc-if>
+
+<section class="section" aria-labelledby="onb-title"><div class="section-head"><h2 class="h2" id="onb-title">{{onbHead}}</h2></div>
+<div class="{{onbCardCls}}"><span class="art art-b" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h6a4 4 0 0 1 4 4V21a3 3 0 0 0-3-3H2z"/><path d="M22 4.5h-6a4 4 0 0 0-4 4V21a3 3 0 0 1 3-3h7z"/></svg></span><div class="grow"><div class="row wrap a-onb-title"><h3 class="h3">Познакомиться с фондом</h3><sc-if value="{{showNudge}}"><span class="tag t-orange">Пройдите до встречи {{meetDay}}</span></sc-if><sc-if value="{{onboarded}}"><span class="tag t-green">Пройдено</span></sc-if></div><p class="p">{{onbText}}</p><div class="row a-onb-bar"><div class="bar bar-green grow"><i style="{{onbBar}}"></i></div><span class="strong num">{{onbCount}}</span></div></div><a class="{{onbBtnCls}}" href="Onboarding.dc.html">{{onbButton}}</a></div>
 </section>
-</div>
 
-<sc-if value="{{showPicker}}"><section class="section a-picker" id="a-picker"><div class="section-head"><h2 class="h2">{{pickerTitle}}</h2><button type="button" class="btn btn-ghost" onClick="{{closePicker}}">{{closeLabel}}</button></div><p class="p">{{coordinator}} · Московское время · В списке только свободные места.</p><div class="i-period"><div class="toolbar"><button type="button" class="iconbtn p-arrow" aria-label="Предыдущая неделя" onClick="{{previous}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><button type="button" class="iconbtn p-arrow" aria-label="Следующая неделя" onClick="{{next}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><span>{{periodLabel}}</span><button type="button" class="btn btn-ghost btn-sm" onClick="{{today}}">Сегодня</button></div><div class="field"><label class="sr-only" for="candidate-week">Перейти к дате</label><button type="button" class="input c-trigger" id="candidate-week" aria-haspopup="dialog" onClick="{{ui_candidate_week.open}}"><span>{{ui_candidate_week.title}}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></button></div></div><div class="local-tabs" role="tablist" aria-label="День встречи"><sc-for list="{{dayTabs}}" as="d"><button type="button" class="{{d.cls}}" role="tab" aria-selected="{{d.selected}}" onClick="{{d.pick}}">{{d.label}}</button></sc-for></div><div class="card i-slot-days" role="radiogroup" aria-label="Свободное время встречи"><sc-for list="{{slotDays}}" as="d"><sc-if value="{{d.visible}}"><div class="i-slot-day"><h3 class="h3">{{d.dateLabel}}</h3><div class="i-slots"><sc-for list="{{d.slots}}" as="sl"><button type="button" class="{{sl.cls}}" role="radio" aria-checked="{{sl.checked}}" onClick="{{sl.pick}}"><b>{{sl.label}}</b><span>{{sl.where}}</span></button></sc-for></div></div></sc-if></sc-for><sc-if value="{{emptySlots}}"><div class="empty"><h3 class="h3">На этой неделе свободного времени нет</h3><p>Посмотрите следующую неделю или напишите, когда вам удобно.</p></div></sc-if></div><div class="a-selected-time"><b>{{pickedSummary}}</b><p class="meta">{{pickedWhere}}</p></div><sc-if value="{{showRoad}}"><label class="check a-road"><input type="checkbox" checked="{{road}}" onChange="{{toggleRoad}}"><span>Нужна помощь с дорогой</span></label></sc-if><div class="actions a-book-actions"><button type="button" class="btn btn-primary" disabled="{{cantBook}}" onClick="{{book}}">{{bookLabel}}</button><button type="button" class="btn btn-ghost" onClick="{{startRequest}}">Ни одно время не подходит</button></div><sc-if value="{{rescheduling}}"><p class="hint">Прежняя запись сохранится до подтверждения переноса.</p></sc-if></section></sc-if>
-<sc-if value="{{pendingRequest}}"><p class="hint a-request-state" role="status">{{requestStatus}}</p></sc-if>
-<sc-if value="{{requesting}}"><div class="p-overlay i-candidate-overlay" onKeyDown="{{modalKeys}}"><section class="card i-candidate-dialog" role="dialog" aria-modal="true" aria-labelledby="request-title"><div class="section-head"><h2 class="h2" id="request-title">{{requestTitle}}</h2><button type="button" class="iconbtn" aria-label="Закрыть вопрос" onClick="{{cancelRequest}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="field"><label class="label" for="meeting-request">{{requestLabel}}</label><textarea class="textarea" id="meeting-request" value="{{requestText}}" onChange="{{changeRequest}}"></textarea></div><sc-if value="{{hasError}}"><p class="error" role="alert">{{error}}</p></sc-if><div class="actions"><button type="button" class="btn btn-primary" onClick="{{sendRequest}}">Передать координатору</button><button type="button" class="btn btn-ghost" onClick="{{cancelRequest}}">Отмена</button></div></section></div></sc-if>
-<section class="card a-tg"><span class="a-ico a-ico-g" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></span><div class="grow"><h2 class="h3">Уведомления в Telegram</h2><p>{{tgText}}</p></div><sc-if value="{{tgOff}}"><button type="button" class="btn btn-primary btn-lg" onClick="{{connectTg}}">Подключить бота</button></sc-if><sc-if value="{{tgOn}}"><span class="tag t-green">Подключено</span></sc-if></section>
-<section class="a-profile-summary"><details class="card candidate-answers"><summary><h2 class="h3">Ваши ответы</h2></summary><div class="list"><sc-for list="{{answers}}" as="a"><div class="li"><span class="a-k">{{a.k}}</span><span class="grow">{{a.v}}</span></div></sc-for></div><div class="actions"><a class="btn btn-secondary" href="Apply.dc.html?edit=1">Изменить ответы</a></div></details></section></sc-if>
-<sc-if value="{{cancelling}}"><div class="p-overlay i-candidate-overlay" onKeyDown="{{modalKeys}}"><section class="card i-candidate-dialog" role="dialog" aria-modal="true" aria-labelledby="cancel-title"><div class="section-head"><h2 class="h2" id="cancel-title">Отменить запись?</h2><button type="button" class="iconbtn" aria-label="Закрыть отмену записи" onClick="{{keepMeeting}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><p>{{meetWhen}}</p><div class="field"><label class="label" for="candidate-cancel-reason">Причина отмены</label><textarea class="textarea" id="candidate-cancel-reason" value="{{cancelReason}}" onChange="{{changeCancelReason}}"></textarea></div><sc-if value="{{hasError}}"><p class="error" role="alert">{{error}}</p></sc-if><div class="actions"><button type="button" class="btn btn-danger" onClick="{{cancelMeeting}}">Да, отменить запись</button><button type="button" class="btn btn-ghost" onClick="{{keepMeeting}}">Оставить встречу</button></div></section></div></sc-if>
 <sc-if value="{{notice}}"><div class="p-notice" role="status">{{notice}}<button type="button" class="iconbtn" aria-label="Закрыть уведомление" onClick="{{dismissNotice}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></sc-if><sc-if value="{{pageError}}"><div class="p-notice i-error-note" role="alert">{{error}}<button type="button" class="iconbtn" aria-label="Закрыть сообщение об ошибке" onClick="{{dismissError}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></sc-if>
+<sc-if value="{{requesting}}"><div class="p-overlay i-candidate-overlay" onKeyDown="{{modalKeys}}"><section class="card i-candidate-dialog" role="dialog" aria-modal="true" aria-labelledby="request-title"><div class="section-head"><h2 class="h2" id="request-title">{{requestTitle}}</h2><button type="button" class="iconbtn" aria-label="Закрыть вопрос" onClick="{{cancelRequest}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="field"><label class="label" for="meeting-request">{{requestLabel}}</label><textarea class="textarea" id="meeting-request" value="{{requestText}}" onChange="{{changeRequest}}"></textarea></div><sc-if value="{{hasError}}"><p class="error" role="alert">{{error}}</p></sc-if><div class="actions"><button type="button" class="btn btn-primary" onClick="{{sendRequest}}">Передать координатору</button><button type="button" class="btn btn-ghost" onClick="{{cancelRequest}}">Отмена</button></div></section></div></sc-if>
+<sc-if value="{{cancelling}}"><div class="p-overlay i-candidate-overlay" onKeyDown="{{modalKeys}}"><section class="card i-candidate-dialog" role="dialog" aria-modal="true" aria-labelledby="cancel-title"><div class="section-head"><h2 class="h2" id="cancel-title">Отменить запись?</h2><button type="button" class="iconbtn" aria-label="Закрыть отмену записи" onClick="{{keepMeeting}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><p>{{meetWhen}}</p><div class="field"><label class="label" for="candidate-cancel-reason">Причина отмены</label><textarea class="textarea" id="candidate-cancel-reason" value="{{cancelReason}}" onChange="{{changeCancelReason}}"></textarea></div><sc-if value="{{hasError}}"><p class="error" role="alert">{{error}}</p></sc-if><div class="actions"><button type="button" class="btn btn-danger" onClick="{{cancelMeeting}}">Да, отменить запись</button><button type="button" class="btn btn-ghost" onClick="{{keepMeeting}}">Оставить встречу</button></div></section></div></sc-if>
+<section class="a-profile-summary"><details class="card candidate-answers"><summary><h2 class="h3">Ваши ответы</h2></summary><div class="list"><sc-for list="{{answers}}" as="a"><div class="li"><span class="a-k">{{a.k}}</span><span class="grow">{{a.v}}</span></div></sc-for></div><div class="actions"><a class="btn btn-secondary" href="Apply.dc.html?edit=1">Изменить ответы</a></div></details></section>
+<sc-if value="{{pendingRequest}}"><p class="hint" role="status">{{requestStatus}}</p></sc-if><div class="actions"><button type="button" class="btn btn-ghost" onClick="{{askQuestion}}">Задать вопрос координатору</button></div>
+</sc-if>
 
 <sc-if value="{{uiDate.open}}"><div class="c-date-overlay" onKeyDown="{{uiDate.key}}"><section class="c-date-dialog card" role="dialog" aria-modal="true" aria-labelledby="ui-date-picker-title"><div class="section-head"><h2 class="h3" id="ui-date-picker-title">{{uiDate.pickerTitle}}</h2><button class="iconbtn" aria-label="Закрыть календарь" autofocus="true" onClick="{{uiDate.closeDatePicker}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="c-date-toolbar"><button class="iconbtn" aria-label="Предыдущий месяц" onClick="{{uiDate.pickerPrevious}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><button class="c-month-label" aria-label="Выбрать месяц" onClick="{{uiDate.pickerMonths}}">{{uiDate.pickerLabel}}</button><label class="sr-only" for="ui-picker-year">Год</label><input class="input c-year" type="number" id="ui-picker-year" min="1900" max="9999" value="{{uiDate.pickerYear}}" onChange="{{uiDate.changePickerYear}}"><button class="iconbtn" aria-label="Следующий месяц" onClick="{{uiDate.pickerNext}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></div><sc-if value="{{uiDate.pickerDayView}}"><div class="c-date-week"><sc-for list="{{uiDate.pickerWeekdays}}" as="w"><span>{{w.label}}</span></sc-for></div><div class="c-date-grid"><sc-for list="{{uiDate.pickerDays}}" as="d"><button class="{{d.cls}}" aria-label="{{d.aria}}" aria-pressed="{{d.pressed}}" onClick="{{d.pick}}">{{d.label}}</button></sc-for></div></sc-if><sc-if value="{{uiDate.pickerMonthView}}"><div class="c-month-grid"><sc-for list="{{uiDate.pickerMonthOptions}}" as="m"><button class="{{m.cls}}" onClick="{{m.pick}}">{{m.label}}</button></sc-for></div></sc-if><sc-if value="{{uiDate.pickerError}}"><p class="error" role="alert">{{uiDate.pickerError}}</p></sc-if><div class="c-date-foot"><button class="btn btn-ghost btn-sm" onClick="{{uiDate.pickerToday}}">Сегодня</button><sc-if value="{{uiDate.clearDateAllowed}}"><button class="btn btn-ghost btn-sm" onClick="{{uiDate.clearDate}}">Убрать дату</button></sc-if><button class="btn btn-secondary btn-sm" onClick="{{uiDate.closeDatePicker}}">Закрыть</button></div></section></div></sc-if>
 
@@ -676,11 +744,12 @@ const demoRead = (key, fallback) => {try {const raw = sessionStorage.getItem('op
 const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-v1:'+key,JSON.stringify(value));if(['candidate','onboarding'].includes(key)&&typeof interviewSync==='function')interviewSync();} catch (_) {}};
 
 /*
-  Анкета волонтёра, версия 2.
+  Анкета волонтёра, версия 4.
   Это данные, а не код: поля, варианты и подсказки можно править прямо здесь.
   Обоснование каждого поля — materials/05-продукт/Анкета v2.md
 
-  Типы полей: text, email, tel, date, textarea, select, radio, checkbox, chips, grid, roles, consent.
+  Типы полей: section (заголовок блока с иконкой), text, email, tel, date, textarea, select (чипы, один ответ),
+  chips (чипы, несколько; варианты могут быть { label, icon }, а groups — группы с showIf), tiles (плитки с иконками), radio, checkbox, grid, roles, consent.
   required — обязательное; optional — пометка «по желанию»; why — короткое «зачем спрашиваем» под полем;
   showIf — показывать, только если в другом поле выбран один из вариантов;
   exclusive — варианты, которые нельзя выбрать вместе с остальными (например, «Нет, не подходит»);
@@ -689,66 +758,96 @@ const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-
 */
 window.FORM = {
   title: "Анкета волонтёра",
-  intro: "Мы рады, что вы хотите помогать фонду «Дети Марии». Три коротких шага — около 5 минут. Остальное обсудим лично.",
+  intro: "Мы рады, что вы хотите помогать. Три коротких шага — около 5 минут.",
+  /* Путь кандидата — карточка справа от анкеты */
+  path: [
+    { icon: "edit", title: "Анкета", meta: "5 минут" },
+    { icon: "book", title: "Знакомство с фондом", meta: "онлайн, около 20 минут" },
+    { icon: "calendar", title: "Встреча с координатором", meta: "30 минут, онлайн или в студии" }
+  ],
+  pathNote: "После встречи откроется платформа: занятия, обучение и сообщения.",
   steps: [
     {
       id: "about",
-      title: "Знакомство",
+      title: "О вас",
       fields: [
+        { type: "section", id: "s-who", title: "Кто вы", icon: "user" },
         { id: "firstName", label: "Имя", type: "text", required: true, mask: "name", half: true,
           placeholder: "Михаил", autocomplete: "given-name" },
         { id: "lastName", label: "Фамилия", type: "text", required: true, mask: "name", half: true,
           placeholder: "Михайлов", autocomplete: "family-name" },
-        { id: "birthdate", label: "Дата рождения", type: "date", required: true },
-        { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel",
-          placeholder: "+7 (999) 123-45-67" },
-        { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email",
-          why: "Пришлём ссылку на личный кабинет." },
-        { id: "channels", label: "Как с вами удобнее связываться?", type: "checkbox", required: true,
-          options: ["Telegram", "WhatsApp", "Max", "Электронная почта", "SMS", "Телефонный звонок"] },
-        { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username",
-          showIf: { field: "channels", value: "Telegram" } },
+        { id: "birthdate", label: "Дата рождения", type: "date", required: true, half: true },
         { id: "area", label: "Где вы живёте?", type: "select", required: true,
-          options: ["Центр Москвы", "Север / Северо-Восток", "Восток / Юго-Восток", "Юг / Юго-Запад", "Запад / Северо-Запад", "Новая Москва", "Московская область", "Ярославская область", "Северная Осетия", "Другой город"] }
+          options: ["Центр Москвы", "Север", "Восток", "Юг", "Запад", "Новая Москва", "Московская область", "Другой город"] },
+        { type: "section", id: "s-contact", title: "Как с вами связаться", icon: "message" },
+        { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel", half: true,
+          placeholder: "+7 (999) 123-45-67" },
+        { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email", half: true,
+          placeholder: "name@mail.ru" },
+        { id: "channels", label: "Где удобнее отвечать?", type: "chips", required: true,
+          options: [{ label: "Telegram", icon: "send" }, { label: "WhatsApp", icon: "message" }, { label: "Max", icon: "message" }, { label: "Почта", icon: "inbox" }, { label: "Звонок", icon: "phone" }] },
+        { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username", half: true,
+          showIf: { field: "channels", value: "Telegram" } }
       ]
     },
     {
       id: "help",
-      title: "О вас",
+      title: "Чем хотите помогать",
       fields: [
-        { id: "directions", label: "Что вам было бы интересно?", type: "chips", required: true,
-          options: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Фото, видео, соцсети", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Профессиональная помощь фонду: юрист, маркетинг, IT", "Пока не знаю"],
-          exclusive: ["Пока не знаю"],
-          why: "Можно несколько. Это не обязательство — роль обсудим на встрече." },
-        { id: "skills", label: "Что вы умеете или любите делать?", type: "chips",
-          options: ["Керамика", "Живопись и рисунок", "Валяние", "Шитьё и вышивка", "Кулинария", "Музыка и вокал", "Театр", "Спорт и игры", "Фотография", "Видео и монтаж", "Дизайн", "Соцсети", "Педагогика", "Психология", "Школьные предметы", "Английский"],
-          allowOther: true },
-        { id: "sphere", label: "В какой сфере вы работаете или учитесь?", type: "select", optional: true,
-          options: ["Образование и педагогика", "Психология, медицина, соцработа", "Искусство и ремёсла", "Дизайн, фото, медиа", "IT", "Маркетинг и продажи", "Право", "Финансы и бизнес", "Учусь в школе или колледже", "Учусь в вузе", "На пенсии", "Другое"] },
-        { id: "volExp", label: "У вас есть опыт волонтёрства?", type: "radio", required: true,
-          options: ["Да", "Нет"] },
-        { id: "volExpText", label: "Расскажите коротко: где и что делали", type: "textarea",
-          showIf: { field: "volExp", value: "Да" } },
-        { id: "specialExp", label: "Был ли у вас опыт общения с людьми с особенностями развития или с детьми, оставшимися без попечения родителей?", type: "radio", required: true,
-          options: ["Да", "Нет, но готов(а) попробовать", "Нет, хочу сначала обсудить на встрече"] },
-        { id: "specialExpText", label: "Расскажите об этом опыте", type: "textarea",
-          showIf: { field: "specialExp", value: "Да" } }
+        { type: "section", id: "s-dir", title: "Что вам интересно", icon: "sparkle" },
+        { id: "directions", label: "Направления", type: "tiles", required: true,
+          options: [
+            { label: "Творческие занятия и мастер-классы", icon: "palette" },
+            { label: "Помогать на занятиях", icon: "hand" },
+            { label: "Обучение и репетиторство", icon: "academy" },
+            { label: "Помощь психолога или логопеда", icon: "heart" },
+            { label: "Фото, видео, соцсети", icon: "camera" },
+            { label: "Мероприятия и выезды", icon: "star" },
+            { label: "Ярмарки и магазин фонда", icon: "home" },
+            { label: "Помощь фонду как специалист", icon: "settings" },
+            { label: "Пока не знаю", icon: "search" }
+          ],
+          exclusive: ["Пока не знаю"] },
+        /* Навыки показываем только по выбранным направлениям, чтобы не смешивать шитьё и IT */
+        { id: "skills", label: "Что вы умеете или любите делать?", type: "chips", optional: true, allowOther: true,
+          showIf: { field: "directions", value: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Фото, видео, соцсети", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Помощь фонду как специалист", "Пока не знаю"] },
+          groups: [
+            { title: "Творчество", showIf: { field: "directions", value: ["Творческие занятия и мастер-классы", "Помогать на занятиях", "Мероприятия и выезды", "Ярмарки и магазин фонда", "Пока не знаю"] },
+              options: [{ label: "Керамика", icon: "palette" }, { label: "Живопись и рисунок", icon: "pen" }, { label: "Валяние", icon: "hand" }, { label: "Шитьё и вышивка", icon: "scissors" }, { label: "Кулинария", icon: "flame" }, { label: "Музыка и вокал", icon: "music" }, { label: "Театр", icon: "mask" }] },
+            { title: "Обучение и игры", showIf: { field: "directions", value: ["Помогать на занятиях", "Обучение и репетиторство", "Помощь психолога или логопеда", "Мероприятия и выезды", "Пока не знаю"] },
+              options: [{ label: "Педагогика", icon: "academy" }, { label: "Психология", icon: "heart" }, { label: "Школьные предметы", icon: "book" }, { label: "Английский", icon: "globe" }, { label: "Спорт и игры", icon: "dice" }] },
+            { title: "Медиа", showIf: { field: "directions", value: ["Фото, видео, соцсети", "Помощь фонду как специалист", "Пока не знаю"] },
+              options: [{ label: "Фотография", icon: "camera" }, { label: "Видео и монтаж", icon: "film" }, { label: "Дизайн", icon: "image" }, { label: "Соцсети", icon: "message" }] },
+            { title: "Работа фонда", showIf: { field: "directions", value: ["Помощь фонду как специалист", "Ярмарки и магазин фонда", "Пока не знаю"] },
+              options: [{ label: "Право", icon: "file" }, { label: "Маркетинг", icon: "chart" }, { label: "IT", icon: "screen" }, { label: "Финансы", icon: "database" }, { label: "Продажи", icon: "users" }] }
+          ] },
+        { type: "section", id: "s-time", title: "Время и формат", icon: "clock",
+          note: "Участникам важны знакомые лица: доверие строится месяцами." },
+        { id: "participation", label: "Как часто хотели бы помогать?", type: "select", required: true,
+          options: ["Каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"] },
+        { id: "online", label: "Могу помогать и онлайн", type: "consent" }
       ]
     },
     {
       id: "final",
-      title: "Последний шаг",
+      title: "Опыт и документы",
       fields: [
-        { id: "participation", label: "Как часто хотели бы помогать?", type: "radio", required: true,
-          options: ["Регулярно, каждую неделю", "Иногда, когда получится", "На отдельных событиях", "Пока не знаю"],
-          why: "Участникам важны знакомые лица: доверие строится месяцами." },
-        { id: "online", label: "Могу помогать и онлайн", type: "consent" },
-        { id: "motivation", label: "Почему вы хотите помогать именно нам?", type: "textarea", optional: true },
+        { type: "section", id: "s-exp", title: "Ваш опыт", icon: "award" },
+        { id: "volExp", label: "Вы раньше были волонтёром?", type: "select", required: true,
+          options: ["Да", "Нет"] },
+        { id: "volExpText", label: "Где и что делали?", type: "textarea", optional: true,
+          showIf: { field: "volExp", value: "Да" } },
+        { id: "specialExp", label: "Общались ли вы с людьми с особенностями развития?", type: "select", required: true,
+          options: ["Да", "Нет, но готов(а) попробовать", "Хочу обсудить на встрече"] },
+        { id: "specialExpText", label: "Расскажите коротко об этом опыте", type: "textarea", optional: true,
+          showIf: { field: "specialExp", value: "Да" } },
+        { type: "section", id: "s-doc", title: "Справка о несудимости", icon: "shield",
+          note: "Нужна для работы с детьми. Заказать можно бесплатно на Госуслугах — это займёт минуту." },
+        { id: "record", label: "Готовы её получить?", type: "select", required: true,
+          options: ["Да", "Справка уже есть", "Хочу обсудить"] },
+        { type: "section", id: "s-last", title: "И последнее", icon: "check-circle" },
         { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
-          options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья или знакомые", "Был(а) на мероприятии фонда", "Другое"] },
-        { id: "record", label: "Для работы с детьми нужна справка об отсутствии судимости. Готовы её получить?", type: "radio", required: true,
-          options: ["Да", "Справка уже есть", "Хочу сначала обсудить"],
-          why: "Заказать её можно бесплатно на Госуслугах — это займёт минуту." },
+          options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья", "Мероприятие фонда", "Другое"] },
         { id: "consentPD", label: "Я согласен(на) на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
         { id: "consentNews", label: "Хочу получать новости и приглашения фонда", type: "consent" }
       ]
@@ -957,6 +1056,8 @@ window.ONBOARDING = {
 // Тексты анкеты и онбординга — в prototype/content/form.js и onboarding.js (FORM, ONBOARDING).
 const FORM = window.FORM, ONB = window.ONBOARDING;
 const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
+// Вариант ответа — строка или { label, icon }
+const optLabel = o => typeof o === 'string' ? o : o.label;
 const cap = w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w;
 const ageOf = d => { const b = new Date(d); if (isNaN(b)) return null; const n = new Date(); let a = n.getFullYear() - b.getFullYear(); if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--; return a; };
 const fullName = c => (c && (c.name || [c.firstName, c.lastName].filter(Boolean).join(' '))) || '';
@@ -1011,6 +1112,7 @@ function validateFields(fields, data) {
   const errs = {};
   fields.filter(f => visibleFor(f, data)).forEach(f => {
     if (f.groups && f.type === 'checkbox') data[f.id] = arr(data[f.id]).filter(o => f.groups.some(g => visibleFor(g, data) && g.options.includes(o)));
+    if (f.groups && f.type === 'chips') data[f.id] = arr(data[f.id]).filter(o => f.groups.some(g => visibleFor(g, data) && g.options.map(optLabel).includes(o)));
     const v = data[f.id];
     const empty = v == null || v === '' || v === false || (Array.isArray(v) && v.length === 0);
     if (f.required && empty) errs[f.id] = f.type === 'consent' ? 'Без согласия мы не сможем обработать заявку' : f.type === 'roles' ? 'Выберите хотя бы одну роль или «Пока не знаю»' : 'Заполните, пожалуйста';
@@ -1026,6 +1128,7 @@ function validateFields(fields, data) {
 
 // Поля формы → данные для шаблона. update(id, value) меняет ответ; ui — раскрытые группы ролей.
 function fieldViews(fields, data, errs, update, ui, setUi) {
+  let sec = 0;
   return fields.filter(f => visibleFor(f, data)).map(f => {
     const v = data[f.id];
     const t = f.type;
@@ -1036,22 +1139,26 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
       on ? set.add(o) : set.delete(o);
       update(f.id, withExclusive(f, [...set], o, on));
     };
-    const optView = o => { const on = (t === 'radio' || t === 'select') ? v === o : arr(v).includes(o); return { label: o, checked: on, pressed: on, cls: on ? 'chip is-on' : 'chip', lineCls: on ? 'a-line is-on' : 'a-line', toggle: (t === 'radio' || t === 'select') ? () => update(f.id, o) : toggleIn(o) }; };
+    const optView = opt => { const o = optLabel(opt), icon = typeof opt === 'string' ? '' : opt.icon || '', on = (t === 'radio' || t === 'select') ? v === o : arr(v).includes(o); return { label: o, ...icoFlags(icon), hasIcon: !!icon, checked: on, pressed: on, cls: on ? 'chip is-on' : 'chip', lineCls: on ? 'a-line is-on' : 'a-line', tileCls: on ? 'a-tile is-on' : 'a-tile', toggle: (t === 'radio' || t === 'select') ? () => update(f.id, o) : toggleIn(o) }; };
     const warn = shortHint(f, v);
     return {
-      id: f.id, label: f.label, req: !!f.required, opt: !!f.optional, why: f.why || '', hasWhy: !!f.why,
-      cls: 'field a-field' + (f.half ? ' a-half' : '') + (errs[f.id] ? ' a-bad' : ''),
+      id: f.id, label: f.label || f.title, req: !!f.required,
+      isSection: t === 'section', note: f.note || '', hasNote: !!f.note, ...icoFlags(f.icon || ''), showLabel: !['consent', 'section', 'tiles'].includes(t) && !f.hideLabel,
+      isTiles: t === 'tiles', opt: !!f.optional, why: f.why || '', hasWhy: !!f.why,
+      cls: (t === 'section' ? 'a-sec a-sec-' + (sec++ % 4) : 'field a-field') + (f.half ? ' a-half' : '') + (errs[f.id] ? ' a-bad' : ''),
       err: errs[f.id] || '', hasErr: !!errs[f.id], warn, hasWarn: !!warn,
       isConsent: t === 'consent', notConsent: t !== 'consent',
       isInput, inputType: t === 'date' ? 'text' : t, inputMode: t === 'date' ? 'numeric' : t === 'email' ? 'email' : t === 'tel' ? 'tel' : 'text', value: t === 'date' ? birthdateDisplay(v) : v == null ? '' : v, placeholder: t === 'date' ? 'ДД.ММ.ГГГГ' : f.placeholder || '', autocomplete: f.autocomplete || 'off',
       change: e => { const raw = e.target.value; update(f.id, t === 'date' ? birthdateInput(raw) : f.mask ? MASK[f.mask](raw) : raw); },
-      focus: () => { if (f.mask === 'phone' && !data[f.id]) update(f.id, '+7 ('); if (f.mask === 'telegram' && !data[f.id]) update(f.id, '@'); },
+      focus: () => { if (f.mask === 'telegram' && !data[f.id]) update(f.id, '@'); },
       blur: () => { if (f.mask) update(f.id, FINAL[f.mask](String(data[f.id] || ''))); },
       isTextarea: t === 'textarea', isSelect: t === 'select',
       isChoice: (t === 'radio' || t === 'checkbox') && !f.groups, choiceType: t, options: (f.options || []).map(optView),
       isGroups: t === 'checkbox' && !!f.groups,
       groups: (t === 'checkbox' && f.groups ? f.groups : []).filter(g => visibleFor(g, data)).map(g => ({ title: g.title, note: g.note || '', hasNote: !!g.note, hasOptions: g.options.length > 0, options: g.options.map(optView) })),
-      isChips: t === 'chips', hasOther: !!f.allowOther, other: data[f.id + 'Other'] || '', changeOther: e => update(f.id + 'Other', e.target.value),
+      isChips: t === 'chips' && !f.groups, isChipGroups: t === 'chips' && !!f.groups,
+      chipGroups: (t === 'chips' && f.groups ? f.groups : []).filter(g => visibleFor(g, data)).map(g => ({ title: g.title, options: g.options.map(optView) })),
+      hasOther: !!f.allowOther, other: data[f.id + 'Other'] || '', changeOther: e => update(f.id + 'Other', e.target.value),
       isGrid: t === 'grid', cols: f.cols || [],
       rows: (f.rows || []).map(r => ({ label: r, cells: (f.cols || []).map(c => { const k = r + '·' + c, on = arr(v).includes(k); return { cls: on ? 'a-cell is-on' : 'a-cell', pressed: on, aria: r + ', ' + c, toggle: toggleIn(k) }; }) })),
       isRoles: t === 'roles',
@@ -1068,10 +1175,10 @@ function fieldViews(fields, data, errs, update, ui, setUi) {
 const freshProgress = () => ({ done: {}, testDone: false, score: null, road: false, tg: false });
 const loadCandidate = () => demoRead('candidate', null);
 const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
-const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Регулярно, каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', directions: ['Творческие занятия и мастер-классы', 'Помогать на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Каждую неделю', online: true, source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
 
 // Иконки по имени из контента (сборщик подставляет svg через ICONSWITCH)
-const ICON_KEYS = ['palette','book','users','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle'];
+const ICON_KEYS = ['palette','book','users','user','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle','academy','pen','scissors','flame','globe','dice','film','image','file','chart','screen','database','send','inbox','settings','search','edit'];
 const icoFlags = name => { const o = {}; ICON_KEYS.forEach(k => { o['ic_' + k.replace('-', '_')] = k === name; }); return o; };
 // В прототипе без анкеты показываем всё на демо-кандидате, чтобы ничего не заполнять руками
 const ensureCandidate = () => { const me = loadCandidate(); if (me) return me; demoWrite('candidate', DEMO_CANDIDATE); return DEMO_CANDIDATE; };
@@ -1318,7 +1425,7 @@ class FormControls extends DCLogic {
 }
 
 class Component extends FormControls {
- constructor(p){super(p);interviewImportLegacy();interviewSync();const initialMeeting=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));this.state={meetingSignature:initialMeeting?initialMeeting.id+':'+initialMeeting.status+':'+initialMeeting.slotId:'',welcome:new URLSearchParams(location.search).has('welcome'),me:loadCandidate(),pr:loadProgress(),picked:'',focus:INTERVIEW_TODAY,rescheduling:false,cancelling:false,cancelReason:'',picking:false,requesting:false,requestKind:'time',requestText:'',error:'',notice:new URLSearchParams(location.search).has('updated')?'Анкета обновлена':''};}
+ constructor(p){super(p);interviewImportLegacy();interviewSync();const initialMeeting=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));this.state={meetingSignature:initialMeeting?initialMeeting.id+':'+initialMeeting.status+':'+initialMeeting.slotId:'',remind:null,welcome:new URLSearchParams(location.search).has('welcome'),me:loadCandidate(),pr:loadProgress(),picked:'',focus:INTERVIEW_TODAY,rescheduling:false,cancelling:false,cancelReason:'',picking:false,requesting:false,requestKind:'time',requestText:'',error:'',notice:new URLSearchParams(location.search).has('updated')?'Анкета обновлена':''};}
  componentDidMount(){this.unsubscribe=interviewSubscribe(this);}
  componentDidUpdate(prevProps,prevState){if((this.state.cancelling&&!prevState.cancelling)||(this.state.requesting&&!prevState.requesting)){if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>document.querySelector('.i-candidate-dialog textarea')?.focus());}}
  componentWillUnmount(){this.unsubscribe?.();}
@@ -1326,23 +1433,29 @@ class Component extends FormControls {
 
  save(pr){demoWrite('onboarding',pr);this.setState({pr});}
  openPicker(extra={}){this.setState({picking:true,picked:'',error:'',...extra});if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>document.getElementById('a-picker')?.scrollIntoView({block:'start'}));}
- book(){const s=this.state,id=interviewIdentity(s.me),data=interviewRead(),current=interviewCurrent(data,id);const result=interviewBook(id,s.picked,s.rescheduling&&current?.status==='booked'?current.id:'','Волонтёр');this.setState(result.error?{error:result.error,picked:''}:{picked:'',picking:false,rescheduling:false,error:'',notice:s.rescheduling?'Встреча перенесена':'Вы записаны на встречу'});}
+ remindOn(){const s=this.state;return s.remind!=null?s.remind:(!!s.pr.tg||!!s.me?.telegram||arr(s.me?.channels).includes('Telegram'));}
+ book(){const s=this.state,id=interviewIdentity(s.me),data=interviewRead(),current=interviewCurrent(data,id);const result=interviewBook(id,s.picked,s.rescheduling&&current?.status==='booked'?current.id:'','Волонтёр');if(!result.error)this.save({...s.pr,tg:this.remindOn()});this.setState(result.error?{error:result.error,picked:''}:{picked:'',picking:false,rescheduling:false,error:'',notice:s.rescheduling?'Встреча перенесена':'Вы записаны на встречу'});}
  demo(pr,withMeeting){const id=interviewIdentity(this.state.me),data=interviewRead();data.bookings=data.bookings.filter(b=>b.candidateId!==id);data.profiles=data.profiles.map(p=>p.id===id?{...p,request:null}:p);interviewWrite(data);this.save(pr);
   if(withMeeting){const slot=interviewSlots(interviewRead(),INTERVIEW_TODAY,scheduleAdd(INTERVIEW_TODAY,13)).find(sl=>!sl.busy&&interviewFuture(sl.date,sl.start));if(slot)interviewBook(id,slot.id,'','Волонтёр');}
   this.setState({picking:false,rescheduling:false,cancelling:false,requesting:false,picked:'',error:'',notice:''});}
  screenVals(){const s=this.state,me=s.me,pr=s.pr,data=interviewRead(),id=interviewIdentity(me),profile=data.profiles.find(p=>p.id===id),meeting=interviewCurrent(data,id),active=meeting?.status==='booked',completed=meeting?.status==='completed';
+ const onboarded=!!pr.testDone,remind=this.remindOn(),showNudge=!!active&&!pr.testDone&&!!pr.tg;
  const total=ONB.modules.length,n=ONB.modules.filter(m=>pr.done[m.id]).length,N=ONB.test.questions.length,passed=interviewReady(profile),allDone=n===total;
- const stages=[{title:'Заявка',sub:'отправлена',done:!!me},{title:'Знакомство с фондом',sub:passed?'пройдено':n+' из '+total+' шагов',done:passed},{title:'Встреча с координатором',sub:meeting?interviewDay(meeting.date)+', '+meeting.start:passed?'выберите время':'после знакомства',done:!!completed},{title:'Первый выход',sub:completed?meeting.result:'обсудим на встрече',done:false}];
+ const stages=[{title:'Заявка',sub:'отправлена',done:!!me},{title:'Знакомство с фондом',sub:passed?'пройдено':n+' из '+total+' шагов',done:passed},{title:'Встреча с координатором',sub:meeting?interviewDay(meeting.date)+', '+meeting.start:'выберите удобное время',done:!!completed},{title:'Первый выход',sub:completed?meeting.result:'обсудим на встрече',done:false}];
  const now=stages.findIndex(x=>!x.done),fmt=v=>Array.isArray(v)?v.join(', ').replace(/·/g,' '):(v||'');
  const answers=me?[['Интересы',fmt(me.directions?.length?me.directions:me.roles)],['Навыки',fmt(me.skills)],['Как помогать',fmt(me.participation)],['Где удобно',fmt(me.places)],['Когда удобно',fmt(me.slots)],['Связь',fmt(me.channels)+(me.telegram?' · '+me.telegram:'')],['Телефон и почта',fmt(me.phone)+' · '+fmt(me.email)]].filter(x=>x[1]).map(([k,v])=>({k,v})):[];
- const nextStep=!passed?{e:n?'Продолжите':'Следующий шаг',t:'Знакомство с фондом',l:'Четыре коротких шага о фонде, участниках и правилах общения и небольшой тест. После него выберете время встречи с координатором.',b:n?'Продолжить':'Начать',h:'Onboarding.dc.html'}:null;
+ const nextStep=!passed?{e:n?'Продолжите':'Следующий шаг',t:'Знакомство с фондом',l:'Четыре коротких шага о фонде, участниках и правилах общения и небольшой тест. Время встречи можно выбрать уже сейчас.',b:n?'Продолжить':'Начать',h:'Onboarding.dc.html'}:null;
  const from=scheduleMonday(s.focus),to=scheduleAdd(from,6),available=interviewSlots(data,from,to,s.rescheduling&&active?meeting.id:'').filter(sl=>!sl.busy&&interviewFuture(sl.date,sl.start)&&sl.id!==meeting?.slotId);
  const dayDates=[...new Set(available.map(sl=>sl.date))],chosenDay=dayDates.includes(s.focus)?s.focus:dayDates[0],pickedSlot=available.find(sl=>sl.id===s.picked),pendingRequest=!!profile?.request;
  const last=data.bookings.filter(b=>b.candidateId===id).slice(-1)[0];
+ const mode=!meeting&&!n&&!onboarded?'fresh':active&&!onboarded&&pr.tg?'booked':active&&onboarded?'all':'';
  return {
+   statusText:completed?'Встреча состоялась':FORM.done.title,statusCls:'dot '+(completed?'dot-green':'dot-yellow'),
+   meetWhenBig:meeting?interviewDay(meeting.date)+', '+meeting.start:'',meetDay:meeting?scheduleLabel(meeting.date,{day:'numeric',month:'long'}):'',
+   remindOn:remind?'true':'false',remindCls:'toggle'+(remind?' is-on':''),toggleRemind:()=>this.setState({remind:!remind}),roadCls:'toggle'+(pr.road?' is-on':''),
+
  showReview:!completed,reviewTitle:FORM.done.title,reviewText:FORM.done.text,onboarded:!!pr.testDone,showNudge:!!active&&!pr.testDone&&!!pr.tg,
- onbCardCls:'card a-two-card'+(pr.testDone?' is-done':'')+(active&&!pr.testDone&&pr.tg?' is-nudge':''),
- onbText:pr.testDone?'Вы прошли знакомство с фондом. Вернуться к материалам можно в любой момент.':(n?'Пройдено '+n+' из '+total+' шагов. Осталось немного — и небольшой тест.':'Около 20 минут: история фонда, кому мы помогаем, кодекс этики и как общаться с участниками.'),onbButton:pr.testDone?'Посмотреть ещё раз':n?'Продолжить':'Начать',onbBtnCls:'btn btn-lg '+(pr.testDone?'btn-ghost':'btn-dark'),meetCardCls:'card a-two-card'+(meeting?' is-done':''),meetText:ONB.meeting.text,notBooked:!meeting,canOpenPicker:!meeting&&!s.picking,openPicker:()=>this.openPicker(),closePicker:()=>this.setState({picking:false,rescheduling:false,picked:'',error:''}),closeLabel:s.rescheduling?'Оставить прежнее время':'Свернуть',tgOn:!!pr.tg,tgOff:!pr.tg,tgText:pr.tg?'Бот напомнит о встрече накануне и подскажет следующий шаг.':'Подключите бота фонда — он напомнит о встрече и подскажет следующий шаг.',connectTg:()=>this.save({...pr,tg:true}),demoFresh:()=>this.demo(freshProgress(),false),demoBookedOnly:()=>this.demo({...freshProgress(),tg:true},true),demoAll:()=>{const done=Object.fromEntries(ONB.modules.map(m=>[m.id,true]));this.demo({...freshProgress(),done,testDone:true,score:9,tg:true},true);},candidateUnlocked:!!completed,candidateLocked:!completed,candidateSection:'Кабинет',candidateName:fullName(me),candidateInitials:fullName(me).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),welcome:s.welcome,welcomeTitle:FORM.done.title,welcomeText:FORM.done.text,road:!!pr.road,toggleRoad:()=>this.save({...pr,road:!pr.road}),noCandidate:!me,hasCandidate:!!me,first:firstName(me),stages:stages.map((x,i)=>({...x,cls:x.done?'is-done':i===now?'is-now':'',mark:x.done?'✓':String(i+1)})),
+ meetText:ONB.meeting.text,notBooked:!meeting,canOpenPicker:!meeting&&!s.picking,openPicker:()=>this.openPicker(),closePicker:()=>this.setState({picking:false,rescheduling:false,picked:'',error:''}),closeLabel:s.rescheduling?'Оставить прежнее время':'Свернуть',tgOn:!!pr.tg,tgOff:!pr.tg,tgText:pr.tg?'Бот напомнит о встрече накануне и подскажет следующий шаг.':'Подключите бота фонда — он напомнит о встрече и подскажет следующий шаг.',connectTg:()=>this.save({...pr,tg:true}),demoFresh:()=>this.demo(freshProgress(),false),demoBookedOnly:()=>this.demo({...freshProgress(),tg:true},true),demoAll:()=>{const done=Object.fromEntries(ONB.modules.map(m=>[m.id,true]));this.demo({...freshProgress(),done,testDone:true,score:9,tg:true},true);},candidateUnlocked:!!completed,candidateLocked:!completed,candidateSection:'Кабинет',candidateName:fullName(me),candidateInitials:fullName(me).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),welcome:s.welcome,welcomeTitle:FORM.done.title,welcomeText:FORM.done.text,road:!!pr.road,toggleRoad:()=>this.save({...pr,road:!pr.road}),noCandidate:!me,hasCandidate:!!me,first:firstName(me),stages:stages.map((x,i)=>({...x,cls:x.done?'is-done':i===now?'is-now':'',mark:x.done?'✓':String(i+1)})),
  showNext:!!nextStep,nextEyebrow:nextStep?.e||'',nextTitle:nextStep?.t||'',nextLead:nextStep?.l||'',nextButton:nextStep?.b||'',nextHref:nextStep?.h||'#',answers,
  showPicker:!!me&&!completed&&((!meeting&&s.picking)||(active&&s.rescheduling)),notRescheduling:!s.rescheduling,rescheduling:!!active&&s.rescheduling,pickerTitle:s.rescheduling?'Выберите другое время':'Встреча с координатором',coordinator:ONB.meeting.coordinator,
  focus:chosenDay||s.focus,changeFocus:e=>{if(scheduleValid(e.target.value))this.setState({focus:e.target.value,picked:'',error:''});},periodLabel:interviewDay(from)+' — '+scheduleLabel(to,{day:'numeric',month:'long'}),previous:()=>this.setState({focus:scheduleAdd(s.focus,-7),picked:''}),next:()=>this.setState({focus:scheduleAdd(s.focus,7),picked:''}),today:()=>this.setState({focus:INTERVIEW_TODAY,picked:''}),
@@ -1351,6 +1464,14 @@ class Component extends FormControls {
  reschedule:()=>this.openPicker({rescheduling:true,movingSlot:meeting?.slotId,focus:meeting?.date||s.focus}),askCancel:()=>this.setState({cancelling:true,cancelReason:'',error:''}),cancelling:s.cancelling,cancelReason:s.cancelReason,changeCancelReason:e=>this.setState({cancelReason:e.target.value,error:''}),keepMeeting:()=>this.setState({cancelling:false,error:''}),cancelMeeting:()=>{const r=interviewCancel(meeting?.id,s.cancelReason,'Волонтёр');this.setState(r.error?{error:r.error}:{cancelling:false,picking:true,rescheduling:false,picked:'',notice:'Запись отменена. Можно выбрать другое время.',error:''});},
  hasCancellation:!meeting&&last?.status==='cancelled',cancellationText:last?.cancelReason||'',requesting:s.requesting,requestTitle:s.requestKind==='question'?'Вопрос координатору':'Другое время встречи',requestLabel:s.requestKind==='question'?'Что хотите уточнить?':'Когда вам удобно встретиться?',requestText:s.requestText,startRequest:()=>this.setState({requesting:true,requestKind:'time',error:''}),askQuestion:()=>this.setState({requesting:true,requestKind:'question',error:''}),changeRequest:e=>this.setState({requestText:e.target.value,error:''}),cancelRequest:()=>this.setState({requesting:false,error:''}),sendRequest:()=>{if(!s.requestText.trim()){this.setState({error:s.requestKind==='question'?'Напишите, что хотите уточнить.':'Напишите, когда вам удобно встретиться.'});return;}const fresh=interviewRead();fresh.profiles=fresh.profiles.map(p=>p.id===id?{...p,request:{text:s.requestText,kind:s.requestKind,status:'new'}}:p);interviewWrite(fresh);this.setState({requesting:false,requestText:'',notice:'Ваш запрос появился у координатора',error:''});},
  modalKeys:e=>{if(e.key==='Escape')this.setState({requesting:false,cancelling:false,error:''});if(e.key==='Tab'){const els=Array.from(e.currentTarget.querySelectorAll('button,textarea,input')).filter(x=>!x.disabled&&x.getClientRects().length);if(e.shiftKey&&e.target===els[0]){e.preventDefault();els[els.length-1].focus();}else if(!e.shiftKey&&e.target===els[els.length-1]){e.preventDefault();els[0].focus();}}},notice:s.notice,dismissNotice:()=>this.setState({notice:''}),dismissError:()=>this.setState({error:''}),error:s.error,hasError:!!s.error,pageError:!!s.error&&!s.requesting&&!s.cancelling,
+   onbHead:active?'До встречи':'Пока анкета проверяется',
+   onbCardCls:'card a-onb'+(showNudge?' is-nudge':''),
+   onbText:onboarded?'Вы прошли знакомство с фондом. Вернуться к материалам можно в любой момент.':'История фонда, кому мы помогаем, кодекс этики и как общаться с участниками. Около 20 минут и небольшой тест.',
+   onbBar:'width:'+Math.round(100*(onboarded?total:n)/total)+'%',onbCount:(onboarded?total:n)+' из '+total,
+   onbButton:onboarded?'Посмотреть ещё раз':(n?'Продолжить':'Начать'),onbBtnCls:'btn btn-lg '+(onboarded?'btn-secondary':'btn-primary'),
+
+ heroInvite:!!me&&!meeting,
+ modes:[['fresh','Только что отправил анкету',()=>this.demo(freshProgress(),false)],['booked','Записался, но не знаком с фондом',()=>this.demo({...freshProgress(),tg:true},true)],['all','Всё сделано',()=>this.demo({...freshProgress(),done:Object.fromEntries(ONB.modules.map(m=>[m.id,true])),testDone:true,score:N,tg:true},true)]].map(([key,label,pick])=>({label,pick,cls:mode===key?'is-on':'',pressed:mode===key?'true':'false'})),
  fillDemo:()=>{demoWrite('candidate',DEMO_CANDIDATE);this.setState({me:DEMO_CANDIDATE});},passAll:()=>{const me2=s.me||DEMO_CANDIDATE;demoWrite('candidate',me2);const done={};ONB.modules.forEach(m=>done[m.id]=true);this.setState({me:me2});this.save({...pr,done,testDone:true,score:N,best:N,attempts:1});},reset:()=>{demoWrite('candidate',null);demoWrite('onboarding',freshProgress());this.setState({me:null,pr:freshProgress(),picked:''});}
  };}
 }

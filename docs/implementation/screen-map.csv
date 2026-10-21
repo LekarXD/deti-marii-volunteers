@@ -1,0 +1,42 @@
+board,kind,target_routes,module,work_packages,acceptance
+Main.dc.html,service,dev/prototype-map,reference,P00 P20,"Карта остаётся инструментом разработки, роли и reset не дают production-доступ"
+Apply.dc.html,surface,/apply; /application/edit,application,P03,"Основная анкета блоками v4, иконки и плитки направлений, условные навыки; черновик и ошибки сохраняются, edit не сбрасывает обучение и встречу"
+ApplicationStatus.dc.html,surface,/application,candidate-home,P03 P04 P06,Анкета на проверке; выбор времени и знакомство параллельно; запись/перенос/отмена/запрос/публичный итог из API; preference Telegram отдельно от привязки
+Home.dc.html,surface,/home,volunteer-home,P09 P12,Новичок и опытный волонтёр видят своё ближайшее назначение и реальные действия
+Catalog.dc.html,legacy,/opportunities,opportunities,P07,"Объединён с FundCatalog, объяснения подбора сохранены без фиктивных баллов"
+Opportunity.dc.html,legacy,/opportunities/:id,opportunities; participation,P07 P09,"Детали объединены с Participation, мгновенный допуск не переносится как правило"
+Schedule.dc.html,surface,/my/schedule,planning; participation,P08 P09,"Личный календарь из общих occurrences, подтверждение/отказ и история"
+Reflection.dc.html,surface,/my/assignments/:id/reflection,followups,P12,"Ответы и голос при наличии voice UI сохранены, помощь создаёт задачу"
+Hours.dc.html,surface,/my/hours,recognition,P13 P19,"Минуты подтверждены, запрос/коррекция/справка и достижения реальны"
+Messages.dc.html,surface,/messages/:thread_id,communications,P17A P17B,"Два пользователя, unread, вложения и достоверные delivery states"
+Profile.dc.html,surface,/profile,profile,P13 P15,"Свои контакты/доступность/пауза/preferences, изменение identity без потери связей"
+Academy.dc.html,surface,/academy,learning,P14 P18B P18D,"Треки и доступность по версии назначения, прогресс и вебинары из API"
+Lesson.dc.html,surface,/academy/lessons/:id,learning,P14 P18E,"Видео/блоки/задание/тест/повтор/завершение, серверный answer key"
+Simulator.dc.html,surface,/simulator/:scenario_id,simulation,P16,"Диалог/hint/pause/finish, реальная оценка по рубрике и appeal"
+Mentor.dc.html,surface,/mentor,knowledge,P15,"Ответы с доступными источниками, unknown/escalation и report"
+Studio.dc.html,surface,/webinars/:id,webinars,P18A P18B P18C P18E,"Shared scene live/recorder, RTC/board, готовый MP4 и явный preview/review/publish, без auto-publish"
+CoordHome.dc.html,surface,/fund,operations,P05 P09 P12 P19,"Очередь реальных задач, переходы к сущностям и числа из server projection"
+Pipeline.dc.html,legacy,/fund/candidates,applications,P05,"Review/decline/reopen перенесены в Candidates, второй воронки нет"
+Volunteers.dc.html,surface,/fund/volunteers,volunteer-crm,P11,"Поиск/фильтры и единая карточка с VolunteerRecord, scope у всех выборок"
+Shifts.dc.html,legacy,/fund/schedule,planning,P08 P09,Подбор/приглашение/ответ/attendance объединены с Planning
+Signals.dc.html,surface,/fund/signals,followups,P12,Назначение/срочность/причина/закрытие/reopen и отдельные sensitive permissions
+Builder.dc.html,surface,/fund/learning,learning,P14 P15 P18D P18E,Draft/edit/preview/review/publish и AI draft без автопубликации; вход Записать урок и publish выбранного take
+Knowledge.dc.html,surface,/fund/knowledge,knowledge,P15,Источники/Q&A/пробелы/index jobs/ошибки и версии
+Scenarios.dc.html,surface,/fund/scenarios,simulation,P16,Сценарии/критерии/test-run/review/publish и история версий
+Reports.dc.html,surface,/fund/reports,reporting,P19,"Сверенные метрики, narrative review и реальные exports/благодарности"
+Admin.dc.html,surface,/fund/settings,administration,P01 P11 P17A P17B P19,"Staff permissions, import preview, integrations/templates/budgets/audit"
+Phone.dc.html,service,storybook/mobile,ui,P02 P20,"Мобильные состояния входят в visual regression, отдельного приложения нет"
+FundCatalog.dc.html,surface,/opportunities,opportunities,P07,"Канонический каталог: поиск, фильтры, реальные условия, detail и отклик"
+Needs.dc.html,surface,/fund/opportunities,opportunities,P07,Редактируемые задачи/аудитория/условия/подготовка/согласование и публикация
+Roles.dc.html,surface,/fund/roles,roles,P07,"Создание/edit/archive/restore, defaults/usage, история без удаления"
+Candidates.dc.html,surface,/fund/candidates,applications,P05,"Очередь, поиск интересов, progress, deep-link обзор/анкета/история"
+Interviews.dc.html,surface,/fund/interviews; /fund/interviews/availability,interviews,P06,"Once/weekly/exceptions/buffer, конкурентная запись, перенос и итог"
+Planning.dc.html,surface,/fund/schedule; /fund/events/:id,planning,P08,"Любые периоды, месяц/неделя/список, series/occurrence и потребности по ролям; связанная карточка Event.html, возврат к дате и синхронный состав команды"
+VolunteerRecord.dc.html,surface,/fund/volunteers/:id,volunteer-crm,P11,"Договорённости, verified availability, contacts, следующий шаг и first-visit outcome"
+Reserve.dc.html,surface,/fund/contacts/review,contact-verification,P11,"Проверка старой базы, ready только с доступностью, no-contact и история"
+Participants.dc.html,surface,/fund/participants; /fund/participants/:id,participants,P10A P10B,"Фото CRUD, практическая памятка/private notes и safe preview"
+Groups.dc.html,surface,/fund/groups; /fund/groups/:id,groups,P10A P10B,"Условия, ведущий/волонтёры, состав с периодами и версия конкретного занятия"
+Group.dc.html,surface,/my/groups/:id,groups,P10B,"Только назначенная группа и разрешённые поля/фото, нет hardcoded art"
+FirstShift.dc.html,surface,/my/assignments/:id/preparation,participation; groups,P12,"Место/встречающий/задачи/checklist/вопрос/отмена, состав группы из API"
+Participation.dc.html,surface,/opportunities/:id; /my/assignments/:id,participation,P09,"Отклик, staff approve, own confirm, attendance и часы отдельными фактами"
+Onboarding.dc.html,surface,/onboarding/:step; /onboarding/test,learning,P04,"Версии материалов и server score, завершение без самовольного проходного процента"

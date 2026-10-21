@@ -318,3 +318,66 @@
 .candidate-mobile-menu{display:none}.candidate-mobile-links a,.candidate-mobile-links .is-locked{display:block;padding:12px 16px;color:var(--ink);border-radius:14px;font-size:16px}.candidate-mobile-links a.is-active{background:var(--soft);font-weight:600}.candidate-mobile-links .is-locked{opacity:.45}.candidate-mobile-links a:hover{text-decoration:none;background:var(--soft)}
 @media(max-width:1000px){.candidate-top{flex-wrap:nowrap;gap:8px}.candidate-top .candidate-nav{display:none}.candidate-mobile-menu{display:block;position:relative;margin-left:auto;min-width:0}.candidate-mobile-menu>summary{display:flex;align-items:center;gap:8px;list-style:none;background:var(--paper);border-radius:999px;padding:12px 14px;min-height:48px;font-size:15px;cursor:pointer;white-space:nowrap}.candidate-mobile-menu>summary::-webkit-details-marker{display:none}.candidate-mobile-menu .ic{width:16px;height:16px}.candidate-mobile-menu[open]>summary .ic{transform:rotate(180deg)}.candidate-mobile-links{position:absolute;right:0;top:calc(100% + 10px);background:var(--paper);box-shadow:0 12px 40px rgba(18,20,26,.12);padding:8px;width:260px;border:1px solid var(--line);border-radius:22px;z-index:100}.candidate-profile{margin-left:0}.candidate-top .brand{gap:8px;height:48px;padding:0 12px 0 8px}.candidate-top .brand small{display:none}.candidate-top .brand b{font-size:17px}.candidate-top .brand .mark{transform:scale(.85)}.candidate-profile>span:last-child{display:none}.candidate-profile{padding:4px}}
 @media(max-width:360px){.candidate-mobile-menu>summary{padding:12px 10px;gap:5px;font-size:14px}.candidate-top .brand{gap:4px;padding-right:10px}.candidate-profile .avatar{width:34px;height:34px}.candidate-top .brand b{font-size:16px}.candidate-top .brand .mark{width:30px;flex-basis:30px;transform-origin:left center}}
+/* Анкета v4: форма слева, путь кандидата справа; блоки с иконками */
+.a-apply{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.a-apply-main{min-width:0}
+.a-form-card.card{padding:36px 40px}
+.a-stephead .h2{margin:6px 0 18px}
+.a-stephead .a-bar{margin:0}
+.a-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 20px;margin-top:8px}
+.a-form>.a-sec{grid-column:1/-1;display:flex;gap:14px;align-items:center;margin-top:10px;padding-top:28px;border-top:1px solid var(--line)}
+.a-form>.a-sec:first-child{margin-top:20px;padding-top:0;border-top:0}
+.a-sec .h3{margin:0}
+.a-sec .a-why{margin-top:2px}
+.a-sec-ico{width:44px;height:44px;flex:0 0 44px;border-radius:14px;display:grid;place-items:center}
+.a-sec-0 .a-sec-ico{background:var(--yellow-tint);color:var(--yellow-ink)}
+.a-sec-1 .a-sec-ico{background:var(--blue-tint);color:var(--blue)}
+.a-sec-2 .a-sec-ico{background:var(--green-tint);color:var(--green-ink)}
+.a-sec-3 .a-sec-ico{background:var(--orange-tint);color:var(--orange-ink)}
+.a-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.a-tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-height:112px;padding:16px;border:0;border-radius:20px;background:var(--soft);text-align:left;font-size:15px;font-weight:600;line-height:1.3;color:var(--ink)}
+.a-tile:hover{box-shadow:inset 0 0 0 1px var(--line-2)}
+.a-tile-ico{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:var(--paper);display:grid;place-items:center}
+.a-tile.is-on{background:var(--yellow-tint);box-shadow:inset 0 0 0 2px var(--ink)}
+.a-tile.is-on::after{content:"✓";position:absolute;top:14px;right:14px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;display:grid;place-items:center}
+.a-chips .chip .ic{width:18px;height:18px}
+.a-cgroups{display:grid;gap:16px}
+.a-cgroup-t{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--mute)}
+.a-cgroup .a-chips{margin:0}
+.a-other{margin-top:14px}
+.a-errs{margin:12px 0 0}
+.a-path-card.card{position:sticky;top:24px;padding:28px}
+.a-pathlist{list-style:none;margin:16px 0;padding:0;display:grid;gap:4px}
+.a-pathlist li{display:flex;gap:14px;align-items:center;padding:12px;border-radius:18px}
+.a-pathlist li.is-now{background:var(--yellow-tint)}
+.a-pathlist b{display:block;font-size:16px;line-height:1.3}
+.a-pathlist small{display:block;font-size:14px;color:var(--mute);line-height:1.35}
+.a-path-ico{width:40px;height:40px;flex:0 0 40px;border-radius:12px;background:var(--soft);display:grid;place-items:center}
+.a-pathlist li.is-now .a-path-ico{background:var(--yellow)}
+.a-path-card .meta{margin:0}
+@media (max-width:1000px){.a-apply{grid-template-columns:1fr}.a-path-card.card{position:static}}
+@media (max-width:720px){.a-form-card.card{padding:24px 20px}.a-form{grid-template-columns:1fr}.a-form>.a-half{grid-column:1/-1}.a-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.a-tile{min-height:100px;padding:14px}.a-sec-ico{width:40px;height:40px;flex-basis:40px}}
+/* Кабинет кандидата в стиле главной «Опоры»: герой-карточка встречи, ниже — знакомство с фондом */
+.a-cab-head{margin-bottom:24px}
+.a-status{margin:12px 0 0}
+.a-hero-title{margin:10px 0 0;font-size:44px;font-weight:600;line-height:1.05;letter-spacing:-.03em;text-wrap:balance}
+.a-hero-small{margin:12px 0 0}
+.a-hero-actions{gap:12px;margin-top:28px}
+.a-hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.card-hero .hero-note .ic{width:20px;height:20px;color:var(--green-ink)}
+.a-demo-link{height:34px;display:inline-flex;align-items:center;padding:0 14px;font-size:14px;font-weight:500}
+.a-picker-sub{margin:-8px 0 0}
+.a-book.card{margin-top:16px;padding:8px 28px}
+.a-book-row{display:flex;align-items:center;gap:16px;padding:16px 0;cursor:pointer}
+.a-book-row+.a-book-row{border-top:1px solid var(--line)}
+.a-book-row b{display:block;font-size:16px}
+.a-book-row small{display:block;font-size:15px;color:var(--mute)}
+.a-picker .actions{margin-top:20px}
+.a-onb.card{display:flex;align-items:center;gap:24px}
+.a-onb .art{align-self:flex-start}
+.a-onb-title{gap:12px}
+.a-onb .p{margin-top:6px;max-width:62ch}
+.a-onb-bar{gap:14px;margin-top:16px;max-width:420px}
+.a-onb.is-nudge{box-shadow:inset 0 0 0 2px var(--orange)}
+@media (max-width:720px){.a-hero-title{font-size:32px}.card-hero .hero-when{font-size:36px}.a-hero-actions .btn{flex:1 1 auto}.a-onb.card{flex-direction:column;align-items:stretch;gap:16px}.a-onb .btn{width:100%}.a-book.card{padding:4px 20px}}
+@media (max-width:720px){.a-tiles{grid-template-columns:1fr;gap:8px}.a-tile{flex-direction:row;align-items:center;min-height:60px;padding:10px 48px 10px 10px}.a-tile.is-on::after{top:50%;transform:translateY(-50%)}}

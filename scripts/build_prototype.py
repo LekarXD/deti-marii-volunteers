@@ -31,7 +31,7 @@ SCREENS = {
     'ApplicationStatus': ('Кандидат: личный кабинет', 'candidate', 1700),
 }
 CONTENT = ROOT / 'prototype/content'
-CANDIDATE_ICONS = ['palette','book','users','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle']
+CANDIDATE_ICONS = ['palette','book','users','user','heart','home','hand','shield','smile','star','camera','calendar','pin','message','mask','music','award','sparkle','eye','clock','phone','alert','check-circle','academy','pen','scissors','flame','globe','dice','film','image','file','chart','screen','database','send','inbox','settings','search','edit']
 
 def subnav(role, current=''):
     links = [('Interviews', 'Собеседования'), ('Needs', 'Возможности'), ('Planning', 'Расписание'), ('Roles', 'Роли'), ('Participants', 'Участники'), ('Groups', 'Группы'), ('Reserve', 'Резерв')] if role == 'coordinator' else [('FirstShift', 'Первый выход'), ('FundCatalog', 'Направления фонда'), ('Group', 'Моя группа')]

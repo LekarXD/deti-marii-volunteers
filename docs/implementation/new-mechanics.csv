@@ -1,0 +1,6 @@
+mechanic,source,target_route,work_packages,acceptance
+solo_recording_project,new user request,/fund/recordings; /fund/recordings/new,P18C P18D,"Создать независимый проект или draft урока, без аудитории/календаря"
+recording_preflight,new user request,/fund/recordings/:id/studio,P18A P18D,"Устройства, звук, презентация и будущий кадр до начала"
+recording_take,new user request,/fund/recordings/:id/studio,P18C P18D,"Start/stop/retake, generation и восстановление без дублей"
+recording_review,new user request,/fund/recordings/:id/takes/:take_id,P18C P18D P18E,"Private player, проверка композиции/звука и выбор дубля"
+recording_publication,new user request,/fund/recordings/:id/publish,P18E,"Metadata/audience, конкретный render hash/lesson version, explicit publish/replace/rollback"

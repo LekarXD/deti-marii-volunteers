@@ -1,0 +1,420 @@
+{
+  "purpose": "Контроль зависимостей 27 задач и ресурсов. P10A/B, P17A/B, P18A–E — части 21 основного пакета. Topological layers не являются расписанием.",
+  "tasks": {
+    "P00": {
+      "owner": "A0",
+      "depends_on": [],
+      "required_agents": [
+        "A0"
+      ]
+    },
+    "P01": {
+      "owner": "A1",
+      "depends_on": [
+        "P00"
+      ],
+      "required_agents": [
+        "A1"
+      ]
+    },
+    "P02": {
+      "owner": "A2",
+      "depends_on": [
+        "P00"
+      ],
+      "required_agents": [
+        "A2"
+      ]
+    },
+    "P03": {
+      "owner": "A3",
+      "depends_on": [
+        "P01",
+        "P02"
+      ],
+      "required_agents": [
+        "A3"
+      ]
+    },
+    "P04": {
+      "owner": "A7",
+      "depends_on": [
+        "P01",
+        "P02"
+      ],
+      "required_agents": [
+        "A7"
+      ]
+    },
+    "P05": {
+      "owner": "A3",
+      "depends_on": [
+        "P03",
+        "P04"
+      ],
+      "required_agents": [
+        "A3"
+      ]
+    },
+    "P06": {
+      "owner": "A4",
+      "depends_on": [
+        "P01",
+        "P02"
+      ],
+      "required_agents": [
+        "A4"
+      ]
+    },
+    "P07": {
+      "owner": "A5",
+      "depends_on": [
+        "P01",
+        "P02"
+      ],
+      "required_agents": [
+        "A5"
+      ]
+    },
+    "P08": {
+      "owner": "A5",
+      "depends_on": [
+        "P07",
+        "P10A"
+      ],
+      "required_agents": [
+        "A5"
+      ]
+    },
+    "P09": {
+      "owner": "A5",
+      "depends_on": [
+        "P06",
+        "P08"
+      ],
+      "required_agents": [
+        "A5"
+      ]
+    },
+    "P10A": {
+      "owner": "A6",
+      "depends_on": [
+        "P01",
+        "P02"
+      ],
+      "required_agents": [
+        "A6"
+      ]
+    },
+    "P10B": {
+      "owner": "A6",
+      "depends_on": [
+        "P09",
+        "P10A"
+      ],
+      "required_agents": [
+        "A6"
+      ]
+    },
+    "P11": {
+      "owner": "A3",
+      "depends_on": [
+        "P05"
+      ],
+      "required_agents": [
+        "A3"
+      ]
+    },
+    "P12": {
+      "owner": "A6",
+      "depends_on": [
+        "P09",
+        "P10B",
+        "P11"
+      ],
+      "required_agents": [
+        "A6"
+      ]
+    },
+    "P13": {
+      "owner": "A3",
+      "depends_on": [
+        "P09",
+        "P11"
+      ],
+      "required_agents": [
+        "A3"
+      ]
+    },
+    "P14": {
+      "owner": "A7",
+      "depends_on": [
+        "P04"
+      ],
+      "required_agents": [
+        "A7"
+      ]
+    },
+    "P15": {
+      "owner": "A7",
+      "depends_on": [
+        "P14",
+        "P17A"
+      ],
+      "required_agents": [
+        "A7"
+      ]
+    },
+    "P16": {
+      "owner": "A4",
+      "depends_on": [
+        "P06",
+        "P14",
+        "P15"
+      ],
+      "required_agents": [
+        "A4"
+      ]
+    },
+    "P17A": {
+      "owner": "A1",
+      "depends_on": [
+        "P01",
+        "P02"
+      ],
+      "required_agents": [
+        "A1"
+      ]
+    },
+    "P17B": {
+      "owner": "A1",
+      "depends_on": [
+        "P17A"
+      ],
+      "required_agents": [
+        "A1"
+      ]
+    },
+    "P18A": {
+      "owner": "A2",
+      "depends_on": [
+        "P01",
+        "P02"
+      ],
+      "required_agents": [
+        "A2"
+      ]
+    },
+    "P18B": {
+      "owner": "A4",
+      "depends_on": [
+        "P17A",
+        "P18A"
+      ],
+      "required_agents": [
+        "A4"
+      ]
+    },
+    "P18C": {
+      "owner": "A1 + A2 renderer",
+      "depends_on": [
+        "P18B",
+        "P14"
+      ],
+      "required_agents": [
+        "A1",
+        "A2"
+      ]
+    },
+    "P18D": {
+      "owner": "A2",
+      "depends_on": [
+        "P18A",
+        "P18C"
+      ],
+      "required_agents": [
+        "A2"
+      ]
+    },
+    "P18E": {
+      "owner": "A7 + A2 UI",
+      "depends_on": [
+        "P14",
+        "P18D"
+      ],
+      "required_agents": [
+        "A7",
+        "A2"
+      ]
+    },
+    "P19": {
+      "owner": "A3",
+      "depends_on": [
+        "P11",
+        "P13",
+        "P15",
+        "P17B"
+      ],
+      "required_agents": [
+        "A3"
+      ]
+    },
+    "P20": {
+      "owner": "A8/A0",
+      "depends_on": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10A",
+        "P10B",
+        "P11",
+        "P12",
+        "P13",
+        "P14",
+        "P15",
+        "P16",
+        "P17B",
+        "P18A",
+        "P18B",
+        "P18C",
+        "P18D",
+        "P18E",
+        "P19",
+        "P17A"
+      ],
+      "required_agents": [
+        "A0",
+        "A1",
+        "A3",
+        "A7",
+        "A8"
+      ],
+      "agent_note": "A1/A3/A7 reserved for the two sequential cross-package integration handoffs; A8/A0 own acceptance."
+    }
+  },
+  "topological_layers": [
+    [
+      "P00"
+    ],
+    [
+      "P01",
+      "P02"
+    ],
+    [
+      "P03",
+      "P04",
+      "P07",
+      "P10A",
+      "P17A",
+      "P18A"
+    ],
+    [
+      "P05",
+      "P06",
+      "P08",
+      "P14",
+      "P17B",
+      "P18B"
+    ],
+    [
+      "P09",
+      "P11",
+      "P15",
+      "P18C"
+    ],
+    [
+      "P10B",
+      "P13",
+      "P16",
+      "P18D"
+    ],
+    [
+      "P12",
+      "P18E",
+      "P19"
+    ],
+    [
+      "P20"
+    ]
+  ],
+  "resource_schedule_note": "Консервативные последовательные батчи, не оценка сроков. A0 интегрирует между merge gates; A8 QA с начала. Не более одного пакета на исполнителя в батче; P18C/P18E резервируют A2 на поддержку.",
+  "resource_schedule": [
+    [
+      "P00"
+    ],
+    [
+      "P01",
+      "P02"
+    ],
+    [
+      "P03",
+      "P04",
+      "P07",
+      "P10A",
+      "P17A",
+      "P18A"
+    ],
+    [
+      "P05",
+      "P06",
+      "P08",
+      "P14",
+      "P17B"
+    ],
+    [
+      "P09",
+      "P11",
+      "P18B",
+      "P15"
+    ],
+    [
+      "P10B",
+      "P13",
+      "P18C",
+      "P16"
+    ],
+    [
+      "P12",
+      "P18D",
+      "P19"
+    ],
+    [
+      "P18E"
+    ],
+    [
+      "P20"
+    ]
+  ],
+  "cross_package_acceptance": [
+    {
+      "journey": "profile_suggestions_accept_reject_revert",
+      "gate": "P20",
+      "requires": [
+        "P13",
+        "P15"
+      ],
+      "handoff_agents": [
+        "A3",
+        "A7"
+      ]
+    },
+    {
+      "journey": "webinar_summary_send_enrolled_audience",
+      "gate": "P20",
+      "requires": [
+        "P17B",
+        "P18E"
+      ],
+      "handoff_agents": [
+        "A7",
+        "A1"
+      ]
+    }
+  ]
+}

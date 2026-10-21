@@ -4,9 +4,11 @@
 
 Единое цифровое пространство: профиль волонтёра, обучение, каталог возможностей, подбор, учёт участия, коммуникация, мотивация и рабочее пространство для команды фонда.
 
+[Технический план реализации](docs/implementation/README.md): React + TypeScript, FastAPI, PostgreSQL; карта всех экранов, модель данных, API и пакеты мультиагентной разработки.
+
 Материалы и постановка задачи — в [`materials/`](materials/README.md).
 
-**Путь кандидата** «анкета → знакомство с фондом → тест → встреча с координатором» — в прототипе «Опора»: `prototype/Apply.dc.html`, `Onboarding.dc.html`, `ApplicationStatus.dc.html`. Тексты правятся в `prototype/content/`, после правки — `python3 scripts/build_prototype.py`. Координатор видит анкеты и прогресс в `Candidates.dc.html`, встречи и доступность — в `Interviews.dc.html`. Старые ссылки `prototype/index.html#/…` переводят в тот же интерфейс; сохранённые ответы переносятся. Подробнее — [prototype/README.md](prototype/README.md).
+**Путь кандидата** «анкета → кабинет → выбор времени встречи и знакомство с фондом параллельно → встреча с координатором» — в прототипе «Опора»: `prototype/Apply.dc.html`, `Onboarding.dc.html`, `ApplicationStatus.dc.html`. Тексты правятся в `prototype/content/`, после правки — `python3 scripts/build_prototype.py`. Координатор видит анкеты и прогресс в `Candidates.dc.html`, встречи и доступность — в `Interviews.dc.html`. Старые ссылки `prototype/index.html#/…` переводят в тот же интерфейс; сохранённые ответы переносятся. Подробнее — [prototype/README.md](prototype/README.md).
 
 Прототип «Опора» и все сохранённые артефакты его подготовки — в [`materials/04-дизайн/прототип-до-фактуры/`](materials/04-дизайн/прототип-до-фактуры/README.md). [Интерактивный холст Claude Design](https://claude.ai/artifact/KeurJ9hsWHTx9g8ovz512u).
 

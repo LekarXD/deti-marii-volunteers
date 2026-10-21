@@ -1,0 +1,240 @@
+{
+  "checked_on": "2026-10-21",
+  "repository": "Petrimaze/curator-bot",
+  "git_head": "38c92cd49b1b6c229ed473de991479ed261e4052",
+  "verification": "read-only source/test inspection; no production/provider/test execution",
+  "files": {
+    "apps/web/src/api/index.js": {
+      "sha256": "3b106ab0f206924bcdf4aa129ff9a1ea71720e7dcf8701f4d9f802eb924888d0",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/context/WebAuthContext.jsx": {
+      "sha256": "2bf6e1953555cb9a55654190f4593af318da027db0570ea2b571cb67b9a9aa96",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/manage/_components/blockEditors/useVideoUpload.js": {
+      "sha256": "d0efa1e74fa07e3d755e9a22b7d20a28e4f2b802fcfe4073c3494de2af27ced0",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/manage/studio/hooks/useLessonPublish.js": {
+      "sha256": "b2ee91add9e5fcc3f570d85980ee4122767afa12c936da1fda1aa1aa1d5839a8",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/manage/studio/lesson/LessonPanel.jsx": {
+      "sha256": "d19ff11fd162d7a7b539e5036276d74d844154b86198e649dee5e855a7bb8be9",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/manage/studio/preview/StudentPreview.jsx": {
+      "sha256": "ab9aba20b3f54b48566eb5200fd057a1b8671744a686b6cb7955cec813b3559e",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/studio/StudioStage.jsx": {
+      "sha256": "d1667fc8fea8f7db2892fe2d6e09a55dbcf8243f790ce1aaee4c446c466b7e29",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/studio/cameraLayout.js": {
+      "sha256": "54f76cf20a8f6c76b77a66df45386faa999acf21dd90add40121f477fce33943",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/studio/media/livekit/board/LiveKitBoard.jsx": {
+      "sha256": "0db0e7f50aada631952c96e28ccec7ac014fc9c49c91a3d18b9478ac57bd9ae9",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/studio/recording/RecordingStage.jsx": {
+      "sha256": "4eb2b8b983dfe7b5a3be842e287af97c4d405ced3f6a01ff8ccd44f01071eccb",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/studio/resumableSlideUpload.js": {
+      "sha256": "3b6a6ead6eef20250ad8786e2ff4e98b1c5cef6fa7f147a9e6e121d5da3546c9",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/studio/stageComposition.js": {
+      "sha256": "9c651749bb37fefd9c126ef3c3f9d1adb3063e00f0fca250f539f7de2cbce419",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/studio/stageGeometry.js": {
+      "sha256": "3c8055416e4ea171279e9fc91bf3bf29ad9331cefff9e5699dda9994b5ffcc8d",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/studio/useSlideFlip.js": {
+      "sha256": "b19a3b75433315c23f68fa3719220da480ac5840c3516a3fb80dd19a8f5c3c66",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "apps/web/src/pages/learn/studio/useStudioData.js": {
+      "sha256": "c6ab568990e3e64e03009897fd37f9425fb163d1c9e190938a37de5fa6130658",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/db/email_verification_tokens.py": {
+      "sha256": "353b24f33fa5e447f70e1bd3a259ab7de273687e71385369118c304d2a366c35",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/db/paging.py": {
+      "sha256": "fdcc239c58781589a8492dcecd125395d898dd24277c9572b535295fc8edfe78",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/db/refresh_tokens.py": {
+      "sha256": "e4487a2963d4cd9a00929e608ddc45539b87014670eb3b8b037352c6a7386c9c",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/db/staff/content_status_audit.py": {
+      "sha256": "02d80948259b3c148624aa15583c4bcee580e4a4607bc020c136180d2bf8e6b9",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/migrations/446_lms_lesson_reward_receipts.sql": {
+      "sha256": "e35dc30c629fe33be15cf98921e8c25c502b47cb08f74a84681cc237a464804c",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/migrations/488_task_mutation_receipts.sql": {
+      "sha256": "1938920969a744d53eee445aaf41ca5a77b894355134d32d96d308aafcc9e7d6",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/migrations/839_lms_studio_stage_events.sql": {
+      "sha256": "4aa1c8b47689faaa10f76ab6f9dd68b7aeebe7d25c9fa54f14223afecd0f812e",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/routers/dependencies.py": {
+      "sha256": "ddcecacdd381f830ab8ad287e0c12f9148dcfc5b9508888bef435dc52269d82f",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/routers/lms/lessons.py": {
+      "sha256": "c8f511f8e93b83cb3e356918f0d10c98970ca3e45e6fe12c8d9c1fb2d421c76d",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/routers/web_auth/_helpers.py": {
+      "sha256": "b73ce7f1f6339ca5200480f08b7773cc3cccc8a6ddc978f48eeda947fd2fc201",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/routers/web_auth/_login.py": {
+      "sha256": "8b65562ffa7711667a013e34e755ae09216a54751e9eae146667372554f384b7",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/routers/web_auth/_sessions.py": {
+      "sha256": "fb39256aeee3dd27fc394c721d314fc2bdd32fe2feaafb832b024592fb9eb942",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/routers/web_tasks/receipts.py": {
+      "sha256": "871517a80815bcd72be62ee4689b15ea3f3fb644c1dce823fb1ed9d402881f42",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/grader_ledger/durable_lease.py": {
+      "sha256": "a6068515f4a585086a8dc3f51f6d9eb2f18497a84609276a8d128bb0e69249d9",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/jobs/_media_drain.py": {
+      "sha256": "4d8fda88aac30b6059168cb2422fefcc06573a1524febc5ba70b880589dda9cf",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/jobs/lms_studio_media.py": {
+      "sha256": "6673a2e8339c93c6165d182b1a384e90c2222d62f1527f69f7cae9f56739d44a",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/jobs/main_worker.py": {
+      "sha256": "c1f83bad4c7a094aeac1dac4e0a18ffd9fcdf69b09a4b4d01818d812a1a4bd30",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_artifacts/execution.py": {
+      "sha256": "56cf2f8fcb0b611cce80a7b76b6c4c3d7d58e59cda8486822b47681490db2fae",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_artifacts/source_identity.py": {
+      "sha256": "b02e9b08532b16f5dd6f4e44c7bb3c3c7007d0594b93a2a68b518cfc9dff5e3e",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/board_snapshots.py": {
+      "sha256": "2a09c47647fbe88d96794cf21bc5332891e64e633cd4809feba63eeb1d725e59",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/livekit_composite.py": {
+      "sha256": "82f4ea8af0a00bb66a25b64ff3a3b1848a2984f32c177f77457efd0d769668bd",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/media_checkpoint.py": {
+      "sha256": "9a9bd73c60c5f425db29ff6616ffa780b19de196f7ecdd176cb305a590f9c6ba",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/media_recordings.py": {
+      "sha256": "300f5a5be3a1e8b2da149f1b18c8c289414e68a282b07f4a272d547155fb84d2",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/media_transfer.py": {
+      "sha256": "03959f9cebf148857da3d59e6382e66655479c20a62303fe99adef1ac3708b62",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/recorder_auth.py": {
+      "sha256": "0d766fe4b133e8acc26dd3f96c7c687199a6282a616b841d52d72e8e84b12fc6",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/recording_compose.py": {
+      "sha256": "cba63187045235de722b79923456f4d8387f046845a4740dffb0d702393a2936",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/recording_compose_plan.py": {
+      "sha256": "e1173b2e7186e3c905e4efb15f16e14615948a7040b9e1fd22ae6ba7f7f5b130",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/recording_stage.py": {
+      "sha256": "fcf6b664b919ea076f32c50b912e8f8fc9170a8ac2dab2032980f09f4943a86f",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/recording_timeline.py": {
+      "sha256": "fba5a7c6ace173101bd6413e0974f162f41a734881d6f79f7a0a2339c049b08d",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/resumable_slides.py": {
+      "sha256": "5e6857ca35bf88a69f425d9e8e27aa109d867324196c6447ef8a46c80fba94cf",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/lms_studio/slides_convert.py": {
+      "sha256": "ae6927604d100ae3ddc4e595937f4480b68f0238a7b07f57293535900127b4dc",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/runtime_readiness.py": {
+      "sha256": "1a87fb6266a95d1f0d2f8cd6a760f82a0ba49ecf930d105ba78d04905dd0efae",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/utils/blocking.py": {
+      "sha256": "7c3a42482eded517a70a76dce835920453214188c95deffec2d6d23313d0773c",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/utils/swr_cache.py": {
+      "sha256": "5c093f430833a497196c19f723690c34b858088e77d1dbc01e9528db7283c60f",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/web/auth_dependency.py": {
+      "sha256": "e1f3efca6570582125876d8451d4bd4effb21c698eafedd9cbfceac4501f97a9",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/web/cache_headers.py": {
+      "sha256": "74a0bcc6fa3e89419c801c114626bd3cd23e23d27b433be8bfad973ca45487ba",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/web/metrics.py": {
+      "sha256": "b4123a2dedde5b1d666daf2914210ff6233fe19f59a4dfb311b55fd1a05010ae",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/web/rate_limit.py": {
+      "sha256": "9a5d151ccc870bc3d1b4f1c0c514ddfd209da28a4d30744643a270d7d1a40d40",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "packages/shared/src/api/client.js": {
+      "sha256": "716fb80e81246a76bb4a3b210a3aac71f2917f7d657f82436d5c76bba41600ff",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "packages/shared/src/lib/chunkReload.js": {
+      "sha256": "8d94017eb3e66b75250087a7ed6b9113000a4ff0dc718a132bf72f340a7e8fc5",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "packages/shared/src/queryClient.js": {
+      "sha256": "99359b223dceb0a1ca13e09df6ca70caff59f7d2fede3b93bcc600aac0f60102",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "packages/ui-core/src/ErrorBoundary.jsx": {
+      "sha256": "4cee45ae4c91f5a726a91dbe5b2ae8d59cec4e5e7b9f74edd24d99c1be12f765",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "packages/ui-core/src/useModalFocusLifecycle.js": {
+      "sha256": "2b2cc4e8d11470f4ab0ef39adbfdc72264e6e1b555ffaed4f3ccc5eefae0fe1b",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    }
+  }
+}
