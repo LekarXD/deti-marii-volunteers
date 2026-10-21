@@ -32,3 +32,11 @@ it('revokes and rechecks loaded font faces after a new font-loading cycle',async
  act(()=>fonts.dispatchEvent(new Event('loading')));await waitFor(()=>expect(status.mock.calls.at(-1)?.[0].ready).toBe(false));
  act(()=>fonts.dispatchEvent(new Event('loadingdone')));await waitFor(()=>expect(status.mock.calls.at(-1)?.[0].ready).toBe(true));
 });
+it('keeps the approved audio element mounted across scene-only revisions and waits for the new slide',async()=>{
+ const scene=fictionScene(),attach=vi.fn(),audio:StageTrackBinding={identity:scene.presenter_identity,track_id:'TR_audio',source:'microphone',kind:'audio',privacy_state:'approved',state:'ready',media_revision:1,attach};
+ const plan={...fictionPlan(scene),allowed_tracks:[{identity:audio.identity,track_id:audio.track_id,source:audio.source,kind:audio.kind,required:true}]};
+ const status=vi.fn(),view=render(<StudioStage scene={scene} plan={plan} asset={fictionAsset} tracks={[audio]} mode="render" onReadiness={status}/>);loadedImage();const element=document.querySelector('audio')!;fireEvent.playing(element);await waitFor(()=>expect(status.mock.calls.at(-1)?.[0].ready).toBe(true));
+ const nextAsset={...fictionAsset,asset_id:'10000000-0000-4000-8000-00000000000a',sha256:'1'.repeat(64)},next=fictionScene('lesson_recording_project',{revision:2,content_asset:{asset_id:nextAsset.asset_id,sha256:nextAsset.sha256,width:1600,height:900},slide_id:'10000000-0000-4000-8000-00000000000b'});
+ view.rerender(<StudioStage scene={next} plan={{...plan,scene_revision:2}} asset={nextAsset} tracks={[audio]} mode="render" onReadiness={status}/>);
+ expect(document.querySelector('audio')).toBe(element);expect(attach).toHaveBeenCalledOnce();await waitFor(()=>expect(status.mock.calls.at(-1)?.[0].ready).toBe(false));loadedImage();await waitFor(()=>expect(status.mock.calls.at(-1)?.[0].ready).toBe(true));expect(document.querySelector('audio')).toBe(element);
+});

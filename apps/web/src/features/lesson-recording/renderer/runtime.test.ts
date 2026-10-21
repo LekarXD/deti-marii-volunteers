@@ -24,7 +24,7 @@ async function fixture():Promise<Bootstrap>{
  };
 }
 beforeEach(()=>{vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-21T12:00:00Z'));vi.stubGlobal('window',{innerWidth:1920,innerHeight:1080,devicePixelRatio:1});});
-afterEach(()=>{vi.unstubAllGlobals();vi.useRealTimers();});
+afterEach(()=>{vi.restoreAllMocks();vi.unstubAllGlobals();vi.useRealTimers();});
 async function harness(initial?:Bootstrap){
  const boot=initial??await fixture();let state:State=boot;let mediaOptions:MediaOptions|undefined;
  const reports:Input[]=[];const views:RendererViewProps[]=[];
@@ -43,9 +43,9 @@ async function harness(initial?:Bootstrap){
   throw new Error('Unexpected private renderer endpoint');
  });vi.stubGlobal('fetch',fetch);
  const connect=vi.fn(async()=>{mediaOptions!.onChange({status:'connected',tracks:[],error:null,cameraOn:false,microphoneOn:false,screenOn:false});});
- const disconnect=vi.fn(async()=>{});
- const runtime=createRendererRuntime({render:props=>views.push(props),mediaFactory:options=>{mediaOptions=options;return {connect,disconnect};}});
- return {runtime,boot,views,reports,fetch,connect,disconnect,
+ const disconnect=vi.fn(async()=>{}),updatePlan=vi.fn();
+ const runtime=createRendererRuntime({render:props=>views.push(props),mediaFactory:options=>{mediaOptions=options;return {connect,disconnect,updatePlan};}});
+ return {runtime,boot,views,reports,fetch,connect,disconnect,updatePlan,
   setState(value:State){state=value;},refresh(){mediaOptions!.onRefreshRequired?.();},
   hold(){holdReady=true;},release(){const input=reports.filter(report=>report.visual_ready).at(-1)!;heldReady?.(json({ready:true,reasons:[],renderer_state_version:input.renderer_state_version,projection_hash:input.projection_hash,readiness_sequence:input.readiness_sequence,capture_state:'created',valid_until:new Date(Date.now()+10_000).toISOString()}));},
   observe(ready:boolean){const view=views.at(-1)!;view.onFrameReadiness!(view.frame!.stamp,{ready,visual_ready:ready,reasons:[]});},
@@ -89,12 +89,12 @@ it('never reports visual readiness at a different capture viewport',async()=>{
  const h=await harness();await h.runtime.start('fictional-ticket');vi.stubGlobal('window',{innerWidth:390,innerHeight:844,devicePixelRatio:2});h.observe(true);
  await vi.advanceTimersByTimeAsync(3000);expect(h.reports.every(report=>!report.visual_ready)).toBe(true);h.runtime.close();
 });
-it('revalidates an advanced scene before reconnecting and ignores the old frame readiness callback',async()=>{
+it('revalidates an advanced scene without reconnecting the same approved media and ignores old readiness callbacks',async()=>{
  const h=await harness();await h.runtime.start('fictional-ticket');const old=h.views.at(-1)!;
  const scene={...h.boot.scene,revision:2,presenter_size:29},capture_plan={...h.boot.capture_plan,scene_revision:2};
  const next={...h.boot,scene,capture_plan,renderer_state_version:2,projection_hash:await hash(scene,capture_plan)};
  h.setState(next);await vi.advanceTimersByTimeAsync(1000);
- await vi.waitFor(()=>expect(h.connect).toHaveBeenCalledTimes(2));
+ await vi.waitFor(()=>expect(h.updatePlan).toHaveBeenCalledTimes(1));expect(h.connect).toHaveBeenCalledTimes(1);expect(h.disconnect).toHaveBeenCalledTimes(1);
  expect(h.views.at(-1)?.frame?.stateVersion).toBe(2);expect(h.views.at(-1)?.phase).toBe('active');
  const before=h.reports.length;old.onFrameReadiness!(old.frame!.stamp,{ready:true,visual_ready:true,reasons:[]});
  expect(h.reports.length).toBe(before);
@@ -105,4 +105,39 @@ it('renews bounded visual receipts with increasing observation sequences every t
  await vi.waitFor(()=>expect(h.reports.at(-1)?.visual_ready).toBe(true));const first=h.reports.at(-1)!.readiness_sequence;
  await vi.advanceTimersByTimeAsync(3000);expect(h.reports.at(-1)?.visual_ready).toBe(true);expect(h.reports.at(-1)!.readiness_sequence).toBeGreaterThan(first);
  h.observe(false);await vi.waitFor(()=>expect(h.reports.at(-1)?.visual_ready).toBe(false));h.runtime.close();
+});
+it('holds only the exactly authorized prior frame while verifying a pure scene transition',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');const original=h.views.at(-1)!;
+ const scene={...h.boot.scene,revision:2,presenter_size:29},capture_plan={...h.boot.capture_plan,scene_revision:2};
+ const next={...h.boot,scene,capture_plan,renderer_state_version:2,projection_hash:await hash(scene,capture_plan),scene_transition:{from_renderer_state_version:1,from_projection_hash:h.boot.projection_hash,expires_at:new Date(Date.now()+5000).toISOString()}};
+ let release:()=>void=()=>{};const gate=new Promise<void>(resolve=>{release=resolve;}),digest=crypto.subtle.digest.bind(crypto.subtle);
+ vi.spyOn(crypto.subtle,'digest').mockImplementation(async(...args)=>{await gate;return digest(...args);});h.setState(next);await vi.advanceTimersByTimeAsync(1000);
+ expect(h.views.at(-1)?.frame?.stateVersion).toBe(1);expect(h.views.at(-1)?.phase).toBe('active');expect(h.views.at(-1)?.isCurrent(original.frame!.stamp)).toBe(true);
+ expect(h.reports.at(-1)).toMatchObject({renderer_state_version:2,visual_ready:false,media_state:'connected'});
+ release();await vi.waitFor(()=>expect(h.views.at(-1)?.frame?.stateVersion).toBe(2));expect(h.views.at(-1)?.isCurrent(original.frame!.stamp)).toBe(false);expect(h.connect).toHaveBeenCalledTimes(1);h.runtime.close();
+});
+it('does not retain pixels under a mismatched transition marker',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');const original=h.views.at(-1)!;
+ const scene={...h.boot.scene,revision:2},capture_plan={...h.boot.capture_plan,scene_revision:2};
+ const next={...h.boot,scene,capture_plan,renderer_state_version:2,projection_hash:await hash(scene,capture_plan),scene_transition:{from_renderer_state_version:1,from_projection_hash:'0'.repeat(64),expires_at:new Date(Date.now()+5000).toISOString()}};
+ let release:()=>void=()=>{};const gate=new Promise<void>(resolve=>{release=resolve;}),digest=crypto.subtle.digest.bind(crypto.subtle);
+ vi.spyOn(crypto.subtle,'digest').mockImplementation(async(...args)=>{await gate;return digest(...args);});h.setState(next);await vi.advanceTimersByTimeAsync(1000);
+ expect(h.views.at(-1)?.phase).toBe('preparing');expect(h.views.at(-1)?.isCurrent(original.frame!.stamp)).toBe(false);release();await vi.waitFor(()=>expect(h.updatePlan).toHaveBeenCalledOnce());h.runtime.close();
+});
+it('observes a revocation while a new frame digest is pending',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');
+ const scene={...h.boot.scene,revision:2},capture_plan={...h.boot.capture_plan,scene_revision:2};
+ const next={...h.boot,scene,capture_plan,renderer_state_version:2,projection_hash:await hash(scene,capture_plan),scene_transition:{from_renderer_state_version:1,from_projection_hash:h.boot.projection_hash,expires_at:new Date(Date.now()+2500).toISOString()}};
+ let release:()=>void=()=>{};const gate=new Promise<void>(resolve=>{release=resolve;}),digest=crypto.subtle.digest.bind(crypto.subtle);
+ vi.spyOn(crypto.subtle,'digest').mockImplementation(async(...args)=>{await gate;return digest(...args);});h.setState(next);await vi.advanceTimersByTimeAsync(1000);
+ h.setState({...next,invalidated:true,renderer_state_version:3});await vi.advanceTimersByTimeAsync(1000);
+ expect(h.views.at(-1)?.phase).toBe('failed');expect(h.views.at(-1)?.frame).toBeUndefined();release();await Promise.resolve();expect(h.connect).toHaveBeenCalledOnce();
+});
+it('removes the prior frame when its authorized transition expires',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');
+ const scene={...h.boot.scene,revision:2},capture_plan={...h.boot.capture_plan,scene_revision:2};
+ const next={...h.boot,scene,capture_plan,renderer_state_version:2,projection_hash:await hash(scene,capture_plan),scene_transition:{from_renderer_state_version:1,from_projection_hash:h.boot.projection_hash,expires_at:new Date(Date.now()+2000).toISOString()}};
+ let release:()=>void=()=>{};const gate=new Promise<void>(resolve=>{release=resolve;}),digest=crypto.subtle.digest.bind(crypto.subtle);
+ vi.spyOn(crypto.subtle,'digest').mockImplementation(async(...args)=>{await gate;return digest(...args);});h.setState(next);await vi.advanceTimersByTimeAsync(1000);expect(h.views.at(-1)?.phase).toBe('active');
+ await vi.advanceTimersByTimeAsync(1100);expect(h.views.at(-1)?.phase).toBe('failed');expect(h.views.at(-1)?.frame).toBeUndefined();release();await Promise.resolve();
 });

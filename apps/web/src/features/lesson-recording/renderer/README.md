@@ -24,4 +24,15 @@ Runtime validates outer foundation/project/take/session/generation against canon
 
 Each readiness observation/heartbeat gets a greater `readiness_sequence`. Ready leases last ten seconds and renew every three seconds; a false observation is sent immediately on visual loss. Local stamp/sequence checks discard stale ACKs. Close clears pixels/media, then retains the access credential only for one bounded best-effort false receipt at a greater sequence before destroying it. Server sequence CAS prevents a delayed older ready request from reopening that lease. No readiness ACK changes take state or starts elapsed recording time.
 
+Scene-only advances with the identical approved track/policy scope use the existing
+RTC adapter's `updatePlan`, never a room reconnect. Prior pixels/audio may remain
+only under the exact server `scene_transition` marker matching their version/hash,
+for at most five seconds. New state is reported visually unready during verification;
+new bytes are checksummed and decoded before atomic handoff. The shared Stage keeps
+media DOM elements mounted across scene-only revisions and resets content readiness
+per asset rather than resetting the entire canvas. Independent state polling continues
+during asset work. A missing/mismatched/expired marker, policy change or nonconnected
+media cannot retain old pixels. Receipts include actual `media_state` so blocked media
+is never treated as a tolerable visual-only transition by the capture supervisor.
+
 Validation: focused runtime/Stage/view/transport/hash/asset/fence suite passes, including delayed-ready close, revoked policy, changed frames, provider renewal and wrong viewport. An isolated production build includes the full private mount + LiveKit graph with `dependency-manifest.json` reporting no cookie transport, AppProviders, normal main/auth, analytics or service worker modules. It compiles 50 modules (32 nonvirtual); the LiveKit-containing entry is about 742 kB before gzip. This is dependency isolation proof, not capture/media acceptance. Private launch binding, actual browser asset/audio playback and recorded artifact verification remain with the integrated orchestration gate.
