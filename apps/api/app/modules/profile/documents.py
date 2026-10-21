@@ -1,6 +1,7 @@
 import asyncio
 from sqlalchemy import select,func
 from app.core.clock import utcnow
+from .dates import local_today
 from app.core.errors import ApiError
 from app.core.models import Foundation,User
 from app.modules.applications.service import check_version
@@ -18,7 +19,7 @@ async def build_snapshot(db,row):
     entries=(await db.scalars(select(ServiceTimeEntry).where(ServiceTimeEntry.foundation_id==row.foundation_id,ServiceTimeEntry.user_id==row.user_id,ServiceTimeEntry.service_date>=row.period_from,ServiceTimeEntry.service_date<=row.period_to).order_by(ServiceTimeEntry.service_date,ServiceTimeEntry.created_at))).all()
     total=sum(entry.delta_minutes for entry in entries)
     if total<=0:raise ApiError(422,'document_no_confirmed_time','За этот период пока нет подтверждённых минут')
-    return dict(document_id=str(row.id),kind=row.kind,foundation_name=foundation.name,display_name=user.display_name,recipient=row.recipient,period_from=row.period_from.strftime('%d.%m.%Y'),period_to=row.period_to.strftime('%d.%m.%Y'),total_minutes=total,entry_ids=[str(entry.id) for entry in entries],issued_at=utcnow().strftime('%d.%m.%Y'),body=row.body)
+    return dict(document_id=str(row.id),kind=row.kind,foundation_name=foundation.name,display_name=user.display_name,recipient=row.recipient,period_from=row.period_from.strftime('%d.%m.%Y'),period_to=row.period_to.strftime('%d.%m.%Y'),total_minutes=total,entry_ids=[str(entry.id) for entry in entries],issued_at=local_today().strftime('%d.%m.%Y'),body=row.body)
 
 async def generate(db,principal,row):
     from .pdf import render_document
@@ -31,7 +32,7 @@ async def generate(db,principal,row):
 async def request_document(db,principal,command):
     from .service import own_user
     user=await own_user(db,principal)
-    if command.period_to>utcnow().date():raise ApiError(422,'future_document_period','Период должен закончиться не позже сегодняшнего дня')
+    if command.period_to>local_today():raise ApiError(422,'future_document_period','Период должен закончиться не позже сегодняшнего дня')
     await subject_lock(db,principal.foundation_id,user.id)
     row=ProfileDocument(foundation_id=principal.foundation_id,user_id=user.id,kind=command.kind,period_from=command.period_from,period_to=command.period_to,recipient=command.recipient.strip(),body='',state='requested',version=1)
     if not row.recipient:raise ApiError(422,'document_recipient_required','Укажите, кому нужен документ')

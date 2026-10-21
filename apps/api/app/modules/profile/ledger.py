@@ -3,6 +3,7 @@ from datetime import date,timedelta
 from zoneinfo import ZoneInfo
 from sqlalchemy import select,func,text
 from app.core.clock import utcnow
+from .dates import local_today
 from app.core.errors import ApiError
 from app.core.models import User
 from app.modules.activities.assignment_models import Assignment,AttendanceEvent,Attendance
@@ -49,7 +50,7 @@ async def manual_view(db,row):
 async def request_manual_time(db,principal,command):
     from .service import own_user
     user=await own_user(db,principal)
-    if command.service_date>utcnow().date():raise ApiError(422,'future_service_date','Подтверждать можно уже выполненную помощь')
+    if command.service_date>local_today():raise ApiError(422,'future_service_date','Подтверждать можно уже выполненную помощь')
     row=ManualTimeRequest(foundation_id=principal.foundation_id,user_id=user.id,title=command.title.strip(),service_date=command.service_date,requested_minutes=command.requested_minutes,state='pending',version=1,approved_minutes=0)
     if not row.title:raise ApiError(422,'empty_title','Укажите, чем помогали')
     db.add(row);await db.flush();return await manual_view(db,row)
@@ -87,13 +88,13 @@ async def hours_view(db,principal):
     count=sum(value>0 for value in assignments.values())
     pending=await db.scalar(select(func.count()).select_from(AttendanceEvent).where(AttendanceEvent.foundation_id==principal.foundation_id,AttendanceEvent.user_id==user.id,AttendanceEvent.ledger_state=='pending'))
     positive=[entry for entry in entries if entry.assignment_id and assignments.get(entry.assignment_id,0)>0]
-    first=min((entry.service_date for entry in positive),default=None);months=0 if not first else max(0,(utcnow().year-first.year)*12+utcnow().month-first.month-(utcnow().day<first.day))
+    first=min((entry.service_date for entry in positive),default=None);months=0 if not first else max(0,(local_today().year-first.year)*12+local_today().month-first.month-(local_today().day<first.day))
     planned=(await db.execute(select(Assignment.id,EventOccurrence.starts_at,Attendance.outcome).join(EventOccurrence,Assignment.occurrence_id==EventOccurrence.id).outerjoin(Attendance,Attendance.assignment_id==Assignment.id).where(Assignment.foundation_id==principal.foundation_id,Assignment.user_id==user.id,Assignment.status=='confirmed',EventOccurrence.status!='cancelled',EventOccurrence.ends_at<utcnow()).order_by(EventOccurrence.starts_at))).all()
     dates=[(id,start.astimezone(ZoneInfo('Europe/Moscow')).date(),outcome) for id,start,outcome in planned]
     month_earned=False;month_progress=0
     for _,start,_ in dates:
         end=start+timedelta(days=27)
-        if end>=utcnow().date():continue
+        if end>=local_today():continue
         window=[(id,day,outcome) for id,day,outcome in dates if start<=day<=end]
         passed=sum(outcome=='attended' and assignments.get(id,0)>0 for id,day,outcome in window)
         weeks=len({day.isocalendar()[:2] for id,day,outcome in window if outcome=='attended' and assignments.get(id,0)>0})

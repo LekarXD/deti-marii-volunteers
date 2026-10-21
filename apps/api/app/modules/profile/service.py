@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy import select,delete,text
 from sqlalchemy.dialects.postgresql import insert
 from app.core.clock import utcnow
+from .dates import local_today
 from app.core.errors import ApiError
 from app.core.models import User,ContactChannel
 from app.modules.applications.service import check_version
@@ -29,7 +30,7 @@ async def profile_view(db,principal):
     pairs=(await db.execute(select(ProfileTag,ProfileTagLink.level).join(ProfileTagLink,ProfileTagLink.tag_id==ProfileTag.id).where(ProfileTagLink.user_id==user.id,ProfileTag.foundation_id==principal.foundation_id).order_by(ProfileTag.kind,ProfileTag.label))).all()
     contacts=(await db.scalars(select(ContactChannel).where(ContactChannel.user_id==user.id).order_by(ContactChannel.type,ContactChannel.id))).all()
     revisions=(await db.scalars(select(ProfileRevision).where(ProfileRevision.user_id==user.id,ProfileRevision.foundation_id==principal.foundation_id).order_by(ProfileRevision.number.desc()).limit(100))).all()
-    expired=bool(profile and profile.lifecycle=='paused' and profile.paused_until and profile.paused_until<utcnow().date())
+    expired=bool(profile and profile.lifecycle=='paused' and profile.paused_until and profile.paused_until<local_today())
     return ProfileView(user_id=user.id,display_name=user.display_name,version=profile.version if profile else 0,about=profile.about if profile else '',lifecycle=profile.lifecycle if profile and not expired else 'active',paused_until=profile.paused_until if profile and not expired else None,photo_asset_id=profile.photo_asset_id if profile else None,ai_about=profile.ai_about if profile else False,ai_skills=profile.ai_skills if profile else False,ai_interests=profile.ai_interests if profile else False,tags=[ProfileTagValue(kind=tag.kind,label=tag.label,level=level) for tag,level in pairs],contacts=[ProfileContactView(type=c.type,value=c.normalized_value,verified_at=c.verified_at) for c in contacts],revisions=[ProfileRevisionView(id=r.id,number=r.number,source=r.source,created_at=r.created_at,snapshot=r.snapshot) for r in revisions])
 
 def snapshot(view):
@@ -39,7 +40,7 @@ async def update_profile(db,principal,command,source='manual'):
     user=await own_user(db,principal,True);profile=await db.get(VolunteerProfile,user.id)
     check_version(profile.version if profile else 0,command.expected_version)
     if command.lifecycle=='active' and command.paused_until:raise ApiError(422,'invalid_pause','Дата окончания нужна только для паузы')
-    if command.paused_until and command.paused_until<utcnow().date():raise ApiError(422,'invalid_pause','Дата окончания паузы уже прошла')
+    if command.paused_until and command.paused_until<local_today():raise ApiError(422,'invalid_pause','Дата окончания паузы уже прошла')
     if command.photo_asset_id:
         from app.modules.assets.service import require_asset
         asset=await require_asset(db,principal,command.photo_asset_id)
@@ -125,7 +126,7 @@ async def decide_suggestion(db,principal,suggestion_id,command):
 
 async def active_for_invitations(db,foundation_id,user_id):
     profile=await db.scalar(select(VolunteerProfile).where(VolunteerProfile.user_id==user_id,VolunteerProfile.foundation_id==foundation_id))
-    return profile is None or profile.lifecycle!='paused' or bool(profile.paused_until and profile.paused_until<utcnow().date())
+    return profile is None or profile.lifecycle!='paused' or bool(profile.paused_until and profile.paused_until<local_today())
 
 from .ledger import append_service_time  # internal P09 transaction seam
 

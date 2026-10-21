@@ -2,6 +2,7 @@
 import io,json,zipfile
 from sqlalchemy import select
 from app.core.clock import utcnow
+from .dates import local_today
 from app.core.errors import ApiError
 from app.core.models import User
 from app.modules.assets.registry import create_generated_asset
@@ -59,7 +60,7 @@ async def review_request(db,principal,request_id,command):
     if row is None:raise ApiError(404,'data_request_not_found','Запрос не найден')
     check_version(row.version,command.expected_version)
     if row.kind!='deletion' or row.state not in ('requested','in_review','approved'):raise ApiError(409,'data_request_decided','Запрос уже обработан')
-    if command.decision=='approved' and (not command.scheduled_for or command.scheduled_for<utcnow().date() or not command.retention_note.strip()):raise ApiError(422,'deletion_plan_required','Укажите дату обработки и какие данные потребуется сохранить')
+    if command.decision=='approved' and (not command.scheduled_for or command.scheduled_for<local_today() or not command.retention_note.strip()):raise ApiError(422,'deletion_plan_required','Укажите дату обработки и какие данные потребуется сохранить')
     if command.decision=='completed':
         # Completion is evidence about account erasure, not a label that executes it.
         user=await db.get(User,row.user_id)

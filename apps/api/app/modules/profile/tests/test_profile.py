@@ -233,3 +233,8 @@ async def test_matching_context_is_self_selected_and_has_actual_version_provenan
             stored=await db.get(VolunteerProfile,principal.user_id);stored.paused_until=date.today()-timedelta(days=1);await db.flush()
             assert not (await matching_context(db,principal))['paused']
     finally:await own.aclose();await other.aclose()
+
+def test_profile_calendar_day_uses_moscow_at_utc_boundary(monkeypatch):
+    from app.modules.profile import dates
+    monkeypatch.setattr(dates,'utcnow',lambda:datetime(2026,10,20,22,30,tzinfo=timezone.utc))
+    assert dates.local_today()==date(2026,10,21)
