@@ -8,7 +8,7 @@ import type {StageTrackBinding} from '../../ui/studio';
 import type {RecordingTake} from './api';
 import {RecordingPolicy,policyMatches,ownRecordingSources} from './RecordingPolicy';
 const scene=fictionScene(),audio:StageTrackBinding={identity:scene.presenter_identity,track_id:'TR_audio',source:'microphone',kind:'audio',privacy_state:'approved',state:'ready',media_revision:1,attach:vi.fn()};
-const take:RecordingTake={id:'take',project_id:'project',number:1,generation:1,state:'created',version:3,renderer_state_version:1,projection_hash:'0'.repeat(64),readiness_state:'waiting',capture_job_id:null,capture_phase:null,started_at:null,stopped_at:null,error_code:null,privacy_state:'unknown',policy_scene_revision:scene.revision,policy_tracks:[]};
+const take:RecordingTake={id:'take',project_id:'project',number:1,generation:1,state:'created',version:3,renderer_state_version:1,projection_hash:'0'.repeat(64),readiness_state:'waiting',max_duration_seconds:1190,stop_reason:null,capture_job_id:null,capture_phase:null,started_at:null,stopped_at:null,error_code:null,privacy_state:'unknown',policy_scene_revision:scene.revision,policy_tracks:[]};
 afterEach(cleanup);
 it('requires explicit consent and submits only actual own sources with both version fences',async()=>{
  const send=vi.fn(async()=>{});render(<RecordingPolicy take={take} scene={scene} tracks={[audio]} connected busy={false} onCommand={send}/>);const user=userEvent.setup();const approve=screen.getByRole('button',{name:'Согласовать источники'});expect(approve.hasAttribute('disabled')).toBe(true);expect(send).not.toHaveBeenCalled();await user.click(screen.getByRole('checkbox'));await user.click(approve);

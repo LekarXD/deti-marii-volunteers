@@ -11,12 +11,12 @@ import {fictionScene} from '../../ui/studio/fixtures';
 import type {StageReadiness} from '../../ui/studio/StudioStage';
 import {RecordingProjectsPage} from './RecordingProjectsPage';
 import {RecordingProjectPage} from './RecordingProjectPage';
-import {deviceError,takeDuration} from './model';
+import {deviceError,recordingLimit,takeDuration} from './model';
 const media=vi.hoisted(()=>({connect:vi.fn(async()=>{}),disconnect:vi.fn(async()=>{}),camera:vi.fn(async()=>{}),microphone:vi.fn(async()=>{}),screen:vi.fn(async()=>{})}));
 vi.mock('../studio/live/useLiveKit',()=>({useLiveKit:()=>({controller:{...media,snapshot:{tracks:[]}},media:{status:'connected',tracks:[],error:null,cameraOn:false,microphoneOn:false,screenOn:false}})}));
 vi.mock('../../ui/studio',()=>({StudioStage:({onReadiness}:{onReadiness?:(value:StageReadiness)=>void})=>{useEffect(()=>onReadiness?.({ready:false,visual_ready:true,reasons:['capture_plan_required']}),[onReadiness]);return <div role="region" aria-label="Готовый кадр занятия"/>;}}));
-const project:components['schemas']['RecordingProjectView']={id:'project',owner_user_id:'owner',title:'Первый урок',mode:'solo',target_lesson_id:'lesson',state:'prepared',privacy_state:'unknown',version:3,studio_session_id:'session',takes:[],takes_next_cursor:null,capabilities:{capture_available:false,capture_reason:'Захват медиа ещё не подключён',private_renderer_available:true,raw_fallback:'forbidden'}};
-const take:components['schemas']['RecordingTakeView']={id:'take',project_id:'project',number:1,generation:1,state:'created',version:2,renderer_state_version:1,projection_hash:'0'.repeat(64),readiness_state:'waiting',privacy_state:'unknown',policy_scene_revision:1,policy_tracks:[],capture_job_id:null,capture_phase:null,started_at:null,stopped_at:null,error_code:null};
+const project:components['schemas']['RecordingProjectView']={id:'project',owner_user_id:'owner',title:'Первый урок',mode:'solo',target_lesson_id:'lesson',state:'prepared',privacy_state:'unknown',version:3,studio_session_id:'session',takes:[],takes_next_cursor:null,capabilities:{max_duration_seconds:1190,capture_limit_reason:'Для длинного занятия запишите несколько дублей',capture_available:false,capture_reason:'Захват медиа ещё не подключён',private_renderer_available:true,raw_fallback:'forbidden'}};
+const take:components['schemas']['RecordingTakeView']={id:'take',project_id:'project',number:1,generation:1,state:'created',version:2,renderer_state_version:1,projection_hash:'0'.repeat(64),readiness_state:'waiting',max_duration_seconds:1190,stop_reason:null,privacy_state:'unknown',policy_scene_revision:1,policy_tracks:[],capture_job_id:null,capture_phase:null,started_at:null,stopped_at:null,error_code:null};
 const scene=fictionScene('lesson_recording_project',{content_kind:'camera',layout:'camera_only',content_asset:null,deck_version_id:null,slide_id:null});
 const session:components['schemas']['StudioSessionView']={id:'session',resource_kind:'lesson_recording_project',resource_id:'project',host_user_id:'owner',state:'live',generation:1,scene:{...scene},scene_revision:1,version:4,can_host:true,board_available:false,capabilities:{configured:true}};
 const track:components['schemas']['TrackView']={id:'track',key:'intro',title:'Вводный трек',archived:false,assessment:null,current_release_id:null,releases:[],version:1,lessons:[{id:'lesson',key:'lesson',title:'Реальный урок',track_id:'track',archived:false,current_version_id:null,draft:null,publication_revision:0}]};
@@ -64,4 +64,20 @@ it('does not invent a live duration and explains actual device failures',()=>{
 
 it('keeps unconfigured media copy in plain Russian without exposing provider diagnostics',async()=>{
  currentSession={...session,capabilities:{configured:false,limitation:'Existing self-hosted tokens are not invalidated'}};view(true);await screen.findByText('Медиасервер пока не подключён. Материалы можно подготовить заранее.');expect(screen.queryByText(/Existing self-hosted/)).toBeNull();
+});
+it('shows the take-specific server limit and distinguishes automatic stopping from a captured result',async()=>{
+ currentTakes=[{...take,state:'stopping',max_duration_seconds:45,stop_reason:'duration_limit',started_at:'2026-10-21T12:00:00Z'}];view(true);
+ await screen.findByText('Достигнут лимит — завершаем запись');
+ expect(screen.getByText(/Один дубль — до 45 с/).textContent).toContain(project.capabilities.capture_limit_reason);
+ expect(screen.getByText('Достигнут лимит длительности. Завершаем запись.')).toBeTruthy();
+ expect(screen.queryByText('Дубль автоматически завершён по лимиту длительности.')).toBeNull();
+ expect(screen.queryByRole('button',{name:'Завершить запись'})).toBeNull();expect(document.querySelector('video')).toBeNull();
+ expect(spy.mock.calls.some(([path])=>path.endsWith('/stop'))).toBe(false);
+});
+it('shows automatic completion only from the stored stop reason and preserves the review section',async()=>{
+ currentTakes=[{...take,state:'captured',stop_reason:'duration_limit',started_at:'2026-10-21T12:00:00Z',stopped_at:'2026-10-21T12:19:50Z'}];view(true);
+ await screen.findByText('Дубль автоматически завершён по лимиту длительности.');
+ expect(screen.getByText('Подтверждённый интервал: 19:50')).toBeTruthy();expect(screen.getByRole('heading',{name:'Просмотр и проверка'})).toBeTruthy();
+ expect(screen.getByText('Результат дубля — в разделе «Просмотр и проверка».')).toBeTruthy();expect(document.querySelector('video')).toBeNull();
+ expect(recordingLimit(1190)).toBe('19 мин 50 с');expect(recordingLimit(120)).toBe('2 мин');expect(recordingLimit(0)).toBeNull();
 });

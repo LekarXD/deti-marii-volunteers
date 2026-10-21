@@ -23,6 +23,10 @@ versions, and disable unsafe automatic retries. Lists expose cursor pagination.
 Server capability flags gate capture; a `capturing` state is not presented as a
 confirmed recording until `started_at` exists. There is no fake running timer,
 progress percentage, raw fallback, preview URL or success receipt.
+The duration limit comes from the current take or project capabilities, including
+the server's reason. `duration_limit` distinguishes automatic stopping from an
+actually captured result; the UI never simulates completion or sends a local
+deadline-based stop command. Finished takes retain the same private review path.
 
 Render discovery uses the actual project render page. Ready/degraded files open only
 on an explicit private-preview action through the existing authorized asset content

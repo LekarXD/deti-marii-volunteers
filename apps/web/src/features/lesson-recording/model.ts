@@ -2,6 +2,11 @@ import type {RecordingTake} from './api';
 export const projectLabels:Record<string,string>={draft:'Черновик',prepared:'Студия подготовлена',has_takes:'Есть дубли',archived:'Проект закрыт'};
 export const takeLabels:Record<string,string>={created:'Дубль подготовлен',starting:'Готовим запись',capturing:'Идёт запись',stopping:'Завершаем запись',captured:'Дубль записан',failed:'Запись не завершилась',discarded:'Дубль удалён'};
 export const activeTake=(items:readonly RecordingTake[])=>items.find(take=>['created','starting','capturing','stopping'].includes(take.state));
+export function recordingLimit(seconds:number) {
+ if(!Number.isSafeInteger(seconds)||seconds<=0)return null;
+ const minutes=Math.floor(seconds/60),remainder=seconds%60;
+ return [minutes?`${minutes} мин`:null,remainder?`${remainder} с`:null].filter(Boolean).join(' ');
+}
 /** No locally simulated elapsed clock: only the confirmed stored interval is shown. */
 export function takeDuration(take:RecordingTake) {
  if(!take.started_at||!take.stopped_at)return null;
