@@ -8,7 +8,7 @@ from app.core.idempotency import payload_hash
 from app.modules.participants.models import ParticipantGroup
 from .calendar_models import EventOccurrence, EventRevision, EventSeries, EventSeriesNeedTemplate, OccurrenceOverride, StaffingNeed
 from .calendar_schemas import EventOccurrenceView, EventSeriesCreate, EventSeriesView, RecurrenceRule, SeriesChangePreview, StaffingNeedView, StaffingNeedsUpdate
-from .models import VolunteerRoleVersion
+from .models import VolunteerRole, VolunteerRoleVersion
 from .recurrence import dates_in_range, local_interval, occurrence_id
 from .service import check_version, role_snapshots
 
@@ -50,23 +50,63 @@ async def count_assignments(db,need_id):
     return counts.get('invited',0),counts.get('confirmed',0)
 
 
+def staffing_need_view(need,revision,invited,confirmed):
+    return StaffingNeedView(id=need.id,role_id=need.role_id,role_version_id=need.role_version_id,
+        role_title=revision.snapshot['title'],version=need.version,required=need.capacity_required,invited=invited,
+        confirmed=confirmed,missing=max(0,need.capacity_required-confirmed),preparation_requirements=need.preparation_requirements,approval_policy=need.approval_policy)
+
+
 async def needs_view(db,entity):
     needs=(await db.scalars(select(StaffingNeed).where(StaffingNeed.occurrence_id==entity.id).order_by(StaffingNeed.id))).all()
     result=[]
     for need in needs:
         revision=await db.get(VolunteerRoleVersion,need.role_version_id)
         invited,confirmed=await count_assignments(db,need.id)
-        result.append(StaffingNeedView(id=need.id,role_id=need.role_id,role_version_id=need.role_version_id,
-            role_title=revision.snapshot['title'],version=need.version,required=need.capacity_required,invited=invited,
-            confirmed=confirmed,missing=max(0,need.capacity_required-confirmed),preparation_requirements=need.preparation_requirements,approval_policy=need.approval_policy))
+        result.append(staffing_need_view(need,revision,invited,confirmed))
     return result
+
+
+def event_occurrence_view(entity,has_override,staffing_needs):
+    fields={field:getattr(entity,field) for field in EventOccurrenceView.model_fields if field not in ('has_override','staffing_needs','allowed_actions')}
+    return EventOccurrenceView(**fields,has_override=has_override,staffing_needs=staffing_needs,
+        allowed_actions=['edit','copy','cancel' if entity.status=='scheduled' else 'restore'] if entity.status!='completed' else ['copy'])
 
 
 async def occurrence_view(db,entity):
     overridden=await db.get(OccurrenceOverride,entity.id)
-    fields={field:getattr(entity,field) for field in EventOccurrenceView.model_fields if field not in ('has_override','staffing_needs','allowed_actions')}
-    return EventOccurrenceView(**fields,has_override=overridden is not None,staffing_needs=await needs_view(db,entity),
-        allowed_actions=['edit','copy','cancel' if entity.status=='scheduled' else 'restore'] if entity.status!='completed' else ['copy'])
+    return event_occurrence_view(entity,overridden is not None,await needs_view(db,entity))
+
+
+async def occurrence_views(db,foundation_id,entities):
+    """Four bounded reads for a calendar page, preserving source and need order.
+
+    Roles use the need's frozen revision, never the current mutable role. Every
+    read is scoped to the current foundation; there is no cross-request cache.
+    Single mutation views retain their existing transaction/locking behaviour.
+    """
+    entities=list(entities)
+    if any(entity.foundation_id!=foundation_id for entity in entities):
+        raise ApiError(404,'occurrence_not_found','Занятие не найдено.')
+    if not entities:return []
+    ids=[entity.id for entity in entities]
+    overridden=set((await db.scalars(select(OccurrenceOverride.occurrence_id).join(EventOccurrence,EventOccurrence.id==OccurrenceOverride.occurrence_id).where(
+        EventOccurrence.foundation_id==foundation_id,OccurrenceOverride.occurrence_id.in_(ids)))).all())
+    needs=(await db.scalars(select(StaffingNeed).where(StaffingNeed.foundation_id==foundation_id,StaffingNeed.occurrence_id.in_(ids)).order_by(StaffingNeed.id))).all()
+    revisions={}
+    counts={}
+    if needs:
+        revisions={revision.id:revision for revision in (await db.scalars(select(VolunteerRoleVersion).join(VolunteerRole,VolunteerRole.id==VolunteerRoleVersion.role_id).where(
+            VolunteerRole.foundation_id==foundation_id,VolunteerRoleVersion.id.in_({need.role_version_id for need in needs})))).all()}
+        table=Base.metadata.tables.get('assignments')
+        if table is not None:
+            rows=(await db.execute(select(table.c.staffing_need_id,table.c.status,func.count()).where(
+                table.c.foundation_id==foundation_id,table.c.staffing_need_id.in_([need.id for need in needs]),table.c.status.in_(('invited','confirmed'))
+            ).group_by(table.c.staffing_need_id,table.c.status))).all()
+            counts={(need_id,status):count for need_id,status,count in rows}
+    grouped={entity.id:[] for entity in entities}
+    for need in needs:
+        grouped[need.occurrence_id].append(staffing_need_view(need,revisions[need.role_version_id],counts.get((need.id,'invited'),0),counts.get((need.id,'confirmed'),0)))
+    return [event_occurrence_view(entity,entity.id in overridden,grouped[entity.id]) for entity in entities]
 
 
 async def series_view(db,entity):

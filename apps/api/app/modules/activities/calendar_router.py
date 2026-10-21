@@ -41,7 +41,8 @@ async def list_occurrences(from_date:date=Query(alias='from'),to_date:date=Query
     query=select(EventOccurrence).where(EventOccurrence.foundation_id==principal.foundation_id,EventOccurrence.starts_at<upper,EventOccurrence.ends_at>lower)
     if cursor:query=query.where(EventOccurrence.id>cursor)
     rows=list((await db.scalars(query.order_by(EventOccurrence.id).limit(limit+1))).all())
-    result=EventOccurrencePage(items=[read_view(await service.occurrence_view(db,item),principal) for item in rows[:limit]],next_cursor=rows[limit-1].id if len(rows)>limit else None)
+    views=await service.occurrence_views(db,principal.foundation_id,rows[:limit])
+    result=EventOccurrencePage(items=[read_view(item,principal) for item in views],next_cursor=rows[limit-1].id if len(rows)>limit else None)
     await db.commit()
     return result
 
