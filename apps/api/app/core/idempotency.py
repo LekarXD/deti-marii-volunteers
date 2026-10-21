@@ -17,6 +17,8 @@ async def begin_command(db, principal, operation, key, payload):
     if receipt:
         if receipt.payload_hash != expected:
             raise ApiError(409, "idempotency_payload_conflict", "Этот ключ уже использован с другими данными")
+        if receipt.result is None:
+            raise ApiError(409, "command_incomplete", "Результат команды ещё не готов", retryable=True)
         return receipt.result
     db.add(MutationReceipt(actor_id=principal.actor_id, operation=operation, key=key, payload_hash=expected))
     await db.flush()

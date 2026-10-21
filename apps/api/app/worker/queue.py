@@ -23,6 +23,7 @@ def enqueue_outbox(db, foundation_id, channel, payload):
 
 async def claim(db, kinds=None, lease_seconds=60):
     now = utcnow()
+    await db.execute(update(Job).where(Job.state == "running", Job.lease_until < now, Job.attempts >= Job.max_attempts).values(state="dead", error_code="lease_exhausted", lease_until=None))
     query = select(Job).where(or_(and_(Job.state == "queued", Job.available_at <= now), and_(Job.state == "running", Job.lease_until < now)), Job.attempts < Job.max_attempts).order_by(Job.available_at, Job.id).with_for_update(skip_locked=True).limit(1)
     if kinds is not None:
         query = query.where(Job.kind.in_(kinds))

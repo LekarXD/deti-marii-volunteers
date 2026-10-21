@@ -135,6 +135,7 @@ class MediaAsset(IdentityMixin, Base):
     foundation_id: Mapped[UUID] = mapped_column(ForeignKey("foundations.id"), index=True)
     owner_user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     owner_registration_id: Mapped[UUID | None] = mapped_column(ForeignKey("registration_sessions.id"))
+    access_permission: Mapped[str | None] = mapped_column(String(100))
     storage_key: Mapped[str] = mapped_column(String(200), unique=True)
     content_type: Mapped[str] = mapped_column(String(100))
     expected_size: Mapped[int] = mapped_column(BigInteger)

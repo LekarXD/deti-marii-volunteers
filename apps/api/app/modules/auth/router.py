@@ -159,3 +159,16 @@ async def mfa_verify(body: MfaInput, response: Response, principal: Principal = 
     result["recovery_codes"] = codes
     await db.commit()
     return result
+
+@router.post("/mfa/revoke", operation_id="auth_mfa_revoke")
+async def mfa_revoke(principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
+    await authz_guard(db, principal)
+    if not principal.user_id or not principal.mfa_at or principal.mfa_at < utcnow()-timedelta(minutes=10):
+        raise ApiError(403, "step_up_required", "Подтвердите вход перед изменением фактора")
+    from sqlalchemy import delete
+    await db.execute(delete(MfaRecovery).where(MfaRecovery.user_id == principal.user_id))
+    await db.execute(delete(MfaFactor).where(MfaFactor.user_id == principal.user_id))
+    await db.execute(update(Session).where(Session.user_id == principal.user_id, Session.revoked_at.is_(None)).values(revoked_at=utcnow()))
+    audit(db, principal, "mfa.revoke", "user", principal.user_id)
+    await db.commit()
+    return {"status": "revoked"}

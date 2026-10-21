@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://opora:opora@127.0.0.1:5432/opora"
     environment: str = "development"
     foundation_id: UUID = UUID("00000000-0000-0000-0000-000000000001")
-    trusted_origins: list[str] = ["http://127.0.0.1:5173", "http://localhost:5173", "http://testserver"]
+    trusted_origins: list[str] = ["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:5174", "http://localhost:5174", "http://testserver"]
     cookie_secure: bool = False
     secret_key: str = "development-only-set-OPORA_SECRET_KEY"
     release: str = "development"

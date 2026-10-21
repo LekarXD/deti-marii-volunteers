@@ -38,6 +38,10 @@ async def resolve_principal(db, session):
             is_staff = True
             rows = (await db.scalars(select(PermissionGrant).where(PermissionGrant.membership_id == membership.id, PermissionGrant.revoked_at.is_(None)))).all()
             grants = tuple((g.permission,g.scope_type,g.scope_id) for g in rows)
+    else:
+        registration = await db.get(RegistrationSession, session.registration_id)
+        if registration is None or registration.expires_at <= utcnow() or registration.claimed_user_id:
+            raise ApiError(401, "session_invalid", "Сессия недействительна")
     return Principal(session.user_id, session.registration_id, session.foundation_id, session.id, is_staff, str(session.user_id or session.registration_id), frozenset(p for p,t,i in grants if t == "foundation"), grants, session.mfa_at)
 
 async def get_session_row(request, db):
