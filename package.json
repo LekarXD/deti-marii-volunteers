@@ -18,5 +18,8 @@
     "@playwright/test": "1.58.2",
     "openapi-typescript": "7.13.0",
     "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "playwright": "1.58.2"
   }
 }
