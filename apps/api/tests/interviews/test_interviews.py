@@ -29,7 +29,7 @@ async def world():
         await c.execute(text('CREATE EXTENSION IF NOT EXISTS btree_gist'))
         await c.execute(text(f'CREATE SCHEMA "{schema}"'))
     await engine.dispose()
-    engine=create_async_engine(url,connect_args={'options':f'-csearch_path={schema},public'})
+    engine=create_async_engine(url,connect_args={'options':f'-csearch_path={schema}'})
     factory=async_sessionmaker(engine,expire_on_commit=False)
     async with engine.begin() as c: await c.run_sync(Base.metadata.create_all)
     async with factory() as db:
