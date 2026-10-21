@@ -123,3 +123,5 @@ class StudioWebhookEvent(Base):
     event_type:Mapped[str]=mapped_column(String(60))
     room_name:Mapped[str]=mapped_column(String(128),index=True)
     received_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),server_default=func.now())
+
+from .summary_models import WebinarSummary,WebinarSummaryRevision,WebinarSummaryPreview,WebinarSummaryDelivery
