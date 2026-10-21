@@ -191,3 +191,11 @@ class ProfileDataView(BaseModel):
     asset_id:UUID|None
     created_at:datetime
     updated_at:datetime
+
+class RecognitionBasisView(BaseModel):
+    entry_id:UUID
+    user_id:UUID
+    display_name:str
+    title:str
+    service_date:date
+    confirmed_minutes:int

@@ -7,7 +7,7 @@ from app.core.models import User
 from app.modules.assets.registry import create_generated_asset
 from app.modules.applications.service import check_version,own_application,application_view
 from app.modules.applications.consents import consent_events
-from .models import ProfileDataRequest
+from .models import ProfileDataRequest,ProfileDocument
 from .schemas import ProfileDataView
 from . import assets
 
@@ -22,6 +22,10 @@ async def own_export(db,principal):
     application=await own_application(db,principal,required=False)
     events=await consent_events(db,principal.foundation_id,user_id=principal.user_id)
     data=dict(format_version=1,generated_at=utcnow().isoformat(),profile=profile.model_dump(mode='json'),hours=hours.model_dump(mode='json'),availability=availability.model_dump(mode='json'),application=(await application_view(db,application)).model_dump(mode='json') if application else None,consents=[dict(id=str(event.id),purpose=event.purpose,granted=event.granted,document=event.document,document_version=event.document_version,source=event.source,created_at=event.created_at.isoformat()) for event in events])
+    from .documents import document_view
+    own_documents=(await db.scalars(select(ProfileDocument).where(ProfileDocument.foundation_id==principal.foundation_id,ProfileDocument.user_id==principal.user_id).order_by(ProfileDocument.created_at))).all()
+    data['documents']=[document_view(row).model_dump(mode='json') for row in own_documents]
+    data['included_sections']=['profile','hours','availability','application','consents','documents']
     # Only domain self projections. Private staff notes never enter the archive.
     encoded=json.dumps(data,ensure_ascii=False,indent=2).encode()
     if len(encoded)>10*1024*1024:raise ApiError(413,'export_review_required','Объём архива требует подготовки сотрудником')

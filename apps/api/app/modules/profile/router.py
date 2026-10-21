@@ -126,3 +126,7 @@ async def data_queue(principal:Principal=Depends(require_permission('profile.req
 @router.post('/coord/profile/data-requests/{request_id}/review',response_model=dto.ProfileDataView)
 async def data_review(request_id:UUID,body:dto.ProfileDataReviewCommand,principal:Principal=Depends(require_permission('profile.requests.review')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
     return await command(db,principal,f'profile.data.review:{request_id}',idempotency_key,body,lambda:data_requests.review_request(db,principal,request_id,body),'profile.requests.review')
+
+@router.get('/coord/profile/recognition-bases',response_model=list[dto.RecognitionBasisView])
+async def recognition_bases(principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db)):
+    return await ledger.recognition_bases(db,principal)

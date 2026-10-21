@@ -1,5 +1,5 @@
 import io,os,zipfile,json,asyncio
-from datetime import date,time,timedelta
+from datetime import date,time,timedelta,datetime,timezone
 from uuid import UUID,uuid4
 import pytest,pytest_asyncio
 from fastapi import FastAPI
@@ -139,17 +139,17 @@ async def test_consents_export_and_deletion_request_workflow(env):
         assert (await own.get('/api/v1/me/profile')).status_code==200
     finally:await own.aclose();await other.aclose();await reviewer.aclose()
 
-async def attendance_fixture(factory,user_id):
+async def attendance_fixture(factory,user_id,day=None):
     from app.core.clock import utcnow
     from app.modules.activities.models import VolunteerRole,VolunteerRoleVersion
     from app.modules.activities.calendar_models import EventSeries,EventOccurrence,StaffingNeed
     from app.modules.activities.assignment_models import Assignment,Attendance,AttendanceEvent
-    foundation_id=get_settings().foundation_id;day=date.today()-timedelta(days=1)
+    foundation_id=get_settings().foundation_id;day=day or date.today()-timedelta(days=1)
     async with factory() as db:
-        role=VolunteerRole(foundation_id=foundation_id,title='Мастерская',normalized_title='мастерская',task='',updated_by='fixture');db.add(role);await db.flush()
+        role=VolunteerRole(foundation_id=foundation_id,title='Мастерская',normalized_title='мастерская-'+str(uuid4()),task='',updated_by='fixture');db.add(role);await db.flush()
         role_version=VolunteerRoleVersion(role_id=role.id,version=1,snapshot={},actor_id='fixture');db.add(role_version)
         series=EventSeries(foundation_id=foundation_id,anchor_date=day,origin_time=time(12),start_date=day,start_time=time(12),duration_minutes=120,recurrence={},title='Занятие',updated_by='fixture');db.add(series);await db.flush()
-        occurrence=EventOccurrence(id=uuid4(),foundation_id=foundation_id,series_id=series.id,origin_local_date=day,origin_local_time=time(12),starts_at=utcnow()-timedelta(hours=25),ends_at=utcnow()-timedelta(hours=23),timezone='Europe/Moscow',title='Занятие',series_version=1,updated_by='fixture');db.add(occurrence);await db.flush()
+        occurrence=EventOccurrence(id=uuid4(),foundation_id=foundation_id,series_id=series.id,origin_local_date=day,origin_local_time=time(12),starts_at=datetime.combine(day,time(9),tzinfo=timezone.utc),ends_at=datetime.combine(day,time(11),tzinfo=timezone.utc),timezone='Europe/Moscow',title='Занятие',series_version=1,updated_by='fixture');db.add(occurrence);await db.flush()
         need=StaffingNeed(foundation_id=foundation_id,occurrence_id=occurrence.id,role_id=role.id,role_version_id=role_version.id,capacity_required=1);db.add(need);await db.flush()
         assignment=Assignment(foundation_id=foundation_id,user_id=user_id,occurrence_id=occurrence.id,staffing_need_id=need.id,status='confirmed',confirmed_at=utcnow()-timedelta(days=2),conditions_version=1,conditions_snapshot={});db.add(assignment);await db.flush()
         attendance=Attendance(foundation_id=foundation_id,assignment_id=assignment.id,outcome='attended',minutes=120,version=1);db.add(attendance);await db.flush()
@@ -174,3 +174,35 @@ async def test_actual_attendance_projection_once_and_correction_delta(env):
             assert await db.scalar(select(func.count()).select_from(ServiceTimeEntry))==2
         hours=(await own.get('/api/v1/me/hours')).json();assert hours['total_minutes']==0 and hours['confirmed_assignments']==0 and hours['ledger_pending']==0
     finally:await own.aclose()
+
+@pytest.mark.asyncio
+async def test_month_milestone_requires_all_actual_confirmed_visits(env):
+    from app.modules.activities.assignment_models import AttendanceEvent,Attendance
+    app,factory=env;own=await volunteer(app,factory);principal=await principal_for(own,factory)
+    try:
+        facts=[]
+        for offset in (40,33,26,19):
+            assignment_id,attendance_id,event_id=await attendance_fixture(factory,principal.user_id,date.today()-timedelta(days=offset));facts.append((assignment_id,attendance_id,event_id))
+            async with factory() as db:await append_service_time(db,principal,principal.user_id,assignment_id,event_id);await db.commit()
+        hours=(await own.get('/api/v1/me/hours')).json();assert next(a for a in hours['achievements'] if a['key']=='month')['earned']
+        assignment_id,attendance_id,_=facts[1]
+        async with factory() as db:
+            attendance=await db.get(Attendance,attendance_id);attendance.outcome='absent';attendance.minutes=0;attendance.version=2
+            correction=AttendanceEvent(foundation_id=principal.foundation_id,attendance_id=attendance_id,assignment_id=assignment_id,user_id=principal.user_id,version=2,old_minutes=120,new_minutes=0,reason='Проверено отсутствие',actor_id='fixture');db.add(correction);await db.flush();await append_service_time(db,principal,principal.user_id,assignment_id,correction.id);await db.commit()
+        hours=(await own.get('/api/v1/me/hours')).json();assert not next(a for a in hours['achievements'] if a['key']=='month')['earned']
+    finally:await own.aclose()
+
+@pytest.mark.asyncio
+async def test_gratitude_uses_actual_confirmed_basis_and_rejects_invalidated_time(env):
+    app,factory=env;own=await volunteer(app,factory);reviewer=await coord(app,factory)
+    try:
+        request=(await post(own,'/me/hours/requests',dict(title='Помощь на ярмарке',service_date=date.today().isoformat(),requested_minutes=90))).json()
+        approved=await post(reviewer,f"/coord/hours/requests/{request['id']}/review",dict(expected_version=1,decision='approved',approved_minutes=90,reason='Проверена помощь на ярмарке'));assert approved.status_code==200
+        bases=(await reviewer.get('/api/v1/coord/profile/recognition-bases')).json();assert bases[0]['confirmed_minutes']==90
+        basis=bases[0];thank=await post(reviewer,'/coord/gratitudes',dict(user_id=basis['user_id'],basis_entry_id=basis['entry_id'],text='Спасибо за помощь на ярмарке'));assert thank.status_code==200,thank.text
+        assert (await own.get('/api/v1/me/hours')).json()['gratitudes'][0]['basis_current']
+        rejected=await post(reviewer,f"/coord/hours/requests/{request['id']}/review",dict(expected_version=2,decision='rejected',approved_minutes=0,reason='Исправлено ошибочное подтверждение'));assert rejected.status_code==200
+        assert not (await own.get('/api/v1/me/hours')).json()['gratitudes'][0]['basis_current']
+        assert (await reviewer.get('/api/v1/coord/profile/recognition-bases')).json()==[]
+        assert (await post(reviewer,'/coord/gratitudes',dict(user_id=basis['user_id'],basis_entry_id=basis['entry_id'],text='Повтор без подтверждённого основания'))).status_code==409
+    finally:await own.aclose();await reviewer.aclose()

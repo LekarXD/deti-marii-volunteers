@@ -1,5 +1,5 @@
 """Append-only minute deltas backed by immutable attendance or coordinator reviews."""
-from datetime import date
+from datetime import date,timedelta
 from zoneinfo import ZoneInfo
 from sqlalchemy import select,func,text
 from app.core.clock import utcnow
@@ -88,7 +88,18 @@ async def hours_view(db,principal):
     pending=await db.scalar(select(func.count()).select_from(AttendanceEvent).where(AttendanceEvent.foundation_id==principal.foundation_id,AttendanceEvent.user_id==user.id,AttendanceEvent.ledger_state=='pending'))
     positive=[entry for entry in entries if entry.assignment_id and assignments.get(entry.assignment_id,0)>0]
     first=min((entry.service_date for entry in positive),default=None);months=0 if not first else max(0,(utcnow().year-first.year)*12+utcnow().month-first.month-(utcnow().day<first.day))
-    achievements=[AchievementView(key='first',title='Первое занятие',earned=count>=1,progress=min(count,1),target=1,rule='Хотя бы одно посещение с подтверждёнными минутами'),AchievementView(key='ten',title='10 занятий',earned=count>=10,progress=min(count,10),target=10,rule='Десять разных назначений с подтверждёнными минутами'),AchievementView(key='six_months',title='Полгода с нами',earned=months>=6,progress=min(months,6),target=6,rule='Шесть месяцев с первого подтверждённого занятия'),AchievementView(key='year',title='Год с фондом',earned=months>=12,progress=min(months,12),target=12,rule='Двенадцать месяцев с первого подтверждённого занятия')]
+    planned=(await db.execute(select(Assignment.id,EventOccurrence.starts_at,Attendance.outcome).join(EventOccurrence,Assignment.occurrence_id==EventOccurrence.id).outerjoin(Attendance,Attendance.assignment_id==Assignment.id).where(Assignment.foundation_id==principal.foundation_id,Assignment.user_id==user.id,Assignment.status=='confirmed',EventOccurrence.status!='cancelled',EventOccurrence.ends_at<utcnow()).order_by(EventOccurrence.starts_at))).all()
+    dates=[(id,start.astimezone(ZoneInfo('Europe/Moscow')).date(),outcome) for id,start,outcome in planned]
+    month_earned=False;month_progress=0
+    for _,start,_ in dates:
+        end=start+timedelta(days=27)
+        if end>=utcnow().date():continue
+        window=[(id,day,outcome) for id,day,outcome in dates if start<=day<=end]
+        passed=sum(outcome=='attended' and assignments.get(id,0)>0 for id,day,outcome in window)
+        weeks=len({day.isocalendar()[:2] for id,day,outcome in window if outcome=='attended' and assignments.get(id,0)>0})
+        month_progress=max(month_progress,min(passed,4))
+        if passed==len(window) and passed>=4 and weeks>=4:month_earned=True
+    achievements=[AchievementView(key='first',title='Первое занятие',earned=count>=1,progress=min(count,1),target=1,rule='Хотя бы одно посещение с подтверждёнными минутами'),AchievementView(key='month',title='Месяц без пропусков',earned=month_earned,progress=4 if month_earned else month_progress,target=4,rule='За завершившиеся 28 дней: минимум четыре подтверждённых занятия в четырёх разных неделях; каждое согласованное занятие в этом периоде посещено'),AchievementView(key='ten',title='10 занятий',earned=count>=10,progress=min(count,10),target=10,rule='Десять разных назначений с подтверждёнными минутами'),AchievementView(key='six_months',title='Полгода с нами',earned=months>=6,progress=min(months,6),target=6,rule='Шесть месяцев с первого подтверждённого занятия'),AchievementView(key='year',title='Год с фондом',earned=months>=12,progress=min(months,12),target=12,rule='Двенадцать месяцев с первого подтверждённого занятия')]
     gratitudes=(await db.scalars(select(Gratitude).where(Gratitude.foundation_id==principal.foundation_id,Gratitude.user_id==user.id).order_by(Gratitude.created_at.desc()))).all();thanks=[]
     for gratitude in gratitudes:
         basis=next((entry for entry in entries if entry.id==gratitude.basis_entry_id),None)
@@ -97,6 +108,7 @@ async def hours_view(db,principal):
     return HoursView(total_minutes=sum(entry.delta_minutes for entry in entries),confirmed_assignments=count,pending_minutes=sum(row.requested_minutes for row in manuals if row.state=='pending'),ledger_pending=pending,entries=[entry_view(row) for row in entries],manual_requests=[await manual_view(db,row) for row in manuals],achievements=achievements,gratitudes=thanks)
 
 async def add_gratitude(db,principal,command):
+    if command.user_id==principal.user_id:raise ApiError(403,'self_gratitude_forbidden','Благодарность пишет другой сотрудник')
     entry=await db.scalar(select(ServiceTimeEntry).where(ServiceTimeEntry.id==command.basis_entry_id,ServiceTimeEntry.foundation_id==principal.foundation_id,ServiceTimeEntry.user_id==command.user_id))
     if entry is None:raise ApiError(404,'service_time_not_found','Подтверждённая помощь не найдена')
     await subject_lock(db,principal.foundation_id,command.user_id)
@@ -104,3 +116,13 @@ async def add_gratitude(db,principal,command):
     if not net or net<=0:raise ApiError(409,'gratitude_basis_invalid','Нет подтверждённых часов для благодарности')
     row=Gratitude(foundation_id=principal.foundation_id,user_id=command.user_id,basis_entry_id=entry.id,text=command.text.strip(),author_id=principal.user_id)
     db.add(row);await db.flush();return GratitudeView(id=row.id,text=row.text,author=(await db.get(User,principal.user_id)).display_name,created_at=row.created_at,basis_current=True)
+
+async def recognition_bases(db,principal):
+    from .schemas import RecognitionBasisView
+    groups=(await db.execute(select(ServiceTimeEntry.user_id,ServiceTimeEntry.source_kind,ServiceTimeEntry.source_id,func.sum(ServiceTimeEntry.delta_minutes)).where(ServiceTimeEntry.foundation_id==principal.foundation_id,ServiceTimeEntry.user_id!=principal.user_id).group_by(ServiceTimeEntry.user_id,ServiceTimeEntry.source_kind,ServiceTimeEntry.source_id).having(func.sum(ServiceTimeEntry.delta_minutes)>0).order_by(func.max(ServiceTimeEntry.created_at).desc()).limit(200))).all()
+    values=[]
+    for user_id,kind,source_id,total in groups:
+        row=await db.scalar(select(ServiceTimeEntry).where(ServiceTimeEntry.foundation_id==principal.foundation_id,ServiceTimeEntry.user_id==user_id,ServiceTimeEntry.source_kind==kind,ServiceTimeEntry.source_id==source_id,ServiceTimeEntry.delta_minutes>0).order_by(ServiceTimeEntry.created_at).limit(1))
+        user=await db.get(User,user_id)
+        values.append(RecognitionBasisView(entry_id=row.id,user_id=user.id,display_name=user.display_name,title=row.title,service_date=row.service_date,confirmed_minutes=total))
+    return values
