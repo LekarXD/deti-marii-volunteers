@@ -1,0 +1,3 @@
+import {Card} from '../../ui';
+import {useDobroQuery,dobroDate,type DobroTeam} from './api';
+export function DobroOneOffPreparation({occurrenceId}:{occurrenceId:string}){const query=useDobroQuery<DobroTeam>('team',`/fund/events/${occurrenceId}/dobro-team`);if(!query.data?.preparation?.length)return null;return <Card className="dobro-section"><h3 className="h3">Добро.рф: подготовка мероприятия</h3>{query.data.preparation.map(item=><div className="dobro-link-row" key={item.key}><div><strong>{item.title}</strong><p className="meta">До {dobroDate(item.date)}</p><p className="meta">{item.note}</p></div>{query.data.activity&&<a className="btn btn-ghost" href={query.data.activity.url} target="_blank" rel="noopener noreferrer">Открыть доброе дело</a>}</div>)}</Card>;}

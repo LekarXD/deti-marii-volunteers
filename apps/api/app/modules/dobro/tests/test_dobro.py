@@ -52,7 +52,7 @@ async def world():
                 await db.rollback()
                 raise
     app.dependency_overrides[get_db] = override
-    coordinator = await staff(app, factory, ('hours.review', 'opportunities.manage', 'integrations.manage', 'assignments.manage'))
+    coordinator = await staff(app, factory, ('hours.review', 'opportunities.manage', 'integrations.manage', 'assignments.manage', 'crm.read'))
     volunteer = await staff(app, factory, ())
     principal = await principal_for(coordinator, factory)
     own = await principal_for(volunteer, factory)
@@ -210,3 +210,97 @@ async def test_states_link_overlap_url_validation_scope_and_current_revoke(world
         for grant in grants: grant.revoked_at = __import__('app.core.clock', fromlist=['utcnow']).utcnow()
         await db.commit()
     assert (await post(world[2], '/fund/integrations/dobro/transfers/mark-entered', payload)).status_code == 403
+
+@pytest.mark.asyncio
+async def test_edit_unused_link_then_freeze_and_resolve_crm_profile_identity(world):
+    from app.modules.crm.models import CrmVolunteer
+    opportunity, activity = await link_fixture(world)
+    update = {key:activity[key] for key in ('url','title','kind','valid_from','valid_until')}
+    update.update(expected_version=1, url='https://dobro.ru/event/67890')
+    response = await world[2].put(f"/api/v1/fund/opportunities/{opportunity.id}/dobro/{activity['id']}", json=update, headers={'Idempotency-Key':uuid4().hex})
+    assert response.status_code == 200 and response.json()['version'] == 2, response.text
+    await fact_fixture(world, opportunity, '2026-08-05', 120)
+    update['expected_version'] = 2
+    assert (await world[2].put(f"/api/v1/fund/opportunities/{opportunity.id}/dobro/{activity['id']}", json=update, headers={'Idempotency-Key':uuid4().hex})).status_code == 409
+    async with world[1]() as db:
+        linked = CrmVolunteer(foundation_id=world[4].foundation_id, user_id=world[5].user_id, display_name='Вымышленный связанный контакт')
+        historical = CrmVolunteer(foundation_id=world[4].foundation_id, display_name='Исторический контакт')
+        db.add_all([linked,historical])
+        await db.commit()
+    path = f'/api/v1/fund/volunteers/{linked.id}/external-profiles/dobro'
+    assert (await world[2].get(path)).json() == {'profile_url':'','version':0}
+    save = await world[2].put(path, json={'profile_url':'https://dobro.ru/volunteers/123','expected_version':0}, headers={'Idempotency-Key':uuid4().hex})
+    assert save.status_code == 200, save.text
+    assert (await world[3].get('/api/v1/me/dobro')).json()['profile_url'] == 'https://dobro.ru/volunteers/123'
+    assert (await world[2].get(f'/api/v1/fund/volunteers/{world[5].user_id}/external-profiles/dobro')).status_code == 404
+    missing = await world[2].get(f'/api/v1/fund/volunteers/{historical.id}/external-profiles/dobro')
+    assert missing.status_code == 409 and missing.json()['code'] == 'dobro_account_unlinked'
+
+@pytest.mark.asyncio
+async def test_opt_in_reminders_real_worker_source_replay_and_revocation(world):
+    from app.core.models import MfaFactor, Job, OutboxMessage
+    from app.core.crypto import seal
+    from app.core.clock import utcnow
+    from app.modules.dobro.jobs import run_reminders
+    from app.modules.dobro import notifications
+    from app.modules.messaging.models import Message
+    from app.modules.notifications.delivery import process_internal
+    from app.worker.queue import claim, complete
+    from app.worker.registry import JobContext
+    import json
+    from app.core.crypto import unseal
+    opportunity, activity = await link_fixture(world)
+    await fact_fixture(world, opportunity, '2026-08-06', 90)
+    await enroll(world, activity)
+    async with world[1]() as db:
+        db.add(MfaFactor(user_id=world[4].user_id, secret_cipher=seal('JBSWY3DPEHPK3PXP'), confirmed_at=utcnow()))
+        await db.commit()
+    view = (await world[2].get('/api/v1/fund/integrations/dobro/settings')).json()
+    assert not view['reminders_enabled']
+    setting_body = {key:view[key] for key in ('organization_url','registration_url','verified','monthly_day','hard_deadline_days','risk_days','rules_confirmed','reminder_template')}
+    setting_body.update(expected_version=0, reminders_enabled=True, monthly_day=1)
+    saved = await world[2].put('/api/v1/fund/integrations/dobro/settings', json=setting_body, headers={'Idempotency-Key':uuid4().hex})
+    assert saved.status_code == 200, saved.text
+    async with world[1]() as db:
+        scan = await claim(db, ['dobro.reminders.scan'])
+        result = await run_reminders(db, JobContext(scan.id, scan.claim_token, scan.foundation_id, scan.payload))
+        assert result['queued'] == 1
+        await complete(db, scan.id, scan.claim_token, result)
+        await db.commit()
+    # A second due scan cannot enqueue the monthly notice twice.
+    async with world[1]() as db:
+        scan = await db.scalar(select(Job).where(Job.kind == 'dobro.reminders.scan', Job.state == 'succeeded'))
+        from app.modules.dobro.jobs import enqueue_once
+        from app.core.auth import load_background_staff_authorization
+        from app.modules.dobro.models import DobroSettings
+        owner = await load_background_staff_authorization(db, scan.foundation_id, world[4].user_id)
+        settings = await db.get(DobroSettings, scan.foundation_id)
+        await service.foundation_lock(db, world[4])
+        assert not await enqueue_once(db, settings, owner, '2026-09', 'monthly')
+        await db.commit()
+    async with world[1]() as db:
+        job = await claim(db, ['outbox.deliver'])
+        outbox = await db.get(OutboxMessage, UUID(job.payload['outbox_id']))
+        payload = json.loads(unseal(outbox.payload_cipher))
+        assert outbox.channel == 'in_app'
+        state = await process_internal(db, job, outbox, payload)
+        assert state == 'delivered'
+        await complete(db, job.id, job.claim_token, {'state':state})
+        await db.commit()
+        assert await db.scalar(select(func.count()).select_from(Message)) == 1
+    # Already queued source resolution checks current grants again, not the grant
+    # snapshot that was present when the scheduler ran.
+    async with world[1]() as db:
+        from app.modules.messaging.consumers import enqueue_notice
+        outbox = enqueue_notice(db, world[4].foundation_id, world[4].user_id, '', '', source=payload['source'])
+        grant = await db.scalar(select(PermissionGrant).where(PermissionGrant.permission == 'hours.review'))
+        grant.revoked_at = utcnow()
+        await db.commit()
+    async with world[1]() as db:
+        job = await claim(db, ['outbox.deliver'])
+        stored = await db.get(OutboxMessage, UUID(job.payload['outbox_id']))
+        suppressed = await process_internal(db, job, stored, json.loads(unseal(stored.payload_cipher)))
+        assert suppressed == 'suppressed_dobro_revoked'
+        await complete(db, job.id, job.claim_token, {'state':suppressed})
+        await db.commit()
+        assert await db.scalar(select(func.count()).select_from(Message)) == 1

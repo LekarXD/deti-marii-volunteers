@@ -217,6 +217,13 @@ class DobroTeamPersonView(BaseModel):
     enrollment_version: int
     reminder_text: str
 
+class DobroPreparationView(BaseModel):
+    key: Literal['publish_activity', 'enter_hours']
+    title: str
+    date: date
+    note: str
+
 class DobroTeamView(BaseModel):
     activity: DobroActivityView | None = None
     people: list[DobroTeamPersonView] = Field(default_factory=list)
+    preparation: list[DobroPreparationView] = Field(default_factory=list)

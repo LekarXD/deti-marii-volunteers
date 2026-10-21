@@ -61,19 +61,49 @@ async def save_settings(db, principal, command):
     await foundation_lock(db, principal)
     row = await db.get(DobroSettings, principal.foundation_id)
     version(row.version if row else 0, command.expected_version)
+    if command.reminders_enabled:
+        permission(principal, 'hours.review')
     if not row:
         row = DobroSettings(foundation_id=principal.foundation_id, version=0, updated_by=principal.actor_id)
         db.add(row)
     for key, value in command.model_dump(exclude={'expected_version'}).items(): setattr(row, key, value)
     row.version += 1
     row.updated_by = principal.actor_id
+    row.reminder_owner_user_id = principal.user_id if command.reminders_enabled else None
     await db.flush()
+    if row.reminders_enabled:
+        from app.worker.queue import enqueue_job
+        enqueue_job(db, principal.foundation_id, 'dobro.reminders.scan', {'settings_version': row.version, 'scheduled_for': utcnow().isoformat()})
     return await settings_view(db, principal)
 
 async def list_links(db, principal, opportunity_id):
     opportunity = await db.scalar(select(Opportunity).where(Opportunity.id == opportunity_id, Opportunity.foundation_id == principal.foundation_id))
     if not opportunity: raise ApiError(404, 'opportunity_not_found', 'Возможность не найдена.')
-    return [activity_view(row) for row in (await db.scalars(select(DobroActivityLink).where(DobroActivityLink.foundation_id == principal.foundation_id, DobroActivityLink.opportunity_id == opportunity_id).order_by(DobroActivityLink.valid_from.desc()))).all()]
+    rows = (await db.scalars(select(DobroActivityLink).where(DobroActivityLink.foundation_id == principal.foundation_id, DobroActivityLink.opportunity_id == opportunity_id).order_by(DobroActivityLink.valid_from.desc()))).all()
+    return [activity_view(row).model_copy(update={'can_edit': not await link_used(db, row)}) for row in rows]
+
+async def link_used(db, row, command=None):
+    enrollment = await db.scalar(select(DobroEnrollment.id).where(DobroEnrollment.activity_id == row.id).limit(1))
+    transferred = await db.scalar(select(DobroTransfer.id).where(DobroTransfer.activity_id == row.id).limit(1))
+    if enrollment or transferred: return True
+    earliest = min(row.valid_from, command.valid_from) if command else row.valid_from
+    latest = max(row.valid_until, command.valid_until) if command else row.valid_until
+    return bool(await db.scalar(select(ServiceTimeEntry.id).join(Assignment, ServiceTimeEntry.assignment_id == Assignment.id).join(EventOccurrence, Assignment.occurrence_id == EventOccurrence.id).join(DobroSeriesOpportunity, DobroSeriesOpportunity.series_id == EventOccurrence.series_id).where(ServiceTimeEntry.foundation_id == row.foundation_id, DobroSeriesOpportunity.foundation_id == row.foundation_id, DobroSeriesOpportunity.opportunity_id == row.opportunity_id, ServiceTimeEntry.service_date >= earliest, ServiceTimeEntry.service_date <= latest).limit(1)))
+
+async def update_link(db, principal, opportunity_id, activity_id, command):
+    permission(principal, 'opportunities.manage')
+    await foundation_lock(db, principal)
+    row = await activity(db, principal, activity_id)
+    if row.opportunity_id != opportunity_id: raise ApiError(404, 'dobro_activity_not_found', 'Доброе дело не найдено.')
+    version(row.version, command.expected_version)
+    if await link_used(db, row, command): raise ApiError(409, 'dobro_activity_has_history', 'По этой ссылке уже есть отклики или факты участия. Изменять её нельзя: добавьте ссылку на следующий период.')
+    overlapping = await db.scalar(select(DobroActivityLink.id).where(DobroActivityLink.foundation_id == principal.foundation_id, DobroActivityLink.opportunity_id == opportunity_id, DobroActivityLink.id != row.id, DobroActivityLink.valid_from <= command.valid_until, DobroActivityLink.valid_until >= command.valid_from))
+    if overlapping: raise ApiError(409, 'dobro_activity_overlap', 'Периоды двух добрых дел одной возможности пересекаются.')
+    for key, value in command.model_dump(exclude={'expected_version'}).items(): setattr(row, key, value)
+    row.version += 1
+    row.actor_id = principal.actor_id
+    await db.flush()
+    return activity_view(row).model_copy(update={'can_edit': True})
 
 async def create_link(db, principal, opportunity_id, command):
     permission(principal, 'opportunities.manage')
@@ -84,7 +114,7 @@ async def create_link(db, principal, opportunity_id, command):
     row = DobroActivityLink(foundation_id=principal.foundation_id, opportunity_id=opportunity_id, actor_id=principal.actor_id, **command.model_dump())
     db.add(row)
     await db.flush()
-    return activity_view(row)
+    return activity_view(row).model_copy(update={'can_edit': True})
 
 async def series_view(db, principal, series_id):
     series = await db.scalar(select(EventSeries).where(EventSeries.id == series_id, EventSeries.foundation_id == principal.foundation_id))
@@ -289,4 +319,5 @@ async def team_view(db, principal, occurrence_id):
     if not link: return dto.DobroTeamView()
     settings = await settings_view(db, principal)
     rows = (await db.execute(select(User, DobroEnrollment).join(Assignment, User.id == Assignment.user_id).outerjoin(DobroEnrollment, (DobroEnrollment.user_id == User.id) & (DobroEnrollment.activity_id == link.id)).where(Assignment.occurrence_id == occurrence_id, Assignment.foundation_id == principal.foundation_id, User.foundation_id == principal.foundation_id, Assignment.status.in_(('confirmed', 'invited'))).order_by(User.display_name, User.id))).all()
-    return dto.DobroTeamView(activity=activity_view(link), people=[dto.DobroTeamPersonView(user_id=person.id, display_name=person.display_name, state=enrollment.state if enrollment else 'none', enrollment_version=enrollment.version if enrollment else 0, reminder_text=settings.reminder_template.replace('{имя}', person.display_name.split()[0] if person.display_name else '').replace('{ссылка}', link.url)) for person, enrollment in rows])
+    preparation = [dto.DobroPreparationView(key='publish_activity', title='Опубликовать мероприятие на Добро.рф', date=link.valid_from-timedelta(days=21), note='Рекомендуемый срок подготовки. Фактический срок модерации уточните в Добро.рф.'), dto.DobroPreparationView(key='enter_hours', title='Внести часы в CRM Добро.рф', date=link.valid_until+timedelta(days=settings.hard_deadline_days), note='Жёсткий срок из настроек фонда. Перенос выполняет координатор вручную.')] if link.kind == 'one_off' else []
+    return dto.DobroTeamView(activity=activity_view(link), people=[dto.DobroTeamPersonView(user_id=person.id, display_name=person.display_name, state=enrollment.state if enrollment else 'none', enrollment_version=enrollment.version if enrollment else 0, reminder_text=settings.reminder_template.replace('{имя}', person.display_name.split()[0] if person.display_name else '').replace('{ссылка}', link.url)) for person, enrollment in rows], preparation=preparation)

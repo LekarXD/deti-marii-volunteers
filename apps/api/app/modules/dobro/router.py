@@ -49,6 +49,10 @@ async def links(opportunity_id: UUID, principal: Principal = Depends(require_per
 async def create_link(opportunity_id: UUID, body: dto.DobroActivityCommand, principal: Principal = Depends(require_permission('opportunities.manage')), db: AsyncSession = Depends(get_db), idempotency_key: str | None = Header(default=None)):
     return await command(db, principal, f'dobro.activity.create:{opportunity_id}', idempotency_key, body, lambda: service.create_link(db, principal, opportunity_id, body), 'opportunities.manage')
 
+@router.put('/fund/opportunities/{opportunity_id}/dobro/{activity_id}', response_model=dto.DobroActivityView)
+async def edit_link(opportunity_id: UUID, activity_id: UUID, body: dto.DobroActivityUpdate, principal: Principal = Depends(require_permission('opportunities.manage')), db: AsyncSession = Depends(get_db), idempotency_key: str | None = Header(default=None)):
+    return await command(db, principal, f'dobro.activity.edit:{activity_id}', idempotency_key, body, lambda: service.update_link(db, principal, opportunity_id, activity_id, body), 'opportunities.manage')
+
 @router.get('/fund/event-series/{series_id}/dobro-opportunity', response_model=dto.DobroSeriesView)
 async def event_mapping(series_id: UUID, principal: Principal = Depends(require_permission('opportunities.manage')), db: AsyncSession = Depends(get_db)):
     return await service.series_view(db, principal, series_id)
