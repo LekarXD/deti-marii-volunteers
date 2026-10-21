@@ -1,0 +1,4 @@
+import {it,expect} from 'vitest';
+import {dobroUrl,movePeriod,validPeriod,transferTsv,type SelectedTransfer} from './model';
+it('keeps month boundaries canonical and accepts only trusted HTTPS Добро links',()=>{expect(movePeriod('2026-12',1)).toBe('2027-01');expect(movePeriod('2026-01',-1)).toBe('2025-12');expect(validPeriod('2026-13')).toBe(false);expect(dobroUrl('https://dobro.ru/volunteers/12')).toBeTruthy();expect(dobroUrl('https://добро.рф/events/1')).toBeTruthy();for(const url of ['javascript:alert(1)','https://dobro.ru.evil.test','https://name:secret@dobro.ru/','http://dobro.ru/'])expect(dobroUrl(url)).toBeNull();});
+it('makes a minimal TSV with cell controls and spreadsheet formulas neutralized in names',()=>{const items=[{row:{display_name:'=SUM(A1)\tУчебный\nЧеловек'},hours:'-2'}] as SelectedTransfer[];expect(transferTsv(items)).toBe("ФИО\tЧасы\n'=SUM(A1) Учебный Человек\t-2");});
