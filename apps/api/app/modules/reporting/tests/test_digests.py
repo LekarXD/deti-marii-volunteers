@@ -63,7 +63,7 @@ async def test_due_digest_is_idempotent_and_delivery_rechecks_revocation(env):
             outbox=await db.scalar(select(OutboxMessage));payload=json.loads(unseal(outbox.payload_cipher))
             membership=await db.scalar(select(StaffMembership).where(StaffMembership.user_id==rp.user_id))
             grant=await db.scalar(select(PermissionGrant).where(PermissionGrant.membership_id==membership.id,PermissionGrant.permission=='reports.read'));grant.revoked_at=utcnow();await db.commit()
-            assert await deliver_internal(db,outbox,payload)=='suppressed_report_access_revoked'
+            assert await deliver_internal(db,outbox,payload)=='suppressed_report_revoked'
             assert not await db.scalar(select(Message.id).where(Message.source_outbox_id==outbox.id))
             await db.rollback()
     finally:
@@ -90,3 +90,48 @@ async def test_delivery_rebuilds_real_metrics_without_cached_numbers(env):
             await db.rollback()
     finally:
         for client in (facts['first'],facts['second'],owner,recipient):await client.aclose()
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('change,expected_state',[
+    ('revoked','suppressed_report_revoked'),
+    ('superseded','suppressed_report_stale'),
+    ('removed','suppressed_report_removed'),
+])
+async def test_worker_persists_digest_suppression_as_terminal_without_state_overflow(env,monkeypatch,change,expected_state):
+    from sqlalchemy import delete
+    from app.core.models import Job
+    from app.modules.notifications.models import NotificationDelivery,DeliveryAttempt
+    from app.modules.reporting.models import ReportDigestRecipient
+    from app.worker import main as worker
+    app,factory=env;owner=await reporter(app,factory);recipient=await staff(app,factory,('reports.read',));op=await principal(owner,factory);rp=await principal(recipient,factory)
+    try:
+        await factor(factory,op.user_id);await factor(factory,rp.user_id)
+        response=await save(owner,dict(expected_version=0,enabled=True,recipient_ids=[str(rp.user_id)],weekday=0,minute_of_day=540,timezone='Europe/Moscow'));assert response.status_code==200,response.text
+        schedule_id=UUID(response.json()['id']);due=utcnow()-timedelta(seconds=1)
+        async def fence(db):pass
+        context=SimpleNamespace(foundation_id=op.foundation_id,payload=dict(schedule_id=str(schedule_id),version=1,scheduled_for=due.isoformat()),fence=fence)
+        async with factory() as db:
+            schedule=await db.get(ReportDigestSchedule,schedule_id);schedule.next_run_at=due;await db.commit()
+            assert (await run_digest(db,context))['queued']==1;await db.commit()
+            outbox=await db.scalar(select(OutboxMessage));outbox_id,job_id=outbox.id,outbox.job_id
+            if change=='revoked':
+                membership=await db.scalar(select(StaffMembership).where(StaffMembership.user_id==rp.user_id))
+                grant=await db.scalar(select(PermissionGrant).where(PermissionGrant.membership_id==membership.id,PermissionGrant.permission=='reports.read'));grant.revoked_at=utcnow()
+            elif change=='superseded':schedule.version+=1
+            else:await db.execute(delete(ReportDigestRecipient).where(ReportDigestRecipient.schedule_id==schedule_id,ReportDigestRecipient.user_id==rp.user_id))
+            await db.commit()
+        # Exercise the actual worker → process_internal → journal/outbox writes.
+        # The fixture's factory is restricted to the dedicated fictitious database.
+        monkeypatch.setattr(worker,'SessionLocal',factory)
+        assert await worker.run_once(['outbox.deliver']) is True
+        async with factory() as db:
+            saved=await db.get(OutboxMessage,outbox_id);job=await db.get(Job,job_id)
+            assert saved.state==expected_state and len(saved.state)<=OutboxMessage.__table__.c.state.type.length
+            assert job.state=='succeeded' and job.result=={'delivery':expected_state} and job.attempts==1
+            delivery=await db.scalar(select(NotificationDelivery).where(NotificationDelivery.outbox_id==outbox_id))
+            attempts=(await db.scalars(select(DeliveryAttempt).where(DeliveryAttempt.delivery_id==delivery.id))).all()
+            assert delivery.state==expected_state and len(attempts)==1 and attempts[0].state==expected_state and attempts[0].completed_at
+            assert not await db.scalar(select(Message.id).where(Message.source_outbox_id==outbox_id))
+        assert await worker.run_once(['outbox.deliver']) is False
+    finally:
+        for client in (owner,recipient):await client.aclose()

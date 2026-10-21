@@ -6,6 +6,8 @@ The page requests only server-listed scopes and canonical metric definitions. It
 
 Letters, certificates and gratitude use the profile owner's recognition/document workflow, not a second store. Weekly settings use the reporting schedule API; the worker and notice source recheck current owner/recipient authorization before delivery.
 
-Validation: reporting module 8 PostgreSQL tests on the dedicated fictitious `opora_reporting_test` database; 6 UI boundary tests. Final 2-page PDF and 2-page DOCX were rendered with bundled Poppler/LibreOffice and all pages visually inspected at `/private/tmp/opora-reporting-evidence`. Root owns live browser visual acceptance.
+Validation: reporting module 11 PostgreSQL tests on the dedicated fictitious `opora_reporting_test` database; 6 UI boundary tests. Final 2-page PDF and 2-page DOCX were rendered with bundled Poppler/LibreOffice and all pages visually inspected at `/private/tmp/opora-reporting-evidence`. Root owns live browser visual acceptance.
 
 Report editing uses a stable report identity. Local drafts survive section saves, server refreshes and typing during an in-flight save. A same-section server edit is compared with the local base and requires an explicit conflict choice; unsaved drafts block report confirmation/metric refresh. Unavailable KPI reasons are reached through the short accessible explanation control. The creation form collapses after report selection.
+
+All source suppression codes fit the existing 30-character outbox state contract. PostgreSQL regressions run the actual bounded outbox worker for revoked access, a superseded schedule and a removed recipient; each persists a terminal attempt/delivery/outbox state, completes the job once and creates no message or retry.

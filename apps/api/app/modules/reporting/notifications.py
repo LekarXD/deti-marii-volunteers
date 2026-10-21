@@ -20,18 +20,18 @@ async def lock_subjects(db,outbox,source):
 
 async def resolve_digest(db,outbox,source):
     pair=await source_rows(db,outbox,source)
-    if pair is None:return 'suppressed_report_source_invalid'
+    if pair is None:return 'suppressed_report_invalid'
     delivery,schedule=pair
-    if not schedule.enabled or source.get('schedule_version')!=schedule.version or delivery.schedule_version!=schedule.version:return 'suppressed_report_source_superseded'
-    if source.get('period_from')!=delivery.period_from.isoformat() or source.get('period_to')!=delivery.period_to.isoformat():return 'suppressed_report_source_invalid'
+    if not schedule.enabled or source.get('schedule_version')!=schedule.version or delivery.schedule_version!=schedule.version:return 'suppressed_report_stale'
+    if source.get('period_from')!=delivery.period_from.isoformat() or source.get('period_to')!=delivery.period_to.isoformat():return 'suppressed_report_invalid'
     selected=await db.scalar(select(ReportDigestRecipient.user_id).where(ReportDigestRecipient.schedule_id==schedule.id,ReportDigestRecipient.user_id==delivery.recipient_id))
-    if not selected:return 'suppressed_report_recipient_removed'
+    if not selected:return 'suppressed_report_removed'
     try:assert_background_authorizations_locked(db,outbox.foundation_id,[schedule.owner_user_id,delivery.recipient_id])
-    except ApiError:return 'suppressed_report_authorization_changed'
+    except ApiError:return 'suppressed_report_authz'
     owner=await load_background_staff_authorization(db,outbox.foundation_id,schedule.owner_user_id);recipient=await load_background_staff_authorization(db,outbox.foundation_id,delivery.recipient_id)
-    if not allowed(owner,'reports.write',schedule.scope_type,schedule.scope_id) or not allowed(owner,'reports.read',schedule.scope_type,schedule.scope_id) or not allowed(recipient,'reports.read',schedule.scope_type,schedule.scope_id):return 'suppressed_report_access_revoked'
+    if not allowed(owner,'reports.write',schedule.scope_type,schedule.scope_id) or not allowed(owner,'reports.read',schedule.scope_type,schedule.scope_id) or not allowed(recipient,'reports.read',schedule.scope_type,schedule.scope_id):return 'suppressed_report_revoked'
     try:data=await metrics(db,recipient,outbox.foundation_id,delivery.period_from,delivery.period_to,schedule.scope_type,schedule.scope_id)
-    except ApiError:return 'suppressed_report_source_unavailable'
+    except ApiError:return 'suppressed_report_unavailable'
     values={item.key:item for item in data.metrics}
     text=f'Сводка за {delivery.period_from:%d.%m.%Y} — {delivery.period_to:%d.%m.%Y}. Область: {data.scope.label}.\nПодтверждённая помощь: {int(values["volunteer_minutes"].value)} минут. Занятий с подтверждённой помощью: {int(values["held_occurrences"].value)}. Волонтёров: {int(values["active_volunteers"].value)}.\nПодробности и определения: /fund/reports'
     return dict(recipient_id=str(delivery.recipient_id),subject='Сводка Опоры',text=text,topic='messages')
