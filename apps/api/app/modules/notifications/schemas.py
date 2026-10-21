@@ -10,7 +10,7 @@ class NotificationTopics(BaseModel):
     learning:bool=True
     messages:bool=True
     news:bool=False
-class PreferenceCommand(BaseModel):
+class NotificationPreferenceCommand(BaseModel):
     expected_version:int=Field(ge=0)
     no_contact:bool
     email_enabled:bool
@@ -50,7 +50,7 @@ class TemplateUpdate(BaseModel):
     expected_version:int=Field(ge=1)
     subject:str=Field(min_length=1,max_length=300)
     body:str=Field(min_length=1,max_length=8000)
-class VersionCommand(BaseModel):
+class NotificationVersionCommand(BaseModel):
     expected_version:int=Field(ge=1)
 class TemplateView(BaseModel):
     id:UUID

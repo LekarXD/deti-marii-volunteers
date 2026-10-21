@@ -14,7 +14,7 @@ from app.core.errors import ApiError
 from app.core.models import OutboxMessage,User
 from . import service
 from .models import DeliveryAttempt,NotificationDelivery,NotificationTemplate,NotificationWebhookReceipt
-from .schemas import AudienceCommand,AudienceView,DeliveryList,EnqueuedView,PreferenceCommand,PreferenceView,SendAudienceCommand,TemplateInput,TemplateList,TemplateUpdate,TemplateView,VersionCommand,WebhookInput,WebhookView,DeliveryAttemptPage,NotificationReadinessView,NotificationRecipientPage
+from .schemas import AudienceCommand,AudienceView,DeliveryList,EnqueuedView,NotificationPreferenceCommand,PreferenceView,SendAudienceCommand,TemplateInput,TemplateList,TemplateUpdate,TemplateView,NotificationVersionCommand,WebhookInput,WebhookView,DeliveryAttemptPage,NotificationReadinessView,NotificationRecipientPage
 router=APIRouter(prefix='/api/v1',tags=['notifications'])
 
 @router.get('/me/notification-preferences',operation_id='notification_preferences',response_model=PreferenceView)
@@ -22,7 +22,7 @@ async def preferences(principal:Principal=Depends(get_principal),db:AsyncSession
     return await service.preference_view(db,principal)
 
 @router.put('/me/notification-preferences',operation_id='notification_preferences_save',response_model=PreferenceView)
-async def preferences_save(body:PreferenceCommand,request:Request,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+async def preferences_save(body:NotificationPreferenceCommand,request:Request,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     result=await service.save_preferences(db,principal,body,request.headers.get('Idempotency-Key'))
     await db.commit()
     return result
@@ -47,13 +47,13 @@ async def template_edit(tid:UUID,body:TemplateUpdate,request:Request,principal:P
     return result
 
 @router.post('/coord/notification-templates/{tid}/publish',operation_id='notification_template_publish',response_model=TemplateView)
-async def template_publish(tid:UUID,body:VersionCommand,request:Request,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+async def template_publish(tid:UUID,body:NotificationVersionCommand,request:Request,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     result=await service.mutate_template(db,principal,tid,body,request.headers.get('Idempotency-Key'),'publish')
     await db.commit()
     return result
 
 @router.post('/coord/notification-templates/{tid}/archive',operation_id='notification_template_archive',response_model=TemplateView)
-async def template_archive(tid:UUID,body:VersionCommand,request:Request,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+async def template_archive(tid:UUID,body:NotificationVersionCommand,request:Request,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     result=await service.mutate_template(db,principal,tid,body,request.headers.get('Idempotency-Key'),'archive')
     await db.commit()
     return result
