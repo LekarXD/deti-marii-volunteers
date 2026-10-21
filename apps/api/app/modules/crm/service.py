@@ -29,7 +29,8 @@ def nonempty(value,label='Заполните поле'):
 
 async def scoped_volunteer(db,foundation_id,volunteer_id,lock=False,allow_alias=False):
     query=select(CrmVolunteer).where(CrmVolunteer.foundation_id==foundation_id,CrmVolunteer.id==volunteer_id)
-    if lock:query=query.with_for_update()
+    # A pre-lock lookup may retain stale flags/version while another command commits.
+    if lock:query=query.with_for_update().execution_options(populate_existing=True)
     value=await db.scalar(query)
     if not value:raise ApiError(404,'volunteer_not_found','Волонтёр не найден')
     if value.merged_into_id and not allow_alias:
@@ -243,7 +244,7 @@ async def update_task(db,principal,task_id,command):
     if not task:raise ApiError(404,'task_not_found','Следующее действие не найдено')
     original=await scoped_volunteer(db,principal.foundation_id,task.volunteer_id,allow_alias=True)
     volunteer=await scoped_volunteer(db,principal.foundation_id,original.merged_into_id or original.id,lock=True)
-    task=await db.scalar(select(FollowUpTask).where(FollowUpTask.id==task_id).with_for_update());check_version(task.version,command.expected_version)
+    task=await db.scalar(select(FollowUpTask).where(FollowUpTask.id==task_id).with_for_update().execution_options(populate_existing=True));check_version(task.version,command.expected_version)
     if task.state!='open':raise ApiError(409,'task_closed','Действие уже завершено. Создайте следующий шаг отдельно')
     if volunteer.no_contact and command.state=='open':raise ApiError(409,'no_contact','Человек попросил не связываться')
     before=task_view(task).model_dump(mode='json')
