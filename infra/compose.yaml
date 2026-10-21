@@ -14,7 +14,7 @@ services:
       timeout: 3s
       retries: 20
   migrate:
-    build: {context: .., dockerfile: infra/docker/api.Dockerfile}
+    build: {context: .., dockerfile: infra/docker/api.Dockerfile, labels: {org.opencontainers.image.revision: "${OPORA_RELEASE:-development}"}}
     command: ["alembic", "upgrade", "head"]
     environment: &api-environment
       OPORA_ENVIRONMENT: development
@@ -49,7 +49,7 @@ services:
     depends_on:
       postgres: {condition: service_healthy}
   api:
-    build: {context: .., dockerfile: infra/docker/api.Dockerfile}
+    build: {context: .., dockerfile: infra/docker/api.Dockerfile, labels: {org.opencontainers.image.revision: "${OPORA_RELEASE:-development}"}}
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--no-access-log"]
     environment: *api-environment
     ports: ["127.0.0.1:8001:8001"]
@@ -62,21 +62,35 @@ services:
       timeout: 3s
       retries: 20
   worker:
-    build: {context: .., dockerfile: infra/docker/api.Dockerfile}
+    stop_grace_period: 3m
+    healthcheck:
+      test: ["CMD", "python", "-m", "app.worker.runtime", "health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+    build: {context: .., dockerfile: infra/docker/api.Dockerfile, labels: {org.opencontainers.image.revision: "${OPORA_RELEASE:-development}"}}
     command: ["python", "-m", "app.worker.main", "--kind", "outbox.deliver"]
     environment: *api-environment
     volumes: ["asset-data:/var/lib/opora/assets"]
     depends_on:
       migrate: {condition: service_completed_successfully}
   io-worker:
-    build: {context: .., dockerfile: infra/docker/api.Dockerfile}
+    stop_grace_period: 3m
+    healthcheck:
+      test: ["CMD", "python", "-m", "app.worker.runtime", "health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+    build: {context: .., dockerfile: infra/docker/api.Dockerfile, labels: {org.opencontainers.image.revision: "${OPORA_RELEASE:-development}"}}
     command: ["python", "-m", "app.worker.main", "--kind", "studio.close", "--kind", "studio.revoke", "--kind", "studio.reconcile_participant", "--kind", "knowledge.index", "--kind", "knowledge.ingest", "--kind", "ai.generate", "--kind", "reporting.digest"]
     environment: *api-environment
     volumes: ["asset-data:/var/lib/opora/assets"]
     depends_on:
       migrate: {condition: service_completed_successfully}
   web:
-    build: {context: .., dockerfile: infra/docker/web.Dockerfile}
+    build: {context: .., dockerfile: infra/docker/web.Dockerfile, labels: {org.opencontainers.image.revision: "${OPORA_RELEASE:-development}"}}
     ports: ["127.0.0.1:8080:8080"]
     depends_on:
       api: {condition: service_healthy}

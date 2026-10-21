@@ -2,6 +2,7 @@
 import asyncio
 import argparse
 import json
+import signal
 from datetime import timedelta
 from app.core.clock import utcnow
 from app.core.crypto import unseal
@@ -12,7 +13,7 @@ from app.core.models import OutboxMessage
 from app.core.config import get_settings
 from app.worker.queue import claim, complete, retry, LeaseLost
 
-async def run_once(kinds=None):
+async def run_once(kinds=None,on_ready=None):
     async with SessionLocal() as db:
         from app.worker.registry import HANDLERS, load_extensions, run_handler
         load_extensions()
@@ -22,6 +23,7 @@ async def run_once(kinds=None):
         lease=max([HANDLERS[k].lease_seconds for k in kinds if k in HANDLERS]+[60])
         job = await claim(db,kinds=kinds,lease_seconds=lease)
         await db.commit()
+        if on_ready:on_ready()
         if job is None:
             return False
         job_id,token,attempts,max_attempts=job.id,job.claim_token,job.attempts,job.max_attempts
@@ -71,13 +73,44 @@ async def run_once(kinds=None):
         return True
 
 async def main(kinds=None):
-    while True:
-        try:
-            if not await run_once(kinds):
-                await asyncio.sleep(1)
-        except Exception:
-            # No job payload, contact or token is logged; durable leases recover outages.
-            await asyncio.sleep(1)
+    from app.worker.runtime import WorkerRuntime,live_drain,HEARTBEAT_INTERVAL
+    runtime=WorkerRuntime();runtime.acquire();stopping=asyncio.Event()
+    loop=asyncio.get_running_loop()
+    for signum in (signal.SIGTERM,signal.SIGINT):loop.add_signal_handler(signum,stopping.set)
+    runtime.publish()
+    def mark_ready():
+        runtime.ready=True;runtime.publish()
+    async def pulse():
+        while True:
+            try:runtime.publish()
+            except OSError:
+                runtime.ready=False;stopping.set();raise
+            await asyncio.sleep(HEARTBEAT_INTERVAL)
+    monitor=asyncio.create_task(pulse())
+    try:
+        while not stopping.is_set():
+            gate=live_drain(runtime.root)
+            if gate:
+                # Acknowledgement happens only here, after run_once returned.
+                # The heartbeat never guesses that a newly requested gate is safe.
+                runtime.gate=gate;runtime.active=False;runtime.publish()
+            else:
+                runtime.gate=None;runtime.active=True;runtime.ready=False;runtime.publish()
+                try:
+                    await run_once(kinds,on_ready=mark_ready)
+                except Exception:
+                    # No payload/contact/token logs. A failed DB claim is not ready.
+                    runtime.ready=False
+                finally:
+                    runtime.active=False;runtime.publish()
+            try:await asyncio.wait_for(stopping.wait(),timeout=1)
+            except TimeoutError:pass
+    finally:
+        monitor.cancel();await asyncio.gather(monitor,return_exceptions=True)
+        runtime.ready=False;runtime.active=False
+        try:runtime.publish()
+        finally:runtime.close()
+        for signum in (signal.SIGTERM,signal.SIGINT):loop.remove_signal_handler(signum)
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()

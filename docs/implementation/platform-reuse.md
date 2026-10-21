@@ -75,3 +75,30 @@ SQLAlchemy не требует переписывать уже проверен�
 Зависимости третьих библиотек и их лицензии проверить при P00 extraction. Собственные API/БД/storage/provider projects, signing keys и room namespaces Опоры изолированы. Это не копия production окружения Общего Дела.
 
 До приёмки extracted module обязан пройти тесты в окружении Опоры: duplicate/replayed command; race/lease loss; principal switch; scope revoke; malformed upload; retry/timeout и неизвестный provider outcome. Для performance helpers дополнительно проверить saturation, cancellation, stale in-flight completion и bounded cardinality. Развёртывание старого рабочего проекта не доказывает эти свойства нового приложения.
+
+## Закрытие эксплуатационного переноса, 2026-10-22
+
+Сверка исходников интеграции `6dc1a0e` подтвердила: cookie/CSRF/current grants,
+общий HTTP transport, receipts, SQL jobs/fencing/heartbeat pool, outbox, purpose-bound
+assets/slides уже подключены к доменам. Они не требуют второй очереди, SDK или
+provider adapter. Пакетная сборка календаря устраняет измеренный N+1; кеширование
+прав и дополнительных индексов для этого не требуется.
+
+Подтверждённый пробел: рабочий цикл не останавливал новые claims при замене,
+не выдавал readiness и получал стандартные 10 секунд Docker перед остановкой.
+Из `backend/services/jobs/_media_drain.py` и `_worker_heartbeat.py` на закреплённом
+OD commit перенесены только expiring owner gate, небольшой heartbeat и подтверждение
+простоя. Destination: `apps/api/app/worker/runtime.py`, подключение к существующему
+`worker/main.py`; dependencies только stdlib POSIX. Изменённые guarantees: отдельный
+runtime path на процесс с эксклюзивным lock, generation после expiry, acknowledgement
+только между jobs, проверка release/freshness и graceful SIGTERM. Нет второго job store.
+Хеши обоих исходников включены в source snapshot; source tests не выдаются за
+приёмку Опоры. Её `tests/test_worker_runtime.py` проверяет expiry/ownership/release,
+ограниченные приватные markers и настоящий дочерний процесс: drain не принимает
+новую работу, resume продолжает работу, SIGTERM ждёт текущую задачу.
+
+Инструкция frozen-source build и swap находится в `infra/README.md`. Наличие этой
+реализации не закрывает supported-amd64 media build, sandbox и длительную запись:
+ARM daemon не исполняет закреплённый amd64 образ без отдельно разрешённого окружения.
+API readiness пока доказывает доступность БД и Alembic-таблицы; совместимость схемы
+проверяется отдельным сравнением live head с head исходников перед swap.

@@ -32,7 +32,7 @@ async def calendar_data():
     dsn=os.getenv('OPORA_ACTIVITIES_PERF_TEST_DATABASE_URL')
     if not dsn:pytest.skip('Set OPORA_ACTIVITIES_PERF_TEST_DATABASE_URL to the dedicated local database')
     url=make_url(dsn)
-    assert url.database=='opora_activities_perf_test' and url.host=='127.0.0.1' and url.port==56147,'Refuse any other database or server'
+    assert url.database=='opora_activities_perf_test' and url.host=='127.0.0.1' and url.port is not None and 0<url.port<65536,'Refuse any other database or server'
     schema='calendar_perf_'+uuid4().hex
     assert re.fullmatch(r'calendar_perf_[a-f0-9]{32}',schema)
     load_models()

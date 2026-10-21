@@ -3,8 +3,15 @@ services:
   media-worker:
     profiles: [media]
     platform: linux/amd64
-    build: {context: .., dockerfile: infra/docker/media.Dockerfile}
+    build: {context: .., dockerfile: infra/docker/media.Dockerfile, labels: {org.opencontainers.image.revision: "${OPORA_RELEASE:-development}"}}
     init: true
+    stop_grace_period: 30m
+    healthcheck:
+      test: ["CMD", "python", "-m", "app.worker.runtime", "health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
     user: "10001:10001"
     read_only: true
     security_opt:

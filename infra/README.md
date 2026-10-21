@@ -57,6 +57,7 @@ python -m pip install -e 'apps/api[test]'
 npm install --global pnpm@11.3.0
 pnpm install --frozen-lockfile
 export OPORA_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_test'
+export OPORA_ACTIVITIES_PERF_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_activities_perf_test'
 export OPORA_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_domain_test'
 export OPORA_LEARNING_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_learning_test'
 export OPORA_PARTICIPANTS_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_participants_test'
@@ -68,7 +69,7 @@ export OPORA_PROFILE_TEST_DATABASE_URL='postgresql+psycopg://opora:local-passwor
 export OPORA_SIMULATOR_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_simulator_test'
 export OPORA_REPORTING_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_reporting_test'
 export OPORA_ADMIN_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_admin_test'
-# Only for a fresh local PostgreSQL instance, creates/migrates the eleven domain DBs:
+# Only for a fresh local PostgreSQL instance, creates/migrates the twelve domain DBs:
 python infra/scripts/prepare-test-dbs.py
 export OPORA_ASSET_ROOT="${TMPDIR:-/tmp}/opora-private-test-assets"
 export OPORA_ENVIRONMENT=development
@@ -76,7 +77,7 @@ export OPORA_TRUSTED_ORIGINS='["http://127.0.0.1:5174","http://localhost:5174"]'
 sh infra/scripts/verify.sh
 # In separate terminals, with the same database/environment:
 (cd apps/api && uvicorn app.main:app --host 127.0.0.1 --port 8001 --no-access-log)
-(cd apps/api && python -m app.worker.main)
+(cd apps/api && OPORA_WORKER_RUNTIME_DIR=/tmp/opora-outbox-runtime python -m app.worker.main)
 pnpm dev
 ```
 
@@ -85,12 +86,12 @@ same private database, asset root and encryption/provider configuration, start
 the bounded I/O process to consume domain jobs:
 
 ```sh
-(cd apps/api && python -m app.worker.main --kind studio.close --kind studio.revoke --kind studio.reconcile_participant --kind knowledge.index --kind knowledge.ingest --kind ai.generate --kind reporting.digest)
+(cd apps/api && OPORA_WORKER_RUNTIME_DIR=/tmp/opora-io-runtime python -m app.worker.main --kind studio.close --kind studio.revoke --kind studio.reconcile_participant --kind knowledge.index --kind knowledge.ingest --kind ai.generate --kind reporting.digest)
 ```
 
 Media jobs require the separate tested toolchain and opt-in configuration from
 `infra/media-runtime.md`; their explicit native command is
-`python -m app.worker.main --kind slides.convert --kind recording.capture --kind followups.audio`.
+`OPORA_WORKER_RUNTIME_DIR=/tmp/opora-media-runtime python -m app.worker.main --kind slides.convert --kind recording.capture --kind followups.audio`.
 Do not add these kinds to either API-image worker or infer provider readiness
 from a running process. Each process admits one job at a time.
 
@@ -138,7 +139,7 @@ It forwards quoted pytest arguments, for example `sh infra/scripts/run-g1.sh -k
 the HTTP G1 database; its ordinary server limits remain active across requests.
 
 Domain test fixtures deliberately drop/recreate their model tables. Keep their
-eleven domain URLs separate from development/staging and the external G1 database. Their
+twelve domain URLs separate from development/staging and the external G1 database. Their
 exact database names are asserted by the domain suites. The CI pytest plugin
 rejects skipped checks; an unset URL is a gate failure, never a passing test run.
 `prepare-test-dbs.py` refuses existing databases and never drops one.
@@ -199,3 +200,66 @@ free. Supply `--pg-bin` if PostgreSQL tools are installed elsewhere.
 A frozen working-tree source is labelled with commit plus tree hash. A final
 immutable-release rerun remains required; this bounded drill does not complete
 full P20 or deploy anything.
+
+## Frozen-source build and graceful worker swap
+
+Build from a committed revision rather than an editable checkout. The helper
+archives that Git commit, hashes the archive, configures Compose against only the
+archive, sets `OPORA_RELEASE` to the full SHA and labels built application images
+with `org.opencontainers.image.revision`. It does not start/stop services or run
+migrations. Keep its final JSON and the build's image digests with release evidence.
+
+```sh
+export OPORA_ENV_FILE=/absolute/private/path/opora-local.env
+sh infra/scripts/build-frozen.sh HEAD --check-only
+sh infra/scripts/build-frozen.sh HEAD
+# Add --media only on an approved native amd64 Docker host.
+```
+
+`--check-only` proves archive/configuration preparation, not an image build.
+The media helper refuses an ARM Docker daemon instead of enabling binfmt or
+emulation. The existing [media build attempt](evidence/media-container-build-attempt-2026-10-21.md)
+remains a failed amd64-on-ARM gate; supported-host build, sandboxed Chrome and real
+synthetic capture acceptance are still required. After starting reviewed images,
+compare `/version.json` through the web origin with the intended full SHA, inspect
+actual image IDs/OCI labels and verify the live Alembic head against that source.
+A release environment variable alone is not source proof.
+
+Every worker now has a small stdlib heartbeat and an expiring admission gate,
+adapted from OD's pinned `_media_drain.py` and `_worker_heartbeat.py`. The heartbeat
+records only release, readiness, active/idle and gate identity. It becomes ready
+after a successful database claim attempt, stays fresh during the current job and
+becomes unready after database failure or shutdown. It proves the worker loop;
+it does not prove SMTP, ASR, LiveKit, media tools, schema compatibility or delivery.
+The API's `/ready` currently checks database/Alembic-table reachability only.
+
+For a reviewed local/staging swap, request a gate separately in each existing
+worker container. An operator-created UUID identifies this deployment; it is not
+an authentication credential. Use the same private environment and Compose files
+as that environment. This example targets the media lane; repeat for `worker` and
+`io-worker` before a complete worker swap.
+
+```sh
+owner=$(python3 -c 'import uuid; print(uuid.uuid4())')
+docker compose --env-file "$OPORA_ENV_FILE" -f infra/compose.yaml -f infra/compose.media.yaml --profile media exec -T media-worker python -m app.worker.runtime drain-start --owner "$owner"
+# Repeat/renew the exact command at least every 30 seconds until its JSON says
+# acknowledged:true and active:false. The owner gate expires after 90 seconds.
+# Stop/replace only that acknowledged container within the renewed gate window.
+# On abort, reopen claims with:
+docker compose --env-file "$OPORA_ENV_FILE" -f infra/compose.yaml -f infra/compose.media.yaml --profile media exec -T media-worker python -m app.worker.runtime drain-stop --owner "$owner"
+```
+
+Never swap on a missing/stale acknowledgement. Only the main worker loop can
+acknowledge, after its current transaction/handler returns; a heartbeat cannot
+mistake a requested gate for completed work. Reopening an expired gate gets a new
+generation, so an old idle marker cannot authorize a swap. SIGTERM/SIGINT stop new
+claims and wait for the active job. Compose permits 3 minutes for I/O/outbox and
+30 minutes for media, exceeding the registered 1600-second capture-handler timeout.
+Do not shorten this with forced kills. Fencing and durable unknown-outcome handling
+remain necessary for crashes and host loss; drain does not replace them.
+
+Native workers must each receive a distinct `OPORA_WORKER_RUNTIME_DIR`, for example
+`/tmp/opora-outbox-runtime`, `/tmp/opora-io-runtime` and `/tmp/opora-media-runtime`.
+A second worker using an occupied directory fails startup rather than overwriting
+another lane's heartbeat. Native control/health commands must use that same
+lane-specific environment. Containers already isolate the default `/tmp` path.

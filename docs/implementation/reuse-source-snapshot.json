@@ -235,6 +235,10 @@
     "packages/ui-core/src/useModalFocusLifecycle.js": {
       "sha256": "2b2cc4e8d11470f4ab0ef39adbfdc72264e6e1b555ffaed4f3ccc5eefae0fe1b",
       "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
+    },
+    "backend/services/jobs/_worker_heartbeat.py": {
+      "sha256": "f14ed8cce668dc708d5eda31ff070b472cef5a052998c1306700307267802122",
+      "source_commit": "38c92cd49b1b6c229ed473de991479ed261e4052"
     }
   }
 }

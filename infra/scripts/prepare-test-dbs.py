@@ -12,6 +12,7 @@ base = make_url(os.environ["OPORA_DATABASE_URL"])
 if base.host not in {"127.0.0.1", "localhost", "::1"}:
     raise SystemExit("Only disposable localhost PostgreSQL is accepted")
 targets = {
+    "OPORA_ACTIVITIES_PERF_TEST_DATABASE_URL": "opora_activities_perf_test",
     "OPORA_TEST_DATABASE_URL": "opora_domain_test",
     "OPORA_LEARNING_TEST_DATABASE_URL": "opora_learning_test",
     "OPORA_PARTICIPANTS_TEST_DATABASE_URL": "opora_participants_test",

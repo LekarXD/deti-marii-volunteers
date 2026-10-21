@@ -3,6 +3,7 @@
 set -eu
 cd "$(dirname "$0")/../.."
 : "${OPORA_DATABASE_URL:?point OPORA_DATABASE_URL at a disposable local or CI PostgreSQL DB}"
+: "${OPORA_ACTIVITIES_PERF_TEST_DATABASE_URL:?set the dedicated opora_activities_perf_test database URL}"
 : "${OPORA_TEST_DATABASE_URL:?set a separate disposable domain DB URL with a name ending _test}"
 : "${OPORA_LEARNING_TEST_DATABASE_URL:?set the dedicated opora_learning_test database URL}"
 : "${OPORA_PARTICIPANTS_TEST_DATABASE_URL:?set the dedicated opora_participants_test database URL}"

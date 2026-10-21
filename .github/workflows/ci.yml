@@ -22,6 +22,7 @@ jobs:
           --health-interval 3s --health-timeout 3s --health-retries 20
     env:
       OPORA_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_test
+      OPORA_ACTIVITIES_PERF_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_activities_perf_test
       OPORA_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_domain_test
       OPORA_LEARNING_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_learning_test
       OPORA_PARTICIPANTS_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_participants_test
