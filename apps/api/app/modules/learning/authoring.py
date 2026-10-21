@@ -127,6 +127,8 @@ async def save_draft(db, principal, lesson_id, body):
     if draft is None:
         raise ApiError(409, "draft_missing", "Сначала откройте редактирование урока")
     check_version(draft.version, body.expected_version)
+    # Newly bound private assets require owner or platform asset permission.
+    await authorize_new_assets(db, principal, value, draft, body.blocks)
     # Preserve arbitrary supported source blocks as JSON snapshots; validation is explicit.
     draft.title, draft.minutes, draft.source, draft.blocks = body.title.strip(), body.minutes, body.source, deepcopy(body.blocks)
     draft.version += 1
@@ -167,6 +169,8 @@ async def block_errors(db, principal, blocks):
         kind = block.get("type")
         if kind not in allowed:
             errors.append(f"Блок {i + 1}: неизвестный тип")
+        if kind == "task" and "required" in block and type(block["required"]) is not bool:
+            errors.append(f"Блок {i + 1}: проверьте обязательность задания")
         if kind in {"lead", "text", "task", "callout"} and not str(block.get("text", "")).strip():
             errors.append(f"Блок {i + 1}: заполните текст")
         if kind in {"facts", "timeline", "icards", "story", "rules", "phrases"}:
@@ -191,8 +195,10 @@ async def block_errors(db, principal, blocks):
                 errors.append(f"Блок {i + 1}: используйте защищённый файл, а не внешний адрес")
                 continue
             try:
-                from app.modules.assets.service import require_asset
-                asset = await require_asset(db, principal, UUID(str(block.get("asset_id"))))
+                from app.core.models import MediaAsset
+                asset = await db.scalar(select(MediaAsset).where(MediaAsset.id == UUID(str(block.get("asset_id"))), MediaAsset.foundation_id == principal.foundation_id, MediaAsset.state == "ready"))
+                if asset is None:
+                    raise ApiError(404, "asset_not_found", "Файл недоступен")
                 if kind == "video" and not asset.content_type.startswith("video/"):
                     errors.append(f"Блок {i + 1}: нужен видеофайл")
             except (ApiError, ValueError, TypeError):
@@ -445,3 +451,37 @@ async def archive_lesson(db, principal, lesson_id, expected_revision):
     current.publication_revision += 1
     parent.version += 1
     return await author_lesson(db, principal, current.id)
+
+
+async def authorize_new_assets(db, principal, stable, draft, blocks):
+    from app.modules.assets.service import require_asset
+    previously_bound = {str(block["asset_id"]) for block in (draft.blocks if draft else []) if block.get("asset_id")}
+    if stable.current_version_id:
+        published = (await db.scalars(select(LessonBlock).where(LessonBlock.lesson_version_id == stable.current_version_id))).all()
+        previously_bound.update(str(block.content["asset_id"]) for block in published if block.content.get("asset_id"))
+    for block in blocks:
+        if block.get("type") in {"file", "video"} and block.get("asset_id"):
+            try:
+                asset_id = UUID(str(block["asset_id"]))
+            except ValueError:
+                raise ApiError(422, "invalid_asset", "Файл не найден")
+            if str(asset_id) not in previously_bound:
+                await require_asset(db, principal, asset_id)
+
+
+async def preview_asset(db, principal, lesson_id, asset_id):
+    from app.core.models import MediaAsset
+    from app.modules.assets.service import asset_content
+    permission(principal, "learning.read")
+    stable = await lesson(db, principal, lesson_id)
+    draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == stable.id))
+    if draft:
+        blocks = draft.blocks
+    else:
+        blocks = [block.content for block in (await db.scalars(select(LessonBlock).where(LessonBlock.lesson_version_id == stable.current_version_id))).all()]
+    if not any(str(block.get("asset_id")) == str(asset_id) and block.get("type") in {"file", "video"} for block in blocks):
+        raise ApiError(404, "asset_not_found", "Файл не найден")
+    asset = await db.scalar(select(MediaAsset).where(MediaAsset.id == asset_id, MediaAsset.foundation_id == principal.foundation_id, MediaAsset.state == "ready"))
+    if asset is None:
+        raise ApiError(404, "asset_not_found", "Файл не найден")
+    return await asset_content(db, asset)

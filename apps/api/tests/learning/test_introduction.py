@@ -185,6 +185,21 @@ async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
             db.add(PermissionGrant(membership_id=membership.id, permission=permission))
         db.add(Session(foundation_id=foundation_id, user_id=user.id, token_hash=digest('staff'+str(foundation_id)), csrf_hash=digest('csrf'), csrf_cipher='fixture', expires_at=datetime.now(timezone.utc)+timedelta(days=1), mfa_at=datetime.now(timezone.utc)))
         await db.commit()
+    from app.core.models import MediaAsset
+    from app.modules.assets.service import asset_path
+    import hashlib
+    pdf_bytes=b'%PDF-1.4\nlearning fixture'
+    async with factory() as db:
+        own_asset=MediaAsset(foundation_id=foundation_id,owner_user_id=user.id,storage_key=uuid4().hex,content_type='application/pdf',expected_size=len(pdf_bytes),received_size=len(pdf_bytes),checksum=hashlib.sha256(pdf_bytes).hexdigest(),state='ready')
+        outsider=User(foundation_id=foundation_id,display_name='Unrelated private asset owner')
+        db.add(outsider)
+        await db.flush()
+        unrelated=MediaAsset(foundation_id=foundation_id,owner_user_id=outsider.id,storage_key=uuid4().hex,content_type='application/pdf',expected_size=1,received_size=1,checksum='0'*64,state='ready')
+        db.add_all([own_asset,unrelated])
+        await db.commit()
+    path=asset_path(own_asset)
+    path.parent.mkdir(parents=True,exist_ok=True)
+    path.write_bytes(pdf_bytes)
     client.cookies.set('opora_session','staff'+str(foundation_id))
     source_track = next(item for item in (await client.get('/api/v1/coord/learning/tracks')).json() if item['key']=='introduction')
     assert len(source_track['assessment']['questions']) == 10 and source_track['assessment']['version'] == 0
@@ -193,8 +208,11 @@ async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
     lesson_response = await post(client, '/coord/learning/lessons', {'track_id':track['id'],'key':'module','title':'Fixture lesson'})
     assert lesson_response.status_code == 200, lesson_response.text
     lesson = lesson_response.json()
-    blocks = [{'type':'text','title':'Fixture heading','text':'Approved fixture content'}, {'type':'quiz','items':[{'q':'Fixture quiz?','o':['Yes','No'],'a':0,'e':'Fixture explanation'}]}, {'type':'task','title':'Fixture task','text':'Write a fixture response','required':True}]
+    blocks = [{'type':'text','title':'Fixture heading','text':'Approved fixture content'}, {'type':'quiz','items':[{'q':'Fixture quiz?','o':['Yes','No'],'a':0,'e':'Fixture explanation'}]}, {'type':'task','title':'Fixture task','text':'Write a fixture response','required':True}, {'type':'file','title':'Fixture material','asset_id':str(own_asset.id)}]
     body = {'expected_version':lesson['draft']['version'],'title':'Fixture lesson','minutes':3,'source':'Fixture evidence','blocks':blocks}
+    unrelated_body={**body,'blocks':[{'type':'file','title':'Must not publish private asset','asset_id':str(unrelated.id)}]}
+    refused = await client.put(f"/api/v1/coord/learning/lessons/{lesson['id']}/draft",json=unrelated_body,headers={'Idempotency-Key':str(uuid4())})
+    assert refused.status_code == 404
     saved = await client.put(f"/api/v1/coord/learning/lessons/{lesson['id']}/draft", json=body, headers={'Idempotency-Key':str(uuid4())})
     assert saved.status_code == 200, saved.text
     lesson = saved.json()
@@ -224,6 +242,9 @@ async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
     assert (await client.get(f"/api/v1/coord/learning/lessons/{lesson['id']}")).status_code == 403
     detail = await client.get(f'/api/v1/learning/lessons/{old_version}')
     assert detail.status_code == 200 and detail.json()['blocks'][0]['text']=='Approved fixture content'
+    assert (await client.get(f"/api/v1/learning/lessons/{old_version}/assets/{own_asset.id}")).content == pdf_bytes
+    assert (await client.get(f"/api/v1/learning/lessons/{old_version}/assets/{unrelated.id}")).status_code == 404
+
     assignment_id = assigned.json()['id']
     assert (await post(client, f'/learning/progress/{old_version}/complete', {'assignment_id':assignment_id})).status_code == 422
     task_block = next(block for block in detail.json()['blocks'] if block['type']=='task')
@@ -259,6 +280,19 @@ async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
     assert rolled.status_code == 200 and rolled.json()['current_release_id']==release_id
     archived = await post(client, f"/coord/learning/tracks/{track['id']}/archive", {'expected_version':rolled.json()['version']})
     assert archived.status_code == 200 and archived.json()['archived'] is True
+    # Another permitted reviewer can inspect a legitimately bound file without
+    # obtaining global asset access or becoming the original uploader.
+    async with factory() as db:
+        reviewer_membership=StaffMembership(foundation_id=foundation_id,user_id=outsider.id)
+        db.add(reviewer_membership)
+        await db.flush()
+        db.add(PermissionGrant(membership_id=reviewer_membership.id,permission='learning.read'))
+        db.add(Session(foundation_id=foundation_id,user_id=outsider.id,token_hash=digest('reader'+str(foundation_id)),csrf_hash=digest('csrf'),csrf_cipher='fixture',expires_at=datetime.now(timezone.utc)+timedelta(days=1),mfa_at=datetime.now(timezone.utc)))
+        await db.commit()
+    client.cookies.set('opora_session','reader'+str(foundation_id))
+    assert (await client.get(f"/api/v1/coord/learning/lessons/{lesson['id']}/preview")).status_code == 200
+    assert (await client.get(f"/api/v1/coord/learning/lessons/{lesson['id']}/assets/{own_asset.id}")).content == pdf_bytes
+    client.cookies.set('opora_session','staff'+str(foundation_id))
     # Even a previously successful receipt must not reveal draft data after revoke.
     from sqlalchemy import delete
     async with factory() as db:
@@ -266,4 +300,5 @@ async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
         await db.commit()
     revoked_replay = await post(client, f"/coord/learning/tracks/{track['id']}/publish", publish, key='publish-fixture')
     assert revoked_replay.status_code == 403
+    path.unlink()
 

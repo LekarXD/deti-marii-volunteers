@@ -229,3 +229,8 @@ async def learning_recipients(search: str = "", principal: Principal = Depends(g
 @router.post("/coord/learning/lessons/{lesson_id}/archive", response_model=AuthorLessonView)
 async def archive_lesson(lesson_id: UUID, body: VersionCommand, request: Request, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db), key: str | None = Header(None, alias="Idempotency-Key")):
     return await command(db, principal, request, key, "learning.archive_lesson", {"id":str(lesson_id), **body.model_dump(mode="json")}, lambda: authoring.archive_lesson(db, principal, lesson_id, body.expected_version))
+
+
+@router.get("/coord/learning/lessons/{lesson_id}/assets/{asset_id}")
+async def preview_asset(lesson_id: UUID, asset_id: UUID, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
+    return await authoring.preview_asset(db, principal, lesson_id, asset_id)
