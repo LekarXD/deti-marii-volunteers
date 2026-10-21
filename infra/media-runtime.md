@@ -28,6 +28,10 @@ older kernel deliberately returns unavailable.
 - UID/GID 10001 matches private-asset ownership in the API image. Assets share the
   existing private volume; the read-only root filesystem has bounded private
   temporary/home mounts, 1GiB shared memory and explicit CPU/memory/PID limits.
+- The Dockerfile-specific build-context allowlist includes only API source/locks,
+  migrations, canonical schemas and media package files. It excludes credentials,
+  local private assets/DBs, browser profiles, dependencies and reference datasets
+  before the builder receives the context. Do not replace it with a broad copy.
 - Chromium must launch with `chromiumSandbox: true` in the source. The overlay
   uses the official version-pinned seccomp profile to permit user namespaces.
   It never requests privileged mode, SYS_ADMIN, host IPC, a Docker socket,

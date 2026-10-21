@@ -1,0 +1,25 @@
+# Dockerfile-specific allowlist: never send local DB/assets, credentials,
+# browser profiles, node_modules or the large reference dataset to the builder.
+**
+!apps/
+!apps/api/
+!apps/api/pyproject.toml
+!apps/api/requirements.lock
+!apps/api/alembic.ini
+!apps/api/app/
+!apps/api/app/**
+!apps/api/migrations/
+!apps/api/migrations/**
+!packages/
+!packages/studio-core/
+!packages/studio-core/**
+!infra/
+!infra/docker/
+!infra/docker/media.Dockerfile
+!infra/docker/media-package.json
+!infra/docker/media-package-lock.json
+**/__pycache__/**
+**/*.pyc
+**/tests/**
+**/.env
+**/.env.*
