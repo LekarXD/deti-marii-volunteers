@@ -218,34 +218,71 @@
    },
    "participation_12m": [
     {
-     "series": "lab",
-     "date": "2025-10-23",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
+     "shift_id": "art@2025-11-01",
      "series": "art",
-     "date": "2025-10-25",
+     "date": "2025-11-01",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "study@2025-11-03",
+     "series": "study",
+     "date": "2025-11-03",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2025-11-05",
+     "series": "study",
+     "date": "2025-11-05",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "art@2025-11-08",
+     "series": "art",
+     "date": "2025-11-08",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "study@2025-11-10",
+     "series": "study",
+     "date": "2025-11-10",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "lab@2025-12-04",
      "series": "lab",
-     "date": "2025-11-20",
+     "date": "2025-12-04",
      "role": "teacher",
      "status": "attended",
      "hours": 2.5
     },
     {
+     "shift_id": "art@2025-12-06",
      "series": "art",
-     "date": "2025-11-22",
+     "date": "2025-12-06",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "study@2025-12-10",
+     "series": "study",
+     "date": "2025-12-10",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "lab@2025-12-11",
      "series": "lab",
      "date": "2025-12-11",
      "role": "teacher",
@@ -253,6 +290,23 @@
      "hours": 2.5
     },
     {
+     "shift_id": "lab@2025-12-18",
+     "series": "lab",
+     "date": "2025-12-18",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "lab@2026-01-01",
+     "series": "lab",
+     "date": "2026-01-01",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2026-01-03",
      "series": "art",
      "date": "2026-01-03",
      "role": "assistant",
@@ -260,55 +314,39 @@
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-01-08",
-     "role": "teacher",
+     "shift_id": "study@2026-01-05",
+     "series": "study",
+     "date": "2026-01-05",
+     "role": "tutor",
      "status": "attended",
-     "hours": 2.5
+     "hours": 2
     },
     {
+     "shift_id": "art@2026-01-10",
      "series": "art",
-     "date": "2026-01-17",
+     "date": "2026-01-10",
      "role": "assistant",
-     "status": "attended",
-     "hours": 4
+     "status": "cancelled_late",
+     "hours": 0
     },
     {
+     "shift_id": "lab@2026-01-15",
      "series": "lab",
-     "date": "2026-01-22",
+     "date": "2026-01-15",
      "role": "teacher",
      "status": "attended",
      "hours": 2.5
     },
     {
-     "series": "lab",
-     "date": "2026-01-29",
-     "role": "teacher",
+     "shift_id": "study@2026-02-02",
+     "series": "study",
+     "date": "2026-02-02",
+     "role": "tutor",
      "status": "attended",
-     "hours": 2.5
+     "hours": 2
     },
     {
-     "series": "lab",
-     "date": "2026-01-29",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-02-05",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "art",
-     "date": "2026-02-07",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
+     "shift_id": "lab@2026-02-12",
      "series": "lab",
      "date": "2026-02-12",
      "role": "teacher",
@@ -316,118 +354,167 @@
      "hours": 2.5
     },
     {
-     "series": "lab",
-     "date": "2026-02-12",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-02-26",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-03-05",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2026-03-05",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-03-05",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
+     "shift_id": "art@2026-02-14",
      "series": "art",
-     "date": "2026-03-14",
+     "date": "2026-02-14",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-03-19",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
+     "shift_id": "study@2026-02-16",
+     "series": "study",
+     "date": "2026-02-16",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
     },
     {
+     "shift_id": "study@2026-02-18",
+     "series": "study",
+     "date": "2026-02-18",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "lab@2026-03-05",
      "series": "lab",
-     "date": "2026-03-26",
+     "date": "2026-03-05",
      "role": "teacher",
      "status": "attended",
      "hours": 2.5
     },
     {
-     "series": "lab",
-     "date": "2026-04-02",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-04-23",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2026-04-23",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2026-04-30",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-04-30",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-05-21",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-05-21",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
+     "shift_id": "art@2026-03-07",
      "series": "art",
-     "date": "2026-05-30",
+     "date": "2026-03-07",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "study@2026-03-09",
+     "series": "study",
+     "date": "2026-03-09",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-03-11",
+     "series": "study",
+     "date": "2026-03-11",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "lab@2026-03-12",
+     "series": "lab",
+     "date": "2026-03-12",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "study@2026-04-01",
+     "series": "study",
+     "date": "2026-04-01",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "art@2026-04-04",
+     "series": "art",
+     "date": "2026-04-04",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "lab@2026-04-09",
+     "series": "lab",
+     "date": "2026-04-09",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2026-04-11",
+     "series": "art",
+     "date": "2026-04-11",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "study@2026-04-15",
+     "series": "study",
+     "date": "2026-04-15",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "art@2026-05-02",
+     "series": "art",
+     "date": "2026-05-02",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "study@2026-05-06",
+     "series": "study",
+     "date": "2026-05-06",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "art@2026-05-09",
+     "series": "art",
+     "date": "2026-05-09",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "lab@2026-05-14",
+     "series": "lab",
+     "date": "2026-05-14",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2026-05-16",
+     "series": "art",
+     "date": "2026-05-16",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "lab@2026-06-04",
+     "series": "lab",
+     "date": "2026-06-04",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "study@2026-06-08",
+     "series": "study",
+     "date": "2026-06-08",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "lab@2026-06-11",
      "series": "lab",
      "date": "2026-06-11",
      "role": "teacher",
@@ -435,34 +522,55 @@
      "hours": 2.5
     },
     {
-     "series": "lab",
-     "date": "2026-06-18",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-07-02",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
+     "shift_id": "art@2026-06-13",
      "series": "art",
-     "date": "2026-07-04",
+     "date": "2026-06-13",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "study@2026-06-15",
+     "series": "study",
+     "date": "2026-06-15",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "lab@2026-07-02",
      "series": "lab",
-     "date": "2026-07-09",
+     "date": "2026-07-02",
      "role": "teacher",
      "status": "attended",
      "hours": 2.5
     },
     {
+     "shift_id": "study@2026-07-06",
+     "series": "study",
+     "date": "2026-07-06",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "art@2026-07-11",
+     "series": "art",
+     "date": "2026-07-11",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "study@2026-07-13",
+     "series": "study",
+     "date": "2026-07-13",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "lab@2026-07-16",
      "series": "lab",
      "date": "2026-07-16",
      "role": "teacher",
@@ -470,13 +578,7 @@
      "hours": 2.5
     },
     {
-     "series": "lab",
-     "date": "2026-07-23",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
+     "shift_id": "art@2026-08-01",
      "series": "art",
      "date": "2026-08-01",
      "role": "assistant",
@@ -484,13 +586,23 @@
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2026-08-01",
-     "role": "assistant",
+     "shift_id": "study@2026-08-05",
+     "series": "study",
+     "date": "2026-08-05",
+     "role": "tutor",
      "status": "attended",
-     "hours": 4
+     "hours": 2
     },
     {
+     "shift_id": "art@2026-08-08",
+     "series": "art",
+     "date": "2026-08-08",
+     "role": "assistant",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "lab@2026-08-13",
      "series": "lab",
      "date": "2026-08-13",
      "role": "teacher",
@@ -498,74 +610,107 @@
      "hours": 2.5
     },
     {
-     "series": "lab",
-     "date": "2026-08-20",
-     "role": "teacher",
+     "shift_id": "study@2026-08-17",
+     "series": "study",
+     "date": "2026-08-17",
+     "role": "tutor",
      "status": "attended",
-     "hours": 2.5
+     "hours": 2
     },
     {
-     "series": "lab",
-     "date": "2026-09-03",
-     "role": "teacher",
+     "shift_id": "study@2026-09-02",
+     "series": "study",
+     "date": "2026-09-02",
+     "role": "tutor",
      "status": "attended",
-     "hours": 2.5
+     "hours": 2
     },
     {
+     "shift_id": "art@2026-09-05",
      "series": "art",
      "date": "2026-09-05",
+     "role": "assistant",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "study@2026-09-09",
+     "series": "study",
+     "date": "2026-09-09",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "lab@2026-09-10",
+     "series": "lab",
+     "date": "2026-09-10",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2026-09-12",
+     "series": "art",
+     "date": "2026-09-12",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "lab@2026-10-01",
      "series": "lab",
-     "date": "2026-09-17",
+     "date": "2026-10-01",
      "role": "teacher",
      "status": "attended",
      "hours": 2.5
     },
     {
-     "series": "lab",
-     "date": "2026-09-17",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2026-09-24",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
+     "shift_id": "art@2026-10-03",
      "series": "art",
      "date": "2026-10-03",
      "role": "assistant",
-     "status": "cancelled_late",
-     "hours": 0
+     "status": "attended",
+     "hours": 4
     },
     {
+     "shift_id": "study@2026-10-07",
+     "series": "study",
+     "date": "2026-10-07",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "lab@2026-10-08",
      "series": "lab",
      "date": "2026-10-08",
      "role": "teacher",
      "status": "attended",
      "hours": 2.5
+    },
+    {
+     "shift_id": "study@2026-10-14",
+     "series": "study",
+     "date": "2026-10-14",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
     }
    ],
    "stats": {
-    "invited_12m": 57,
-    "confirmed_12m": 48,
-    "attended_12m": 39,
-    "absent_12m": 8,
+    "invited_12m": 105,
+    "confirmed_12m": 60,
+    "attended_12m": 57,
+    "absent_12m": 2,
     "late_cancel_12m": 1,
-    "hours_12m": 114.0,
-    "hours_total": 168,
-    "last_attended": "2026-10-08",
+    "hours_12m": 155.0,
+    "hours_total": 317.0,
+    "last_attended": "2026-10-14",
     "series_attended": {
-     "art": 11,
-     "lab": 28
+     "art": 16,
+     "lab": 18,
+     "study": 23
     },
     "series_attended_before": {}
    },
@@ -632,41 +777,55 @@
    },
    "participation_12m": [
     {
+     "shift_id": "life@2025-10-22",
+     "series": "life",
+     "date": "2025-10-22",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2025-11-19",
+     "series": "life",
+     "date": "2025-11-19",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "event@2025-11-21",
      "series": "event",
-     "date": "2025-10-25",
+     "date": "2025-11-21",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "event@2025-12-06",
      "series": "event",
-     "date": "2025-10-30",
+     "date": "2025-12-06",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "event",
-     "date": "2025-11-01",
-     "role": "event",
+     "shift_id": "life@2025-12-10",
+     "series": "life",
+     "date": "2025-12-10",
+     "role": "life",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
-     "series": "event",
-     "date": "2025-11-20",
-     "role": "event",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "event",
-     "date": "2025-12-04",
-     "role": "event",
+     "shift_id": "fair@2025-12-13",
+     "series": "fair",
+     "date": "2025-12-13",
+     "role": "fair",
      "status": "attended",
-     "hours": 4
+     "hours": 8
     },
     {
+     "shift_id": "event@2025-12-13",
      "series": "event",
      "date": "2025-12-13",
      "role": "event",
@@ -674,83 +833,127 @@
      "hours": 4
     },
     {
+     "shift_id": "life@2025-12-17",
+     "series": "life",
+     "date": "2025-12-17",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-01-07",
+     "series": "life",
+     "date": "2026-01-07",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "event@2026-01-09",
      "series": "event",
-     "date": "2025-12-19",
+     "date": "2026-01-09",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "life@2026-01-14",
+     "series": "life",
+     "date": "2026-01-14",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "event@2026-01-15",
      "series": "event",
-     "date": "2025-12-20",
+     "date": "2026-01-15",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "event@2026-01-16",
      "series": "event",
-     "date": "2025-12-25",
+     "date": "2026-01-16",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "event",
-     "date": "2026-01-02",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-01-03",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-02-05",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-02-06",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
+     "shift_id": "sorochany@2026-02-02",
      "series": "sorochany",
-     "date": "2026-02-08",
+     "date": "2026-02-02",
      "role": "escort",
      "status": "attended",
      "hours": 40
     },
     {
+     "shift_id": "life@2026-02-04",
+     "series": "life",
+     "date": "2026-02-04",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-02-07",
+     "series": "fair",
+     "date": "2026-02-07",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "life@2026-02-25",
+     "series": "life",
+     "date": "2026-02-25",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-02-28",
+     "series": "art",
+     "date": "2026-02-28",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-03-07",
      "series": "event",
-     "date": "2026-02-26",
+     "date": "2026-03-07",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "event@2026-03-12",
      "series": "event",
-     "date": "2026-03-06",
+     "date": "2026-03-12",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "event@2026-03-13",
      "series": "event",
-     "date": "2026-03-19",
+     "date": "2026-03-13",
      "role": "event",
-     "status": "attended",
-     "hours": 4
+     "status": "absent",
+     "hours": 0
     },
     {
+     "shift_id": "fair@2026-03-14",
+     "series": "fair",
+     "date": "2026-03-14",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "event@2026-03-20",
      "series": "event",
      "date": "2026-03-20",
      "role": "event",
@@ -758,62 +961,95 @@
      "hours": 4
     },
     {
-     "series": "event",
+     "shift_id": "fair@2026-04-04",
+     "series": "fair",
      "date": "2026-04-04",
-     "role": "event",
+     "role": "fair",
      "status": "attended",
-     "hours": 4
+     "hours": 8
     },
     {
-     "series": "event",
-     "date": "2026-04-09",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-04-10",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
+     "shift_id": "fair@2026-04-11",
+     "series": "fair",
      "date": "2026-04-11",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
+     "role": "fair",
+     "status": "absent",
+     "hours": 0
     },
     {
+     "shift_id": "life@2026-04-22",
+     "series": "life",
+     "date": "2026-04-22",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "event@2026-04-24",
      "series": "event",
-     "date": "2026-04-16",
+     "date": "2026-04-24",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "art@2026-04-25",
+     "series": "art",
+     "date": "2026-04-25",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-05-01",
      "series": "event",
-     "date": "2026-05-07",
+     "date": "2026-05-01",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "fair@2026-05-02",
+     "series": "fair",
+     "date": "2026-05-02",
+     "role": "fair",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "fair@2026-05-09",
+     "series": "fair",
+     "date": "2026-05-09",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "life@2026-05-13",
+     "series": "life",
+     "date": "2026-05-13",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-05-20",
+     "series": "life",
+     "date": "2026-05-20",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "event@2026-06-05",
      "series": "event",
-     "date": "2026-05-15",
+     "date": "2026-06-05",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "event",
-     "date": "2026-05-23",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
+     "shift_id": "event@2026-06-11",
      "series": "event",
      "date": "2026-06-11",
      "role": "event",
@@ -821,90 +1057,119 @@
      "hours": 4
     },
     {
+     "shift_id": "event@2026-06-12",
      "series": "event",
-     "date": "2026-06-25",
+     "date": "2026-06-12",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "event",
-     "date": "2026-06-26",
-     "role": "event",
+     "shift_id": "fair@2026-06-13",
+     "series": "fair",
+     "date": "2026-06-13",
+     "role": "fair",
      "status": "attended",
-     "hours": 4
+     "hours": 8
     },
     {
-     "series": "event",
-     "date": "2026-07-03",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
+     "shift_id": "art@2026-06-27",
+     "series": "art",
+     "date": "2026-06-27",
+     "role": "assistant",
+     "status": "absent",
+     "hours": 0
     },
     {
+     "shift_id": "residence@2026-07-06",
+     "series": "residence",
+     "date": "2026-07-06",
+     "role": "escort",
+     "status": "attended",
+     "hours": 60
+    },
+    {
+     "shift_id": "event@2026-07-10",
      "series": "event",
      "date": "2026-07-10",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-07-25",
+     "series": "art",
+     "date": "2026-07-25",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-07-29",
+     "series": "life",
+     "date": "2026-07-29",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-08-08",
+     "series": "fair",
+     "date": "2026-08-08",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "art@2026-08-22",
+     "series": "art",
+     "date": "2026-08-22",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-08-26",
+     "series": "life",
+     "date": "2026-08-26",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-08-29",
+     "series": "art",
+     "date": "2026-08-29",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-09-02",
+     "series": "life",
+     "date": "2026-09-02",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "event@2026-09-03",
+     "series": "event",
+     "date": "2026-09-03",
      "role": "event",
      "status": "absent",
      "hours": 0
     },
     {
+     "shift_id": "event@2026-09-12",
      "series": "event",
-     "date": "2026-07-23",
+     "date": "2026-09-12",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "event",
-     "date": "2026-07-24",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-08-07",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-08-20",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-08-27",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-09-04",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-09-11",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-09-17",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
+     "shift_id": "event@2026-09-24",
      "series": "event",
      "date": "2026-09-24",
      "role": "event",
@@ -912,38 +1177,37 @@
      "hours": 4
     },
     {
-     "series": "event",
-     "date": "2026-10-03",
-     "role": "event",
+     "shift_id": "life@2026-09-30",
+     "series": "life",
+     "date": "2026-09-30",
+     "role": "life",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
-     "series": "event",
-     "date": "2026-10-08",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
+     "shift_id": "fair@2026-10-10",
+     "series": "fair",
      "date": "2026-10-10",
-     "role": "event",
+     "role": "fair",
      "status": "attended",
-     "hours": 4
+     "hours": 8
     }
    ],
    "stats": {
-    "invited_12m": 50,
-    "confirmed_12m": 43,
-    "attended_12m": 41,
-    "absent_12m": 1,
+    "invited_12m": 106,
+    "confirmed_12m": 52,
+    "attended_12m": 47,
+    "absent_12m": 4,
     "late_cancel_12m": 1,
-    "hours_12m": 200,
-    "hours_total": 140,
+    "hours_12m": 297,
+    "hours_total": 627,
     "last_attended": "2026-10-10",
     "series_attended": {
-     "event": 40,
+     "art": 5,
+     "event": 17,
+     "fair": 8,
+     "life": 15,
+     "residence": 1,
      "sorochany": 1
     },
     "series_attended_before": {}
@@ -1010,83 +1274,87 @@
    },
    "participation_12m": [
     {
-     "series": "pack",
-     "date": "2025-10-24",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "pack",
-     "date": "2025-10-31",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "pack",
-     "date": "2025-11-07",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "pack",
-     "date": "2025-11-07",
-     "role": "packing",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "pack",
-     "date": "2025-11-21",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "pack",
-     "date": "2025-11-28",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "pack",
-     "date": "2025-11-28",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "pack",
-     "date": "2025-12-05",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "pack",
-     "date": "2025-12-19",
-     "role": "packing",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "pack",
-     "date": "2025-12-19",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
+     "shift_id": "fair@2025-11-01",
      "series": "fair",
-     "date": "2025-12-28",
+     "date": "2025-11-01",
+     "role": "fair",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "life@2025-11-05",
+     "series": "life",
+     "date": "2025-11-05",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "lab@2025-11-06",
+     "series": "lab",
+     "date": "2025-11-06",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "pack@2025-11-07",
+     "series": "pack",
+     "date": "2025-11-07",
+     "role": "packing",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "fair@2025-11-08",
+     "series": "fair",
+     "date": "2025-11-08",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "fair@2025-12-06",
+     "series": "fair",
+     "date": "2025-12-06",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "pack@2025-12-12",
+     "series": "pack",
+     "date": "2025-12-12",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2025-12-13",
+     "series": "art",
+     "date": "2025-12-13",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2025-12-13",
+     "series": "fair",
+     "date": "2025-12-13",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "pack@2025-12-19",
+     "series": "pack",
+     "date": "2025-12-19",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-01-02",
      "series": "pack",
      "date": "2026-01-02",
      "role": "packing",
@@ -1094,6 +1362,31 @@
      "hours": 3
     },
     {
+     "shift_id": "art@2026-01-03",
+     "series": "art",
+     "date": "2026-01-03",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-01-03",
+     "series": "fair",
+     "date": "2026-01-03",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "pack@2026-01-09",
+     "series": "pack",
+     "date": "2026-01-09",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-01-10",
      "series": "fair",
      "date": "2026-01-10",
      "role": "fair",
@@ -1101,13 +1394,7 @@
      "hours": 8
     },
     {
-     "series": "pack",
-     "date": "2026-01-16",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
+     "shift_id": "pack@2026-02-06",
      "series": "pack",
      "date": "2026-02-06",
      "role": "packing",
@@ -1115,41 +1402,135 @@
      "hours": 3
     },
     {
+     "shift_id": "art@2026-02-07",
+     "series": "art",
+     "date": "2026-02-07",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-02-07",
      "series": "fair",
-     "date": "2026-02-21",
+     "date": "2026-02-07",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "fair@2026-02-14",
      "series": "fair",
-     "date": "2026-02-21",
+     "date": "2026-02-14",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "life@2026-02-18",
+     "series": "life",
+     "date": "2026-02-18",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-03-06",
      "series": "pack",
      "date": "2026-03-06",
-     "role": "packing",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "fair",
-     "date": "2026-03-21",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
-     "series": "pack",
-     "date": "2026-04-10",
      "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "art@2026-03-07",
+     "series": "art",
+     "date": "2026-03-07",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-03-07",
+     "series": "fair",
+     "date": "2026-03-07",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "life@2026-03-11",
+     "series": "life",
+     "date": "2026-03-11",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-03-13",
+     "series": "pack",
+     "date": "2026-03-13",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-04-01",
+     "series": "life",
+     "date": "2026-04-01",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-04-03",
+     "series": "pack",
+     "date": "2026-04-03",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-04-04",
+     "series": "fair",
+     "date": "2026-04-04",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "life@2026-04-08",
+     "series": "life",
+     "date": "2026-04-08",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-04-11",
+     "series": "fair",
+     "date": "2026-04-11",
+     "role": "fair",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "pack@2026-05-01",
+     "series": "pack",
+     "date": "2026-05-01",
+     "role": "packing",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "art@2026-05-02",
+     "series": "art",
+     "date": "2026-05-02",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-05-02",
      "series": "fair",
      "date": "2026-05-02",
      "role": "fair",
@@ -1157,104 +1538,135 @@
      "hours": 8
     },
     {
-     "series": "fair",
-     "date": "2026-05-23",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
-     "series": "fair",
-     "date": "2026-05-30",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
-     "series": "fair",
-     "date": "2026-06-13",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
+     "shift_id": "pack@2026-05-08",
      "series": "pack",
-     "date": "2026-06-19",
+     "date": "2026-05-08",
      "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "fair@2026-05-09",
+     "series": "fair",
+     "date": "2026-05-09",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "life@2026-06-03",
+     "series": "life",
+     "date": "2026-06-03",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-06-05",
      "series": "pack",
-     "date": "2026-06-19",
+     "date": "2026-06-05",
      "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
-     "series": "pack",
-     "date": "2026-06-19",
-     "role": "packing",
+     "shift_id": "art@2026-06-06",
+     "series": "art",
+     "date": "2026-06-06",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-06-06",
+     "series": "fair",
+     "date": "2026-06-06",
+     "role": "fair",
      "status": "absent",
      "hours": 0
     },
     {
+     "shift_id": "pack@2026-06-12",
+     "series": "pack",
+     "date": "2026-06-12",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-07-01",
+     "series": "life",
+     "date": "2026-07-01",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-07-04",
      "series": "fair",
-     "date": "2026-06-20",
+     "date": "2026-07-04",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "pack@2026-07-10",
      "series": "pack",
-     "date": "2026-07-03",
+     "date": "2026-07-10",
      "role": "packing",
-     "status": "absent",
-     "hours": 0
+     "status": "attended",
+     "hours": 3
     },
     {
+     "shift_id": "fair@2026-07-11",
      "series": "fair",
-     "date": "2026-07-05",
+     "date": "2026-07-11",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
-     "series": "pack",
-     "date": "2026-07-17",
-     "role": "packing",
+     "shift_id": "life@2026-07-15",
+     "series": "life",
+     "date": "2026-07-15",
+     "role": "life",
      "status": "attended",
      "hours": 3
     },
     {
-     "series": "pack",
-     "date": "2026-07-17",
-     "role": "packing",
+     "shift_id": "art@2026-08-01",
+     "series": "art",
+     "date": "2026-08-01",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-08-01",
+     "series": "fair",
+     "date": "2026-08-01",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "lab@2026-08-06",
+     "series": "lab",
+     "date": "2026-08-06",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "life@2026-08-12",
+     "series": "life",
+     "date": "2026-08-12",
+     "role": "life",
      "status": "attended",
      "hours": 3
     },
     {
-     "series": "pack",
-     "date": "2026-07-24",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "pack",
-     "date": "2026-07-24",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "pack",
-     "date": "2026-08-07",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
+     "shift_id": "pack@2026-08-14",
      "series": "pack",
      "date": "2026-08-14",
      "role": "packing",
@@ -1262,20 +1674,15 @@
      "hours": 3
     },
     {
-     "series": "pack",
-     "date": "2026-08-21",
-     "role": "packing",
+     "shift_id": "lab@2026-09-03",
+     "series": "lab",
+     "date": "2026-09-03",
+     "role": "teacher",
      "status": "attended",
-     "hours": 3
+     "hours": 2.5
     },
     {
-     "series": "pack",
-     "date": "2026-08-28",
-     "role": "packing",
-     "status": "absent",
-     "hours": 0
-    },
-    {
+     "shift_id": "pack@2026-09-04",
      "series": "pack",
      "date": "2026-09-04",
      "role": "packing",
@@ -1283,48 +1690,63 @@
      "hours": 3
     },
     {
-     "series": "pack",
-     "date": "2026-09-04",
-     "role": "packing",
+     "shift_id": "art@2026-09-12",
+     "series": "art",
+     "date": "2026-09-12",
+     "role": "assistant",
      "status": "attended",
-     "hours": 3
+     "hours": 4
     },
     {
-     "series": "pack",
-     "date": "2026-09-11",
-     "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
+     "shift_id": "fair@2026-09-12",
      "series": "fair",
-     "date": "2026-09-19",
+     "date": "2026-09-12",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
-     "series": "pack",
-     "date": "2026-10-09",
-     "role": "packing",
+     "shift_id": "life@2026-09-16",
+     "series": "life",
+     "date": "2026-09-16",
+     "role": "life",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "fair@2026-10-03",
+     "series": "fair",
+     "date": "2026-10-03",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "art@2026-10-10",
+     "series": "art",
+     "date": "2026-10-10",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-10-10",
      "series": "fair",
      "date": "2026-10-10",
      "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
-     "series": "pack",
-     "date": "2026-10-16",
-     "role": "packing",
-     "status": "absent",
+     "status": "cancelled_late",
      "hours": 0
     },
     {
+     "shift_id": "life@2026-10-14",
+     "series": "life",
+     "date": "2026-10-14",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-10-16",
      "series": "pack",
      "date": "2026-10-16",
      "role": "packing",
@@ -1333,17 +1755,20 @@
     }
    ],
    "stats": {
-    "invited_12m": 51,
-    "confirmed_12m": 46,
-    "attended_12m": 39,
-    "absent_12m": 7,
-    "late_cancel_12m": 0,
-    "hours_12m": 182,
-    "hours_total": 52,
+    "invited_12m": 97,
+    "confirmed_12m": 60,
+    "attended_12m": 54,
+    "absent_12m": 3,
+    "late_cancel_12m": 3,
+    "hours_12m": 249.5,
+    "hours_total": 506.0,
     "last_attended": "2026-10-16",
     "series_attended": {
-     "fair": 13,
-     "pack": 26
+     "art": 9,
+     "fair": 16,
+     "lab": 3,
+     "life": 11,
+     "pack": 15
     },
     "series_attended_before": {}
    },
@@ -1408,125 +1833,23 @@
    },
    "participation_12m": [
     {
+     "shift_id": "art@2026-05-30",
      "series": "art",
-     "date": "2025-11-08",
+     "date": "2026-05-30",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2025-11-22",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "fair",
-     "date": "2025-12-14",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
-     "series": "art",
-     "date": "2025-12-27",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-02-14",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-02-28",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-03-21",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-03-21",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-03-28",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-04-11",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-04-18",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-04-18",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-04-18",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-04-25",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-04-25",
-     "role": "assistant",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "fair",
-     "date": "2026-05-17",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
+     "shift_id": "art@2026-06-06",
      "series": "art",
      "date": "2026-06-06",
      "role": "assistant",
-     "status": "attended",
-     "hours": 4
+     "status": "absent",
+     "hours": 0
     },
     {
+     "shift_id": "art@2026-06-13",
      "series": "art",
      "date": "2026-06-13",
      "role": "assistant",
@@ -1534,20 +1857,47 @@
      "hours": 4
     },
     {
+     "shift_id": "art@2026-06-20",
      "series": "art",
      "date": "2026-06-20",
      "role": "assistant",
-     "status": "absent",
-     "hours": 0
+     "status": "attended",
+     "hours": 4
     },
     {
-     "series": "fair",
-     "date": "2026-07-05",
-     "role": "fair",
+     "shift_id": "art@2026-06-27",
+     "series": "art",
+     "date": "2026-06-27",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-07-04",
+     "series": "art",
+     "date": "2026-07-04",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "residence@2026-07-06",
+     "series": "residence",
+     "date": "2026-07-06",
+     "role": "escort",
      "status": "cancelled_late",
      "hours": 0
     },
     {
+     "shift_id": "art@2026-07-11",
+     "series": "art",
+     "date": "2026-07-11",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-07-18",
      "series": "art",
      "date": "2026-07-18",
      "role": "assistant",
@@ -1555,20 +1905,15 @@
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2026-07-18",
-     "role": "assistant",
+     "shift_id": "life@2026-07-22",
+     "series": "life",
+     "date": "2026-07-22",
+     "role": "life",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
-     "series": "art",
-     "date": "2026-07-25",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
+     "shift_id": "art@2026-08-08",
      "series": "art",
      "date": "2026-08-08",
      "role": "assistant",
@@ -1576,13 +1921,31 @@
      "hours": 4
     },
     {
-     "series": "fair",
-     "date": "2026-08-16",
-     "role": "fair",
+     "shift_id": "art@2026-08-15",
+     "series": "art",
+     "date": "2026-08-15",
+     "role": "assistant",
      "status": "attended",
-     "hours": 8
+     "hours": 4
     },
     {
+     "shift_id": "art@2026-08-22",
+     "series": "art",
+     "date": "2026-08-22",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-08-26",
+     "series": "life",
+     "date": "2026-08-26",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-08-29",
      "series": "art",
      "date": "2026-08-29",
      "role": "assistant",
@@ -1590,20 +1953,31 @@
      "hours": 4
     },
     {
-     "series": "fair",
-     "date": "2026-08-30",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
+     "shift_id": "art@2026-09-05",
      "series": "art",
-     "date": "2026-09-12",
+     "date": "2026-09-05",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "life@2026-09-09",
+     "series": "life",
+     "date": "2026-09-09",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-09-19",
+     "series": "art",
+     "date": "2026-09-19",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-09-26",
      "series": "art",
      "date": "2026-09-26",
      "role": "assistant",
@@ -1611,32 +1985,42 @@
      "hours": 4
     },
     {
+     "shift_id": "art@2026-10-03",
      "series": "art",
-     "date": "2026-09-26",
+     "date": "2026-10-03",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "art@2026-10-10",
      "series": "art",
      "date": "2026-10-10",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-10-17",
+     "series": "art",
+     "date": "2026-10-17",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     }
    ],
    "stats": {
-    "invited_12m": 37,
-    "confirmed_12m": 31,
-    "attended_12m": 25,
-    "absent_12m": 4,
-    "late_cancel_12m": 2,
-    "hours_12m": 116,
-    "hours_total": 46,
-    "last_attended": "2026-10-10",
+    "invited_12m": 33,
+    "confirmed_12m": 22,
+    "attended_12m": 20,
+    "absent_12m": 1,
+    "late_cancel_12m": 1,
+    "hours_12m": 77,
+    "hours_total": 77,
+    "last_attended": "2026-10-17",
     "series_attended": {
-     "art": 21,
-     "fair": 4
+     "art": 17,
+     "life": 3
     },
     "series_attended_before": {}
    },
@@ -1700,6 +2084,7 @@
    },
    "participation_12m": [
     {
+     "shift_id": "life@2025-11-05",
      "series": "life",
      "date": "2025-11-05",
      "role": "life",
@@ -1707,34 +2092,47 @@
      "hours": 3
     },
     {
+     "shift_id": "life@2025-11-12",
      "series": "life",
-     "date": "2025-11-05",
-     "role": "life",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "life",
-     "date": "2025-11-26",
-     "role": "life",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "life",
-     "date": "2025-11-26",
+     "date": "2025-11-12",
      "role": "life",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "pack@2025-11-14",
      "series": "pack",
-     "date": "2025-11-28",
+     "date": "2025-11-14",
      "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "life@2025-11-19",
+     "series": "life",
+     "date": "2025-11-19",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2025-11-21",
+     "series": "pack",
+     "date": "2025-11-21",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2025-12-03",
+     "series": "life",
+     "date": "2025-12-03",
+     "role": "life",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "pack@2025-12-05",
      "series": "pack",
      "date": "2025-12-05",
      "role": "packing",
@@ -1742,6 +2140,23 @@
      "hours": 3
     },
     {
+     "shift_id": "art@2025-12-06",
+     "series": "art",
+     "date": "2025-12-06",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2025-12-10",
+     "series": "life",
+     "date": "2025-12-10",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2025-12-12",
      "series": "pack",
      "date": "2025-12-12",
      "role": "packing",
@@ -1749,13 +2164,31 @@
      "hours": 3
     },
     {
+     "shift_id": "pack@2026-01-02",
      "series": "pack",
-     "date": "2025-12-19",
+     "date": "2026-01-02",
      "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "life@2026-01-07",
+     "series": "life",
+     "date": "2026-01-07",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-01-14",
+     "series": "life",
+     "date": "2026-01-14",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-01-16",
      "series": "pack",
      "date": "2026-01-16",
      "role": "packing",
@@ -1763,20 +2196,31 @@
      "hours": 3
     },
     {
+     "shift_id": "art@2026-01-17",
+     "series": "art",
+     "date": "2026-01-17",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-02-04",
      "series": "life",
-     "date": "2026-01-28",
+     "date": "2026-02-04",
      "role": "life",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "life@2026-02-11",
      "series": "life",
-     "date": "2026-01-28",
+     "date": "2026-02-11",
      "role": "life",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "pack@2026-02-13",
      "series": "pack",
      "date": "2026-02-13",
      "role": "packing",
@@ -1784,6 +2228,7 @@
      "hours": 3
     },
     {
+     "shift_id": "pack@2026-02-20",
      "series": "pack",
      "date": "2026-02-20",
      "role": "packing",
@@ -1791,6 +2236,15 @@
      "hours": 3
     },
     {
+     "shift_id": "art@2026-02-21",
+     "series": "art",
+     "date": "2026-02-21",
+     "role": "assistant",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "life@2026-03-04",
      "series": "life",
      "date": "2026-03-04",
      "role": "life",
@@ -1798,6 +2252,7 @@
      "hours": 3
     },
     {
+     "shift_id": "life@2026-03-11",
      "series": "life",
      "date": "2026-03-11",
      "role": "life",
@@ -1805,13 +2260,7 @@
      "hours": 3
     },
     {
-     "series": "life",
-     "date": "2026-03-11",
-     "role": "life",
-     "status": "attended",
-     "hours": 3
-    },
-    {
+     "shift_id": "life@2026-03-18",
      "series": "life",
      "date": "2026-03-18",
      "role": "life",
@@ -1819,13 +2268,47 @@
      "hours": 3
     },
     {
+     "shift_id": "pack@2026-03-20",
+     "series": "pack",
+     "date": "2026-03-20",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-03-21",
+     "series": "art",
+     "date": "2026-03-21",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-04-01",
      "series": "life",
-     "date": "2026-03-18",
+     "date": "2026-04-01",
      "role": "life",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "life@2026-04-08",
+     "series": "life",
+     "date": "2026-04-08",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-04-10",
+     "series": "pack",
+     "date": "2026-04-10",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-04-15",
      "series": "life",
      "date": "2026-04-15",
      "role": "life",
@@ -1833,20 +2316,23 @@
      "hours": 3
     },
     {
-     "series": "life",
-     "date": "2026-04-15",
-     "role": "life",
+     "shift_id": "pack@2026-04-17",
+     "series": "pack",
+     "date": "2026-04-17",
+     "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
-     "series": "life",
-     "date": "2026-04-22",
-     "role": "life",
+     "shift_id": "pack@2026-05-01",
+     "series": "pack",
+     "date": "2026-05-01",
+     "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "life@2026-05-06",
      "series": "life",
      "date": "2026-05-06",
      "role": "life",
@@ -1854,13 +2340,31 @@
      "hours": 3
     },
     {
-     "series": "pack",
-     "date": "2026-05-29",
-     "role": "packing",
+     "shift_id": "life@2026-05-13",
+     "series": "life",
+     "date": "2026-05-13",
+     "role": "life",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "pack@2026-05-15",
+     "series": "pack",
+     "date": "2026-05-15",
+     "role": "packing",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "art@2026-05-16",
+     "series": "art",
+     "date": "2026-05-16",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-06-03",
      "series": "life",
      "date": "2026-06-03",
      "role": "life",
@@ -1868,13 +2372,7 @@
      "hours": 3
     },
     {
-     "series": "life",
-     "date": "2026-06-10",
-     "role": "life",
-     "status": "absent",
-     "hours": 0
-    },
-    {
+     "shift_id": "life@2026-06-10",
      "series": "life",
      "date": "2026-06-10",
      "role": "life",
@@ -1882,41 +2380,87 @@
      "hours": 3
     },
     {
-     "series": "life",
-     "date": "2026-06-24",
-     "role": "life",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "life",
-     "date": "2026-07-15",
-     "role": "life",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "life",
-     "date": "2026-07-22",
-     "role": "life",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "life",
-     "date": "2026-07-22",
-     "role": "life",
-     "status": "attended",
-     "hours": 3
-    },
-    {
+     "shift_id": "pack@2026-06-12",
      "series": "pack",
-     "date": "2026-07-24",
+     "date": "2026-06-12",
      "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "life@2026-06-17",
+     "series": "life",
+     "date": "2026-06-17",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-06-19",
+     "series": "pack",
+     "date": "2026-06-19",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-07-01",
+     "series": "life",
+     "date": "2026-07-01",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-07-03",
+     "series": "pack",
+     "date": "2026-07-03",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-07-08",
+     "series": "life",
+     "date": "2026-07-08",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-07-10",
+     "series": "pack",
+     "date": "2026-07-10",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-07-17",
+     "series": "pack",
+     "date": "2026-07-17",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-08-05",
+     "series": "life",
+     "date": "2026-08-05",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-08-07",
+     "series": "pack",
+     "date": "2026-08-07",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-08-12",
      "series": "life",
      "date": "2026-08-12",
      "role": "life",
@@ -1924,13 +2468,47 @@
      "hours": 3
     },
     {
+     "shift_id": "life@2026-08-19",
      "series": "life",
-     "date": "2026-08-12",
+     "date": "2026-08-19",
      "role": "life",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "pack@2026-08-21",
+     "series": "pack",
+     "date": "2026-08-21",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-09-04",
+     "series": "pack",
+     "date": "2026-09-04",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-09-09",
+     "series": "life",
+     "date": "2026-09-09",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-09-11",
+     "series": "pack",
+     "date": "2026-09-11",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "life@2026-09-16",
      "series": "life",
      "date": "2026-09-16",
      "role": "life",
@@ -1938,13 +2516,15 @@
      "hours": 3
     },
     {
-     "series": "life",
-     "date": "2026-09-23",
-     "role": "life",
+     "shift_id": "pack@2026-09-18",
+     "series": "pack",
+     "date": "2026-09-18",
+     "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "pack@2026-10-02",
      "series": "pack",
      "date": "2026-10-02",
      "role": "packing",
@@ -1952,25 +2532,51 @@
      "hours": 3
     },
     {
+     "shift_id": "life@2026-10-07",
      "series": "life",
      "date": "2026-10-07",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-10-09",
+     "series": "pack",
+     "date": "2026-10-09",
+     "role": "packing",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "art@2026-10-10",
+     "series": "art",
+     "date": "2026-10-10",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-10-14",
+     "series": "life",
+     "date": "2026-10-14",
      "role": "life",
      "status": "attended",
      "hours": 3
     }
    ],
    "stats": {
-    "invited_12m": 38,
-    "confirmed_12m": 37,
-    "attended_12m": 34,
-    "absent_12m": 3,
-    "late_cancel_12m": 0,
-    "hours_12m": 102,
+    "invited_12m": 82,
+    "confirmed_12m": 60,
+    "attended_12m": 56,
+    "absent_12m": 2,
+    "late_cancel_12m": 2,
+    "hours_12m": 173,
     "hours_total": 410,
-    "last_attended": "2026-10-07",
+    "last_attended": "2026-10-14",
     "series_attended": {
-     "life": 24,
-     "pack": 10
+     "art": 5,
+     "life": 28,
+     "pack": 23
     },
     "series_attended_before": {}
    },
@@ -2033,13 +2639,31 @@
    },
    "participation_12m": [
     {
+     "shift_id": "study@2025-11-03",
      "series": "study",
-     "date": "2025-10-22",
+     "date": "2025-11-03",
      "role": "tutor",
-     "status": "absent",
-     "hours": 0
+     "status": "attended",
+     "hours": 2
     },
     {
+     "shift_id": "study@2025-11-05",
+     "series": "study",
+     "date": "2025-11-05",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2025-11-10",
+     "series": "study",
+     "date": "2025-11-10",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2025-11-12",
      "series": "study",
      "date": "2025-11-12",
      "role": "tutor",
@@ -2047,6 +2671,15 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2025-11-17",
+     "series": "study",
+     "date": "2025-11-17",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2025-12-01",
      "series": "study",
      "date": "2025-12-01",
      "role": "tutor",
@@ -2054,6 +2687,15 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2025-12-03",
+     "series": "study",
+     "date": "2025-12-03",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2025-12-08",
      "series": "study",
      "date": "2025-12-08",
      "role": "tutor",
@@ -2061,6 +2703,7 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2025-12-10",
      "series": "study",
      "date": "2025-12-10",
      "role": "tutor",
@@ -2068,6 +2711,7 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2025-12-15",
      "series": "study",
      "date": "2025-12-15",
      "role": "tutor",
@@ -2075,34 +2719,7 @@
      "hours": 2
     },
     {
-     "series": "study",
-     "date": "2025-12-22",
-     "role": "tutor",
-     "status": "attended",
-     "hours": 2
-    },
-    {
-     "series": "study",
-     "date": "2025-12-29",
-     "role": "tutor",
-     "status": "attended",
-     "hours": 2
-    },
-    {
-     "series": "study",
-     "date": "2025-12-29",
-     "role": "tutor",
-     "status": "attended",
-     "hours": 2
-    },
-    {
-     "series": "study",
-     "date": "2025-12-31",
-     "role": "tutor",
-     "status": "absent",
-     "hours": 0
-    },
-    {
+     "shift_id": "study@2026-01-05",
      "series": "study",
      "date": "2026-01-05",
      "role": "tutor",
@@ -2110,20 +2727,71 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-01-07",
      "series": "study",
-     "date": "2026-01-26",
+     "date": "2026-01-07",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2026-01-12",
      "series": "study",
-     "date": "2026-01-28",
+     "date": "2026-01-12",
      "role": "tutor",
-     "status": "absent",
-     "hours": 0
+     "status": "attended",
+     "hours": 2
     },
     {
+     "shift_id": "study@2026-01-14",
+     "series": "study",
+     "date": "2026-01-14",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-01-19",
+     "series": "study",
+     "date": "2026-01-19",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-02-02",
+     "series": "study",
+     "date": "2026-02-02",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-02-04",
+     "series": "study",
+     "date": "2026-02-04",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-02-09",
+     "series": "study",
+     "date": "2026-02-09",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-02-11",
+     "series": "study",
+     "date": "2026-02-11",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-02-16",
      "series": "study",
      "date": "2026-02-16",
      "role": "tutor",
@@ -2131,20 +2799,47 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-03-02",
      "series": "study",
-     "date": "2026-03-30",
+     "date": "2026-03-02",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2026-03-04",
      "series": "study",
-     "date": "2026-03-30",
+     "date": "2026-03-04",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2026-03-11",
+     "series": "study",
+     "date": "2026-03-11",
+     "role": "tutor",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "study@2026-03-16",
+     "series": "study",
+     "date": "2026-03-16",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-03-18",
+     "series": "study",
+     "date": "2026-03-18",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-04-01",
      "series": "study",
      "date": "2026-04-01",
      "role": "tutor",
@@ -2152,6 +2847,23 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-04-06",
+     "series": "study",
+     "date": "2026-04-06",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-04-08",
+     "series": "study",
+     "date": "2026-04-08",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-04-13",
      "series": "study",
      "date": "2026-04-13",
      "role": "tutor",
@@ -2159,6 +2871,31 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-04-15",
+     "series": "study",
+     "date": "2026-04-15",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-05-04",
+     "series": "study",
+     "date": "2026-05-04",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-05-06",
+     "series": "study",
+     "date": "2026-05-06",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-05-11",
      "series": "study",
      "date": "2026-05-11",
      "role": "tutor",
@@ -2166,13 +2903,31 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-05-13",
      "series": "study",
-     "date": "2026-05-11",
+     "date": "2026-05-13",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2026-05-18",
+     "series": "study",
+     "date": "2026-05-18",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-06-01",
+     "series": "study",
+     "date": "2026-06-01",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-06-03",
      "series": "study",
      "date": "2026-06-03",
      "role": "tutor",
@@ -2180,6 +2935,7 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-06-08",
      "series": "study",
      "date": "2026-06-08",
      "role": "tutor",
@@ -2187,27 +2943,39 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-06-10",
      "series": "study",
-     "date": "2026-06-08",
+     "date": "2026-06-10",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2026-06-15",
      "series": "study",
-     "date": "2026-06-17",
+     "date": "2026-06-15",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2026-07-01",
      "series": "study",
-     "date": "2026-06-22",
+     "date": "2026-07-01",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2026-07-06",
+     "series": "study",
+     "date": "2026-07-06",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-07-08",
      "series": "study",
      "date": "2026-07-08",
      "role": "tutor",
@@ -2215,6 +2983,7 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-07-13",
      "series": "study",
      "date": "2026-07-13",
      "role": "tutor",
@@ -2222,13 +2991,31 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-07-15",
      "series": "study",
-     "date": "2026-07-22",
+     "date": "2026-07-15",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2026-08-03",
+     "series": "study",
+     "date": "2026-08-03",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-08-05",
+     "series": "study",
+     "date": "2026-08-05",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-08-10",
      "series": "study",
      "date": "2026-08-10",
      "role": "tutor",
@@ -2236,27 +3023,23 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-08-12",
      "series": "study",
-     "date": "2026-08-19",
+     "date": "2026-08-12",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2026-08-17",
      "series": "study",
-     "date": "2026-08-19",
+     "date": "2026-08-17",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
-     "series": "study",
-     "date": "2026-08-26",
-     "role": "tutor",
-     "status": "attended",
-     "hours": 2
-    },
-    {
+     "shift_id": "study@2026-09-02",
      "series": "study",
      "date": "2026-09-02",
      "role": "tutor",
@@ -2264,6 +3047,15 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-09-07",
+     "series": "study",
+     "date": "2026-09-07",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-09-09",
      "series": "study",
      "date": "2026-09-09",
      "role": "tutor",
@@ -2271,6 +3063,23 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-09-14",
+     "series": "study",
+     "date": "2026-09-14",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-09-16",
+     "series": "study",
+     "date": "2026-09-16",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-10-05",
      "series": "study",
      "date": "2026-10-05",
      "role": "tutor",
@@ -2278,6 +3087,31 @@
      "hours": 2
     },
     {
+     "shift_id": "study@2026-10-07",
+     "series": "study",
+     "date": "2026-10-07",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-10-12",
+     "series": "study",
+     "date": "2026-10-12",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-10-14",
+     "series": "study",
+     "date": "2026-10-14",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-10-19",
      "series": "study",
      "date": "2026-10-19",
      "role": "tutor",
@@ -2286,16 +3120,16 @@
     }
    ],
    "stats": {
-    "invited_12m": 41,
-    "confirmed_12m": 36,
-    "attended_12m": 33,
-    "absent_12m": 3,
-    "late_cancel_12m": 0,
-    "hours_12m": 66,
-    "hours_total": 190,
+    "invited_12m": 61,
+    "confirmed_12m": 60,
+    "attended_12m": 59,
+    "absent_12m": 0,
+    "late_cancel_12m": 1,
+    "hours_12m": 118,
+    "hours_total": 240,
     "last_attended": "2026-10-19",
     "series_attended": {
-     "study": 33
+     "study": 59
     },
     "series_attended_before": {}
    },
@@ -2363,340 +3197,379 @@
    },
    "participation_12m": [
     {
-     "series": "lab",
-     "date": "2025-10-23",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "event",
-     "date": "2025-11-06",
-     "role": "event",
+     "shift_id": "art@2025-11-08",
+     "series": "art",
+     "date": "2025-11-08",
+     "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2025-11-13",
-     "role": "teacher",
+     "shift_id": "life@2025-11-12",
+     "series": "life",
+     "date": "2025-11-12",
+     "role": "life",
      "status": "attended",
-     "hours": 2.5
+     "hours": 3
     },
     {
-     "series": "lab",
-     "date": "2025-11-13",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2025-11-27",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2025-11-27",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2025-12-04",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "event",
-     "date": "2025-12-05",
-     "role": "event",
+     "shift_id": "art@2025-11-15",
+     "series": "art",
+     "date": "2025-11-15",
+     "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "event",
-     "date": "2025-12-06",
-     "role": "event",
+     "shift_id": "life@2025-11-26",
+     "series": "life",
+     "date": "2025-11-26",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2025-11-29",
+     "series": "art",
+     "date": "2025-11-29",
+     "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2025-12-25",
-     "role": "teacher",
+     "shift_id": "life@2025-12-03",
+     "series": "life",
+     "date": "2025-12-03",
+     "role": "life",
      "status": "attended",
-     "hours": 2.5
+     "hours": 3
     },
     {
-     "series": "lab",
-     "date": "2025-12-25",
-     "role": "teacher",
+     "shift_id": "life@2025-12-17",
+     "series": "life",
+     "date": "2025-12-17",
+     "role": "life",
      "status": "attended",
-     "hours": 2.5
+     "hours": 3
     },
     {
-     "series": "lab",
-     "date": "2025-12-25",
-     "role": "teacher",
+     "shift_id": "life@2025-12-24",
+     "series": "life",
+     "date": "2025-12-24",
+     "role": "life",
      "status": "attended",
-     "hours": 2.5
+     "hours": 3
     },
     {
-     "series": "event",
-     "date": "2026-01-03",
-     "role": "event",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "event",
-     "date": "2026-02-05",
-     "role": "event",
+     "shift_id": "art@2025-12-27",
+     "series": "art",
+     "date": "2025-12-27",
+     "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-02-05",
-     "role": "teacher",
+     "shift_id": "life@2025-12-31",
+     "series": "life",
+     "date": "2025-12-31",
+     "role": "life",
      "status": "attended",
-     "hours": 2.5
+     "hours": 3
     },
     {
-     "series": "event",
-     "date": "2026-02-06",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "lab",
-     "date": "2026-02-19",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-02-26",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-03-05",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "event",
-     "date": "2026-03-06",
-     "role": "event",
+     "shift_id": "art@2026-01-17",
+     "series": "art",
+     "date": "2026-01-17",
+     "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-03-19",
-     "role": "teacher",
+     "shift_id": "life@2026-01-21",
+     "series": "life",
+     "date": "2026-01-21",
+     "role": "life",
      "status": "attended",
-     "hours": 2.5
+     "hours": 3
     },
     {
-     "series": "event",
+     "shift_id": "art@2026-01-24",
+     "series": "art",
+     "date": "2026-01-24",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-01-28",
+     "series": "life",
+     "date": "2026-01-28",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-01-31",
+     "series": "art",
+     "date": "2026-01-31",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-02-18",
+     "series": "life",
+     "date": "2026-02-18",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-02-21",
+     "series": "art",
+     "date": "2026-02-21",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-02-25",
+     "series": "life",
+     "date": "2026-02-25",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-02-28",
+     "series": "art",
+     "date": "2026-02-28",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-03-04",
+     "series": "life",
+     "date": "2026-03-04",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-03-14",
+     "series": "art",
+     "date": "2026-03-14",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-03-18",
+     "series": "life",
+     "date": "2026-03-18",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-03-21",
+     "series": "art",
      "date": "2026-03-21",
-     "role": "event",
+     "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-03-26",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2026-03-26",
-     "role": "teacher",
+     "shift_id": "life@2026-03-25",
+     "series": "life",
+     "date": "2026-03-25",
+     "role": "life",
      "status": "attended",
-     "hours": 2.5
+     "hours": 3
     },
     {
-     "series": "event",
-     "date": "2026-04-03",
-     "role": "event",
+     "shift_id": "art@2026-04-04",
+     "series": "art",
+     "date": "2026-04-04",
+     "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-04-23",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-04-30",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "event",
-     "date": "2026-04-30",
-     "role": "event",
+     "shift_id": "art@2026-04-18",
+     "series": "art",
+     "date": "2026-04-18",
+     "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-05-07",
-     "role": "teacher",
+     "shift_id": "life@2026-04-22",
+     "series": "life",
+     "date": "2026-04-22",
+     "role": "life",
      "status": "attended",
-     "hours": 2.5
+     "hours": 3
     },
     {
-     "series": "lab",
-     "date": "2026-05-07",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-05-14",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-05-14",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "event",
-     "date": "2026-05-28",
-     "role": "event",
+     "shift_id": "art@2026-04-25",
+     "series": "art",
+     "date": "2026-04-25",
+     "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-06-04",
-     "role": "teacher",
+     "shift_id": "life@2026-05-06",
+     "series": "life",
+     "date": "2026-05-06",
+     "role": "life",
      "status": "attended",
-     "hours": 2.5
+     "hours": 3
     },
     {
-     "series": "lab",
-     "date": "2026-06-04",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-06-18",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-06-25",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-07-02",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-07-09",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-07-16",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-08-06",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "event",
-     "date": "2026-08-13",
-     "role": "event",
+     "shift_id": "art@2026-05-23",
+     "series": "art",
+     "date": "2026-05-23",
+     "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-08-20",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
+     "shift_id": "life@2026-05-27",
+     "series": "life",
+     "date": "2026-05-27",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
     },
     {
-     "series": "lab",
-     "date": "2026-09-24",
-     "role": "teacher",
+     "shift_id": "art@2026-05-30",
+     "series": "art",
+     "date": "2026-05-30",
+     "role": "assistant",
      "status": "attended",
-     "hours": 2.5
+     "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-10-15",
-     "role": "teacher",
+     "shift_id": "art@2026-06-20",
+     "series": "art",
+     "date": "2026-06-20",
+     "role": "assistant",
      "status": "attended",
-     "hours": 2.5
+     "hours": 4
     },
     {
-     "series": "lab",
-     "date": "2026-10-15",
-     "role": "teacher",
+     "shift_id": "life@2026-06-24",
+     "series": "life",
+     "date": "2026-06-24",
+     "role": "life",
      "status": "attended",
-     "hours": 2.5
+     "hours": 3
+    },
+    {
+     "shift_id": "residence@2026-07-06",
+     "series": "residence",
+     "date": "2026-07-06",
+     "role": "escort",
+     "status": "attended",
+     "hours": 60
+    },
+    {
+     "shift_id": "life@2026-07-15",
+     "series": "life",
+     "date": "2026-07-15",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-07-18",
+     "series": "art",
+     "date": "2026-07-18",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-07-22",
+     "series": "life",
+     "date": "2026-07-22",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-07-25",
+     "series": "art",
+     "date": "2026-07-25",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-08-22",
+     "series": "art",
+     "date": "2026-08-22",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-08-29",
+     "series": "art",
+     "date": "2026-08-29",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-09-23",
+     "series": "life",
+     "date": "2026-09-23",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-09-26",
+     "series": "art",
+     "date": "2026-09-26",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-09-30",
+     "series": "life",
+     "date": "2026-09-30",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-10-03",
+     "series": "art",
+     "date": "2026-10-03",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
     }
    ],
    "stats": {
-    "invited_12m": 48,
-    "confirmed_12m": 46,
-    "attended_12m": 42,
-    "absent_12m": 4,
+    "invited_12m": 72,
+    "confirmed_12m": 45,
+    "attended_12m": 45,
+    "absent_12m": 0,
     "late_cancel_12m": 0,
-    "hours_12m": 121.5,
-    "hours_total": 230,
-    "last_attended": "2026-10-15",
+    "hours_12m": 215,
+    "hours_total": 379,
+    "last_attended": "2026-10-03",
     "series_attended": {
-     "event": 11,
-     "lab": 31
+     "art": 23,
+     "life": 21,
+     "residence": 1
     },
     "series_attended_before": {}
    },
@@ -2760,6 +3633,15 @@
    },
    "participation_12m": [
     {
+     "shift_id": "art@2025-10-25",
+     "series": "art",
+     "date": "2025-10-25",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2025-11-01",
      "series": "art",
      "date": "2025-11-01",
      "role": "assistant",
@@ -2767,48 +3649,183 @@
      "hours": 4
     },
     {
-     "series": "art",
+     "shift_id": "fair@2025-11-01",
+     "series": "fair",
      "date": "2025-11-01",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2025-11-08",
+     "series": "fair",
+     "date": "2025-11-08",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "event@2025-11-08",
+     "series": "event",
+     "date": "2025-11-08",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2025-11-15",
+     "series": "art",
+     "date": "2025-11-15",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "fair@2025-12-06",
+     "series": "fair",
+     "date": "2025-12-06",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2025-12-13",
+     "series": "fair",
+     "date": "2025-12-13",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "art@2025-12-20",
      "series": "art",
-     "date": "2025-11-22",
+     "date": "2025-12-20",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "life@2025-12-24",
+     "series": "life",
+     "date": "2025-12-24",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2025-12-27",
      "series": "art",
+     "date": "2025-12-27",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-01-03",
+     "series": "fair",
      "date": "2026-01-03",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
     },
     {
+     "shift_id": "fair@2026-01-10",
+     "series": "fair",
+     "date": "2026-01-10",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "event@2026-01-10",
+     "series": "event",
+     "date": "2026-01-10",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-01-17",
      "series": "art",
-     "date": "2026-02-14",
+     "date": "2026-01-17",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "art@2026-01-24",
+     "series": "art",
+     "date": "2026-01-24",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "sorochany@2026-02-02",
      "series": "sorochany",
-     "date": "2026-02-25",
+     "date": "2026-02-02",
      "role": "escort",
      "status": "attended",
      "hours": 40
     },
     {
+     "shift_id": "art@2026-02-07",
      "series": "art",
-     "date": "2026-03-07",
+     "date": "2026-02-07",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "life@2026-02-11",
+     "series": "life",
+     "date": "2026-02-11",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-02-14",
+     "series": "art",
+     "date": "2026-02-14",
+     "role": "assistant",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "fair@2026-02-14",
+     "series": "fair",
+     "date": "2026-02-14",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-03-07",
+     "series": "fair",
+     "date": "2026-03-07",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "art@2026-03-14",
+     "series": "art",
+     "date": "2026-03-14",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-03-14",
+     "series": "fair",
+     "date": "2026-03-14",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "art@2026-03-21",
      "series": "art",
      "date": "2026-03-21",
      "role": "assistant",
@@ -2816,13 +3833,23 @@
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2026-04-04",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
+     "shift_id": "life@2026-03-25",
+     "series": "life",
+     "date": "2026-03-25",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
     },
     {
+     "shift_id": "fair@2026-04-04",
+     "series": "fair",
+     "date": "2026-04-04",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "art@2026-04-11",
      "series": "art",
      "date": "2026-04-11",
      "role": "assistant",
@@ -2830,6 +3857,31 @@
      "hours": 4
     },
     {
+     "shift_id": "fair@2026-04-11",
+     "series": "fair",
+     "date": "2026-04-11",
+     "role": "fair",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "life@2026-04-15",
+     "series": "life",
+     "date": "2026-04-15",
+     "role": "life",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "art@2026-04-18",
+     "series": "art",
+     "date": "2026-04-18",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-05-02",
      "series": "art",
      "date": "2026-05-02",
      "role": "assistant",
@@ -2837,13 +3889,79 @@
      "hours": 4
     },
     {
+     "shift_id": "fair@2026-05-02",
+     "series": "fair",
+     "date": "2026-05-02",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "art@2026-05-09",
      "series": "art",
-     "date": "2026-06-06",
+     "date": "2026-05-09",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "fair@2026-05-09",
+     "series": "fair",
+     "date": "2026-05-09",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "event@2026-05-09",
+     "series": "event",
+     "date": "2026-05-09",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-06-10",
+     "series": "life",
+     "date": "2026-06-10",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-06-13",
+     "series": "art",
+     "date": "2026-06-13",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-06-13",
+     "series": "fair",
+     "date": "2026-06-13",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "life@2026-06-17",
+     "series": "life",
+     "date": "2026-06-17",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "event@2026-06-18",
+     "series": "event",
+     "date": "2026-06-18",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-07-04",
      "series": "art",
      "date": "2026-07-04",
      "role": "assistant",
@@ -2851,55 +3969,127 @@
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2026-07-18",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
+     "shift_id": "residence@2026-07-06",
      "series": "residence",
-     "date": "2026-07-29",
+     "date": "2026-07-06",
      "role": "escort",
      "status": "attended",
      "hours": 60
     },
     {
+     "shift_id": "life@2026-07-08",
+     "series": "life",
+     "date": "2026-07-08",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-07-11",
      "series": "art",
+     "date": "2026-07-11",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-07-11",
+     "series": "fair",
+     "date": "2026-07-11",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-08-01",
+     "series": "fair",
      "date": "2026-08-01",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "life@2026-08-05",
+     "series": "life",
+     "date": "2026-08-05",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-08-08",
+     "series": "art",
+     "date": "2026-08-08",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2026-08-15",
-     "role": "assistant",
+     "shift_id": "fair@2026-08-08",
+     "series": "fair",
+     "date": "2026-08-08",
+     "role": "fair",
      "status": "attended",
-     "hours": 4
+     "hours": 8
     },
     {
-     "series": "art",
-     "date": "2026-08-15",
-     "role": "assistant",
+     "shift_id": "life@2026-08-19",
+     "series": "life",
+     "date": "2026-08-19",
+     "role": "life",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
-     "series": "art",
-     "date": "2026-09-19",
-     "role": "assistant",
+     "shift_id": "life@2026-09-02",
+     "series": "life",
+     "date": "2026-09-02",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-09-05",
+     "series": "fair",
+     "date": "2026-09-05",
+     "role": "fair",
      "status": "absent",
      "hours": 0
     },
     {
+     "shift_id": "fair@2026-09-12",
+     "series": "fair",
+     "date": "2026-09-12",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "art@2026-09-19",
      "series": "art",
-     "date": "2026-10-10",
+     "date": "2026-09-19",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "life@2026-09-23",
+     "series": "life",
+     "date": "2026-09-23",
+     "role": "life",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-10-10",
+     "series": "fair",
+     "date": "2026-10-10",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "art@2026-10-17",
      "series": "art",
      "date": "2026-10-17",
      "role": "assistant",
@@ -2908,16 +4098,19 @@
     }
    ],
    "stats": {
-    "invited_12m": 28,
-    "confirmed_12m": 21,
-    "attended_12m": 18,
-    "absent_12m": 3,
-    "late_cancel_12m": 0,
-    "hours_12m": 164,
-    "hours_total": 520,
+    "invited_12m": 92,
+    "confirmed_12m": 58,
+    "attended_12m": 54,
+    "absent_12m": 1,
+    "late_cancel_12m": 3,
+    "hours_12m": 370,
+    "hours_total": 692,
     "last_attended": "2026-10-17",
     "series_attended": {
-     "art": 16,
+     "art": 20,
+     "event": 4,
+     "fair": 18,
+     "life": 10,
      "residence": 1,
      "sorochany": 1
     },
@@ -2971,67 +4164,153 @@
    },
    "participation_12m": [
     {
+     "shift_id": "event@2025-11-21",
      "series": "event",
-     "date": "2025-12-04",
+     "date": "2025-11-21",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "event@2025-12-13",
      "series": "event",
-     "date": "2025-12-04",
+     "date": "2025-12-13",
+     "role": "event",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "event@2026-01-15",
+     "series": "event",
+     "date": "2026-01-15",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "event@2026-01-16",
      "series": "event",
-     "date": "2026-01-31",
+     "date": "2026-01-16",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "event@2026-02-14",
      "series": "event",
-     "date": "2026-01-31",
+     "date": "2026-02-14",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "fair",
-     "date": "2026-04-11",
-     "role": "fair",
+     "shift_id": "event@2026-03-13",
+     "series": "event",
+     "date": "2026-03-13",
+     "role": "event",
      "status": "attended",
-     "hours": 8
+     "hours": 4
     },
     {
-     "series": "fair",
-     "date": "2026-07-19",
-     "role": "fair",
+     "shift_id": "event@2026-04-03",
+     "series": "event",
+     "date": "2026-04-03",
+     "role": "event",
      "status": "attended",
-     "hours": 8
+     "hours": 4
     },
     {
-     "series": "fair",
-     "date": "2026-08-15",
-     "role": "fair",
+     "shift_id": "event@2026-04-24",
+     "series": "event",
+     "date": "2026-04-24",
+     "role": "event",
      "status": "attended",
-     "hours": 8
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-05-01",
+     "series": "event",
+     "date": "2026-05-01",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-05-09",
+     "series": "event",
+     "date": "2026-05-09",
+     "role": "event",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "event@2026-06-05",
+     "series": "event",
+     "date": "2026-06-05",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-06-11",
+     "series": "event",
+     "date": "2026-06-11",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-07-04",
+     "series": "event",
+     "date": "2026-07-04",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "residence@2026-07-06",
+     "series": "residence",
+     "date": "2026-07-06",
+     "role": "escort",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "event@2026-09-04",
+     "series": "event",
+     "date": "2026-09-04",
+     "role": "event",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "event@2026-09-24",
+     "series": "event",
+     "date": "2026-09-24",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-10-01",
+     "series": "event",
+     "date": "2026-10-01",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
     }
    ],
    "stats": {
-    "invited_12m": 8,
-    "confirmed_12m": 7,
-    "attended_12m": 7,
-    "absent_12m": 0,
+    "invited_12m": 27,
+    "confirmed_12m": 17,
+    "attended_12m": 13,
+    "absent_12m": 4,
     "late_cancel_12m": 0,
-    "hours_12m": 40,
-    "hours_total": 18,
-    "last_attended": "2026-08-15",
+    "hours_12m": 52,
+    "hours_total": 68,
+    "last_attended": "2026-10-01",
     "series_attended": {
-     "event": 4,
-     "fair": 3
+     "event": 13
     },
     "series_attended_before": {}
    },
@@ -3092,46 +4371,138 @@
    },
    "participation_12m": [
     {
+     "shift_id": "fair@2025-11-01",
+     "series": "fair",
+     "date": "2025-11-01",
+     "role": "fair",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "fair@2025-11-08",
+     "series": "fair",
+     "date": "2025-11-08",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2025-12-06",
+     "series": "fair",
+     "date": "2025-12-06",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2025-12-13",
+     "series": "fair",
+     "date": "2025-12-13",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-01-10",
+     "series": "fair",
+     "date": "2026-01-10",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "event@2026-01-31",
+     "series": "event",
+     "date": "2026-01-31",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "sorochany@2026-02-02",
      "series": "sorochany",
-     "date": "2026-02-12",
+     "date": "2026-02-02",
      "role": "escort",
-     "status": "attended",
-     "hours": 40
+     "status": "absent",
+     "hours": 0
     },
     {
+     "shift_id": "fair@2026-02-14",
      "series": "fair",
-     "date": "2026-03-08",
+     "date": "2026-02-14",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "fair@2026-03-07",
      "series": "fair",
-     "date": "2026-03-21",
+     "date": "2026-03-07",
+     "role": "fair",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "fair@2026-06-06",
+     "series": "fair",
+     "date": "2026-06-06",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "fair@2026-07-04",
      "series": "fair",
-     "date": "2026-06-27",
+     "date": "2026-07-04",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-07-11",
+     "series": "fair",
+     "date": "2026-07-11",
+     "role": "fair",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "fair@2026-09-05",
+     "series": "fair",
+     "date": "2026-09-05",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-09-12",
+     "series": "fair",
+     "date": "2026-09-12",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-10-03",
+     "series": "fair",
+     "date": "2026-10-03",
      "role": "fair",
      "status": "attended",
      "hours": 8
     }
    ],
    "stats": {
-    "invited_12m": 5,
-    "confirmed_12m": 4,
-    "attended_12m": 4,
-    "absent_12m": 0,
-    "late_cancel_12m": 0,
-    "hours_12m": 64,
-    "hours_total": 20,
-    "last_attended": "2026-06-27",
+    "invited_12m": 33,
+    "confirmed_12m": 15,
+    "attended_12m": 11,
+    "absent_12m": 2,
+    "late_cancel_12m": 2,
+    "hours_12m": 84,
+    "hours_total": 212,
+    "last_attended": "2026-10-03",
     "series_attended": {
-     "fair": 3,
-     "sorochany": 1
+     "event": 1,
+     "fair": 10
     },
     "series_attended_before": {}
    },
@@ -3192,48 +4563,17 @@
     "frequency": "Раз в месяц",
     "paused_until": "2026-12-01"
    },
-   "participation_12m": [
-    {
-     "series": "event",
-     "date": "2025-12-11",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-03-19",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-04-09",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-07-10",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    }
-   ],
+   "participation_12m": [],
    "stats": {
-    "invited_12m": 5,
-    "confirmed_12m": 4,
-    "attended_12m": 4,
+    "invited_12m": 0,
+    "confirmed_12m": 0,
+    "attended_12m": 0,
     "absent_12m": 0,
     "late_cancel_12m": 0,
-    "hours_12m": 16,
+    "hours_12m": 0,
     "hours_total": 56,
-    "last_attended": "2026-07-10",
-    "series_attended": {
-     "event": 4
-    },
+    "last_attended": null,
+    "series_attended": {},
     "series_attended_before": {}
    },
    "activity": {
@@ -3293,20 +4633,39 @@
    },
    "participation_12m": [
     {
+     "shift_id": "fair@2025-11-01",
      "series": "fair",
-     "date": "2025-11-16",
+     "date": "2025-11-01",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "fair@2025-11-08",
      "series": "fair",
-     "date": "2025-11-30",
+     "date": "2025-11-08",
      "role": "fair",
-     "status": "cancelled_late",
-     "hours": 0
+     "status": "attended",
+     "hours": 8
     },
     {
+     "shift_id": "fair@2025-12-06",
+     "series": "fair",
+     "date": "2025-12-06",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "event@2025-12-06",
+     "series": "event",
+     "date": "2025-12-06",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-01-03",
      "series": "fair",
      "date": "2026-01-03",
      "role": "fair",
@@ -3314,6 +4673,47 @@
      "hours": 8
     },
     {
+     "shift_id": "fair@2026-01-10",
+     "series": "fair",
+     "date": "2026-01-10",
+     "role": "fair",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "fair@2026-02-07",
+     "series": "fair",
+     "date": "2026-02-07",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-02-14",
+     "series": "fair",
+     "date": "2026-02-14",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-03-07",
+     "series": "fair",
+     "date": "2026-03-07",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-03-14",
+     "series": "fair",
+     "date": "2026-03-14",
+     "role": "fair",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "fair@2026-04-04",
      "series": "fair",
      "date": "2026-04-04",
      "role": "fair",
@@ -3321,38 +4721,122 @@
      "hours": 8
     },
     {
+     "shift_id": "event@2026-04-04",
+     "series": "event",
+     "date": "2026-04-04",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-05-02",
      "series": "fair",
-     "date": "2026-04-12",
+     "date": "2026-05-02",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "fair@2026-05-09",
      "series": "fair",
-     "date": "2026-05-10",
+     "date": "2026-05-09",
      "role": "fair",
-     "status": "absent",
-     "hours": 0
+     "status": "attended",
+     "hours": 8
     },
     {
+     "shift_id": "fair@2026-06-06",
      "series": "fair",
-     "date": "2026-08-30",
+     "date": "2026-06-06",
      "role": "fair",
-     "status": "absent",
-     "hours": 0
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-06-13",
+     "series": "fair",
+     "date": "2026-06-13",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-07-04",
+     "series": "fair",
+     "date": "2026-07-04",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-07-11",
+     "series": "fair",
+     "date": "2026-07-11",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-08-01",
+     "series": "fair",
+     "date": "2026-08-01",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-08-08",
+     "series": "fair",
+     "date": "2026-08-08",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-09-05",
+     "series": "fair",
+     "date": "2026-09-05",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-09-12",
+     "series": "fair",
+     "date": "2026-09-12",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-10-03",
+     "series": "fair",
+     "date": "2026-10-03",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "fair@2026-10-10",
+     "series": "fair",
+     "date": "2026-10-10",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
     }
    ],
    "stats": {
-    "invited_12m": 8,
-    "confirmed_12m": 7,
-    "attended_12m": 4,
+    "invited_12m": 28,
+    "confirmed_12m": 24,
+    "attended_12m": 22,
     "absent_12m": 2,
-    "late_cancel_12m": 1,
-    "hours_12m": 32,
-    "hours_total": 64,
-    "last_attended": "2026-04-12",
+    "late_cancel_12m": 0,
+    "hours_12m": 168,
+    "hours_total": 328,
+    "last_attended": "2026-10-10",
     "series_attended": {
-     "fair": 4
+     "event": 2,
+     "fair": 20
     },
     "series_attended_before": {}
    },
@@ -3421,60 +4905,179 @@
    },
    "participation_12m": [
     {
+     "shift_id": "fair@2026-01-03",
+     "series": "fair",
+     "date": "2026-01-03",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "pack@2026-01-30",
+     "series": "pack",
+     "date": "2026-01-30",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-02-07",
+     "series": "fair",
+     "date": "2026-02-07",
+     "role": "fair",
+     "status": "attended",
+     "hours": 8
+    },
+    {
+     "shift_id": "pack@2026-02-20",
+     "series": "pack",
+     "date": "2026-02-20",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "event@2026-03-07",
      "series": "event",
-     "date": "2025-12-25",
+     "date": "2026-03-07",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "fair@2026-03-14",
      "series": "fair",
-     "date": "2026-03-01",
+     "date": "2026-03-14",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "fair@2026-04-11",
      "series": "fair",
-     "date": "2026-03-15",
+     "date": "2026-04-11",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "pack@2026-04-17",
+     "series": "pack",
+     "date": "2026-04-17",
+     "role": "packing",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "pack@2026-05-22",
+     "series": "pack",
+     "date": "2026-05-22",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-05-29",
+     "series": "pack",
+     "date": "2026-05-29",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-06-06",
      "series": "fair",
-     "date": "2026-04-05",
+     "date": "2026-06-06",
+     "role": "fair",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "fair@2026-06-13",
+     "series": "fair",
+     "date": "2026-06-13",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "fair@2026-07-04",
      "series": "fair",
-     "date": "2026-07-05",
+     "date": "2026-07-04",
      "role": "fair",
      "status": "attended",
      "hours": 8
     },
     {
+     "shift_id": "event@2026-07-10",
+     "series": "event",
+     "date": "2026-07-10",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-08-08",
      "series": "fair",
-     "date": "2026-10-11",
+     "date": "2026-08-08",
+     "role": "fair",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "pack@2026-08-28",
+     "series": "pack",
+     "date": "2026-08-28",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "fair@2026-09-05",
+     "series": "fair",
+     "date": "2026-09-05",
+     "role": "fair",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "event@2026-09-11",
+     "series": "event",
+     "date": "2026-09-11",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "fair@2026-10-03",
+     "series": "fair",
+     "date": "2026-10-03",
      "role": "fair",
      "status": "attended",
      "hours": 8
+    },
+    {
+     "shift_id": "pack@2026-10-09",
+     "series": "pack",
+     "date": "2026-10-09",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
     }
    ],
    "stats": {
-    "invited_12m": 6,
-    "confirmed_12m": 6,
-    "attended_12m": 6,
-    "absent_12m": 0,
-    "late_cancel_12m": 0,
-    "hours_12m": 44,
-    "hours_total": 24,
-    "last_attended": "2026-10-11",
+    "invited_12m": 49,
+    "confirmed_12m": 20,
+    "attended_12m": 16,
+    "absent_12m": 2,
+    "late_cancel_12m": 2,
+    "hours_12m": 86,
+    "hours_total": 86,
+    "last_attended": "2026-10-09",
     "series_attended": {
-     "event": 1,
-     "fair": 5
+     "event": 3,
+     "fair": 7,
+     "pack": 6
     },
     "series_attended_before": {}
    },
@@ -3585,7 +5188,7 @@
    },
    "participation_12m": [],
    "stats": {
-    "invited_12m": 1,
+    "invited_12m": 0,
     "confirmed_12m": 0,
     "attended_12m": 0,
     "absent_12m": 0,
@@ -3645,13 +5248,23 @@
    },
    "participation_12m": [
     {
+     "shift_id": "event@2025-11-08",
+     "series": "event",
+     "date": "2025-11-08",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2025-12-18",
      "series": "event",
      "date": "2025-12-18",
      "role": "event",
-     "status": "absent",
-     "hours": 0
+     "status": "attended",
+     "hours": 4
     },
     {
+     "shift_id": "event@2026-01-09",
      "series": "event",
      "date": "2026-01-09",
      "role": "event",
@@ -3659,34 +5272,23 @@
      "hours": 4
     },
     {
+     "shift_id": "event@2026-01-10",
      "series": "event",
-     "date": "2026-01-23",
-     "role": "event",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "event",
-     "date": "2026-02-13",
+     "date": "2026-01-10",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "event@2026-02-14",
      "series": "event",
-     "date": "2026-02-20",
+     "date": "2026-02-14",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "event",
-     "date": "2026-03-06",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
+     "shift_id": "event@2026-03-12",
      "series": "event",
      "date": "2026-03-12",
      "role": "event",
@@ -3694,53 +5296,89 @@
      "hours": 4
     },
     {
+     "shift_id": "event@2026-03-20",
      "series": "event",
-     "date": "2026-06-19",
+     "date": "2026-03-20",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "fair",
-     "date": "2026-06-20",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
+     "shift_id": "event@2026-04-03",
      "series": "event",
-     "date": "2026-08-08",
+     "date": "2026-04-03",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "event@2026-04-04",
      "series": "event",
-     "date": "2026-10-09",
+     "date": "2026-04-04",
+     "role": "event",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "event@2026-06-12",
+     "series": "event",
+     "date": "2026-06-12",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "event@2026-06-18",
      "series": "event",
-     "date": "2026-10-10",
+     "date": "2026-06-18",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-07-04",
+     "series": "event",
+     "date": "2026-07-04",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-09-04",
+     "series": "event",
+     "date": "2026-09-04",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-09-10",
+     "series": "event",
+     "date": "2026-09-10",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-10-08",
+     "series": "event",
+     "date": "2026-10-08",
      "role": "event",
      "status": "attended",
      "hours": 4
     }
    ],
    "stats": {
-    "invited_12m": 13,
-    "confirmed_12m": 12,
-    "attended_12m": 10,
+    "invited_12m": 30,
+    "confirmed_12m": 15,
+    "attended_12m": 14,
     "absent_12m": 1,
-    "late_cancel_12m": 1,
-    "hours_12m": 44,
-    "hours_total": 16,
-    "last_attended": "2026-10-10",
+    "late_cancel_12m": 0,
+    "hours_12m": 56,
+    "hours_total": 80,
+    "last_attended": "2026-10-08",
     "series_attended": {
-     "event": 9,
-     "fair": 1
+     "event": 14
     },
     "series_attended_before": {}
    },
@@ -3792,165 +5430,116 @@
    },
    "participation_12m": [
     {
+     "shift_id": "event@2025-12-18",
      "series": "event",
-     "date": "2025-10-31",
+     "date": "2025-12-18",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "art@2025-12-27",
+     "series": "art",
+     "date": "2025-12-27",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "life@2026-01-21",
+     "series": "life",
+     "date": "2026-01-21",
+     "role": "life",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "pack@2026-02-27",
+     "series": "pack",
+     "date": "2026-02-27",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-04-25",
+     "series": "art",
+     "date": "2026-04-25",
+     "role": "assistant",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "pack@2026-05-22",
+     "series": "pack",
+     "date": "2026-05-22",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-05-29",
+     "series": "pack",
+     "date": "2026-05-29",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "residence@2026-07-06",
+     "series": "residence",
+     "date": "2026-07-06",
+     "role": "escort",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "pack@2026-07-31",
+     "series": "pack",
+     "date": "2026-07-31",
+     "role": "packing",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "event@2026-09-03",
      "series": "event",
-     "date": "2026-01-10",
+     "date": "2026-09-03",
      "role": "event",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2026-01-24",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-01-31",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-02-21",
-     "role": "assistant",
+     "shift_id": "pack@2026-09-25",
+     "series": "pack",
+     "date": "2026-09-25",
+     "role": "packing",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
-     "series": "event",
-     "date": "2026-03-07",
-     "role": "event",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-03-14",
-     "role": "assistant",
+     "shift_id": "life@2026-10-07",
+     "series": "life",
+     "date": "2026-10-07",
+     "role": "life",
      "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-03-14",
-     "role": "assistant",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-03-28",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-03-28",
-     "role": "assistant",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-05-02",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "event",
-     "date": "2026-05-02",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "event",
-     "date": "2026-05-08",
-     "role": "event",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-05-23",
-     "role": "assistant",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-05-30",
-     "role": "assistant",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "event",
-     "date": "2026-06-06",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-06-13",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-08-22",
-     "role": "assistant",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-09-26",
-     "role": "assistant",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-10-03",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "art",
-     "date": "2026-10-17",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
+     "hours": 3
     }
    ],
    "stats": {
-    "invited_12m": 23,
-    "confirmed_12m": 21,
+    "invited_12m": 48,
+    "confirmed_12m": 12,
     "attended_12m": 8,
-    "absent_12m": 6,
-    "late_cancel_12m": 7,
-    "hours_12m": 32,
-    "hours_total": 38,
-    "last_attended": "2026-06-13",
+    "absent_12m": 2,
+    "late_cancel_12m": 2,
+    "hours_12m": 27,
+    "hours_total": 39,
+    "last_attended": "2026-10-07",
     "series_attended": {
-     "art": 4,
-     "event": 4
+     "art": 1,
+     "event": 2,
+     "life": 1,
+     "pack": 4
     },
     "series_attended_before": {}
    },
@@ -4009,90 +5598,15 @@
    },
    "participation_12m": [
     {
-     "series": "lab",
-     "date": "2025-11-06",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2025-11-06",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2025-11-13",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2025-11-13",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2025-11-20",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2025-11-27",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2025-11-27",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2025-12-04",
-     "role": "teacher",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2025-12-11",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2025-12-11",
-     "role": "teacher",
-     "status": "cancelled_late",
-     "hours": 0
-    },
-    {
+     "shift_id": "lab@2025-12-25",
      "series": "lab",
      "date": "2025-12-25",
      "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-01-15",
-     "role": "teacher",
-     "status": "absent",
+     "status": "cancelled_late",
      "hours": 0
     },
     {
+     "shift_id": "lab@2026-01-22",
      "series": "lab",
      "date": "2026-01-22",
      "role": "teacher",
@@ -4100,6 +5614,7 @@
      "hours": 2.5
     },
     {
+     "shift_id": "lab@2026-01-29",
      "series": "lab",
      "date": "2026-01-29",
      "role": "teacher",
@@ -4107,101 +5622,89 @@
      "hours": 2.5
     },
     {
+     "shift_id": "lab@2026-02-19",
      "series": "lab",
-     "date": "2026-02-05",
+     "date": "2026-02-19",
      "role": "teacher",
      "status": "absent",
      "hours": 0
     },
     {
+     "shift_id": "lab@2026-03-26",
      "series": "lab",
-     "date": "2026-03-12",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2026-06-04",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-06-25",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2026-06-25",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-07-02",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2026-07-02",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2026-07-30",
-     "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
-    },
-    {
-     "series": "lab",
-     "date": "2026-07-30",
-     "role": "teacher",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "lab",
-     "date": "2026-08-06",
+     "date": "2026-03-26",
      "role": "teacher",
      "status": "cancelled_late",
      "hours": 0
     },
     {
+     "shift_id": "lab@2026-04-30",
+     "series": "lab",
+     "date": "2026-04-30",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "lab@2026-05-28",
+     "series": "lab",
+     "date": "2026-05-28",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "pack@2026-06-26",
+     "series": "pack",
+     "date": "2026-06-26",
+     "role": "packing",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "art@2026-06-27",
+     "series": "art",
+     "date": "2026-06-27",
+     "role": "assistant",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "lab@2026-08-27",
+     "series": "lab",
+     "date": "2026-08-27",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "lab@2026-09-24",
      "series": "lab",
      "date": "2026-09-24",
      "role": "teacher",
-     "status": "cancelled_late",
+     "status": "absent",
      "hours": 0
     },
     {
+     "shift_id": "lab@2026-10-15",
      "series": "lab",
      "date": "2026-10-15",
      "role": "teacher",
-     "status": "attended",
-     "hours": 2.5
+     "status": "cancelled_late",
+     "hours": 0
     }
    ],
    "stats": {
-    "invited_12m": 30,
-    "confirmed_12m": 26,
-    "attended_12m": 14,
-    "absent_12m": 8,
+    "invited_12m": 34,
+    "confirmed_12m": 12,
+    "attended_12m": 5,
+    "absent_12m": 3,
     "late_cancel_12m": 4,
-    "hours_12m": 35.0,
+    "hours_12m": 12.5,
     "hours_total": 15,
-    "last_attended": "2026-10-15",
+    "last_attended": "2026-08-27",
     "series_attended": {
-     "lab": 14
+     "lab": 5
     },
     "series_attended_before": {}
    },
@@ -4254,34 +5757,47 @@
    },
    "participation_12m": [
     {
+     "shift_id": "study@2025-11-17",
      "series": "study",
-     "date": "2025-10-29",
+     "date": "2025-11-17",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2025-11-26",
      "series": "study",
-     "date": "2025-12-15",
+     "date": "2025-11-26",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2025-12-01",
      "series": "study",
-     "date": "2025-12-22",
+     "date": "2025-12-01",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2025-12-03",
      "series": "study",
-     "date": "2025-12-22",
+     "date": "2025-12-03",
      "role": "tutor",
-     "status": "absent",
+     "status": "cancelled_late",
      "hours": 0
     },
     {
+     "shift_id": "study@2025-12-08",
+     "series": "study",
+     "date": "2025-12-08",
+     "role": "tutor",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "study@2026-01-07",
      "series": "study",
      "date": "2026-01-07",
      "role": "tutor",
@@ -4289,88 +5805,249 @@
      "hours": 2
     },
     {
-     "series": "event",
-     "date": "2026-01-17",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
+     "shift_id": "study@2026-01-12",
      "series": "study",
-     "date": "2026-02-02",
-     "role": "tutor",
-     "status": "absent",
-     "hours": 0
-    },
-    {
-     "series": "study",
-     "date": "2026-02-23",
+     "date": "2026-01-12",
      "role": "tutor",
      "status": "attended",
      "hours": 2
     },
     {
+     "shift_id": "study@2026-01-14",
+     "series": "study",
+     "date": "2026-01-14",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-02-04",
+     "series": "study",
+     "date": "2026-02-04",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-02-09",
+     "series": "study",
+     "date": "2026-02-09",
+     "role": "tutor",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "study@2026-02-11",
+     "series": "study",
+     "date": "2026-02-11",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-03-02",
+     "series": "study",
+     "date": "2026-03-02",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-03-04",
      "series": "study",
      "date": "2026-03-04",
      "role": "tutor",
-     "status": "cancelled_late",
-     "hours": 0
+     "status": "attended",
+     "hours": 2
     },
     {
+     "shift_id": "study@2026-03-09",
      "series": "study",
-     "date": "2026-04-01",
+     "date": "2026-03-09",
      "role": "tutor",
      "status": "absent",
      "hours": 0
     },
     {
+     "shift_id": "study@2026-04-06",
+     "series": "study",
+     "date": "2026-04-06",
+     "role": "tutor",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "study@2026-04-08",
      "series": "study",
      "date": "2026-04-08",
      "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-04-13",
+     "series": "study",
+     "date": "2026-04-13",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-05-04",
+     "series": "study",
+     "date": "2026-05-04",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-05-11",
+     "series": "study",
+     "date": "2026-05-11",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-05-13",
+     "series": "study",
+     "date": "2026-05-13",
+     "role": "tutor",
      "status": "absent",
      "hours": 0
     },
     {
-     "series": "event",
-     "date": "2026-04-09",
-     "role": "event",
-     "status": "attended",
-     "hours": 4
-    },
-    {
+     "shift_id": "study@2026-06-01",
      "series": "study",
-     "date": "2026-04-20",
-     "role": "tutor",
-     "status": "attended",
-     "hours": 2
-    },
-    {
-     "series": "study",
-     "date": "2026-05-18",
-     "role": "tutor",
-     "status": "attended",
-     "hours": 2
-    },
-    {
-     "series": "study",
-     "date": "2026-09-30",
+     "date": "2026-06-01",
      "role": "tutor",
      "status": "cancelled_late",
      "hours": 0
+    },
+    {
+     "shift_id": "study@2026-06-03",
+     "series": "study",
+     "date": "2026-06-03",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-06-10",
+     "series": "study",
+     "date": "2026-06-10",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-07-01",
+     "series": "study",
+     "date": "2026-07-01",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "residence@2026-07-06",
+     "series": "residence",
+     "date": "2026-07-06",
+     "role": "escort",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "study@2026-07-08",
+     "series": "study",
+     "date": "2026-07-08",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-08-03",
+     "series": "study",
+     "date": "2026-08-03",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-08-10",
+     "series": "study",
+     "date": "2026-08-10",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-08-12",
+     "series": "study",
+     "date": "2026-08-12",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-09-07",
+     "series": "study",
+     "date": "2026-09-07",
+     "role": "tutor",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "study@2026-09-16",
+     "series": "study",
+     "date": "2026-09-16",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-09-21",
+     "series": "study",
+     "date": "2026-09-21",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
+    },
+    {
+     "shift_id": "study@2026-10-05",
+     "series": "study",
+     "date": "2026-10-05",
+     "role": "tutor",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "study@2026-10-12",
+     "series": "study",
+     "date": "2026-10-12",
+     "role": "tutor",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "study@2026-10-19",
+     "series": "study",
+     "date": "2026-10-19",
+     "role": "tutor",
+     "status": "attended",
+     "hours": 2
     }
    ],
    "stats": {
-    "invited_12m": 16,
-    "confirmed_12m": 15,
-    "attended_12m": 9,
-    "absent_12m": 4,
-    "late_cancel_12m": 2,
-    "hours_12m": 22,
-    "hours_total": 27,
-    "last_attended": "2026-05-18",
+    "invited_12m": 53,
+    "confirmed_12m": 35,
+    "attended_12m": 24,
+    "absent_12m": 5,
+    "late_cancel_12m": 6,
+    "hours_12m": 48,
+    "hours_total": 48,
+    "last_attended": "2026-10-19",
     "series_attended": {
-     "event": 2,
-     "study": 7
+     "study": 24
     },
     "series_attended_before": {}
    },
@@ -4537,7 +6214,7 @@
    },
    "participation_12m": [],
    "stats": {
-    "invited_12m": 1,
+    "invited_12m": 0,
     "confirmed_12m": 0,
     "attended_12m": 0,
     "absent_12m": 0,
@@ -4604,7 +6281,7 @@
    },
    "participation_12m": [],
    "stats": {
-    "invited_12m": 1,
+    "invited_12m": 0,
     "confirmed_12m": 0,
     "attended_12m": 0,
     "absent_12m": 0,
@@ -4718,7 +6395,7 @@
    },
    "participation_12m": [],
    "stats": {
-    "invited_12m": 1,
+    "invited_12m": 0,
     "confirmed_12m": 0,
     "attended_12m": 0,
     "absent_12m": 0,
@@ -4777,7 +6454,7 @@
    },
    "participation_12m": [],
    "stats": {
-    "invited_12m": 1,
+    "invited_12m": 0,
     "confirmed_12m": 0,
     "attended_12m": 0,
     "absent_12m": 0,
@@ -4835,7 +6512,7 @@
    },
    "participation_12m": [],
    "stats": {
-    "invited_12m": 1,
+    "invited_12m": 0,
     "confirmed_12m": 0,
     "attended_12m": 0,
     "absent_12m": 0,
@@ -5040,7 +6717,7 @@
    },
    "participation_12m": [],
    "stats": {
-    "invited_12m": 1,
+    "invited_12m": 0,
     "confirmed_12m": 0,
     "attended_12m": 0,
     "absent_12m": 0,
@@ -5232,7 +6909,7 @@
    },
    "participation_12m": [],
    "stats": {
-    "invited_12m": 1,
+    "invited_12m": 0,
     "confirmed_12m": 0,
     "attended_12m": 0,
     "absent_12m": 0,
@@ -5299,7 +6976,7 @@
    },
    "participation_12m": [],
    "stats": {
-    "invited_12m": 1,
+    "invited_12m": 0,
     "confirmed_12m": 0,
     "attended_12m": 0,
     "absent_12m": 0,
@@ -5420,7 +7097,7 @@
    },
    "participation_12m": [],
    "stats": {
-    "invited_12m": 1,
+    "invited_12m": 0,
     "confirmed_12m": 0,
     "attended_12m": 0,
     "absent_12m": 0,
@@ -5498,60 +7175,74 @@
    },
    "participation_12m": [
     {
+     "shift_id": "fair@2026-08-01",
      "series": "fair",
-     "date": "2025-11-08",
+     "date": "2026-08-01",
      "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
-     "series": "fair",
-     "date": "2025-11-08",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
-     "series": "fair",
-     "date": "2026-03-08",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
-     "series": "fair",
-     "date": "2026-03-22",
-     "role": "fair",
-     "status": "attended",
-     "hours": 8
-    },
-    {
-     "series": "event",
-     "date": "2026-06-06",
-     "role": "event",
-     "status": "absent",
+     "status": "cancelled_late",
      "hours": 0
     },
     {
-     "series": "fair",
-     "date": "2026-07-18",
-     "role": "fair",
+     "shift_id": "pack@2026-08-21",
+     "series": "pack",
+     "date": "2026-08-21",
+     "role": "packing",
      "status": "attended",
-     "hours": 8
+     "hours": 3
+    },
+    {
+     "shift_id": "event@2026-09-10",
+     "series": "event",
+     "date": "2026-09-10",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-09-11",
+     "series": "event",
+     "date": "2026-09-11",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-09-12",
+     "series": "event",
+     "date": "2026-09-12",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-10-01",
+     "series": "event",
+     "date": "2026-10-01",
+     "role": "event",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "event@2026-10-08",
+     "series": "event",
+     "date": "2026-10-08",
+     "role": "event",
+     "status": "cancelled_late",
+     "hours": 0
     }
    ],
    "stats": {
-    "invited_12m": 7,
-    "confirmed_12m": 6,
+    "invited_12m": 14,
+    "confirmed_12m": 7,
     "attended_12m": 5,
-    "absent_12m": 1,
-    "late_cancel_12m": 0,
-    "hours_12m": 40,
-    "hours_total": 8,
-    "last_attended": "2026-07-18",
+    "absent_12m": 0,
+    "late_cancel_12m": 2,
+    "hours_12m": 19,
+    "hours_total": 19,
+    "last_attended": "2026-10-01",
     "series_attended": {
-     "event": 0,
-     "fair": 5
+     "event": 4,
+     "pack": 1
     },
     "series_attended_before": {}
    },
@@ -5615,6 +7306,15 @@
    },
    "participation_12m": [
     {
+     "shift_id": "pack@2025-11-07",
+     "series": "pack",
+     "date": "2025-11-07",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2025-11-08",
      "series": "art",
      "date": "2025-11-08",
      "role": "assistant",
@@ -5622,34 +7322,95 @@
      "hours": 4
     },
     {
+     "shift_id": "lab@2025-11-13",
+     "series": "lab",
+     "date": "2025-11-13",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "pack@2025-12-05",
+     "series": "pack",
+     "date": "2025-12-05",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2025-12-13",
      "series": "art",
-     "date": "2025-11-15",
+     "date": "2025-12-13",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "pack@2025-12-19",
+     "series": "pack",
+     "date": "2025-12-19",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-01-09",
+     "series": "pack",
+     "date": "2026-01-09",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-01-10",
      "series": "art",
-     "date": "2025-11-29",
+     "date": "2026-01-10",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2025-11-29",
-     "role": "assistant",
+     "shift_id": "pack@2026-01-16",
+     "series": "pack",
+     "date": "2026-01-16",
+     "role": "packing",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
-     "series": "art",
-     "date": "2026-03-07",
-     "role": "assistant",
+     "shift_id": "pack@2026-02-06",
+     "series": "pack",
+     "date": "2026-02-06",
+     "role": "packing",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
+     "shift_id": "pack@2026-02-13",
+     "series": "pack",
+     "date": "2026-02-13",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-02-14",
+     "series": "art",
+     "date": "2026-02-14",
+     "role": "assistant",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "pack@2026-03-06",
+     "series": "pack",
+     "date": "2026-03-06",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "pack@2026-03-13",
      "series": "pack",
      "date": "2026-03-13",
      "role": "packing",
@@ -5657,55 +7418,63 @@
      "hours": 3
     },
     {
+     "shift_id": "pack@2026-03-20",
      "series": "pack",
-     "date": "2026-03-13",
+     "date": "2026-03-20",
      "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "pack@2026-04-03",
+     "series": "pack",
+     "date": "2026-04-03",
+     "role": "packing",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "art@2026-04-04",
      "series": "art",
-     "date": "2026-03-28",
+     "date": "2026-04-04",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2026-04-11",
-     "role": "assistant",
+     "shift_id": "pack@2026-04-10",
+     "series": "pack",
+     "date": "2026-04-10",
+     "role": "packing",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
-     "series": "art",
-     "date": "2026-04-11",
-     "role": "assistant",
+     "shift_id": "pack@2026-05-08",
+     "series": "pack",
+     "date": "2026-05-08",
+     "role": "packing",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
-     "series": "art",
-     "date": "2026-05-09",
-     "role": "assistant",
+     "shift_id": "pack@2026-05-15",
+     "series": "pack",
+     "date": "2026-05-15",
+     "role": "packing",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
-     "series": "art",
-     "date": "2026-05-16",
-     "role": "assistant",
+     "shift_id": "life@2026-05-20",
+     "series": "life",
+     "date": "2026-05-20",
+     "role": "life",
      "status": "attended",
-     "hours": 4
+     "hours": 3
     },
     {
-     "series": "art",
-     "date": "2026-05-23",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
+     "shift_id": "pack@2026-06-05",
      "series": "pack",
      "date": "2026-06-05",
      "role": "packing",
@@ -5713,81 +7482,124 @@
      "hours": 3
     },
     {
-     "series": "art",
-     "date": "2026-06-13",
-     "role": "assistant",
+     "shift_id": "lab@2026-06-18",
+     "series": "lab",
+     "date": "2026-06-18",
+     "role": "teacher",
      "status": "attended",
-     "hours": 4
+     "hours": 2.5
     },
     {
+     "shift_id": "pack@2026-06-19",
      "series": "pack",
-     "date": "2026-06-26",
+     "date": "2026-06-19",
      "role": "packing",
-     "status": "attended",
-     "hours": 3
-    },
-    {
-     "series": "art",
-     "date": "2026-07-18",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-07-18",
-     "role": "assistant",
-     "status": "attended",
-     "hours": 4
-    },
-    {
-     "series": "art",
-     "date": "2026-08-15",
-     "role": "assistant",
      "status": "absent",
      "hours": 0
     },
     {
+     "shift_id": "pack@2026-07-03",
      "series": "pack",
-     "date": "2026-09-04",
+     "date": "2026-07-03",
      "role": "packing",
      "status": "attended",
      "hours": 3
     },
     {
+     "shift_id": "pack@2026-07-17",
+     "series": "pack",
+     "date": "2026-07-17",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "lab@2026-07-23",
+     "series": "lab",
+     "date": "2026-07-23",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "pack@2026-08-07",
+     "series": "pack",
+     "date": "2026-08-07",
+     "role": "packing",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "pack@2026-08-14",
+     "series": "pack",
+     "date": "2026-08-14",
+     "role": "packing",
+     "status": "attended",
+     "hours": 3
+    },
+    {
+     "shift_id": "art@2026-08-15",
      "series": "art",
-     "date": "2026-09-12",
+     "date": "2026-08-15",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "art@2026-09-05",
      "series": "art",
-     "date": "2026-10-03",
+     "date": "2026-09-05",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2026-10-17",
-     "role": "assistant",
+     "shift_id": "pack@2026-09-11",
+     "series": "pack",
+     "date": "2026-09-11",
+     "role": "packing",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "lab@2026-09-17",
+     "series": "lab",
+     "date": "2026-09-17",
+     "role": "teacher",
      "status": "attended",
-     "hours": 4
+     "hours": 2.5
+    },
+    {
+     "shift_id": "pack@2026-10-02",
+     "series": "pack",
+     "date": "2026-10-02",
+     "role": "packing",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "pack@2026-10-16",
+     "series": "pack",
+     "date": "2026-10-16",
+     "role": "packing",
+     "status": "absent",
+     "hours": 0
     }
    ],
    "stats": {
-    "invited_12m": 25,
-    "confirmed_12m": 23,
-    "attended_12m": 22,
-    "absent_12m": 1,
-    "late_cancel_12m": 0,
-    "hours_12m": 83,
+    "invited_12m": 78,
+    "confirmed_12m": 35,
+    "attended_12m": 28,
+    "absent_12m": 3,
+    "late_cancel_12m": 4,
+    "hours_12m": 88.0,
     "hours_total": 360,
-    "last_attended": "2026-10-17",
+    "last_attended": "2026-09-17",
     "series_attended": {
-     "art": 17,
-     "pack": 5
+     "art": 6,
+     "lab": 4,
+     "life": 1,
+     "pack": 17
     },
     "series_attended_before": {}
    },
@@ -5841,27 +7653,17 @@
     "frequency": "Раз в месяц",
     "paused_until": null
    },
-   "participation_12m": [
-    {
-     "series": "residence",
-     "date": "2026-07-19",
-     "role": "escort",
-     "status": "attended",
-     "hours": 60
-    }
-   ],
+   "participation_12m": [],
    "stats": {
-    "invited_12m": 2,
-    "confirmed_12m": 1,
-    "attended_12m": 1,
+    "invited_12m": 1,
+    "confirmed_12m": 0,
+    "attended_12m": 0,
     "absent_12m": 0,
     "late_cancel_12m": 0,
-    "hours_12m": 60,
+    "hours_12m": 0,
     "hours_total": 60,
-    "last_attended": "2026-07-19",
-    "series_attended": {
-     "residence": 1
-    },
+    "last_attended": null,
+    "series_attended": {},
     "series_attended_before": {}
    },
    "activity": {
@@ -5919,6 +7721,7 @@
    },
    "participation_12m": [
     {
+     "shift_id": "art@2025-11-01",
      "series": "art",
      "date": "2025-11-01",
      "role": "assistant",
@@ -5926,6 +7729,7 @@
      "hours": 4
     },
     {
+     "shift_id": "art@2025-11-15",
      "series": "art",
      "date": "2025-11-15",
      "role": "assistant",
@@ -5933,27 +7737,143 @@
      "hours": 4
     },
     {
+     "shift_id": "lab@2025-11-20",
+     "series": "lab",
+     "date": "2025-11-20",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2025-12-06",
      "series": "art",
-     "date": "2025-11-22",
+     "date": "2025-12-06",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "art@2025-12-13",
      "series": "art",
-     "date": "2026-01-31",
+     "date": "2025-12-13",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "art@2025-12-20",
      "series": "art",
-     "date": "2026-02-14",
+     "date": "2025-12-20",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "art@2026-01-03",
+     "series": "art",
+     "date": "2026-01-03",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "lab@2026-01-08",
+     "series": "lab",
+     "date": "2026-01-08",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2026-01-10",
+     "series": "art",
+     "date": "2026-01-10",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "lab@2026-02-05",
+     "series": "lab",
+     "date": "2026-02-05",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2026-02-07",
+     "series": "art",
+     "date": "2026-02-07",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-02-21",
+     "series": "art",
+     "date": "2026-02-21",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-03-07",
+     "series": "art",
+     "date": "2026-03-07",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-03-14",
+     "series": "art",
+     "date": "2026-03-14",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "lab@2026-03-19",
+     "series": "lab",
+     "date": "2026-03-19",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "lab@2026-04-02",
+     "series": "lab",
+     "date": "2026-04-02",
+     "role": "teacher",
+     "status": "cancelled_late",
+     "hours": 0
+    },
+    {
+     "shift_id": "art@2026-04-11",
+     "series": "art",
+     "date": "2026-04-11",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "lab@2026-04-16",
+     "series": "lab",
+     "date": "2026-04-16",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "lab@2026-05-07",
+     "series": "lab",
+     "date": "2026-05-07",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2026-05-09",
      "series": "art",
      "date": "2026-05-09",
      "role": "assistant",
@@ -5961,13 +7881,7 @@
      "hours": 4
     },
     {
-     "series": "art",
-     "date": "2026-05-16",
-     "role": "assistant",
-     "status": "absent",
-     "hours": 0
-    },
-    {
+     "shift_id": "art@2026-05-16",
      "series": "art",
      "date": "2026-05-16",
      "role": "assistant",
@@ -5975,6 +7889,31 @@
      "hours": 4
     },
     {
+     "shift_id": "art@2026-06-06",
+     "series": "art",
+     "date": "2026-06-06",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-06-20",
+     "series": "art",
+     "date": "2026-06-20",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "lab@2026-06-25",
+     "series": "lab",
+     "date": "2026-06-25",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2026-07-04",
      "series": "art",
      "date": "2026-07-04",
      "role": "assistant",
@@ -5982,31 +7921,90 @@
      "hours": 4
     },
     {
+     "shift_id": "lab@2026-07-09",
+     "series": "lab",
+     "date": "2026-07-09",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2026-07-18",
      "series": "art",
-     "date": "2026-07-11",
+     "date": "2026-07-18",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     },
     {
+     "shift_id": "art@2026-08-01",
      "series": "art",
      "date": "2026-08-01",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-08-15",
+     "series": "art",
+     "date": "2026-08-15",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "lab@2026-08-20",
+     "series": "lab",
+     "date": "2026-08-20",
+     "role": "teacher",
+     "status": "attended",
+     "hours": 2.5
+    },
+    {
+     "shift_id": "art@2026-09-12",
+     "series": "art",
+     "date": "2026-09-12",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-09-19",
+     "series": "art",
+     "date": "2026-09-19",
+     "role": "assistant",
+     "status": "absent",
+     "hours": 0
+    },
+    {
+     "shift_id": "art@2026-09-26",
+     "series": "art",
+     "date": "2026-09-26",
+     "role": "assistant",
+     "status": "attended",
+     "hours": 4
+    },
+    {
+     "shift_id": "art@2026-10-17",
+     "series": "art",
+     "date": "2026-10-17",
      "role": "assistant",
      "status": "attended",
      "hours": 4
     }
    ],
    "stats": {
-    "invited_12m": 14,
-    "confirmed_12m": 11,
-    "attended_12m": 10,
+    "invited_12m": 62,
+    "confirmed_12m": 34,
+    "attended_12m": 32,
     "absent_12m": 1,
-    "late_cancel_12m": 0,
-    "hours_12m": 40,
-    "hours_total": 70,
-    "last_attended": "2026-08-01",
+    "late_cancel_12m": 1,
+    "hours_12m": 114.5,
+    "hours_total": 229.5,
+    "last_attended": "2026-10-17",
     "series_attended": {
-     "art": 10
+     "art": 23,
+     "lab": 9
     },
     "series_attended_before": {}
    },

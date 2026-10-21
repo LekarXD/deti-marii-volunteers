@@ -14,6 +14,7 @@
     python3 scripts/generate_synthetic_volunteers.py
 
 Пишет materials/05-продукт/данные/synthetic-volunteers.json и .csv. Набор детерминирован (seed).
+Историю смен (отклики, явку, часы) потом пересчитывает scripts/generate_synthetic_shifts.py — запускать его вторым.
 """
 import csv
 import json
@@ -251,7 +252,10 @@ def build():
 
 
 def main():
-    people = build()
+    write_volunteers(build())
+
+
+def write_volunteers(people):
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / 'synthetic-volunteers.json').write_text(json.dumps({'generated_for': TODAY.isoformat(), 'series': SERIES, 'volunteers': people},
                                                               ensure_ascii=False, indent=1) + '\n')

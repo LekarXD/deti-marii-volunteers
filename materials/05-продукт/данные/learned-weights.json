@@ -1,0 +1,32 @@
+{
+ "train_invitations": 1608,
+ "test_invitations": 386,
+ "attended_rate": 0.541,
+ "auc_hand_weights": 0.705,
+ "auc_learned_weights": 0.707,
+ "auc_ceiling_true_model": 0.711,
+ "hand_weights": {
+  "interest": 0.25,
+  "familiar": 0.25,
+  "time": 0.2,
+  "reliability": 0.1,
+  "response": 0.1,
+  "near": 0.1
+ },
+ "learned_weights_share": {
+  "interest": 0.13,
+  "familiar": 0.23,
+  "time": 0.27,
+  "reliability": 0.1,
+  "response": 0.17,
+  "near": 0.11
+ },
+ "learned_coefficients": {
+  "interest": 0.53,
+  "familiar": 0.94,
+  "time": 1.14,
+  "reliability": 0.4,
+  "response": 0.72,
+  "near": 0.44
+ }
+}
