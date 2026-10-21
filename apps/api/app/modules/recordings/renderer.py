@@ -56,11 +56,12 @@ async def renderer_scope(request:Request,authorization:str|None=Header(None),db:
     plan=take.projection.get('capture_plan',{})
     # Studio scene changes invalidate readiness until the authoritative policy snapshot is refreshed.
     if session.scene_revision!=plan.get('scene_revision'):
-        await service.snapshot(db,owner,take,session,privacy_state='unknown',allowed_tracks=[])
+        approved=owner.privacy_state=='approved' and plan.get('privacy_state')=='approved'
+        await service.snapshot(db,owner,take,session,privacy_state='approved' if approved else 'unknown',allowed_tracks=plan.get('allowed_tracks',[]) if approved else [])
     return db,grant,take,owner,session
 
 async def state_view(db,grant,take,owner,session,*,with_provider=False):
-    value={'foundation_id':owner.foundation_id,'project_id':owner.id,'take_id':take.id,'session_id':session.id,'generation':take.generation,'renderer_state_version':take.renderer_state_version,'projection_hash':take.projection_hash,**take.projection,'provider_grant':None,'invalidated':take.projection['capture_plan']['privacy_state']!='approved'}
+    value={'foundation_id':owner.foundation_id,'project_id':owner.id,'take_id':take.id,'session_id':session.id,'generation':take.generation,'renderer_state_version':take.renderer_state_version,'projection_hash':take.projection_hash,**take.projection,'provider_grant':None,'invalidated':take.projection['capture_plan']['privacy_state']!='approved','scene_transition':service.scene_transition(take)}
     settings=RtcSettings.from_env()
     if with_provider and settings.capabilities().configured and not value['invalidated']:
         hidden_identity='opora-renderer-'+grant.id.hex
@@ -114,6 +115,7 @@ async def readiness(body:RendererReadinessInput,scope=Depends(active_renderer)):
         return grant.readiness_response
     reasons=[]
     if not body.visual_ready:reasons.append('visual_frame_unready')
+    if body.media_state is not None and body.media_state!='connected':reasons.append('media_not_connected')
     plan=take.projection['capture_plan']
     if plan['privacy_state']!='approved':reasons.append('privacy_not_approved')
     if (body.viewport_width,body.viewport_height,body.device_pixel_ratio)!=(1920,1080,1):reasons.append('viewport_mismatch')
@@ -131,6 +133,10 @@ async def readiness(body:RendererReadinessInput,scope=Depends(active_renderer)):
     proofs={str(x.asset_id):x.sha256 for x in body.asset_proofs}
     if len(proofs)!=len(body.asset_proofs) or proofs!=wanted:reasons.append('asset_checksum_mismatch')
     valid_until=utcnow()+timedelta(seconds=10) if not reasons else None
+    if not reasons and take.state in ('capturing','stopping') and take.started_at:
+        from .models import RecordingStageEvent
+        event=await db.scalar(select(RecordingStageEvent).where(RecordingStageEvent.take_id==take.id,RecordingStageEvent.renderer_state_version==take.renderer_state_version))
+        if event and event.media_time_ms is None:event.media_time_ms=max(0,round((utcnow()-take.started_at).total_seconds()*1000))
     take.readiness_state='ready' if not reasons else 'blocked'
     take.readiness=body.model_dump(mode='json')|{'reasons':sorted(set(reasons)),'grant_id':str(grant.id),'received_at':utcnow().isoformat(),'valid_until':valid_until.isoformat() if valid_until else None}
     value={'readiness_sequence':body.readiness_sequence,'ready':not reasons,'reasons':sorted(set(reasons)),'renderer_state_version':take.renderer_state_version,'projection_hash':take.projection_hash,'capture_state':take.state,'valid_until':valid_until}

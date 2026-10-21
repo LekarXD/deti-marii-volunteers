@@ -38,7 +38,7 @@ def register_handler(kind, handler, *, lease_seconds=120, heartbeat_seconds=30, 
 
 def load_extensions():
     # An explicit source-controlled allowlist; never import code named in a job payload.
-    for name in ("app.modules.studio.jobs","app.modules.knowledge.jobs","app.modules.simulator.jobs","app.modules.profile.jobs","app.modules.reporting.jobs","app.modules.followups.jobs"):
+    for name in ("app.modules.studio.jobs","app.modules.recordings.jobs","app.modules.knowledge.jobs","app.modules.simulator.jobs","app.modules.profile.jobs","app.modules.reporting.jobs","app.modules.followups.jobs"):
         try:
             importlib.import_module(name)
         except ModuleNotFoundError as exc:

@@ -10,5 +10,8 @@ async def authorize(db,p,resource_type,resource_id):
 
 def validate(data,content_type):
     # Full ffprobe decode/media validation is owned by the fenced renderer job before asset creation.
-    return content_type=='video/mp4' and len(data)>32 and data[4:8]==b'ftyp'
-register_asset_purpose('recording.output',content_types={'video/mp4'},max_bytes=500*1024*1024,authorize=authorize,validate=validate)
+    return content_type=='video/mp4' and len(data)>=32 and data[4:8]==b'ftyp'
+def validate_file(path,content_type):
+    with path.open('rb') as handle:header=handle.read(32)
+    return validate(header,content_type)
+register_asset_purpose('recording.output',content_types={'video/mp4'},max_bytes=500*1024*1024,authorize=authorize,validate=validate,validate_file=validate_file)

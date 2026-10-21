@@ -107,6 +107,8 @@ async def complete_upload(asset_id: UUID, principal: Principal = Depends(get_pri
     await db.refresh(asset, with_for_update=True)
     if asset.state in ("ready","processing"):
         return view(asset)
+    if asset.state != "uploading":
+        raise ApiError(409,"upload_closed","Загрузка закрыта")
     path = asset_path(asset)
     if asset.received_size != asset.expected_size or not path.exists():
         raise ApiError(409, "upload_incomplete", "Файл загружен не полностью")

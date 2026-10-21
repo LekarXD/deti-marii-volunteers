@@ -37,7 +37,7 @@ async function exactViewport(page){
  }finally{await cdp.detach();}
 }
 async function launchIsolated(chromium,executablePath){
- const browser=await chromium.launch({headless:true,executablePath,args:['--window-size=1920,1167','--auto-select-tab-capture-source-by-title=Opora Private Renderer','--allow-http-screen-capture','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream','--autoplay-policy=no-user-gesture-required'],timeout:20000});
+ const browser=await chromium.launch({headless:true,chromiumSandbox:true,executablePath,args:['--window-size=1920,1167','--auto-select-tab-capture-source-by-title=Кадр записи — Опора','--allow-http-screen-capture','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream','--autoplay-policy=no-user-gesture-required'],timeout:20000});
  const context=await browser.newContext({viewport:null,acceptDownloads:false,serviceWorkers:'block',ignoreHTTPSErrors:false});
  const page=await context.newPage();
  await context.addInitScript(()=>{if(navigator.mediaDevices)Object.defineProperty(navigator.mediaDevices,'getUserMedia',{configurable:false,value:()=>Promise.reject(new DOMException('Private renderer never opens devices','NotAllowedError'))});});
@@ -95,7 +95,7 @@ async function captureOwnTab(page,spoolPath,{maxBytes=500*1024*1024,maxMilliseco
     }).catch(()=>{error='capture_sink_failed';firstReject(new Error(error));if(recorder.state==='recording')recorder.stop();});
    };
    recorder.start(500);const deadline=setTimeout(()=>{error='capture_duration_limit';if(recorder.state==='recording')recorder.stop();},maxMilliseconds);
-   return {async started(){await first;return {width:settings.width,height:settings.height,display_surface:settings.displaySurface,audio_tracks:stream.getAudioTracks().length,media_started_ms:started};},async stop(){if(done)throw new Error('capture_already_stopped');done=true;clearTimeout(deadline);if(recorder.state==='recording')recorder.stop();await stopped;await pending;stream.getTracks().forEach(track=>track.stop());if(error)throw new Error(error);return {duration_ms:Math.round(ended-started),media_started_ms:started,media_ended_ms:ended,chunks:sequence};}};
+   return {async started(){await first;return {width:settings.width,height:settings.height,display_surface:settings.displaySurface,audio_tracks:stream.getAudioTracks().length,media_started_ms:started,media_started_at_ms:performance.timeOrigin+started};},async stop(){if(done)throw new Error('capture_already_stopped');done=true;clearTimeout(deadline);if(recorder.state==='recording')recorder.stop();await stopped;await pending;stream.getTracks().forEach(track=>track.stop());if(error)throw new Error(error);return {duration_ms:Math.round(ended-started),media_started_ms:started,media_ended_ms:ended,chunks:sequence};}};
   },{sink,maxMilliseconds});
   const started=await handle.evaluate(value=>value.started());
   return {started,async stop(){if(closed)fail('capture_already_stopped');try{const result=await handle.evaluate(value=>value.stop());closed=true;fs.fsyncSync(descriptor);return {...result,size,sha256:await hashFile(spoolPath)};}finally{closed=true;fs.closeSync(descriptor);await handle.dispose();}}};

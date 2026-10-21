@@ -13,11 +13,12 @@ class AssetPurpose:
     authorize: Callable[..., Awaitable[None]]
     validate: Callable[[bytes,str],bool]
     processor_kind: str | None
+    validate_file: Callable | None = None
 
 PURPOSES: dict[str, AssetPurpose]={}
 
-def register_asset_purpose(name,*,content_types,max_bytes,authorize,validate,processor_kind=None):
-    if name=="generic" or not name or not 0<max_bytes<=500*1024*1024 or not callable(authorize) or not callable(validate):
+def register_asset_purpose(name,*,content_types,max_bytes,authorize,validate,processor_kind=None,validate_file=None):
+    if name=="generic" or not name or not 0<max_bytes<=500*1024*1024 or not callable(authorize) or not callable(validate) or (validate_file is not None and not callable(validate_file)):
         raise ValueError("invalid_asset_purpose")
     if name in PURPOSES:
         current=PURPOSES[name]
@@ -26,7 +27,7 @@ def register_asset_purpose(name,*,content_types,max_bytes,authorize,validate,pro
         return
     if len(PURPOSES)>=32:
         raise ValueError("purpose_budget_exceeded")
-    PURPOSES[name]=AssetPurpose(frozenset(content_types),max_bytes,authorize,validate,processor_kind)
+    PURPOSES[name]=AssetPurpose(frozenset(content_types),max_bytes,authorize,validate,processor_kind,validate_file)
 
 def load_asset_extensions():
     for name in ("app.modules.studio.assets","app.modules.profile.assets","app.modules.recordings.assets","app.modules.reporting.assets","app.modules.followups.assets"):
@@ -98,4 +99,47 @@ async def create_generated_asset(db,principal,*,content_type,data,purpose,resour
     asset.received_size=len(data)
     asset.state="ready"
     await db.flush()
+    return asset
+
+
+async def create_generated_asset_from_file(db,principal,*,content_type,source_path,expected_checksum,purpose,resource_type,resource_id):
+    """Bounded private import for validated media; no second file/asset lifecycle.
+
+    The trusted worker fences immediately before entry. Bytes are copied once to
+    private storage, hashed while streaming, validated there, fsynced and renamed.
+    No caller-provided public path or provider URL is stored on the asset.
+    """
+    import asyncio,hashlib,os,stat
+    from pathlib import Path
+    from app.core.auth import authz_guard
+    from app.modules.assets.service import asset_path
+    await authz_guard(db,principal)
+    policy=purpose_for(purpose)
+    if policy.validate_file is None or content_type not in policy.content_types or len(expected_checksum)!=64 or any(c not in '0123456789abcdef' for c in expected_checksum):
+        raise ApiError(422,'generated_media_invalid','Проверьте формат и контрольную сумму медиа')
+    source=Path(source_path)
+    size=source.stat().st_size
+    if not 0<size<=policy.max_bytes:raise ApiError(422,'generated_media_invalid','Медиа превышает допустимый размер')
+    asset=await create_upload_intent(db,principal,content_type=content_type,expected_size=size,checksum=expected_checksum,purpose=purpose,resource_type=resource_type,resource_id=resource_id)
+    destination=asset_path(asset)
+    def copy_validate():
+        destination.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
+        temporary=destination.with_name(destination.name+'.'+uuid4().hex+'.tmp')
+        try:
+            descriptor=os.open(source,os.O_RDONLY|os.O_NOFOLLOW)
+            with os.fdopen(descriptor,'rb') as input,temporary.open('xb') as output:
+                if not stat.S_ISREG(os.fstat(input.fileno()).st_mode):raise ValueError('source_not_regular')
+                os.chmod(temporary,0o600);digest=hashlib.sha256();total=0
+                while chunk:=input.read(512*1024):
+                    total+=len(chunk)
+                    if total>size or total>policy.max_bytes:raise ValueError('source_changed')
+                    digest.update(chunk);output.write(chunk)
+                if total!=size or digest.hexdigest()!=expected_checksum:raise ValueError('source_changed')
+                output.flush();os.fsync(output.fileno())
+            if not policy.validate_file(temporary,content_type):raise ValueError('media_validation_failed')
+            os.replace(temporary,destination)
+        finally:temporary.unlink(missing_ok=True)
+    try:await asyncio.to_thread(copy_validate)
+    except (OSError,ValueError):raise ApiError(422,'generated_media_invalid','Медиа не прошло проверку') from None
+    asset.received_size=size;asset.state='ready';await db.flush()
     return asset

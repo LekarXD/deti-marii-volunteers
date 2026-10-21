@@ -11,7 +11,7 @@ from app.core.errors import ApiError
 from app.core.idempotency import begin_command,finish_command
 from . import service
 from .models import RecordingProject,RecordingTake,RecordingRendererGrant,RecordingRenderVersion,RecordingReview
-from .schemas import RecordingProjectInput,RecordingProjectUpdate,RecordingVersionCommand,RecordingTakeInput,RecordingProjectView,RecordingTakeView,RecordingRenderView,RecordingReviewCommand,RecordingProjectPage,RecordingTakePage
+from .schemas import RecordingProjectInput,RecordingProjectUpdate,RecordingVersionCommand,RecordingTakeInput,RecordingProjectView,RecordingTakeView,RecordingRenderView,RecordingReviewCommand,RecordingProjectPage,RecordingTakePage,RecordingPolicyCommand,RecordingRenderPage
 from .renderer import router as renderer_router
 router=APIRouter(prefix='/api/v1',tags=['recordings'])
 
@@ -117,16 +117,44 @@ async def discard(id:UUID,body:RecordingVersionCommand,request:Request,p:Princip
     audit(db,p,'recording.discard','recording_take',id)
     return await finish(db,p,request,operation,service.take_view(row))
 
+@router.post('/recording-takes/{id}/policy',operation_id='recording_take_policy',response_model=RecordingTakeView)
+async def policy(id:UUID,body:RecordingPolicyCommand,request:Request,p:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    from .capture import approve_policy
+    row,owner=await service.take(db,p,id,True);operation=f'recordings.policy:{id}'
+    replay=await command(db,p,request,operation,body)
+    if replay is not None:return replay
+    version(row,body.expected_version);await approve_policy(db,p,row,owner,body)
+    audit(db,p,'recording.policy','recording_take',id,('privacy_state','allowed_tracks'))
+    return await finish(db,p,request,operation,service.take_view(row))
+
 @router.post('/recording-takes/{id}/start',operation_id='recording_take_start',response_model=RecordingTakeView)
-async def start(id:UUID,body:RecordingVersionCommand,p:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
-    row,_=await service.take(db,p,id,True);version(row,body.expected_version)
-    # No provider acceptance is inferred from renderer readiness or a browser timer.
-    raise ApiError(503,'recording_capture_unavailable','Захват медиа ещё не подключён')
+async def start(id:UUID,body:RecordingVersionCommand,request:Request,p:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    from .capture import start_capture
+    row,owner=await service.take(db,p,id,True);operation=f'recordings.start:{id}'
+    replay=await command(db,p,request,operation,body)
+    if replay is not None:return replay
+    version(row,body.expected_version);await start_capture(db,row,owner)
+    audit(db,p,'recording.start','recording_take',id)
+    return await finish(db,p,request,operation,service.take_view(row))
 
 @router.post('/recording-takes/{id}/stop',operation_id='recording_take_stop',response_model=RecordingTakeView)
-async def stop(id:UUID,body:RecordingVersionCommand,p:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
-    row,_=await service.take(db,p,id,True);version(row,body.expected_version)
-    raise ApiError(503,'recording_capture_unavailable','Захват медиа ещё не подключён')
+async def stop(id:UUID,body:RecordingVersionCommand,request:Request,p:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    from .capture import stop_capture
+    row,_=await service.take(db,p,id,True);operation=f'recordings.stop:{id}'
+    replay=await command(db,p,request,operation,body)
+    if replay is not None:return replay
+    version(row,body.expected_version);await stop_capture(db,row)
+    audit(db,p,'recording.stop','recording_take',id)
+    return await finish(db,p,request,operation,service.take_view(row))
+
+@router.get('/recording-projects/{id}/renders',operation_id='recording_render_list',response_model=RecordingRenderPage)
+async def render_list(id:UUID,cursor:UUID|None=None,limit:int=Query(20,ge=1,le=50),p:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    await service.project(db,p,id)
+    query=select(RecordingRenderVersion).where(RecordingRenderVersion.project_id==id)
+    if cursor:query=query.where(RecordingRenderVersion.id>cursor)
+    rows=(await db.scalars(query.order_by(RecordingRenderVersion.id).limit(limit+1))).all()
+    value={'items':[await service.render_view(db,row) for row in rows[:limit]],'next_cursor':rows[limit-1].id if len(rows)>limit else None}
+    await db.commit();return value
 
 @router.get('/recording-renders/{id}/status',operation_id='recording_render_status',response_model=RecordingRenderView)
 async def render_status(id:UUID,p:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):

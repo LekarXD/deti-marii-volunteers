@@ -68,6 +68,10 @@ class RendererProviderGrant(BaseModel):
     session_id:UUID
     generation:int
     expires_in:int
+class RendererSceneTransition(BaseModel):
+    from_renderer_state_version:int
+    from_projection_hash:str
+    expires_at:datetime
 class RendererStateView(BaseModel):
     foundation_id:UUID
     project_id:UUID
@@ -81,6 +85,7 @@ class RendererStateView(BaseModel):
     resolved_assets:list[ResolvedRendererAsset]
     provider_grant:RendererProviderGrant|None=None
     invalidated:bool=False
+    scene_transition:RendererSceneTransition|None=None
 class RendererBootstrapView(RendererStateView):
     access_token:str
     expires_at:datetime
@@ -96,6 +101,7 @@ class RendererAssetProof(BaseModel):
     asset_id:UUID
     sha256:str=Field(pattern='^[0-9a-f]{64}$')
 class RendererReadinessInput(BaseModel):
+    media_state:Literal['connected','connecting','blocked','disconnected','reconnecting']|None=None
     readiness_sequence:int=Field(ge=1)
     visual_ready:bool
     renderer_state_version:int=Field(ge=1)
@@ -131,3 +137,18 @@ class RecordingRenderView(BaseModel):
     quality:str
     error_code:str|None
     approval_state:str
+
+class RecordingPolicyTrack(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    identity:str=Field(min_length=1,max_length=128)
+    track_id:str=Field(min_length=1,max_length=128)
+    source:Literal['camera','screen','microphone','screen_audio']
+    kind:Literal['video','audio']
+    required:bool=True
+class RecordingPolicyCommand(RecordingVersionCommand):
+    expected_scene_revision:int=Field(ge=0)
+    approved:bool
+    tracks:list[RecordingPolicyTrack]=Field(max_length=64)
+class RecordingRenderPage(BaseModel):
+    items:list[RecordingRenderView]
+    next_cursor:UUID|None

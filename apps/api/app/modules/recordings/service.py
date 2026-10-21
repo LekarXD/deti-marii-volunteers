@@ -2,7 +2,7 @@ import hashlib
 import rfc8785
 from uuid import UUID,uuid4
 from sqlalchemy import select,func
-from datetime import datetime
+from datetime import datetime,timedelta
 from app.core.clock import utcnow
 from app.core.auth import authz_guard
 from app.core.errors import ApiError
@@ -41,8 +41,9 @@ async def take(db,p,id,lock=False):
     return row,owner
 
 def capabilities():
-    # A renderer bootstrap is an authorization/readiness surface; it is not a media recorder.
-    return {'capture_available':False,'capture_reason':'Захват медиа ещё не подключён','private_renderer_available':True,'raw_fallback':'forbidden'}
+    from .capture import CaptureSettings
+    available=CaptureSettings.configured() is not None
+    return {'capture_available':available,'capture_reason':'Захват готов' if available else 'Захват медиа не настроен','private_renderer_available':True,'raw_fallback':'forbidden'}
 async def project_view(db,row):
     capture=await db.scalar(select(StudioCaptureSession).where(StudioCaptureSession.project_id==row.id).order_by(StudioCaptureSession.generation.desc()).limit(1))
     takes=(await db.scalars(select(RecordingTake).where(RecordingTake.project_id==row.id).order_by(RecordingTake.number.desc()).limit(51))).all()
@@ -93,8 +94,14 @@ async def snapshot(db,owner,row,session,*,privacy_state,allowed_tracks,media_tim
     projection={'scene':session.scene,'capture_plan':plan,'resolved_assets':[session.scene['content_asset']] if session.scene['content_asset'] else []}
     digest=stable_hash(projection)
     if row.projection_hash!=digest:
+        previous=row.projection.get('capture_plan',{})
+        transition=bool(row.state=='capturing' and readiness_current(row) and privacy_state=='approved' and previous.get('privacy_state')=='approved' and previous.get('allowed_tracks')==allowed_tracks and previous.get('recording_policy_id')==plan['recording_policy_id'] and previous.get('scene_revision')!=plan['scene_revision'])
+        old_version,old_hash=row.renderer_state_version,row.projection_hash
         row.renderer_state_version=(row.renderer_state_version or 0)+1
         row.projection=projection;row.projection_hash=digest;row.readiness_state='waiting';row.readiness=None
+        if row.capture_checkpoint is not None:
+            row.capture_checkpoint={key:value for key,value in row.capture_checkpoint.items() if key!='scene_transition'}
+            if transition:row.capture_checkpoint={**row.capture_checkpoint,'scene_transition':{'from_renderer_state_version':old_version,'from_projection_hash':old_hash,'expires_at':(utcnow()+timedelta(seconds=5)).isoformat(),'to_renderer_state_version':row.renderer_state_version}}
         sequence=(await db.scalar(select(func.max(RecordingStageEvent.sequence)).where(RecordingStageEvent.take_id==row.id)) or 0)+1
         db.add(RecordingStageEvent(take_id=row.id,sequence=sequence,renderer_state_version=row.renderer_state_version,projection_hash=digest,projection=projection,media_time_ms=media_time_ms))
     await db.flush()
@@ -105,3 +112,16 @@ async def render_view(db,row):
     return {k:getattr(row,k) for k in ('id','project_id','take_id','generation','state','version','asset_id','render_hash','content_hash','duration_ms','quality','error_code')}|{'approval_state':'approved' if approved else 'rejected' if review and review.decision=='rejected' else 'pending'}
 
 studio.register_resource_authorizer('lesson_recording_project',resource_authorizer)
+
+def scene_transition(row):
+    value=(row.capture_checkpoint or {}).get('scene_transition')
+    if not value or value.get('to_renderer_state_version')!=row.renderer_state_version:return None
+    try:active=datetime.fromisoformat(value['expires_at'])>utcnow()
+    except (ValueError,TypeError,KeyError):return None
+    return {key:value[key] for key in ('from_renderer_state_version','from_projection_hash','expires_at')} if active else None
+def capture_ready(row):
+    if readiness_current(row):return True
+    transition=scene_transition(row)
+    if not transition:return False
+    reasons=(row.readiness or {}).get('reasons',[])
+    return row.readiness_state=='waiting' or (row.readiness_state=='blocked' and set(reasons)<=set(['visual_frame_unready']))
