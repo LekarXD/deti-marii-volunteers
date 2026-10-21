@@ -1,0 +1,71 @@
+[
+  {
+    "value": {
+      "presenter_size": 28.0,
+      "ratio": 1.0,
+      "negative_zero": -0.0,
+      "tiny": 1e-07,
+      "large": 1e+21,
+      "имя": "Тест",
+      "😀": 1,
+      "דּ": 2
+    },
+    "sha256": "d40fe6174dd31a2724669ab9f15889e20746196d4ac5af0d1a49502eca85f3be"
+  },
+  {
+    "value": {
+      "x": [
+        1.7777777777777777,
+        1e-06,
+        1e+20,
+        null,
+        true
+      ]
+    },
+    "sha256": "668928e464f2ac62d8bb7adf74f46ac8e36fcb94799089e89520ec6ce76b5dd3"
+  },
+  {
+    "value": {
+      "scene": {
+        "layout": "camera_only",
+        "take_id": "dd16fb1a-d531-4b27-b868-9e31665f6f1f",
+        "revision": 1,
+        "slide_id": null,
+        "theme_id": "opora-warm",
+        "session_id": "b245dd91-f7ec-4b61-9cca-fcd34ac089d7",
+        "resource_id": "762ff6c1-5cfc-4a02-a9c1-c2f12505995a",
+        "content_kind": "camera",
+        "content_asset": null,
+        "content_ratio": 1.7777777777777777,
+        "foundation_id": "00000000-0000-0000-0000-000000000001",
+        "resource_kind": "lesson_recording_project",
+        "presenter_size": 28,
+        "schema_version": 1,
+        "deck_version_id": null,
+        "screen_track_id": null,
+        "presenter_camera": false,
+        "board_snapshot_id": null,
+        "presenter_identity": "opora-ubdd923e280dc4e03b9ebf0a7ca639186",
+        "recording_policy_id": "cfe991f3-4832-4be3-89ce-8f019b70a232",
+        "presenter_display_name": "Координатор Тестовый",
+        "render_profile_version": "opora-stage/1"
+      },
+      "capture_plan": {
+        "take_id": "dd16fb1a-d531-4b27-b868-9e31665f6f1f",
+        "generation": 1,
+        "session_id": "b245dd91-f7ec-4b61-9cca-fcd34ac089d7",
+        "resource_id": "762ff6c1-5cfc-4a02-a9c1-c2f12505995a",
+        "raw_fallback": "forbidden",
+        "foundation_id": "00000000-0000-0000-0000-000000000001",
+        "privacy_state": "unknown",
+        "allowed_tracks": [],
+        "scene_revision": 1,
+        "schema_version": 1,
+        "recording_policy_id": "cfe991f3-4832-4be3-89ce-8f019b70a232",
+        "render_profile_version": "opora-stage/1"
+      },
+      "resolved_assets": []
+    },
+    "sha256": "3209e47563be9130f6fe4a8866c4032d77d40ff2fb5c04c5cb4a5172c099ab2d"
+  }
+]
