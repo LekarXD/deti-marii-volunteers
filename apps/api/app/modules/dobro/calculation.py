@@ -79,4 +79,8 @@ def month_start(value: str) -> date:
         raise ApiError(422, 'invalid_period', 'Укажите месяц в формате ГГГГ-ММ.')
 
 def next_month(value: date) -> date:
-    return date(value.year + value.month // 12, value.month % 12 + 1, 1)
+    try:
+        return date(value.year + value.month // 12, value.month % 12 + 1, 1)
+    except ValueError:
+        from app.core.errors import ApiError
+        raise ApiError(422, 'invalid_period', 'Выберите месяц до декабря 9999 года.')

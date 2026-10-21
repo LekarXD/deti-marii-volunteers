@@ -49,6 +49,7 @@ class DobroActivityCommand(DobroCommand):
     @model_validator(mode='after')
     def dates(self):
         if self.valid_until < self.valid_from: raise ValueError('Окончание раньше начала.')
+        if self.valid_until.year > 9998: raise ValueError('Укажите год окончания до 9999, чтобы сохранить срок переноса.')
         return self
 
 class DobroActivityView(DobroActivityCommand):

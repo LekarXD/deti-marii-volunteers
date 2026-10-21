@@ -2,18 +2,19 @@ import {useState} from 'react';
 import {Button,Card,Dialog,ErrorState,Field,Input,LoadingState} from '../../ui';
 import {useDobroQuery,useDobroCommand,dobroStates,type DobroOwn,type DobroOwnActivity} from './api';
 import './dobro.css';
+import {useDobroDraft,DobroDraftConflict} from './useDobroDraft';
 
 export function DobroMyPath(){
  const query=useDobroQuery<DobroOwn>('own','/me/dobro');
  if(query.isPending)return <LoadingState label="Загружаем данные Добро.рф…"/>;
  if(query.error)return <ErrorState error={query.error} retry={()=>void query.refetch()}/>;
  const view=query.data;
- return <section className="dobro-section"><div className="section-head"><h2 className="h2">Добро.рф</h2><span className="tag">Перенос вручную</span></div><Card><p className="lead">{view.entered_hours} ч отмечено как внесённые{view.hours_due>0?` · ещё ${view.hours_due} ч к переносу`:''}</p><p>Координатор переносит подтверждённые часы в электронную книжку. Участие в занятиях доступно независимо от Добро.рф.</p><DobroProfileEditor key={view.profile_version} view={view}/>{view.registration_url&&!view.profile_url&&<a className="btn btn-secondary" href={view.registration_url} target="_blank" rel="noopener noreferrer">Зарегистрироваться на Добро.рф</a>}{view.verified_organization&&<p className="meta">В настройках фонда отмечена верификация на Добро.рф.</p>}</Card>{view.activities.length?view.activities.map(item=><OwnActivity key={item.activity.id} item={item}/>):<p className="meta">После подтверждения участия здесь появится доброе дело, если координатор добавил к нему ссылку.</p>}<details><summary>Как учитываются часы</summary><p>{view.rules_note}</p></details></section>;
+ return <section className="dobro-section"><div className="section-head"><h2 className="h2">Добро.рф</h2><span className="tag">Перенос вручную</span></div><Card><p className="lead">{view.entered_hours} ч отмечено как внесённые{view.hours_due>0?` · ещё ${view.hours_due} ч к переносу`:''}</p><p>Координатор переносит подтверждённые часы в электронную книжку. Участие в занятиях доступно независимо от Добро.рф.</p><DobroProfileEditor view={view}/>{view.registration_url&&!view.profile_url&&<a className="btn btn-secondary" href={view.registration_url} target="_blank" rel="noopener noreferrer">Зарегистрироваться на Добро.рф</a>}{view.verified_organization&&<p className="meta">В настройках фонда отмечена верификация на Добро.рф.</p>}</Card>{view.activities.length?view.activities.map(item=><OwnActivity key={item.activity.id} item={item}/>):<p className="meta">После подтверждения участия здесь появится доброе дело, если координатор добавил к нему ссылку.</p>}<details><summary>Как учитываются часы</summary><p>{view.rules_note}</p></details></section>;
 }
 
 function DobroProfileEditor({view}:{view:DobroOwn}){
- const [profile,setProfile]=useState(view.profile_url),save=useDobroCommand('/me/external-profiles/dobro','PUT');
- return <form className="dobro-inline" onSubmit={event=>{event.preventDefault();void save.mutateAsync({profile_url:profile,expected_version:view.profile_version}).catch(()=>{});}}><Field label="Ссылка на твой профиль" hint="Необязательно. Например, https://dobro.ru/volunteers/12345"><Input type="url" value={profile} onChange={e=>setProfile(e.target.value)} maxLength={1500}/></Field><Button type="submit" variant="secondary" disabled={profile===view.profile_url} loading={save.isPending}>Сохранить</Button>{save.error&&<ErrorState error={save.error}/>}</form>;
+ const editor=useDobroDraft({profile_url:view.profile_url,version:view.profile_version}),{draft,conflict,dirty}=editor,profile=draft.profile_url,setProfile=(value:string)=>editor.setDraft({...draft,profile_url:value}),save=useDobroCommand('/me/external-profiles/dobro','PUT');
+ return <form className="dobro-inline" onSubmit={event=>{event.preventDefault();void save.mutateAsync({profile_url:profile,expected_version:draft.version}).catch(()=>{});}}><Field label="Ссылка на твой профиль" hint="Необязательно. Например, https://dobro.ru/volunteers/12345"><Input type="url" value={profile} onChange={e=>setProfile(e.target.value)} maxLength={1500}/></Field><>{conflict&&<DobroDraftConflict useServer={editor.useServer} keepMine={editor.keepMine}/>}</><Button type="submit" variant="secondary" disabled={!dirty||conflict} loading={save.isPending}>Сохранить</Button>{save.error&&<ErrorState error={save.error}/>}</form>;
 }
 
 function OwnActivity({item}:{item:DobroOwnActivity}){
