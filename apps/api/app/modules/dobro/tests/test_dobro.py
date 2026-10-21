@@ -347,3 +347,60 @@ async def test_own_export_is_scoped_and_excludes_staff_notes_and_snapshots(world
     assert payload['dobro']['transfers'][0]['hours_delta'] == 2
     assert 'PRIVATE_COORDINATOR_NOTE_NOT_FOR_EXPORT' not in json.dumps(payload)
     assert 'STRANGER_DISPLAY_NAME' not in json.dumps(payload)
+
+@pytest.mark.asyncio
+async def test_attendance_correction_and_transfer_have_consistent_pg_lock_order(world):
+    """Reproduce the actual migration21 trigger/ledger interaction, without sleeps
+    standing in for success: wait until PostgreSQL reports the command lock wait.
+    """
+    import importlib.util
+    from pathlib import Path
+    from alembic.migration import MigrationContext
+    from alembic.operations import Operations
+    from app.modules.profile.ledger import subject_lock
+    opportunity, activity = await link_fixture(world)
+    assignment, attendance, _ = await fact_fixture(world, opportunity, '2026-08-08', 120)
+    await enroll(world, activity)
+    before = await period(world)
+    payload = mark_body(before, before['groups'][0]['rows'][0], activity['id'])
+    migration = Path(__file__).resolve().parents[4]/'migrations'/'versions'/'c72a9064de18_safe_unused_dobro_link_edit_and_reminder_owner.py'
+    spec = importlib.util.spec_from_file_location('dobro_lock_migration', migration)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    def install_trigger(connection):
+        with Operations.context(MigrationContext.configure(connection)):
+            module.lock_guards(True)
+        connection.exec_driver_sql('CREATE TRIGGER tr_test_attendance_dobro_mapping_lock BEFORE INSERT ON attendance_events FOR EACH ROW EXECUTE FUNCTION opora_dobro_ledger_mapping_lock()')
+    async with world[1].kw['bind'].begin() as connection:
+        await connection.run_sync(install_trigger)
+    pending = None
+    try:
+        async with world[1]() as held:
+            await subject_lock(held, world[4].foundation_id, world[5].user_id)
+            pending = asyncio.create_task(post(world[2], '/fund/integrations/dobro/transfers/mark-entered', payload))
+            blocked = False
+            for _ in range(200):
+                blocked = bool(await held.scalar(text("SELECT 1 FROM pg_locks WHERE locktype='advisory' AND NOT granted LIMIT 1")))
+                if blocked: break
+                await asyncio.sleep(.01)
+            assert blocked, 'The mark command did not reach its subject-ledger lock'
+            # With the old foundation→ledger order this times out: the HTTP
+            # command owns the foundation while waiting on this transaction.
+            await held.execute(text("SET LOCAL lock_timeout='500ms'"))
+            await service.foundation_lock(held, world[4])
+            row = await held.get(Attendance, attendance.id)
+            row.minutes, row.version = 60, 2
+            event = AttendanceEvent(foundation_id=world[4].foundation_id, attendance_id=attendance.id, assignment_id=assignment.id, user_id=world[5].user_id, version=2, old_minutes=120, new_minutes=60, reason='Конкурентное уточнение', actor_id=world[4].actor_id)
+            held.add(event)
+            await held.flush()
+            await append_service_time(held, world[4], world[5].user_id, assignment.id, event.id)
+            await held.commit()
+        response = await asyncio.wait_for(pending, 5)
+        assert response.status_code == 409 and response.json()['code'] == 'dobro_snapshot_changed'
+        async with world[1]() as db:
+            assert await db.scalar(select(func.count()).select_from(DobroTransfer)) == 0
+            assert await db.scalar(select(func.sum(ServiceTimeEntry.delta_minutes))) == 60
+    finally:
+        if pending is not None and not pending.done():
+            pending.cancel()
+            await asyncio.gather(pending, return_exceptions=True)
