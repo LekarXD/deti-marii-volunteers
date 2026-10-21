@@ -10,6 +10,7 @@ async function run(config){let browser,step="launch";try{
  step="navigate";await page.goto(config.url);await page.addScriptTag({url:config.url+'livekit.js'});
  step="publish";const tracks=await page.evaluate(async config=>{
   const room=new LivekitClient.Room();await room.connect(config.provider_url,config.token);
+  if(config.publish===false)return [];
   const canvas=document.createElement('canvas');canvas.width=1280;canvas.height=720;const ctx=canvas.getContext('2d');let frame=0;
   setInterval(()=>{ctx.fillStyle='#244ea1';ctx.fillRect(0,0,1280,720);ctx.fillStyle='#ffbc47';ctx.fillRect(80+(frame++%40)*10,80,200,160);ctx.fillStyle='white';ctx.font='52px sans-serif';ctx.fillText('SYNTHETIC OPORA STAGE',60,500);},40);
   const a=new AudioContext(),osc=a.createOscillator(),gain=a.createGain(),audio=a.createMediaStreamDestination();osc.frequency.value=440;gain.gain.value=.08;osc.connect(gain).connect(audio);osc.start();await a.resume();

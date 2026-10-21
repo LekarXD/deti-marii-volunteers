@@ -13,7 +13,9 @@ os.environ['OPORA_CAPTURE_ENABLED']='true'
 if not os.environ.get('OPORA_CAPTURE_CHROME_PATH'):raise RuntimeError('Official Chrome path required')
 DIST=Path(os.environ['OPORA_RECORDING_SMOKE_DIST']).resolve()
 SCENARIO=os.getenv('OPORA_RECORDING_SMOKE_SCENARIO','success')
-if SCENARIO not in ('success','presentation','privacy-revoke','auth-revoke','unknown-participant','lease-restart','auto-stop'):raise ValueError('Unknown smoke scenario')
+if SCENARIO not in ('success','presentation','privacy-revoke','auth-revoke','unknown-participant','lease-restart','auto-stop','live-presentation','live-unknown','live-host-revoke','live-enrollment-revoke'):raise ValueError('Unknown smoke scenario')
+LIVE=SCENARIO.startswith('live-')
+PRESENTATION=SCENARIO in ('presentation','live-presentation')
 SMOKE_SECONDS=int(os.getenv('OPORA_RECORDING_SMOKE_SECONDS','6'))
 if not 3<=SMOKE_SECONDS<=120:raise ValueError('Smoke duration must be 3..120 seconds')
 def port():
@@ -67,15 +69,31 @@ async def main():
      headers['Idempotency-Key']=uuid4().hex;r=await client.post('/api/v1'+path,json=body,headers=headers)
      if r.status_code!=200:raise RuntimeError(f'{path} {r.status_code} {r.text}')
      return r.json()
-    project=await post('/recording-projects',{'title':'Synthetic SharedStage pipeline proof'})
-    project=await post(f"/recording-projects/{project['id']}/prepare",{'expected_version':project['version']})
+    if LIVE:
+     from app.core.models import Session,User
+     from app.core.auth import resolve_principal
+     from app.core.clock import utcnow
+     from app.modules.studio.models import Webinar,WebinarEnrollment
+     from app.modules.studio import service as studio_service
+     from datetime import timedelta
+     async with SessionLocal() as db:
+      login=await db.scalar(select(Session).where(Session.user_id==UUID(me['user_id']),Session.revoked_at.is_(None)).order_by(Session.created_at.desc()))
+      principal=await resolve_principal(db,login)
+      webinar=Webinar(foundation_id=principal.foundation_id,host_user_id=principal.user_id,title='Synthetic current live proof',starts_at=utcnow(),state='published',require_strict_revocation=False)
+      db.add(webinar);await db.flush();live_session,_=await studio_service.create_session(db,principal,'live_event',webinar.id)
+      live_session.state='live';await db.commit();webinar_id=webinar.id;live_session_id=live_session.id
+     project=await post(f'/webinars/{webinar_id}/recording-project',{'studio_session_id':str(live_session_id),'expected_scene_revision':0})
+     assert project['live_event_id']==str(webinar_id) and project['studio_session_id']==str(live_session_id)
+    else:
+     project=await post('/recording-projects',{'title':'Synthetic SharedStage pipeline proof'})
+     project=await post(f"/recording-projects/{project['id']}/prepare",{'expected_version':project['version']})
     tid=await post(f"/recording-projects/{project['id']}/takes",{'expected_version':project['version'],'expected_scene_revision':0})
     async with SessionLocal() as db:
      take=await db.get(RecordingTake,UUID(tid['id']));capture=await db.get(StudioCaptureSession,take.capture_session_id);studio=await db.get(StudioSession,capture.studio_session_id)
      room=studio.room_name;auth_id=capture.host_auth_session_id
      scene={**studio.scene,'revision':studio.scene_revision+1,'presenter_camera':True}
      slides=[]
-     if SCENARIO=='presentation':
+     if PRESENTATION:
       from PIL import Image,ImageDraw,ImageFont
       from app.core.models import MediaAsset
       from app.modules.assets.service import asset_path
@@ -94,6 +112,18 @@ async def main():
     pub=json.loads(await asyncio.wait_for(publisher.stdout.readline(),30));assert pub['state']=='published',pub
     from app.integrations.rtc.livekit import LiveKitAdapter
     parts=await LiveKitAdapter().participants(room);await asyncio.sleep(.4)
+    if LIVE:
+     async with SessionLocal() as db:
+      viewer=User(foundation_id=UUID(me['foundation_id']));db.add(viewer);await db.flush()
+      viewer_login=Session(foundation_id=viewer.foundation_id,user_id=viewer.id,token_hash=uuid4().hex*2,csrf_hash='x'*64,csrf_cipher='synthetic',expires_at=utcnow()+timedelta(hours=1));db.add(viewer_login);await db.flush()
+      enrollment=WebinarEnrollment(foundation_id=viewer.foundation_id,webinar_id=webinar_id,user_id=viewer.id);db.add(enrollment);await db.commit();viewer_id=viewer.id;viewer_session_id=viewer_login.id;enrollment_id=enrollment.id
+     grant=join_token(RtcSettings.from_env(),room=room,participant_identity=identity(viewer_id),name='Synthetic enrolled subscriber',host=False,policy=RevocationPolicy(),auth_session_id=viewer_session_id)
+     spectator=await asyncio.create_subprocess_exec(__import__('shutil').which('node'),str(ROOT/'apps/api/scripts/recording_synthetic_publisher.cjs'),stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True);processes.append(spectator)
+     spectator.stdin.write((json.dumps({'chrome':os.environ['OPORA_CAPTURE_CHROME_PATH'],'url':f'http://127.0.0.1:{http_port}/','provider_url':os.environ['OPORA_RTC_PUBLIC_URL'],'token':grant,'publish':False})+'\n').encode());await spectator.stdin.drain();grant=None
+     spectator_receipt=json.loads(await asyncio.wait_for(spectator.stdout.readline(),30));assert spectator_receipt=={'state':'published','tracks':[]}
+     provider_participants=await LiveKitAdapter().participants(room)
+     assert any(participant['identity']==identity(viewer_id) and not participant.get('tracks') for participant in provider_participants)
+     print(json.dumps({'event':'existing_live_room_bound','same_studio_session':True,'enrolled_subscriber_tracks':0}),flush=True)
     tid=await post(f"/recording-takes/{tid['id']}/policy",{'expected_version':tid['version'],'expected_scene_revision':revision,'approved':True,'tracks':pub['tracks']})
     tid=await post(f"/recording-takes/{tid['id']}/start",{'expected_version':tid['version']});assert tid['state']=='starting'
     if SCENARIO=='auto-stop':
@@ -129,7 +159,7 @@ async def main():
      if current['state']=='failed' or asyncio.get_running_loop().time()>deadline:raise RuntimeError('capture start '+json.dumps(current))
     began=asyncio.get_running_loop().time();print(json.dumps({'event':'capture_started','requested_seconds':SMOKE_SECONDS}),flush=True)
     await asyncio.sleep(3)
-    if SCENARIO=='presentation':
+    if PRESENTATION:
      changes=[(3,1)] if SMOKE_SECONDS<30 else [(SMOKE_SECONDS*fraction,index%2) for fraction,index in ((.25,1),(.5,0),(.75,1))]
      for scheduled,asset_index in changes:
       await asyncio.sleep(max(0,began+scheduled-asyncio.get_running_loop().time()))
@@ -148,7 +178,7 @@ async def main():
      await asyncio.sleep(max(0,began+SMOKE_SECONDS-asyncio.get_running_loop().time()))
      current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json();assert current['state']=='capturing',current
     if SCENARIO=='success' and SMOKE_SECONDS>6:await asyncio.sleep(max(0,began+SMOKE_SECONDS-asyncio.get_running_loop().time()))
-    if SCENARIO not in ('success','presentation','auto-stop'):
+    if SCENARIO not in ('success','presentation','live-presentation','auto-stop'):
      if SCENARIO=='lease-restart':
       from app.core.clock import utcnow
       from datetime import timedelta
@@ -161,6 +191,12 @@ async def main():
       while any(participant.get('identity','').startswith('opora-renderer-') and participant.get('state') not in ('DISCONNECTED',3) for participant in await LiveKitAdapter().participants(room)):
        if asyncio.get_running_loop().time()>=departed:raise RuntimeError('Private recorder did not leave RTC')
        await asyncio.sleep(.25)
+     elif SCENARIO=='live-host-revoke':
+      async with SessionLocal() as db:
+       webinar=await db.get(Webinar,webinar_id);webinar.host_user_id=viewer_id;await db.commit()
+     elif SCENARIO=='live-enrollment-revoke':
+      async with SessionLocal() as db:
+       enrollment=await db.get(WebinarEnrollment,enrollment_id);enrollment.state='revoked';await db.commit()
      elif SCENARIO=='privacy-revoke':
       await post(f"/recording-takes/{tid['id']}/policy",{'expected_version':current['version'],'expected_scene_revision':revision,'approved':False,'tracks':[]})
      elif SCENARIO=='auth-revoke':
@@ -195,7 +231,7 @@ async def main():
      subprocess.run([__import__('shutil').which('ffmpeg'),'-nostdin','-v','error','-ss','1','-i',str(path),'-frames:v','1','-y',str(Path(os.environ['OPORA_ASSET_ROOT'])/'shared-stage-proof.png')],check=True)
      audio=subprocess.run([__import__('shutil').which('ffmpeg'),'-nostdin','-v','info','-i',str(path),'-vn','-af','volumedetect','-f','null','-'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=True).stderr.decode()
      audio_proof=None
-     if SCENARIO=='presentation':
+     if PRESENTATION:
       for name,second in [('slide-a',1),('slide-b',max(1,manifest['media']['duration_ms']/1000-1))]:
        subprocess.run([__import__('shutil').which('ffmpeg'),'-nostdin','-v','error','-ss',str(second),'-i',str(path),'-frames:v','1','-y',str(Path(os.environ['OPORA_ASSET_ROOT'])/(name+'.png'))],check=True)
       import array,math
@@ -212,7 +248,7 @@ async def main():
       assert len(manifest['stage_events'])>=3 and any(event['media_time_ms']>0 for event in manifest['stage_events'])
      import re
      mean=re.search(r'mean_volume: ([^\n]+)',audio).group(1)
-     print(json.dumps({'state':'actual_shared_stage_pipeline_passed','scenario':SCENARIO,'take_id':tid['id'],'render_id':str(render.id),'asset_id':str(asset.id),'artifact':str(path),'media':manifest['media'],'audio_mean_volume':mean,'audio_proof':audio_proof,'journal_events':len(manifest['stage_events']),'source_sha256':manifest['source_sha256'],'output_sha256':manifest['output_sha256']}))
+     print(json.dumps({'state':'actual_shared_stage_pipeline_passed','scenario':SCENARIO,'reused_live_room':LIVE,'audience_publications_captured':0 if LIVE else None,'take_id':tid['id'],'render_id':str(render.id),'asset_id':str(asset.id),'artifact':str(path),'media':manifest['media'],'audio_mean_volume':mean,'audio_proof':audio_proof,'journal_events':len(manifest['stage_events']),'source_sha256':manifest['source_sha256'],'output_sha256':manifest['output_sha256']}))
   finally:
    if server:server.should_exit=True;await serving
    for process in reversed(processes):
