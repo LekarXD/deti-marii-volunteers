@@ -1,0 +1,355 @@
+{
+  "source_revision": "ab1d5a04adae6b6c839ea33f107678a7222b4e08",
+  "public_url": "https://www.odschool.ru/deti-marii/",
+  "capture_enabled": false,
+  "project": "opora-preview",
+  "private_database": "opora_stage",
+  "postgres_container_unchanged": true,
+  "images": [
+    {
+      "name": "api",
+      "image_id": "sha256:617a889e15cc9d67e8a8f25fc81537b6c85a86dd9cba2c62a5a6a6435f2ec6cd",
+      "source_revision": "ab1d5a04adae6b6c839ea33f107678a7222b4e08"
+    },
+    {
+      "name": "web",
+      "image_id": "sha256:6132417f05e1d90725073fbfb05331adb7b23ba5fda42c1f65030c1a1cbf2576",
+      "source_revision": "ab1d5a04adae6b6c839ea33f107678a7222b4e08"
+    },
+    {
+      "name": "board",
+      "image_id": "sha256:c6217036dfbbe8184ace8fbb79f6fee6eb036f81dfa1610094f365ad1f0a2bfc",
+      "source_revision": "ab1d5a04adae6b6c839ea33f107678a7222b4e08"
+    },
+    {
+      "name": "media",
+      "image_id": "sha256:3a3a3f9e55ead9f3866482efb427e851bafdaa2929e8c477b48a010e754b8d9b",
+      "source_revision": "ab1d5a04adae6b6c839ea33f107678a7222b4e08"
+    }
+  ],
+  "services": [
+    {
+      "service": "api",
+      "running": true,
+      "health": "healthy",
+      "image_id": "sha256:617a889e15cc9d67e8a8f25fc81537b6c85a86dd9cba2c62a5a6a6435f2ec6cd"
+    },
+    {
+      "service": "web",
+      "running": true,
+      "health": null,
+      "image_id": "sha256:6132417f05e1d90725073fbfb05331adb7b23ba5fda42c1f65030c1a1cbf2576"
+    },
+    {
+      "service": "board",
+      "running": true,
+      "health": null,
+      "image_id": "sha256:c6217036dfbbe8184ace8fbb79f6fee6eb036f81dfa1610094f365ad1f0a2bfc"
+    },
+    {
+      "service": "media",
+      "running": true,
+      "health": "healthy",
+      "image_id": "sha256:3a3a3f9e55ead9f3866482efb427e851bafdaa2929e8c477b48a010e754b8d9b"
+    },
+    {
+      "service": "io",
+      "running": true,
+      "health": "healthy",
+      "image_id": "sha256:617a889e15cc9d67e8a8f25fc81537b6c85a86dd9cba2c62a5a6a6435f2ec6cd"
+    },
+    {
+      "service": "outbox",
+      "running": true,
+      "health": "healthy",
+      "image_id": "sha256:617a889e15cc9d67e8a8f25fc81537b6c85a86dd9cba2c62a5a6a6435f2ec6cd"
+    },
+    {
+      "service": "livekit",
+      "running": true,
+      "health": null,
+      "image_id": "sha256:2c13cbf2edcbf13ea7b20d05c10b394d04d8fb3fe358269cff845a90b4de9576"
+    },
+    {
+      "service": "postgres",
+      "running": true,
+      "health": "healthy",
+      "image_id": "sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685"
+    }
+  ],
+  "http_checks": [
+    {
+      "path": "/deti-marii/",
+      "status": 200
+    },
+    {
+      "path": "/deti-marii/ready",
+      "status": 200
+    },
+    {
+      "path": "/deti-marii/version.json",
+      "status": 200
+    },
+    {
+      "path": "/deti-marii/fund",
+      "status": 200
+    },
+    {
+      "path": "/ertad/",
+      "status": 200
+    },
+    {
+      "path": "/api/web/health",
+      "status": 200
+    }
+  ],
+  "native_short": {
+    "state": "actual_shared_stage_pipeline_passed",
+    "scenario": "live-encode-restart",
+    "app_mount_prefix": "/deti-marii",
+    "stop_reason": "owner_requested",
+    "reused_live_room": true,
+    "audience_publications_captured": 0,
+    "media": {
+      "width": 1920,
+      "height": 1080,
+      "profile": "opora-stage/1",
+      "frame_rate": 25,
+      "audio_codec": "aac",
+      "duration_ms": 8938,
+      "full_decode": true,
+      "video_codec": "h264",
+      "video_frames": 175
+    },
+    "audio_mean_volume": "-25.1 dB",
+    "audio_proof": {
+      "tone_samples": [
+        {
+          "second": 1,
+          "peak_hz": 441
+        },
+        {
+          "second": 3,
+          "peak_hz": 440
+        },
+        {
+          "second": 4,
+          "peak_hz": 440
+        }
+      ],
+      "windows_100ms": 58,
+      "min_rms": 0.04988,
+      "continuous": true
+    },
+    "journal_events": 3,
+    "source_sha256": "1ea8860529335c0b12425f6d681d203300de80218bc3e0c8dff747c2af9c95a4",
+    "output_sha256": "cc099989caa20790e0cbd4a2c3a7e6ee28beeb9b64da1f1fedd4bf0a8968de2c",
+    "source_revision": "ab1d5a04adae6b6c839ea33f107678a7222b4e08",
+    "wall_seconds": 28.985
+  },
+  "long_recording_and_load_accepted": false,
+  "strict_webinar_policy_unchanged": true,
+  "gateway": {
+    "all_existing_objects_exactly_preserved": true,
+    "canonical_source_durable": true,
+    "own_route_only": "/deti-marii",
+    "rtc_log_redaction": {
+      "public_rtc_status": 401,
+      "invalid_synthetic_token_only": true,
+      "access_logs": [
+        {
+          "logger_file": "/data/access-web.log",
+          "redacted": true
+        }
+      ],
+      "real_tokens_read_or_printed": false,
+      "own_nginx_access_log_disabled": true
+    }
+  },
+  "runtime_policy": {
+    "OPORA_ENVIRONMENT": "staging",
+    "OPORA_APP_MOUNT_PREFIX": "/deti-marii",
+    "OPORA_COOKIE_SECURE": "true",
+    "OPORA_DEV_INBOX": "false",
+    "OPORA_CAPTURE_ENABLED": "false"
+  },
+  "media_isolation": {
+    "user": "10001:10001",
+    "readonly_rootfs": true,
+    "privileged": false,
+    "cap_drop": [
+      "ALL"
+    ],
+    "no_new_privileges": true,
+    "seccomp_present": true,
+    "memory_bytes": 2147483648,
+    "nano_cpus": 1500000000,
+    "pids_limit": 256,
+    "host_devices": false
+  },
+  "schema": {
+    "database": "opora_stage",
+    "head": "c72a9064de18",
+    "source_head_matches": true
+  },
+  "source_transfer": {
+    "source_revision": "ab1d5a04adae6b6c839ea33f107678a7222b4e08",
+    "verified_git_blobs": 656,
+    "all_match": true,
+    "streamed_archive_sha256": "43b93e0a7cfd33a585f2abe7155182dfda6efc8eac3f5988dad6267f635f5ea0",
+    "streamed_bytes": 7833600
+  },
+  "buffering_regression": {
+    "before": {
+      "synthetic_upstream_bytes": 104857600,
+      "paused_client": true,
+      "same_web_image_limits_and_nginx": true,
+      "samples": [
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0
+        },
+        {
+          "running": false,
+          "oom": true,
+          "exit": 137
+        }
+      ]
+    },
+    "after": {
+      "synthetic_upstream_bytes": 104857600,
+      "paused_client": true,
+      "same_web_image_limits_and_nginx": true,
+      "samples": [
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        },
+        {
+          "running": true,
+          "oom": false,
+          "exit": 0,
+          "proxy_tmp_kib": 0
+        }
+      ]
+    },
+    "fixtures_separate_cgroups": true,
+    "baseline_peak_tmpfs_not_measured": true
+  },
+  "native_actual_stage_30s_encoding": {
+    "state": "actual_stage_25fps_encode_decode_passed",
+    "actual_source_bytes": 952810,
+    "cpus": 1.5,
+    "memory_gib": 2,
+    "encode_seconds": 13.778,
+    "full_decode_seconds": 1.361,
+    "profile": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "25/1",
+          "avg_frame_rate": "25/1",
+          "duration": "30.280000",
+          "nb_frames": "757"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0",
+          "avg_frame_rate": "0/0",
+          "duration": "31.611333",
+          "nb_frames": "913"
+        }
+      ],
+      "format": {
+        "duration": "31.613333",
+        "size": "728120"
+      }
+    }
+  },
+  "not_accepted": [
+    "1190s/full-duration recording capacity",
+    "recording HTTP load",
+    "strict-policy public webinar application join",
+    "public owner/foreign-user MP4 Range bytes"
+  ],
+  "all_test_only_containers_stopped": true,
+  "disk_free_bytes": 7782637568,
+  "evidence_utc": "2026-10-21T23:31:57.699248+00:00",
+  "observed_application_data": {
+    "seeded_demo_submitted": 5,
+    "extra_anonymous_submitted": 4,
+    "extra_classification": "unattributed; not assumed fictional",
+    "nonempty_drafts": 2,
+    "users": 6,
+    "verified_non_example_test_email_contacts": 0,
+    "no_external_import_performed": true
+  }
+}
