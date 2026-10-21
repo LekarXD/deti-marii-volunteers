@@ -48,7 +48,9 @@ export OPORA_CANDIDATES_TEST_DATABASE_URL='postgresql+psycopg://opora:local-pass
 export OPORA_CRM_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_crm_test'
 export OPORA_KNOWLEDGE_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_knowledge_test'
 export OPORA_STUDIO_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_studio_test'
-# Only for a fresh local PostgreSQL instance, creates/migrates the seven domain DBs:
+export OPORA_PROFILE_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_profile_test'
+export OPORA_SIMULATOR_TEST_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_simulator_test'
+# Only for a fresh local PostgreSQL instance, creates/migrates the nine domain DBs:
 python infra/scripts/prepare-test-dbs.py
 export OPORA_ASSET_ROOT="${TMPDIR:-/tmp}/opora-private-test-assets"
 export OPORA_ENVIRONMENT=development
@@ -101,7 +103,7 @@ The runner defaults to port 8001; set `OPORA_G1_BASE_URL=http://127.0.0.1:8002`
 for a separate QA port. Stop any previous API on the chosen port first.
 
 Domain test fixtures deliberately drop/recreate their model tables. Keep their
-seven domain URLs separate from development/staging and the external G1 database. Their
+nine domain URLs separate from development/staging and the external G1 database. Their
 exact database names are asserted by the domain suites. The CI pytest plugin
 rejects skipped checks; an unset URL is a gate failure, never a passing test run.
 `prepare-test-dbs.py` refuses existing databases and never drops one.

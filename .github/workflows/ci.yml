@@ -29,6 +29,8 @@ jobs:
       OPORA_CRM_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_crm_test
       OPORA_KNOWLEDGE_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_knowledge_test
       OPORA_STUDIO_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_studio_test
+      OPORA_PROFILE_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_profile_test
+      OPORA_SIMULATOR_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_simulator_test
       OPORA_ASSET_ROOT: ${{ runner.temp }}/opora-private-test-assets
       OPORA_ENVIRONMENT: development
       PYTHONPATH: apps/api

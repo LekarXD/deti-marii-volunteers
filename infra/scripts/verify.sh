@@ -10,6 +10,8 @@ cd "$(dirname "$0")/../.."
 : "${OPORA_CRM_TEST_DATABASE_URL:?set the dedicated opora_crm_test database URL}"
 : "${OPORA_KNOWLEDGE_TEST_DATABASE_URL:?set the dedicated opora_knowledge_test database URL}"
 : "${OPORA_STUDIO_TEST_DATABASE_URL:?set the dedicated Studio test database URL}"
+: "${OPORA_PROFILE_TEST_DATABASE_URL:?set the dedicated opora_profile_test database URL}"
+: "${OPORA_SIMULATOR_TEST_DATABASE_URL:?set the dedicated opora_simulator_test database URL}"
 case "$OPORA_DATABASE_URL" in postgresql+psycopg://*) ;; *) echo 'A real PostgreSQL database is required' >&2; exit 2 ;; esac
 export PYTHONPATH="$PWD/apps/api${PYTHONPATH:+:$PYTHONPATH}"
 (
