@@ -307,3 +307,5 @@
 .a-two-card.is-nudge{background:var(--yellow)}
 .a-two-card.is-nudge .a-ico{background:rgba(255,255,255,.7)}
 .a-nudge-e{margin:0;color:var(--ink)}
+/* Жёлтое выделение текста не видно на жёлтых карточках */
+.card-hero ::selection,.a-two-card.is-nudge ::selection{background:rgba(18,20,26,.22)}

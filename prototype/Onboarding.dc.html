@@ -591,6 +591,8 @@ sc-if,sc-for{display:contents}
 .a-two-card.is-nudge{background:var(--yellow)}
 .a-two-card.is-nudge .a-ico{background:rgba(255,255,255,.7)}
 .a-nudge-e{margin:0;color:var(--ink)}
+/* Жёлтое выделение текста не видно на жёлтых карточках */
+.card-hero ::selection,.a-two-card.is-nudge ::selection{background:rgba(18,20,26,.22)}
 
 </style>
 </helmet>
@@ -893,7 +895,7 @@ window.ONBOARDING = {
 
   test: {
     title: "Небольшой тест",
-    intro: "10 вопросов по тому, что вы прочитали. После каждого ответа — пояснение. Это не экзамен.",
+    intro: "10 вопросов по тому, что вы прочитали.",
     pass: 0,
     source: "Вопросы 1–5 — по онбордингу Фёдора, 6–10 — команда по кодексу и библиотеке фонда",
     questions: [
