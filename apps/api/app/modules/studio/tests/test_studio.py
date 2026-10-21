@@ -221,3 +221,23 @@ async def test_room_close_marks_event_ended_only_after_provider_and_worker_ack(w
     async with w.factory() as db:
         assert await jobs.close_studio(db,context)=={'state':'closed'};await db.commit()
         assert (await db.get(Webinar,UUID(event['id']))).state=='ended';assert fences==[True]
+
+@pytest.mark.asyncio
+async def test_board_draw_revoke_denies_existing_pass_and_next_grant_is_readonly(world,monkeypatch):
+    from starlette.requests import Request
+    from app.modules.studio.schemas import StudioBoardGrantInput
+    w=world;event=await webinar(w);prepared=await prepare(w,event);id=UUID(prepared['id'])
+    async with w.factory() as db:
+        row=await db.get(StudioSession,id);row.state='live';await db.commit()
+    settings=RtcSettings(board_url='wss://board.example.test',board_secret='board-fixture-secret-at-least-thirty-two-bytes')
+    monkeypatch.setattr(RtcSettings,'from_env',classmethod(lambda cls:settings))
+    async with w.factory() as db:await routes.enroll(UUID(event['id']),None,db,w.viewer,uuid4().hex)
+    async with w.factory() as db:await routes.board_grant(id,StudioBoardGrantInput(expected_version=1,user_id=w.viewer.user_id,can_draw=True),db,w.host,uuid4().hex)
+    async with w.factory() as db:grant=await routes.board_token(id,db,w.viewer);assert grant['can_draw']
+    def request():return Request({'type':'http','method':'POST','path':'/api/v1/studio-board/authorize','headers':[(b'authorization',('Bearer '+grant['token']).encode())]})
+    async with w.factory() as db:assert (await routes.authorize_board(request(),db))['can_draw']
+    async with w.factory() as db:await routes.board_grant(id,StudioBoardGrantInput(expected_version=2,user_id=w.viewer.user_id,can_draw=False),db,w.host,uuid4().hex)
+    async with w.factory() as db:
+        with pytest.raises(ApiError) as denied:await routes.authorize_board(request(),db)
+        assert denied.value.status_code==403
+    async with w.factory() as db:assert not (await routes.board_token(id,db,w.viewer))['can_draw']
