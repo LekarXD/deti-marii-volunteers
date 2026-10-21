@@ -41,7 +41,7 @@ jobs:
           alembic upgrade head
           alembic check
       - run: pnpm typecheck && pnpm build && pnpm test
-      - run: python -m pytest apps/api/tests tests/contract -q
+      - run: python -m pytest -c apps/api/pyproject.toml apps/api/tests tests/contract -q
       - name: Generated SDK drift
         run: sh infra/scripts/check-openapi.sh
       - name: Independent G1 against a fresh PostgreSQL database

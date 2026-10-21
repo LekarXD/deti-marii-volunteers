@@ -379,3 +379,44 @@ def test_revoke_commits_before_waiting_staff_command_and_receipt(staff, postgres
         staff.command("POST", "/coord/staff/grants", {
             "user_id": identity["user_id"], "permission": "interviews.manage", "scope_type": "foundation",
         })
+
+
+def test_verified_login_claims_only_own_registration_and_keeps_history(candidate, stranger, staff, environment):
+    import json
+    import os
+    from pathlib import Path
+    import subprocess
+    import sys
+    application = submit(candidate)
+    preparation = candidate.read("/me/preparation")
+    assignment = preparation["assignments"][0]
+    lesson = assignment["lessons"][0]
+    candidate.command("POST", f"/learning/progress/{lesson['id']}/complete", {"assignment_id": assignment["id"]})
+    booking = book(candidate, slots(staff, candidate)[0])
+    duplicate = dict(application["revision"]["answers"])
+    stranger_application = stranger.command("POST", "/applications/submit", {
+        "expected_version": 0, "answers": duplicate,
+        "consents": {"personal_data": True, "news": False, "document_version": "4"},
+    })
+    assert stranger_application["id"] != application["id"]
+    assert stranger.read("/me/interviews") == []
+    old_cookie = candidate.http.cookies.get("opora_session")
+    challenge = candidate.command("POST", "/auth/challenges", {"email": duplicate["email"], "purpose": "login"})
+    process = subprocess.run(
+        [sys.executable, "-m", "app.cli", "dev-inbox", "--email", duplicate["email"]],
+        cwd=os.environ.get("OPORA_G1_API_DIR", str(Path(__file__).resolve().parents[2] / "apps/api")),
+        check=True, capture_output=True, text=True,
+    )
+    token = next(row["token"] for row in json.loads(process.stdout) if row["challenge_id"] == challenge["challenge_id"])
+    candidate.command("POST", "/auth/challenges/verify", {"challenge_id": challenge["challenge_id"], "token": token})
+    session = candidate.refresh()
+    assert session["user_id"] and session["registration_id"] is None
+    assert candidate.read("/me/application")["id"] == application["id"]
+    assert candidate.read("/me/interviews")[0]["id"] == booking["id"]
+    claimed = candidate.read("/me/preparation")["assignments"][0]
+    assert claimed["id"] == assignment["id"]
+    assert next(item for item in claimed["lessons"] if item["id"] == lesson["id"])["completed"] is True
+    assert stranger.read("/me/application")["id"] == stranger_application["id"]
+    assert stranger.read("/me/interviews") == []
+    revoked = candidate.http.get("/api/v1/me/application", headers={"Cookie": f"opora_session={old_cookie}"})
+    assert revoked.status_code == 401

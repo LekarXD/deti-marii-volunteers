@@ -14,5 +14,5 @@ export PYTHONPATH="$PWD/apps/api${PYTHONPATH:+:$PYTHONPATH}"
 pnpm typecheck
 pnpm build
 pnpm test
-python3 -m pytest apps/api/tests tests/contract -q
+python3 -m pytest -c apps/api/pyproject.toml apps/api/tests tests/contract -q
 sh infra/scripts/check-openapi.sh
