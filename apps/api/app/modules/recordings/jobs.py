@@ -17,7 +17,7 @@ from app.modules.assets.service import asset_path
 from app.modules.studio.models import StudioSession
 from app.worker.registry import register_handler
 from . import service
-from .capture import CaptureSettings,encode_and_validate,verify_provider_scope
+from .capture import CaptureSettings,encode_and_validate,verify_provider_scope,MAX_CAPTURE_SECONDS
 from .models import RecordingTake,RecordingProject,StudioCaptureSession,RecordingRendererGrant,RecordingStageEvent,RecordingSourceFile,RecordingRenderVersion
 from .renderer import issue_renderer_ticket
 
@@ -57,7 +57,7 @@ async def read_event(process,timeout=30):
     if not line or len(line)>8192:raise CaptureFailure('capture_process_lost')
     try:value=json.loads(line)
     except ValueError:raise CaptureFailure('capture_protocol_invalid') from None
-    if value.get('event')=='failed':raise CaptureFailure(value['code'] if value.get('code') in ('capture_audio_source_unavailable','capture_audio_scope_invalid','capture_surface_mismatch','capture_tab_timeout','capture_viewport_mismatch','capture_budget_invalid') else 'capture_browser_failed')
+    if value.get('event')=='failed':raise CaptureFailure(value['code'] if value.get('code') in ('capture_audio_source_unavailable','capture_audio_scope_invalid','capture_surface_mismatch','capture_tab_timeout','capture_viewport_mismatch','capture_budget_invalid','capture_browser_close_timeout') else 'capture_browser_failed')
     return value
 
 async def send(process,**message):
@@ -105,6 +105,7 @@ async def capture_take(db,context):
             if started.get('audio_source')!='approved_rtc_webaudio' or sorted(started.get('audio_track_ids',[]))!=expected_audio:raise CaptureFailure('capture_audio_scope_invalid')
             if not service.capture_ready(row):raise CaptureFailure('capture_readiness_lost')
             row.started_at=datetime.fromtimestamp(started['media_started_at_ms']/1000,tz=timezone.utc)
+            capture_started_mono=asyncio.get_running_loop().time()-max(0,(utcnow()-row.started_at).total_seconds())
             if abs((utcnow()-row.started_at).total_seconds())>15:raise CaptureFailure('capture_clock_invalid')
             if row.state!='stopping':row.state='capturing'
             row.capture_phase='capturing';row.version+=1
@@ -120,8 +121,8 @@ async def capture_take(db,context):
                     try:await verify_provider_scope(db,row,owner)
                     except Exception:raise CaptureFailure('capture_provider_scope_invalid') from None
                     next_scope_check=asyncio.get_running_loop().time()+1
-                if row.state=='capturing' and (utcnow()-row.started_at).total_seconds()>=1190:
-                    row.state='stopping';row.capture_phase='stopping';row.version+=1
+                if row.state=='capturing' and asyncio.get_running_loop().time()-capture_started_mono>=MAX_CAPTURE_SECONDS:
+                    row.state='stopping';row.capture_phase='stopping';row.version+=1;row.capture_checkpoint={**row.capture_checkpoint,'stop_reason':'duration_limit'}
                 stopped=row.state=='stopping'
                 if row.state not in ('capturing','stopping'):raise CaptureFailure('capture_superseded')
                 await db.commit()
@@ -137,7 +138,10 @@ async def capture_take(db,context):
             await db.execute(update(RecordingRendererGrant).where(RecordingRendererGrant.take_id==row.id,RecordingRendererGrant.revoked_at.is_(None)).values(revoked_at=utcnow()))
             await db.commit()
             await send(process,command='close')
-            try:await asyncio.wait_for(process.wait(),10)
+            try:
+                closed=await read_event(process,10)
+                if closed.get('event')!='closed' or closed.get('browser_process_exited') is not True:raise CaptureFailure('capture_browser_close_timeout')
+                await asyncio.wait_for(process.wait(),5)
             except TimeoutError:raise CaptureFailure('capture_browser_close_timeout') from None
             row,owner=await checked_take(db,context);row.capture_phase='encoding';row.capture_checkpoint={**row.capture_checkpoint,'phase':'encoding'};await db.commit()
             profile=await encode_and_validate(settings,source,output,final['duration_ms'])
@@ -164,7 +168,7 @@ async def capture_take(db,context):
             asset=await create_generated_asset_from_file(db,principal,content_type='video/mp4',source_path=output,expected_checksum=content_hash,purpose='recording.output',resource_type='recording_render',resource_id=render.id)
             render.asset_id=asset.id
             db.add(RecordingSourceFile(take_id=row.id,asset_id=asset.id,kind='validated_composite',content_hash=content_hash,manifest=manifest,duration_ms=profile['duration_ms'],retained_until=utcnow()+timedelta(days=30)))
-            row.state='captured';row.capture_phase='complete';row.version+=1;row.error_code=None;row.readiness_state='blocked';row.capture_checkpoint={'schema_version':1,'phase':'complete','render_id':str(render.id),'content_hash':content_hash}
+            row.state='captured';row.capture_phase='complete';row.version+=1;row.error_code=None;row.readiness_state='blocked';row.capture_checkpoint={'schema_version':1,'phase':'complete','render_id':str(render.id),'content_hash':content_hash,'stop_reason':row.capture_checkpoint.get('stop_reason','owner_requested')}
             await db.flush();return {'state':'captured','render_id':str(render.id)}
     except (CaptureFailure,ValueError,TimeoutError,OSError,KeyError,TypeError) as exc:
         await db.rollback();await context.fence(db)

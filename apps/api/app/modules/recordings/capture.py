@@ -15,6 +15,8 @@ from app.worker.queue import enqueue_job
 from .models import StudioCaptureSession
 from . import service
 
+MAX_CAPTURE_SECONDS=1190
+
 class MediaValidationError(ValueError):
     def __init__(self,code,diagnostics=None):
         super().__init__(code);self.code=code;self.diagnostics=diagnostics
@@ -90,6 +92,7 @@ async def start_capture(db,row,owner):
 async def stop_capture(db,row):
     if row.state not in ('starting','capturing'):raise ApiError(409,'recording_capture_not_active','Запись сейчас не идёт')
     row.state='stopping';row.version+=1
+    if row.capture_checkpoint is not None:row.capture_checkpoint={**row.capture_checkpoint,'stop_reason':'owner_requested'}
 
 async def media_command(*arguments,timeout=90):
     process=await asyncio.create_subprocess_exec(*arguments,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL)

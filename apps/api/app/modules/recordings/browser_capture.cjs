@@ -47,9 +47,13 @@ async function launchIsolated(chromium,executablePath){
  return {browser,server,context,page};
 }
 async function closeIsolated(instance){
- let timer;try{await Promise.race([instance.server.close(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('browser_close_timeout')),3000);})]);}
- catch{await instance.server.kill();}
- finally{clearTimeout(timer);}
+ const child=instance.server.process();
+ const bounded=async(promise,ms)=>{let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('browser_close_timeout')),ms);})]);}finally{clearTimeout(timer);}};
+ try{await bounded(instance.server.close(),3000);}
+ catch{await bounded(instance.server.kill(),2000).catch(()=>{});}
+ finally{await bounded(instance.browser.close(),1000).catch(()=>{});}
+ if(child.exitCode===null&&child.signalCode===null)throw new Error('browser_close_timeout');
+ return {browser_process_exited:true};
 }
 async function installRequestBoundary(context,page,targetUrl,providerUrl=null){
  const target=new URL(targetUrl),provider=providerUrl?new URL(providerUrl):null;

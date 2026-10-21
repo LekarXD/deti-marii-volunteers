@@ -15,6 +15,8 @@ class RecordingProjectUpdate(RecordingVersionCommand):
     title:str|None=Field(None,min_length=1,max_length=300)
     target_lesson_id:UUID|None=None
 class RecordingCapabilities(BaseModel):
+    max_duration_seconds:int
+    capture_limit_reason:str
     capture_available:bool
     capture_reason:str
     private_renderer_available:bool
@@ -45,6 +47,8 @@ class RecordingPolicyTrack(BaseModel):
     kind:Literal['video','audio']
     required:bool=True
 class RecordingTakeView(BaseModel):
+    max_duration_seconds:int
+    stop_reason:Literal['owner_requested','duration_limit']|None
     privacy_state:Literal['unknown','approved','blocked']
     policy_scene_revision:int
     policy_tracks:list[RecordingPolicyTrack]

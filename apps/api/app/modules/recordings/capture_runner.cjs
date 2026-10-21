@@ -26,5 +26,11 @@ const send=value=>process.stdout.write(JSON.stringify(value)+'\n');
   send({event:'finalized',...await capture.stop()});capture=null;
   const close=await next();if(!close||close.command!=='close')throw Error();
  }catch(error){const allowed=['capture_audio_source_unavailable','capture_audio_scope_invalid','capture_surface_mismatch','capture_tab_timeout','capture_viewport_mismatch','capture_budget_invalid'];const code=allowed.find(value=>String(error.message).includes(value))||'capture_browser_failed';send({event:'failed',code});process.exitCode=1;}
- finally{dispose?.();if(instance)await closeIsolated(instance);input.close();process.stdin.destroy();}
+ finally{
+  dispose?.();let closed=false;
+  try{if(instance){await closeIsolated(instance);closed=true;}}catch{process.exitCode=1;}
+  input.close();process.stdin.destroy();
+  await new Promise(resolve=>process.stdout.write(JSON.stringify(closed?{event:'closed',browser_process_exited:true}:{event:'failed',code:'capture_browser_close_timeout'})+'\n',resolve));
+  process.exit(process.exitCode||0);
+ }
 })();

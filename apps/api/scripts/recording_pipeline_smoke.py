@@ -13,7 +13,7 @@ os.environ['OPORA_CAPTURE_ENABLED']='true'
 if not os.environ.get('OPORA_CAPTURE_CHROME_PATH'):raise RuntimeError('Official Chrome path required')
 DIST=Path(os.environ['OPORA_RECORDING_SMOKE_DIST']).resolve()
 SCENARIO=os.getenv('OPORA_RECORDING_SMOKE_SCENARIO','success')
-if SCENARIO not in ('success','presentation','privacy-revoke','auth-revoke','unknown-participant'):raise ValueError('Unknown smoke scenario')
+if SCENARIO not in ('success','presentation','privacy-revoke','auth-revoke','unknown-participant','lease-restart','auto-stop'):raise ValueError('Unknown smoke scenario')
 SMOKE_SECONDS=int(os.getenv('OPORA_RECORDING_SMOKE_SECONDS','6'))
 if not 3<=SMOKE_SECONDS<=120:raise ValueError('Smoke duration must be 3..120 seconds')
 def port():
@@ -96,6 +96,9 @@ async def main():
     parts=await LiveKitAdapter().participants(room);await asyncio.sleep(.4)
     tid=await post(f"/recording-takes/{tid['id']}/policy",{'expected_version':tid['version'],'expected_scene_revision':revision,'approved':True,'tracks':pub['tracks']})
     tid=await post(f"/recording-takes/{tid['id']}/start",{'expected_version':tid['version']});assert tid['state']=='starting'
+    if SCENARIO=='auto-stop':
+     import app.modules.recordings.jobs as recording_jobs
+     recording_jobs.MAX_CAPTURE_SECONDS=5
     if SMOKE_SECONDS>=30:
      import app.modules.recordings.jobs as recording_jobs
      import shutil
@@ -111,6 +114,12 @@ async def main():
     load_extensions();proof_kind='recording.proof.'+uuid4().hex;HANDLERS[proof_kind]=HANDLERS['recording.capture']
     async with SessionLocal() as db:
      job=await db.get(Job,UUID(tid['capture_job_id']));job.kind=proof_kind;await db.commit()
+    capture_children=[];original_spawn=asyncio.create_subprocess_exec
+    async def track_capture_child(*arguments,**options):
+     child=await original_spawn(*arguments,**options)
+     if any(str(argument).endswith('capture_runner.cjs') for argument in arguments):capture_children.append(child)
+     return child
+    asyncio.create_subprocess_exec=track_capture_child
     work=asyncio.create_task(run_once([proof_kind]))
     deadline=asyncio.get_running_loop().time()+60
     while True:
@@ -139,8 +148,20 @@ async def main():
      await asyncio.sleep(max(0,began+SMOKE_SECONDS-asyncio.get_running_loop().time()))
      current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json();assert current['state']=='capturing',current
     if SCENARIO=='success' and SMOKE_SECONDS>6:await asyncio.sleep(max(0,began+SMOKE_SECONDS-asyncio.get_running_loop().time()))
-    if SCENARIO not in ('success','presentation'):
-     if SCENARIO=='privacy-revoke':
+    if SCENARIO not in ('success','presentation','auto-stop'):
+     if SCENARIO=='lease-restart':
+      from app.core.clock import utcnow
+      from datetime import timedelta
+      async with SessionLocal() as db:
+       job=await db.get(Job,UUID(tid['capture_job_id']));job.claim_token=uuid4();job.lease_until=utcnow()-timedelta(seconds=1);await db.commit()
+      await asyncio.wait_for(work,40)
+      assert capture_children and all(child.returncode is not None for child in capture_children)
+      await run_once([proof_kind])
+      departed=asyncio.get_running_loop().time()+10
+      while any(participant.get('identity','').startswith('opora-renderer-') and participant.get('state') not in ('DISCONNECTED',3) for participant in await LiveKitAdapter().participants(room)):
+       if asyncio.get_running_loop().time()>=departed:raise RuntimeError('Private recorder did not leave RTC')
+       await asyncio.sleep(.25)
+     elif SCENARIO=='privacy-revoke':
       await post(f"/recording-takes/{tid['id']}/policy",{'expected_version':current['version'],'expected_scene_revision':revision,'approved':False,'tracks':[]})
      elif SCENARIO=='auth-revoke':
       from app.core.models import Session
@@ -157,11 +178,13 @@ async def main():
      async with SessionLocal() as db:
       row=await db.get(RecordingTake,UUID(tid['id']));assert row.state=='failed',(SCENARIO,row.state,row.error_code)
       assert not await db.scalar(select(RecordingRenderVersion.id).where(RecordingRenderVersion.take_id==row.id))
-      print(json.dumps({'state':'actual_capture_revocation_passed','scenario':SCENARIO,'capture_started':bool(row.started_at),'take_state':row.state,'error_code':row.error_code,'render_created':False}))
+      print(json.dumps({'state':'actual_capture_revocation_passed','scenario':SCENARIO,'capture_started':bool(row.started_at),'take_state':row.state,'error_code':row.error_code,'render_created':False,'capture_child_exited':all(child.returncode is not None for child in capture_children)}))
      return
-    current=await post(f"/recording-takes/{tid['id']}/stop",{'expected_version':current['version']});assert current['state']=='stopping'
+    if SCENARIO!='auto-stop':
+     current=await post(f"/recording-takes/{tid['id']}/stop",{'expected_version':current['version']});assert current['state']=='stopping'
     await asyncio.wait_for(work,max(60,SMOKE_SECONDS*2))
     current=(await client.get('/api/v1/recording-takes/'+tid['id'])).json()
+    if SCENARIO=='auto-stop':assert current['stop_reason']=='duration_limit',current
     if current['state']!='captured':raise RuntimeError('capture final '+json.dumps(current))
     async with SessionLocal() as db:
      render=await db.scalar(select(RecordingRenderVersion).where(RecordingRenderVersion.take_id==UUID(tid['id'])))

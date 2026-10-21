@@ -41,9 +41,9 @@ async def take(db,p,id,lock=False):
     return row,owner
 
 def capabilities():
-    from .capture import CaptureSettings
+    from .capture import CaptureSettings,MAX_CAPTURE_SECONDS
     available=CaptureSettings.configured() is not None
-    return {'capture_available':available,'capture_reason':'Запись выполняется медиа-обработчиком' if available else 'Захват медиа не настроен','private_renderer_available':True,'raw_fallback':'forbidden'}
+    return {'max_duration_seconds':MAX_CAPTURE_SECONDS,'capture_limit_reason':'Для длинного занятия запишите несколько дублей','capture_available':available,'capture_reason':'Запись выполняется медиа-обработчиком' if available else 'Захват медиа не настроен','private_renderer_available':True,'raw_fallback':'forbidden'}
 async def project_view(db,row):
     capture=await db.scalar(select(StudioCaptureSession).where(StudioCaptureSession.project_id==row.id).order_by(StudioCaptureSession.generation.desc()).limit(1))
     takes=(await db.scalars(select(RecordingTake).where(RecordingTake.project_id==row.id).order_by(RecordingTake.number.desc()).limit(51))).all()
@@ -55,6 +55,8 @@ def readiness_current(row,now=None):
     return expiry>(now or utcnow())
 def take_view(row):
     value={k:getattr(row,k) for k in ('id','project_id','number','generation','state','version','renderer_state_version','projection_hash','readiness_state','capture_job_id','capture_phase','started_at','stopped_at','error_code')}
+    from .capture import MAX_CAPTURE_SECONDS
+    value.update(max_duration_seconds=MAX_CAPTURE_SECONDS,stop_reason=(row.capture_checkpoint or {}).get('stop_reason'))
     plan=row.projection['capture_plan']
     value.update(privacy_state=plan['privacy_state'],policy_scene_revision=plan['scene_revision'],policy_tracks=plan['allowed_tracks'])
     if value['readiness_state']=='ready' and not readiness_current(row):value['readiness_state']='expired'

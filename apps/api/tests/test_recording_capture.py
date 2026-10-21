@@ -32,6 +32,7 @@ async def prepared(client):
     project=(await post('/recording-projects',{'title':'Synthetic command privacy fixture'})).json()
     project=(await post(f"/recording-projects/{project['id']}/prepare",{'expected_version':project['version']})).json()
     take=(await post(f"/recording-projects/{project['id']}/takes",{'expected_version':project['version'],'expected_scene_revision':0})).json()
+    assert take['max_duration_seconds']==1190 and take['stop_reason'] is None
     return me,headers,post,take
 
 @pytest.mark.asyncio
