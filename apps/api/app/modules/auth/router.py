@@ -16,6 +16,7 @@ from app.core.models import AuthChallenge, ContactChannel, Foundation, User, Reg
 from app.core.rate_limit import rate_limit
 from app.core.audit import audit
 from app.worker.queue import enqueue_outbox
+from .schemas import AuthSessionView, MfaSessionView, ChallengeView, MfaEnrollmentView, AuthStatusView
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -30,7 +31,7 @@ class VerifyInput(BaseModel):
 class MfaInput(BaseModel):
     code: str = Field(min_length=6, max_length=100)
 
-@router.get("/session", operation_id="auth_session")
+@router.get("/session", operation_id="auth_session", response_model=AuthSessionView)
 async def session(request: Request, response: Response, db: AsyncSession = Depends(get_db)):
     existing = await get_session_row(request, db)
     if existing:
@@ -45,7 +46,7 @@ async def session(request: Request, response: Response, db: AsyncSession = Depen
     await db.commit()
     return result
 
-@router.post("/challenges", operation_id="auth_challenge_create")
+@router.post("/challenges", operation_id="auth_challenge_create", response_model=ChallengeView)
 async def challenge(body: ChallengeInput, request: Request, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     email = body.email.strip().lower()
     if body.purpose != "login" or "@" not in email or any(c.isspace() for c in email):
@@ -62,7 +63,7 @@ async def challenge(body: ChallengeInput, request: Request, principal: Principal
     await db.commit()
     return {"challenge_id": str(row.id), "status": "queued", "delivery": "dev_inbox" if get_settings().dev_inbox else "pending"}
 
-@router.post("/challenges/verify", operation_id="auth_challenge_verify")
+@router.post("/challenges/verify", operation_id="auth_challenge_verify", response_model=AuthSessionView)
 async def verify(body: VerifyInput, response: Response, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     await rate_limit(db, principal.actor_id, "challenge_verify", limit=20)
     row = await db.scalar(select(AuthChallenge).where(AuthChallenge.id == body.challenge_id).with_for_update())
@@ -103,7 +104,7 @@ async def verify(body: VerifyInput, response: Response, principal: Principal = D
     await db.commit()
     return result
 
-@router.post("/logout", operation_id="auth_logout")
+@router.post("/logout", operation_id="auth_logout", response_model=AuthStatusView)
 async def logout(response: Response, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     await authz_guard(db, principal)
     row = await db.get(Session, principal.session_id)
@@ -113,7 +114,7 @@ async def logout(response: Response, principal: Principal = Depends(get_principa
     response.delete_cookie("opora_session", path="/")
     return {"status": "logged_out"}
 
-@router.post("/mfa/enroll", operation_id="auth_mfa_enroll")
+@router.post("/mfa/enroll", operation_id="auth_mfa_enroll", response_model=MfaEnrollmentView)
 async def enroll(principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     if not principal.user_id or not await db.scalar(select(StaffMembership.id).where(StaffMembership.user_id == principal.user_id, StaffMembership.revoked_at.is_(None))):
         raise ApiError(403, "staff_required", "Недостаточно прав")
@@ -130,7 +131,7 @@ async def enroll(principal: Principal = Depends(get_principal), db: AsyncSession
     await db.commit()
     return {"secret": secret, "provisioning_uri": pyotp.TOTP(secret).provisioning_uri(str(principal.user_id), issuer_name="Опора")}
 
-@router.post("/mfa/verify", operation_id="auth_mfa_verify")
+@router.post("/mfa/verify", operation_id="auth_mfa_verify", response_model=MfaSessionView)
 async def mfa_verify(body: MfaInput, response: Response, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     if not principal.user_id:
         raise ApiError(403, "user_required", "Войдите в аккаунт")
@@ -161,7 +162,7 @@ async def mfa_verify(body: MfaInput, response: Response, principal: Principal = 
     await db.commit()
     return result
 
-@router.post("/mfa/revoke", operation_id="auth_mfa_revoke")
+@router.post("/mfa/revoke", operation_id="auth_mfa_revoke", response_model=AuthStatusView)
 async def mfa_revoke(principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     await authz_guard(db, principal)
     if not principal.user_id or not principal.mfa_at or principal.mfa_at < utcnow()-timedelta(minutes=10):

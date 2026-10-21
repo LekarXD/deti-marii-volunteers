@@ -19,6 +19,12 @@ class GrantInput(BaseModel):
     scope_type: str = "foundation"
     scope_id: UUID | None = None
 
+class GrantView(BaseModel):
+    id: UUID
+    permission: str
+class RevokeView(BaseModel):
+    status: str
+
 async def grant_guard(db, principal, target):
     from hashlib import sha256
     subjects = (principal.user_id or principal.registration_id, target)
@@ -29,7 +35,7 @@ async def grant_guard(db, principal, target):
     if not principal.has_permission("staff.manage") or not principal.mfa_at or principal.mfa_at < utcnow()-timedelta(minutes=10):
         raise ApiError(403, "step_up_required", "Подтвердите вход перед изменением доступа")
 
-@router.post("/grants", operation_id="staff_grant")
+@router.post("/grants", operation_id="staff_grant", response_model=GrantView)
 async def grant(body: GrantInput, request: Request, principal: Principal = Depends(require_permission("staff.manage")), db: AsyncSession = Depends(get_db)):
     await grant_guard(db, principal, body.user_id)
     key = request.headers.get("Idempotency-Key")
@@ -56,7 +62,7 @@ async def grant(body: GrantInput, request: Request, principal: Principal = Depen
     await db.commit()
     return result
 
-@router.post("/grants/{grant_id}/revoke", operation_id="staff_revoke")
+@router.post("/grants/{grant_id}/revoke", operation_id="staff_revoke", response_model=RevokeView)
 async def revoke(grant_id: UUID, request: Request, principal: Principal = Depends(require_permission("staff.manage")), db: AsyncSession = Depends(get_db)):
     row = await db.get(PermissionGrant, grant_id)
     membership = await db.get(StaffMembership, row.membership_id) if row else None

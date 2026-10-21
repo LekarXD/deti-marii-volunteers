@@ -20,10 +20,18 @@ class UploadIntent(BaseModel):
     expected_size: int = Field(gt=0)
     checksum: str = Field(pattern="^[a-f0-9]{64}$")
 
+class AssetView(BaseModel):
+    id: UUID
+    state: str
+    received_size: int
+    expected_size: int
+    content_type: str
+    upload_url: str
+
 def view(asset):
     return {"id": str(asset.id), "state": asset.state, "received_size": asset.received_size, "expected_size": asset.expected_size, "content_type": asset.content_type, "upload_url": f"/api/v1/assets/{asset.id}/upload"}
 
-@router.post("/upload-intents", operation_id="asset_upload_intent")
+@router.post("/upload-intents", operation_id="asset_upload_intent", response_model=AssetView)
 async def intent(body: UploadIntent, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     if body.content_type not in ("image/png", "image/jpeg", "image/webp", "application/pdf") or body.expected_size > get_settings().max_asset_bytes:
         raise ApiError(422, "unsupported_asset", "Допустимы PNG, JPEG, WebP и PDF в пределах лимита")
@@ -34,7 +42,7 @@ async def intent(body: UploadIntent, principal: Principal = Depends(get_principa
     await db.commit()
     return view(asset)
 
-@router.patch("/{asset_id}/upload", operation_id="asset_upload_chunk")
+@router.patch("/{asset_id}/upload", operation_id="asset_upload_chunk", response_model=AssetView)
 async def upload(asset_id: UUID, request: Request, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     await authz_guard(db, principal)
     asset = await require_asset(db, principal, asset_id, ready=False)
@@ -67,7 +75,7 @@ async def upload(asset_id: UUID, request: Request, principal: Principal = Depend
     await db.commit()
     return view(asset)
 
-@router.post("/{asset_id}/complete-upload", operation_id="asset_upload_complete")
+@router.post("/{asset_id}/complete-upload", operation_id="asset_upload_complete", response_model=AssetView)
 async def complete_upload(asset_id: UUID, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     await authz_guard(db, principal)
     asset = await require_asset(db, principal, asset_id, ready=False)
@@ -105,7 +113,7 @@ async def complete_upload(asset_id: UUID, principal: Principal = Depends(get_pri
     await db.commit()
     return view(asset)
 
-@router.get("/{asset_id}/status", operation_id="asset_status")
+@router.get("/{asset_id}/status", operation_id="asset_status", response_model=AssetView)
 async def status(asset_id: UUID, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     return view(await require_asset(db, principal, asset_id, ready=False))
 

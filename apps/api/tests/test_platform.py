@@ -161,3 +161,10 @@ async def test_private_upload_checks_full_image_and_other_identity(app):
         await owner.patch(f'/api/v1/assets/{bad}/upload',content=malformed,headers={**headers,'X-Upload-Offset':'0'})
         assert (await owner.post(f'/api/v1/assets/{bad}/complete-upload',headers=headers)).status_code==422
         assert (await owner.get(f'/api/v1/assets/{bad}/content')).status_code==409
+
+def test_auth_openapi_has_concrete_generated_session_contract(app):
+    schema=app.openapi()
+    for path in ('/api/v1/auth/session','/api/v1/auth/challenges/verify'):
+        method='get' if path.endswith('/session') else 'post'
+        assert schema['paths'][path][method]['responses']['200']['content']['application/json']['schema']['$ref'].endswith('/AuthSessionView')
+    assert set(schema['components']['schemas']['AuthSessionView']['required']) == {'user_id','registration_id','foundation_id','is_staff','permissions','csrf_token','actor_id','mfa_required'}
