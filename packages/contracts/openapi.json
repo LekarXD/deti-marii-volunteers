@@ -6332,6 +6332,26 @@
         "title": "LessonView",
         "type": "object"
       },
+      "LiveRecordingProjectInput": {
+        "properties": {
+          "expected_scene_revision": {
+            "minimum": 0.0,
+            "title": "Expected Scene Revision",
+            "type": "integer"
+          },
+          "studio_session_id": {
+            "format": "uuid",
+            "title": "Studio Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "studio_session_id",
+          "expected_scene_revision"
+        ],
+        "title": "LiveRecordingProjectInput",
+        "type": "object"
+      },
       "ManualTimeCommand": {
         "additionalProperties": false,
         "properties": {
@@ -9858,6 +9878,18 @@
             "title": "Id",
             "type": "string"
           },
+          "live_event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Live Event Id"
+          },
           "mode": {
             "title": "Mode",
             "type": "string"
@@ -9932,6 +9964,7 @@
           "owner_user_id",
           "title",
           "mode",
+          "live_event_id",
           "target_lesson_id",
           "state",
           "privacy_state",
@@ -10994,6 +11027,19 @@
             "title": "Resolved Assets",
             "type": "array"
           },
+          "resource_id": {
+            "format": "uuid",
+            "title": "Resource Id",
+            "type": "string"
+          },
+          "resource_kind": {
+            "enum": [
+              "live_event",
+              "lesson_recording_project"
+            ],
+            "title": "Resource Kind",
+            "type": "string"
+          },
           "scene": {
             "$id": "urn:opora:studio-scene:1",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -11362,6 +11408,8 @@
           }
         },
         "required": [
+          "resource_kind",
+          "resource_id",
           "foundation_id",
           "project_id",
           "take_id",
@@ -11843,6 +11891,19 @@
             "title": "Resolved Assets",
             "type": "array"
           },
+          "resource_id": {
+            "format": "uuid",
+            "title": "Resource Id",
+            "type": "string"
+          },
+          "resource_kind": {
+            "enum": [
+              "live_event",
+              "lesson_recording_project"
+            ],
+            "title": "Resource Kind",
+            "type": "string"
+          },
           "scene": {
             "$id": "urn:opora:studio-scene:1",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -12211,6 +12272,8 @@
           }
         },
         "required": [
+          "resource_kind",
+          "resource_id",
           "foundation_id",
           "project_id",
           "take_id",
@@ -63852,6 +63915,129 @@
         "summary": "Publish Webinar",
         "tags": [
           "studio"
+        ]
+      }
+    },
+    "/api/v1/webinars/{id}/recording-project": {
+      "post": {
+        "operationId": "webinar_recording_project_ensure",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveRecordingProjectInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingProjectView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Ensure Live Project",
+        "tags": [
+          "recordings"
         ]
       }
     },

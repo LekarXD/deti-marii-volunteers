@@ -5401,6 +5401,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/webinars/{id}/recording-project": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ensure Live Project */
+        post: operations["webinar_recording_project_ensure"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/webinars/{id}/summary": {
         parameters: {
             query?: never;
@@ -8518,6 +8535,16 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** LiveRecordingProjectInput */
+        LiveRecordingProjectInput: {
+            /** Expected Scene Revision */
+            expected_scene_revision: number;
+            /**
+             * Studio Session Id
+             * Format: uuid
+             */
+            studio_session_id: string;
+        };
         /** ManualTimeCommand */
         ManualTimeCommand: {
             /** Requested Minutes */
@@ -9996,6 +10023,8 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** Live Event Id */
+            live_event_id: string | null;
             /** Mode */
             mode: string;
             /**
@@ -10405,6 +10434,16 @@ export interface components {
             renderer_state_version: number;
             /** Resolved Assets */
             resolved_assets: components["schemas"]["ResolvedRendererAsset"][];
+            /**
+             * Resource Id
+             * Format: uuid
+             */
+            resource_id: string;
+            /**
+             * Resource Kind
+             * @enum {string}
+             */
+            resource_kind: "live_event" | "lesson_recording_project";
             /** Immutable StudioScene v1 */
             scene: {
                 board_snapshot_id: string | null;
@@ -10624,6 +10663,16 @@ export interface components {
             renderer_state_version: number;
             /** Resolved Assets */
             resolved_assets: components["schemas"]["ResolvedRendererAsset"][];
+            /**
+             * Resource Id
+             * Format: uuid
+             */
+            resource_id: string;
+            /**
+             * Resource Kind
+             * @enum {string}
+             */
+            resource_kind: "live_event" | "lesson_recording_project";
             /** Immutable StudioScene v1 */
             scene: {
                 board_snapshot_id: string | null;
@@ -47902,6 +47951,104 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WebinarView"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorView"];
+                };
+            };
+        };
+    };
+    webinar_recording_project_ensure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LiveRecordingProjectInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingProjectView"];
                 };
             };
             /** @description Bad Request */
