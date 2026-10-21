@@ -8,7 +8,7 @@ import pytest_asyncio
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.core.auth import get_principal, issue_session
@@ -26,8 +26,13 @@ pytestmark=pytest.mark.skipif(not DSN, reason="Set OPORA_PARTICIPANTS_TEST_DATAB
 @pytest_asyncio.fixture
 async def env(tmp_path):
     assert DSN and DSN.rsplit('/',1)[-1] == 'opora_participants_test', 'Refuse non-dedicated database'
+    # Readiness adapters can import other domain models lazily. Load the canonical
+    # model graph before reset so a repeated scoped run includes their foreign keys.
+    from app.core.model_loader import load_models
+    load_models()
     engine=create_async_engine(DSN)
     async with engine.begin() as connection:
+        await connection.execute(text("CREATE EXTENSION IF NOT EXISTS btree_gist"))
         await connection.run_sync(Base.metadata.drop_all)
         await connection.run_sync(Base.metadata.create_all)
     sessions=async_sessionmaker(engine,expire_on_commit=False)

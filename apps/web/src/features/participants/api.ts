@@ -13,6 +13,7 @@ export const readGroups = (signal?: AbortSignal, archived=false) => api<componen
 export const readGroup = (id: string, at: string, signal?: AbortSignal) => api<GroupDetail>(`/coord/groups/${id}?at=${at}`, {signal});
 export const readStaff = (signal?: AbortSignal) => api<components['schemas']['ParticipantStaffOptions']>('/coord/groups/staff-options', {signal});
 export const readNotes = (id: string, signal?: AbortSignal) => api<components['schemas']['PrivateNoteList']>(`/coord/participants/${id}/private-notes`, {signal});
+export const readAssignmentBriefing = (id: string, signal?: AbortSignal) => api<components['schemas']['AssignmentGroupBriefing']>(`/me/assignments/${id}/group-briefing`, {signal});
 export const readAssignmentParticipants = (id: string, signal?: AbortSignal) => api<components['schemas']['AssignmentParticipantList']>(`/me/assignments/${id}/participants`, {signal});
 export const command = <T,>(path: string, body: unknown, method = 'POST') => api<T>(path, {method, body, idempotencyKey: crypto.randomUUID()});
 

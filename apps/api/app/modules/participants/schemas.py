@@ -142,3 +142,12 @@ class ParticipantStaffOption(BaseModel):
 
 class ParticipantStaffOptions(BaseModel):
     items: list[ParticipantStaffOption]
+
+
+class AssignmentSafeGroup(BaseModel):
+    id: UUID
+    title: str
+
+
+class AssignmentGroupBriefing(AssignmentParticipantList):
+    groups: list[AssignmentSafeGroup]

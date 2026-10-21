@@ -3,7 +3,7 @@ from uuid import UUID
 from zoneinfo import ZoneInfo
 from app.core.clock import utcnow
 
-from fastapi import APIRouter, Depends, Header, Query
+from fastapi import APIRouter, Depends, Header, Query, Response
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,7 +15,7 @@ from app.core.idempotency import begin_command, finish_command
 from app.core.models import MediaAsset, StaffMembership, User
 from .access import AssignmentAccess, get_assignment_access
 from .models import GroupMembership, Participant, ParticipantBriefing, ParticipantGroup, ParticipantPrivateNote
-from .schemas import ParticipantStaffOptions, AssignmentParticipantList, GroupDetail, GroupList, MembershipResult, ParticipantList, PrivateNoteList, PrivateNoteView, SafeParticipant, GroupInput, GroupUpdate, GroupView, MembershipEnd, MembershipInput, ParticipantInput, ParticipantUpdate, PrivateNoteInput
+from .schemas import AssignmentGroupBriefing, ParticipantStaffOptions, AssignmentParticipantList, GroupDetail, GroupList, MembershipResult, ParticipantList, PrivateNoteList, PrivateNoteView, SafeParticipant, GroupInput, GroupUpdate, GroupView, MembershipEnd, MembershipInput, ParticipantInput, ParticipantUpdate, PrivateNoteInput
 from .service import add_membership, check_version, foundation_permission, get_group, get_participant, group_scope, participant_scope, safe_participant
 
 router = APIRouter(prefix="/api/v1", tags=["participants"])
@@ -267,13 +267,35 @@ async def staff_photo(participant_id: UUID, db: AsyncSession = Depends(get_db), 
     return await photo_response(db, await get_participant(db, principal, participant_id))
 
 
-@router.get("/me/assignments/{assignment_id}/participants", response_model=AssignmentParticipantList)
-async def assignment_participants(assignment_id: UUID, db: AsyncSession = Depends(get_db), principal: Principal = Depends(get_principal), access: AssignmentAccess = Depends(get_assignment_access)):
+async def assignment_projection(db, principal, assignment_id, access):
+    # Authorization is evaluated from current P09 state on every request. Never infer
+    # membership from the caller's staff flag, uploaded-file ownership or group today.
     grant = await access.participants(db, principal, assignment_id)
     if grant.assignment_id != assignment_id:
         denied()
-    people = (await db.scalars(select(Participant).where(Participant.id.in_(grant.participant_ids), Participant.foundation_id == principal.foundation_id))).all()
-    return {"assignment_id": str(assignment_id), "items": [(await safe_participant(db, item)).model_dump(mode="json") for item in people]}
+    people = (await db.scalars(select(Participant).where(
+        Participant.id.in_(grant.participant_ids), Participant.foundation_id == principal.foundation_id
+    ).order_by(Participant.display_name, Participant.id))).all()
+    return grant, [(await safe_participant(db, item)).model_dump(mode="json") for item in people]
+
+
+@router.get("/me/assignments/{assignment_id}/participants", response_model=AssignmentParticipantList)
+async def assignment_participants(assignment_id: UUID, response: Response, db: AsyncSession = Depends(get_db), principal: Principal = Depends(get_principal), access: AssignmentAccess = Depends(get_assignment_access)):
+    _, people = await assignment_projection(db, principal, assignment_id, access)
+    response.headers["Cache-Control"] = "private, no-store"
+    return {"assignment_id": str(assignment_id), "items": people}
+
+
+@router.get("/me/assignments/{assignment_id}/group-briefing", response_model=AssignmentGroupBriefing)
+async def assignment_group_briefing(assignment_id: UUID, response: Response, db: AsyncSession = Depends(get_db), principal: Principal = Depends(get_principal), access: AssignmentAccess = Depends(get_assignment_access)):
+    grant, people = await assignment_projection(db, principal, assignment_id, access)
+    groups = (await db.scalars(select(ParticipantGroup).where(
+        ParticipantGroup.id.in_(grant.group_ids), ParticipantGroup.foundation_id == principal.foundation_id
+    ).order_by(ParticipantGroup.title, ParticipantGroup.id))).all()
+    response.headers["Cache-Control"] = "private, no-store"
+    # Current generic schedules/team grants are not event conditions. P09 owns those;
+    # this projection exposes only the authorized group's name and captured roster.
+    return {"assignment_id": str(assignment_id), "groups": [{"id": str(group.id), "title": group.title} for group in groups], "items": people}
 
 
 @router.get("/me/assignments/{assignment_id}/participants/{participant_id}/photo")
