@@ -71,7 +71,9 @@ async def assignment_view(db,item,principal):
         if principal.user_id==item.user_id:actions+=['confirm','decline']
     if item.status=='confirmed':
         if principal.user_id==item.user_id:actions.append('cancel')
-        if staff(principal):actions+=['cancel','attendance']
+        if staff(principal):
+            actions+=['cancel']
+            if event.starts_at<=utcnow():actions.append('correct-attendance' if attendance else 'attendance')
     return AssignmentParticipationView(id=item.id,version=item.version,user_id=item.user_id,display_name=user.display_name,
         occurrence_id=item.occurrence_id,staffing_need_id=item.staffing_need_id,title=event.title,role_title=revision.snapshot['title'],
         starts_at=event.starts_at,ends_at=event.ends_at,timezone=event.timezone,location=event.location,status=item.status,approved_at=item.approved_at,
@@ -93,7 +95,7 @@ async def invite(db,principal,need_id,body):
     event=await occurrence(db,principal,before.occurrence_id,True)
     need=await db.scalar(select(StaffingNeed).where(StaffingNeed.id==need_id).with_for_update())
     check_version(need,body.expected_version)
-    if event.status!='scheduled' or need.capacity_required==0:raise ApiError(409,'event_not_open','Набор на занятие закрыт.')
+    if event.status!='scheduled' or event.ends_at<=utcnow() or need.capacity_required==0:raise ApiError(409,'event_not_open','Набор на занятие закрыт.')
     user=await db.get(User,body.user_id)
     if user is None or user.foundation_id!=principal.foundation_id or user.account_state!='active':raise ApiError(422,'invalid_volunteer','Волонтёр недоступен.')
     item=await db.scalar(select(Assignment).where(Assignment.occurrence_id==event.id,Assignment.user_id==user.id).with_for_update())
@@ -123,7 +125,7 @@ async def approve(db,principal,id,body):
 async def confirm(db,principal,id,body):
     require_user(principal)
     item,event,need=await locked_assignment(db,principal,id,True);check_version(item,body.expected_version)
-    if item.status!='invited' or event.status!='scheduled':raise ApiError(409,'assignment_state_conflict','Подтверждение больше недоступно.')
+    if item.status!='invited' or event.status!='scheduled' or event.ends_at<=utcnow():raise ApiError(409,'assignment_state_conflict','Подтверждение больше недоступно.')
     if item.conditions_version!=need.version:raise ApiError(409,'conditions_changed','Условия изменились. Координатор должен обновить приглашение.')
     if item.conditions_snapshot['approval_policy']=='coordinator' and item.approved_at is None:raise ApiError(409,'approval_required','Сначала участие должен согласовать координатор.')
     pending=[r for r in await readiness(db,item) if r.level=='mandatory' and r.state=='pending']
@@ -188,7 +190,7 @@ async def response_view(db,row,principal):
     history=(await db.scalars(select(OpportunityResponseEvent).where(OpportunityResponseEvent.response_id==row.id).order_by(OpportunityResponseEvent.version))).all()
     return ParticipationResponseView(id=row.id,opportunity_id=row.opportunity_id,opportunity_title=opportunity.title,user_id=row.user_id,display_name=user.display_name,
         state=row.state,decision_reason=row.decision_reason,version=row.version,
-        allowed_actions=(['approve','decline','request-preparation'] if staff(principal) and row.state in ('submitted','under_review','preparation_requested') else [])+(['withdraw'] if principal.user_id==row.user_id and row.state not in ('withdrawn','declined') else []),
+        allowed_actions=(['approve','decline','request-preparation'] if staff(principal) and row.state in ('submitted','under_review','preparation_requested') else [])+(['withdraw'] if principal.user_id==row.user_id and row.state not in ('withdrawn','declined') else ['resubmit'] if principal.user_id==row.user_id else []),
         history=[{'state':h.state,'reason':h.reason,'at':h.created_at.isoformat()} for h in history])
 
 
@@ -207,7 +209,10 @@ async def decide_response(db,principal,id,body,state,own=False):
     row=await db.scalar(query.with_for_update())
     if row is None:raise ApiError(404,'response_not_found','Отклик не найден.')
     check_version(row,body.expected_version)
-    if state=='withdrawn' and row.state in ('withdrawn','declined') or state!='withdrawn' and row.state not in ('submitted','under_review','preparation_requested'):raise ApiError(409,'response_state_conflict','Состояние отклика уже изменилось.')
+    if state=='submitted':
+        if row.state not in ('withdrawn','declined'):raise ApiError(409,'response_state_conflict','Отклик уже на рассмотрении.')
+        await find_opportunity(db,principal,row.opportunity_id)
+    elif state=='withdrawn' and row.state in ('withdrawn','declined') or state!='withdrawn' and row.state not in ('submitted','under_review','preparation_requested'):raise ApiError(409,'response_state_conflict','Состояние отклика уже изменилось.')
     row.state=state;row.version+=1;row.updated_at=utcnow();row.decision_reason=getattr(body,'reason','')
     db.add(OpportunityResponseEvent(response_id=id,version=row.version,state=state,reason=row.decision_reason,actor_id=principal.actor_id))
     return await response_view(db,row,principal)

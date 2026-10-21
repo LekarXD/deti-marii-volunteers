@@ -21,18 +21,19 @@ async def respond(opportunity_id:UUID,body:ParticipationResponseCreate,request:R
     return await command(db,principal,f'participation.respond:{opportunity_id}',key,body,lambda:service.respond(db,principal,opportunity_id,body),request)
 
 
-async def responses_list(db,principal,staff,cursor,limit):
+async def responses_list(db,principal,staff,cursor,limit,opportunity_id=None):
     query=select(OpportunityResponse).where(OpportunityResponse.foundation_id==principal.foundation_id)
     if not staff:query=query.where(OpportunityResponse.user_id==principal.user_id)
+    if opportunity_id:query=query.where(OpportunityResponse.opportunity_id==opportunity_id)
     if cursor:query=query.where(OpportunityResponse.id>cursor)
     rows=list((await db.scalars(query.order_by(OpportunityResponse.id).limit(limit+1))).all())
     return ParticipationResponsePage(items=[await service.response_view(db,row,principal) for row in rows[:limit]],next_cursor=rows[limit-1].id if len(rows)>limit else None)
 
 
 @router.get('/me/responses',response_model=ParticipationResponsePage,operation_id='getOwnOpportunityResponses')
-async def own_responses(cursor:UUID|None=None,limit:int=Query(50,ge=1,le=100),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+async def own_responses(opportunity_id:UUID|None=None,cursor:UUID|None=None,limit:int=Query(50,ge=1,le=100),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     service.require_user(principal)
-    return await responses_list(db,principal,False,cursor,limit)
+    return await responses_list(db,principal,False,cursor,limit,opportunity_id)
 
 
 @router.get('/coord/responses',response_model=ParticipationResponsePage,operation_id='getStaffOpportunityResponses')
@@ -43,6 +44,11 @@ async def staff_responses(cursor:UUID|None=None,limit:int=Query(50,ge=1,le=100),
 @router.post('/responses/{response_id}/withdraw',response_model=ParticipationResponseView,operation_id='withdrawOpportunityResponse')
 async def withdraw(response_id:UUID,body:VersionCommand,request:Request,key:str=Header(alias='Idempotency-Key'),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     return await command(db,principal,f'participation.withdraw:{response_id}',key,body,lambda:service.decide_response(db,principal,response_id,body,'withdrawn',True),request)
+
+
+@router.post('/responses/{response_id}/resubmit',response_model=ParticipationResponseView,operation_id='resubmitOpportunityResponse')
+async def resubmit(response_id:UUID,body:VersionCommand,request:Request,key:str=Header(alias='Idempotency-Key'),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    return await command(db,principal,f'participation.resubmit:{response_id}',key,body,lambda:service.decide_response(db,principal,response_id,body,'submitted',True),request)
 
 
 @router.post('/coord/responses/{response_id}/approve',response_model=ParticipationResponseView,operation_id='approveOpportunityResponse')
@@ -65,7 +71,7 @@ async def suggestions(need_id:UUID,q:str=Query('',max_length=200),principal:Prin
     from .calendar_models import StaffingNeed
     need=await db.get(StaffingNeed,need_id)
     if need is None or need.foundation_id!=principal.foundation_id:raise ApiError(404,'need_not_found','Потребность не найдена.')
-    rows=(await db.scalars(select(User).where(User.foundation_id==principal.foundation_id,User.account_state=='active',User.display_name.ilike('%'+q.replace('%','\\%').replace('_','\\_')+'%',escape='\\')).order_by(User.display_name,User.id).limit(50))).all()
+    rows=(await db.scalars(select(User).where(User.foundation_id==principal.foundation_id,User.account_state=='active',User.display_name.ilike('%'+q.replace('\\','\\\\').replace('%','\\%').replace('_','\\_')+'%',escape='\\')).order_by(User.display_name,User.id).limit(50))).all()
     return [AssignmentSuggestion(user_id=user.id,display_name=user.display_name,reasons=[],missing_data=['availability','preparation']) for user in rows]
 
 

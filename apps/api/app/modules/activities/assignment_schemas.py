@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
-from pydantic import BaseModel,ConfigDict,Field,model_validator
+from pydantic import BaseModel,ConfigDict,Field,field_validator,model_validator
 from .schemas import VersionCommand
 
 class ParticipationResponseCreate(BaseModel):
@@ -10,6 +10,11 @@ class ParticipationResponseCreate(BaseModel):
 
 class ParticipationDecision(VersionCommand):
     reason:str=Field(min_length=1,max_length=5000)
+    @field_validator('reason')
+    @classmethod
+    def reason_not_blank(cls,value):
+        if not value.strip():raise ValueError('Укажите причину.')
+        return value.strip()
 
 class ParticipationResponseView(BaseModel):
     id:UUID
@@ -44,6 +49,13 @@ class AssignmentReadinessItem(BaseModel):
     state:Literal['fulfilled','waived','pending']
     evidence:dict|None=None
 
+class AssignmentAttendanceView(BaseModel):
+    id:UUID
+    version:int
+    outcome:Literal['attended','absent']
+    minutes:int
+    ledger_state:str
+
 class AssignmentParticipationView(BaseModel):
     id:UUID
     version:int
@@ -64,7 +76,7 @@ class AssignmentParticipationView(BaseModel):
     readiness:list[AssignmentReadinessItem]
     allowed_actions:list[str]
     history:list[dict]
-    attendance:dict|None=None
+    attendance:AssignmentAttendanceView|None=None
 
 class AssignmentParticipationPage(BaseModel):
     items:list[AssignmentParticipationView]
@@ -80,6 +92,11 @@ class AttendanceCommand(VersionCommand):
     outcome:Literal['attended','absent']
     minutes:int=Field(ge=0,le=10080)
     reason:str=Field(min_length=1,max_length=5000)
+    @field_validator('reason')
+    @classmethod
+    def reason_not_blank(cls,value):
+        if not value.strip():raise ValueError('Укажите причину.')
+        return value.strip()
     @model_validator(mode='after')
     def no_show_zero(self):
         if self.outcome=='absent' and self.minutes!=0:raise ValueError('Неучастие не начисляет минуты.')

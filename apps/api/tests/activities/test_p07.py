@@ -35,6 +35,7 @@ async def context():
     assert URL.rsplit('/',1)[-1].endswith('_test'), 'Refusing non-test database'
     engine=create_async_engine(URL)
     async with engine.begin() as connection:
+        await connection.execute(text('CREATE EXTENSION IF NOT EXISTS btree_gist'))
         await connection.run_sync(Base.metadata.drop_all)
         await connection.run_sync(Base.metadata.create_all)
     factory=async_sessionmaker(engine,expire_on_commit=False)
@@ -55,6 +56,11 @@ async def context():
         principal=await resolve_principal(db,session)
         foreign_principal=Principal(None,None,other.id,uuid4(),False,'other')
     app=FastAPI();app.include_router(router,prefix='/api/v1')
+    from app.modules.participants.router import router as participants_router
+    from app.modules.participants.access import get_assignment_access
+    from app.modules.activities.assignment_service import ActivityAssignmentAccess
+    app.include_router(participants_router)
+    app.dependency_overrides[get_assignment_access]=ActivityAssignmentAccess
     @app.exception_handler(ApiError)
     async def handler(request:Request,error:ApiError):
         return JSONResponse(status_code=error.status_code,content={'code':error.code,'message':error.message})
