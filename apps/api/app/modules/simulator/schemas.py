@@ -29,17 +29,17 @@ class SimulatorEvaluationCase(BaseModel):
 class SimulatorScenarioDraft(BaseModel):
     model_config = ConfigDict(extra='forbid')
     title: str = Field(min_length=1, max_length=200)
-    character_name: str = Field(min_length=1, max_length=100)
-    character_profile: str = Field(min_length=1, max_length=5000)
-    situation: str = Field(min_length=1, max_length=5000)
-    first_turn: str = Field(min_length=1, max_length=5000)
+    character_name: str = Field(default='', max_length=100)
+    character_profile: str = Field(default='', max_length=5000)
+    situation: str = Field(default='', max_length=5000)
+    first_turn: str = Field(default='', max_length=5000)
     warning: str = Field(default='', max_length=2000)
     methods: list[str] = Field(default_factory=list, max_length=30)
     hints: list[str] = Field(default_factory=list, max_length=30)
-    criteria: list[SimulatorCriterion] = Field(min_length=1, max_length=20)
-    evaluation_cases: list[SimulatorEvaluationCase] = Field(min_length=2, max_length=20)
+    criteria: list[SimulatorCriterion] = Field(default_factory=list, max_length=20)
+    evaluation_cases: list[SimulatorEvaluationCase] = Field(default_factory=list, max_length=20)
 
-    @field_validator('title', 'character_name', 'character_profile', 'situation', 'first_turn')
+    @field_validator('title')
     @classmethod
     def not_blank(cls, value):
         if not value.strip():
@@ -54,8 +54,8 @@ class SimulatorScenarioDraft(BaseModel):
         if len({case.key for case in self.evaluation_cases}) != len(self.evaluation_cases):
             raise ValueError('Ключи примеров не должны повторяться.')
         for case in self.evaluation_cases:
-            if set(case.expected_scores) != keys:
-                raise ValueError('У каждого примера нужны эталонные оценки всех критериев.')
+            if set(case.expected_scores) - keys:
+                raise ValueError('Эталонная оценка ссылается на неизвестный критерий.')
             if not any(turn.speaker == 'volunteer' for turn in case.turns):
                 raise ValueError('В примере нужен ответ волонтёра.')
         return self
@@ -185,6 +185,7 @@ class SimulatorSessionView(BaseModel):
 class SimulatorSessionStart(BaseModel):
     model_config = ConfigDict(extra='forbid')
     scenario_id: UUID
+    publication_id: UUID | None = None
     parent_session_id: UUID | None = None
 
 
@@ -217,3 +218,39 @@ class SimulatorTestRunView(BaseModel):
     limits: dict
     cases: list[dict]
     completed_at: datetime | None
+
+
+class SimulatorSupportCommand(SimulatorVersionCommand):
+    text: str = Field(min_length=1, max_length=5000)
+
+
+class SimulatorExampleCreate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    example_index: int = Field(ge=0, le=5)
+
+
+class SimulatorSimpleResult(BaseModel):
+    id: UUID
+    version: int
+    state: str
+    response: str | None = None
+
+
+class SimulatorSessionPage(BaseModel):
+    items: list[SimulatorSessionView]
+    next_cursor: UUID | None = None
+
+
+class SimulatorReviewQueueItem(BaseModel):
+    id: UUID
+    version: int
+    state: str
+    text: str
+    title: str
+    session_id: UUID
+    response: str | None = None
+
+
+class SimulatorAppealDetail(BaseModel):
+    appeal: SimulatorReviewQueueItem
+    attempt: SimulatorSessionView
