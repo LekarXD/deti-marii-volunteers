@@ -40,3 +40,11 @@ it('keeps the approved audio element mounted across scene-only revisions and wai
  view.rerender(<StudioStage scene={next} plan={{...plan,scene_revision:2}} asset={nextAsset} tracks={[audio]} mode="render" onReadiness={status}/>);
  expect(document.querySelector('audio')).toBe(element);expect(attach).toHaveBeenCalledOnce();await waitFor(()=>expect(status.mock.calls.at(-1)?.[0].ready).toBe(false));loadedImage();await waitFor(()=>expect(status.mock.calls.at(-1)?.[0].ready).toBe(true));expect(document.querySelector('audio')).toBe(element);
 });
+it('attaches an approved muted optional audio source without treating it as playing',async()=>{
+ const scene=fictionScene(),attach=vi.fn();
+ const primary:StageTrackBinding={identity:scene.presenter_identity,track_id:'TR_primary',source:'microphone',kind:'audio',privacy_state:'approved',state:'ready',media_revision:1,attach};
+ const secondary:StageTrackBinding={...primary,track_id:'TR_secondary',source:'screen_audio',state:'muted',media_revision:2};
+ const plan={...fictionPlan(scene),allowed_tracks:[{identity:primary.identity,track_id:primary.track_id,source:primary.source,kind:primary.kind,required:true},{identity:secondary.identity,track_id:secondary.track_id,source:secondary.source,kind:secondary.kind,required:false}]};
+ const status=vi.fn();render(<StudioStage scene={scene} plan={plan} tracks={[primary,secondary]} asset={fictionAsset} mode="render" onReadiness={status}/>);loadedImage();
+ expect(document.querySelectorAll('audio')).toHaveLength(2);expect(attach).toHaveBeenCalledTimes(2);fireEvent.playing(document.querySelector('audio[data-track-id="TR_primary"]')!);await waitFor(()=>expect(status.mock.calls.at(-1)?.[0].ready).toBe(true));
+});
