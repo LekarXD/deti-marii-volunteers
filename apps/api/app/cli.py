@@ -12,7 +12,7 @@ from app.core.db import SessionLocal
 from app.core.model_loader import load_models
 from app.core.models import Foundation, User, ContactChannel, StaffMembership, PermissionGrant, MfaFactor, OutboxMessage
 
-PERMISSIONS = ("staff.manage", "assets.manage", "candidates.read", "candidates.review", "candidates.notes", "interviews.manage", "interviews.read", "roles.manage", "opportunities.manage", "events.manage", "assignments.manage", "participants.read", "participants.write", "participants.private_notes", "groups.read", "groups.write", "learning.manage", "reports.read")
+PERMISSIONS = ("staff.manage", "messaging.manage", "integrations.manage", "assets.manage", "candidates.read", "candidates.review", "candidates.notes", "interviews.manage", "interviews.read", "roles.manage", "opportunities.manage", "events.manage", "assignments.manage", "participants.read", "participants.write", "participants.private_notes", "groups.read", "groups.write", "learning.manage", "reports.read")
 
 async def fixtures():
     if get_settings().environment != "development":
@@ -41,7 +41,8 @@ async def fixtures():
                     membership = StaffMembership(user_id=user.id, foundation_id=foundation.id)
                     db.add(membership)
                     await db.flush()
-                    db.add_all([PermissionGrant(membership_id=membership.id, permission=p) for p in PERMISSIONS])
+                existing_permissions=set((await db.scalars(select(PermissionGrant.permission).where(PermissionGrant.membership_id==membership.id))).all())
+                db.add_all([PermissionGrant(membership_id=membership.id,permission=p) for p in PERMISSIONS if p not in existing_permissions])
                 factor = await db.scalar(select(MfaFactor).where(MfaFactor.user_id == user.id))
                 if factor is None:
                     secret = pyotp.random_base32()
@@ -54,6 +55,8 @@ async def fixtures():
         except ModuleNotFoundError as exc:
             if exc.name not in ("app.modules.learning", "app.modules.learning.seed"):
                 raise
+        from app.modules.messaging.seed import seed_messaging
+        await seed_messaging(db, foundation.id, identities)
         await db.commit()
         return {"foundation_id": str(foundation.id), "identities": identities, "delivery": "development inbox; no external messages sent"}
 

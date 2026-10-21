@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     max_asset_bytes: int = 10 * 1024 * 1024
     dev_inbox: bool = True
     session_hours: int = 24
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_from: str | None = None
+    smtp_starttls: bool = True
+    smtp_username: str | None = None
+    smtp_password: str | None = None
     def validate_runtime(self):
         if self.environment != "development" and (not self.cookie_secure or self.secret_key.startswith("development-") or self.dev_inbox):
             raise RuntimeError("Production requires secure cookies, configured encryption secret, disabled dev inbox")

@@ -1,7 +1,7 @@
 import importlib
 from app.core import models
 
-DOMAIN_MODULES = ("applications", "interviews", "activities", "participants", "learning")
+DOMAIN_MODULES = ("applications", "interviews", "activities", "participants", "learning", "messaging")
 def load_models():
     for module in DOMAIN_MODULES:
         name = f"app.modules.{module}.models"
@@ -13,6 +13,9 @@ def load_models():
 
 async def claim_registration(db, registration_id, user_id):
     """Domain hooks claim only this proven registration; never match arbitrary contacts."""
+    from sqlalchemy import update
+    from app.core.models import MediaAsset
+    await db.execute(update(MediaAsset).where(MediaAsset.owner_registration_id==registration_id).values(owner_user_id=user_id,owner_registration_id=None))
     for module in DOMAIN_MODULES:
         name = f"app.modules.{module}.service"
         try:
