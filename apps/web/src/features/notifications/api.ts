@@ -1,7 +1,7 @@
 import type {components} from '../../api/generated/schema';
 import {api} from '../../api/transport';
 export type Preferences = components['schemas']['PreferenceView'];
-export type PreferenceCommand = components['schemas']['PreferenceCommand'];
+export type PreferenceCommand = components['schemas']['NotificationPreferenceCommand'];
 export type Template = components['schemas']['TemplateView'];
 export type TemplateInput = components['schemas']['TemplateInput'];
 export type TemplateUpdate = components['schemas']['TemplateUpdate'];
