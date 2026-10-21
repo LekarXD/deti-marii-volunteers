@@ -3,7 +3,6 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 from uuid import uuid4
 
-from conftest import Client
 
 
 PRIVATE_SENTINEL = "G1-PRIVATE-NOTE-NOT-FOR-CANDIDATE"

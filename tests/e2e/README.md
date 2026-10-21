@@ -39,3 +39,10 @@ The staff fixture uses real HTTP challenge creation, the local CLI dev inbox,
 HTTP challenge verification and TOTP MFA. Its cookie rotates at both identity
 and assurance changes. Tests never call a public endpoint with a role label or
 trust questionnaire email as ownership proof.
+
+`pnpm exec playwright test -c tests/e2e/playwright.config.ts` defines automated
+ordinary form/reload, network recovery and width smoke checks. It requires an
+explicitly permitted browser runner with Chromium installed. In this environment
+actual browser interaction and visual proof use CUA; authoring the tests does not
+count as running them. Traces/video are disabled to avoid retaining auth cookies.
+These smoke tests do not substitute for the full two-context coordinator journey.

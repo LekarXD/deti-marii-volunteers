@@ -1,7 +1,9 @@
 FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 WORKDIR /app
-COPY apps/api/ ./
+COPY apps/api/pyproject.toml apps/api/requirements.lock apps/api/alembic.ini ./
+COPY apps/api/app/ ./app/
+COPY apps/api/migrations/ ./migrations/
 RUN pip install -r requirements.lock && pip install --no-deps . && useradd --create-home --uid 10001 opora
 USER opora
 EXPOSE 8001

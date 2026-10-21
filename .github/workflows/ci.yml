@@ -30,7 +30,7 @@ jobs:
         with: {python-version: '3.12'}
       - uses: actions/setup-node@v4
         with: {node-version: '26'}
-      - run: corepack enable && corepack prepare pnpm@11.3.0 --activate
+      - run: npm install --global pnpm@11.3.0
       - run: pnpm install --frozen-lockfile
       - run: python -m pip install -r apps/api/requirements.lock
       - run: python -m pip install --no-deps -e 'apps/api[test]'
@@ -44,3 +44,10 @@ jobs:
       - run: python -m pytest apps/api/tests tests/contract -q
       - name: Generated SDK drift
         run: sh infra/scripts/check-openapi.sh
+      - name: Independent G1 against a fresh PostgreSQL database
+        env:
+          OPORA_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_g1
+        run: |
+          python -c "import psycopg; c=psycopg.connect('postgresql://opora:ci-local-only@127.0.0.1:5432/postgres', autocommit=True); c.execute('CREATE DATABASE opora_g1'); c.close()"
+          (cd apps/api && alembic upgrade head)
+          sh infra/scripts/run-g1.sh

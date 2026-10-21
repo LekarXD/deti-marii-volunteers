@@ -36,8 +36,7 @@ fallback is accepted for concurrency, constraints or migration evidence.
 python3.12 -m venv .venv
 . .venv/bin/activate
 python -m pip install -e 'apps/api[test]'
-corepack enable
-corepack prepare pnpm@11.3.0 --activate
+npm install --global pnpm@11.3.0
 pnpm install --frozen-lockfile
 export OPORA_DATABASE_URL='postgresql+psycopg://opora:local-password@127.0.0.1:55647/opora_test'
 export OPORA_ENVIRONMENT=development
@@ -79,3 +78,11 @@ or staging data in production. Runtime `/version.json` must equal the release SH
 
 A successful image build or healthcheck does not prove deploy success. Production
 release requires separate user authorization. No script here targets production.
+
+For an isolated fresh G1 database, after `alembic upgrade head`,
+`sh infra/scripts/run-g1.sh` seeds CLI-only credentials, starts a local API, runs
+all independent HTTP tests and stops its API. It deletes only its temporary
+credential file, never a database. Use a different database from backend unit
+checks, since their MFA enrollment consumes the same fixture TOTP counter.
+`OPORA_G1_FIXTURE_FILE` can point to the preserved initial seed output instead.
+The runner uses port 8001; stop any previous local API before invoking it.
