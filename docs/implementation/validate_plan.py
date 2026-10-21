@@ -56,10 +56,10 @@ for item in graph['cross_package_acceptance']:
 
 rows = list(csv.DictReader((docs / 'screen-map.csv').open()))
 boards = set(json.loads((root / 'prototype/canvas.json').read_text())['boards'])
-check(len(rows) == 41 and len({r['board'] for r in rows}) == 41, 'Expected 41 unique boards')
+check(len(rows) == 43 and len({r['board'] for r in rows}) == 43, 'Expected 43 unique boards')
 check({r['board'] for r in rows} == boards, 'Board map differs from canvas')
 counts = dict(Counter(r['kind'] for r in rows))
-check(counts == {'surface': 35, 'legacy': 4, 'service': 2}, 'Unexpected board kinds')
+check(counts == {'surface': 35, 'legacy': 4, 'variant': 2, 'service': 2}, 'Unexpected board kinds')
 mechanics = list(csv.DictReader((docs / 'new-mechanics.csv').open()))
 check({r['mechanic'] for r in mechanics} == {
     'solo_recording_project', 'recording_preflight', 'recording_take',

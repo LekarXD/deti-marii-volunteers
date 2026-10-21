@@ -19,11 +19,15 @@ class Component extends DCLogic {
  const now=stages.findIndex(x=>!x.done),fmt=v=>Array.isArray(v)?v.join(', ').replace(/·/g,' '):(v||'');
  const answers=me?[['Интересы',fmt(me.directions?.length?me.directions:me.roles)],['Навыки',fmt(me.skills)],['Как помогать',fmt(me.participation)],['Где удобно',fmt(me.places)],['Когда удобно',fmt(me.slots)],['Связь',fmt(me.channels)+(me.telegram?' · '+me.telegram:'')],['Телефон и почта',fmt(me.phone)+' · '+fmt(me.email)]].filter(x=>x[1]).map(([k,v])=>({k,v})):[];
  const nextStep=!passed?{e:n?'Продолжите':'Следующий шаг',t:'Знакомство с фондом',l:'Четыре коротких шага о фонде, участниках и правилах общения и небольшой тест. Время встречи можно выбрать уже сейчас.',b:n?'Продолжить':'Начать',h:'Onboarding.dc.html'}:null;
- const from=scheduleMonday(s.focus),to=scheduleAdd(from,6),available=interviewSlots(data,from,to,s.rescheduling&&active?meeting.id:'').filter(sl=>!sl.busy&&interviewFuture(sl.date,sl.start)&&sl.id!==meeting?.slotId);
- const dayDates=[...new Set(available.map(sl=>sl.date))],chosenDay=dayDates.includes(s.focus)?s.focus:dayDates[0],pickedSlot=available.find(sl=>sl.id===s.picked),pendingRequest=!!profile?.request;
+ const from=s.focus,to=scheduleAdd(from,13),available=interviewSlots(data,from,to,s.rescheduling&&active?meeting.id:'').filter(sl=>!sl.busy&&interviewFuture(sl.date,sl.start)&&sl.id!==meeting?.slotId);
+ const dayDates=[...new Set(available.map(sl=>sl.date))],chosenDay=dayDates.includes(s.day)?s.day:dayDates[0],pickedSlot=available.find(sl=>sl.id===s.picked),pendingRequest=!!profile?.request;
  const last=data.bookings.filter(b=>b.candidateId===id).slice(-1)[0];
+ const places=k=>k+' '+(k%10===1&&k%100!==11?'место':[2,3,4].includes(k%10)&&![12,13,14].includes(k%100)?'места':'мест');
  const mode=!meeting&&!n&&!onboarded?'fresh':active&&!onboarded&&pr.tg?'booked':active&&onboarded?'all':'';
  return {
+ days:dayDates.map(date=>({wd:scheduleLabel(date,{weekday:'short'}),num:String(scheduleDate(date).getUTCDate()),n:places(available.filter(sl=>sl.date===date).length),cls:'a-day'+(date===chosenDay?' is-on':''),pressed:date===chosenDay?'true':'false',pick:()=>this.setState({day:date,picked:'',error:''})})),
+ dayLabel:chosenDay?interviewDay(chosenDay):'',hasDayWhere:false,dayWhere:'',daySlots:available.filter(sl=>sl.date===chosenDay).map(sl=>({...sl,label:sl.start+'–'+sl.end,cls:'i-slot'+(s.picked===sl.id?' is-on':''),checked:s.picked===sl.id?'true':'false',pick:()=>{if(/онлайн/i.test(sl.where)&&pr.road)this.save({...pr,road:false});this.setState({picked:sl.id,error:''});}})),
+
    statusText:completed?'Встреча состоялась':FORM.done.title,statusCls:'dot '+(completed?'dot-green':'dot-yellow'),
    meetWhenBig:meeting?interviewDay(meeting.date)+', '+meeting.start:'',meetDay:meeting?scheduleLabel(meeting.date,{day:'numeric',month:'long'}):'',
    remindOn:remind?'true':'false',remindCls:'toggle'+(remind?' is-on':''),toggleRemind:()=>this.setState({remind:!remind}),roadCls:'toggle'+(pr.road?' is-on':''),

@@ -28,6 +28,8 @@ SCREENS = {
     # Путь кандидата: тексты в prototype/content/, общая логика в candidate-store.js
     'Apply': ('Кандидат: анкета волонтёра', 'candidate', 2600),
     'Onboarding': ('Кандидат: знакомство с фондом', 'candidate', 2400),
+    'OnboardingCards': ('Кандидат: знакомство с фондом — карточки', 'candidate', 1100),
+    'OnboardingList': ('Кандидат: знакомство с фондом — темы списком', 'candidate', 1600),
     'ApplicationStatus': ('Кандидат: личный кабинет', 'candidate', 1700),
 }
 CONTENT = ROOT / 'prototype/content'
@@ -69,8 +71,13 @@ for name,(title,role,height) in SCREENS.items():
             # анкета живёт на сайте фонда — без навигации платформы
             head = '<sc-if value="{{isRegistering}}">'+(SRC/'site-header.html').read_text()+'</sc-if><sc-if value="{{isEditing}}">'+(SRC/'candidate-header.html').read_text().replace('CANDIDATE_HOME','').replace('CANDIDATE_ONBOARDING','')+'</sc-if>'
         else:
-            head = (SRC/'candidate-header.html').read_text().replace('CANDIDATE_HOME','is-active' if name=='ApplicationStatus' else '').replace('CANDIDATE_ONBOARDING','is-active' if name=='Onboarding' else '')
+            head = (SRC/'candidate-header.html').read_text().replace('CANDIDATE_HOME','is-active' if name=='ApplicationStatus' else '').replace('CANDIDATE_ONBOARDING','is-active' if name in ['Onboarding','OnboardingCards','OnboardingList'] else '')
         body = (SRC/f'{name}.body.html').read_text().replace('<!--FIELDS-->', (SRC/'form-fields.html').read_text())
+        # Блоки и тест знакомства с фондом — общие для всех вариантов
+        blocks_html = (SRC/'onb-blocks.html').read_text()
+        body = re.sub(r'<!--ONB_BLOCKS(?::([\w.]+))?-->', lambda m: blocks_html.replace('list="{{blocks}}"', 'list="{{' + (m.group(1) or 'blocks') + '}}"'), body).replace('<!--ONB_TEST-->', (SRC/'onb-test.html').read_text())
+        # Варианты знакомства с фондом — переключатель в полосе прототипа
+        body = body.replace('<!--ONB_VARIANTS-->', '<span class="demo-cap a-var-cap">Вариант:</span>' + ''.join(f'<a class="a-var{" is-on" if n == name else ""}" href="{n}.dc.html">{label}</a>' for n,label in [('Onboarding','1. Лента'),('OnboardingCards','2. Карточки'),('OnboardingList','3. Темы списком')]))
         icons = dict(re.findall(r'^([\w-]+):\s*(<svg[^\n]+)', (ROOT/'materials/04-дизайн/прототип-до-фактуры/kit/icons.html').read_text(), re.M))
         head = head.replace('ICON_CANDIDATE_DOWN', icons['chevron-down'])
         # ICONSWITCH(x) — иконка по имени из данных: x.ic_palette, x.ic_check_circle …
@@ -80,7 +87,7 @@ for name,(title,role,height) in SCREENS.items():
         body = re.sub(r'ICONSWITCH\((\w+)\)', iconswitch, body)
         body = re.sub(r'<button(?![^>]*\btype=)', '<button type="button"', body)
         body, candidate_logic = enhance_controls(body, (SRC/f'{name}.js').read_text(), SRC)
-        for token,key in [('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('CHECK','check-circle'),('SPARKLE','sparkle'),('CLOCKICO','clock'),('BOOKICO','book'),('MESSAGEICO','message'),('X','x')]:
+        for token,key in [('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left'),('CHECK','check-circle'),('SPARKLE','sparkle'),('CLOCKICO','clock'),('BOOKICO','book'),('MESSAGEICO','message'),('DOWN','chevron-down'),('X','x')]:
             body = body.replace('ICON_'+token, icons[key])
         logic = (SRC/'date-utils.js').read_text() + '\n' + (SRC/'demo-store.js').read_text() + '\n' + (CONTENT/'form.js').read_text() + '\n' + (CONTENT/'onboarding.js').read_text() + '\n' + (SRC/'candidate-store.js').read_text() + '\n' + (SRC/'interview-store.js').read_text() + '\n' + candidate_logic
         h = helmet.replace('</style>', css + '\n' + (SRC/'candidate.css').read_text() + '\n</style>')
@@ -142,7 +149,7 @@ for name,(title,role,height) in SCREENS.items():
 # Add a connected entry into the original map, without replacing its four role cards.
 p = OUT/'Main.dc.html'
 t = p.read_text()
-extension = '<section class="section"><div class="section-head"><h2 class="h2">Новые сценарии</h2></div><div class="grid-3">' + ''.join(f'<a class="card" href="{name}.dc.html"><h3 class="h3">{label}</h3></a>' for name,label in [('Apply','Анкета волонтёра'),('Onboarding','Знакомство с фондом и тест'),('ApplicationStatus','Личный кабинет кандидата и встреча с координатором'),('FirstShift','Первый выход'),('Needs','Возможности и подготовка'),('Planning','Расписание'),('Candidates','Кандидаты и анкеты'),('Interviews','Собеседования и доступность'),('Roles','Роли волонтёров'),('VolunteerRecord','Договорённости с волонтёром'),('Participants','Участники фонда'),('Groups','Группы и состав')]) + '</div></section>'
+extension = '<section class="section"><div class="section-head"><h2 class="h2">Новые сценарии</h2></div><div class="grid-3">' + ''.join(f'<a class="card" href="{name}.dc.html"><h3 class="h3">{label}</h3></a>' for name,label in [('Apply','Анкета волонтёра'),('Onboarding','Знакомство с фондом: вариант 1 — лента'),('OnboardingCards','Знакомство с фондом: вариант 2 — карточки'),('OnboardingList','Знакомство с фондом: вариант 3 — темы списком'),('ApplicationStatus','Личный кабинет кандидата и встреча с координатором'),('FirstShift','Первый выход'),('Needs','Возможности и подготовка'),('Planning','Расписание'),('Candidates','Кандидаты и анкеты'),('Interviews','Собеседования и доступность'),('Roles','Роли волонтёров'),('VolunteerRecord','Договорённости с волонтёром'),('Participants','Участники фонда'),('Groups','Группы и состав')]) + '</div></section>'
 t = t.replace('</div></div>\n</x-dc>', extension+'\n</div></div>\n</x-dc>')
 t = t.replace('class Component extends DCLogic', (SRC/'demo-store.js').read_text() + '\nclass Component extends DCLogic')
 t = t.replace('    return {\n      steps:', '    return {\n      demoReset:!!s.demoReset, resetDemo:()=>{try{localStorage.removeItem("opora-interviews-v1");}catch(_){}["roles","role-directory","people","groups","reflection","schedule-v2","schedule-responses-v2","candidate","onboarding","apply-draft","apply-edit-draft"].forEach(k=>{try{sessionStorage.removeItem("opora-prototype-v1:"+k);}catch(_){}});this.setState({demoReset:true});},\n      steps:')

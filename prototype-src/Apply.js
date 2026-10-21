@@ -11,6 +11,7 @@ class Component extends DCLogic {
  renderVals(){const s=this.state,step=FORM.steps[s.step],last=s.step===FORM.steps.length-1;
   return {candidateUnlocked:false,candidateLocked:true,candidateSection:'Анкета',candidateName:fullName(s.data),candidateInitials:fullName(s.data).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),isRegistering:!s.edit,eyebrow:s.edit?'Личный кабинет':'Стать волонтёром',isEditing:s.edit,title:s.edit?'Моя анкета':FORM.title,intro:s.edit?'Измените ответы. Знакомство с фондом и запись на встречу сохранятся.':FORM.intro,
    steps:FORM.steps.map((x,i)=>({label:(i+1)+'. '+x.title,cls:i===s.step?'chip is-on':(i<s.step?'chip a-done':'chip')})),
+
    stepTitle:step.title,path:FORM.path.map((x,i)=>({...x,...icoFlags(x.icon),cls:i===0?'is-now':''})),pathNote:FORM.pathNote,
 
    progressLabel:'Шаг '+(s.step+1)+' из '+FORM.steps.length,barStyle:'width:'+Math.round(100*(s.step+1)/FORM.steps.length)+'%',

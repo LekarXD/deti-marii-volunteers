@@ -1,6 +1,6 @@
 board,kind,target_routes,module,work_packages,acceptance
 Main.dc.html,service,dev/prototype-map,reference,P00 P20,"Карта остаётся инструментом разработки, роли и reset не дают production-доступ"
-Apply.dc.html,surface,/apply; /application/edit,application,P03,"Основная анкета блоками v4, иконки и плитки направлений, условные навыки; черновик и ошибки сохраняются, edit не сбрасывает обучение и встречу"
+Apply.dc.html,surface,/apply; /application/edit,application,P03,"Актуальная основная анкета v4, компактный выбор направлений, условные навыки; черновик и ошибки сохраняются, edit не сбрасывает обучение и встречу"
 ApplicationStatus.dc.html,surface,/application,candidate-home,P03 P04 P06,Анкета на проверке; выбор времени и знакомство параллельно; запись/перенос/отмена/запрос/публичный итог из API; preference Telegram отдельно от привязки
 Home.dc.html,surface,/home,volunteer-home,P09 P12,Новичок и опытный волонтёр видят своё ближайшее назначение и реальные действия
 Catalog.dc.html,legacy,/opportunities,opportunities,P07,"Объединён с FundCatalog, объяснения подбора сохранены без фиктивных баллов"
@@ -40,3 +40,5 @@ Group.dc.html,surface,/my/groups/:id,groups,P10B,"Только назначен�
 FirstShift.dc.html,surface,/my/assignments/:id/preparation,participation; groups,P12,"Место/встречающий/задачи/checklist/вопрос/отмена, состав группы из API"
 Participation.dc.html,surface,/opportunities/:id; /my/assignments/:id,participation,P09,"Отклик, staff approve, own confirm, attendance и часы отдельными фактами"
 Onboarding.dc.html,surface,/onboarding/:step; /onboarding/test,learning,P04,"Версии материалов и server score, завершение без самовольного проходного процента"
+OnboardingCards.dc.html,variant,/onboarding/:step; /onboarding/test,learning,P04,Карточки по одному блоку; общий progress/test/identity с основным знакомством; P00 фиксирует основной вариант
+OnboardingList.dc.html,variant,/onboarding/:step; /onboarding/test,learning,P04,Темы списком; общий progress/test/identity с основным знакомством; P00 фиксирует основной вариант

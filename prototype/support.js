@@ -1,6 +1,8 @@
 // Local preview stand-in for the .dc.html runtime: holes, sc-if, sc-for, events, DCLogic.
 // Scratchpad only — never shipped with the canvas.
 (function () {
+  // Пока React не загрузился, сырой шаблон с {{…}} не показываем (на медленной сети он мелькал)
+  var hide = document.createElement('style'); hide.textContent = 'x-dc{display:none}'; document.head.appendChild(hide);
   var supportBase = document.currentScript ? new URL(".", document.currentScript.src) : new URL(".", location.href);
   function load(src) {
     return new Promise(function (res, rej) {

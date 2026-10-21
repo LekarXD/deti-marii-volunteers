@@ -381,3 +381,95 @@
 .a-onb.is-nudge{box-shadow:inset 0 0 0 2px var(--orange)}
 @media (max-width:720px){.a-hero-title{font-size:32px}.card-hero .hero-when{font-size:36px}.a-hero-actions .btn{flex:1 1 auto}.a-onb.card{flex-direction:column;align-items:stretch;gap:16px}.a-onb .btn{width:100%}.a-book.card{padding:4px 20px}}
 @media (max-width:720px){.a-tiles{grid-template-columns:1fr;gap:8px}.a-tile{flex-direction:row;align-items:center;min-height:60px;padding:10px 48px 10px 10px}.a-tile.is-on::after{top:50%;transform:translateY(-50%)}}
+/* Направления — компактные плитки в строку: иконка + короткое название */
+.a-tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.a-tile{flex-direction:row;align-items:center;gap:12px;min-height:60px;padding:10px 40px 10px 10px;border-radius:16px;font-size:15px}
+.a-tile-ico{flex:0 0 36px;width:36px;height:36px;border-radius:10px}
+.a-tile.is-on::after{top:50%;right:12px;transform:translateY(-50%);width:22px;height:22px;font-size:12px}
+.a-form{gap:24px 20px}
+@media (max-width:720px){.a-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.a-tile{min-height:52px;gap:8px;padding:8px 30px 8px 8px;font-size:14px;line-height:1.25}.a-tile-ico{flex-basis:30px;width:30px;height:30px}.a-tile-ico .ic{width:17px;height:17px}.a-tile.is-on::after{right:8px;width:18px;height:18px;font-size:10px}.a-path-card.card{display:none}}
+/* На телефоне направления — лёгкие «таблетки» в несколько строк, а не сетка карточек */
+@media (max-width:720px){
+ .a-tiles{display:flex;flex-wrap:wrap;gap:8px}
+ .a-tile{min-height:44px;padding:0 14px 0 6px;border-radius:999px;gap:8px;font-size:14px;font-weight:500;line-height:1.2}
+ .a-tile-ico{flex-basis:32px;width:32px;height:32px;border-radius:50%}
+ .a-tile.is-on{background:var(--ink);color:#fff;box-shadow:none}
+ .a-tile.is-on .a-tile-ico{background:rgba(255,255,255,.16);color:#fff}
+ .a-tile.is-on::after{display:none}
+ .a-chips .chip,.a-rchips .chip{min-height:40px;padding:8px 14px;font-size:14px;gap:6px}
+ .a-chips .chip .ic{width:16px;height:16px}
+}
+/* Выбор встречи: сначала день (лента), потом время этого дня */
+.a-days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;margin:0 -2px 16px;scrollbar-width:none}
+.a-days::-webkit-scrollbar{display:none}
+.a-day{flex:0 0 auto;min-width:84px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 10px;border:0;border-radius:18px;background:var(--paper);color:var(--ink)}
+.a-day b{font-size:24px;line-height:1.1}
+.a-day-wd{font-size:14px;color:var(--mute)}
+.a-day small{font-size:13px;color:var(--mute)}
+.a-day.is-on{background:var(--ink);color:#fff}
+.a-day.is-on .a-day-wd,.a-day.is-on small{color:rgba(255,255,255,.75)}
+.a-day-slots{margin-bottom:4px}
+/* Большая круглая иконка на телефоне не помещается рядом с текстом — прячем */
+@media (max-width:720px){.dm .card-hero .hero-art{display:none}.a-day-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.a-picker .actions .btn{width:100%}}
+.a-day-where{margin:0 0 10px;font-size:15px;color:var(--mute)}
+.a-day-slots .i-slot span:empty{display:none}
+.a-day-slots .i-slot{align-items:center;text-align:center}
+.a-picker .section-head{align-items:center}
+.a-static .a-reveal{opacity:1;transform:none;transition:none}
+/* Знакомство на телефоне: вместо стопки больших карточек — один список, пары фраз — одной карточкой */
+@media (max-width:720px){
+ .a-icards{display:block;background:var(--paper);border-radius:22px;padding:2px 16px}
+ .dm .a-icards .a-icard{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;align-items:start;padding:14px 0;border-radius:0;background:transparent;border-top:1px solid var(--line)}
+ .a-icards .a-icard:first-child{border-top:0}
+ .a-icard .a-ico{grid-row:span 2;width:40px;height:40px;border-radius:12px}
+ .a-icard .a-ico .ic{width:20px;height:20px}
+ .a-icard h3{margin:0;font-size:16px;line-height:1.3}
+ .a-icard p{font-size:15px;line-height:1.45}
+ .a-ic-o .a-ico{background:var(--orange-tint)}.a-ic-b .a-ico{background:var(--blue-tint)}.a-ic-g .a-ico{background:var(--green-tint)}.a-ic-v .a-ico{background:var(--violet-tint)}.a-ic-y .a-ico{background:var(--yellow-tint)}
+ .a-storyrow{gap:8px}
+ .a-stage{grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;padding:14px}
+ .a-stage .a-ico{grid-row:span 2;width:40px;height:40px}
+ .a-stage-t{font-size:16px}
+ .a-stage:not(:last-child)::after{display:none}
+ .a-phr{display:block;background:var(--paper);border-radius:18px;padding:12px 14px;margin-bottom:8px}
+ .a-yes,.a-no{display:block;padding:0 0 0 26px;border-radius:0;background:transparent;font-size:15px;line-height:1.4}
+ .a-no{margin-top:6px;color:var(--mute);text-decoration:line-through;text-decoration-color:rgba(179,18,10,.5)}
+ .a-yes::before,.a-no::before{left:2px;top:0}
+ .a-no::before{color:var(--red-ink)}
+}
+/* Знакомство, вариант 2 «Карточки»: один блок на экран */
+.c-wrap,.l-wrap{max-width:760px;margin:0 auto}
+.c-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:8px 0 14px}
+.c-mod{margin:0;font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.c-card.card{min-height:360px;padding:28px}
+.c-card .a-blocks{gap:0}
+.c-card .a-lead{font-size:22px;line-height:1.45;margin:0}
+.c-card .a-icards{grid-template-columns:1fr 1fr}
+.c-nav{display:flex;gap:10px;margin-top:16px}
+.c-next{flex:1}
+@media (max-width:720px){.c-mod{font-size:24px}.c-card.card{min-height:58vh;padding:20px 18px}.c-card .a-icards{display:block;background:transparent;padding:0}.c-card .a-lead{font-size:20px}.c-nav{position:sticky;bottom:12px}}
+/* Знакомство, вариант 3 «Темы списком»: аккордеон, по одной теме */
+.l-list.card{padding:4px 24px;margin-top:20px}
+.l-item{border-top:1px solid var(--line)}
+.l-item:first-child{border-top:0}
+.l-head{width:100%;display:flex;align-items:center;gap:14px;min-height:64px;padding:12px 0;border:0;background:transparent;text-align:left;font-size:17px;font-weight:600;color:var(--ink)}
+.l-mark{flex:0 0 32px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-size:14px;color:var(--ink-2)}
+.l-item.is-seen .l-mark{background:var(--green);color:#fff}
+.l-title{flex:1}
+.l-chev .ic{transition:transform .2s}
+.l-item.is-open .l-chev .ic{transform:rotate(180deg)}
+.l-body{padding:0 0 22px 46px}
+.l-body .a-blocks{gap:16px}
+.l-body .a-icards{display:block;background:transparent;padding:0}
+.dm .l-body .a-icards .a-icard{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;padding:12px 0;border-radius:0;background:transparent;border-top:1px solid var(--line)}
+.l-body .a-icards .a-icard:first-child{border-top:0}
+.l-body .a-icard .a-ico{grid-row:span 2;width:40px;height:40px;border-radius:12px}
+.l-ok{margin-top:16px}
+@media (max-width:720px){.l-list.card{padding:2px 16px}.l-body{padding-left:0}.l-head{font-size:16px}}
+/* Переключатель вариантов знакомства в полосе прототипа */
+.a-var-cap{margin-left:8px}
+.a-var{height:34px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:14px;font-weight:500;color:var(--ink-2);text-decoration:none}
+.a-var:hover{text-decoration:none;background:rgba(255,255,255,.5)}
+.a-var.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.c-card.card{min-height:280px;display:flex;flex-direction:column;justify-content:center}
+@media (max-width:720px){.c-card.card{min-height:52vh}}
