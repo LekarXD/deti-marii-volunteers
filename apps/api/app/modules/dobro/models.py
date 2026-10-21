@@ -48,6 +48,7 @@ class DobroProfile(Base):
     version: Mapped[int] = mapped_column(Integer, default=1)
     updated_by: Mapped[str] = mapped_column(String(200))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    __table_args__ = (ForeignKeyConstraint(['user_id', 'foundation_id'], ['users.id', 'users.foundation_id'], name='fk_dobro_profile_user_scope'),)
 
 
 class DobroEnrollment(Base):
@@ -60,6 +61,7 @@ class DobroEnrollment(Base):
     version: Mapped[int] = mapped_column(Integer, default=1)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     __table_args__ = (UniqueConstraint('activity_id', 'user_id'),
+        ForeignKeyConstraint(['user_id', 'foundation_id'], ['users.id', 'users.foundation_id'], name='fk_dobro_enrollment_user_scope'),
         ForeignKeyConstraint(['activity_id', 'foundation_id'], ['dobro_activity_links.id', 'dobro_activity_links.foundation_id']),
         CheckConstraint("state IN ('none','applied','approved','not_needed') AND version > 0", name='ck_dobro_enrollment'))
 
@@ -91,6 +93,7 @@ class DobroTransfer(Base):
     note: Mapped[str] = mapped_column(Text, default='')
     entered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     __table_args__ = (ForeignKeyConstraint(['activity_id', 'foundation_id'], ['dobro_activity_links.id', 'dobro_activity_links.foundation_id']),
+        ForeignKeyConstraint(['user_id', 'foundation_id'], ['users.id', 'users.foundation_id'], name='fk_dobro_transfer_user_scope'),
         CheckConstraint('hours_delta <> 0 AND EXTRACT(DAY FROM period) = 1', name='ck_dobro_transfer_delta'))
 
 
@@ -105,7 +108,11 @@ class DobroSettings(Base):
     risk_days: Mapped[int] = mapped_column(Integer, default=7)
     whole_hours: Mapped[bool] = mapped_column(Boolean, default=True)
     rules_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
+    reminders_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default='false')
+    reminder_owner_user_id: Mapped[UUID | None] = mapped_column(ForeignKey('users.id'))
     reminder_template: Mapped[str] = mapped_column(Text, default='{имя}, чтобы мы внесли твои часы в электронную книжку Добро.рф, откликнись один раз на доброе дело: {ссылка}. Потом нажми «Я откликнулся» в Опоре.')
     version: Mapped[int] = mapped_column(Integer, default=1)
     updated_by: Mapped[str] = mapped_column(String(200))
-    __table_args__ = (CheckConstraint('monthly_day BETWEEN 1 AND 28 AND hard_deadline_days BETWEEN 1 AND 365 AND risk_days BETWEEN 1 AND 60 AND version > 0', name='ck_dobro_settings'),)
+    __table_args__ = (CheckConstraint('monthly_day BETWEEN 1 AND 28 AND hard_deadline_days BETWEEN 1 AND 365 AND risk_days BETWEEN 1 AND 60 AND version > 0', name='ck_dobro_settings'),
+        CheckConstraint('NOT reminders_enabled OR reminder_owner_user_id IS NOT NULL', name='ck_dobro_reminder_owner'),
+        ForeignKeyConstraint(['reminder_owner_user_id', 'foundation_id'], ['users.id', 'users.foundation_id'], name='fk_dobro_reminder_owner_scope'))

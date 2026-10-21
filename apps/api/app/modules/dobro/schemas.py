@@ -55,6 +55,10 @@ class DobroActivityView(DobroActivityCommand):
     id: UUID
     opportunity_id: UUID
     version: int
+    can_edit: bool = False
+
+class DobroActivityUpdate(DobroActivityCommand):
+    expected_version: int = Field(gt=0)
 
 class DobroProfileCommand(DobroCommand):
     profile_url: str = Field(default='', max_length=1500)
@@ -95,6 +99,7 @@ class DobroSettingsCommand(DobroCommand):
     hard_deadline_days: int = Field(default=60, ge=1, le=365)
     risk_days: int = Field(default=7, ge=1, le=60)
     rules_confirmed: bool = False
+    reminders_enabled: bool = False
     reminder_template: str = Field(min_length=1, max_length=3000)
     @field_validator('organization_url', 'registration_url')
     @classmethod
@@ -113,6 +118,7 @@ class DobroSettingsView(BaseModel):
     hard_deadline_days: int = 60
     risk_days: int = 7
     rules_confirmed: bool = False
+    reminders_enabled: bool = False
     reminder_template: str = '{имя}, чтобы мы внесли твои часы в электронную книжку Добро.рф, откликнись один раз на доброе дело: {ссылка}. Потом нажми «Я откликнулся» в Опоре.'
     version: int = 0
     rules_note: str = 'Опора готовит целые часы; оставшиеся минуты переходят дальше. Приём дробных часов и накопительной суммы за длительное доброе дело нужно сверить в CRM Добро.рф. Отметка здесь — подтверждение координатора, а не ответ Добро.рф.'
