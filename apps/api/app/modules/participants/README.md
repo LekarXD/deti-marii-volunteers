@@ -50,6 +50,12 @@ sessions, current staff revocation, two groups, private-field/search absence, cr
 isolation, denied volunteer list/photo access, membership overlap/history/CAS/concurrency,
 idempotency, actual image upload/read, rejected replacement and revoked uploader access.
 
-Remaining gates: P09/P10B assignment snapshots and real volunteer positive/revoked access;
-end-to-end visual acceptance against the mounted shared UI. No fixture people are loaded
-in a product path and no assignment state is invented.
+Local visual acceptance used the shared coordinator shell, real PostgreSQL fixtures and
+a genuine cookie/CSRF staff session at desktop 1440px and mobile 390px. Five screenshots
+were inspected; no JavaScript error or horizontal overflow occurred. Participant edits
+and group title/schedule/location/leader/coordinator edits persisted after browser reload.
+Screenshots are temporary review artifacts in `/private/tmp/p10a-*.png`. Shared hero-title
+typography was restored from the accepted prototype by the shared UI owner.
+
+Remaining gate: P09/P10B assignment snapshots and real volunteer positive/revoked access.
+No fixture people are loaded in a product path and no assignment state is invented.
