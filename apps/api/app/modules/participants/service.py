@@ -1,5 +1,7 @@
 from datetime import date
 from uuid import UUID
+from zoneinfo import ZoneInfo
+from app.core.clock import utcnow
 
 from sqlalchemy import and_, exists, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,14 +32,14 @@ def participant_scope(principal: Principal, permission: str):
     if foundation_permission(principal, permission):
         return Participant.foundation_id == principal.foundation_id
     # Historical memberships do not keep a leader's current read privilege alive.
-    today = date.today()
+    today = utcnow().astimezone(ZoneInfo("Europe/Moscow")).date()
     allowed_membership = exists(select(GroupMembership.id).join(
         ParticipantGroup, ParticipantGroup.id == GroupMembership.group_id).where(
             GroupMembership.participant_id == Participant.id,
             GroupMembership.foundation_id == principal.foundation_id,
             GroupMembership.valid_from <= today,
             or_(GroupMembership.valid_until.is_(None), GroupMembership.valid_until > today),
-            group_scope(principal, permission.replace("participants.", "groups."))))
+            or_(group_scope(principal, permission), group_scope(principal, permission.replace("participants.", "groups.")))))
     return and_(Participant.foundation_id == principal.foundation_id, allowed_membership)
 
 

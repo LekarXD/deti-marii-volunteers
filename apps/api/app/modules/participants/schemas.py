@@ -133,3 +133,12 @@ class PrivateNoteList(BaseModel):
 class AssignmentParticipantList(BaseModel):
     assignment_id: UUID
     items: list[SafeParticipant]
+
+
+class ParticipantStaffOption(BaseModel):
+    id: UUID
+    display_name: str
+
+
+class ParticipantStaffOptions(BaseModel):
+    items: list[ParticipantStaffOption]

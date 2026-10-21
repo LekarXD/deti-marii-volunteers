@@ -1,5 +1,7 @@
 from datetime import date
 from uuid import UUID
+from zoneinfo import ZoneInfo
+from app.core.clock import utcnow
 
 from fastapi import APIRouter, Depends, Header, Query
 from sqlalchemy import or_, select
@@ -13,7 +15,7 @@ from app.core.idempotency import begin_command, finish_command
 from app.core.models import MediaAsset, StaffMembership, User
 from .access import AssignmentAccess, get_assignment_access
 from .models import GroupMembership, Participant, ParticipantBriefing, ParticipantGroup, ParticipantPrivateNote
-from .schemas import AssignmentParticipantList, GroupDetail, GroupList, MembershipResult, ParticipantList, PrivateNoteList, PrivateNoteView, SafeParticipant, GroupInput, GroupUpdate, GroupView, MembershipEnd, MembershipInput, ParticipantInput, ParticipantUpdate, PrivateNoteInput
+from .schemas import ParticipantStaffOptions, AssignmentParticipantList, GroupDetail, GroupList, MembershipResult, ParticipantList, PrivateNoteList, PrivateNoteView, SafeParticipant, GroupInput, GroupUpdate, GroupView, MembershipEnd, MembershipInput, ParticipantInput, ParticipantUpdate, PrivateNoteInput
 from .service import add_membership, check_version, foundation_permission, get_group, get_participant, group_scope, participant_scope, safe_participant
 
 router = APIRouter(prefix="/api/v1", tags=["participants"])
@@ -122,7 +124,7 @@ async def update_participant(participant_id: UUID, data: ParticipantUpdate, db: 
 async def private_permission(db, principal, item):
     if foundation_permission(principal, "participants.private_notes"):
         return
-    today = date.today()
+    today = utcnow().astimezone(ZoneInfo("Europe/Moscow")).date()
     groups = (await db.scalars(select(GroupMembership.group_id).where(GroupMembership.participant_id == item.id,
         GroupMembership.foundation_id == principal.foundation_id, GroupMembership.valid_from <= today,
         or_(GroupMembership.valid_until.is_(None), GroupMembership.valid_until > today)))).all()
@@ -153,6 +155,16 @@ async def add_private_note(participant_id: UUID, data: PrivateNoteInput, db: Asy
     return await complete(db, principal, operation, key, {"id": str(note.id), "text": note.text, "author_id": str(note.author_id), "created_at": note.created_at.isoformat()}, "participant", item.id, ["private_note"])
 
 
+@router.get("/coord/groups/staff-options", response_model=ParticipantStaffOptions)
+async def staff_options(db: AsyncSession = Depends(get_db), principal: Principal = Depends(get_principal)):
+    if not principal.is_staff or not (foundation_permission(principal, "groups.write") or await db.scalar(select(ParticipantGroup.id).where(group_scope(principal, "groups.write")).limit(1))):
+        denied()
+    rows = (await db.scalars(select(User).join(StaffMembership, StaffMembership.user_id == User.id).where(
+        User.foundation_id == principal.foundation_id, User.account_state == "active",
+        StaffMembership.foundation_id == principal.foundation_id, StaffMembership.revoked_at.is_(None)).order_by(User.display_name, User.id).limit(200))).all()
+    return {"items": [{"id": row.id, "display_name": row.display_name} for row in rows]}
+
+
 @router.get("/coord/groups", response_model=GroupList)
 async def list_groups(archived: bool = False, db: AsyncSession = Depends(get_db), principal: Principal = Depends(get_principal)):
     if not principal.is_staff:
@@ -181,7 +193,7 @@ async def create_group(data: GroupInput, db: AsyncSession = Depends(get_db), pri
 @router.get("/coord/groups/{group_id}", response_model=GroupDetail)
 async def read_group(group_id: UUID, at: date | None = None, db: AsyncSession = Depends(get_db), principal: Principal = Depends(get_principal)):
     group = await get_group(db, principal, group_id)
-    effective = at or date.today()
+    effective = at or utcnow().astimezone(ZoneInfo("Europe/Moscow")).date()
     rows = (await db.scalars(select(GroupMembership).where(GroupMembership.group_id == group.id,
         GroupMembership.foundation_id == principal.foundation_id, GroupMembership.valid_from <= effective,
         or_(GroupMembership.valid_until.is_(None), GroupMembership.valid_until > effective)).order_by(GroupMembership.valid_from, GroupMembership.id))).all()
