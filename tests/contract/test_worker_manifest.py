@@ -57,6 +57,13 @@ def test_every_registered_job_has_exactly_one_manifest_owner_and_workload():
         'io': kinds(base['io-worker']['command']),
         'media': kinds(overlay['media-worker'].get('command', media_command)),
     }
+    preview = yaml.safe_load((ROOT / 'infra/preview/compose.yml').read_text())['services']
+    preview_owners = {
+        'outbox': kinds(preview['outbox']['command']),
+        'io': kinds(preview['io']['command']),
+        'media': kinds(preview['media'].get('command', media_command)),
+    }
+    assert preview_owners == owners, 'Preview must execute every registered job with the same isolation'
     assert owners['outbox'] == {'outbox.deliver'}
     assert not (owners['outbox'] & owners['io'] or owners['io'] & owners['media'] or owners['outbox'] & owners['media'])
     assert set().union(*owners.values()) == set(registered) | {'outbox.deliver'}

@@ -88,7 +88,7 @@ services:
       migrate: {condition: service_completed_successfully}
   io:
     <<: *api
-    command: [python, -m, app.worker.main, --kind, studio.close, --kind, studio.revoke, --kind, studio.reconcile_participant, --kind, knowledge.index, --kind, knowledge.ingest, --kind, ai.generate, --kind, reporting.digest]
+    command: [python, -m, app.worker.main, --kind, studio.close, --kind, studio.revoke, --kind, studio.reconcile_participant, --kind, knowledge.index, --kind, knowledge.ingest, --kind, ai.generate, --kind, reporting.digest, --kind, followups.rules, --kind, dobro.reminders.scan]
     mem_limit: 192m
     cpus: 0.3
     stop_grace_period: 3m
