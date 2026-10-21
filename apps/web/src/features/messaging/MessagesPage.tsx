@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
+import {Link} from 'react-router-dom';
 import {useInfiniteQuery,useMutation,useQuery,useQueryClient} from '@tanstack/react-query';
 import {keys} from '../../api/keys';
 import {getPrincipalKey,initializeSession,onSessionChange} from '../../api/transport';
@@ -35,7 +36,7 @@ export function MessagesPage(){
  const session=useQuery({queryKey:keys.session(),queryFn:()=>initializeSession(),staleTime:Infinity});
  if(session.isPending)return <LoadingState label="Открываем сообщения…"/>;
  if(session.isError)return <ErrorState error={session.error} retry={()=>void session.refetch()}/>;
- if(!session.data.user_id)return <Card><EmptyState title="Подтвердите почту" description="После подтверждения почты здесь появятся диалоги с координатором и командой фонда." action={<a className="btn btn-primary" href="/account">Войти в Опору</a>}/></Card>;
+ if(!session.data.user_id)return <Card><EmptyState title="Подтвердите почту" description="После подтверждения почты здесь появятся диалоги с координатором и командой фонда." action={<Link className="btn btn-primary" to="/login?next=%2Fmessages">Войти в Опору</Link>}/></Card>;
  return <Messages key={getPrincipalKey()} userId={session.data.user_id} canGroup={session.data.permissions.includes('messaging.manage')}/>;
 }
 function Messages({userId,canGroup}:{userId:string;canGroup:boolean}){
