@@ -94,7 +94,7 @@ async def readiness(db,volunteer):
     return availability,reasons
 
 
-async def volunteer_view(db,volunteer,detail=False):
+async def volunteer_view(db,volunteer,detail=False,*,principal=None):
     availability,reasons=await readiness(db,volunteer)
     ids=await alias_ids(db,volunteer)
     tasks=(await db.scalars(select(FollowUpTask).where(FollowUpTask.foundation_id==volunteer.foundation_id,FollowUpTask.volunteer_id.in_(ids)).order_by(FollowUpTask.due_on,FollowUpTask.created_at))).all()
@@ -108,7 +108,11 @@ async def volunteer_view(db,volunteer,detail=False):
     reviews=(await db.scalars(select(ReserveReview).where(ReserveReview.volunteer_id.in_(ids)).order_by(ReserveReview.created_at.desc(),ReserveReview.id))).all()
     provenance=(await db.execute(select(ImportEffect,ImportRow,ImportBatch).join(ImportRow,ImportEffect.row_id==ImportRow.id).join(ImportBatch,ImportRow.batch_id==ImportBatch.id)
         .where(ImportEffect.volunteer_id.in_(ids),ImportBatch.foundation_id==volunteer.foundation_id).order_by(ImportEffect.created_at))).all()
-    return CrmVolunteerView(**values,agreements=[AgreementView(id=a.id,text=a.text,role_context=a.role_context,valid_until=a.valid_until,created_at=a.created_at) for a in agreements],
+    latest_reflection=None
+    if volunteer.user_id is not None and principal is not None:
+        from app.modules.followups.service import latest_reflection_for_user
+        latest_reflection=await latest_reflection_for_user(db,volunteer.foundation_id,volunteer.user_id,principal=principal)
+    return CrmVolunteerView(**values,latest_reflection=latest_reflection,agreements=[AgreementView(id=a.id,text=a.text,role_context=a.role_context,valid_until=a.valid_until,created_at=a.created_at) for a in agreements],
         contact_events=[ContactEventView(id=e.id,kind=e.kind,direction=e.direction,text=e.text,occurred_at=e.occurred_at) for e in events],
         follow_up_tasks=[task_view(task) for task in tasks],reviews=[ReserveReviewView(id=r.id,outcome=r.outcome,note=r.note,no_contact=r.no_contact,created_at=r.created_at) for r in reviews],
         merged_record_ids=ids[1:],import_provenance=[dict(batch_id=str(batch.id),filename=batch.filename,checksum=batch.checksum,source_system=batch.source_system,line_number=row.line_number,snapshot=effect.snapshot,created_at=effect.created_at.isoformat()) for effect,row,batch in provenance])
@@ -136,7 +140,7 @@ async def add_agreement(db,principal,volunteer_id,command):
             if volunteer.no_contact or not availability or not availability.verified:
                 raise ApiError(422,'availability_required','Перед приглашением подтвердите актуальную доступность и разрешение на связь')
         volunteer.relationship_state=command.relationship_state
-    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True)
+    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True,principal=principal)
 
 
 async def add_contact(db,principal,volunteer_id,command):
@@ -146,7 +150,7 @@ async def add_contact(db,principal,volunteer_id,command):
     if when.tzinfo is None:raise ApiError(422,'timezone_required','Укажите время связи с часовым поясом')
     if when>utcnow():raise ApiError(422,'future_contact','Будущую связь запишите следующим действием')
     db.add(ContactEvent(volunteer_id=volunteer.id,kind=command.kind,direction=command.direction,text=nonempty(command.text),author_id=principal.actor_id,occurred_at=when))
-    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True)
+    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True,principal=principal)
 
 
 async def write_availability(db,volunteer,principal,command):
@@ -167,7 +171,7 @@ async def write_availability(db,volunteer,principal,command):
 
 async def save_availability(db,principal,volunteer_id,command):
     volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer_id,lock=True);check_version(volunteer.version,command.expected_version)
-    await write_availability(db,volunteer,principal,command);touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True)
+    await write_availability(db,volunteer,principal,command);touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True,principal=principal)
 
 
 async def verify_availability(db,principal,volunteer_id,command):
@@ -176,7 +180,7 @@ async def verify_availability(db,principal,volunteer_id,command):
     rule=await db.scalar(select(AvailabilityRule).where(AvailabilityRule.volunteer_id==volunteer.id).order_by(AvailabilityRule.number.desc()).limit(1))
     if not rule:raise ApiError(422,'availability_required','Сначала уточните доступность')
     db.add(AvailabilityVerification(rule_id=rule.id,valid_until=command.valid_until,source=nonempty(command.source),author_id=principal.actor_id))
-    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True)
+    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True,principal=principal)
 
 
 async def cancel_open_tasks(db,volunteer,principal,reason):
@@ -195,7 +199,7 @@ async def set_preference(db,principal,volunteer_id,command):
     volunteer.no_contact=command.no_contact
     db.add(ContactEvent(volunteer_id=volunteer.id,kind='preference',direction='recorded',text=nonempty(command.reason),author_id=principal.actor_id))
     if volunteer.no_contact:await cancel_open_tasks(db,volunteer,principal,'Просьба не связываться')
-    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True)
+    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True,principal=principal)
 
 
 async def record_review(db,principal,volunteer_id,command):
@@ -219,7 +223,7 @@ async def record_review(db,principal,volunteer_id,command):
     db.add(ReserveReview(volunteer_id=volunteer.id,outcome=command.outcome,note=note,no_contact=volunteer.no_contact,author_id=principal.actor_id))
     db.add(ContactEvent(volunteer_id=volunteer.id,kind='contact_review',direction='recorded',text=note,author_id=principal.actor_id))
     if volunteer.no_contact:await cancel_open_tasks(db,volunteer,principal,'Просьба не связываться')
-    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True)
+    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True,principal=principal)
 
 
 async def create_task(db,principal,volunteer_id,command):
@@ -321,7 +325,7 @@ async def merge_volunteers(db,principal,source_id,command):
     touch(source);touch(target)
     await db.flush()
     if target.no_contact:await cancel_open_tasks(db,target,principal,'Объединена просьба не связываться')
-    return await volunteer_view(db,target,True)
+    return await volunteer_view(db,target,True,principal=principal)
 
 
 async def own_volunteer(db,principal):
@@ -398,7 +402,7 @@ async def first_visit_outcome(db,principal,volunteer_id,command):
             assigned_user_id=command.assigned_user_id,due_on=command.due_on,title=labels[command.outcome],source_type='first_visit_outcome',source_id=uuid4(),source_revision=1)
         db.add(task);await db.flush()
         db.add(FollowUpTaskEvent(task_id=task.id,kind='created',reason=note,after=task_view(task).model_dump(mode='json'),author_id=principal.actor_id))
-    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True)
+    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True,principal=principal)
 
 
 async def ensure_user_volunteer(db,foundation_id,user_id):

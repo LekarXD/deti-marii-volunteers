@@ -7,7 +7,7 @@ import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import ASGITransport,AsyncClient
-from sqlalchemy import select,func
+from sqlalchemy import select,func,text
 from sqlalchemy.ext.asyncio import create_async_engine,async_sessionmaker
 from app.core.db import Base,get_db
 from app.core.config import get_settings
@@ -28,6 +28,7 @@ async def env():
     if not url.endswith('/opora_crm_test'):raise RuntimeError('Dedicated CRM DB required')
     engine=create_async_engine(url);factory=async_sessionmaker(engine,expire_on_commit=False)
     async with engine.begin() as conn:
+        await conn.execute(text('CREATE EXTENSION IF NOT EXISTS btree_gist'))
         await conn.run_sync(Base.metadata.drop_all);await conn.run_sync(Base.metadata.create_all)
     async with factory() as db:db.add(Foundation(id=get_settings().foundation_id,name='Тестовый фонд'));await db.commit()
     app=FastAPI();install_error_handlers(app);app.include_router(auth_router);app.include_router(applications_router);app.include_router(router)

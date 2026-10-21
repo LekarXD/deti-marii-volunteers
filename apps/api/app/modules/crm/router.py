@@ -56,13 +56,13 @@ async def staff_options(principal:Principal=Depends(require_permission('crm.read
 
 @router.post('/coord/volunteers',response_model=CrmVolunteerView)
 async def create_volunteer(body:CreateVolunteerCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
-    async def action():return await service.volunteer_view(db,await service.ensure_volunteer(db,principal.foundation_id,body.application_id),True)
+    async def action():return await service.volunteer_view(db,await service.ensure_volunteer(db,principal.foundation_id,body.application_id),True,principal=principal)
     return await command(db,principal,'crm.create',idempotency_key,body,action,'crm.write')
 
 
 @router.get('/coord/volunteers/{volunteer_id}',response_model=CrmVolunteerView)
 async def volunteer(volunteer_id:UUID,principal:Principal=Depends(require_permission('crm.read')),db:AsyncSession=Depends(get_db)):
-    return await service.volunteer_view(db,await service.scoped_volunteer(db,principal.foundation_id,volunteer_id),True)
+    return await service.volunteer_view(db,await service.scoped_volunteer(db,principal.foundation_id,volunteer_id),True,principal=principal)
 
 
 @router.post('/coord/volunteers/{volunteer_id}/agreements',response_model=CrmVolunteerView)

@@ -142,7 +142,28 @@ class CrmVolunteerSummary(BaseModel):
     availability:AvailabilityView|None
     next_task:FollowUpTaskView|None
 
+class CrmReflectionReviewView(BaseModel):
+    id:UUID
+    revision:int
+    decision:str
+    public_message:str
+    next_date:date|None
+    assigned_staff_name:str
+    created_at:datetime
+
+class CrmReflectionView(BaseModel):
+    id:UUID
+    assignment_id:UUID
+    text:str
+    unexpected:str
+    help:str
+    continuation:str
+    submitted_at:datetime
+    can_review:bool
+    review:CrmReflectionReviewView|None
+
 class CrmVolunteerView(CrmVolunteerSummary):
+    latest_reflection:CrmReflectionView|None=None
     agreements:list[AgreementView]
     contact_events:list[ContactEventView]
     follow_up_tasks:list[FollowUpTaskView]
