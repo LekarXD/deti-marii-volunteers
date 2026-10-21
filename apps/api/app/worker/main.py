@@ -9,7 +9,7 @@ from uuid import UUID
 from app.core.db import SessionLocal
 from app.core.models import OutboxMessage
 from app.core.config import get_settings
-from app.worker.queue import claim, complete, retry
+from app.worker.queue import claim, complete, retry, LeaseLost
 
 async def run_once():
     async with SessionLocal() as db:
@@ -17,6 +17,7 @@ async def run_once():
         await db.commit()
         if job is None:
             return False
+        job_id,token,attempts,max_attempts=job.id,job.claim_token,job.attempts,job.max_attempts
         try:
             if job.kind == "outbox.deliver":
                 message = await db.get(OutboxMessage, UUID(job.payload["outbox_id"]))
@@ -44,9 +45,15 @@ async def run_once():
             else:
                 await retry(db, job.id, job.claim_token, "handler_unavailable", job.attempts, job.max_attempts)
             await db.commit()
+        except LeaseLost:
+            await db.rollback()
         except Exception:
             await db.rollback()
-            raise
+            try:
+                await retry(db,job_id,token,"handler_failed",attempts,max_attempts)
+                await db.commit()
+            except LeaseLost:
+                await db.rollback()
         return True
 
 async def main():

@@ -52,6 +52,8 @@ async def deliver_internal(db,outbox,payload):
         return "suppressed_recipient"
     direct_key=f"system:{outbox.foundation_id}:{recipient}"
     await db.execute(text("SELECT pg_advisory_xact_lock(:key)"),{"key":int(digest(direct_key)[:15],16)})
+    if await db.scalar(select(Message.id).where(Message.source_outbox_id==outbox.id)):
+        return "delivered"
     conversation=await db.scalar(select(Conversation).where(Conversation.direct_key==direct_key).with_for_update())
     if conversation is None:
         conversation=Conversation(id=uuid4(),foundation_id=outbox.foundation_id,title="Уведомления фонда",kind="system",direct_key=direct_key)

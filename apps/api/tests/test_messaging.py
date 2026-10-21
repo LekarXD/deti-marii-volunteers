@@ -162,3 +162,23 @@ async def test_cancelled_or_replaced_booking_version_never_delivers_stale_notice
         recipient=await db.scalar(select(ConversationMember.user_id).where(ConversationMember.conversation_id==message.conversation_id))
         assert recipient==user
         await db.rollback()
+
+@pytest.mark.asyncio
+async def test_two_concurrent_outbox_consumers_persist_one_message():
+    seed=await fixtures()
+    recipient=UUID(seed['identities']['candidate-two@example.test']['user_id'])
+    payload={'recipient_id':str(recipient),'subject':'Конкурентная проверка','text':'Один факт'}
+    async with SessionLocal() as db:
+        outbox=enqueue_notice(db,UUID(seed['foundation_id']),recipient,payload['subject'],payload['text'])
+        await db.flush()
+        oid=outbox.id
+        await db.commit()
+    async def consume():
+        async with SessionLocal() as db:
+            message=await db.get(OutboxMessage,oid)
+            state=await deliver_internal(db,message,payload)
+            await db.commit()
+            return state
+    assert await asyncio.gather(consume(),consume())==['delivered','delivered']
+    async with SessionLocal() as db:
+        assert await db.scalar(select(func.count()).select_from(Message).where(Message.source_outbox_id==oid))==1
