@@ -131,3 +131,29 @@ async def test_group_reader_only_sees_its_derived_signals_and_cannot_configure(s
     f.client.cookies.set('opora_session','rules-group-reader');rows=(await f.client.get('/api/v1/coord/followups/rule-signals')).json();assert {x['rule'] for x in rows}=={'miss','shift'}
     assert (await f.client.get('/api/v1/coord/followups/rules')).status_code==403
     assert (await post(f,'rules/reset',{'expected_version':1})).status_code==403
+
+
+@pytest.mark.asyncio
+async def test_explicit_source_corrections_resolve_all_five_conditions(scenario):
+    f=scenario;data=await facts(f);assert (await post(f,'rules/evaluate',{'expected_version':0})).status_code==200;await run(f)
+    async with f.w.factory() as db:
+        for attendance in (await db.scalars(select(Attendance).where(Attendance.foundation_id==f.w.foundation.id))).all():attendance.outcome='attended';attendance.minutes=60;attendance.version+=1
+        db.add(ContactEvent(volunteer_id=data.person.id,kind='phone',direction='outgoing',text='Уточнили планы',author_id='fixture',occurred_at=utcnow()))
+        learning=await db.get(LearningAssignment,data.learning.id);learning.completed_at=utcnow()
+        application=await db.get(Application,data.application.id);application.review_state='closed';application.version+=1
+        event=await db.get(EventOccurrence,data.events[-1].id);event.status='cancelled';event.version+=1
+        await db.commit()
+    assert (await post(f,'rules/evaluate',{'expected_version':1})).status_code==200;result=await run(f);assert all(result[name]['matched']==0 for name in result),result
+    assert (await f.client.get('/api/v1/coord/followups/rule-signals')).json()==[]
+
+
+@pytest.mark.asyncio
+async def test_dismissed_observation_stays_closed_until_source_facts_change(scenario):
+    f=scenario;data=await facts(f);assert (await post(f,'rules/evaluate',{'expected_version':0})).status_code==200;await run(f)
+    quiet=next(x for x in (await f.client.get('/api/v1/coord/followups/rule-signals')).json() if x['rule']=='quiet')
+    assert (await post(f,f"rule-signals/{quiet['id']}/dismiss",{'expected_version':quiet['version'],'reason':'Решение принято'})).status_code==200
+    assert (await post(f,'rules/evaluate',{'expected_version':1})).status_code==200;await run(f)
+    assert all(x['rule']!='quiet' for x in (await f.client.get('/api/v1/coord/followups/rule-signals')).json())
+    async with f.w.factory() as db:db.add(ContactEvent(volunteer_id=data.person.id,kind='phone',direction='incoming',text='Дополнительный исходный факт',author_id='fixture',occurred_at=utcnow()-timedelta(days=25)));await db.commit()
+    assert (await post(f,'rules/evaluate',{'expected_version':2})).status_code==200;await run(f)
+    reopened=next(x for x in (await f.client.get('/api/v1/coord/followups/rule-signals')).json() if x['rule']=='quiet');assert reopened['id']==quiet['id'] and reopened['version']>quiet['version']

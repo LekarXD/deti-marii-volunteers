@@ -1,7 +1,7 @@
 """Configured operational thresholds and their durable internal queue observations."""
 from datetime import datetime
 from uuid import UUID,uuid4
-from sqlalchemy import CheckConstraint,DateTime,ForeignKey,Integer,String,UniqueConstraint
+from sqlalchemy import CheckConstraint,DateTime,ForeignKey,ForeignKeyConstraint,Integer,String,UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped,mapped_column
 from app.core.clock import utcnow
@@ -16,7 +16,7 @@ class SignalRuleSettings(Base):
     next_run_at:Mapped[datetime]=mapped_column(DateTime(timezone=True))
     last_run_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True))
     last_result:Mapped[dict]=mapped_column(JSONB,default=dict)
-    __table_args__=(CheckConstraint('version>0',name='ck_signal_rule_version'),)
+    __table_args__=(CheckConstraint('version>0',name='ck_signal_rule_version'),ForeignKeyConstraint(['owner_user_id','foundation_id'],['users.id','users.foundation_id'],name='fk_signal_rule_owner_scope'))
 
 class RuleSignal(Base):
     __tablename__='rule_signals'
@@ -34,4 +34,4 @@ class RuleSignal(Base):
     state:Mapped[str]=mapped_column(String(20),default='open')
     observed_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
     updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
-    __table_args__=(UniqueConstraint('foundation_id','rule','entity_id'),CheckConstraint("rule IN ('miss','quiet','learn','app','shift')",name='ck_rule_signal_kind'),CheckConstraint("state IN ('open','resolved','dismissed') AND version>0",name='ck_rule_signal_state'))
+    __table_args__=(ForeignKeyConstraint(['subject_user_id','foundation_id'],['users.id','users.foundation_id'],name='fk_rule_signal_user_scope'),ForeignKeyConstraint(['group_id','foundation_id'],['participant_groups.id','participant_groups.foundation_id'],name='fk_rule_signal_group_scope'),UniqueConstraint('foundation_id','rule','entity_id'),CheckConstraint("rule IN ('miss','quiet','learn','app','shift')",name='ck_rule_signal_kind'),CheckConstraint("state IN ('open','resolved','dismissed') AND version>0",name='ck_rule_signal_state'))
