@@ -12,8 +12,8 @@ def load_models():
             if exc.name not in (name, f"app.modules.{module}"):
                 raise
 
-async def claim_registration(db, registration_id, user_id):
-    """Domain hooks claim only this proven registration; never match arbitrary contacts."""
+async def claim_registration(db, registration_id, user_id, *, newly_created_user=False):
+    """Claim only this proven registration; opt-in initialization is new-user-only."""
     from sqlalchemy import update
     from app.core.models import MediaAsset
     await db.execute(update(MediaAsset).where(MediaAsset.owner_registration_id==registration_id).values(owner_user_id=user_id,owner_registration_id=None))
@@ -25,6 +25,10 @@ async def claim_registration(db, registration_id, user_id):
             if exc.name not in (name, f"app.modules.{module}"):
                 raise
             continue
+        if newly_created_user:
+            initialize = getattr(service, "initialize_registration_user", None)
+            if initialize:
+                await initialize(db, registration_id, user_id)
         hook = getattr(service, "claim_registration", None)
         if hook:
             await hook(db, registration_id, user_id)

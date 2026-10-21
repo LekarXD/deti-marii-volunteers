@@ -81,6 +81,7 @@ async def verify(body: VerifyInput, response: Response, principal: Principal = D
     lock = int(digest(row.normalized_contact)[:15], 16)
     await db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": lock})
     contact = await db.scalar(select(ContactChannel).where(ContactChannel.normalized_value == row.normalized_contact))
+    newly_created_user = contact is None
     if contact:
         user = await db.get(User, contact.user_id)
         if user.foundation_id != principal.foundation_id:
@@ -95,7 +96,7 @@ async def verify(body: VerifyInput, response: Response, principal: Principal = D
         registration.verified_email, registration.claimed_user_id = row.normalized_contact, user.id
         # Transfer only the current session's owned domain records, within this transaction.
         from app.core.model_loader import claim_registration
-        await claim_registration(db, principal.registration_id, user.id)
+        await claim_registration(db, principal.registration_id, user.id, newly_created_user=newly_created_user)
     old = await db.get(Session, principal.session_id)
     old.revoked_at = utcnow()
     new, _ = await issue_session(db, response, user_id=user.id)
