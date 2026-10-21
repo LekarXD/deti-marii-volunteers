@@ -29,12 +29,15 @@ async function harness(initial?:Bootstrap){
  const boot=initial??await fixture();let state:State=boot;let mediaOptions:MediaOptions|undefined;
  const reports:Input[]=[];const views:RendererViewProps[]=[];
  let heldReady:((response:Response)=>void)|undefined;let holdReady=false;
+ let nextReadinessError:{status:number;code:string}|undefined;
+ let heldState:((response:Response)=>void)|undefined,holdState=false;
  const fetch=vi.fn(async(path:string,options?:RequestInit):Promise<Response>=>{
   if(path.endsWith('/bootstrap'))return json(boot);
-  if(path.includes('/state?'))return json(state);
+  if(path.includes('/state?')){if(holdState){holdState=false;return new Promise(resolve=>{const snapshot=state;heldState=()=>resolve(json(snapshot));});}return json(state);}
   if(path.endsWith('/provider-grant'))return json({...state,provider_grant:{...boot.provider_grant,token:'fresh-fictional-room-token'}});
   if(path.endsWith('/readiness')){
    const input=JSON.parse(String(options?.body)) as Input;reports.push(input);
+   if(nextReadinessError){const error=nextReadinessError;nextReadinessError=undefined;return new Response(JSON.stringify({code:error.code}),{status:error.status});}
    const ack={ready:input.visual_ready,reasons:input.visual_ready?[]:['visual_frame_unready'],renderer_state_version:input.renderer_state_version,projection_hash:input.projection_hash,
     readiness_sequence:input.readiness_sequence,capture_state:'created',valid_until:input.visual_ready?new Date(Date.now()+10_000).toISOString():null};
    if(holdReady&&input.visual_ready)return new Promise(resolve=>{heldReady=resolve;});
@@ -47,6 +50,8 @@ async function harness(initial?:Bootstrap){
  const runtime=createRendererRuntime({render:props=>views.push(props),mediaFactory:options=>{mediaOptions=options;return {connect,disconnect,updatePlan};}});
  return {runtime,boot,views,reports,fetch,connect,disconnect,updatePlan,
   setState(value:State){state=value;},refresh(){mediaOptions!.onRefreshRequired?.();},
+  rejectReadiness(status=409,code='renderer_state_conflict'){nextReadinessError={status,code};},
+  holdState(){holdState=true;},releaseState(){heldState?.(json(state));},
   hold(){holdReady=true;},release(){const input=reports.filter(report=>report.visual_ready).at(-1)!;heldReady?.(json({ready:true,reasons:[],renderer_state_version:input.renderer_state_version,projection_hash:input.projection_hash,readiness_sequence:input.readiness_sequence,capture_state:'created',valid_until:new Date(Date.now()+10_000).toISOString()}));},
   observe(ready:boolean){const view=views.at(-1)!;view.onFrameReadiness!(view.frame!.stamp,{ready,visual_ready:ready,reasons:[]});},
  };
@@ -140,4 +145,40 @@ it('removes the prior frame when its authorized transition expires',async()=>{
  let release:()=>void=()=>{};const gate=new Promise<void>(resolve=>{release=resolve;}),digest=crypto.subtle.digest.bind(crypto.subtle);
  vi.spyOn(crypto.subtle,'digest').mockImplementation(async(...args)=>{await gate;return digest(...args);});h.setState(next);await vi.advanceTimersByTimeAsync(1000);expect(h.views.at(-1)?.phase).toBe('active');
  await vi.advanceTimersByTimeAsync(1100);expect(h.views.at(-1)?.phase).toBe('failed');expect(h.views.at(-1)?.frame).toBeUndefined();release();await Promise.resolve();
+});
+it('refreshes a conflicted scene observation without retrying the old report or duplicating the poll timer',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');await vi.waitFor(()=>expect(h.reports.length).toBeGreaterThan(0));
+ // An already-running poll can have read the prior transaction before the owner save.
+ h.holdState();await vi.advanceTimersByTimeAsync(1000);
+ const scene={...h.boot.scene,revision:2,presenter_size:29},capture_plan={...h.boot.capture_plan,scene_revision:2};
+ const next={...h.boot,scene,capture_plan,renderer_state_version:2,projection_hash:await hash(scene,capture_plan),scene_transition:{from_renderer_state_version:1,from_projection_hash:h.boot.projection_hash,expires_at:new Date(Date.now()+5000).toISOString()}};
+ h.setState(next);h.rejectReadiness();h.observe(true);await vi.waitFor(()=>expect(h.reports.at(-1)?.visual_ready).toBe(true));h.releaseState();
+ await vi.waitFor(()=>expect(h.views.at(-1)?.frame?.stateVersion).toBe(2));
+ expect(h.views.some(view=>view.phase==='failed')).toBe(false);expect(h.connect).toHaveBeenCalledOnce();expect(h.updatePlan).toHaveBeenCalledOnce();
+ expect(h.reports.at(-1)).toMatchObject({renderer_state_version:2,visual_ready:false});
+ const reads=()=>h.fetch.mock.calls.filter(([path])=>path.includes('/state?')).length;
+ expect(reads()).toBe(2);await vi.advanceTimersByTimeAsync(1000);expect(reads()).toBe(3);
+ h.observe(true);await vi.waitFor(()=>expect(h.reports.at(-1)).toMatchObject({renderer_state_version:2,visual_ready:true}));h.runtime.close();
+});
+it('fails closed when a conflict refresh reveals revoked permission',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');await vi.waitFor(()=>expect(h.reports.length).toBeGreaterThan(0));
+ h.setState({...h.boot,renderer_state_version:2,invalidated:true});h.rejectReadiness();h.observe(true);
+ await vi.waitFor(()=>expect(h.views.at(-1)?.phase).toBe('failed'));expect(h.views.at(-1)?.frame).toBeUndefined();expect(h.connect).toHaveBeenCalledOnce();
+});
+it('does not loop a conflict when the authoritative fence has not advanced',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');await vi.waitFor(()=>expect(h.reports.length).toBeGreaterThan(0));h.rejectReadiness();h.observe(true);
+ await vi.waitFor(()=>expect(h.views.at(-1)?.phase).toBe('failed'));expect(h.fetch.mock.calls.filter(([path])=>path.includes('/state?'))).toHaveLength(1);
+});
+it.each([[409,'recording_policy_not_approved'],[403,'renderer_state_conflict'],[410,'renderer_state_conflict']])('never refreshes readiness error %s %s as a scene race',async(status,code)=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');await vi.waitFor(()=>expect(h.reports.length).toBeGreaterThan(0));h.rejectReadiness(status,code);h.observe(true);
+ await vi.waitFor(()=>expect(h.views.at(-1)?.phase).toBe('failed'));expect(h.fetch.mock.calls.some(([path])=>path.includes('/state?'))).toBe(false);expect(h.views.at(-1)?.frame).toBeUndefined();
+});
+it('expires the authorized old frame even when conflict recovery is still verifying its replacement',async()=>{
+ const h=await harness();await h.runtime.start('fictional-ticket');await vi.waitFor(()=>expect(h.reports.length).toBeGreaterThan(0));
+ const scene={...h.boot.scene,revision:2},capture_plan={...h.boot.capture_plan,scene_revision:2};
+ const next={...h.boot,scene,capture_plan,renderer_state_version:2,projection_hash:await hash(scene,capture_plan),scene_transition:{from_renderer_state_version:1,from_projection_hash:h.boot.projection_hash,expires_at:new Date(Date.now()+1000).toISOString()}};
+ let release:()=>void=()=>{};const gate=new Promise<void>(resolve=>{release=resolve;}),digest=crypto.subtle.digest.bind(crypto.subtle);
+ vi.spyOn(crypto.subtle,'digest').mockImplementation(async(...args)=>{await gate;return digest(...args);});h.setState(next);h.rejectReadiness();h.observe(true);
+ await vi.waitFor(()=>expect(h.reports.at(-1)?.renderer_state_version).toBe(2));expect(h.views.at(-1)?.frame?.stateVersion).toBe(1);
+ await vi.advanceTimersByTimeAsync(1100);expect(h.views.at(-1)?.phase).toBe('failed');expect(h.views.at(-1)?.frame).toBeUndefined();release();await Promise.resolve();expect(h.connect).toHaveBeenCalledOnce();
 });

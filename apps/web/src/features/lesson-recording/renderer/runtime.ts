@@ -1,5 +1,6 @@
 import {canonicalSerialize,parseCapturePlan,parseStudioScene,RENDER_PROFILE,SceneContractError,type CapturePlan} from '../../../../../../packages/studio-core';
 import type {components} from '../../../api/generated/schema';
+import {ApiError} from '../../../api/errors';
 import {HiddenCaptureController} from '../../studio/live/HiddenCaptureController';
 import type {MediaOptions,MediaSnapshot} from '../../studio/live/RoomController';
 import type {RendererViewProps} from './RendererView';
@@ -38,6 +39,7 @@ export function createRendererRuntime(options:RendererRuntimeOptions) {
  let hold:{stamp:string;expires:number}|null=null,transitionTimer:ReturnType<typeof setTimeout>|undefined;
  let workAbort:AbortController|null=null,mediaAbort:AbortController|null=null,poll:ReturnType<typeof setTimeout>|undefined,heartbeat:ReturnType<typeof setInterval>|undefined,expiry:ReturnType<typeof setTimeout>|undefined;
  let latestReport:{body:ReadinessInput;stamp:string}|null=null,reportBusy=false,sequence=0,renewing:Promise<void>|null=null;
+ let stateRead:Promise<void>|null=null,stateReadAgain=false;
  const strictlyCurrent=(stamp:string)=>!closed&&!!fence?.isCurrent(stamp);
  const isCurrent=(stamp:string)=>strictlyCurrent(stamp)||(!closed&&hold?.stamp===stamp&&hold.expires>Date.now());
  const publish=(phase?:RendererViewProps['phase'])=>options.render({frame,tracks:media.tracks,assetLease:lease,
@@ -78,7 +80,18 @@ export function createRendererRuntime(options:RendererRuntimeOptions) {
   try{while(latestReport&&!closed&&access){
    const report=latestReport;latestReport=null;
    let ack:Receipt;try{ack=await access.request<Receipt>('readiness',{body:report.body,idempotencyKey:crypto.randomUUID()});}
-   catch{if(!isCurrent(report.stamp)||report.body.readiness_sequence!==sequence)continue;throw new SceneContractError('renderer_receipt_unavailable');}
+   catch(error){
+    if(closed)return;
+    if(error instanceof ApiError&&error.status===409&&error.code==='renderer_state_conflict'){
+     // Owner scene changes can precede the next poll. Never retry the stale
+     // observation: commit and validate the purpose API's current projection first.
+     latestReport=null;await readState(true);
+     if(closed)return;
+     if(!authoritativeFrame||authoritativeFrame.stateVersion<=report.body.renderer_state_version)throw new SceneContractError('renderer_receipt_conflict_unresolved');
+     queueReport();continue;
+    }
+    throw new SceneContractError('renderer_receipt_unavailable');
+   }
    if(!isCurrent(report.stamp)||report.body.readiness_sequence!==sequence)continue;
    if(ack.renderer_state_version!==report.body.renderer_state_version||ack.projection_hash!==report.body.projection_hash||ack.readiness_sequence!==report.body.readiness_sequence)throw new SceneContractError('renderer_receipt_mismatch');
    if(ack.ready&&(!report.body.visual_ready||!ack.valid_until||Date.parse(ack.valid_until)<=Date.now()))throw new SceneContractError('renderer_receipt_invalid');
@@ -134,7 +147,7 @@ export function createRendererRuntime(options:RendererRuntimeOptions) {
    const value=await access.request<State>('provider-grant');if(!closed)await prepare(value,true);
   })().finally(()=>{renewing=null;});return renewing;
  }
- async function readState(){
+ async function readAuthoritativeState(){
   if(closed||!access||!frame)return;
   try{const value=await access.request<State>('state',{afterRevision:authoritativeFrame!.stateVersion});if(closed)return;
    const {scene,plan}=parseState(value),previous=fence!.current();const change=fence!.accept(scene,plan,value.renderer_state_version);
@@ -142,7 +155,14 @@ export function createRendererRuntime(options:RendererRuntimeOptions) {
    else if(change==='unchanged'&&value.projection_hash!==projectionHash)throw new SceneContractError('renderer_projection_hash_reused');
    else if(change==='unchanged'&&preparing&&workingStamp!==authoritativeFrame?.stamp&&!renewing){const stamp=authoritativeFrame!.stamp;void refreshProvider().catch(()=>{if(strictlyCurrent(stamp))fail();});}
   }catch{if(!closed)fail();}
-  if(!closed)poll=setTimeout(()=>{void readState();},1000);
+ }
+ function readState(refresh=false):Promise<void>{
+  if(refresh)stateReadAgain=true;
+  if(stateRead)return stateRead;
+  clearTimeout(poll);
+  stateRead=(async()=>{do{stateReadAgain=false;await readAuthoritativeState();}while(stateReadAgain&&!closed);})().finally(()=>{
+   stateRead=null;clearTimeout(poll);if(!closed)poll=setTimeout(()=>{void readState();},1000);
+  });return stateRead;
  }
  return Object.freeze({
   async start(oneUseTicket:string){
@@ -151,7 +171,7 @@ export function createRendererRuntime(options:RendererRuntimeOptions) {
     if(closed)return;const expires=Date.parse(initial.expires_at);if(!Number.isFinite(expires)||expires<=Date.now())throw new SceneContractError('renderer_access_expired');
     access=transportFactory(initial.access_token);expiry=setTimeout(()=>fail(),Math.min(2147483647,expires-Date.now()));
     await prepare(initial);if(closed)return;
-    heartbeat=setInterval(queueReport,3000);poll=setTimeout(()=>{void readState();},1000);
+    heartbeat=setInterval(queueReport,3000);clearTimeout(poll);poll=setTimeout(()=>{void readState();},1000);
    }catch{if(!closed)fail();}
   },
   close(){stop('stopped');},
