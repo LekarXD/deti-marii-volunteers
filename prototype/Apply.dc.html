@@ -712,6 +712,42 @@ sc-if,sc-for{display:contents}
  .a-yes::before,.a-no::before{left:2px;top:0}
  .a-no::before{color:var(--red-ink)}
 }
+/* Знакомство, вариант 2 «Карточки»: один блок на экран */
+.c-wrap,.l-wrap{max-width:760px;margin:0 auto}
+.c-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:8px 0 14px}
+.c-mod{margin:0;font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.c-card.card{min-height:360px;padding:28px}
+.c-card .a-blocks{gap:0}
+.c-card .a-lead{font-size:22px;line-height:1.45;margin:0}
+.c-card .a-icards{grid-template-columns:1fr 1fr}
+.c-nav{display:flex;gap:10px;margin-top:16px}
+.c-next{flex:1}
+@media (max-width:720px){.c-mod{font-size:24px}.c-card.card{min-height:58vh;padding:20px 18px}.c-card .a-icards{display:block;background:transparent;padding:0}.c-card .a-lead{font-size:20px}.c-nav{position:sticky;bottom:12px}}
+/* Знакомство, вариант 3 «Темы списком»: аккордеон, по одной теме */
+.l-list.card{padding:4px 24px;margin-top:20px}
+.l-item{border-top:1px solid var(--line)}
+.l-item:first-child{border-top:0}
+.l-head{width:100%;display:flex;align-items:center;gap:14px;min-height:64px;padding:12px 0;border:0;background:transparent;text-align:left;font-size:17px;font-weight:600;color:var(--ink)}
+.l-mark{flex:0 0 32px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-size:14px;color:var(--ink-2)}
+.l-item.is-seen .l-mark{background:var(--green);color:#fff}
+.l-title{flex:1}
+.l-chev .ic{transition:transform .2s}
+.l-item.is-open .l-chev .ic{transform:rotate(180deg)}
+.l-body{padding:0 0 22px 46px}
+.l-body .a-blocks{gap:16px}
+.l-body .a-icards{display:block;background:transparent;padding:0}
+.dm .l-body .a-icards .a-icard{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;row-gap:2px;padding:12px 0;border-radius:0;background:transparent;border-top:1px solid var(--line)}
+.l-body .a-icards .a-icard:first-child{border-top:0}
+.l-body .a-icard .a-ico{grid-row:span 2;width:40px;height:40px;border-radius:12px}
+.l-ok{margin-top:16px}
+@media (max-width:720px){.l-list.card{padding:2px 16px}.l-body{padding-left:0}.l-head{font-size:16px}}
+/* Переключатель вариантов знакомства в полосе прототипа */
+.a-var-cap{margin-left:8px}
+.a-var{height:34px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:14px;font-weight:500;color:var(--ink-2);text-decoration:none}
+.a-var:hover{text-decoration:none;background:rgba(255,255,255,.5)}
+.a-var.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.c-card.card{min-height:280px;display:flex;flex-direction:column;justify-content:center}
+@media (max-width:720px){.c-card.card{min-height:52vh}}
 
 </style>
 </helmet>
@@ -1197,6 +1233,36 @@ const ICON_KEYS = ['palette','book','users','user','heart','home','hand','shield
 const icoFlags = name => { const o = {}; ICON_KEYS.forEach(k => { o['ic_' + k.replace('-', '_')] = k === name; }); return o; };
 // В прототипе без анкеты показываем всё на демо-кандидате, чтобы ничего не заполнять руками
 const ensureCandidate = () => { const me = loadCandidate(); if (me) return me; demoWrite('candidate', DEMO_CANDIDATE); return DEMO_CANDIDATE; };
+
+// Знакомство с фондом: блоки шага → данные для шаблона onb-blocks.html (общие для всех вариантов)
+const BLOCK_FLAGS = ['isLead','isFacts','isTimeline','isIcards','isStory','isRules','isPhrases','isQuiz','isVideo','isCallout'];
+const CARD_TINTS = ['a-ic-o','a-ic-b','a-ic-g','a-ic-v','a-ic-y'];
+function onbBlockView(b,mi,bi,quiz,setQuiz){const v={};BLOCK_FLAGS.forEach(k=>v[k]=false);v['is'+b.type[0].toUpperCase()+b.type.slice(1)]=true;
+  v.text=b.text||'';v.title=b.title||'';v.hasTitle=!!b.title;v.intro=b.intro||'';v.duration=b.duration||'';v.cls=(b.tone==='warn'?'error':'hint')+' a-reveal';
+  const it=b.items||[];
+  if(b.type==='facts')v.items=it.map(([n,l])=>({n,l,to:parseInt(n,10)||0,suffix:String(n).replace(/^\d+/,'')}));
+  else if(b.type==='timeline')v.items=it.map(([y,t,d])=>({y,t,d}));
+  else if(b.type==='icards')v.items=it.map(x=>({...x,...icoFlags(x.icon),cls:'a-icard a-reveal '+CARD_TINTS[(bi||0)%CARD_TINTS.length]}));
+  else if(b.type==='story')v.items=it.map(([t,d,icon],k)=>({t,d,...icoFlags(icon),cls:'a-stage a-reveal '+['a-ic-b','a-ic-y','a-ic-g'][k%3]}));
+  else if(b.type==='rules')v.items=it.map((t,k)=>({t,n:k+1}));
+  else if(b.type==='phrases')v.items=it.map(([say,avoid])=>({say,avoid}));
+  else if(b.type==='quiz')v.items=it.map((x,k)=>{const key=mi+'-'+k,ans=quiz[key],answered=ans!=null,ok=ans===x.a;
+   return {q:x.q,e:x.e,answered,fbCls:'a-fb '+(ok?'is-ok':'is-bad'),fbHead:ok?'Верно':'Не совсем',
+    opts:x.o.map((o,j)=>({text:o,locked:answered,cls:'a-qopt'+(answered&&j===x.a?' is-right':'')+(answered&&j===ans&&!ok?' is-wrong':''),pick:()=>setQuiz({...quiz,[key]:j})}))};});
+  else v.items=[];
+  return v;}
+// Тест знакомства: общий для всех вариантов. c — компонент со state.run и state.pr и методом save
+function onbTestVals(c,isTest){const s=c.state,pr=s.pr,T=ONB.test,N=T.questions.length,run=s.run,inQ=!!run&&run.i<N,showRes=isTest&&(pr.testDone||(!!run&&run.i>=N)),q=inQ?T.questions[run.i]:null,ans=inQ?run.answers[run.i]:null,answered=ans!=null,ok=answered&&ans===q.a;
+  const score=pr.testDone?pr.score:(run?run.answers.filter((a,k)=>a===T.questions[k].a).length:0);
+  return {
+   testTitle:T.title,testText:T.intro,testIntro:isTest&&!run&&!pr.testDone,start:()=>c.setState({run:{i:0,answers:[]}}),
+   testQuestion:isTest&&inQ,qNum:inQ?run.i+1:0,qTotal:N,qText:q?q.q:'',
+   qOpts:q?q.o.map((o,j)=>({text:o,locked:answered,cls:'a-answer'+(answered&&j===q.a?' is-right':'')+(answered&&j===ans&&!ok?' is-wrong':''),pick:()=>{const answers=[...run.answers];answers[run.i]=j;c.setState({run:{...run,answers}});}})):[],
+   answered,sheetCls:'a-sheet-card '+(ok?'is-ok':'is-bad'),sheetMark:ok?'✓':'✕',explHead:ok?'Верно!':'Не совсем',expl:q?q.e:'',
+   nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Завершить',
+   nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;c.save({...pr,testDone:true,score:sc});}c.setState({run:r});window.scrollTo(0,0);},
+   resultNext:(()=>{const mt=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));return mt?.status==='booked'?'Ждём вас на встрече с координатором: '+interviewDay(mt.date)+', '+mt.start+'.':'Дальше — встреча с координатором. Выбрать время можно в личном кабинете.';})(),
+   testResult:showRes,scoreLine:'Правильных ответов: '+score+' из '+N};}
 
 // Shared browser demo registry for candidate progress, availability and interviews.
 // Stored locally on this origin; no real invitations or reminders are sent.

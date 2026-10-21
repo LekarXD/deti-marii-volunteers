@@ -1,0 +1,16 @@
+<div class="demo" role="group" aria-label="Состояния прототипа"><span class="demo-cap">Прототип:</span><button onClick="{{restart}}">Начать сначала</button><!--ONB_VARIANTS--></div>
+<div class="l-wrap">
+<div class="a-ohead"><p class="eyebrow">{{stepLabel}}</p><div class="a-seg" aria-hidden="true"><sc-for list="{{segs}}" as="sg"><i class="{{sg.cls}}"></i></sc-for></div></div>
+<sc-if value="{{isModule}}"><h1 class="h1 a-modtitle">{{modTitle}}</h1><sc-if value="{{hasLead}}"><p class="a-lead">{{lead}}</p></sc-if>
+<div class="l-list card"><sc-for list="{{topics}}" as="it"><div class="{{it.cls}}">
+<button class="l-head" aria-expanded="{{it.open}}" onClick="{{it.toggle}}"><span class="l-mark" aria-hidden="true">{{it.mark}}</span><span class="l-title">{{it.title}}</span><span class="l-chev" aria-hidden="true">ICON_DOWN</span></button>
+<sc-if value="{{it.open}}"><div class="l-body">
+<!--ONB_BLOCKS:it.blocks-->
+<button class="btn btn-primary l-ok" onClick="{{it.ok}}">Понятно</button></div></sc-if>
+</div></sc-for></div>
+<div class="actions a-nav"><span class="meta num">{{seenLine}}</span><span class="grow"></span><button class="{{doneCls}}" disabled="{{doneLocked}}" onClick="{{done}}">{{doneLabel}}</button></div>
+</sc-if>
+<sc-if value="{{isTest}}"><h1 class="h1 a-modtitle">{{testTitle}}</h1>
+<!--ONB_TEST-->
+</sc-if>
+</div>

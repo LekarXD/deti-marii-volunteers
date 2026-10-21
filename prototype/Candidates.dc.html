@@ -762,6 +762,36 @@ const icoFlags = name => { const o = {}; ICON_KEYS.forEach(k => { o['ic_' + k.re
 // В прототипе без анкеты показываем всё на демо-кандидате, чтобы ничего не заполнять руками
 const ensureCandidate = () => { const me = loadCandidate(); if (me) return me; demoWrite('candidate', DEMO_CANDIDATE); return DEMO_CANDIDATE; };
 
+// Знакомство с фондом: блоки шага → данные для шаблона onb-blocks.html (общие для всех вариантов)
+const BLOCK_FLAGS = ['isLead','isFacts','isTimeline','isIcards','isStory','isRules','isPhrases','isQuiz','isVideo','isCallout'];
+const CARD_TINTS = ['a-ic-o','a-ic-b','a-ic-g','a-ic-v','a-ic-y'];
+function onbBlockView(b,mi,bi,quiz,setQuiz){const v={};BLOCK_FLAGS.forEach(k=>v[k]=false);v['is'+b.type[0].toUpperCase()+b.type.slice(1)]=true;
+  v.text=b.text||'';v.title=b.title||'';v.hasTitle=!!b.title;v.intro=b.intro||'';v.duration=b.duration||'';v.cls=(b.tone==='warn'?'error':'hint')+' a-reveal';
+  const it=b.items||[];
+  if(b.type==='facts')v.items=it.map(([n,l])=>({n,l,to:parseInt(n,10)||0,suffix:String(n).replace(/^\d+/,'')}));
+  else if(b.type==='timeline')v.items=it.map(([y,t,d])=>({y,t,d}));
+  else if(b.type==='icards')v.items=it.map(x=>({...x,...icoFlags(x.icon),cls:'a-icard a-reveal '+CARD_TINTS[(bi||0)%CARD_TINTS.length]}));
+  else if(b.type==='story')v.items=it.map(([t,d,icon],k)=>({t,d,...icoFlags(icon),cls:'a-stage a-reveal '+['a-ic-b','a-ic-y','a-ic-g'][k%3]}));
+  else if(b.type==='rules')v.items=it.map((t,k)=>({t,n:k+1}));
+  else if(b.type==='phrases')v.items=it.map(([say,avoid])=>({say,avoid}));
+  else if(b.type==='quiz')v.items=it.map((x,k)=>{const key=mi+'-'+k,ans=quiz[key],answered=ans!=null,ok=ans===x.a;
+   return {q:x.q,e:x.e,answered,fbCls:'a-fb '+(ok?'is-ok':'is-bad'),fbHead:ok?'Верно':'Не совсем',
+    opts:x.o.map((o,j)=>({text:o,locked:answered,cls:'a-qopt'+(answered&&j===x.a?' is-right':'')+(answered&&j===ans&&!ok?' is-wrong':''),pick:()=>setQuiz({...quiz,[key]:j})}))};});
+  else v.items=[];
+  return v;}
+// Тест знакомства: общий для всех вариантов. c — компонент со state.run и state.pr и методом save
+function onbTestVals(c,isTest){const s=c.state,pr=s.pr,T=ONB.test,N=T.questions.length,run=s.run,inQ=!!run&&run.i<N,showRes=isTest&&(pr.testDone||(!!run&&run.i>=N)),q=inQ?T.questions[run.i]:null,ans=inQ?run.answers[run.i]:null,answered=ans!=null,ok=answered&&ans===q.a;
+  const score=pr.testDone?pr.score:(run?run.answers.filter((a,k)=>a===T.questions[k].a).length:0);
+  return {
+   testTitle:T.title,testText:T.intro,testIntro:isTest&&!run&&!pr.testDone,start:()=>c.setState({run:{i:0,answers:[]}}),
+   testQuestion:isTest&&inQ,qNum:inQ?run.i+1:0,qTotal:N,qText:q?q.q:'',
+   qOpts:q?q.o.map((o,j)=>({text:o,locked:answered,cls:'a-answer'+(answered&&j===q.a?' is-right':'')+(answered&&j===ans&&!ok?' is-wrong':''),pick:()=>{const answers=[...run.answers];answers[run.i]=j;c.setState({run:{...run,answers}});}})):[],
+   answered,sheetCls:'a-sheet-card '+(ok?'is-ok':'is-bad'),sheetMark:ok?'✓':'✕',explHead:ok?'Верно!':'Не совсем',expl:q?q.e:'',
+   nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Завершить',
+   nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;c.save({...pr,testDone:true,score:sc});}c.setState({run:r});window.scrollTo(0,0);},
+   resultNext:(()=>{const mt=interviewCurrent(interviewRead(),interviewIdentity(loadCandidate()));return mt?.status==='booked'?'Ждём вас на встрече с координатором: '+interviewDay(mt.date)+', '+mt.start+'.':'Дальше — встреча с координатором. Выбрать время можно в личном кабинете.';})(),
+   testResult:showRes,scoreLine:'Правильных ответов: '+score+' из '+N};}
+
 // Shared browser demo registry for candidate progress, availability and interviews.
 // Stored locally on this origin; no real invitations or reminders are sent.
 const INTERVIEW_KEY = 'opora-interviews-v1';
