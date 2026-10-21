@@ -27,6 +27,8 @@ class WebinarView(WebinarInput):
     enrollment_state:str|None=None
     enrollment_version:int|None=None
     can_host:bool=False
+    can_manage_summary:bool=False
+    summary_available:bool=False
     session_id:UUID|None=None
 class StudioSessionCreate(BaseModel):
     resource_kind:Literal['live_event','lesson_recording_project']

@@ -14,7 +14,8 @@ from app.core.models import User,Foundation,Session,StaffMembership,PermissionGr
 from app.modules.studio.tests.test_studio import world
 from app.modules.studio.models import Webinar,WebinarEnrollment
 from app.modules.studio.summary_models import WebinarSummaryRevision,WebinarSummaryDelivery
-from app.modules.studio.summary_router import router,edit_summary,published_summary
+from app.modules.studio.summary_router import edit_summary,published_summary
+from app.modules.studio.router import router
 from app.modules.studio.summary_schemas import SummaryEditInput
 from app.modules.studio import summary_notifications
 from app.modules.notifications.models import NotificationPreference
@@ -37,7 +38,7 @@ async def scenario(world,monkeypatch):
         db.add(WebinarEnrollment(foundation_id=w.foundation.id,webinar_id=webinar.id,user_id=blocked.id));db.add(NotificationPreference(foundation_id=w.foundation.id,user_id=blocked.id,no_contact=True))
         foreign=Foundation(name='Другой фонд');db.add(foreign);await db.flush();foreign_webinar=Webinar(foundation_id=foreign.id,host_user_id=w.host.user_id,title='Чужая встреча',starts_at=utcnow()-timedelta(days=1),state='ended');db.add(foreign_webinar)
         await db.commit();w.host=await resolve_principal(db,host_session)
-    app=FastAPI();install_error_handlers(app);app.include_router(router,prefix='/api/v1')
+    app=FastAPI();install_error_handlers(app);app.include_router(router)
     async def database():
         async with w.factory() as db:yield db
     app.dependency_overrides[get_db]=database
@@ -75,7 +76,7 @@ async def test_real_summary_review_publication_preview_delivery_and_replay(scena
     async with w.factory() as db:assert await db.scalar(select(func.count()).select_from(OutboxMessage))==0
     response=await post(f,'review',dict(expected_version=value['version'],revision=1));value=response.json()
     body=dict(expected_version=value['version'],revision=1);response=await post(f,'publish',body,'publish-once');value=response.json();assert await post(f,'publish',body,'publish-once') is not None
-    f.client.cookies.set('opora_session','summary-viewer');published=(await f.client.get(f'/api/v1/webinars/{f.id}/summary/published')).json();assert published['body']=='Что обсудили и что сделать дальше.' and 'draft' not in published
+    f.client.cookies.set('opora_session','summary-viewer');webinars=(await f.client.get('/api/v1/webinars')).json();assert len(webinars)==1 and webinars[0]['summary_available'] and not webinars[0]['can_manage_summary'];published=(await f.client.get(f'/api/v1/webinars/{f.id}/summary/published')).json();assert published['body']=='Что обсудили и что сделать дальше.' and 'draft' not in published
     f.client.cookies.set('opora_session','summary-host');audience=await preview(f,value);assert audience['eligible_count']==1 and len(audience['members'])==2
     assert next(x for x in audience['members'] if x['user_id']==str(f.blocked.id))['reason']=='no_contact'
     response=await post(f,'send',send_body(value,audience),'send-once');assert response.status_code==200,response.text
@@ -97,6 +98,7 @@ async def test_audience_changes_require_new_preview_and_current_enrollment_at_di
     audience=await preview(f,value);assert (await post(f,'send',send_body(value,audience))).status_code==200
     async with f.w.factory() as db:
         enrollment=await db.scalar(select(WebinarEnrollment).where(WebinarEnrollment.webinar_id==f.id,WebinarEnrollment.user_id==f.w.viewer.user_id));enrollment.state='revoked';enrollment.version+=1;await db.commit()
+    f.client.cookies.set('opora_session','summary-viewer');assert (await f.client.get('/api/v1/webinars')).json()==[]
     assert await dispatch(f.w)=='suppressed_summary_enrollment'
     async with f.w.factory() as db:
         assert await db.scalar(select(func.count()).select_from(Message))==0
@@ -133,3 +135,25 @@ async def test_edit_compare_and_swap_and_unfinished_webinar_denial(scenario):
     async with f.w.factory() as db:
         webinar=await db.get(Webinar,f.id);webinar.state='published';await db.commit()
     response=await f.client.get(f'/api/v1/webinars/{f.id}/summary');assert response.status_code==409
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('policy',['no_contact','quiet'])
+async def test_current_recipient_policy_applies_at_actual_dispatch(scenario,policy):
+    f=scenario;value=await publish(f);audience=await preview(f,value);assert (await post(f,'send',send_body(value,audience))).status_code==200
+    async with f.w.factory() as db:
+        values=dict(foundation_id=f.w.foundation.id,user_id=f.w.viewer.user_id)
+        if policy=='no_contact':values['no_contact']=True
+        else:
+            minute=utcnow().hour*60+utcnow().minute;values.update(quiet_enabled=True,timezone='UTC',quiet_from=(minute-1)%1440,quiet_to=(minute+60)%1440)
+        db.add(NotificationPreference(**values));await db.commit()
+    assert await dispatch(f.w)==('suppressed_no_contact' if policy=='no_contact' else 'deferred_quiet')
+    async with f.w.factory() as db:assert await db.scalar(select(func.count()).select_from(Message))==0
+
+
+@pytest.mark.asyncio
+async def test_revoked_sending_session_suppresses_queued_summary(scenario):
+    f=scenario;value=await publish(f);audience=await preview(f,value);assert (await post(f,'send',send_body(value,audience))).status_code==200
+    async with f.w.factory() as db:
+        session=await db.get(Session,f.w.host.session_id);session.revoked_at=utcnow();await db.commit()
+    assert await dispatch(f.w)=='suppressed_summary_sender'

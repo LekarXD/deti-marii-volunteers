@@ -4,7 +4,7 @@ from uuid import UUID,uuid4
 import time
 from fastapi import APIRouter,Depends,Header,Request
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import select
+from sqlalchemy import select,or_,and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import Principal,get_principal,authz_guard,resolve_principal
@@ -17,6 +17,7 @@ from app.core.rate_limit import rate_limit
 from app.worker.queue import enqueue_job
 from app.integrations.rtc.livekit import RtcSettings,LiveKitAdapter,RevocationPolicy,ProviderError,identity
 from .models import Webinar,WebinarEnrollment,StudioSession,StudioBoardGrant
+from .summary_models import WebinarSummary
 from .schemas import WebinarInput,WebinarView,WebinarUpdate,StudioVersionCommand,StudioSessionCreate,StudioSessionView,StudioSceneCommand,StudioJoinView,StudioEnrollmentView,StudioBoardPass,StudioBoardGrantInput,SlideDeckView,SlideUploadInput,StudioBoardSnapshotInput,StudioParticipantView
 from . import service as s
 router=APIRouter(prefix='/api/v1',tags=['studio'])
@@ -42,12 +43,15 @@ async def manage_scope(p):require_manage(p)
 async def webinar_view(db,p,row):
     enrollment=await db.scalar(select(WebinarEnrollment).where(WebinarEnrollment.webinar_id==row.id,WebinarEnrollment.user_id==p.user_id)) if p.user_id else None
     current=await db.scalar(select(StudioSession).where(StudioSession.resource_kind=='live_event',StudioSession.resource_id==row.id,StudioSession.state.in_(['prepared','opening','live','closing'])))
-    return WebinarView.model_validate(row).model_dump()|{'enrollment_state':enrollment.state if enrollment else None,'enrollment_version':enrollment.version if enrollment else None,'can_host':p.user_id==row.host_user_id and (p.has_permission('studio.manage') or p.has_permission('studio.host','webinar',row.id)),'session_id':current.id if current else None}
+    available=await db.scalar(select(WebinarSummary.id).where(WebinarSummary.webinar_id==row.id,WebinarSummary.foundation_id==p.foundation_id,WebinarSummary.published_revision.is_not(None))) if row.state=='ended' else None
+    return WebinarView.model_validate(row).model_dump()|{'summary_available':bool(available),'can_manage_summary':p.has_permission('studio.manage'),'enrollment_state':enrollment.state if enrollment else None,'enrollment_version':enrollment.version if enrollment else None,'can_host':p.user_id==row.host_user_id and (p.has_permission('studio.manage') or p.has_permission('studio.host','webinar',row.id)),'session_id':current.id if current else None}
 
 @router.get('/webinars',response_model=list[WebinarView])
 async def webinars(db:AsyncSession=Depends(get_db),p:Principal=Depends(get_principal)):
     query=select(Webinar).where(Webinar.foundation_id==p.foundation_id)
-    if not p.has_permission('studio.manage'):query=query.where(Webinar.state=='published')
+    if not p.has_permission('studio.manage'):
+        enrolled=select(WebinarEnrollment.webinar_id).where(WebinarEnrollment.foundation_id==p.foundation_id,WebinarEnrollment.user_id==p.user_id,WebinarEnrollment.state=='enrolled')
+        query=query.where(or_(Webinar.state=='published',and_(Webinar.state=='ended',Webinar.id.in_(enrolled))))
     rows=(await db.scalars(query.order_by(Webinar.starts_at))).all()
     return [await webinar_view(db,p,row) for row in rows]
 

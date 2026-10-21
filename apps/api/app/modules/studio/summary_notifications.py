@@ -1,7 +1,9 @@
 """P17 reconstructs published text after current sender/enrollment authorization."""
 from uuid import UUID
 from sqlalchemy import select
-from app.core.auth import load_background_staff_authorization,assert_background_authorizations_locked
+from app.core.auth import resolve_principal,assert_background_authorizations_locked
+from app.core.models import Session
+from app.core.clock import utcnow
 from app.core.errors import ApiError
 from app.modules.messaging.registry import register_notice_source
 from .models import Webinar,WebinarEnrollment
@@ -21,8 +23,13 @@ async def resolve_summary(db,outbox,source):
     delivery,summary=pair
     try:assert_background_authorizations_locked(db,outbox.foundation_id,[delivery.sender_user_id,delivery.recipient_id])
     except ApiError:return 'suppressed_summary_authz'
-    sender=await load_background_staff_authorization(db,outbox.foundation_id,delivery.sender_user_id)
-    if not sender or not sender.has_permission('studio.manage') or not sender.has_permission('notifications.send'):return 'suppressed_summary_sender'
+    try:session_id=UUID(source['sender_session_id'])
+    except (ValueError,TypeError,KeyError):return 'suppressed_summary_sender'
+    session=await db.get(Session,session_id,populate_existing=True)
+    if not session or session.user_id!=delivery.sender_user_id or session.foundation_id!=outbox.foundation_id or session.revoked_at or session.expires_at<=utcnow():return 'suppressed_summary_sender'
+    try:sender=await resolve_principal(db,session)
+    except ApiError:return 'suppressed_summary_sender'
+    if not sender.has_permission('studio.manage') or not sender.has_permission('notifications.send'):return 'suppressed_summary_sender'
     webinar=await db.scalar(select(Webinar).where(Webinar.id==summary.webinar_id,Webinar.foundation_id==outbox.foundation_id).with_for_update())
     await db.refresh(summary,with_for_update=True)
     if not webinar or webinar.state!='ended' or summary.published_revision!=delivery.published_revision:return 'suppressed_summary_stale'

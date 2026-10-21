@@ -89,7 +89,7 @@ async def send(db,p,webinar,body):
     deliveries=[]
     for item in selected:
         delivery=WebinarSummaryDelivery(id=uuid4(),summary_id=row.id,published_revision=row.published_revision,recipient_id=UUID(item['user_id']),sender_user_id=p.user_id)
-        outbox=enqueue_notice(db,p.foundation_id,delivery.recipient_id,'','',topic='learning',source={'kind':'webinar_summary','delivery_id':str(delivery.id)})
+        outbox=enqueue_notice(db,p.foundation_id,delivery.recipient_id,'','',topic='learning',source={'kind':'webinar_summary','delivery_id':str(delivery.id),'sender_session_id':str(p.session_id)})
         delivery.outbox_id=outbox.id;db.add(delivery);deliveries.append(delivery.id)
     value.consumed_at=utcnow();await db.flush();audit(db,p,'studio.summary.send','webinar',webinar.id,('published_revision','audience'))
     return dict(state='queued',enqueued=len(deliveries),delivery_ids=deliveries)
