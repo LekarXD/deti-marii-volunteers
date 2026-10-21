@@ -40,6 +40,21 @@ Final acceptance must record the integrator's final commit and runtime release.
   invented test data and is stored privately outside the checkout.
 - Compose syntax validates with `docker-compose ... config --quiet`.
 
+## Bounded follow-up after the P14 receipt finding
+
+Ten additional real HTTP/PG cases passed (1.13 seconds): role, opportunity,
+calendar-series, private participant-note and private messaging-group creation,
+with both a new command and an old receipt. Each queues an actual capability
+revoke before the command's shared authorization guard; revoke commits first,
+and the waiting command plus a direct post-commit replay return 403. Capabilities
+are restored through the authorized admin API after each isolated test.
+
+Two additional messaging membership cases passed (1.37 seconds). An actual
+coordinator member revoke wins the conversation lock before a verified member's
+new send or old send receipt. The removed member cannot read detail, history or
+sync, and a denied send appends no message. These checks found no further runtime
+failure in the five requested domains. They do not certify unrelated commands.
+
 ## Defects found and resolved
 
 1. A waiting interview mutation could execute after a committed permission revoke.

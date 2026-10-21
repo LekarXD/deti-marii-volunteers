@@ -127,3 +127,21 @@ def postgres(environment):
         assert found, "CLI fixture foundation must be in the same test database"
     yield connection
     connection.close()
+
+
+@pytest.fixture
+def signed_in_candidate(environment):
+    client = Client(environment["base"], environment["origin"])
+    email = environment["fixture"]["identities"]["candidate-one@example.test"]["email"]
+    challenge = client.command("POST", "/auth/challenges", {"email": email, "purpose": "login"})
+    process = subprocess.run(
+        [sys.executable, "-m", "app.cli", "dev-inbox", "--email", email],
+        cwd=os.environ.get("OPORA_G1_API_DIR", str(Path(__file__).resolve().parents[2] / "apps/api")),
+        check=True, capture_output=True, text=True,
+    )
+    token = next(row["token"] for row in json.loads(process.stdout) if row["challenge_id"] == challenge["challenge_id"])
+    client.command("POST", "/auth/challenges/verify", {"challenge_id": challenge["challenge_id"], "token": token})
+    client.refresh()
+    assert client.session["user_id"] and client.session["is_staff"] is False
+    yield client
+    client.close()
