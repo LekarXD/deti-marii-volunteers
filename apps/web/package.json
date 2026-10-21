@@ -12,6 +12,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@excalidraw/excalidraw": "0.17.6",
     "@tanstack/react-query": "5.100.6",
     "livekit-client": "2.22.3",
     "lucide-react": "0.556.0",
@@ -19,6 +20,9 @@
     "react-dom": "18.3.1",
     "react-hook-form": "7.71.1",
     "react-router-dom": "6.30.4",
+    "y-excalidraw": "2.0.12",
+    "y-websocket": "3.1.0",
+    "yjs": "13.6.33",
     "zod": "4.3.6"
   },
   "devDependencies": {
