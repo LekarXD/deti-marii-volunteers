@@ -3,3 +3,6 @@
 @media(max-width:720px){.studio-frame{border-radius:18px}.studio-preview-settings{grid-template-columns:1fr}.studio-readiness{align-items:flex-start}.studio-blocked{padding:20px}.studio-blocked p{font-size:18px}.studio-blocked small{font-size:15px}}
 /* A rejected frame is status UI, never a capturable composition: keep the reason readable at phone widths. */
 .studio-scale:has(>.studio-blocked){transform:none!important;width:100%;height:100%}.studio-scale>.studio-blocked{width:100%!important;height:100%!important;aspect-ratio:auto}
+
+/* Continuous read-only board view uses the same content rect; source Excalidraw controls stay outside the stage. */
+.studio-board-surface{width:100%;height:100%;overflow:hidden;pointer-events:none}.studio-board-surface .excalidraw .layer-ui__wrapper{display:none!important}.studio-board-surface .App-menu_top,.studio-board-surface .layer-ui__wrapper__top-right,.studio-board-surface .layer-ui__wrapper__footer{display:none}
