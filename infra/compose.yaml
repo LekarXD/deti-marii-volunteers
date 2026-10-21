@@ -1,0 +1,57 @@
+name: opora-local
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: opora
+      POSTGRES_USER: opora
+      POSTGRES_PASSWORD: ${OPORA_POSTGRES_PASSWORD:?set OPORA_POSTGRES_PASSWORD in infra/.env}
+    ports: ["127.0.0.1:55432:5432"]
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opora -d opora"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  migrate:
+    build: {context: .., dockerfile: infra/docker/api.Dockerfile}
+    command: ["alembic", "upgrade", "head"]
+    environment: &api-environment
+      OPORA_ENVIRONMENT: development
+      OPORA_DATABASE_URL: postgresql+psycopg://opora:${OPORA_POSTGRES_PASSWORD}@postgres:5432/opora
+      OPORA_TRUSTED_ORIGINS: '["http://localhost:8080","http://127.0.0.1:8080"]'
+      OPORA_COOKIE_SECURE: "false"
+      OPORA_DELIVERY_PROVIDER: unavailable
+      OPORA_AI_PROVIDER: unavailable
+      OPORA_RTC_PROVIDER: unavailable
+    depends_on:
+      postgres: {condition: service_healthy}
+  api:
+    build: {context: .., dockerfile: infra/docker/api.Dockerfile}
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--no-access-log"]
+    environment: *api-environment
+    ports: ["127.0.0.1:8001:8001"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health/ready',timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  worker:
+    build: {context: .., dockerfile: infra/docker/api.Dockerfile}
+    command: ["python", "-m", "app.worker.main"]
+    environment: *api-environment
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  web:
+    build: {context: .., dockerfile: infra/docker/web.Dockerfile}
+    ports: ["127.0.0.1:8080:8080"]
+    depends_on:
+      api: {condition: service_healthy}
+  inbox:
+    image: axllent/mailpit:v1.21
+    profiles: [delivery-dev]
+    ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
+volumes:
+  postgres-data:

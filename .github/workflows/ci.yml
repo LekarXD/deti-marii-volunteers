@@ -1,0 +1,45 @@
+name: opora-ci
+on: [push, pull_request]
+permissions:
+  contents: read
+concurrency:
+  group: opora-ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: opora
+          POSTGRES_PASSWORD: ci-local-only
+          POSTGRES_DB: opora_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U opora -d opora_test"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      OPORA_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_test
+      OPORA_ENVIRONMENT: development
+      PYTHONPATH: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '26'}
+      - run: corepack enable && corepack prepare pnpm@11.3.0 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: python -m pip install -e 'apps/api[test]'
+      - name: Empty database migration and one Alembic head
+        working-directory: apps/api
+        run: |
+          python -c 'from alembic.config import Config; from alembic.script import ScriptDirectory; assert len(ScriptDirectory.from_config(Config("alembic.ini")).get_heads()) == 1'
+          alembic upgrade head
+          alembic check
+      - run: pnpm typecheck && pnpm build && pnpm test
+      - run: python -m pytest apps/api/tests tests/contract -q
+      - name: Generated SDK drift
+        run: sh infra/scripts/check-openapi.sh
