@@ -104,6 +104,7 @@ async def readiness(body:RendererReadinessInput,scope=Depends(active_renderer)):
     if body.renderer_state_version!=take.renderer_state_version or body.projection_hash!=take.projection_hash:
         raise ApiError(409,'renderer_state_conflict','Композиция записи изменилась',current_version=take.renderer_state_version)
     reasons=[]
+    if not body.visual_ready:reasons.append('visual_frame_unready')
     plan=take.projection['capture_plan']
     if plan['privacy_state']!='approved':reasons.append('privacy_not_approved')
     if (body.viewport_width,body.viewport_height,body.device_pixel_ratio)!=(1920,1080,1):reasons.append('viewport_mismatch')
@@ -120,9 +121,10 @@ async def readiness(body:RendererReadinessInput,scope=Depends(active_renderer)):
     wanted={str(x['asset_id']):x['sha256'] for x in take.projection['resolved_assets']}
     proofs={str(x.asset_id):x.sha256 for x in body.asset_proofs}
     if len(proofs)!=len(body.asset_proofs) or proofs!=wanted:reasons.append('asset_checksum_mismatch')
+    valid_until=utcnow()+timedelta(seconds=10) if not reasons else None
     take.readiness_state='ready' if not reasons else 'blocked'
-    take.readiness=body.model_dump(mode='json')|{'reasons':sorted(set(reasons)),'grant_id':str(grant.id),'received_at':utcnow().isoformat()}
-    value={'ready':not reasons,'reasons':sorted(set(reasons)),'renderer_state_version':take.renderer_state_version,'projection_hash':take.projection_hash,'capture_state':take.state}
+    take.readiness=body.model_dump(mode='json')|{'reasons':sorted(set(reasons)),'grant_id':str(grant.id),'received_at':utcnow().isoformat(),'valid_until':valid_until.isoformat() if valid_until else None}
+    value={'ready':not reasons,'reasons':sorted(set(reasons)),'renderer_state_version':take.renderer_state_version,'projection_hash':take.projection_hash,'capture_state':take.state,'valid_until':valid_until}
     await db.commit()
     return value
 

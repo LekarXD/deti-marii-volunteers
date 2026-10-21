@@ -94,6 +94,7 @@ class RendererAssetProof(BaseModel):
     asset_id:UUID
     sha256:str=Field(pattern='^[0-9a-f]{64}$')
 class RendererReadinessInput(BaseModel):
+    visual_ready:bool
     renderer_state_version:int=Field(ge=1)
     projection_hash:str=Field(pattern='^[0-9a-f]{64}$')
     viewport_width:int=Field(ge=1,le=16384)
@@ -108,6 +109,7 @@ class RendererReadinessView(BaseModel):
     renderer_state_version:int
     projection_hash:str
     capture_state:str
+    valid_until:datetime|None
 class RecordingReviewCommand(RecordingVersionCommand):
     render_hash:str=Field(pattern='^[0-9a-f]{64}$')
     reason:str=Field(default='',max_length=4000)
