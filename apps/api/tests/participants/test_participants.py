@@ -199,3 +199,19 @@ async def test_cross_foundation_is_never_visible_and_scoped_leader_cannot_reassi
     assert (await clients['admin'].get(f'/api/v1/coord/participants/{foreign_id}')).status_code==404
     attempt=await mutate(clients['leader'],f"/api/v1/coord/groups/{g1['id']}",{'title':'Group one','leader_id':str(users['admin']),'expected_version':g1['version']},'PATCH')
     assert attempt.status_code==403
+
+
+@pytest.mark.asyncio
+async def test_concurrent_membership_writers_and_leader_change_revoke(env):
+    import asyncio
+    _,clients,_,_,_=env
+    a,b,g1,g2=await setup_people(env);c=clients['admin']
+    # Both writers observe one group version; the row lock forces exactly one winner.
+    body={'participant_id':b['id'],'valid_from':'2020-01-01','expected_version':g1['version']}
+    results=await asyncio.gather(*(mutate(c,f"/api/v1/coord/groups/{g1['id']}/memberships",body) for _ in range(2)))
+    assert sorted(r.status_code for r in results)==[200,409]
+    group=(await c.get(f"/api/v1/coord/groups/{g1['id']}")).json()
+    assert len(group['members'])==2
+    changed=await mutate(c,f"/api/v1/coord/groups/{g1['id']}",{'title':group['title'],'leader_id':None,'expected_version':group['version']},'PATCH')
+    assert changed.status_code==200
+    assert (await clients['leader'].get(f"/api/v1/coord/participants/{a['id']}")).status_code==404
