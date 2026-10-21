@@ -9,7 +9,7 @@ class Component extends DCLogic {
   const previous=s.edit?loadCandidate():null;const me={...data,...(previous?{interviewId:interviewIdentity(previous)}:{}),name:[data.firstName,data.lastName].filter(Boolean).join(' '),submittedAt:previous?.submittedAt||new Date().toISOString()};
   demoWrite('candidate',me);if(!s.edit)demoWrite('onboarding',freshProgress());demoWrite(s.edit?'apply-edit-draft':'apply-draft',s.edit?null:{step:0,data:{}});location.href='ApplicationStatus.dc.html'+(s.edit?'?updated=1':'');}
  renderVals(){const s=this.state,step=FORM.steps[s.step],last=s.step===FORM.steps.length-1;
-  return {candidateUnlocked:false,candidateLocked:true,candidateSection:'Анкета',candidateName:fullName(s.data),candidateInitials:fullName(s.data).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),isRegistering:!s.edit,eyebrow:s.edit?'Личный кабинет':'Стать волонтёром',isEditing:s.edit,title:s.edit?'Моя анкета':FORM.title,intro:s.edit?'Измените ответы. Знакомство с фондом и запись на встречу сохранятся.':FORM.intro,
+  return {candidateUnlocked:false,candidateLocked:true,candidateSection:'Анкета',candidateName:fullName(s.data),candidateInitials:fullName(s.data).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),isRegistering:!s.edit,eyebrow:s.edit?'Личный кабинет':'Стать волонтёром',isEditing:s.edit,title:s.edit?'Моя анкета':FORM.title,intro:s.edit?'Измените ответы. Знакомство с фондом и запись на встречу сохранятся.':FORM.intro,hasIntro:!!s.edit||!!FORM.intro,
    steps:FORM.steps.map((x,i)=>({label:(i+1)+'. '+x.title,cls:i===s.step?'chip is-on':(i<s.step?'chip a-done':'chip')})),
 
    stepTitle:step.title,path:FORM.path.map((x,i)=>({...x,...icoFlags(x.icon),cls:i===0?'is-now':''})),pathNote:FORM.pathNote,

@@ -13,7 +13,7 @@
 */
 window.FORM = {
   title: "Анкета волонтёра",
-  intro: "Мы рады, что вы хотите помогать. Три коротких шага — около 5 минут.",
+  intro: "",
   /* Путь кандидата — карточка справа от анкеты */
   path: [
     { icon: "edit", title: "Анкета", meta: "5 минут" },
@@ -53,21 +53,21 @@ window.FORM = {
             { label: "Фото, видео, соцсети", icon: "camera" },
             { label: "Мероприятия", icon: "star" },
             { label: "Ярмарки", icon: "home" },
-            { label: "Как специалист", icon: "settings" },
+            { label: "Юрист, IT, маркетинг", icon: "settings" },
             { label: "Пока не знаю", icon: "search" }
           ],
           exclusive: ["Пока не знаю"] },
         /* Навыки показываем только по выбранным направлениям, чтобы не смешивать шитьё и IT */
         { id: "skills", label: "Что умеете или любите делать?", type: "chips", optional: true, allowOther: true,
-          showIf: { field: "directions", value: ["Творчество", "Помощь на занятиях", "Обучение", "Психолог, логопед", "Фото, видео, соцсети", "Мероприятия", "Ярмарки", "Как специалист", "Пока не знаю"] },
+          showIf: { field: "directions", value: ["Творчество", "Помощь на занятиях", "Обучение", "Психолог, логопед", "Фото, видео, соцсети", "Мероприятия", "Ярмарки", "Юрист, IT, маркетинг", "Пока не знаю"] },
           groups: [
             { title: "Творчество", showIf: { field: "directions", value: ["Творчество", "Помощь на занятиях", "Мероприятия", "Ярмарки", "Пока не знаю"] },
               options: [{ label: "Керамика", icon: "palette" }, { label: "Живопись и рисунок", icon: "pen" }, { label: "Валяние", icon: "hand" }, { label: "Шитьё и вышивка", icon: "scissors" }, { label: "Кулинария", icon: "flame" }, { label: "Музыка и вокал", icon: "music" }, { label: "Театр", icon: "mask" }] },
             { title: "Обучение и игры", showIf: { field: "directions", value: ["Помощь на занятиях", "Обучение", "Психолог, логопед", "Мероприятия", "Пока не знаю"] },
               options: [{ label: "Педагогика", icon: "academy" }, { label: "Психология", icon: "heart" }, { label: "Школьные предметы", icon: "book" }, { label: "Английский", icon: "globe" }, { label: "Спорт и игры", icon: "dice" }] },
-            { title: "Медиа", showIf: { field: "directions", value: ["Фото, видео, соцсети", "Как специалист", "Пока не знаю"] },
+            { title: "Медиа", showIf: { field: "directions", value: ["Фото, видео, соцсети", "Юрист, IT, маркетинг", "Пока не знаю"] },
               options: [{ label: "Фотография", icon: "camera" }, { label: "Видео и монтаж", icon: "film" }, { label: "Дизайн", icon: "image" }, { label: "Соцсети", icon: "message" }] },
-            { title: "Работа фонда", showIf: { field: "directions", value: ["Ярмарки", "Как специалист", "Пока не знаю"] },
+            { title: "Работа фонда", showIf: { field: "directions", value: ["Ярмарки", "Юрист, IT, маркетинг", "Пока не знаю"] },
               options: [{ label: "Право", icon: "file" }, { label: "Маркетинг", icon: "chart" }, { label: "IT", icon: "screen" }, { label: "Финансы", icon: "database" }, { label: "Продажи", icon: "users" }] }
           ] },
         { id: "participation", label: "Как часто хотели бы помогать?", type: "select", required: true,
@@ -90,10 +90,10 @@ window.FORM = {
         /* Ссылку на Госуслуги в анкете не даём — человек уйдёт и не вернётся. Она появится в кабинете после отправки. */
         { id: "record", label: "Для работы с детьми нужна справка о несудимости. Она у вас есть?", type: "select", required: true,
           options: ["Справка уже есть", "Получу её"],
-          why: "Если нет — ссылку на Госуслуги дадим сразу после анкеты." },
+          why: "Если нет — ссылку на Госуслуги дадим сразу после анкеты" },
         { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
           options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья", "Мероприятие фонда", "Другое"] },
-        { id: "consentPD", label: "Я согласен(на) на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
+        { id: "consentPD", label: "Согласен на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
         { id: "consentNews", label: "Хочу получать новости и приглашения фонда", type: "consent" }
       ]
     }

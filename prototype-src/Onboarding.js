@@ -28,14 +28,14 @@ class Component extends DCLogic {
   const tint=bi=>m.blocks.slice(0,bi).filter(x=>x.type==='icards').length+cur.i;
   const toPrev=()=>this.open(prv.id,prv.mode==='cards'?prv.blocks.length-1:0);
   const finish=()=>{this.save({...pr,done:{...pr.done,[m.id]:true}});this.open(nxt?nxt.id:'test');};
-  return {candidateUnlocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status==='completed',candidateLocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status!=='completed',candidateSection:'Знакомство',candidateName:fullName(s.me),candidateInitials:fullName(s.me).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),stepLabel:'Знакомство с фондом · шаг '+stepN+' из '+total,
+  return {candidateUnlocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status==='completed',candidateLocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status!=='completed',candidateSection:'Знакомство',candidateName:fullName(s.me),candidateInitials:fullName(s.me).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),stepLabel:'Шаг '+stepN+' из '+total,
    segs:Array.from({length:total},(_,j)=>({cls:j<stepN-1?'is-done':(j===stepN-1?'is-on':'')})),
    isModule:!!m,isTest:!!cur.test,isCards:cards,isFeed:!!m&&!cards,modTitle:m?m.title:'',
    blocks:!m?[]:cards?[this.blockView(m.blocks[k],cur.i,tint(k))]:m.blocks.map((b,bi)=>this.blockView(b,cur.i,tint(bi))),
    cardCount:cards?(k+1)+' / '+n:'',hasBack:cards&&(k>0||!!prv),back:()=>{if(k>0)this.open(m.id,k-1);else toPrev();},
    nextLabel:!cards?'':(last?(nxt?'К следующему шагу':'К тесту'):'Дальше'),forward:()=>{if(!last)this.open(m.id,k+1);else finish();},
    hasPrev:!!prv,prev:toPrev,
-   doneLocked:!!m&&!unlocked,doneCls:'btn btn-lg '+(unlocked?'btn-primary a-unlocked':'btn-subtle'),doneLabel:!m?'':(unlocked?(nxt?'Понятно, дальше':'Понятно, к тесту'):'Дочитайте до конца ↓'),
+   doneLocked:!!m&&!unlocked,doneCls:'btn btn-lg '+(unlocked?'btn-primary a-unlocked':'btn-subtle'),doneLabel:!m?'':(unlocked?(nxt?'Понятно, дальше':'Понятно, к тесту'):'Дочитайте до конца'),
    done:()=>{if(m)finish();},
    restart:()=>{this.save(freshProgress());this.setState({view:null,k:0,read:{},quiz:{},run:null});window.scrollTo(0,0);},
    ...onbTestVals(this,!!cur.test),

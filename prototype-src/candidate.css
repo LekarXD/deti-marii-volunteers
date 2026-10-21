@@ -495,3 +495,7 @@
  .dm .card-hero .hero-title{font-size:32px;line-height:1.1}
 }
 .a-record{margin-top:12px}
+/* Всплывашка после записи: приглашение познакомиться с фондом с заметной кнопкой */
+.p-notice .a-notice-go{background:#fff;color:var(--ink);flex:0 0 auto}
+.p-notice .a-notice-go:hover{background:var(--soft)}
+@media (max-width:720px){.p-notice{width:calc(100% - 24px);justify-content:space-between;padding:10px 8px 10px 18px;gap:10px}}
