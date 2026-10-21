@@ -166,3 +166,15 @@ class AssessmentDraft(Base):
     version: Mapped[int] = mapped_column(BigInteger, default=1)
     status: Mapped[str] = mapped_column(String(20), default="draft")
     reviewed_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+
+
+class LessonTaskSubmission(Base):
+    __tablename__ = "lesson_task_submissions"
+    __table_args__ = (UniqueConstraint("assignment_id", "block_id"),)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    assignment_id: Mapped[UUID] = mapped_column(ForeignKey("learning_assignments.id"), index=True)
+    lesson_version_id: Mapped[UUID] = mapped_column(ForeignKey("lesson_versions.id"), index=True)
+    block_id: Mapped[UUID] = mapped_column(ForeignKey("lesson_blocks.id"))
+    answer_text: Mapped[str] = mapped_column(String(12000))
+    version: Mapped[int] = mapped_column(BigInteger, default=1)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

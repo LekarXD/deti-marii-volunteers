@@ -176,3 +176,37 @@ async def learning_asset(version_id: UUID, asset_id: UUID, principal: Principal 
     if asset is None:
         raise ApiError(404, "asset_not_found", "Файл не найден")
     return await asset_content(db, asset)
+
+from .schemas import TaskSubmit, TaskSubmissionView
+
+
+@router.get("/learning/assignments/{assignment_id}/tasks", response_model=list[TaskSubmissionView])
+async def get_tasks(assignment_id: UUID, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
+    return await service.task_submissions(db, principal, assignment_id)
+
+
+@router.post("/learning/lessons/{version_id}/tasks/{block_id}", response_model=TaskSubmissionView)
+async def submit_task(version_id: UUID, block_id: UUID, body: TaskSubmit, request: Request, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db), key: str | None = Header(None, alias="Idempotency-Key")):
+    return await command(db, principal, request, key, "learning.task_submit", {"id":str(block_id), "version_id":str(version_id), **body.model_dump(mode="json")}, lambda: service.submit_task(db, principal, version_id, block_id, body))
+
+
+@router.post("/coord/learning/lessons/{lesson_id}/preview/quiz/{block_position}")
+async def preview_quiz(lesson_id: UUID, block_position: int, body: MiniQuizInput, request: Request, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db), key: str | None = Header(None, alias="Idempotency-Key")):
+    return await command(db, principal, request, key, "learning.preview_quiz", {"id":str(lesson_id),"block_position":block_position,**body.model_dump(mode="json")}, lambda: authoring.preview_quiz(db, principal, lesson_id, block_position, body.question_index, body.selected_option))
+
+
+@router.get("/coord/learning/recipients")
+async def learning_recipients(search: str = "", principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    from app.core.models import User
+    authoring.permission(principal, "learning.write")
+    user_query = select(User).where(User.foundation_id == principal.foundation_id, User.account_state == "active")
+    if search:
+        user_query = user_query.where(User.display_name.ilike("%" + search[:100].replace("%", "").replace("_", "") + "%"))
+    users = (await db.scalars(user_query.order_by(User.display_name).limit(100))).all()
+    options = [dict(user_id=str(user.id), registration_id=None, application_id=None, label=user.display_name) for user in users]
+    if principal.has_permission("candidates.read"):
+        from app.modules.applications.service import learning_recipient_options
+        applications = await learning_recipient_options(db, principal, search)
+        options += [dict(user_id=None, registration_id=None, application_id=str(item["application_id"]), label=item["label"]) for item in applications]
+    return options

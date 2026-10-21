@@ -127,9 +127,14 @@ async def save_draft(db, principal, lesson_id, body):
 
 def question_errors(questions):
     errors = []
+    if not isinstance(questions, list):
+        return ["Вопросы должны быть списком"]
     if not questions:
         errors.append("Добавьте хотя бы один вопрос")
     for i, question in enumerate(questions):
+        if not isinstance(question, dict):
+            errors.append(f"Вопрос {i + 1}: некорректный формат")
+            continue
         options = question.get("o")
         answer = question.get("a")
         if not isinstance(question.get("q"), str) or not question["q"].strip():
@@ -154,8 +159,18 @@ async def block_errors(db, principal, blocks):
             errors.append(f"Блок {i + 1}: неизвестный тип")
         if kind in {"lead", "text", "task", "callout"} and not str(block.get("text", "")).strip():
             errors.append(f"Блок {i + 1}: заполните текст")
-        if kind in {"facts", "timeline", "icards", "story", "rules", "phrases"} and not isinstance(block.get("items"), list):
-            errors.append(f"Блок {i + 1}: заполните элементы")
+        if kind in {"facts", "timeline", "icards", "story", "rules", "phrases"}:
+            items = block.get("items")
+            if not isinstance(items, list) or not items:
+                errors.append(f"Блок {i + 1}: заполните элементы")
+            elif kind == "rules" and any(not isinstance(item, str) or not item.strip() for item in items):
+                errors.append(f"Блок {i + 1}: заполните текст правил")
+            elif kind == "icards" and any(not isinstance(item, dict) or not all(isinstance(item.get(key), str) and item[key].strip() for key in ["title", "text"]) for item in items):
+                errors.append(f"Блок {i + 1}: заполните карточки")
+            elif kind in {"facts", "timeline", "story", "phrases"}:
+                count = 3 if kind in {"timeline", "story"} else 2
+                if any(not isinstance(item, list) or len(item) < count or any(not isinstance(cell, str) for cell in item) for item in items):
+                    errors.append(f"Блок {i + 1}: проверьте строки")
         if kind == "quiz":
             errors += [f"Блок {i + 1}: {error}" for error in question_errors(block.get("items", []))]
         if kind in {"video", "file"}:
@@ -209,14 +224,17 @@ async def preview_lesson(db, principal, lesson_id):
     value = await lesson(db, principal, lesson_id)
     draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == value.id))
     if draft:
+        validation = await validate_lesson(db, principal, lesson_id)
+        if not validation["valid"]:
+            raise ApiError(422, "lesson_invalid", "Сначала исправьте блоки урока", field_errors={"blocks":validation["errors"]})
         # The exact learner renderer schema, no progress reads or writes.
-        blocks = [learner_block(LessonBlock(id=uuid4(), content=block)) for block in draft.blocks]
+        blocks = [{**learner_block(LessonBlock(id=uuid4(), content=block)), "id": str(position)} for position, block in enumerate(draft.blocks)]
         return dict(id=value.id, title=draft.title, minutes=draft.minutes, blocks=blocks)
     version = await db.get(LessonVersion, value.current_version_id) if value.current_version_id else None
     if version is None:
         raise ApiError(404, "preview_unavailable", "Нет материала для просмотра")
     blocks = (await db.scalars(select(LessonBlock).where(LessonBlock.lesson_version_id == version.id).order_by(LessonBlock.position))).all()
-    return dict(id=value.id, title=version.title, minutes=version.minutes, blocks=[learner_block(block) for block in blocks])
+    return dict(id=value.id, title=version.title, minutes=version.minutes, blocks=[{**learner_block(block), "id": str(position)} for position, block in enumerate(blocks)])
 
 
 async def save_assessment(db, principal, track_id, body):
@@ -303,6 +321,7 @@ async def publish_release(db, principal, track_id, body):
     assessment_id = current.assessment_version_id if current else None
     assessment = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == parent.id).with_for_update())
     if assessment and assessment.status != "published":
+        check_version(assessment.version, body.assessment_draft_version)
         if assessment.status != "reviewed":
             raise ApiError(409, "assessment_review_required", "Сначала согласуйте тест")
         errors = question_errors(assessment.questions)
@@ -353,6 +372,12 @@ async def archive_track(db, principal, track_id, expected_version):
 
 async def assign(db, principal, body):
     permission(principal, "learning.write")
+    if body.application_id:
+        if body.user_id or body.registration_id:
+            raise ApiError(422, "assignment_owner_required", "Выберите одного получателя")
+        from app.modules.applications.service import learning_recipient_owner
+        owner_data = await learning_recipient_owner(db, principal, body.application_id)
+        body = body.model_copy(update={"user_id": owner_data["user_id"], "registration_id": owner_data["registration_id"]})
     if bool(body.user_id) == bool(body.registration_id):
         raise ApiError(422, "assignment_owner_required", "Укажите одного получателя")
     owner = await db.get(User if body.user_id else RegistrationSession, body.user_id or body.registration_id)
@@ -371,3 +396,22 @@ async def assign(db, principal, body):
     db.add(value)
     await db.flush()
     return dict(id=str(value.id), release_id=str(value.release_id))
+
+
+async def preview_quiz(db, principal, lesson_id, block_position, question_index, selected_option):
+    permission(principal, "learning.read")
+    value = await lesson(db, principal, lesson_id)
+    draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == value.id))
+    if draft:
+        blocks = draft.blocks
+    else:
+        blocks = [block.content for block in (await db.scalars(select(LessonBlock).where(LessonBlock.lesson_version_id == value.current_version_id).order_by(LessonBlock.position))).all()]
+    if not 0 <= block_position < len(blocks) or blocks[block_position].get("type") != "quiz":
+        raise ApiError(404, "question_not_found", "Вопрос не найден")
+    items = blocks[block_position].get("items", [])
+    if question_index >= len(items):
+        raise ApiError(404, "question_not_found", "Вопрос не найден")
+    question = items[question_index]
+    if selected_option >= len(question.get("o", [])):
+        raise ApiError(422, "invalid_option", "Выберите вариант ответа")
+    return dict(correct=selected_option == question.get("a"), explanation=question.get("e", ""))

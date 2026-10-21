@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import Principal
 from app.core.errors import ApiError
-from .models import AssessmentAnswer, AssessmentAttempt, AssessmentQuestion, LearningAssignment, LearningRelease, LearningTrack, Lesson, LessonBlock, LessonProgress, LessonVersion
+from .models import AssessmentAnswer, AssessmentAttempt, AssessmentQuestion, AssessmentVersion, LearningAssignment, LearningRelease, LearningTrack, Lesson, LessonBlock, LessonProgress, LessonVersion
 
 
 def owner_scope(principal: Principal):
@@ -98,6 +98,12 @@ async def complete_lesson(db: AsyncSession, principal: Principal, version_id: UU
     release = await db.get(LearningRelease, item.release_id)
     if str(version_id) not in release.lesson_version_ids:
         raise ApiError(404, "lesson_not_found", "Материал не найден")
+    from .models import LessonTaskSubmission
+    required = (await db.scalars(select(LessonBlock).where(LessonBlock.lesson_version_id == version_id))).all()
+    required_ids = {block.id for block in required if block.content.get("type") == "task" and block.content.get("required") is True}
+    submitted_ids = set((await db.scalars(select(LessonTaskSubmission.block_id).where(LessonTaskSubmission.assignment_id == item.id))).all())
+    if not required_ids.issubset(submitted_ids):
+        raise ApiError(422, "tasks_incomplete", "Сначала сохраните ответы на обязательные задания")
     await db.execute(insert(LessonProgress).values(id=uuid4(), assignment_id=item.id, lesson_version_id=version_id).on_conflict_do_nothing())
     await update_completion(db, item)
     return dict(completed=True, assignment_completed=item.completed_at is not None)
@@ -122,10 +128,11 @@ async def attempt_view(db: AsyncSession, principal: Principal, attempt_id: UUID,
     item = await db.scalar(query)
     if item is None:
         raise ApiError(404, "attempt_not_found", "Попытка не найдена")
+    assessment = await db.get(AssessmentVersion, item.assessment_version_id)
     qs = await questions(db, item.assessment_version_id)
     answers = (await db.scalars(select(AssessmentAnswer).where(AssessmentAnswer.attempt_id == item.id))).all()
     by_id = {q.id: q for q in qs}
-    return item, dict(id=item.id, assignment_id=item.assignment_id, assessment_version_id=item.assessment_version_id, state="submitted" if item.submitted_at else "active", questions=[dict(id=q.id, prompt=q.prompt, options=q.options) for q in qs], answers=[dict(question_id=a.question_id, selected_option=a.selected_option, correct=a.selected_option == by_id[a.question_id].correct_option, explanation=by_id[a.question_id].explanation) for a in answers], score=item.score if item.submitted_at else None, total=len(qs))
+    return item, dict(id=item.id, title=assessment.title, intro=assessment.intro, assignment_id=item.assignment_id, assessment_version_id=item.assessment_version_id, state="submitted" if item.submitted_at else "active", questions=[dict(id=q.id, prompt=q.prompt, options=q.options) for q in qs], answers=[dict(question_id=a.question_id, selected_option=a.selected_option, correct=a.selected_option == by_id[a.question_id].correct_option, explanation=by_id[a.question_id].explanation) for a in answers], score=item.score if item.submitted_at else None, total=len(qs))
 
 
 async def start_attempt(db: AsyncSession, principal: Principal, version_id: UUID):
@@ -198,3 +205,32 @@ async def candidate_progress(db: AsyncSession, foundation_id: UUID, user_id: UUI
     progress = list((await db.scalars(select(LessonProgress.lesson_version_id).where(LessonProgress.assignment_id == item.id))).all()) if item else []
     count = len(set(map(str, progress)).intersection(release.lesson_version_ids))
     return dict(completed=bool(item and item.completed_at), completed_lessons=count, total_lessons=len(release.lesson_version_ids), available=True)
+
+
+async def task_submissions(db, principal, assignment_id):
+    from .models import LessonTaskSubmission
+    await assignment(db, principal, assignment_id)
+    items = (await db.scalars(select(LessonTaskSubmission).where(LessonTaskSubmission.assignment_id == assignment_id))).all()
+    return [dict(block_id=item.block_id, answer_text=item.answer_text, version=item.version) for item in items]
+
+
+async def submit_task(db, principal, version_id, block_id, body):
+    from .models import LessonTaskSubmission
+    item = await assignment(db, principal, body.assignment_id, lock=True)
+    release = await db.get(LearningRelease, item.release_id)
+    block = await db.scalar(select(LessonBlock).where(LessonBlock.id == block_id, LessonBlock.lesson_version_id == version_id))
+    if str(version_id) not in release.lesson_version_ids or block is None or block.content.get("type") != "task":
+        raise ApiError(404, "task_not_found", "Задание не найдено")
+    if not body.answer_text.strip():
+        raise ApiError(422, "answer_empty", "Добавьте ответ на задание")
+    value = await db.scalar(select(LessonTaskSubmission).where(LessonTaskSubmission.assignment_id == item.id, LessonTaskSubmission.block_id == block_id).with_for_update())
+    actual = value.version if value else 0
+    if actual != body.expected_version:
+        raise ApiError(409, "version_conflict", "Ответ изменён. Обновите страницу", current_version=actual)
+    if value is None:
+        value = LessonTaskSubmission(assignment_id=item.id, lesson_version_id=version_id, block_id=block_id, answer_text=body.answer_text.strip())
+        db.add(value)
+    else:
+        value.answer_text, value.version = body.answer_text.strip(), value.version + 1
+    await db.flush()
+    return dict(block_id=value.block_id, answer_text=value.answer_text, version=value.version)

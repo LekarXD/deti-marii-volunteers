@@ -190,7 +190,7 @@ async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
     lesson_response = await post(client, '/coord/learning/lessons', {'track_id':track['id'],'key':'module','title':'Fixture lesson'})
     assert lesson_response.status_code == 200, lesson_response.text
     lesson = lesson_response.json()
-    blocks = [{'type':'text','title':'Fixture heading','text':'Approved fixture content'}, {'type':'quiz','items':[{'q':'Fixture quiz?','o':['Yes','No'],'a':0,'e':'Fixture explanation'}]}]
+    blocks = [{'type':'text','title':'Fixture heading','text':'Approved fixture content'}, {'type':'quiz','items':[{'q':'Fixture quiz?','o':['Yes','No'],'a':0,'e':'Fixture explanation'}]}, {'type':'task','title':'Fixture task','text':'Write a fixture response','required':True}]
     body = {'expected_version':lesson['draft']['version'],'title':'Fixture lesson','minutes':3,'source':'Fixture evidence','blocks':blocks}
     saved = await client.put(f"/api/v1/coord/learning/lessons/{lesson['id']}/draft", json=body, headers={'Idempotency-Key':str(uuid4())})
     assert saved.status_code == 200, saved.text
@@ -222,7 +222,14 @@ async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
     detail = await client.get(f'/api/v1/learning/lessons/{old_version}')
     assert detail.status_code == 200 and detail.json()['blocks'][0]['text']=='Approved fixture content'
     assignment_id = assigned.json()['id']
-    await post(client, f'/learning/progress/{old_version}/complete', {'assignment_id':assignment_id})
+    assert (await post(client, f'/learning/progress/{old_version}/complete', {'assignment_id':assignment_id})).status_code == 422
+    task_block = next(block for block in detail.json()['blocks'] if block['type']=='task')
+    task_path = f"/learning/lessons/{old_version}/tasks/{task_block['id']}"
+    task_response = await post(client, task_path, {'assignment_id':assignment_id,'answer_text':'Persisted response','expected_version':0})
+    assert task_response.status_code == 200, task_response.text
+    assert (await client.get(f'/api/v1/learning/assignments/{assignment_id}/tasks')).json()[0]['answer_text']=='Persisted response'
+    assert (await post(client, task_path, {'assignment_id':assignment_id,'answer_text':'Stale overwrite','expected_version':0})).status_code == 409
+    assert (await post(client, f'/learning/progress/{old_version}/complete', {'assignment_id':assignment_id})).status_code == 200
     await post(client, '/policy-acknowledgements', {'assignment_id':assignment_id})
     prep = (await client.get('/api/v1/me/preparation')).json()
     assert prep['introduction_completed'] is False # completed academy is not introduction

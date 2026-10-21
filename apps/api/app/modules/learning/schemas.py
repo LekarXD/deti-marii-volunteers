@@ -40,6 +40,8 @@ class FeedbackView(BaseModel):
 
 class AttemptView(BaseModel):
     id: UUID
+    title: str
+    intro: str
     assignment_id: UUID
     assessment_version_id: UUID
     state: str
@@ -121,6 +123,7 @@ class AssessmentSave(Command):
 
 
 class ReleasePublish(VersionCommand):
+    assessment_draft_version: int | None = None
     lesson_draft_versions: dict[UUID, int]
     lesson_publication_revisions: dict[UUID, int]
     intro: str = Field(default="", max_length=3000)
@@ -134,9 +137,29 @@ class ReleaseRollback(VersionCommand):
 
 
 class AssignmentCreate(Command):
+    application_id: UUID | None = None
     release_id: UUID
     user_id: UUID | None = None
     registration_id: UUID | None = None
+
+
+class LessonDraftView(BaseModel):
+    id: UUID
+    version: int
+    title: str
+    minutes: int
+    source: str
+    blocks: list[dict[str, Any]]
+    status: str
+
+
+class AssessmentDraftView(BaseModel):
+    id: UUID
+    version: int
+    title: str
+    intro: str
+    questions: list[dict[str, Any]]
+    status: str
 
 
 class AuthorLessonView(BaseModel):
@@ -146,7 +169,7 @@ class AuthorLessonView(BaseModel):
     current_version_id: UUID | None
     publication_revision: int
     archived: bool
-    draft: dict[str, Any] | None
+    draft: LessonDraftView | None
 
 
 class TrackView(BaseModel):
@@ -157,5 +180,16 @@ class TrackView(BaseModel):
     archived: bool
     current_release_id: UUID | None
     lessons: list[AuthorLessonView]
-    assessment: dict[str, Any] | None
+    assessment: AssessmentDraftView | None
     releases: list[dict[str, Any]]
+
+
+class TaskSubmit(VersionCommand):
+    assignment_id: UUID
+    answer_text: str = Field(min_length=1, max_length=12000)
+
+
+class TaskSubmissionView(BaseModel):
+    block_id: UUID
+    answer_text: str
+    version: int
