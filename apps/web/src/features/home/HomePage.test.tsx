@@ -10,19 +10,19 @@ import type {components} from '../../api/generated/schema';
 import type {AssignmentParticipation} from '../activities/participationApi';
 import type {Preparation, Assignment} from '../learning/api';
 import {HomePage} from './HomePage';
-import {assignmentWhen, learningDestination, upcomingAssignments} from './model';
+import {assignmentWhen, homeScheduleRange, learningDestination, upcomingAssignments} from './model';
 
 const now = Date.parse('2026-10-21T22:00:00Z');
 const assignment = (changes: Partial<AssignmentParticipation> = {}): AssignmentParticipation => ({
   id:'first', user_id:'volunteer', display_name:'Тестовый волонтёр', occurrence_id:'event', staffing_need_id:'need',
-  title:'Мастерская', role_title:'Помощь на занятии', status:'confirmed', approved_at:null, confirmed_at:null,
+  occurrence_status:'scheduled', title:'Мастерская', role_title:'Помощь на занятии', status:'confirmed', approved_at:null, confirmed_at:null,
   starts_at:'2026-10-22T09:00:00Z', ends_at:'2026-10-22T11:00:00Z', timezone:'Europe/Moscow', location:'Мастерская фонда',
   readiness:[], history:[], allowed_actions:[], conditions_version:1, version:1, ...changes,
 });
-const track: Assignment = {id:'learning', track_id:'track', track_key:'intro', release_id:'release', release_number:1,
+const track: Assignment = {id:'learning', track_id:'track', track_key:'intro', release_id:'release', release_number:1, change_note:'',
   title:'Подготовка к занятию', intro:'Полезные материалы', acknowledged:false, completed:false,
   assessment_version_id:null, latest_attempt_id:null, latest_attempt_state:null, reacknowledgement_required:false,
-  lessons:[{id:'read',key:'read',lesson_id:'read-source',minutes:5,title:'Знакомство',completed:true},{id:'next',key:'next',lesson_id:'next-source',minutes:10,title:'На занятии',completed:false}]};
+  lessons:[{id:'read',key:'read',lesson_id:'read-source',minutes:5,mode:'feed',title:'Знакомство',completed:true},{id:'next',key:'next',lesson_id:'next-source',minutes:10,mode:'feed',title:'На занятии',completed:false}]};
 const learning: Preparation = {assignments:[track], introduction_completed:false, booking_requires_introduction:false};
 const preparation: components['schemas']['AssignmentPreparationView'] = {
   assignment_id:'first', assignment_version:1, title:'Мастерская', status:'confirmed', starts_at:'2026-10-22T09:00:00Z', ends_at:'2026-10-22T11:00:00Z',
@@ -42,7 +42,7 @@ beforeEach(() => {
   vi.spyOn(Date, 'now').mockReturnValue(now);
   rows = []; nextRows = undefined; learningError = undefined; assignmentsError = undefined; nextPageError = undefined;
   apiSpy = vi.spyOn(transport, 'api').mockImplementation(async <T,>(path: string): Promise<T> => {
-    if(path.startsWith('/me/assignments?')) {
+    if(path.startsWith('/me/schedule?')) {
       if (assignmentsError) throw assignmentsError;
       if (path.includes('cursor=next') && nextPageError) throw nextPageError;
       return (path.includes('cursor=next') ? {items:nextRows ?? [],next_cursor:null} : {items:rows,next_cursor:nextRows ? 'next' : null}) as T;
@@ -60,7 +60,8 @@ function view() {
 describe('home projection', () => {
   it('chooses active invitations and confirmed events by actual start time, excluding history and cancelled items', () => {
     const values = [assignment({id:'later',starts_at:'2026-10-23T09:00:00Z'}),assignment({id:'cancelled',status:'cancelled'}),
-      assignment({id:'attended',attendance:{outcome:'attended',minutes:60,ledger_state:'recorded'} as AssignmentParticipation['attendance']}),
+      assignment({id:'event-cancelled',occurrence_status:'cancelled'}),assignment({id:'event-postponed',occurrence_status:'postponed'}),
+      assignment({id:'attended',attendance:{id:'attendance',version:1,outcome:'attended',minutes:60,ledger_state:'recorded'}}),
       assignment({id:'expired',ends_at:'2026-10-20T11:00:00Z'}),assignment({id:'invitation',status:'invited',starts_at:'2026-10-22T08:00:00Z'}),
       assignment({id:'ongoing',starts_at:'2026-10-21T21:00:00Z',ends_at:'2026-10-21T23:00:00Z'}),assignment({id:'invalid',starts_at:'not a date'})];
     expect(upcomingAssignments(values, now).map(item=>item.id)).toEqual(['ongoing','invitation','later']);
@@ -69,6 +70,7 @@ describe('home projection', () => {
   it('labels today in the event timezone rather than the browser date, and does not invent a learning lesson', () => {
     const value = assignmentWhen(assignment(), now);
     expect(value).toEqual({today:true,date:'Сегодня',time:'12:00–14:00'});
+    expect(homeScheduleRange(now)).toEqual({from:'2026-10-22',to:'2027-01-19'});
     expect(learningDestination({...track,lessons:[]})).toBe('/academy');
     expect(learningDestination({...track,lessons:[],assessment_version_id:'assessment'})).toBe('/academy/lessons/assessment?assignment=learning');
   });
@@ -77,6 +79,7 @@ describe('volunteer home', () => {
   it('loads all assignment pages before choosing the nearest hero and uses the existing preparation/learning APIs', async () => {
     rows=[assignment({id:'later',title:'Позже',starts_at:'2026-10-23T09:00:00Z',ends_at:'2026-10-23T11:00:00Z'})];nextRows=[assignment()];
     view();
+    await userEvent.setup().click(await screen.findByRole('button',{name:'Загрузить ещё занятия'}));
     await screen.findByRole('heading',{name:/Сегодня 12:00–14:00/});
     expect(screen.getByRole('link',{name:'Подготовиться к выходу'}).getAttribute('href')).toBe('/my/assignments/first/preparation');
     await screen.findByText('Тестовый ведущий');
@@ -87,6 +90,8 @@ describe('volunteer home', () => {
     expect([progress.value,progress.max]).toEqual([1,2]);
     expect(screen.getByRole('link',{name:'Продолжить обучение'}).getAttribute('href')).toBe('/academy/lessons/next?assignment=learning');
     expect(apiSpy.mock.calls.some(call=>String(call[0]).includes('cursor=next'))).toBe(true);
+    expect(apiSpy.mock.calls.filter(call=>String(call[0]).startsWith('/me/schedule?')).every(call=>String(call[0]).includes('from=2026-10-22&to=2027-01-19&timezone=Europe/Moscow&state=active'))).toBe(true);
+    expect(apiSpy.mock.calls.some(call=>String(call[0]).startsWith('/me/assignments?'))).toBe(false);
     expect(apiSpy.mock.calls.every(call=>!call[1] || !call[1].method || call[1].method==='GET')).toBe(true);
   });
   it('keeps invitations actionable through existing participation controls and does not expose unconfirmed preparation', async () => {
@@ -98,7 +103,7 @@ describe('volunteer home', () => {
     expect(screen.queryByRole('button',{name:/приду/})).toBeNull();
   });
   it('shows the genuine newcomer path without invented identity, hours or matching scores', async () => {
-    view();await screen.findByRole('heading',{name:'Начнём знакомство'});
+    view();await screen.findByRole('heading',{name:'Впереди новые встречи'});
     expect(screen.getByRole('link',{name:'Моя анкета'}).getAttribute('href')).toBe('/application');
     expect(screen.getByRole('link',{name:'Знакомство с координатором'}).getAttribute('href')).toBe('/interviews');
     expect(screen.getByRole('link',{name:'Посмотреть возможности'}).getAttribute('href')).toBe('/opportunities');
@@ -115,8 +120,11 @@ describe('volunteer home', () => {
   });
   it('does not misrepresent a failed list or missing pagination page as an empty/newcomer result', async () => {
     rows=[assignment({id:'later'})];nextRows=[assignment()];nextPageError=new Error('Приглашения временно недоступны');view();
+    await screen.findByRole('heading',{name:'Расписание загружено не полностью'});
+    expect(apiSpy.mock.calls.some(call=>String(call[0]).includes('cursor=next'))).toBe(false);
+    await userEvent.setup().click(screen.getByRole('button',{name:'Загрузить ещё занятия'}));
     await screen.findByText('Приглашения временно недоступны');
-    expect(screen.queryByRole('heading',{name:'Начнём знакомство'})).toBeNull();
+    expect(screen.queryByRole('heading',{name:'Впереди новые встречи'})).toBeNull();
     expect(screen.queryByText('Ближайшее занятие')).toBeNull();
     nextPageError=undefined;
     await userEvent.setup().click(screen.getByRole('button',{name:'Попробовать ещё раз'}));

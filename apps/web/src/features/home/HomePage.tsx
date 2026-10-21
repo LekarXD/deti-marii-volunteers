@@ -2,24 +2,22 @@ import {useEffect, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {Link} from 'react-router-dom';
 import {keys} from '../../api/keys';
-import {Card, ErrorState, Icon, LoadingState} from '../../ui';
-import {useAssignments, type AssignmentParticipation} from '../activities/participationApi';
+import {Button, Card, ErrorState, Icon, LoadingState} from '../../ui';
+import {usePersonalSchedule, type AssignmentParticipation} from '../activities/participationApi';
 import {usePreparation} from '../learning/api';
 import {readPreparation} from '../followups/api';
-import {assignmentWhen, learningDestination, upcomingAssignments} from './model';
+import {assignmentWhen, homeScheduleRange, learningDestination, upcomingAssignments} from './model';
 import './home.css';
 
 /** CandidateLayout is supplied by the router; this page owns only the home content. */
 export function HomePage() {
-  const assignments = useAssignments();
-  const learning = usePreparation();
   const [now, setNow] = useState(Date.now);
+  const {from,to}=homeScheduleRange(now);
+  const assignments = usePersonalSchedule(from,to,'active');
+  const learning = usePreparation();
   useEffect(() => {const timer = window.setInterval(() => {setNow(Date.now()); void assignments.refetch();}, 30_000); return () => window.clearInterval(timer);}, [assignments.refetch]);
-  // The list is cursor-paginated. Do not call the first page's item "nearest" while
-  // an older page may contain an earlier, still active invitation.
-  useEffect(() => {
-    if (assignments.hasNextPage && !assignments.isFetchingNextPage && !assignments.isError) void assignments.fetchNextPage();
-  }, [assignments.hasNextPage, assignments.isFetchingNextPage, assignments.isError, assignments.fetchNextPage]);
+  // Cursor order is by UUID: a partial date window cannot establish the nearest
+  // event. Remaining pages require an explicit action rather than an unbounded scan.
   const items = assignments.data?.pages.flatMap(page => page.items) ?? [];
   const upcoming = upcomingAssignments(items, now);
   const complete = !assignments.isPending && !assignments.hasNextPage && !assignments.isError;
@@ -39,13 +37,15 @@ export function HomePage() {
   return <div className="volunteer-home">
     <h1 className="h1 home-greeting">Привет!</h1>
     {assignments.isError ? <Card><ErrorState error={assignments.error} retry={retryAssignments}/></Card>
-      : !complete ? <Card tone="hero"><LoadingState label="Ищем ближайшее занятие…"/></Card>
+      : assignments.isPending ? <Card tone="hero"><LoadingState label="Ищем ближайшее занятие…"/></Card>
+      : !complete ? <Card tone="hero"><h2 className="h2">Расписание загружено не полностью</h2><p className="lead">В ближайшие 90 дней есть ещё занятия. Загрузи следующую страницу, чтобы определить ближайшее.</p><Button loading={assignments.isFetchingNextPage} onClick={() => {void assignments.fetchNextPage();}}>Загрузить ещё занятия</Button></Card>
       : next ? <NextAssignment item={next} now={now}/>
       : <Card tone="hero"><div className="hero-grid"><div className="home-hero-copy">
-        <p className="eyebrow">{items.length ? 'Моё участие' : 'Знакомство с фондом'}</p>
-        <h2 className="hero-when">{items.length ? 'Впереди новые встречи' : 'Начнём знакомство'}</h2>
-        <p className="lead">{items.length ? 'Ближайших занятий пока нет. Посмотри, где сейчас нужна помощь.' : 'Расскажи о себе, познакомься с командой и выбери, как хочешь помогать.'}</p>
-        <div className="home-actions"><Link className="btn btn-primary btn-lg" to={items.length ? '/opportunities' : '/application'}>{items.length ? 'Где нужна помощь' : 'Моя анкета'}</Link><Link className="btn btn-secondary btn-lg" to={items.length ? '/my/assignments' : '/interviews'}>{items.length ? 'Моё участие' : 'Знакомство с координатором'}</Link></div>
+        <p className="eyebrow">Моё участие</p>
+        <h2 className="hero-when">Впереди новые встречи</h2>
+        <p className="lead">На ближайшие 90 дней занятий пока нет. Посмотри, где сейчас нужна помощь.</p>
+        <div className="home-actions"><Link className="btn btn-primary btn-lg" to="/opportunities">Где нужна помощь</Link><Link className="btn btn-secondary btn-lg" to="/my/assignments">Моё участие</Link></div>
+        <p className="p home-newcomer">Только знакомишься с фондом? <Link to="/application">Моя анкета</Link> · <Link to="/interviews">Знакомство с координатором</Link></p>
       </div><span className="hero-art" aria-hidden="true"><Icon name="academy"/></span></div></Card>}
 
     {complete && invitations.length > 0 && <section className="section" aria-labelledby="home-invitations">
@@ -67,7 +67,7 @@ export function HomePage() {
         </> : <><p className="p">Координатор подберёт материалы для твоей роли. Назначенные треки появятся здесь.</p><Link className="btn btn-secondary" to="/academy">Перейти в обучение</Link></>}
       </section>
       <section className="card home-preparation" aria-labelledby="home-preparation">
-        <p className="eyebrow">Перед выходом</p><h2 className="h3 home-card-title" id="home-preparation">{confirmed ? 'Кто встретит и что взять' : 'Всё начинается со знакомства'}</h2>
+        <p className="eyebrow">Перед выходом</p><h2 className="h3 home-card-title" id="home-preparation">{confirmed ? 'Кто встретит и что взять' : 'Подготовка к следующему выходу'}</h2>
         {confirmed ? <>
           <p className="p">{confirmed.title}</p>
           {preparation.isPending ? <LoadingState label="Загружаем памятку…"/> : preparation.error ? <ErrorState error={preparation.error} retry={() => {void preparation.refetch();}}/> : preparation.data && <>

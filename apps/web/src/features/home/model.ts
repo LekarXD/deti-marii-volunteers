@@ -1,10 +1,11 @@
+import {addDays, localParts} from '../activities/calendarDates';
 import type {AssignmentParticipation} from '../activities/participationApi';
 import type {Assignment as LearningAssignment} from '../learning/api';
 
 /** Upcoming includes a class already in progress, until its actual end. */
 export function upcomingAssignments(items: readonly AssignmentParticipation[], now: number) {
   return items.filter(item => ['invited', 'confirmed'].includes(item.status)
-    && !item.attendance && Number.isFinite(Date.parse(item.starts_at))
+    && item.occurrence_status === 'scheduled' && !item.attendance && Number.isFinite(Date.parse(item.starts_at))
     && Date.parse(item.ends_at) > now)
     .sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at) || a.id.localeCompare(b.id));
 }
@@ -27,4 +28,10 @@ export function learningDestination(item: LearningAssignment) {
   if (lesson) return `/academy/lessons/${encodeURIComponent(lesson.id)}?assignment=${encodeURIComponent(item.id)}`;
   if (item.assessment_version_id) return `/academy/lessons/assessment?assignment=${encodeURIComponent(item.id)}`;
   return '/academy';
+}
+
+/** Ninety inclusive Moscow calendar days; the API includes overlapping overnight events. */
+export function homeScheduleRange(now:number) {
+  const from=localParts(new Date(now).toISOString()).date;
+  return {from,to:addDays(from,89)};
 }

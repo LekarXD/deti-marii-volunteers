@@ -10,10 +10,12 @@ shared original Opora kit. There is no sidebar or demonstration mode selector.
 
 Data reuse:
 
-- `activities/participationApi.useAssignments`: all cursor pages before selecting
-  the nearest active invited/confirmed class, ordered by the actual start instant.
-  An in-progress class remains relevant until it ends. Closed/attended entries do
-  not appear as upcoming; failed pagination is never presented as an empty list.
+- `activities/participationApi.usePersonalSchedule`: a bounded window of 90 inclusive
+  Moscow calendar days, with server `state=active`. No historical assignment scan.
+  Pagination remains explicit: a partial window asks the user to load another page
+  before claiming which event is nearest. An in-progress class remains relevant
+  until it ends. Cancelled/postponed occurrences and closed/attended assignments
+  never appear as upcoming. Failed pagination is never presented as an empty list.
 - `learning/api.usePreparation`: assigned learning tracks and the actual completed
   lesson count. Links use the existing Academy routes; absent lessons never become
   an `undefined` lesson route.
@@ -25,6 +27,9 @@ Assignments refresh every 30 seconds and preparation every 15 seconds. All reads
 use domain APIs, principal-scoped cache keys and the sole ordinary API transport.
 Home never confirms an invitation, modifies a checklist, or invents attendance,
 hours, matching scores, personal names or milestones.
+An empty date window does not prove that someone is a newcomer. Its copy names the
+90-day window and offers the application/interview path conditionally, alongside
+opportunities and the full personal schedule.
 
 `HomePage.test.tsx` exercises these actual hooks with typed DTO fixtures and mocked
 sole transport reads, including pagination and recovery. Browser screenshot proof
