@@ -5,6 +5,7 @@ from app.core.config import get_settings
 from app.core.db import engine
 from app.core.model_loader import load_models
 from app.core.platform import install_platform
+from app.modules.assets.router import router as assets
 from app.modules.auth.router import router as auth
 from app.modules.staff.router import router as staff
 from app.modules.applications.router import router as applications
@@ -12,6 +13,11 @@ from app.modules.interviews.router import router as interviews
 from app.modules.activities.router import router as activities
 from app.modules.participants.router import router as participants
 from app.modules.learning.router import router as learning
+from app.modules.messaging.router import router as messaging
+from app.modules.crm.router import router as crm
+from app.modules.knowledge.router import router as knowledge
+from app.modules.participants.access import get_assignment_access
+from app.modules.activities.assignment_service import ActivityAssignmentAccess
 
 class ErrorView(BaseModel):
     code: str
@@ -32,7 +38,8 @@ def create_app() -> FastAPI:
     app = FastAPI(title="Опора API", version="0.1.0", lifespan=lifespan,
                   responses={status: {"model": ErrorView} for status in (400, 401, 403, 404, 409, 422, 429, 503)})
     install_platform(app)
-    for router in (auth, staff, applications, interviews, participants, learning):
+    app.dependency_overrides[get_assignment_access] = lambda: ActivityAssignmentAccess()
+    for router in (auth, staff, assets, applications, interviews, participants, learning, messaging, crm, knowledge):
         app.include_router(router)
     app.include_router(activities, prefix="/api/v1")
     return app

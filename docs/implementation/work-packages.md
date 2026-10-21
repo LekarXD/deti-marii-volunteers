@@ -34,6 +34,8 @@
 
 Работать в отдельных `codex/<package>` ветках/worktrees от известного интеграционного SHA. Не использовать force push общей ветки. Не включать в коммиты текущие незакоммиченные правки прототипа и реальные файлы фонда без отдельной задачи. `prototype/` и архив — reference; product implementation появляется в новых `apps/` и `packages/`.
 
+21 октября: после сдачи P09 пакет P16 явно передан A5, чтобы A4 продолжал P18B без пересечения областей. A5 владеет `modules/simulator` и `features/simulator`; общий AI gateway остаётся у A7. Подготовка моделей/авторского редактора может идти заранее, но AI-команды подключаются только после проверенного P15 контракта.
+
 ## Очередь пакетов
 
 | ID | Владелец | Зависимости | Результат |
@@ -55,7 +57,7 @@
 | P13 | A3 | P09/P11 | минуты, ручные запросы, справки/благодарности и профиль |
 | P14 | A7 | P04 | академия, уроки, редактор треков/блоков/тестов и публикация |
 | P15 | A7 | P14/P17A | knowledge/editor, Mentor, индекс и общий AI gateway |
-| P16 | A4 | P06/P14/P15 | Scenarios, Simulator, оценка/appeal; реальный AI вместо fixtures |
+| P16 | A5 (после P09) | P06/P14/P15 | Scenarios, Simulator, оценка/appeal; реальный AI вместо fixtures |
 | P17A | A1 | P01/P02 | внутренняя переписка, attachments, read cursors, sync, outbox handlers и delivery contract |
 | P17B | A1 | P17A | реальные email/прочие согласованные каналы, templates, preferences, webhooks, broadcast preview |
 | P18A | A2 | P01/P02 | извлечённые shared stage/types/geometry, Opora brand, render contracts |

@@ -1,0 +1,2 @@
+/** Enabled routes follow integrated packages; API permissions remain authoritative. */
+export const enabledDestinations = new Set(['/fund/volunteers','/fund/contacts/review','/fund/contacts/import','/my/assignments','/fund/responses','/academy','/messages','/fund/messages','/fund/learning','/fund/schedule','/application','/onboarding','/opportunities','/fund','/fund/candidates','/fund/interviews','/fund/interviews/availability','/fund/opportunities','/fund/roles','/fund/participants','/fund/groups']);

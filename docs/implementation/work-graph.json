@@ -166,15 +166,16 @@
       ]
     },
     "P16": {
-      "owner": "A4",
+      "owner": "A5",
       "depends_on": [
         "P06",
         "P14",
         "P15"
       ],
       "required_agents": [
-        "A4"
-      ]
+        "A5"
+      ],
+      "agent_note": "Explicit handoff after A5 completed P09; A4 retains P18B. AI integration waits P15 gateway contract."
     },
     "P17A": {
       "owner": "A1",
