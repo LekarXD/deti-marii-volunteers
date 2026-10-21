@@ -108,7 +108,7 @@ async def test_duplicate_review_manual_resolution_and_merge_preserve_history(env
         assert resolved.status_code==200,resolved.text
         assert (await post(coord,f"/coord/import-batches/{duplicate['id']}/apply",dict(expected_version=resolved.json()['version']))).status_code==200
         # A merge retains all histories and strict no-contact from either record.
-        merged=await post(coord,f"/coord/volunteers/{second}/merge",dict(expected_version=1,target_id=first,target_expected_version=1,reason='Фиктивный дубль проверен координатором'))
+        merged=await post(coord,f"/coord/volunteers/{second}/merge",dict(expected_version=1,target_id=first,target_expected_version=(await coord.get('/api/v1/coord/volunteers/'+first)).json()['version'],reason='Фиктивный дубль проверен координатором'))
         assert merged.status_code==200,merged.text
         detail=merged.json();assert detail['no_contact'] and second in detail['merged_record_ids']
         assert len(detail['import_provenance'])==3 and len(detail['contact_events'])>=4

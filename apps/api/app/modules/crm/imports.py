@@ -229,6 +229,7 @@ async def apply_batch(db,principal,batch_id,command):
                 context=normalized.get('context',''),relationship_state='unverified',no_contact=normalized.get('no_contact',False))
             db.add(target);await db.flush();row.volunteer_id=target.id
         if normalized.get('no_contact'):target.no_contact=True
+        if row.decision=='link':target.version+=1;target.updated_at=utcnow()
         if external_id and reference is None:db.add(ImportExternalReference(foundation_id=principal.foundation_id,source_system=batch.source_system,external_id=external_id,volunteer_id=target.id))
         if target.no_contact:
             from .service import cancel_open_tasks
