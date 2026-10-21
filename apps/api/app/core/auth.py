@@ -112,3 +112,19 @@ async def load_background_staff_authorization(db,foundation_id,user_id):
     if user is None or member is None or factor is None:return None
     rows=(await db.scalars(select(PermissionGrant).where(PermissionGrant.membership_id==member.id,PermissionGrant.revoked_at.is_(None)))).all()
     return BackgroundStaffAuthorization(user_id,foundation_id,member.id,tuple((g.permission,g.scope_type,g.scope_id) for g in rows))
+
+async def lock_background_authorizations(db,foundation_id,user_ids):
+    """Acquire before contact_guard/domain rows, matching interactive grant/revoke keys."""
+    ids={UUID(str(value)) for value in user_ids}
+    if not 1<=len(ids)<=1000:raise ApiError(422,'background_authorization_limit','Проверьте участников фоновой задачи')
+    keys=sorted({int.from_bytes(hashlib.sha256(f'authz:{foundation_id}:{uid}'.encode()).digest()[:8],'big',signed=True) for uid in ids})
+    for key in keys:await db.execute(text('SELECT pg_advisory_xact_lock(:key)'),{'key':key})
+    transaction=db.sync_session.get_transaction()
+    held=db.info.setdefault('background_authorization_locks',{})
+    for uid in ids:held[(UUID(str(foundation_id)),uid)]=transaction
+
+def assert_background_authorizations_locked(db,foundation_id,user_ids):
+    transaction=db.sync_session.get_transaction()
+    held=db.info.get('background_authorization_locks',{})
+    if transaction is None or any(held.get((UUID(str(foundation_id)),UUID(str(uid)))) is not transaction for uid in user_ids):
+        raise ApiError(409,'background_authorization_changed','Область фонового уведомления изменилась')

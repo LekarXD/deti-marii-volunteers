@@ -18,6 +18,8 @@ def enqueue_notice(db,foundation_id,recipient_id,subject,body,*,topic='messages'
 
 async def deliver_internal(db,outbox,payload):
     from app.core.contact_policy import contact_guard
+    from .registry import prepare_notice_source_locks
+    await prepare_notice_source_locks(db,outbox,payload)
     await contact_guard(db,outbox.foundation_id)
     existing=await db.scalar(select(Message.id).where(Message.source_outbox_id==outbox.id))
     if existing:

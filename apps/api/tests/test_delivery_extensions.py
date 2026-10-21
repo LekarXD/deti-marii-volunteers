@@ -4,7 +4,7 @@ import httpx
 import pytest
 from sqlalchemy import select,func
 from app.cli import fixtures
-from app.core.auth import load_background_staff_authorization
+from app.core.auth import load_background_staff_authorization,assert_background_authorizations_locked
 from app.core.clock import utcnow
 from app.core.crypto import digest,seal
 from app.core.db import SessionLocal
@@ -52,9 +52,11 @@ async def test_background_grants_have_no_session_and_notices_rebuild_from_source
     seed=await fixtures()
     enabled=True
     async def resolve(db,outbox,source):
+        assert_background_authorizations_locked(db,outbox.foundation_id,[source['recipient_id']])
         if not enabled:return 'suppressed_schedule_changed'
         return {'recipient_id':source['recipient_id'],'subject':'Actual source','text':'Rebuilt current content','topic':'messages'}
-    register_notice_source('fixture.report_digest',resolve)
+    async def lock_subjects(db,outbox,source):return [UUID(source['recipient_id'])]
+    register_notice_source('fixture.report_digest',resolve,lock_subjects=lock_subjects)
     async with SessionLocal() as db:
         user=User(foundation_id=UUID(seed['foundation_id']),display_name='Invented background staff');db.add(user);await db.flush()
         member=StaffMembership(foundation_id=user.foundation_id,user_id=user.id);db.add(member);await db.flush()
@@ -75,3 +77,23 @@ async def test_background_grants_have_no_session_and_notices_rebuild_from_source
         grant.revoked_at=utcnow();await db.flush()
         assert not (await load_background_staff_authorization(db,user.foundation_id,user.id)).has_permission('reports.read')
         await db.rollback()
+
+@pytest.mark.asyncio
+async def test_background_lock_serializes_with_interactive_authz_guard():
+    import asyncio
+    from datetime import timedelta
+    from app.core.auth import authz_guard,lock_background_authorizations,resolve_principal
+    from app.core.models import Foundation
+    seed=await fixtures()
+    async with SessionLocal() as setup:
+        user=User(foundation_id=UUID(seed['foundation_id']),display_name='Invented lock parity subject');setup.add(user);await setup.flush()
+        session=Session(foundation_id=user.foundation_id,user_id=user.id,token_hash=digest(uuid4().hex),csrf_hash=digest(uuid4().hex),csrf_cipher=seal(uuid4().hex),expires_at=utcnow()+timedelta(hours=1));setup.add(session);await setup.commit();uid,sid,fid=user.id,session.id,user.foundation_id
+    async with SessionLocal() as one,SessionLocal() as two:
+        principal=await resolve_principal(two,await two.get(Session,sid));await two.commit()
+        await lock_background_authorizations(one,fid,[uid])
+        pending=asyncio.create_task(authz_guard(two,principal))
+        done,_=await asyncio.wait([pending],timeout=0.05)
+        assert not done
+        await one.commit()
+        await asyncio.wait_for(pending,2)
+        await two.rollback()

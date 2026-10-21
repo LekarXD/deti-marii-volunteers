@@ -59,7 +59,7 @@ async def check_email(db,outbox,payload):
             allowed,reason=await hard_contact_allowed(db,outbox.foundation_id,contact.user_id)
             if not allowed:return 'suppressed_'+reason
         return await policy.validate(db,outbox,payload)
-    if not payload.get('recipient_id'):return 'unavailable' 
+    if not payload.get('recipient_id'):return 'unavailable'
     if not await sender_authorized(db,outbox.foundation_id,payload):return 'suppressed_authz'
     recipient=UUID(payload['recipient_id'])
     allowed,reason=await may_contact(db,outbox.foundation_id,recipient,'email',topic_for(payload))
@@ -141,6 +141,8 @@ async def process_email(db,job,outbox,payload):
     return result
 
 async def process_internal(db,job,outbox,payload):
+    from app.modules.messaging.registry import prepare_notice_source_locks
+    await prepare_notice_source_locks(db,outbox,payload)
     await contact_guard(db,outbox.foundation_id)
     delivery=await journal(db,outbox,payload)
     latest=await db.scalar(select(DeliveryAttempt).where(DeliveryAttempt.delivery_id==delivery.id).order_by(DeliveryAttempt.attempt_number.desc()).limit(1))
