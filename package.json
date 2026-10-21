@@ -1,0 +1,22 @@
+{
+  "name": "opora",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.3.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @opora/web dev",
+    "build": "pnpm --filter @opora/web build",
+    "typecheck": "pnpm --filter @opora/web typecheck",
+    "test": "pnpm --filter @opora/web test",
+    "test:e2e": "playwright test",
+    "contracts": "python3 scripts/export_openapi.py"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  }
+}

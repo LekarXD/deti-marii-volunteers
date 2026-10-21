@@ -7,3 +7,11 @@ node_modules/
 __pycache__/
 .venv/
 .claude/launch.json
+
+dist/
+.pytest_cache/
+.ruff_cache/
+*.tsbuildinfo
+playwright-report/
+test-results/
+.local/
