@@ -199,3 +199,29 @@ async def test_ongoing_activity_never_exposes_or_accepts_attendance(context):
     async with context.db() as db:
         assert await db.scalar(select(func.count()).select_from(Attendance))==1
         assert await db.scalar(select(func.count()).select_from(AttendanceEvent))==1
+
+
+@pytest.mark.asyncio
+async def test_attendance_fact_prevents_cancellation_and_keeps_correction_available(context):
+    event,need,user1,user2,_=await setup(context)
+    item=await invite_approve(context,need,user1)
+    confirmed=await context.client.post(f"/api/v1/assignments/{item['id']}/confirm",headers=user_headers(),json={'expected_version':item['version']})
+    item=confirmed.json()
+    async with context.db() as db:
+        event_row=await db.get(EventOccurrence,UUID(event['id']))
+        event_row.starts_at=utcnow()-timedelta(hours=3);event_row.ends_at=utcnow()-timedelta(hours=1)
+        await db.commit()
+    recorded=await context.client.post(f"/api/v1/coord/assignments/{item['id']}/attendance",headers=headers(),json={'expected_version':item['version'],'outcome':'attended','minutes':120,'reason':'Участие отмечено после занятия.'})
+    assert recorded.status_code==200,recorded.text
+    item=recorded.json()
+    assert 'cancel' not in item['allowed_actions'] and 'correct-attendance' in item['allowed_actions']
+    for path,request_headers,body in [(f"/api/v1/assignments/{item['id']}/cancel",user_headers(),{'expected_version':item['version']}),(f"/api/v1/coord/assignments/{item['id']}/cancel",headers(),{'expected_version':item['version'],'reason':'Поздняя отмена'}),(f"/api/v1/coord/event-occurrences/{event['id']}/cancel",headers(),{'expected_version':event['version']})]:
+        denied=await context.client.post(path,headers=request_headers,json=body)
+        assert denied.status_code==409 and denied.json()['code']=='attendance_already_recorded',denied.text
+    corrected=await context.client.post(f"/api/v1/coord/assignments/{item['id']}/attendance/correct",headers=headers(),json={'expected_version':item['version'],'outcome':'attended','minutes':90,'reason':'Уточнена фактическая длительность.'})
+    assert corrected.status_code==200,corrected.text
+    async with context.db() as db:
+        assert (await db.get(Assignment,UUID(item['id']))).status=='confirmed'
+        assert (await db.get(EventOccurrence,UUID(event['id']))).status=='scheduled'
+        facts=(await db.scalars(select(AttendanceEvent).order_by(AttendanceEvent.version))).all()
+        assert [(row.old_minutes,row.new_minutes) for row in facts]==[(0,120),(120,90)]

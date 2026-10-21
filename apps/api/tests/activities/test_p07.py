@@ -33,6 +33,14 @@ pytestmark=pytest.mark.skipif(not URL, reason='Set an isolated PostgreSQL OPORA_
 async def context():
     if not URL:pytest.skip('Set an isolated PostgreSQL OPORA_TEST_DATABASE_URL')
     assert URL.rsplit('/',1)[-1].endswith('_test'), 'Refusing non-test database'
+    from app.core.model_loader import load_models
+    load_models()
+    # Shared readiness helpers can load these modules lazily during a previous run.
+    import importlib
+    for model_module in ('app.modules.knowledge.models','app.integrations.ai.models'):
+        try:importlib.import_module(model_module)
+        except ModuleNotFoundError as error:
+            if error.name not in (model_module,model_module.rsplit('.',1)[0]):raise
     engine=create_async_engine(URL)
     async with engine.begin() as connection:
         await connection.execute(text('CREATE EXTENSION IF NOT EXISTS btree_gist'))

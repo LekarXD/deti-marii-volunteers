@@ -70,9 +70,9 @@ async def assignment_view(db,item,principal):
         if staff(principal):actions=['approve','review-requirement','cancel']
         if principal.user_id==item.user_id:actions+=['confirm','decline']
     if item.status=='confirmed':
-        if principal.user_id==item.user_id:actions.append('cancel')
+        if attendance is None and principal.user_id==item.user_id:actions.append('cancel')
         if staff(principal):
-            actions+=['cancel']
+            if attendance is None:actions+=['cancel']
             if event.ends_at<=utcnow():actions.append('correct-attendance' if attendance else 'attendance')
     return AssignmentParticipationView(id=item.id,version=item.version,user_id=item.user_id,display_name=user.display_name,
         occurrence_id=item.occurrence_id,staffing_need_id=item.staffing_need_id,title=event.title,role_title=revision.snapshot['title'],
@@ -149,6 +149,8 @@ async def confirm(db,principal,id,body):
 
 async def cancel(db,principal,id,body,status='cancelled',own=False):
     item,event,need=await locked_assignment(db,principal,id,own);check_version(item,body.expected_version)
+    if await db.scalar(select(Attendance.id).where(Attendance.assignment_id==item.id)):
+        raise ApiError(409,'attendance_already_recorded','Факт уже отмечен. При необходимости исправьте отметку участия.')
     if item.status not in ('invited','confirmed'):raise ApiError(409,'assignment_state_conflict','Назначение уже изменилось.')
     if status=='declined' and item.status!='invited':raise ApiError(409,'already_confirmed','Для подтверждённого участия используйте отмену.')
     item.status=status;item.version+=1;item.updated_at=utcnow()
@@ -230,6 +232,8 @@ class ActivityAssignmentAccess:
 
 async def cancel_occurrence_assignments(db,principal,occurrence_id):
     items=(await db.scalars(select(Assignment).where(Assignment.occurrence_id==occurrence_id,Assignment.status.in_(['invited','confirmed'])).order_by(Assignment.id).with_for_update())).all()
+    if items and await db.scalar(select(Attendance.id).where(Attendance.assignment_id.in_([item.id for item in items])).limit(1)):
+        raise ApiError(409,'attendance_already_recorded','По занятию уже есть факты участия. Исправьте отметки, сохранив историю.')
     for item in items:
         item.status='cancelled';item.version+=1;item.updated_at=utcnow()
         await db.execute(update(ResourceReservation).where(ResourceReservation.source_type=='activity',ResourceReservation.source_id==item.id).values(active=False))
