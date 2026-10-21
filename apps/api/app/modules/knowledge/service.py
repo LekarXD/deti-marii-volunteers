@@ -26,7 +26,7 @@ def check_version(actual,expected):
         raise ApiError(409,'version_conflict','Материал изменён. Обновите страницу',current_version=actual)
 
 async def source(db,principal,source_id,lock=False):
-    value=await db.scalar(select(KnowledgeSource).where(KnowledgeSource.id==source_id,KnowledgeSource.foundation_id==principal.foundation_id).with_for_update() if lock else select(KnowledgeSource).where(KnowledgeSource.id==source_id,KnowledgeSource.foundation_id==principal.foundation_id))
+    value=await db.scalar(select(KnowledgeSource).where(KnowledgeSource.id==source_id,KnowledgeSource.foundation_id==principal.foundation_id).with_for_update().execution_options(populate_existing=True) if lock else select(KnowledgeSource).where(KnowledgeSource.id==source_id,KnowledgeSource.foundation_id==principal.foundation_id))
     if value is None:
         raise ApiError(404,'source_not_found','Источник не найден')
     return value
@@ -205,7 +205,7 @@ async def ask_mentor(db,principal,text):
 
 async def owned_run(db,principal,run_id,lock=False):
     query=select(MentorRun).where(MentorRun.id==run_id,MentorRun.foundation_id==principal.foundation_id,owner_scope(principal,MentorRun))
-    item=await db.scalar(query.with_for_update() if lock else query)
+    item=await db.scalar(query.with_for_update().execution_options(populate_existing=True) if lock else query)
     if item is None:raise ApiError(404,'mentor_run_not_found','Вопрос не найден')
     return item
 
@@ -280,7 +280,7 @@ async def question_list(db,principal):
 
 async def question(db,principal,question_id,lock=False):
     query=select(KnowledgeQuestion).where(KnowledgeQuestion.id==question_id,KnowledgeQuestion.foundation_id==principal.foundation_id)
-    value=await db.scalar(query.with_for_update() if lock else query)
+    value=await db.scalar(query.with_for_update().execution_options(populate_existing=True) if lock else query)
     if value is None:raise ApiError(404,'question_not_found','Вопрос не найден')
     return value
 

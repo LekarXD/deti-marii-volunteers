@@ -302,3 +302,38 @@ async def test_manual_builder_review_publish_cas_and_old_learner_version(setup):
     assert revoked_replay.status_code == 403
     path.unlink()
 
+
+
+@pytest.mark.asyncio
+async def test_private_ready_recording_cannot_bypass_missing_publication_guard(setup,monkeypatch):
+    from app.core.models import User,StaffMembership,PermissionGrant,MediaAsset
+    from app.modules.learning.models import Lesson,LessonDraft,LessonVersion
+    from sqlalchemy import func
+    def missing_module(name):raise ModuleNotFoundError('recording publication capability unavailable',name=name)
+    monkeypatch.setattr('app.modules.learning.recording_publication.import_module',missing_module)
+    client,factory,foundation_id=setup
+    original=(await client.get('/api/v1/me/preparation')).json()['assignments'][0]
+    lesson_id=UUID(original['lessons'][0]['lesson_id'])
+    async with factory() as db:
+        staff=User(foundation_id=foundation_id,display_name='Recording publication fixture')
+        db.add(staff);await db.flush()
+        member=StaffMembership(foundation_id=foundation_id,user_id=staff.id);db.add(member);await db.flush()
+        for name in ['learning.read','learning.write','learning.publish']:db.add(PermissionGrant(membership_id=member.id,permission=name))
+        db.add(Session(foundation_id=foundation_id,user_id=staff.id,token_hash=digest('publisher'+str(foundation_id)),csrf_hash=digest('csrf'),csrf_cipher='fixture',expires_at=datetime.now(timezone.utc)+timedelta(days=1),mfa_at=datetime.now(timezone.utc)))
+        asset=MediaAsset(foundation_id=foundation_id,owner_user_id=staff.id,purpose='recording.output',storage_key=uuid4().hex,content_type='video/mp4',expected_size=1,received_size=1,checksum='0'*64,state='ready')
+        db.add(asset);await db.flush()
+        draft=LessonDraft(lesson_id=lesson_id,foundation_id=foundation_id,title='Private preview',blocks=[{'type':'video','asset_id':str(asset.id),'title':'Private preview'}],version=2,status='reviewed')
+        db.add(draft)
+        track=await db.get(LearningTrack,UUID(original['track_id']))
+        stable=await db.get(Lesson,lesson_id)
+        track_version,publication_revision=track.version,stable.publication_revision
+        old_pointer=stable.current_version_id
+        count=await db.scalar(select(func.count()).select_from(LessonVersion).where(LessonVersion.lesson_id==lesson_id))
+        await db.commit()
+    client.cookies.set('opora_session','publisher'+str(foundation_id))
+    result=await post(client,f"/coord/learning/tracks/{original['track_id']}/publish",{'expected_version':track_version,'lesson_ids':[str(lesson_id)],'lesson_draft_versions':{str(lesson_id):2},'lesson_publication_revisions':{str(lesson_id):publication_revision}})
+    assert result.status_code==503 and result.json()['code']=='recording_publication_unavailable'
+    async with factory() as db:
+        assert (await db.get(Lesson,lesson_id)).current_version_id==old_pointer
+        assert (await db.get(LearningTrack,UUID(original['track_id']))).current_release_id==UUID(original['release_id'])
+        assert await db.scalar(select(func.count()).select_from(LessonVersion).where(LessonVersion.lesson_id==lesson_id))==count

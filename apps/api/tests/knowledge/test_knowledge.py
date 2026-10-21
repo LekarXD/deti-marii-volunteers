@@ -329,3 +329,19 @@ async def test_explicit_introduction_import_reuses_exact_published_content(setup
     client.cookies.set('opora_session','one'+str(foundation))
     hits=(await client.get('/api/v1/knowledge/search',params={'q':'Мария Елисеева'})).json()
     assert hits and any('1993' in item['text'] for item in hits)
+
+@pytest.mark.asyncio
+async def test_lock_reload_does_not_use_cached_source_revision(setup):
+    from app.modules.knowledge.service import source
+    client,factory,foundation=setup
+    publication=await publish(client,factory,foundation)
+    async with factory() as first:
+        session=await first.scalar(select(Session).where(Session.token_hash==digest('staff'+str(foundation))))
+        principal=await resolve_principal(first,session)
+        before=await source(first,principal,UUID(publication['id']))
+        previous=before.draft_version
+        async with factory() as second:
+            newer=await second.get(KnowledgeSource,before.id)
+            newer.draft_version+=1;await second.commit()
+        locked=await source(first,principal,before.id,True)
+        assert locked.draft_version==previous+1

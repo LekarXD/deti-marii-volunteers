@@ -22,7 +22,7 @@ def owner_scope(principal: Principal):
 async def assignment(db: AsyncSession, principal: Principal, assignment_id: UUID, *, lock=False):
     query = select(LearningAssignment).where(LearningAssignment.id == assignment_id, LearningAssignment.foundation_id == principal.foundation_id, owner_scope(principal))
     if lock:
-        query = query.with_for_update()
+        query = query.with_for_update().execution_options(populate_existing=True)
     value = await db.scalar(query)
     if value is None:
         raise ApiError(404, "assignment_not_found", "Обучение не найдено")
@@ -124,7 +124,7 @@ async def attempt_view(db: AsyncSession, principal: Principal, attempt_id: UUID,
     # Scope before locking and before revealing any question or history.
     query = select(AssessmentAttempt).join(LearningAssignment).where(AssessmentAttempt.id == attempt_id, LearningAssignment.foundation_id == principal.foundation_id, owner_scope(principal))
     if lock:
-        query = query.with_for_update(of=AssessmentAttempt)
+        query = query.with_for_update(of=AssessmentAttempt).execution_options(populate_existing=True)
     item = await db.scalar(query)
     if item is None:
         raise ApiError(404, "attempt_not_found", "Попытка не найдена")

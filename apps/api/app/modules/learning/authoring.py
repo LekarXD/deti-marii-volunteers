@@ -19,7 +19,7 @@ def permission(principal: Principal, name: str):
 async def track(db, principal, track_id, *, lock=False):
     query = select(LearningTrack).where(LearningTrack.id == track_id, LearningTrack.foundation_id == principal.foundation_id)
     if lock:
-        query = query.with_for_update()
+        query = query.with_for_update().execution_options(populate_existing=True)
     value = await db.scalar(query)
     if value is None:
         raise ApiError(404, "track_not_found", "Трек не найден")
@@ -29,7 +29,7 @@ async def track(db, principal, track_id, *, lock=False):
 async def lesson(db, principal, lesson_id, *, lock=False):
     query = select(Lesson).where(Lesson.id == lesson_id, Lesson.foundation_id == principal.foundation_id)
     if lock:
-        query = query.with_for_update()
+        query = query.with_for_update().execution_options(populate_existing=True)
     value = await db.scalar(query)
     if value is None:
         raise ApiError(404, "lesson_not_found", "Урок не найден")
@@ -123,7 +123,7 @@ async def begin_edit(db, principal, lesson_id):
 async def save_draft(db, principal, lesson_id, body):
     permission(principal, "learning.write")
     value = await lesson(db, principal, lesson_id, lock=True)
-    draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == value.id).with_for_update())
+    draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == value.id).with_for_update().execution_options(populate_existing=True))
     if draft is None:
         raise ApiError(409, "draft_missing", "Сначала откройте редактирование урока")
     check_version(draft.version, body.expected_version)
@@ -221,7 +221,7 @@ async def validate_lesson(db, principal, lesson_id):
 async def review_lesson(db, principal, lesson_id, expected_version):
     permission(principal, "learning.write")
     await lesson(db, principal, lesson_id, lock=True)
-    draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == lesson_id).with_for_update())
+    draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == lesson_id).with_for_update().execution_options(populate_existing=True))
     if draft is None:
         raise ApiError(409, "draft_missing", "Нет черновика")
     check_version(draft.version, expected_version)
@@ -256,7 +256,7 @@ async def preview_lesson(db, principal, lesson_id):
 async def save_assessment(db, principal, track_id, body):
     permission(principal, "learning.write")
     await track(db, principal, track_id, lock=True)
-    draft = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == track_id).with_for_update())
+    draft = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == track_id).with_for_update().execution_options(populate_existing=True))
     check_version(draft.version if draft else 0, body.expected_version)
     if draft is None:
         draft = AssessmentDraft(track_id=track_id, foundation_id=principal.foundation_id, title=body.title, intro=body.intro, questions=body.questions)
@@ -272,7 +272,7 @@ async def save_assessment(db, principal, track_id, body):
 async def review_assessment(db, principal, track_id, expected_version):
     permission(principal, "learning.write")
     await track(db, principal, track_id, lock=True)
-    draft = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == track_id).with_for_update())
+    draft = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == track_id).with_for_update().execution_options(populate_existing=True))
     if draft is None:
         raise ApiError(409, "draft_missing", "Нет черновика теста")
     check_version(draft.version, expected_version)
@@ -285,15 +285,19 @@ async def review_assessment(db, principal, track_id, expected_version):
     return await track_view(db, principal, track_id)
 
 
-async def publish_lesson_version(db, principal, lesson_id, expected_draft_version, expected_publication_revision):
+async def publish_lesson_version(db, principal, lesson_id, expected_draft_version, expected_publication_revision, *, recording_claims=None):
     """P18E extension: exact draft + pointer CAS; called inside release transaction."""
     permission(principal, "learning.publish")
+    from .recording_publication import prepare_recording_assets, validate_recording_assets
+    if recording_claims is None:
+        recording_claims = await prepare_recording_assets(db, principal, [lesson_id], {lesson_id: expected_draft_version})
     value = await lesson(db, principal, lesson_id, lock=True)
     check_version(value.publication_revision, expected_publication_revision)
-    draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == lesson_id).with_for_update())
+    draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == lesson_id).with_for_update().execution_options(populate_existing=True))
     if draft is None or draft.status != "reviewed":
         raise ApiError(409, "review_required", "Сначала проверьте и согласуйте редакцию урока")
     check_version(draft.version, expected_draft_version)
+    await validate_recording_assets(db, principal, lesson_id, draft.version, draft.blocks, recording_claims)
     validation = await validate_lesson(db, principal, lesson_id)
     if not validation["valid"]:
         raise ApiError(422, "lesson_invalid", "Материал не прошёл проверку", field_errors={"blocks": validation["errors"]})
@@ -312,6 +316,8 @@ async def publish_lesson_version(db, principal, lesson_id, expected_draft_versio
 
 async def publish_release(db, principal, track_id, body):
     permission(principal, "learning.publish")
+    from .recording_publication import prepare_recording_assets
+    recording_claims = await prepare_recording_assets(db, principal, body.lesson_ids, body.lesson_draft_versions)
     parent = await track(db, principal, track_id, lock=True)
     check_version(parent.version, body.expected_version)
     if parent.archived or len(body.lesson_ids) != len(set(body.lesson_ids)):
@@ -323,11 +329,11 @@ async def publish_release(db, principal, track_id, body):
         value = locked[lesson_id]
         if value.track_id != parent.id or value.archived:
             raise ApiError(422, "release_lesson_invalid", "Урок не входит в активные материалы этого трека")
-        draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == value.id).with_for_update())
+        draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == value.id).with_for_update().execution_options(populate_existing=True))
         check_version(value.publication_revision, body.lesson_publication_revisions.get(value.id, -1))
         check_version(draft.version if draft else 0, body.lesson_draft_versions.get(value.id, -1))
         if draft and draft.status != "published":
-            version_id = await publish_lesson_version(db, principal, value.id, draft.version, value.publication_revision)
+            version_id = await publish_lesson_version(db, principal, value.id, draft.version, value.publication_revision, recording_claims=recording_claims)
         elif value.current_version_id:
             version_id = value.current_version_id
         else:
@@ -335,7 +341,7 @@ async def publish_release(db, principal, track_id, body):
         versions.append(str(version_id))
     current = await db.get(LearningRelease, parent.current_release_id) if parent.current_release_id else None
     assessment_id = current.assessment_version_id if current else None
-    assessment = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == parent.id).with_for_update())
+    assessment = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == parent.id).with_for_update().execution_options(populate_existing=True))
     if assessment and assessment.status != "published":
         check_version(assessment.version, body.assessment_draft_version)
         if assessment.status != "reviewed":
@@ -374,11 +380,11 @@ async def rollback_release(db, principal, track_id, release_id, expected_version
         stable = await lesson(db, principal, version.lesson_id, lock=True)
         stable.current_version_id = version.id
         stable.publication_revision += 1
-        draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == stable.id).with_for_update())
+        draft = await db.scalar(select(LessonDraft).where(LessonDraft.lesson_id == stable.id).with_for_update().execution_options(populate_existing=True))
         if draft:
             draft.status, draft.reviewed_by = "draft", None
             draft.version += 1
-    assessment = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == parent.id).with_for_update())
+    assessment = await db.scalar(select(AssessmentDraft).where(AssessmentDraft.track_id == parent.id).with_for_update().execution_options(populate_existing=True))
     if assessment:
         assessment.status, assessment.reviewed_by = "draft", None
         assessment.version += 1
