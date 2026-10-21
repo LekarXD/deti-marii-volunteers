@@ -1,12 +1,24 @@
 // @vitest-environment jsdom
-import {afterEach,expect,it,vi} from 'vitest';
+import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 import {cleanup,fireEvent,render,screen} from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';
 import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
 import {api} from '../../api/transport';
 import {ProfileAIRunPanel} from './ProfileAIRunPanel';
 vi.mock('../../api/transport',async load=>({...await load<typeof import('../../api/transport')>(),api:vi.fn(),getPrincipalKey:()=> 'fixture:owner'}));
-afterEach(()=>{cleanup();vi.clearAllMocks();localStorage.clear();});
+// Node 26 exposes an experimental localStorage global without a browser store.
+// Give each test an explicit browser Storage surface and restore the host after it.
+class MemoryStorage implements Storage {
+ private values=new Map<string,string>();
+ get length(){return this.values.size;}
+ clear(){this.values.clear();}
+ getItem(key:string){return this.values.get(String(key))??null;}
+ key(index:number){return Array.from(this.values.keys())[index]??null;}
+ removeItem(key:string){this.values.delete(String(key));}
+ setItem(key:string,value:string){this.values.set(String(key),String(value));}
+}
+beforeEach(()=>{vi.stubGlobal('localStorage',new MemoryStorage());});
+afterEach(()=>{cleanup();vi.clearAllMocks();vi.unstubAllGlobals();});
 function mount(){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});render(<QueryClientProvider client={client}><MemoryRouter><ProfileAIRunPanel version={3}/></MemoryRouter></QueryClientProvider>);return client;}
 it('requires saved field opt-in before an explicit request',async()=>{vi.mocked(api).mockResolvedValue({version:3,ai_about:false,ai_skills:false,ai_interests:false} as never);const client=mount();await screen.findByText(/Выберите поля/);expect((screen.getByRole('button',{name:'Подготовить предложение'}) as HTMLButtonElement).disabled).toBe(true);expect(vi.mocked(api).mock.calls.some(([,options])=>options?.method==='POST')).toBe(false);client.clear();});
 it('requests the actual producer and displays provider-unavailable instead of a fabricated proposal',async()=>{vi.mocked(api).mockImplementation(async path=>{if(path==='/me/profile')return {version:3,ai_about:true,ai_skills:false,ai_interests:false} as never;if(path.startsWith('/me/profile/ai-runs'))return {id:'run-a',state:'unavailable',error_code:'provider_unconfigured',profile_version:3,suggestion_id:null} as never;throw Error(path);});const client=mount();const button=await screen.findByRole('button',{name:'Подготовить предложение'});await vi.waitFor(()=>expect((button as HTMLButtonElement).disabled).toBe(false));fireEvent.click(button);expect(await screen.findByText('Провайдер ИИ пока не подключён.')).toBeTruthy();const request=vi.mocked(api).mock.calls.find(([path,options])=>path==='/me/profile/ai-runs'&&options?.method==='POST');expect(request?.[1]?.body).toEqual({expected_profile_version:3});expect(localStorage.getItem('opora:profile-ai-run:fixture:owner')).toBe('run-a');expect(screen.queryByText('Предложение готово. Проверьте изменения ниже перед применением.')).toBeNull();client.clear();});
