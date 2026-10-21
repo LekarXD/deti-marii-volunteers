@@ -1,13 +1,31 @@
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
-from pydantic import BaseModel,Field
+from pydantic import BaseModel,Field,model_validator
+from zoneinfo import ZoneInfo,ZoneInfoNotFoundError
 
+Topic = Literal['assignments','learning','messages','news']
+class NotificationTopics(BaseModel):
+    assignments:bool=True
+    learning:bool=True
+    messages:bool=True
+    news:bool=False
 class PreferenceCommand(BaseModel):
     expected_version:int=Field(ge=0)
     no_contact:bool
     email_enabled:bool
     in_app_enabled:bool
+    topics:NotificationTopics|None=None
+    quiet_enabled:bool|None=None
+    quiet_from:int|None=Field(None,ge=0,lt=1440)
+    quiet_to:int|None=Field(None,ge=0,lt=1440)
+    timezone:str|None=Field(None,max_length=80)
+    @model_validator(mode='after')
+    def valid_timezone(self):
+        if self.timezone:
+            try:ZoneInfo(self.timezone)
+            except (ZoneInfoNotFoundError,ValueError):raise ValueError('Неизвестный часовой пояс')
+        return self
 class PreferenceView(BaseModel):
     no_contact:bool
     email_enabled:bool
@@ -15,12 +33,20 @@ class PreferenceView(BaseModel):
     effective_no_contact:bool
     version:int
     email_provider_state:str
+    topics:NotificationTopics
+    quiet_enabled:bool
+    quiet_from:int
+    quiet_to:int
+    timezone:str
+    news_consent:bool
 class TemplateInput(BaseModel):
     key:str=Field(pattern='^[a-z0-9][a-z0-9_.-]{0,99}$')
     channel:Literal['email','in_app']
+    topic:Topic='messages'
     subject:str=Field(min_length=1,max_length=300)
     body:str=Field(min_length=1,max_length=8000)
 class TemplateUpdate(BaseModel):
+    topic:Topic|None=None
     expected_version:int=Field(ge=1)
     subject:str=Field(min_length=1,max_length=300)
     body:str=Field(min_length=1,max_length=8000)
@@ -30,6 +56,7 @@ class TemplateView(BaseModel):
     id:UUID
     key:str
     channel:str
+    topic:Topic
     subject:str
     body:str
     state:str
@@ -78,6 +105,7 @@ class DeliveryView(BaseModel):
     version:int
     attempts:list[DeliveryAttemptView]
     attempts_next_cursor:int|None
+    next_attempt_at:datetime|None
 class DeliveryList(BaseModel):
     items:list[DeliveryView]
     next_cursor:UUID|None
@@ -91,9 +119,21 @@ class WebhookView(BaseModel):
 class DeliveryAttemptPage(BaseModel):
     items:list[DeliveryAttemptView]
     next_cursor:int|None
+class NotificationChannelReadiness(BaseModel):
+    channel:str
+    state:str
+    reason:str
 class NotificationReadinessView(BaseModel):
     channel:str
     state:str
     reason:str
     webhook_state:str
     external_send_enabled:bool
+    channels:list[NotificationChannelReadiness]
+
+class NotificationRecipient(BaseModel):
+    id:UUID
+    display_name:str
+class NotificationRecipientPage(BaseModel):
+    items:list[NotificationRecipient]
+    next_cursor:UUID|None

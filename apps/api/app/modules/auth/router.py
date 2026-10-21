@@ -174,3 +174,6 @@ async def mfa_revoke(principal: Principal = Depends(get_principal), db: AsyncSes
     audit(db, principal, "mfa.revoke", "user", principal.user_id)
     await db.commit()
     return {"status": "revoked"}
+
+from .contact_change import router as contact_change_router
+router.include_router(contact_change_router)

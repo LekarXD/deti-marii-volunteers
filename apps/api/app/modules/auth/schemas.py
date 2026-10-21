@@ -1,6 +1,7 @@
 from typing import Literal
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
+from datetime import datetime
 
 class AuthSessionView(BaseModel):
     user_id: UUID | None
@@ -26,3 +27,13 @@ class MfaEnrollmentView(BaseModel):
 
 class AuthStatusView(BaseModel):
     status: Literal["logged_out", "revoked"]
+
+class ContactChangeRequestCommand(BaseModel):
+    email:str=Field(min_length=3,max_length=320)
+class ContactChangeVerifyCommand(BaseModel):
+    challenge_id:UUID
+    token:str=Field(min_length=20,max_length=200)
+class ContactChangeChallengeView(BaseModel):
+    challenge_id:UUID
+    expires_at:datetime
+    delivery_state:Literal['dev_inbox','pending']

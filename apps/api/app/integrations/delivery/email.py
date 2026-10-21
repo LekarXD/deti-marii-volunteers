@@ -27,18 +27,18 @@ async def deliver_email(payload):
     if not settings.smtp_host or not settings.smtp_from:
         return DeliveryOutcome("unavailable","provider_unavailable")
     purpose=payload.get('purpose')
-    if purpose not in ('login','notification') or not payload.get('to') or any(c in payload['to'] for c in ('\r','\n')):
+    if purpose not in ('login','contact_change','notification') or not payload.get('to') or any(c in payload['to'] for c in ('\r','\n')):
         return DeliveryOutcome("unavailable","template_unavailable")
     email=EmailMessage()
     email['From']=settings.smtp_from
     email['To']=payload['to']
     if payload.get('message_id'):
         email['Message-ID']=payload['message_id']
-    if purpose=='login':
+    if purpose in ('login','contact_change'):
         if not all(payload.get(k) for k in ('challenge_id','token')):
             return DeliveryOutcome('unavailable','template_unavailable')
-        email['Subject']='Опора — подтверждение входа'
-        email.set_content(f"Код подтверждения входа в Опору:\n{payload['token']}\n\nЗапрос: {payload['challenge_id']}\nКод действует 15 минут. Если вы не запрашивали вход, не используйте его.")
+        email['Subject']='Опора — подтверждение смены почты' if purpose=='contact_change' else 'Опора — подтверждение входа'
+        email.set_content(f"Код подтверждения запроса в Опоре:\n{payload['token']}\n\nЗапрос: {payload['challenge_id']}\nКод действует 15 минут. Если вы не запрашивали вход, не используйте его.")
     else:
         if not payload.get('subject') or not payload.get('text') or len(payload['subject'])>300 or len(payload['text'])>10000 or any(c in payload['subject'] for c in ('\r','\n')):
             return DeliveryOutcome('unavailable','template_unavailable')

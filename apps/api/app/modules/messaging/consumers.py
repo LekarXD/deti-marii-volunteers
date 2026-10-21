@@ -10,11 +10,11 @@ from .models import Conversation, ConversationMember, Message
 
 LABELS={"interview.booked":"Встреча назначена", "interview.rescheduled":"Встреча перенесена", "interview.cancelled":"Встреча отменена", "interview.completed":"Встреча завершена", "interview.missed":"Не удалось встретиться", "interview.result_updated":"Итог встречи обновлён"}
 
-def enqueue_notice(db,foundation_id,recipient_id,subject,body):
+def enqueue_notice(db,foundation_id,recipient_id,subject,body,*,topic='messages'):
     """For authoritative, already-authorized non-scheduled system events only.
     Booking/reminder producers must use the source-bound internal event envelope.
     """
-    return enqueue_outbox(db,foundation_id,"in_app",{"recipient_id":str(recipient_id),"subject":subject,"text":body})
+    return enqueue_outbox(db,foundation_id,"in_app",{"topic":topic,"recipient_id":str(recipient_id),"subject":subject,"text":body})
 
 async def deliver_internal(db,outbox,payload):
     from app.core.contact_policy import contact_guard
@@ -68,12 +68,17 @@ async def deliver_internal(db,outbox,payload):
         content=f"{payload.get('subject','Уведомление фонда')}\n{payload.get('text','')}".strip()
         if len(content)>8000:
             return "unavailable"
-    from app.modules.notifications.service import may_contact,sender_authorized
+    from app.modules.notifications.service import may_contact,sender_authorized,quiet_until,topic_for
+    from app.modules.notifications.models import NotificationDelivery
     if not await sender_authorized(db,outbox.foundation_id,payload):
         return "suppressed_authz"
-    allowed,reason=await may_contact(db,outbox.foundation_id,recipient,"in_app")
+    allowed,reason=await may_contact(db,outbox.foundation_id,recipient,"in_app",topic_for(payload))
     if not allowed:
         return "suppressed_"+reason
+    delivery=await db.scalar(select(NotificationDelivery).where(NotificationDelivery.outbox_id==outbox.id))
+    if delivery:delivery.recipient_user_id=recipient
+    outbox.defer_until=await quiet_until(db,outbox.foundation_id,recipient)
+    if outbox.defer_until:return 'deferred_quiet'
     user=await db.get(User,recipient)
     if user is None or user.foundation_id!=outbox.foundation_id or user.account_state!="active":
         return "suppressed_recipient"

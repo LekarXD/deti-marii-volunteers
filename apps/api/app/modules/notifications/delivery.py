@@ -8,7 +8,7 @@ from app.core.models import AuthChallenge,ContactChannel,OutboxMessage
 from app.integrations.delivery.email import DeliveryOutcome,deliver_email,readiness
 from app.worker.queue import fenced_update
 from .models import DeliveryAttempt,NotificationDelivery,NotificationTemplate,NotificationTemplateVersion
-from .service import may_contact,sender_authorized
+from .service import may_contact,sender_authorized,quiet_until,topic_for
 
 async def journal(db,outbox,payload):
     row=await db.scalar(select(NotificationDelivery).where(NotificationDelivery.outbox_id==outbox.id).with_for_update())
@@ -29,18 +29,22 @@ async def new_attempt(db,delivery,state):
     return attempt
 
 async def check_email(db,outbox,payload):
-    if payload.get('purpose')=='login':
+    if payload.get('purpose') in ('login','contact_change'):
         try:identity=UUID(payload.get('challenge_id',''))
         except ValueError:return 'suppressed_stale_auth'
         challenge=await db.get(AuthChallenge,identity)
-        if challenge is None or challenge.foundation_id!=outbox.foundation_id or challenge.consumed_at or challenge.expires_at<=utcnow() or challenge.token_hash!=digest(payload.get('token','')):
+        if challenge is None or challenge.foundation_id!=outbox.foundation_id or challenge.consumed_at or challenge.expires_at<=utcnow() or challenge.token_hash!=digest(payload.get('token','')) or challenge.purpose!=payload.get('purpose'):
             return 'suppressed_stale_auth'
+        if challenge.purpose=='contact_change':
+            from app.core.models import Session
+            session=await db.get(Session,challenge.bound_session_id)
+            if session is None or session.revoked_at or session.expires_at<=utcnow() or session.user_id!=challenge.bound_user_id:return 'suppressed_stale_auth'
         return None
     if payload.get('purpose')!='notification' or not payload.get('recipient_id'):
         return 'unavailable'
     if not await sender_authorized(db,outbox.foundation_id,payload):return 'suppressed_authz'
     recipient=UUID(payload['recipient_id'])
-    allowed,reason=await may_contact(db,outbox.foundation_id,recipient,'email')
+    allowed,reason=await may_contact(db,outbox.foundation_id,recipient,'email',topic_for(payload))
     if not allowed:return 'suppressed_'+reason
     version=await db.get(NotificationTemplateVersion,UUID(payload['template_version_id']))
     template=await db.get(NotificationTemplate,version.template_id) if version else None
@@ -50,7 +54,7 @@ async def check_email(db,outbox,payload):
     return None
 
 async def process_email(db,job,outbox,payload):
-    if payload.get('purpose')!='login':await contact_guard(db,outbox.foundation_id)
+    if payload.get('purpose') not in ('login','contact_change'):await contact_guard(db,outbox.foundation_id)
     delivery=await journal(db,outbox,payload)
     latest=await db.scalar(select(DeliveryAttempt).where(DeliveryAttempt.delivery_id==delivery.id).order_by(DeliveryAttempt.attempt_number.desc()).limit(1))
     if delivery.state in ('delivered','bounced'):
@@ -62,7 +66,7 @@ async def process_email(db,job,outbox,payload):
         delivery.state=outbox.state='unknown'
         delivery.version+=1
         return DeliveryOutcome('unknown','worker_interrupted_after_calling')
-    if latest and latest.state not in ('unavailable','queued'):
+    if latest and latest.state not in ('unavailable','queued','deferred_quiet'):
         return DeliveryOutcome(latest.state,latest.error_code)
     blocked=await check_email(db,outbox,payload)
     if blocked:
@@ -71,6 +75,13 @@ async def process_email(db,job,outbox,payload):
         delivery.state=outbox.state=blocked
         delivery.version+=1
         return DeliveryOutcome(blocked)
+    outbox.defer_until=await quiet_until(db,outbox.foundation_id,UUID(payload['recipient_id'])) if payload.get('purpose')=='notification' else None
+    if outbox.defer_until:
+        attempt=await new_attempt(db,delivery,'deferred_quiet')
+        attempt.completed_at=utcnow()
+        delivery.state=outbox.state='deferred_quiet'
+        delivery.version+=1
+        return DeliveryOutcome('deferred_quiet')
     if readiness()['state']=='unavailable':
         attempt=await new_attempt(db,delivery,'unavailable')
         attempt.completed_at=utcnow()
@@ -82,8 +93,11 @@ async def process_email(db,job,outbox,payload):
     delivery.state=outbox.state='calling'
     # A crash after this point is uncertain. A retry never blindly calls SMTP again.
     await db.commit()
-    if payload.get('purpose')!='login':await contact_guard(db,outbox.foundation_id)
+    if payload.get('purpose') not in ('login','contact_change'):await contact_guard(db,outbox.foundation_id)
     blocked=await check_email(db,outbox,payload)
+    if not blocked and payload.get('purpose')=='notification':
+        outbox.defer_until=await quiet_until(db,outbox.foundation_id,UUID(payload['recipient_id']))
+        if outbox.defer_until:blocked='deferred_quiet'
     result=DeliveryOutcome(blocked) if blocked else await deliver_email({**payload,'message_id':delivery.provider_message_id})
     await fenced_update(db,job.id,job.claim_token,state='running')
     attempt.state=result.state
@@ -102,7 +116,7 @@ async def process_internal(db,job,outbox,payload):
     await contact_guard(db,outbox.foundation_id)
     delivery=await journal(db,outbox,payload)
     latest=await db.scalar(select(DeliveryAttempt).where(DeliveryAttempt.delivery_id==delivery.id).order_by(DeliveryAttempt.attempt_number.desc()).limit(1))
-    if latest and latest.state not in ('waiting_identity','unavailable'):
+    if latest and latest.state not in ('waiting_identity','unavailable','deferred_quiet'):
         return latest.state
     attempt=await new_attempt(db,delivery,'processing')
     from app.modules.messaging.consumers import deliver_internal

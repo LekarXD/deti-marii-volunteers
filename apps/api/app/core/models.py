@@ -52,6 +52,8 @@ class Session(IdentityMixin, Base):
 
 class AuthChallenge(IdentityMixin, Base):
     __tablename__ = "auth_challenges"
+    bound_user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
+    bound_session_id: Mapped[UUID | None] = mapped_column(ForeignKey("sessions.id"))
     foundation_id: Mapped[UUID] = mapped_column(ForeignKey("foundations.id"))
     registration_id: Mapped[UUID | None] = mapped_column(ForeignKey("registration_sessions.id"))
     token_hash: Mapped[str] = mapped_column(String(64), unique=True)
@@ -130,6 +132,7 @@ class OutboxMessage(IdentityMixin, Base):
     payload_cipher: Mapped[str] = mapped_column(Text)
     state: Mapped[str] = mapped_column(String(30), default="queued")
     job_id: Mapped[UUID | None] = mapped_column(ForeignKey("jobs.id"))
+    defer_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 class MediaAsset(IdentityMixin, Base):
     __tablename__ = "media_assets"

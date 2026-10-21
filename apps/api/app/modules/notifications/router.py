@@ -11,10 +11,10 @@ from app.core.clock import utcnow
 from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.errors import ApiError
-from app.core.models import OutboxMessage
+from app.core.models import OutboxMessage,User
 from . import service
 from .models import DeliveryAttempt,NotificationDelivery,NotificationTemplate,NotificationWebhookReceipt
-from .schemas import AudienceCommand,AudienceView,DeliveryList,EnqueuedView,PreferenceCommand,PreferenceView,SendAudienceCommand,TemplateInput,TemplateList,TemplateUpdate,TemplateView,VersionCommand,WebhookInput,WebhookView,DeliveryAttemptPage,NotificationReadinessView
+from .schemas import AudienceCommand,AudienceView,DeliveryList,EnqueuedView,PreferenceCommand,PreferenceView,SendAudienceCommand,TemplateInput,TemplateList,TemplateUpdate,TemplateView,VersionCommand,WebhookInput,WebhookView,DeliveryAttemptPage,NotificationReadinessView,NotificationRecipientPage
 router=APIRouter(prefix='/api/v1',tags=['notifications'])
 
 @router.get('/me/notification-preferences',operation_id='notification_preferences',response_model=PreferenceView)
@@ -70,6 +70,16 @@ async def send(body:SendAudienceCommand,request:Request,principal:Principal=Depe
     await db.commit()
     return result
 
+@router.get('/coord/notifications/recipients',operation_id='notification_recipients',response_model=NotificationRecipientPage)
+async def recipients(q:str=Query('',max_length=100),cursor:UUID|None=None,limit:int=Query(30,ge=1,le=100),principal:Principal=Depends(require_permission('notifications.manage')),db:AsyncSession=Depends(get_db)):
+    query=select(User).where(User.foundation_id==principal.foundation_id,User.account_state=='active')
+    if q.strip():
+        normalized=func.translate(func.lower(User.display_name),'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ','абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
+        query=query.where(normalized.contains(q.strip().casefold(),autoescape=True))
+    if cursor:query=query.where(User.id>cursor)
+    rows=(await db.scalars(query.order_by(User.id).limit(limit+1))).all()
+    return {'items':[{'id':u.id,'display_name':u.display_name} for u in rows[:limit]],'next_cursor':rows[limit-1].id if len(rows)>limit else None}
+
 @router.get('/coord/notification-deliveries',operation_id='notification_deliveries',response_model=DeliveryList)
 async def deliveries(limit:int=Query(20,ge=1,le=50),cursor:UUID|None=None,principal:Principal=Depends(require_permission('notifications.manage')),db:AsyncSession=Depends(get_db)):
     query=select(NotificationDelivery).where(NotificationDelivery.foundation_id==principal.foundation_id)
@@ -78,7 +88,7 @@ async def deliveries(limit:int=Query(20,ge=1,le=50),cursor:UUID|None=None,princi
     result=[]
     for row in rows[:limit]:
         attempts=(await db.scalars(select(DeliveryAttempt).where(DeliveryAttempt.delivery_id==row.id).order_by(DeliveryAttempt.attempt_number.desc()).limit(21))).all()
-        result.append({'id':row.id,'recipient_user_id':row.recipient_user_id,'template_version_id':row.template_version_id,'channel':row.channel,'state':row.state,'version':row.version,'attempts_next_cursor':attempts[19].attempt_number if len(attempts)>20 else None,'attempts':[{'attempt_number':a.attempt_number,'state':a.state,'error_code':a.error_code,'started_at':a.started_at,'completed_at':a.completed_at} for a in attempts[:20]]})
+        result.append({'id':row.id,'recipient_user_id':row.recipient_user_id,'template_version_id':row.template_version_id,'channel':row.channel,'state':row.state,'version':row.version,'next_attempt_at':(await db.get(OutboxMessage,row.outbox_id)).defer_until,'attempts_next_cursor':attempts[19].attempt_number if len(attempts)>20 else None,'attempts':[{'attempt_number':a.attempt_number,'state':a.state,'error_code':a.error_code,'started_at':a.started_at,'completed_at':a.completed_at} for a in attempts[:20]]})
     return {'items':result,'next_cursor':rows[limit-1].id if len(rows)>limit else None}
 
 @router.get('/coord/notification-deliveries/{delivery_id}/attempts',operation_id='notification_delivery_attempts',response_model=DeliveryAttemptPage)
@@ -94,7 +104,7 @@ async def attempts(delivery_id:UUID,before:int|None=Query(None,ge=1),limit:int=Q
 async def provider_readiness(principal:Principal=Depends(require_permission('notifications.manage'))):
     from app.integrations.delivery.email import readiness
     value=readiness()
-    return {**value,'webhook_state':'configured' if get_settings().email_webhook_secret else 'unavailable','external_send_enabled':value['state']=='available'}
+    return {**value,'webhook_state':'configured' if get_settings().email_webhook_secret else 'unavailable','external_send_enabled':value['state']=='available','channels':[{'channel':'in_app','state':'available','reason':'Внутренние уведомления сохраняются в платформе'},value]}
 
 @router.post('/integrations/email/webhook',operation_id='notification_email_webhook',response_model=WebhookView)
 async def webhook(request:Request,db:AsyncSession=Depends(get_db)):

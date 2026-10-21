@@ -33,15 +33,17 @@ async def run_once(kinds=None):
                     from app.modules.notifications.delivery import process_internal
                     state=await process_internal(db,job,message,payload)
                     message.state=state
-                    if state=="waiting_identity":
-                        await fenced_update(db,job.id,job.claim_token,state="queued",attempts=max(0,job.attempts-1),available_at=utcnow()+timedelta(minutes=5),lease_until=None)
+                    if state in ("waiting_identity","deferred_quiet"):
+                        await fenced_update(db,job.id,job.claim_token,state="queued",attempts=max(0,job.attempts-1),available_at=message.defer_until if state=="deferred_quiet" else utcnow()+timedelta(minutes=5),lease_until=None)
                     else:
                         await complete(db,job.id,job.claim_token,{"delivery":state})
                 elif message.channel=="email":
                     from app.modules.notifications.delivery import process_email
                     result=await process_email(db,job,message,payload)
                     message.state=result.state
-                    if result.state=="unavailable":
+                    if result.state=="deferred_quiet":
+                        await fenced_update(db,job.id,job.claim_token,state="queued",attempts=max(0,job.attempts-1),available_at=message.defer_until,lease_until=None,error_code='quiet_hours')
+                    elif result.state=="unavailable":
                         await retry(db,job.id,job.claim_token,result.error_code or "provider_unavailable",job.attempts,job.max_attempts)
                     else:
                         # Unknown SMTP outcomes are terminal and never retried blindly.

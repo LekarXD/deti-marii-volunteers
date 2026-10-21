@@ -176,3 +176,43 @@ async def test_webhook_signature_timestamp_and_event_replay(app,monkeypatch):
         assert (await client.post('/api/v1/integrations/email/webhook',content=raw,headers=headers)).json()['status']=='replayed'
         stale={**headers,'X-Webhook-Timestamp':str(int(timestamp)-1000)}
         assert (await client.post('/api/v1/integrations/email/webhook',content=raw,headers=stale)).status_code==401
+
+@pytest.mark.asyncio
+async def test_topics_news_consent_quiet_deferral_and_human_directory(app):
+    from datetime import datetime,timezone
+    from app.modules.notifications.models import NotificationPreference
+    from app.modules.notifications.service import may_contact,quiet_until
+    from app.modules.applications.models import ConsentEvent
+    await fixtures()
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as staff,httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as candidate:
+        _,sh=await actor(staff,'coordinator@example.test',True)
+        cs,ch=await actor(candidate,f'quiet-{uuid4().hex}@example.test')
+        saved=await candidate.put('/api/v1/me/notification-preferences',json={'expected_version':0,'no_contact':False,'email_enabled':False,'in_app_enabled':True,'topics':{'assignments':True,'learning':True,'messages':True,'news':True},'quiet_enabled':True,'quiet_from':1320,'quiet_to':540,'timezone':'Europe/Moscow'},headers=ch)
+        assert saved.status_code==200,saved.text
+        assert saved.json()['news_consent'] is False
+        directory=await staff.get('/api/v1/coord/notifications/recipients?limit=100',headers=sh)
+        assert directory.status_code==200 and all(set(x)=={'id','display_name'} for x in directory.json()['items'])
+        readiness=(await staff.get('/api/v1/coord/notifications/provider-readiness',headers=sh)).json()
+        assert next(x for x in readiness['channels'] if x['channel']=='in_app')['state']=='available'
+        async with SessionLocal() as db:
+            uid=UUID(cs['user_id']);fid=UUID(cs['foundation_id'])
+            assert await may_contact(db,fid,uid,'in_app','news')==(False,'newsletter_consent_missing')
+            consent=ConsentEvent(subject_user_id=uid,purpose='news',granted=True,document='news',document_version='4',author_id=str(uid),source='profile')
+            db.add(consent)
+            await db.flush()
+            assert await may_contact(db,fid,uid,'in_app','news')==(True,None)
+            assert await quiet_until(db,fid,uid,datetime(2026,10,21,20,tzinfo=timezone.utc))==datetime(2026,10,22,6,tzinfo=timezone.utc)
+            pref=await db.scalar(select(NotificationPreference).where(NotificationPreference.user_id==uid))
+            # Force current minute inside a valid quiet interval, then retry after preference change.
+            now=utcnow().astimezone(__import__('zoneinfo').ZoneInfo('Europe/Moscow')); minute=now.hour*60+now.minute
+            pref.quiet_from=(minute-1)%1440;pref.quiet_to=(minute+2)%1440
+            payload={'recipient_id':str(uid),'subject':'Fixture','text':'Internal quiet-hours proof'}
+            outbox=enqueue_outbox(db,fid,'in_app',payload)
+            await db.flush();job=await db.get(Job,outbox.job_id)
+            assert await process_internal(db,job,outbox,payload)=='deferred_quiet'
+            assert outbox.defer_until>utcnow()
+            assert not await db.scalar(select(Message.id).where(Message.source_outbox_id==outbox.id))
+            pref.quiet_enabled=False
+            assert await process_internal(db,job,outbox,payload)=='delivered'
+            assert outbox.defer_until is None
+            await db.rollback()
