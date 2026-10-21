@@ -6,8 +6,8 @@
 
 Материалы и постановка задачи — в [`materials/`](materials/README.md).
 
-**Рабочий прототип** «анкета → кабинет → онбординг → встреча с координатором» — в [`prototype/`](prototype/README.md). Тексты правятся в `prototype/content/`.
+**Путь кандидата** «анкета → знакомство с фондом → тест → встреча с координатором» — в прототипе «Опора»: `prototype/Apply.dc.html`, `Onboarding.dc.html`, `ApplicationStatus.dc.html`. Тексты правятся в `prototype/content/`, после правки — `python3 scripts/build_prototype.py`. Первая версия на простом HTML (`prototype/index.html`) оставлена как черновик, подробнее — [prototype/README.md](prototype/README.md).
 
 Прототип «Опора» и все сохранённые артефакты его подготовки — в [`materials/04-дизайн/прототип-до-фактуры/`](materials/04-дизайн/прототип-до-фактуры/README.md). [Интерактивный холст Claude Design](https://claude.ai/artifact/KeurJ9hsWHTx9g8ovz512u).
 
-**Расширенный прототип «Опора»**: [расписание, роли, участники и группы](prototype/README-opora.md). Открывается через `prototype/Main.dc.html`; исходники в `prototype-src/`. Онбординг Фёдора в `prototype/index.html` сохранён отдельно.
+**Расширенный прототип «Опора»**: [расписание, роли, участники и группы](prototype/README-opora.md). Открывается через `prototype/Main.dc.html`; исходники в `prototype-src/`. Анкета и онбординг — экраны `Apply`, `Onboarding`, `ApplicationStatus`.

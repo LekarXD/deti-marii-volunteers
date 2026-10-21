@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Кандидат: знакомство с фондом — Опора</title><script src="./support.js"></script></head><body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F0ECE3}
+.dm{--page:#F0ECE3;--paper:#FFFFFF;--soft:#F6F3EE;--soft-2:#E8E3D8;--line:#E9E4DA;--line-2:#D6D0C3;--ink:#12141A;--ink-2:#3B3E46;--mute:#5E5A52;--quiet:#8C877C;--orange:#FF6218;--orange-ink:#B83E06;--orange-tint:#FFE9DC;--yellow:#FFB93F;--yellow-ink:#7A4E00;--yellow-tint:#FFF1D2;--blue:#0F3DA7;--blue-tint:#E7ECF8;--blue-soft:#C9D4F0;--green:#28A15D;--green-ink:#1E7A46;--green-tint:#DDF0E2;--red:#E2160C;--red-ink:#B3120A;--red-tint:#FDE5E1;--violet:#5B3FB0;--violet-tint:#EFEAFB;--pink:#E0457B;--pink-tint:#FCE4ED;--shadow:0 4px 14px rgba(18,20,26,.06);--focus:0 0 0 3px rgba(15,61,167,.32);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.dm *{box-sizing:border-box}
+:where(.dm) a{color:var(--blue);text-decoration:none}
+:where(.dm) a:hover{text-decoration:underline}
+sc-if,sc-for{display:contents}
+:where(.dm) button{font:inherit;color:inherit;cursor:pointer}
+.dm :focus-visible{outline:none;box-shadow:var(--focus)}
+.dm ::selection{background:rgba(255,185,63,.45)}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic-sm{width:18px;height:18px}.ic-lg{width:26px;height:26px}.ic-xl{width:36px;height:36px}
+.ic-fill{fill:currentColor;stroke:none}
+.ic-dots{stroke-width:3}
+.shell{max-width:1280px;margin:0 auto;padding:20px 32px 80px}
+.top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand . end" "nav nav nav";align-items:center;gap:14px 16px;margin-bottom:40px}
+.top > .brand{grid-area:brand;justify-self:start}
+.top > .nav{grid-area:nav;justify-self:start}
+.brand{display:inline-flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 10px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink);text-decoration:none}
+.brand:hover{text-decoration:none}
+.mark{position:relative;width:36px;height:36px;flex:0 0 36px}
+.mark i{position:absolute;width:18px;height:18px;border-radius:50%;mix-blend-mode:multiply}
+.mark i:nth-child(1){left:0;top:2px;background:var(--blue)}
+.mark i:nth-child(2){left:13px;top:0;background:var(--orange)}
+.mark i:nth-child(3){left:4px;top:15px;background:var(--yellow)}
+.mark i:nth-child(4){left:16px;top:16px;background:var(--green)}
+.brand b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.brand small{display:block;font-size:13px;color:var(--mute);line-height:1.2;margin-top:3px}
+.nav{display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;color:var(--ink-2);font-size:15px;font-weight:500;white-space:nowrap;text-decoration:none}
+.nav a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.nav a.is-active{background:var(--ink);color:#fff}
+.nav .count{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:var(--ink);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.top-end{grid-area:end;justify-self:end;display:flex;align-items:center;gap:8px;min-width:0}
+.pillbox{display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow)}
+.iconbtn{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--soft);color:var(--ink)}
+.iconbtn .pip{position:absolute;top:10px;right:11px;width:9px;height:9px;border-radius:50%;background:var(--orange);border:2px solid var(--paper)}
+.role{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;background:var(--paper);box-shadow:var(--shadow);color:var(--ink-2);font-size:15px;font-weight:500;text-decoration:none;white-space:nowrap}
+.role:hover{color:var(--ink);text-decoration:none}
+.avatar{width:44px;height:44px;flex:0 0 44px;border-radius:50%;display:inline-grid;place-items:center;font-size:15px;font-weight:600;color:var(--ink);background:var(--yellow-tint)}
+.avatar-sm{width:36px;height:36px;flex-basis:36px;font-size:13px}
+.avatar-lg{width:72px;height:72px;flex-basis:72px;font-size:24px}
+.av-o{background:var(--orange-tint)}.av-y{background:var(--yellow-tint)}.av-b{background:var(--blue-tint)}.av-g{background:var(--green-tint)}.av-v{background:var(--violet-tint)}.av-p{background:var(--pink-tint)}
+.display{margin:0;font-size:56px;font-weight:600;line-height:1.02;letter-spacing:-.035em;text-wrap:balance}
+.h1{margin:0;font-size:40px;font-weight:600;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+.h2{margin:0;font-size:28px;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+.h3{margin:0;font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.lead{margin:12px 0 0;font-size:18px;line-height:1.5;color:var(--ink-2);max-width:60ch;text-wrap:pretty}
+.p{margin:0;color:var(--ink-2)}
+.meta{font-size:15px;line-height:1.45;color:var(--mute)}
+.eyebrow{font-size:15px;font-weight:600;color:var(--ink-2)}
+.num{font-variant-numeric:tabular-nums}
+.strong{font-weight:600;color:var(--ink)}
+.pre{white-space:pre-line}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:28px}
+.head > div:first-child{flex:1 1 420px;min-width:0}
+.section{margin-top:56px}
+.section-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin-bottom:18px}
+.card{background:var(--paper);border-radius:28px;padding:28px 32px}
+.card-soft{background:var(--soft);border-radius:28px;padding:28px 32px}
+.card-hero{background:var(--yellow);border-radius:32px;padding:40px 44px;color:var(--ink)}
+.card-hero .lead,.card-hero .p{color:var(--ink)}
+.card-hero .meta{color:var(--ink-2)}
+.card-hero .btn-secondary{background:transparent;border-color:rgba(18,20,26,.35)}
+.card-hero .btn-secondary:hover{border-color:var(--ink)}
+.card-hero .btn-ghost{color:var(--ink)}
+.card-hero .btn-ghost:hover{background:rgba(255,255,255,.35)}
+.card-hero .bar{background:rgba(18,20,26,.14)}
+.card-hero .bar > i{background:var(--ink)}
+.card-dark{background:var(--ink);color:#fff;border-radius:32px;padding:40px 44px}
+.card-tight{padding:18px 22px;border-radius:22px}
+.ai-box{background:#F3EFFD;border-radius:24px;padding:22px 26px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.wrap{flex-wrap:wrap}
+.grow{flex:1 1 auto;min-width:0}
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.split > .main-col{flex:999 1 560px;min-width:0}
+.split > .side-col{flex:1 1 320px;min-width:0;max-width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.divider{height:1px;background:var(--line);border:0;margin:20px 0}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:16px;padding:18px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li-title{font-weight:600;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;border:1px solid transparent;font-size:16px;font-weight:600;line-height:1;white-space:nowrap;text-decoration:none;color:var(--ink);background:transparent}
+.btn:hover{text-decoration:none}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:#2B2E37}
+.btn-accent{background:var(--orange);color:var(--ink)}
+.btn-secondary{background:var(--paper);border-color:var(--line-2)}
+.btn-secondary:hover{border-color:var(--ink-2)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--soft);color:var(--ink)}
+.btn-subtle{background:var(--blue-tint);color:var(--blue)}
+.btn-subtle:hover{background:var(--blue-soft)}
+.btn-dark{background:var(--ink);color:#fff}
+.btn-danger{background:var(--red-tint);color:var(--red-ink)}
+.btn-ai{background:var(--violet-tint);color:var(--violet)}
+.btn-sm{height:40px;padding:0 16px;font-size:15px}
+.btn-lg{height:56px;padding:0 28px;font-size:17px}
+.btn-block{width:100%}
+.btn[aria-disabled="true"]{background:var(--soft-2);color:var(--mute);border-color:transparent;cursor:not-allowed}
+.tag{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;font-size:14px;font-weight:500;white-space:nowrap;background:var(--soft-2);color:var(--ink-2)}
+.t-orange{background:var(--orange-tint);color:var(--orange-ink)}
+.t-yellow{background:var(--yellow-tint);color:var(--yellow-ink)}
+.t-blue{background:var(--blue-tint);color:var(--blue)}
+.t-green{background:var(--green-tint);color:var(--green-ink)}
+.t-red{background:var(--red-tint);color:var(--red-ink)}
+.t-violet{background:var(--violet-tint);color:var(--violet)}
+.t-pink{background:var(--pink-tint);color:#A3204F}
+.ai-tag{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--violet-tint);color:var(--violet);font-size:14px;font-weight:600}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:var(--ink-2)}
+.dot::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--quiet);flex:0 0 9px}
+.dot-green::before{background:var(--green)}.dot-orange::before{background:var(--orange)}.dot-red::before{background:var(--red)}.dot-blue::before{background:var(--blue)}.dot-yellow::before{background:var(--yellow)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:0;background:var(--paper);font-size:15px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.chip:hover{color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.chip.is-on{background:var(--ink);color:#fff}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--paper)}
+.seg button{height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-size:15px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.seg button.is-on{background:var(--ink);color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line-2);overflow-x:auto}
+.tabs button{height:50px;padding:0 18px;border:0;background:transparent;font-size:16px;font-weight:600;color:var(--mute);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.is-on{color:var(--ink);border-bottom-color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.label{font-size:15px;font-weight:600;color:var(--ink)}
+.input,.textarea,.select{width:100%;min-height:52px;padding:13px 16px;border-radius:14px;border:1px solid var(--line-2);background:var(--paper);font:inherit;color:var(--ink)}
+.textarea{min-height:140px;resize:vertical;line-height:1.55}
+.input:focus,.textarea:focus{outline:none;border-color:var(--blue);box-shadow:var(--focus)}
+.input::placeholder,.textarea::placeholder{color:var(--quiet)}
+.help{font-size:15px;color:var(--mute)}
+.err{font-size:15px;color:var(--red-ink)}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:16px;color:var(--ink-2)}
+.check input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--ink);flex:0 0 22px}
+.toggle{position:relative;width:48px;height:28px;flex:0 0 48px;border-radius:999px;background:var(--line-2);border:0;padding:0}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.is-on{background:var(--green)}
+.toggle.is-on::after{left:23px}
+.kpi{position:relative;display:flex;flex-direction:column;gap:8px;padding:26px 28px;border-radius:28px;background:var(--paper);min-width:0;text-decoration:none;color:inherit}
+.kpi-num{position:relative;font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);z-index:1}
+.kpi-label{position:relative;font-size:16px;color:var(--ink-2);z-index:1}
+.kpi-delta{font-size:15px;color:var(--mute)}
+.blob{position:absolute;z-index:0;width:72px;height:64px;left:14px;top:12px;border-radius:58% 42% 55% 45%/48% 60% 40% 52%}
+.blob-y{background:var(--yellow-tint)}.blob-b{background:var(--blue-tint)}.blob-g{background:var(--green-tint)}.blob-p{background:var(--pink-tint)}.blob-o{background:var(--orange-tint)}.blob-v{background:var(--violet-tint)}
+.bar{height:10px;border-radius:999px;background:var(--soft-2);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:999px;background:var(--orange)}
+.bar-green > i{background:var(--green)}.bar-blue > i{background:var(--blue)}.bar-yellow > i{background:var(--yellow)}.bar-ink > i{background:var(--ink)}
+.tbl{display:grid}
+.tbl-row{display:grid;align-items:center;gap:16px;padding:16px 4px;border-bottom:1px solid var(--line);min-width:0}
+.tbl-row:last-child{border-bottom:0}
+.tbl-head{font-size:15px;font-weight:600;color:var(--mute);padding-top:8px;padding-bottom:12px}
+.scroll-x{overflow-x:auto}
+.art{width:60px;height:60px;flex:0 0 60px;border-radius:20px;display:grid;place-items:center}
+.art .ic{width:26px;height:26px}
+.art-lg{width:100%;height:150px;border-radius:24px}
+.art-o{background:var(--orange-tint);color:var(--orange-ink)}.art-y{background:var(--yellow-tint);color:var(--yellow-ink)}.art-b{background:var(--blue-tint);color:var(--blue)}.art-g{background:var(--green-tint);color:var(--green-ink)}.art-v{background:var(--violet-tint);color:var(--violet)}.art-p{background:var(--pink-tint);color:#A3204F}
+.heat{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--soft-2)}
+.heat i.h1{background:#FFE0C9}.heat i.h2{background:#FFB98F}.heat i.h3{background:#FF8A4C}.heat i.h4{background:var(--orange)}
+.bubble{max-width:72%;padding:14px 18px;border-radius:22px;background:var(--soft);color:var(--ink);font-size:16px;line-height:1.5}
+.bubble-me{margin-left:auto;background:var(--blue-tint);border-bottom-right-radius:6px}
+.bubble-them{border-bottom-left-radius:6px}
+.bubble-ai{background:#F3EFFD}
+.cite{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line-2);font-size:15px;color:var(--ink-2)}
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:fit-content;max-width:100%;margin:0 0 32px;padding:6px;border-radius:999px;background:#E3DDD0}
+.demo-cap{font-size:14px;font-weight:600;color:var(--mute);padding:0 8px 0 10px}
+.demo button{height:34px;padding:0 14px;border-radius:999px;border:0;background:transparent;font-size:14px;font-weight:500;color:var(--ink-2)}
+.demo button.is-on{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 24px;color:var(--ink-2)}
+@media (max-width:720px){.shell{padding:12px 16px 56px}.display{font-size:40px}.h1{font-size:30px}.h2{font-size:24px}.card,.card-soft{padding:22px 20px;border-radius:24px}.card-hero,.card-dark{padding:28px 22px;border-radius:26px}.top{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "end" "nav"}.top-end{justify-self:start;flex-wrap:wrap}.bubble{max-width:88%}.heat{grid-template-columns:repeat(13,minmax(0,1fr))}}
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-when{margin:10px 0 0;font-size:52px;font-weight:600;line-height:1.02;letter-spacing:-.035em}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center;color:var(--ink)}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.hero-note{margin-top:24px;padding:18px 22px;border-radius:22px;background:rgba(255,255,255,.7);display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.match{display:flex;flex-direction:column;gap:14px;min-height:100%;color:inherit;text-decoration:none}
+.match:hover{text-decoration:none}
+.match:hover .h3{color:var(--blue)}
+.match-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.score{display:inline-flex;align-items:baseline;gap:4px;font-size:28px;font-weight:600;color:var(--violet);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.formula{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:16px}
+.formula div{padding:14px 16px;border-radius:16px;background:var(--paper);font-size:15px;color:var(--ink-2)}
+.formula b{display:block;font-size:24px;color:var(--ink);font-variant-numeric:tabular-nums}
+.ask{display:flex;gap:10px;margin-top:16px}
+.ask .input{flex:1 1 auto}
+.big{font-size:56px;font-weight:600;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums}
+.hero-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.hero-copy{flex:1 1 560px;min-width:0}
+.hero-title{margin:10px 0 0;font-size:52px;font-weight:600;line-height:1.05;letter-spacing:-.035em;text-wrap:balance}
+.hero-art{width:168px;height:168px;flex:0 0 168px;border-radius:50%;background:rgba(255,255,255,.55);display:grid;place-items:center}
+.hero-art .ic{width:72px;height:72px;stroke-width:1.4}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:24px}
+.subnav{margin:-16px 0 32px;gap:8px}
+.card-link{display:flex;flex-direction:column;gap:18px;color:var(--ink);text-decoration:none}
+.card-link:hover{text-decoration:none}.card-link:hover .h3{color:var(--blue)}
+.card-foot{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.field-wide{grid-column:1/-1}.filters{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:24px}
+.filters .input{flex:1 1 260px}.section-head .input{max-width:320px}
+.row-button{width:100%;padding:18px 0;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;display:flex;align-items:center;gap:16px}
+.row-button:first-child{border-top:0}.row-button:hover .li-title{color:var(--blue)}
+.card.row-button{background:var(--paper)}
+.profile-photo{width:84px;height:84px;flex:0 0 84px;border-radius:24px;object-fit:cover;background:var(--yellow-tint)}
+.profile-photo-lg{width:168px;height:168px;flex-basis:168px;border-radius:28px;font-size:52px}
+.profile-photo:not(img){display:grid;place-items:center;font-size:28px;font-weight:600}
+.profile-photo-lg:not(img){font-size:52px}.hint{padding:18px 22px;border-radius:22px;background:var(--green-tint);color:var(--green-ink);margin:20px 0 0;font-size:16px}
+.profile-photo.av-o{background:var(--orange-tint)}.profile-photo.av-v{background:var(--violet-tint)}.profile-photo.av-b{background:var(--blue-tint)}.profile-photo.av-g{background:var(--green-tint)}
+.error{padding:16px 20px;border-radius:18px;background:var(--red-tint);color:var(--red-ink);margin:16px 0}
+.count-big{font-size:44px;line-height:1;letter-spacing:-.03em;font-weight:600;font-variant-numeric:tabular-nums}
+.metric-row{display:flex;flex-wrap:wrap;gap:24px 44px;margin:24px 0}.metric-row div{display:flex;flex-direction:column;gap:8px}
+.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:24px}
+.day{min-height:96px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;border:0;border-radius:20px;background:var(--paper);padding:16px;font-size:16px}
+.day.is-on{background:var(--ink);color:#fff}.day.has-event{box-shadow:inset 0 0 0 2px var(--orange)}
+.day.is-on .strong,.day.is-on .meta{color:#fff}
+.calendar-cap{font-size:15px;color:var(--mute);text-align:center}
+.checkline{display:flex;gap:16px;align-items:center;padding:20px 0;border-top:1px solid var(--line)}.checkline:first-child{border-top:0}
+.checkline input{width:24px;height:24px;accent-color:var(--ink);flex:0 0 24px}
+.timeline{border-left:2px solid var(--line-2);padding-left:24px}.timeline .li{align-items:flex-start}
+.steps{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:24px}.step{display:flex;align-items:center;gap:10px;color:var(--mute)}
+.step.is-on{color:var(--ink);font-weight:600}.num-dot{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:var(--soft-2);flex:0 0 32px}
+.step.is-on .num-dot{background:var(--ink);color:#fff}.note-text{white-space:pre-line}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.group-card{display:flex;gap:20px;align-items:flex-start}.group-card .grow{min-width:0}
+.dm .grid-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}.dm .grid-3{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.dm .textarea{min-height:120px}.dm .chips a:hover{text-decoration:none}.dm .btn,.dm .chip,.dm .seg button{max-width:100%}
+.dm .hero-title,.dm .li-title,.dm .h3{overflow-wrap:anywhere}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:720px){.hero-title{font-size:36px}.hero-art{width:112px;height:112px;flex-basis:112px}.hero-art .ic{width:48px;height:48px}.field-grid{grid-template-columns:minmax(0,1fr)}.calendar{gap:5px}.day{min-height:64px;padding:8px;border-radius:14px}.day .meta{display:none}.profile-photo-lg{width:112px;height:112px;flex-basis:112px}.group-card{gap:14px}.group-card .profile-photo{width:60px;height:60px;flex-basis:60px}.demo{border-radius:24px}.hero-copy{flex-basis:100%}.row-button,.li{flex-wrap:wrap}.subnav .chip{height:40px;padding:0 14px}.metric-row{gap:22px}.btn{white-space:normal;text-align:center;line-height:1.25}}
+/* Schedule: calendar first, editing in a separate panel. */
+.p-heading{margin-bottom:28px}.p-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.p-month{font-size:28px;text-transform:capitalize;min-width:180px}.p-arrow{background:var(--paper);width:40px;height:40px}
+.p-filters{display:grid;grid-template-columns:minmax(0,1fr) 220px 190px;gap:12px;margin-bottom:20px}
+.p-filters .input,.p-filters .select{height:48px;min-height:48px;padding:10px 16px}
+.p-attention{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 22px;border-radius:20px;background:var(--yellow);margin-bottom:24px}
+.p-workspace{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}.p-calendar-col{min-width:0}
+.p-calendar.card{padding:14px 12px 12px;border-radius:28px}.p-calendar-head{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding:0 0 12px}
+.p-calendar-head span{font-size:15px;color:var(--mute);text-align:center}.p-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.p-day{position:relative;min-height:116px;padding:7px 4px;border-top:1px solid var(--line);border-left:1px solid var(--line);min-width:0}
+.p-day:nth-child(7n+1){border-left:0}.p-day.is-outside{background:var(--soft)}.p-day.is-selected{background:var(--yellow-tint);border-radius:12px}
+.p-date{width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;font-size:16px;font-weight:600;margin:0 0 6px 3px}
+.is-selected .p-date{background:var(--ink);color:#fff}.is-today:not(.is-selected) .p-date{background:var(--orange-tint);color:var(--orange-ink)}.is-outside .p-date{color:var(--mute)}
+.p-day-events{display:flex;flex-direction:column;gap:5px}.p-event{display:flex;flex-direction:column;gap:2px;width:100%;padding:7px 6px;border:0;border-radius:8px;text-align:left;background:var(--blue-tint);color:var(--blue);font-size:15px;line-height:1.25;overflow:hidden}
+.p-event span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.p-event.is-full{background:var(--green-tint);color:var(--green-ink)}.p-event.is-cancelled{background:var(--soft-2);color:var(--mute);text-decoration:line-through}
+.p-event:hover{box-shadow:inset 0 0 0 1px currentColor}.p-more{background:transparent;border:0;text-align:left;font-size:15px;color:var(--blue);padding:4px 6px}
+.p-mobile-count{display:none}.p-month-grid.is-week .p-day{min-height:260px}.p-agenda .section-head{margin:0 0 14px}.p-agenda-card.card,.p-selected.card{padding:22px 24px}
+.p-agenda-item{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;border:0;background:transparent;padding:16px 0;text-align:left;border-bottom:1px solid var(--line)}
+.p-agenda-item:first-child{padding-top:0}.p-agenda-item:last-child{border:0;padding-bottom:0}.p-agenda-item.is-on .h3{color:var(--blue)}.p-selected{margin-top:0}.p-agenda-card+.p-selected{margin-top:20px}.p-selected .li{padding:12px 0;gap:12px}.p-selected .section-head{gap:12px}
+.p-list-date{width:54px;flex:0 0 54px;text-align:center;display:flex;flex-direction:column;line-height:1.3}.p-list-date b{font-size:28px;letter-spacing:-.02em}.p-list-date span{font-size:15px;color:var(--mute)}
+.p-list-item .dot{max-width:180px}.p-overlay{position:fixed;inset:0;z-index:1000;background:rgba(18,20,26,.32);display:flex;justify-content:flex-end;overflow:hidden}
+.p-editor{display:flex;flex-direction:column;width:620px;max-width:100%;height:100%;background:var(--page);box-shadow:-8px 0 40px rgba(18,20,26,.12)}
+.p-editor-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;border-bottom:1px solid var(--line-2)}.p-editor-head .meta{margin:0 0 4px}
+.p-editor-body{padding:24px 28px;overflow-y:auto;min-height:0;flex:1}.p-editor-body .card{padding:24px}.p-editor-body .field-grid{gap:20px}.p-editor-body .p-scope{margin-bottom:24px}
+.p-editor-foot{display:flex;gap:12px;padding:20px 28px;border-top:1px solid var(--line-2);background:var(--paper)}.p-confirm{width:480px;max-width:calc(100% - 32px);margin:auto}
+.p-notice{position:fixed;z-index:1100;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:8px 12px 8px 24px;border-radius:999px;background:var(--ink);color:#fff;box-shadow:var(--shadow);max-width:calc(100% - 32px)}.p-notice .iconbtn{color:#fff;flex:0 0 44px}
+@media(max-width:1100px){.p-workspace{grid-template-columns:minmax(0,1fr)}.p-agenda{display:grid;grid-template-columns:1fr 1fr;gap:16px}.p-agenda>.section-head{grid-column:1/-1;margin-bottom:0}.p-selected{margin-top:0}}
+@media(max-width:720px){.p-toolbar .toolbar{gap:8px}.p-month{font-size:24px;min-width:150px}.p-toolbar .seg{width:100%;justify-content:center}.p-toolbar .seg button{flex:1}.p-filters{grid-template-columns:1fr 1fr}.p-filters>.field:first-child{grid-column:1/-1}.p-filters .input,.p-filters .select{font-size:15px;padding:10px 12px}.p-attention{align-items:flex-start;flex-direction:column;gap:4px;padding:16px 18px}.p-attention .btn{padding:0}.p-calendar.card{padding:14px 7px 7px;border-radius:24px}.p-day{min-height:70px;padding:7px 2px}.p-date{width:30px;height:30px;margin:0 auto 4px}.p-day-events{display:none}.p-mobile-count{display:block;text-align:center;font-size:15px;color:var(--blue)}.p-agenda{grid-template-columns:minmax(0,1fr)}.p-month-grid.is-week .p-day{min-height:90px}.p-calendar-head span{font-size:15px}.p-editor-head,.p-editor-body{padding:20px}.p-editor-body .card{padding:20px}.p-editor-head .h2{font-size:24px}.p-editor-body .field-grid{grid-template-columns:minmax(0,1fr)}.p-editor-foot{padding:16px 20px}.p-editor-body .p-scope{width:100%;display:flex}.p-scope button{padding:0 12px!important;flex:1}.p-list-item .dot{max-width:none}.p-notice{border-radius:20px;font-size:15px;bottom:12px}.p-heading{align-items:center}.p-heading .btn{height:44px;padding:0 18px;font-size:15px}}
+/* Built-in selection controls share the original surfaces and focus treatment. */
+.c-trigger{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;text-align:left;cursor:pointer;background:var(--paper);color:var(--ink);font-weight:400;line-height:1.35;height:auto;min-height:56px}.c-trigger span:first-child{min-width:0;overflow-wrap:anywhere}.c-trigger .ic{flex:0 0 22px;width:22px;height:22px}.c-chevron{width:9px;height:9px;border-right:1.5px solid;border-bottom:1.5px solid;transform:rotate(45deg);margin:0 4px 5px;flex:0 0 9px}.c-select{position:relative;min-width:0}
+.c-menu,.c-role-menu{background:var(--paper);border:1px solid var(--line-2);border-radius:20px;padding:8px;margin-top:8px;box-shadow:0 8px 24px rgba(18,20,26,.06)}.p-filters .c-menu{position:absolute;top:100%;left:0;right:0;z-index:10;margin-top:6px}.c-options{max-height:248px;overflow-y:auto;margin-top:8px;overscroll-behavior:contain}.c-option{display:block;position:relative;width:100%;padding:13px 38px 13px 14px;background:transparent;border:0;border-radius:12px;text-align:left;color:var(--ink);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere}.c-option:hover{background:var(--soft)}.c-option.is-on{background:var(--yellow-tint)}.c-option.is-on:after{content:'✓';position:absolute;right:14px;top:13px}.c-role-menu>.input{min-height:48px;height:48px;padding:12px 14px}.c-menu-foot{border-top:1px solid var(--line);margin-top:8px;padding:12px 6px 4px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;font-size:15px}.c-menu-foot .btn{padding:0;height:36px;gap:6px}.c-empty{padding:12px}.c-quick{background:var(--soft);padding:16px;border-radius:14px;margin-top:12px;display:flex;flex-direction:column;gap:16px}.c-quick .actions{margin-top:0}.c-quick .textarea{min-height:90px}
+.c-date-overlay{position:fixed;inset:0;z-index:1200;background:rgba(18,20,26,.32);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}.c-date-dialog.card{width:396px;max-width:100%;padding:24px;box-shadow:var(--shadow);border-radius:28px}.c-date-dialog .section-head{margin-bottom:18px;gap:8px}.c-date-dialog .section-head .h3{font-size:22px}.c-date-toolbar{display:flex;align-items:center;gap:4px;margin-bottom:18px}.c-date-toolbar .iconbtn{width:34px;height:40px;flex:0 0 34px}.c-month-label{border:0;background:transparent;text-transform:capitalize;font-size:18px;font-weight:600;flex:1;text-align:left;padding:8px 2px}.c-year.input{width:86px;min-height:44px;height:44px;padding:8px 10px;font-size:17px;border-radius:12px}.c-date-week,.c-date-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.c-date-week{margin-bottom:8px;text-align:center;color:var(--mute);font-size:15px}.c-date{border:0;background:transparent;border-radius:50%;height:42px;width:100%;font-size:16px;color:var(--ink);display:grid;place-items:center}.c-date:hover{background:var(--yellow-tint)}.c-date.is-outside{color:var(--mute)}.c-date.is-today{box-shadow:inset 0 0 0 1px var(--orange)}.c-date.is-on{background:var(--ink);color:#fff;box-shadow:none}.c-date-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:16px;margin-top:16px}.c-date-foot .btn{padding:0 12px;font-size:15px}.c-month-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.c-month{border:0;border-radius:12px;background:var(--soft);padding:14px 6px;text-transform:capitalize;font-size:16px}.c-month.is-on{background:var(--ink);color:#fff}
+.r-tools{display:flex;justify-content:space-between;gap:24px;margin:0 0 24px;align-items:center}.r-tools .field{max-width:520px;flex:1}.r-workspace{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);gap:24px;align-items:start}.r-list.card{padding:12px 24px}.r-role.row-button{gap:16px;padding:20px 0;border-radius:0}.r-role.is-on .h3{color:var(--blue)}.r-role-note{display:block;margin-top:8px;line-height:1.45}.r-detail>.field{margin-top:22px}.r-detail>.checkline{margin-top:20px}.r-detail .actions{gap:10px}.r-usage{margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}.r-usage .p{font-size:16px;margin-bottom:12px}
+@media(max-width:720px){.c-date-dialog.card{padding:20px;border-radius:24px}.c-date{height:38px}.c-month-label{font-size:17px}.c-date-toolbar .iconbtn{width:28px;flex-basis:28px}.c-year.input{width:78px;font-size:16px}.c-trigger{font-size:16px}.c-menu-foot{align-items:flex-start;flex-direction:column}.r-workspace{grid-template-columns:minmax(0,1fr)}.r-tools{flex-direction:column;align-items:stretch;gap:16px}.r-tools .field{max-width:none}.r-tools .seg{align-self:flex-start}.r-detail.card{padding:24px}.c-date-overlay{align-items:center}}
+
+.r-back{display:none}@media(max-width:720px){.r-workspace:not(.is-detail) .r-detail,.r-workspace.is-detail .r-list,.r-tools.is-detail{display:none}.r-back{display:inline-flex;padding:0;margin-bottom:20px}.r-role.row-button{flex-wrap:nowrap}.r-role .grow{min-width:0}.r-role .ic{flex:0 0 22px}}
+
+/* Анкета, «Моя заявка» и знакомство с фондом — поверх дизайн-системы «Опоры» */
+.dm .top-end a.is-here{background:var(--ink);color:#fff}
+.a-intro{max-width:62ch}
+.a-steps{margin:0 0 14px}
+.a-steps .chip{height:38px;padding:0 16px;font-size:14px}
+.a-steps .chip.a-done{background:var(--yellow-tint);color:var(--ink)}
+.a-bar{margin:0 0 24px}
+.a-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 20px}
+.a-form>.a-field{grid-column:1/-1}
+.a-form>.a-half{grid-column:auto}
+.a-form-1{margin-top:24px}
+.a-req{color:var(--orange);font-weight:600}
+.a-opt{font-weight:400;font-size:14px;color:var(--quiet)}
+.a-why{margin:0;font-size:15px;color:var(--mute)}
+.a-bad .input,.a-bad .select,.a-bad .textarea{border-color:var(--red)}
+.a-textarea{min-height:110px}
+.a-lines{display:grid;gap:8px}
+.a-line{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:var(--soft);cursor:pointer;font-size:16px;color:var(--ink-2)}
+.a-line input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--ink);flex:0 0 20px}
+.a-line.is-on{background:var(--yellow-tint);color:var(--ink)}
+.a-groups{display:grid;gap:20px}
+.a-group{display:grid;gap:8px}
+.a-group .eyebrow{margin:0}
+.a-chips .chip,.a-rchips .chip{background:var(--soft)}
+.a-chips .chip.is-on,.a-rchips .chip.is-on{background:var(--ink);color:#fff}
+.a-chips{margin-bottom:8px}
+.a-grid{display:grid;grid-template-columns:auto repeat(3,minmax(64px,110px));gap:8px;align-items:center;justify-content:start}
+.a-gh{font-size:14px;color:var(--mute);text-align:center}
+.a-gr{font-weight:600;padding-right:8px}
+.a-cell{height:48px;border:0;border-radius:14px;background:var(--soft);color:transparent;font-size:18px;font-weight:700}
+.a-cell.is-on{background:var(--ink);color:#fff}
+.a-roles{display:grid;gap:8px}
+.a-rgroup{border-radius:18px;background:var(--soft)}
+.a-rgroup.is-open{background:var(--yellow-tint)}
+.a-rhead{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;border:0;background:none;text-align:left;color:var(--ink);cursor:pointer}
+.a-rtitle{display:grid;gap:2px}
+.a-rtitle small{font-size:14px;color:var(--mute)}
+.a-rchips{padding:0 18px 18px}
+.a-rchips .chip{background:var(--paper)}
+.a-unsure{margin-top:8px}
+.a-warn{margin:0;padding:12px 14px;border-radius:14px;background:var(--orange-tint);color:var(--orange-ink);font-size:15px}
+.a-consent{font-size:16px;color:var(--ink)}
+.a-nav{margin-top:28px}
+.a-letter p{margin:12px 0 0}
+.a-empty{max-width:760px}
+/* «Моя заявка» */
+.a-path{list-style:none;margin:0 0 28px;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.a-path li{display:grid;gap:6px;align-content:start;padding:18px;border-radius:22px;background:var(--paper)}
+.a-path li small{font-size:14px;color:var(--mute)}
+.a-path .a-n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft-2);font-weight:600;font-size:14px}
+.a-path li.is-done .a-n{background:var(--green);color:#fff}
+.a-path li.is-now{box-shadow:inset 0 0 0 2px var(--ink)}
+.a-path li.is-now .a-n{background:var(--orange);color:#fff}
+.a-next{margin-bottom:8px}
+.a-slots{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.a-k{flex:0 0 200px;color:var(--mute);font-size:15px}
+/* знакомство с фондом */
+.a-progress{gap:14px;margin:0 0 24px;align-items:center}
+.a-mods{display:grid;gap:10px}
+.a-mod{display:flex;align-items:center;gap:18px;width:100%;padding:18px 22px;border:0;border-radius:22px;background:var(--paper);text-align:left;color:var(--ink);cursor:pointer}
+.a-mod:hover{box-shadow:inset 0 0 0 1px var(--line-2)}
+.a-mod.is-locked{opacity:.5;cursor:not-allowed}
+.a-modtext{display:grid;gap:2px}
+.a-modtext small{font-size:14px;color:var(--mute)}
+.a-num{width:40px;height:40px;flex:0 0 40px;border-radius:14px;display:grid;place-items:center;background:var(--yellow-tint);color:var(--yellow-ink);font-weight:600}
+.a-mod.is-done .a-num{background:var(--green);color:#fff}
+.a-num-o{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:var(--orange);color:#fff}
+.a-chev .ic{width:20px;height:20px}
+.a-readbar{position:fixed;top:0;left:0;right:0;height:5px;z-index:50}
+.a-readbar i{display:block;height:100%;width:0;background:var(--orange);transition:width .1s linear}
+.a-modnav{margin:0 0 20px;gap:12px}
+.a-pills{display:flex;gap:6px;flex-wrap:wrap}
+.a-pill{width:36px;height:36px;border:0;border-radius:50%;background:var(--paper);font-weight:600;color:var(--ink-2)}
+.a-pill.is-done{background:var(--green);color:#fff}
+.a-pill.is-on{background:var(--ink);color:#fff}
+.a-modtitle{margin-bottom:24px}
+.a-blocks{display:grid;gap:24px;margin-top:8px}
+.a-lead{margin:0;font-size:22px;line-height:1.4;font-weight:500;color:var(--ink);max-width:60ch}
+.a-text p{margin:0 0 12px}
+.a-facts .kpi-num{font-size:36px}
+.a-timeline{display:grid;gap:18px}
+.a-tl{display:grid;grid-template-columns:72px 1fr;gap:16px}
+.a-year{font-weight:600;font-size:20px;color:var(--orange-ink)}
+.a-cards .card-soft,.a-cards .card{display:grid;gap:6px;align-content:start}
+.a-bt{margin:0 0 12px}
+.a-li{align-items:flex-start}
+.a-dot{width:8px;height:8px;flex:0 0 8px;margin-top:9px;border-radius:50%;background:var(--orange)}
+.a-steps-v{display:grid;gap:10px}
+.a-step{display:flex;gap:16px;align-items:flex-start}
+.a-phrase{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px}
+.a-say{color:var(--green-ink);font-weight:600}
+.a-avoid{color:var(--red-ink)}
+.a-pwhy{grid-column:1/-1}
+.a-sit{margin-bottom:8px}
+.a-sit summary{cursor:pointer}
+.a-sitbody{margin-top:16px}
+.a-do,.a-dont{padding:16px;border-radius:18px}
+.a-do{background:var(--green-tint)}.a-dont{background:var(--red-tint)}
+.a-do p,.a-dont p{margin:6px 0 0}
+.a-pillar{display:grid;gap:8px;align-content:start;padding:24px 26px;border-radius:24px}
+.a-pillar p{margin:0}
+.a-p-o{background:var(--orange-tint)}.a-p-b{background:var(--blue-tint)}.a-p-g{background:var(--green-tint)}.a-p-v{background:var(--violet-tint)}
+.a-pi::before{content:"• "}
+.a-from{margin-top:4px}
+.a-video{margin:0;display:grid;gap:8px}
+.a-vbox{aspect-ratio:16/9;border-radius:24px;background:var(--soft-2);display:grid;place-items:center;align-content:center;gap:10px;color:var(--mute)}
+.a-play{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--paper);color:var(--orange);font-size:22px}
+.a-more summary{cursor:pointer}
+.a-more .a-blocks{margin-top:16px}
+.a-answers{display:grid;gap:10px;margin-top:20px}
+.a-answer{text-align:left;padding:16px 18px;border:0;border-radius:16px;background:var(--soft);font-size:16px;color:var(--ink);cursor:pointer}
+.a-answer:hover:not([disabled]){box-shadow:inset 0 0 0 1px var(--line-2)}
+.a-answer.is-right{background:var(--green-tint);color:var(--green-ink)}
+.a-answer.is-wrong{background:var(--red-tint);color:var(--red-ink)}
+.a-answer[disabled]{cursor:default}
+.a-wrong{margin-bottom:10px}
+.a-wrong p{margin:8px 0 0}
+@media (max-width:720px){
+ .a-form{grid-template-columns:1fr}.a-form>.a-half{grid-column:1/-1}
+ .a-path{grid-template-columns:1fr}.a-path li{grid-template-columns:30px 1fr;column-gap:12px}.a-path li small{grid-column:2}
+ .a-phrase{grid-template-columns:1fr}.a-k{flex-basis:120px}.a-tl{grid-template-columns:56px 1fr}
+ .a-grid{grid-template-columns:auto repeat(3,minmax(48px,1fr))}
+}
+
+</style>
+</helmet>
+<div class="dm"><div class="shell">
+<header class="top">
+  <a class="brand" href="Main.dc.html"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span><b>Опора</b><small>волонтёры «Дети Марии»</small></span></a>
+  <div class="top-end">
+    <a class="btn btn-ghost" href="Apply.dc.html">Анкета</a>
+    <a class="btn btn-ghost is-here" aria-current="page" href="Onboarding.dc.html">Знакомство с фондом</a>
+    <a class="btn btn-ghost" href="ApplicationStatus.dc.html">Моя заявка</a>
+  </div>
+</header>
+
+<sc-if value="{{noCandidate}}"><section class="card a-empty"><h1 class="h2">Сначала анкета</h1><p class="lead">Знакомство с фондом открывается после анкеты волонтёра.</p><div class="actions"><a class="btn btn-primary btn-lg" href="Apply.dc.html">Заполнить анкету</a><button type="button" class="btn btn-ghost" onClick="{{fillDemo}}">Продолжить на демо-кандидате</button></div></section></sc-if>
+
+<sc-if value="{{isHub}}"><div class="head"><div><p class="eyebrow">Перед встречей с координатором</p><h1 class="h1">{{hubTitle}}</h1><p class="lead a-intro">{{hubIntro}}</p></div><a class="btn btn-ghost" href="ApplicationStatus.dc.html">Моя заявка</a></div>
+<div class="row a-progress"><div class="bar grow"><i style="{{hubBar}}"></i></div><span class="strong num">{{hubCount}}</span></div>
+<section class="section a-mods"><sc-for list="{{mods}}" as="m"><button type="button" class="{{m.cls}}" onClick="{{m.open}}"><span class="a-num">{{m.mark}}</span><span class="grow a-modtext"><b>{{m.title}}</b><small>{{m.minutes}} мин</small></span><span class="a-chev" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button></sc-for>
+<button type="button" class="{{testCls}}" onClick="{{openTest}}" disabled="{{testLocked}}"><span class="a-num">{{testMark}}</span><span class="grow a-modtext"><b>{{testTitle}}</b><small>{{testSub}}</small></span><span class="a-chev" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button></section>
+</sc-if>
+
+<sc-if value="{{isModule}}"><div class="a-readbar" aria-hidden="true"><i id="a-readbar"></i></div>
+<div class="row a-modnav"><button type="button" class="btn btn-ghost" onClick="{{toHub}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg> Все шаги</button><span class="grow"></span><nav class="a-pills" aria-label="Шаги"><sc-for list="{{pills}}" as="p"><button type="button" class="{{p.cls}}" aria-label="{{p.title}}" onClick="{{p.open}}">{{p.n}}</button></sc-for></nav></div>
+<p class="eyebrow">{{modEyebrow}}</p><h1 class="h1 a-modtitle">{{modTitle}}</h1>
+<sc-if value="{{isForm}}"><p class="lead">{{formIntro}}</p><section class="card a-form a-form-1"><sc-for list="{{fields}}" as="f"><div class="{{f.cls}}">
+<sc-if value="{{f.isConsent}}"><label class="check a-consent"><input type="checkbox" checked="{{f.checked}}" onChange="{{f.toggle}}"><span>{{f.label}}<sc-if value="{{f.req}}"> <b class="a-req">*</b></sc-if></span></label></sc-if>
+<sc-if value="{{f.notConsent}}"><span class="label">{{f.label}}<sc-if value="{{f.req}}"> <b class="a-req">*</b></sc-if><sc-if value="{{f.opt}}"> <span class="a-opt">по желанию</span></sc-if></span></sc-if>
+<sc-if value="{{f.hasWhy}}"><p class="a-why">{{f.why}}</p></sc-if>
+<sc-if value="{{f.isInput}}"><input class="input" type="{{f.inputType}}" value="{{f.value}}" placeholder="{{f.placeholder}}" autocomplete="{{f.autocomplete}}" aria-label="{{f.label}}" onChange="{{f.change}}" onFocus="{{f.focus}}" onBlur="{{f.blur}}"></sc-if>
+<sc-if value="{{f.isTextarea}}"><textarea class="textarea a-textarea" value="{{f.value}}" aria-label="{{f.label}}" onChange="{{f.change}}"></textarea></sc-if>
+<sc-if value="{{f.isSelect}}"><div class="chips a-chips" role="radiogroup" aria-label="{{f.label}}"><sc-for list="{{f.options}}" as="o"><button type="button" class="{{o.cls}}" role="radio" aria-checked="{{o.checked}}" onClick="{{o.toggle}}">{{o.label}}</button></sc-for></div></sc-if>
+<sc-if value="{{f.isChoice}}"><div class="a-lines"><sc-for list="{{f.options}}" as="o"><label class="{{o.lineCls}}"><input type="{{f.choiceType}}" name="{{f.id}}" checked="{{o.checked}}" onChange="{{o.toggle}}"><span>{{o.label}}</span></label></sc-for></div></sc-if>
+<sc-if value="{{f.isGroups}}"><div class="a-groups"><sc-for list="{{f.groups}}" as="g"><div class="a-group"><p class="eyebrow">{{g.title}}</p><sc-if value="{{g.hasNote}}"><p class="a-why">{{g.note}}</p></sc-if><sc-if value="{{g.hasOptions}}"><div class="a-lines"><sc-for list="{{g.options}}" as="o"><label class="{{o.lineCls}}"><input type="checkbox" checked="{{o.checked}}" onChange="{{o.toggle}}"><span>{{o.label}}</span></label></sc-for></div></sc-if></div></sc-for></div></sc-if>
+<sc-if value="{{f.isChips}}"><div class="chips a-chips"><sc-for list="{{f.options}}" as="o"><button type="button" class="{{o.cls}}" aria-pressed="{{o.pressed}}" onClick="{{o.toggle}}">{{o.label}}</button></sc-for></div><sc-if value="{{f.hasOther}}"><input class="input" type="text" value="{{f.other}}" placeholder="Другое — через запятую" aria-label="Другие навыки" onChange="{{f.changeOther}}"></sc-if></sc-if>
+<sc-if value="{{f.isGrid}}"><div class="a-grid"><span></span><sc-for list="{{f.cols}}" as="c"><span class="a-gh">{{c}}</span></sc-for><sc-for list="{{f.rows}}" as="r"><span class="a-gr">{{r.label}}</span><sc-for list="{{r.cells}}" as="c"><button type="button" class="{{c.cls}}" aria-pressed="{{c.pressed}}" aria-label="{{c.aria}}" onClick="{{c.toggle}}">✓</button></sc-for></sc-for></div></sc-if>
+<sc-if value="{{f.isRoles}}"><div class="a-roles"><sc-for list="{{f.rgroups}}" as="g"><div class="{{g.cls}}"><button type="button" class="a-rhead" aria-expanded="{{g.open}}" onClick="{{g.toggle}}"><span class="a-rtitle"><b>{{g.title}}</b><sc-if value="{{g.hasHint}}"><small>{{g.hint}}</small></sc-if></span><span class="{{g.badgeCls}}">{{g.badge}}</span></button><sc-if value="{{g.open}}"><div class="chips a-rchips"><sc-for list="{{g.roles}}" as="o"><button type="button" class="{{o.cls}}" aria-pressed="{{o.pressed}}" onClick="{{o.toggle}}">{{o.label}}</button></sc-for></div></sc-if></div></sc-for><label class="check a-unsure"><input type="checkbox" checked="{{f.unsureOn}}" onChange="{{f.unsureToggle}}"><span>{{f.unsure}}</span></label></div></sc-if>
+<sc-if value="{{f.hasWarn}}"><p class="a-warn">{{f.warn}}</p></sc-if>
+<sc-if value="{{f.hasErr}}"><p class="err">{{f.err}}</p></sc-if>
+</div></sc-for>
+</section></sc-if>
+<div class="a-blocks"><sc-for list="{{blocks}}" as="b">
+<sc-if value="{{b.isLead}}"><p class="a-lead">{{b.text}}</p></sc-if>
+<sc-if value="{{b.isText}}"><div class="a-text"><sc-for list="{{b.paras}}" as="t"><p>{{t}}</p></sc-for></div></sc-if>
+<sc-if value="{{b.isFacts}}"><div class="grid-4 a-facts"><sc-for list="{{b.items}}" as="x"><div class="kpi"><span class="blob blob-y"></span><span class="kpi-num">{{x.n}}</span><span class="kpi-label">{{x.l}}</span></div></sc-for></div></sc-if>
+<sc-if value="{{b.isTimeline}}"><div class="card a-timeline"><sc-for list="{{b.items}}" as="x"><div class="a-tl"><span class="a-year">{{x.y}}</span><div><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></div></sc-for></div></sc-if>
+<sc-if value="{{b.isCards}}"><div class="grid-3 a-cards"><sc-for list="{{b.items}}" as="x"><div class="card-soft"><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></sc-for></div></sc-if>
+<sc-if value="{{b.isList}}"><div class="card"><sc-if value="{{b.hasTitle}}"><h3 class="h3 a-bt">{{b.title}}</h3></sc-if><div class="list"><sc-for list="{{b.items}}" as="x"><div class="li a-li"><sc-if value="{{b.ordered}}"><span class="a-num a-num-o">{{x.n}}</span></sc-if><sc-if value="{{b.bullets}}"><span class="a-dot" aria-hidden="true"></span></sc-if><span class="grow">{{x.t}}</span></div></sc-for></div></div></sc-if>
+<sc-if value="{{b.isSteps}}"><div><sc-if value="{{b.hasTitle}}"><h3 class="h3 a-bt">{{b.title}}</h3></sc-if><div class="a-steps-v"><sc-for list="{{b.items}}" as="x"><div class="card a-step"><span class="a-num">{{x.n}}</span><div><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></div></sc-for></div></div></sc-if>
+<sc-if value="{{b.isPhrases}}"><div class="card"><h3 class="h3 a-bt">{{b.title}}</h3><div class="list"><sc-for list="{{b.items}}" as="x"><div class="li a-phrase"><span class="a-say">✓ {{x.say}}</span><span class="a-avoid">✕ {{x.avoid}}</span><sc-if value="{{x.hasWhy}}"><span class="meta a-pwhy">{{x.why}}</span></sc-if></div></sc-for></div></div></sc-if>
+<sc-if value="{{b.isSituations}}"><div><h3 class="h3 a-bt">Если случилось…</h3><sc-for list="{{b.items}}" as="x"><details class="card a-sit"><summary class="h4">{{x.title}}</summary><div class="grid-2 a-sitbody"><div class="a-do"><b>Что делать</b><sc-for list="{{x.do}}" as="d"><p>{{d}}</p></sc-for></div><div class="a-dont"><b>Чего не делать</b><sc-for list="{{x.dont}}" as="d"><p>{{d}}</p></sc-for></div></div></details></sc-for></div></sc-if>
+<sc-if value="{{b.isPillars}}"><div class="grid-2 a-pillars"><sc-for list="{{b.items}}" as="x"><div class="{{x.cls}}"><h3 class="h3">{{x.title}}</h3><p>{{x.text}}</p><p class="eyebrow">На занятии это значит</p><sc-for list="{{x.items}}" as="i"><p class="a-pi">{{i}}</p></sc-for><p class="meta a-from">Из кодекса: {{x.from}}</p></div></sc-for></div></sc-if>
+<sc-if value="{{b.isCheck}}"><div><h3 class="h3 a-bt">{{b.title}}</h3><p class="meta">{{b.intro}}</p><sc-for list="{{b.items}}" as="x"><details class="card a-sit"><summary class="h4">{{x.q}}</summary><p>{{x.a}}</p><p class="meta">{{x.p}}</p></details></sc-for></div></sc-if>
+<sc-if value="{{b.isVideo}}"><figure class="a-video"><div class="a-vbox"><span class="a-play" aria-hidden="true">▶</span><span>Видео скоро появится</span></div><figcaption><b>{{b.title}}</b> <span class="meta">{{b.duration}}</span></figcaption></figure></sc-if>
+<sc-if value="{{b.isCallout}}"><p class="{{b.cls}}">{{b.text}}</p></sc-if>
+<sc-if value="{{b.isMore}}"><details class="card-soft a-more"><summary class="h4">{{b.title}}</summary><div class="a-blocks">
+<sc-for list="{{b.blocks}}" as="c">
+<sc-if value="{{c.isList}}"><div class="list"><sc-for list="{{c.items}}" as="x"><div class="li a-li"><span class="a-dot" aria-hidden="true"></span><span class="grow">{{x.t}}</span></div></sc-for></div></sc-if>
+<sc-if value="{{c.isCards}}"><div class="grid-2 a-cards"><sc-for list="{{c.items}}" as="x"><div class="card"><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></sc-for></div></sc-if>
+<sc-if value="{{c.isSteps}}"><div class="list"><sc-for list="{{c.items}}" as="x"><div class="li a-li"><span class="a-num a-num-o">{{x.n}}</span><span class="grow"><b>{{x.t}}.</b> {{x.d}}</span></div></sc-for></div></sc-if>
+<sc-if value="{{c.isPhrases}}"><div class="list"><sc-for list="{{c.items}}" as="x"><div class="li a-phrase"><span class="a-say">✓ {{x.say}}</span><span class="a-avoid">✕ {{x.avoid}}</span><sc-if value="{{x.hasWhy}}"><span class="meta a-pwhy">{{x.why}}</span></sc-if></div></sc-for></div></sc-if>
+</sc-for></div></details></sc-if>
+</sc-for></div>
+<div id="a-read-end"></div>
+<div class="actions a-nav"><sc-if value="{{hasPrev}}"><button type="button" class="btn btn-ghost btn-lg" onClick="{{prev}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg> Назад</button></sc-if><span class="grow"></span><button type="button" class="{{doneCls}}" disabled="{{doneLocked}}" onClick="{{done}}">{{doneLabel}}</button></div>
+</sc-if>
+
+<sc-if value="{{isTest}}"><div class="row a-modnav"><button type="button" class="btn btn-ghost" onClick="{{toHub}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg> Все шаги</button></div>
+<sc-if value="{{testIntro}}"><section class="card-hero"><p class="eyebrow">Последний шаг знакомства</p><h1 class="hero-title">{{testTitle}}</h1><p class="lead">{{testText}}</p><sc-if value="{{hasBest}}"><p class="lead">Лучший результат: <b>{{bestLine}}</b></p></sc-if><div class="actions"><button type="button" class="btn btn-dark btn-lg" onClick="{{start}}">{{startLabel}}</button><sc-if value="{{passed}}"><a class="btn btn-ghost" href="ApplicationStatus.dc.html">К записи на встречу</a></sc-if></div></section></sc-if>
+<sc-if value="{{testQuestion}}"><div class="row a-progress"><span class="eyebrow">Вопрос {{qNum}} из {{qTotal}}</span><div class="bar grow"><i style="{{qBar}}"></i></div></div><section class="card"><h2 class="h2">{{qText}}</h2><div class="a-answers"><sc-for list="{{qOpts}}" as="o"><button type="button" class="{{o.cls}}" disabled="{{o.locked}}" onClick="{{o.pick}}">{{o.text}}</button></sc-for></div><sc-if value="{{answered}}"><p class="{{explCls}}"><b>{{explHead}}</b> {{expl}}</p><div class="actions"><span class="grow"></span><button type="button" class="btn btn-primary btn-lg" onClick="{{nextQ}}">{{nextQLabel}}</button></div></sc-if></section></sc-if>
+<sc-if value="{{testResult}}"><section class="card-hero"><p class="eyebrow">Результат</p><h1 class="hero-title">{{scoreLine}}</h1><p class="lead">{{resultText}}</p><div class="actions"><sc-if value="{{resultPassed}}"><a class="btn btn-dark btn-lg" href="ApplicationStatus.dc.html">Выбрать время встречи</a></sc-if><button type="button" class="btn btn-ghost btn-lg" onClick="{{start}}">Пройти ещё раз</button></div></section>
+<sc-if value="{{hasWrong}}"><section class="section"><div class="section-head"><h2 class="h2">Разбор ошибок</h2></div><sc-for list="{{wrong}}" as="w"><div class="card a-wrong"><h3 class="h4">{{w.q}}</h3><p>Правильно: {{w.a}}</p><p class="meta">{{w.e}}</p></div></sc-for></section></sc-if></sc-if>
+</sc-if>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2400}}'>
+// Browser-only demo data. No uploads or messages are sent to external services.
+const demoRead = (key, fallback) => {try {const raw = sessionStorage.getItem('opora-prototype-v1:'+key);return raw ? JSON.parse(raw) : fallback;} catch (_) {return fallback;}};
+const demoWrite = (key, value) => {try {sessionStorage.setItem('opora-prototype-v1:'+key,JSON.stringify(value));} catch (_) {}};
+
+/*
+  Анкета волонтёра, версия 2.
+  Это данные, а не код: поля, варианты и подсказки можно править прямо здесь.
+  Обоснование каждого поля — materials/05-продукт/Анкета v2.md
+
+  Типы полей: text, email, tel, date, textarea, select, radio, checkbox, chips, grid, roles, consent.
+  required — обязательное; optional — пометка «по желанию»; why — короткое «зачем спрашиваем» под полем;
+  showIf — показывать, только если в другом поле выбран один из вариантов;
+  exclusive — варианты, которые нельзя выбрать вместе с остальными (например, «Нет, не подходит»);
+  mask — автоформат ввода: name (заглавные буквы), phone (+7 (999) 123-45-67), telegram (@ник);
+  half — поле в половину ширины (два в ряд).
+*/
+window.FORM = {
+  title: "Анкета волонтёра",
+  intro: "Мы рады, что вы хотите помогать фонду «Дети Марии». Ответы помогут понять, где вам будет интереснее и где вы нужнее всего. Займёт около 10 минут.",
+  steps: [
+    {
+      id: "about",
+      title: "Знакомство",
+      fields: [
+        { id: "firstName", label: "Имя", type: "text", required: true, mask: "name", half: true,
+          placeholder: "Михаил", autocomplete: "given-name" },
+        { id: "lastName", label: "Фамилия", type: "text", required: true, mask: "name", half: true,
+          placeholder: "Михайлов", autocomplete: "family-name" },
+        { id: "birthdate", label: "Дата рождения", type: "date", required: true },
+        { id: "phone", label: "Телефон", type: "tel", required: true, mask: "phone", autocomplete: "tel",
+          placeholder: "+7 (999) 123-45-67" },
+        { id: "email", label: "Электронная почта", type: "email", required: true, autocomplete: "email",
+          why: "На почту придёт ссылка в личный кабинет волонтёра." },
+        { id: "channels", label: "Как с вами удобнее связываться?", type: "checkbox", required: true,
+          options: ["Telegram", "WhatsApp", "Max", "Электронная почта", "SMS", "Телефонный звонок"] },
+        { id: "telegram", label: "Ник в Telegram", type: "text", mask: "telegram", placeholder: "@username",
+          showIf: { field: "channels", value: "Telegram" } },
+        { id: "area", label: "Где вы живёте?", type: "select", required: true,
+          options: ["Центр Москвы", "Север / Северо-Восток", "Восток / Юго-Восток", "Юг / Юго-Запад", "Запад / Северо-Запад", "Новая Москва", "Московская область", "Ярославская область", "Северная Осетия", "Другой город"],
+          why: "Чтобы звать на занятия, до которых вам удобно добираться." }
+      ]
+    },
+    {
+      id: "help",
+      title: "Чем хотите помогать",
+      fields: [
+        { id: "roles", label: "Чем вы хотите помогать?", type: "roles", required: true,
+          why: "Откройте направление и отметьте конкретные роли — так координатор сразу поймёт, куда вас позвать. Можно несколько.",
+          unsure: "Пока не знаю — помогите выбрать на встрече",
+          groups: [
+            { title: "Творческие занятия", hint: "регулярно или разово, с детьми и взрослыми",
+              roles: ["Педагог Арт-лаборатории (подростки из ЦССВ, раз в неделю)", "Ведущий мастер-класса", "Театральные занятия", "Активные и развивающие игры"] },
+            { title: "Помощь на занятиях", hint: "рядом с педагогом, опыт не обязателен",
+              roles: ["Ассистент педагога в мастерской"] },
+            { title: "Обучение", hint: "онлайн или очно",
+              roles: ["Репетитор по школьным предметам", "Жизненные навыки: деньги, документы, быт"] },
+            { title: "Помощь специалиста", hint: "нужно профильное образование",
+              roles: ["Психолог", "Логопед", "Нейропсихолог"] },
+            { title: "Фото, видео и контент",
+              roles: ["Предметная съёмка для магазина", "Репортажная съёмка занятий и событий", "Монтаж видео", "Соцсети и тексты", "Графический дизайн: афиши, листовки"] },
+            { title: "Мероприятия и выезды",
+              roles: ["Помощь на мероприятиях: встреча гостей, навигация", "Сопровождение на выездах (арт-резиденция, поездки)"] },
+            { title: "Магазин и ярмарки",
+              roles: ["Продажи на ярмарках и маркетах", "Упаковка и подготовка изделий"] },
+            { title: "Pro bono для фонда", hint: "профессиональная помощь команде",
+              roles: ["Юрист", "Помощь с трудоустройством выпускников", "Маркетинг и продвижение", "Сайт и IT", "Дизайн и бренд"] }
+          ] },
+        { id: "skills", label: "Что вы умеете или любите делать?", type: "chips",
+          options: ["Керамика", "Живопись и рисунок", "Валяние", "Шитьё и вышивка", "Кулинария", "Музыка и вокал", "Театр", "Спорт и подвижные игры", "Фотография", "Видео и монтаж", "Дизайн", "Соцсети", "Педагогика", "Психология", "Школьные предметы", "Английский", "Опыт вожатого", "Жесты или карточки для общения"],
+          allowOther: true,
+          why: "По навыкам мы подбираем мастер-классы и занятия, где вы будете на своём месте." },
+        { id: "sphere", label: "В какой сфере вы работаете или учитесь?", type: "select", optional: true,
+          options: ["Образование и педагогика", "Психология, медицина, соцработа", "Искусство и ремёсла", "Дизайн, фото, медиа", "IT", "Маркетинг и продажи", "Право", "Финансы и бизнес", "Учусь в школе или колледже", "Учусь в вузе", "На пенсии", "Другое"],
+          why: "Иногда фонду нужна профессиональная помощь — так мы узнаем, к кому обратиться." },
+        { id: "volExp", label: "У вас есть опыт волонтёрства?", type: "radio", required: true,
+          options: ["Да", "Нет"] },
+        { id: "volExpText", label: "Расскажите коротко: где и что делали", type: "textarea",
+          showIf: { field: "volExp", value: "Да" } },
+        { id: "specialExp", label: "Был ли у вас опыт общения с людьми с особенностями развития или с детьми, оставшимися без попечения родителей?", type: "radio", required: true,
+          options: ["Да", "Нет, но готов(а) попробовать", "Нет, хочу сначала обсудить на встрече"] },
+        { id: "specialExpText", label: "Расскажите об этом опыте", type: "textarea",
+          showIf: { field: "specialExp", value: "Да" } }
+      ]
+    },
+    {
+      id: "time",
+      title: "Когда и где",
+      fields: [
+        { id: "participation", label: "Как вы хотите помогать?", type: "radio", required: true,
+          options: ["Постоянно — в одной программе, раз в неделю или чаще", "Регулярно, но реже — пару раз в месяц", "Разово — отдельные мероприятия и задачи", "Пока не знаю — обсудим на встрече"],
+          why: "Участникам важны знакомые лица: доверие строится месяцами. Постоянным волонтёрам подберём группу, разовым — события." },
+        /* Варианты зависят от региона из первого шага (поле area). Площадки — по постам фонда в ВК */
+        { id: "places", label: "Где вам удобно помогать?", type: "checkbox", required: true,
+          why: "Отметьте всё, что подходит. Выезды — для всех: участники и волонтёры едут из разных городов.",
+          groups: [
+            { title: "В Москве",
+              showIf: { field: "area", value: ["Центр Москвы", "Север / Северо-Восток", "Восток / Юго-Восток", "Юг / Юго-Запад", "Запад / Северо-Запад", "Новая Москва", "Московская область"] },
+              options: [
+                "Студия на Дмитровском переулке (м. Театральная)",
+                "Студия на Новинском бульваре",
+                "Инклюзивный центр «Тверская 15»",
+                "Загородная мастерская Марии Елисеевой — Арт-субботы",
+                "Ярмарки и маркеты по Москве"
+              ] },
+            { title: "В Ярославской области",
+              showIf: { field: "area", value: "Ярославская область" },
+              note: "Постоянных площадок в области у фонда нет. Ребята из детских домов Углича, Рыбинска и Ярославля едут в летнюю арт-резиденцию в Учме и на зимнюю неделю — их можно отметить в выездах ниже.",
+              options: [] },
+            { title: "В Северной Осетии",
+              showIf: { field: "area", value: "Северная Осетия" },
+              note: "Фонд приезжает каждый сентябрь и апрель. Многие ребята из Беслана сами стали волонтёрами.",
+              options: [
+                "Беслан, школа № 1 — мастер-классы во время приездов фонда",
+                "Интернат «Надежда», село Дур-Дур"
+              ] },
+            { title: "Выезды с ночёвкой",
+              options: [
+                "Летняя арт-резиденция в Учме на Волге, Ярославская обл. — июль–август",
+                "Зимняя неделя в Сорочанах, Подмосковье — февраль",
+                "Поездки в Беслан, Северная Осетия — сентябрь и апрель"
+              ] },
+            { title: "Удалённо",
+              options: ["Онлайн"] }
+          ] },
+        { id: "slots", label: "Когда вам обычно удобно?", type: "grid", required: true,
+          rows: ["Будни", "Суббота", "Воскресенье"], cols: ["Утро", "День", "Вечер"],
+          why: "Многие занятия проходят по будням утром и днём — если у вас есть это время, обязательно отметьте." }
+      ]
+    },
+    {
+      id: "final",
+      title: "Последний шаг",
+      fields: [
+        { id: "motivation", label: "Почему вы хотите помогать именно нам?", type: "textarea", optional: true,
+          why: "Нам правда интересно." },
+        { id: "source", label: "Откуда вы узнали о фонде?", type: "select", required: true,
+          options: ["ВКонтакте", "Telegram", "Сайт фонда", "Добро.РФ", "mos.ru", "Друзья или знакомые", "Был(а) на мероприятии фонда", "Другое"] },
+        { id: "record", label: "Для работы с детьми нужна справка об отсутствии судимости. Готовы её получить?", type: "radio", required: true,
+          options: ["Да", "Справка уже есть", "Хочу сначала обсудить"],
+          why: "Её можно бесплатно заказать на Госуслугах, приходит за 1–4 недели." },
+        { id: "consentPD", label: "Я согласен(на) на обработку персональных данных фондом «Дети Марии»", type: "consent", required: true },
+        { id: "consentNews", label: "Хочу получать новости и приглашения фонда", type: "consent" }
+      ]
+    }
+  ],
+
+  /*
+    Шаг онбординга «Профиль для подбора» — заполняется уже на платформе, после модуля «Кому мы помогаем».
+    На входе эти вопросы лишние, а после знакомства с участниками понятно, зачем фонд о них спрашивает.
+  */
+  matching: {
+    title: "Профиль для подбора",
+    intro: "Теперь, когда вы знаете, кто наши участники, расскажите чуть больше о себе. По этим ответам мы будем звать вас на подходящие занятия. Всё по желанию, изменить можно в профиле.",
+    fields: [
+      { id: "physical", label: "Можете помочь физически, если нужно?", type: "checkbox",
+        options: ["Помочь человеку на коляске", "Перенести или собрать оборудование", "Нет, физическая помощь мне не подходит"],
+        exclusive: ["Нет, физическая помощь мне не подходит"],
+        optional: true,
+        why: "Иногда на занятии нужна физическая помощь — так мы позовём тех, кому это по силам. Эти данные видит только координатор." },
+      { id: "portfolio", label: "Ссылка на портфолио или примеры работ", type: "text", optional: true, placeholder: "https://…",
+        showIf: { field: "roles", value: ["Предметная съёмка для магазина", "Репортажная съёмка занятий и событий", "Монтаж видео", "Соцсети и тексты", "Графический дизайн: афиши, листовки", "Дизайн и бренд"] },
+        why: "Координатор посмотрит и подберёт задачу под ваш уровень." },
+      { id: "comfort", label: "Дорога", type: "checkbox",
+        options: ["Нужна помощь с дорогой"],
+        optional: true,
+        why: "Подскажем маршрут, встретим у метро, а на выезды договоримся ехать вместе." }
+    ]
+  },
+
+  /* Уменьшительные имена: если человек ввёл такое, мягко просим полное. Не блокирует отправку. */
+  shortNames: { "Миша": "Михаил", "Саша": "Александр или Александра", "Маша": "Мария", "Женя": "Евгений или Евгения", "Дима": "Дмитрий", "Катя": "Екатерина", "Настя": "Анастасия", "Лена": "Елена", "Таня": "Татьяна", "Оля": "Ольга", "Аня": "Анна", "Вова": "Владимир", "Петя": "Пётр", "Коля": "Николай", "Серёжа": "Сергей", "Сережа": "Сергей", "Лёша": "Алексей", "Леша": "Алексей", "Паша": "Павел", "Юля": "Юлия", "Света": "Светлана", "Наташа": "Наталья", "Ира": "Ирина", "Даша": "Дарья", "Ваня": "Иван", "Костя": "Константин", "Гриша": "Григорий", "Витя": "Виктор", "Галя": "Галина", "Люба": "Любовь", "Надя": "Надежда", "Соня": "Софья", "Ксюша": "Ксения", "Тёма": "Артём", "Тема": "Артём", "Андрюша": "Андрей", "Жора": "Георгий", "Слава": "Вячеслав или Ярослава" },
+
+  done: {
+    title: "Спасибо! Заявка отправлена",
+    text: "Мы отправили ссылку в личный кабинет волонтёра на вашу почту. В кабинете — короткое знакомство с фондом. После него мы позовём вас на встречу с координатором."
+  }
+};
+
+/*
+  Контент онбординга волонтёра. Это данные, а не код: тексты правятся прямо здесь.
+
+  У каждого модуля source — откуда взят текст (для команды, в интерфейсе не показывается).
+
+  Типы блоков:
+    lead       { text }                                — крупный вводный абзац
+    text       { text }                                — абзацы через пустую строку
+    facts      { items: [[число, подпись], …] }
+    timeline   { items: [[год, заголовок, текст], …] }
+    cards      { items: [[заголовок, текст], …], open } — open: true — текст сразу виден, иначе по нажатию
+    list       { title, items: [строка, …], ordered }      — ordered: true — нумерованный список 1, 2, 3…
+    steps      { title, items: [[заголовок, текст], …] }
+    phrases    { items: [[как сказать, как не говорить, почему], …] }
+    situations { items: [{ title, do: […], dont: […] }, …]  }
+
+  Модуль с form: "matching" вместо блоков показывает поля из FORM.matching (content/form.js),
+  ответы сохраняются в профиль волонтёра.
+    callout    { tone: "info" | "warn", text }
+    pillars    { items: [{ title, from, text, items: […] }, …] } — опоры с «что это значит на занятии»
+    check      { title, intro, items: [{ q, a, p }, …] }    — ситуация, ответ открывается по нажатию
+    more       { title, blocks: […] }                       — раскрывающийся блок с любыми блоками внутри
+    video      { title, duration, src }                     — src: ссылка на VK Видео, Rutube, YouTube или .mp4;
+                                                              без src показывается заглушка «видео скоро появится».
+                                                              Видео необязательны и не влияют на прогресс
+*/
+window.ONBOARDING = {
+  title: "Знакомство с фондом",
+  intro: "Шесть коротких шагов перед встречей с координатором: кто мы, кому помогаем, как себя вести и как общаться с участниками. В конце — тест.",
+
+  modules: [
+    {
+      id: "history",
+      title: "История фонда",
+      minutes: 3,
+      source: "Сайт фонда, материал АСИ к 25-летию (Фёдор), презентация фонда для партнёров 2025",
+      blocks: [
+        { type: "lead", text: "Всё началось с рисования за столом для пинг-понга." },
+        { type: "facts", items: [["300+", "участников в год"], ["4", "площадки в Москве, занятия вне стен учреждений"], ["7", "дней в неделю идут мастерские"], ["40+", "сотрудников и волонтёров"]] },
+        { type: "timeline", items: [
+          ["1993", "Первый раз в детском доме", "Семья и друзья художницы Марии Елисеевой приходят в московский интернат волонтёрами. Мария начинает рисовать вместе с детьми."],
+          ["1997", "Художественный центр", "Занятия переезжают из интерната в театр-студию «Подвал». Первый грант получают на краски."],
+          ["2020", "Благотворительный фонд", "Художественный центр становится благотворительным фондом «Дети Марии»."],
+          ["2021", "Наставники и сопровождение", "Запускается программа наставничества и сопровождение подростков, которые выходят из детских учреждений."],
+          ["2026", "Сегодня", "Фонд объединился с АНО «Тверская 15». «Арт-лаборатория» получила Грант Мэра Москвы."]
+        ] },
+        { type: "video", title: "Как всё начиналось", duration: "2–3 мин" },
+        { type: "callout", tone: "info", text: "Фонд вырос из волонтёрской идеи. Волонтёры здесь с первого дня — поэтому мы так внимательно готовим каждого нового человека." }
+      ]
+    },
+
+    {
+      id: "people",
+      title: "Кому мы помогаем",
+      minutes: 4,
+      source: "Сайт фонда, презентация фонда для партнёров 2025, книги из библиотеки фонда",
+      blocks: [
+        { type: "lead", text: "Дети и взрослые с ментальными особенностями и опытом сиротства." },
+        { type: "list", title: "Кто приходит на занятия", items: [
+          "Ребята из центров содействия семейному воспитанию «Радуга» и «Сколковский» и Угличского детского дома",
+          "Жители социальных домов (бывших ПНИ) «Филимонки», «Нагатино-Садовники», «Егорьевский»",
+          "Выпускники детских домов — уже самостоятельно или с семьями"
+        ] },
+        { type: "cards", open: true, items: [
+          ["Творчество", "Арт-лаборатория, мастерские «Я могу больше», Арт-суббота, клуб «Пеликан»"],
+          ["Обучение", "«Хочу больше знать»: школьные предметы и навыки для самостоятельной жизни"],
+          ["Инклюзия", "«Воображариум» и «Разные вместе»: участники и гости работают вместе"],
+          ["Сопровождение", "Куратор и тьютор: документы, город, работа. Тренировочная квартира"],
+          ["Выезды", "Арт-резиденция на Волге, зимняя неделя в Сорочанах, поездки в Беслан"]
+        ] },
+        { type: "steps", title: "История Вовы", items: [
+          ["Так было", "Вова жил в социальном доме и впервые пришёл в фонд на занятия керамикой."],
+          ["Шаг за шагом", "Творчество, математика, логопед, куратор. Каждую неделю, четыре года подряд."],
+          ["Так стало", "Вова живёт в квартире сопровождаемого проживания, работает, завёл кота и учится играть на гитаре."]
+        ] },
+        { type: "list", title: "Что это значит для вас", items: [
+          "Многие участники выросли без постоянных взрослых рядом. Им важно, чтобы человек приходил снова и снова: доверие строится месяцами.",
+          "Кто-то говорит мало или не говорит совсем, кто-то быстро устаёт от шума. Это не невежливость и не каприз.",
+          "Диагнозы знать не нужно. Педагог расскажет, что важно знать о группе."
+        ] },
+        { type: "more", title: "Самостоятельность, права и дееспособность", blocks: [
+          { type: "list", items: [
+            "Многие участники годами жили там, где всё решали за них. Отсюда «выученная беспомощность» — следствие жизни в учреждении, а не диагноза. Поэтому мы не делаем за человека то, что он может сам.",
+            "Фразу «тебе нельзя, ты недееспособный» не говорим. Работа, учёба, выбор — право человека, а не награда.",
+            "Дееспособность — юридический статус, а не «ум». Меняет его только суд. Даже если человек недееспособен, опекун обязан учитывать его мнение.",
+            "Всегда обращайтесь к самому человеку, а не к тому, кто его сопровождает."
+          ] }
+        ] }
+      ]
+    },
+
+    {
+      id: "matching",
+      title: "Профиль для подбора",
+      minutes: 2,
+      form: "matching",
+      source: "Поля — в content/form.js → matching"
+    },
+
+    {
+      id: "ethics",
+      title: "Кодекс этики",
+      minutes: 5,
+      source: "Кодекс этики и стандарты работы БФ «Дети Марии»; формулировка «уважать не жалея…» — сборник «Особенное тьюторство», 2025",
+      blocks: [
+        { type: "lead", text: "В кодексе фонда 10 принципов, и они касаются волонтёров так же, как сотрудников. На занятии всё сводится к четырём опорам." },
+        { type: "pillars", items: [
+          { title: "Уважение", from: "Уважение и достоинство · Инклюзивность · Соучастие и эмпатия",
+            text: "Уважать не жалея, помогать не унижая, учить без снисходительности.",
+            items: ["Спрашиваем, а не решаем за человека", "Ко взрослым участникам обращаемся как ко взрослым", "Не шутим об особенностях — ни при участниках, ни без них"] },
+          { title: "Безопасность и тайна", from: "Безопасность · Конфиденциальность",
+            text: "Участник должен быть в безопасности — физически, эмоционально и в интернете.",
+            items: ["Фото и видео — только с согласия самого человека и через фонд", "Не пересказываем личные истории и не обсуждаем диагнозы", "Тревожное — сразу педагогу"] },
+          { title: "Честность и обещания", from: "Честность и прозрачность · Ответственность · Доверие",
+            text: "Многие участники привыкли, что взрослые исчезают. Мы — нет.",
+            items: ["Приходим, когда обещали; не можем — предупреждаем заранее", "Не обещаем того, что не сделаем", "Признаём свои ошибки"] },
+          { title: "Вместе", from: "Поддержка и вовлечение · Командная работа · Сотрудничество · Профессионализм",
+            text: "Волонтёр — часть команды занятия, а не отдельный помощник.",
+            items: ["Участник делает сам, мы помогаем", "Не уверены — спрашиваем педагога или координатора", "Рассказываем команде, что заметили на занятии"] }
+        ] },
+        { type: "check", title: "Как бы вы поступили?", intro: "Подумайте, потом откройте ответ.", items: [
+          { q: "Взрослый участник хочет сам налить себе чай, но у него дрожат руки. Налить за него?",
+            a: "Спросить: «Подержать чашку?» — и дать сделать самому. Самостоятельность важнее скорости, а подстраховать можно рядом.",
+            p: "Уважение и достоинство · Поддержка и вовлечение" },
+          { q: "Вы опаздываете на занятие на 20 минут. Участники ждут именно вас.",
+            a: "Сразу написать педагогу или координатору: те предупредят ребят. Молча опоздать — значит подвести тех, кто ждёт.",
+            p: "Ответственность · Доверие и честность" },
+          { q: "Педагог просит не помогать участнику, хотя у него явно не получается.",
+            a: "Довериться педагогу: он знает участника и, возможно, учит его справляться самостоятельно. Вопросы — после занятия.",
+            p: "Индивидуальный подход · Командная работа" }
+        ] },
+        { type: "more", title: "Полный текст: 10 принципов и правила принятия решений", blocks: [
+          { type: "cards", open: true, items: [
+            ["Уважение и достоинство", "Мы признаём уникальность каждого человека, относимся ко всем с уважением и защищаем их достоинство."],
+            ["Честность и прозрачность", "Мы честны во всём и открыто говорим о наших целях, методах и результатах."],
+            ["Соучастие и эмпатия", "Мы слушаем и понимаем потребности участников и поддерживаем их с солидарностью и заботой."],
+            ["Поддержка и вовлечение", "Мы вовлекаем сотрудников и участников в решения, которые касаются их жизни."],
+            ["Профессионализм", "Мы держим высокий уровень и постоянно обновляем знания и навыки."],
+            ["Конфиденциальность", "Мы уважаем право участников на конфиденциальность и не раскрываем личные данные без их согласия."],
+            ["Инклюзивность", "Мы создаём условия для развития всех, независимо от особенностей или прошлого."],
+            ["Сотрудничество", "Мы строим партнёрства с другими организациями и обмениваемся опытом."],
+            ["Ответственность", "Мы отвечаем за свои действия, обещания и результаты перед участниками, коллегами и обществом."],
+            ["Командная работа", "Мы поддерживаем коллег и волонтёров и создаём условия для совместной работы."]
+          ] },
+          { type: "steps", items: [
+            ["Интересы участников прежде всего", "Решения принимаются исходя из интересов детей и взрослых, которым мы помогаем."],
+            ["Индивидуальный подход", "Учитываем потребности, способности и желания каждого."],
+            ["Безопасность", "Физическая, психологическая и информационная."],
+            ["Конфиденциальность", "Личные данные раскрываются только в случаях, предусмотренных законом, и в интересах человека."],
+            ["Доверие и честность", "Выполняем обязательства, не обманываем и не манипулируем."],
+            ["Устойчивость", "Нам важны долгие результаты, а не разовые."]
+          ] }
+        ] }
+      ]
+    },
+
+    {
+      id: "talk",
+      title: "Как общаться с участниками",
+      minutes: 7,
+      source: "Команда: кодекс этики, книги из библиотеки фонда («Жизнь как жизнь», Е. Заблоцкис, «Особенное тьюторство»), практики NSPCC и National Autistic Society. Заменить правилами коммуникации фонда, когда они будут",
+      blocks: [
+        { type: "lead", text: "Главное, на чём спотыкаются новые волонтёры, — не творчество, а общение. Вот что помогает с первого дня." },
+        { type: "list", title: "Пять правил", ordered: true, items: [
+          "Обещайте только то, что точно сделаете. «Я приду в следующую субботу» — это обещание.",
+          "Будьте на виду. Общаемся в группе или там, где рядом другие взрослые.",
+          "Личные контакты не даём и не берём: телефон, соцсети, переписка — только через фонд.",
+          "Сначала чувство, потом задание. Если человек расстроен, сначала помогите успокоиться.",
+          "Не справляетесь — зовите педагога. Это не слабость, а правило."
+        ] },
+        { type: "phrases", items: [
+          ["«Тебе синий или зелёный?» — и показать оба", "«Что ты хочешь?»", "Выбор из двух посилен, открытый вопрос часто слишком сложен"],
+          ["«Вижу, ты расстроился. Я рядом»", "«Да ладно, ничего страшного»", "Назвать чувство — значит его признать"],
+          ["«Так делать не надо. А ты — молодец, что пришёл»", "«Ты плохо себя ведёшь»", "Оцениваем поступок, а не человека"],
+          ["«Можно я помогу?»", "Молча взять и сделать за человека", "Сохраняем самостоятельность и достоинство"]
+        ] },
+        { type: "list", title: "Если человеку трудно говорить", items: [
+          "Представьтесь и скажите, зачем подошли.",
+          "Говорите медленно и просто, показывайте действие руками.",
+          "Задавайте вопросы, на которые можно ответить «да» или «нет». Меняйте варианты местами: иногда человек повторяет последнее услышанное слово.",
+          "Ждите ответа — до 10 секунд. Жест и взгляд тоже ответ, «не знаю» — тоже."
+        ] },
+        { type: "situations", items: [
+          { title: "Участник не хочет заниматься",
+            do: ["Не настаивать. Предложить посидеть рядом или выбрать другое занятие", "Сказать, что можно присоединиться позже"],
+            dont: ["Уговаривать, стыдить, сравнивать с другими"] },
+          { title: "Просит ваш телефон или добавиться в друзья",
+            do: ["Мягко объяснить: «Я не даю свой номер, но мы увидимся здесь в субботу»", "Сказать координатору, что участник хочет общаться"],
+            dont: ["Давать номер «один раз», переписываться в соцсетях"] },
+          { title: "Рассказывает о насилии или о том, что ему плохо",
+            do: ["Спокойно выслушать, не перебивать", "Сказать: «Ты правильно сделал, что рассказал. Ты не виноват»", "Объяснить, что расскажете тому, кто может помочь, и сразу сообщить педагогу или координатору"],
+            dont: ["Обещать сохранить секрет", "Расспрашивать о деталях"] },
+          { title: "Перегрузка: кричит, закрывает уши, раскачивается",
+            do: ["Убрать лишнее: шум, свет, зрителей", "Говорить мало и тихо, дать время", "Позвать педагога"],
+            dont: ["Трогать без разрешения", "Требовать успокоиться"] },
+          { title: "Спрашивает о личном: тело, отношения, болезнь",
+            do: ["Спокойно сказать, что это важный вопрос", "Предложить обсудить его с куратором и сообщить куратору"],
+            dont: ["Вести такой разговор самому", "Смеяться или обрывать"] }
+        ] },
+        { type: "more", title: "Как говорить о людях", blocks: [
+          { type: "phrases", items: [
+            ["человек на коляске", "колясочник", "Сначала человек, потом его особенность"],
+            ["человек с синдромом Дауна, с аутизмом", "даун, аутист", "Диагноз — не имя"],
+            ["у него аутизм", "он болеет, страдает аутизмом", "Это состояние, а не болезнь"],
+            ["человек с инвалидностью", "инвалид", ""]
+          ] }
+        ] },
+        { type: "callout", tone: "warn", text: "Если есть угроза жизни или здоровью — сразу зовите педагога, при необходимости звоните 112." }
+      ]
+    },
+
+    {
+      id: "shift",
+      title: "Как пройдёт первое занятие",
+      minutes: 2,
+      source: "Фёдор и команда; согласовать с фондом",
+      blocks: [
+        { type: "lead", text: "Первое занятие вы проведёте рядом с педагогом — одного вас не оставят." },
+        { type: "steps", items: [
+          ["До занятия", "Вы знаете дату, место и кто вас встретит. Педагог коротко расскажет о группе."],
+          ["На занятии", "Начинаем с приветственного круга. Вы помогаете участникам, а как заниматься — решает педагог."],
+          ["После", "Пять минут разбора с педагогом. Через пару дней координатор спросит, как всё прошло."],
+          ["Дальше", "Регулярные занятия, другая роль или пауза — решаем вместе. Если решите уйти, скажите заранее, чтобы попрощаться с группой."]
+        ] },
+        { type: "video", title: "Один день в мастерской", duration: "1–2 мин" },
+        { type: "list", title: "Что взять с собой", items: [
+          "Одежду, которую не жалко испачкать, и сменную обувь",
+          "Полчаса запаса по времени"
+        ] }
+      ]
+    }
+  ],
+
+  test: {
+    title: "Проверьте себя",
+    intro: "Это не экзамен. После каждого ответа вы увидите пояснение. Чтобы записаться на встречу с координатором, ответьте правильно на 13 вопросов из 16. Пройти можно сколько угодно раз.",
+    pass: 13,
+    source: "Вопросы 1–10 — Фёдор, 11–16 — команда по кодексу и библиотеке фонда",
+    questions: [
+      { q: "С чего начался фонд «Дети Марии»?", o: ["С большого государственного гранта на строительство центра", "С того, что художница Мария Елисеева стала рисовать вместе с детьми из интерната", "С благотворительного концерта", "С открытия интернет-магазина изделий мастерских"], a: 1, e: "В 1993 году семья и друзья Марии Елисеевой пришли в интернат волонтёрами. Первый грант позже получили на краски." },
+      { q: "Кому помогает фонд?", o: ["Только детям младшего школьного возраста", "Пожилым людям в домах престарелых", "Детям и взрослым с ментальными особенностями и опытом сиротства", "Семьям, которые хотят усыновить ребёнка"], a: 2, e: "Участники — ребята из детских домов, жители социальных домов и выпускники интернатов." },
+      { q: "На кого распространяется кодекс этики?", o: ["Только на руководство фонда", "На штатных сотрудников", "На сотрудников, исполнителей и волонтёров", "Только на ведущих мастерских"], a: 2, e: "Кодекс прямо распространяется на волонтёров, как и на сотрудников и исполнителей." },
+      { q: "На занятии участник рассказал вам о своей семье. Вечером знакомый спрашивает, как прошёл день. Что делать?", o: ["Пересказать историю: знакомый никого из участников не знает", "Рассказать о занятии в общих словах, не передавая личное", "Записать историю, чтобы потом выложить пост", "Пересказать, но изменить имя"], a: 1, e: "Принцип конфиденциальности: личные истории участников не раскрываются без их согласия." },
+      { q: "Вы сделали отличное фото с участниками на мастер-классе. Как поступить?", o: ["Сразу выложить в свои соцсети", "Отправить в общий чат друзей", "Не публиковать самому и спросить координатора: изображения участников публикуются только с их согласия", "Выложить, закрыв лица смайликами"], a: 2, e: "Изображение — тоже личная информация. Решение о публикации принимается с согласия участника и вместе с фондом." },
+      { q: "Участник хочет сделать поделку по-своему, а не так, как показал ведущий. Ваши действия?", o: ["Настоять на образце: так будет красивее", "Поддержать его идею и помочь, если это безопасно", "Сделать работу за него, чтобы успеть", "Отправить его к другому столу"], a: 1, e: "Индивидуальный подход и вовлечение: мы учитываем желания человека и поддерживаем его самостоятельность." },
+      { q: "Вы пообещали прийти в субботу, но планы изменились. Что правильно?", o: ["Просто не прийти: волонтёрство добровольное", "Как можно раньше предупредить координатора", "Написать участнику напрямую и попросить не ждать", "Прислать вместо себя друга без предупреждения"], a: 1, e: "Мы выполняем обязательства, а если не можем — заранее предупреждаем. Участники ждут знакомых людей." },
+      { q: "Во время занятия ситуация кажется вам небезопасной для участника. Что делать?", o: ["Подождать до конца занятия и рассказать потом", "Сразу сказать руководителю занятия или координатору", "Разобраться самостоятельно любым способом", "Ничего не делать: это не ваша зона ответственности"], a: 1, e: "Безопасность — одно из правил принятия решений. Если сомневаетесь, остановитесь и спросите." },
+      { q: "Какое правило стоит первым, когда фонд принимает решения?", o: ["Экономия ресурсов", "Удобство сотрудников", "Приоритет интересов участников", "Скорость"], a: 2, e: "Все решения принимаются исходя из интересов детей и взрослых, которым помогает фонд." },
+      { q: "Другой волонтёр пренебрежительно пошутил про участника. Как поступить?", o: ["Посмеяться, чтобы не портить атмосферу", "Промолчать: это его дело", "Тактично остановить его и, если нужно, сказать руководителю", "Высмеять его в ответ при всех"], a: 2, e: "Кодекс требует избегать унижения и пренебрежения и при этом быть тактичным." },
+      { q: "Подросток просит ваш номер телефона, чтобы писать вам. Что ответить?", o: ["Дать номер: это поможет построить доверие", "«Я не даю свой номер, но мы увидимся здесь в субботу», и сказать координатору", "Добавиться в соцсетях вместо телефона", "Сделать вид, что не услышали"], a: 1, e: "Личные контакты не даём. Объясняем мягко и честно и сообщаем координатору." },
+      { q: "Участник рассказывает, что дома его обижают, и просит никому не говорить. Как поступить?", o: ["Пообещать молчать, чтобы не потерять доверие", "Расспросить подробно, чтобы понять, правда ли это", "Выслушать, сказать, что он не виноват, объяснить, что расскажете тому, кто поможет, и сразу сообщить руководителю", "Сменить тему, чтобы не травмировать"], a: 2, e: "Секрет обещать нельзя. Выслушать, поддержать, не расспрашивать о деталях и сразу передать специалисту." },
+      { q: "Участник закрыл уши, раскачивается и кричит — в комнате шумно. Что делать в первую очередь?", o: ["Попросить его успокоиться", "Убрать раздражители — шум, зрителей — говорить мало и тихо, позвать руководителя", "Обнять, чтобы успокоить", "Не обращать внимания, это пройдёт"], a: 1, e: "Это перегрузка, а не каприз. Сначала убрать раздражители и дать время. Трогать без разрешения нельзя." },
+      { q: "В конце занятия участник спрашивает: «Ты придёшь ещё?» Вы не уверены. Как ответить?", o: ["«Конечно, буду приходить всегда!»", "«Пока не знаю. Если смогу — приду, а если нет, обязательно скажу»", "Промолчать", "«Это зависит от твоего поведения»"], a: 1, e: "Честное обещание лучше большого. Для участников особенно больно, когда взрослые исчезают без объяснений." },
+      { q: "Участница долго выбирает цвет краски и молчит. Как помочь?", o: ["Выбрать за неё, чтобы не терять время", "Спросить «Какой ты хочешь?» ещё несколько раз", "Показать две баночки: «Синий или зелёный?» — и подождать ответа", "Перейти к другому участнику"], a: 2, e: "Выбор из двух настоящих вариантов посилен, а на ответ может понадобиться время. Выбирать за человека — значит отнимать у него самостоятельность." },
+      { q: "Житель социального дома хочет записаться на курсы. Сотрудник рядом говорит: «Ему нельзя, он недееспособный». Что верно?", o: ["Сотрудник прав: недееспособным учиться нельзя", "Учёба и работа — право человека, его мнение важно. Расскажите координатору о желании участника", "Отговорить участника, чтобы не расстраивался", "Записать его самостоятельно, никого не спрашивая"], a: 1, e: "Дееспособность — юридический статус, он не отнимает права на учёбу и работу. Решения принимаются вместе с человеком и фондом." }
+    ]
+  },
+
+  meeting: {
+    title: "Встреча с координатором",
+    text: "Знакомство на 30 минут: расскажем о программах, обсудим, что вам интересно и когда вы свободны, и подберём первую смену.",
+    coordinator: "Алевтина, координатор волонтёров",
+    slots: [
+      { day: "Чт, 23 октября", time: "18:30", where: "Онлайн, Яндекс Телемост" },
+      { day: "Пт, 24 октября", time: "12:00", where: "Студия, м. Театральная" },
+      { day: "Сб, 25 октября", time: "11:00", where: "Онлайн, Яндекс Телемост" },
+      { day: "Вт, 28 октября", time: "19:00", where: "Онлайн, Яндекс Телемост" }
+    ]
+  }
+};
+
+// Общая логика кандидата: анкета, маски ввода, проверки, прогресс онбординга.
+// Тексты анкеты и онбординга — в prototype/content/form.js и onboarding.js (FORM, ONBOARDING).
+const FORM = window.FORM, ONB = window.ONBOARDING;
+const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
+const cap = w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w;
+const ageOf = d => { const b = new Date(d); if (isNaN(b)) return null; const n = new Date(); let a = n.getFullYear() - b.getFullYear(); if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--; return a; };
+const fullName = c => (c && (c.name || [c.firstName, c.lastName].filter(Boolean).join(' '))) || '';
+const firstName = c => fullName(c).split(/\s+/)[0] || '';
+const allFields = () => FORM.steps.flatMap(s => s.fields).concat(FORM.matching.fields);
+
+const MASK = {
+  name: v => v.replace(/[^A-Za-zА-Яа-яЁё\- ']/g, '').replace(/\s+/g, ' ').replace(/^[\s-]+/, '').replace(/(^|[\s-])([a-zа-яё])/g, (m, a, b) => a + b.toUpperCase()),
+  phone: v => {
+    let d = v.replace(/\D/g, '');
+    if (d[0] === '8') d = '7' + d.slice(1);
+    if (d[0] !== '7') d = '7' + d;
+    if (d.length > 11 && d[1] === '8') d = d[0] + d.slice(2); // набрали 8… после подставленного +7
+    const p = d.slice(1, 11);
+    let out = '+7';
+    if (p.length) out += ' (' + p.slice(0, 3);
+    if (p.length > 3) out += ') ' + p.slice(3, 6);
+    if (p.length > 6) out += '-' + p.slice(6, 8);
+    if (p.length > 8) out += '-' + p.slice(8, 10);
+    return out;
+  },
+  telegram: v => '@' + v.trim().replace(/^@+/, '').replace(/^(https?:\/\/)?(www\.)?(t\.me|telegram\.me)\//i, '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 32)
+};
+const FINAL = {
+  name: v => MASK.name(v).trim().replace(/-+$/, '').split(/([\s-])/).map(w => /[\s-]/.test(w) ? w : cap(w)).join(''),
+  phone: v => v.replace(/\D/g, '').length <= 1 ? '' : MASK.phone(v),
+  telegram: v => v === '@' ? '' : MASK.telegram(v)
+};
+const shortHint = (f, v) => {
+  if (f.id !== 'firstName') return '';
+  const full = (FORM.shortNames || {})[cap(String(v || '').trim())];
+  return full ? `Это полное имя? Например, ${full}. Так координатору будет проще найти вас в документах.` : '';
+};
+const visibleFor = (f, data) => {
+  if (!f.showIf) return true;
+  const v = arr(data[f.showIf.field]), want = arr(f.showIf.value);
+  return want.some(w => v.includes(w));
+};
+// «Нет, не подходит» и «Пока не знаю» нельзя выбрать вместе с остальными вариантами
+const withExclusive = (f, list, changed, added) => {
+  const ex = (f.exclusive || []).concat(f.unsure ? [f.unsure] : []);
+  if (!added || !ex.length) return list;
+  return ex.includes(changed) ? [changed] : list.filter(v => !ex.includes(v));
+};
+const roleGroups = roles => {
+  const f = FORM.steps.flatMap(s => s.fields).find(x => x.type === 'roles');
+  return f ? f.groups.filter(g => g.roles.some(r => arr(roles).includes(r))).map(g => g.title) : [];
+};
+function validateFields(fields, data) {
+  const errs = {};
+  fields.filter(f => visibleFor(f, data)).forEach(f => {
+    if (f.groups && f.type === 'checkbox') data[f.id] = arr(data[f.id]).filter(o => f.groups.some(g => visibleFor(g, data) && g.options.includes(o)));
+    const v = data[f.id];
+    const empty = v == null || v === '' || v === false || (Array.isArray(v) && v.length === 0);
+    if (f.required && empty) errs[f.id] = f.type === 'consent' ? 'Без согласия мы не сможем обработать заявку' : f.type === 'roles' ? 'Выберите хотя бы одну роль или «Пока не знаю»' : 'Заполните, пожалуйста';
+    else if (!empty && f.type === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) errs[f.id] = 'Проверьте адрес почты';
+    else if (!empty && f.mask === 'phone' && String(v).replace(/\D/g, '').length !== 11) errs[f.id] = 'Номер должен быть из 10 цифр после +7';
+    else if (!empty && f.mask === 'telegram' && !/^@[A-Za-z0-9_]{5,32}$/.test(v)) errs[f.id] = 'Ник — от 5 символов: латиница, цифры и _';
+    else if (!empty && f.mask === 'name' && !/^[А-ЯЁA-Z][а-яёa-z']+([\s-][А-ЯЁA-Z][а-яёa-z']+)*$/.test(v)) errs[f.id] = 'Проверьте написание: только буквы, без сокращений';
+    else if (!empty && f.id === 'birthdate') { const a = ageOf(v); if (a == null || a < 16) errs[f.id] = 'Волонтёром можно стать с 16 лет'; else if (a > 110) errs[f.id] = 'Проверьте дату'; }
+  });
+  return errs;
+}
+
+// Поля формы → данные для шаблона. update(id, value) меняет ответ; ui — раскрытые группы ролей.
+function fieldViews(fields, data, errs, update, ui, setUi) {
+  return fields.filter(f => visibleFor(f, data)).map(f => {
+    const v = data[f.id];
+    const t = f.type;
+    const isInput = ['text', 'email', 'tel', 'date'].includes(t);
+    const toggleIn = (o) => () => {
+      const set = new Set(arr(data[f.id]));
+      const on = !set.has(o);
+      on ? set.add(o) : set.delete(o);
+      update(f.id, withExclusive(f, [...set], o, on));
+    };
+    const optView = o => { const on = (t === 'radio' || t === 'select') ? v === o : arr(v).includes(o); return { label: o, checked: on, pressed: on, cls: on ? 'chip is-on' : 'chip', lineCls: on ? 'a-line is-on' : 'a-line', toggle: (t === 'radio' || t === 'select') ? () => update(f.id, o) : toggleIn(o) }; };
+    const warn = shortHint(f, v);
+    return {
+      id: f.id, label: f.label, req: !!f.required, opt: !!f.optional, why: f.why || '', hasWhy: !!f.why,
+      cls: 'field a-field' + (f.half ? ' a-half' : '') + (errs[f.id] ? ' a-bad' : ''),
+      err: errs[f.id] || '', hasErr: !!errs[f.id], warn, hasWarn: !!warn,
+      isConsent: t === 'consent', notConsent: t !== 'consent',
+      isInput, inputType: t === 'tel' ? 'tel' : t, value: v == null ? '' : v, placeholder: f.placeholder || '', autocomplete: f.autocomplete || 'off',
+      change: e => { const raw = e.target.value; update(f.id, f.mask ? MASK[f.mask](raw) : raw); },
+      focus: () => { if (f.mask === 'phone' && !data[f.id]) update(f.id, '+7 ('); if (f.mask === 'telegram' && !data[f.id]) update(f.id, '@'); },
+      blur: () => { if (f.mask) update(f.id, FINAL[f.mask](String(data[f.id] || ''))); },
+      isTextarea: t === 'textarea', isSelect: t === 'select',
+      isChoice: (t === 'radio' || t === 'checkbox') && !f.groups, choiceType: t, options: (f.options || []).map(optView),
+      isGroups: t === 'checkbox' && !!f.groups,
+      groups: (t === 'checkbox' && f.groups ? f.groups : []).filter(g => visibleFor(g, data)).map(g => ({ title: g.title, note: g.note || '', hasNote: !!g.note, hasOptions: g.options.length > 0, options: g.options.map(optView) })),
+      isChips: t === 'chips', hasOther: !!f.allowOther, other: data[f.id + 'Other'] || '', changeOther: e => update(f.id + 'Other', e.target.value),
+      isGrid: t === 'grid', cols: f.cols || [],
+      rows: (f.rows || []).map(r => ({ label: r, cells: (f.cols || []).map(c => { const k = r + '·' + c, on = arr(v).includes(k); return { cls: on ? 'a-cell is-on' : 'a-cell', pressed: on, aria: r + ', ' + c, toggle: toggleIn(k) }; }) })),
+      isRoles: t === 'roles',
+      rgroups: (t === 'roles' ? f.groups : []).map((g, gi) => {
+        const n = g.roles.filter(r => arr(v).includes(r)).length, key = f.id + gi, open = n > 0 || !!ui[key];
+        return { title: g.title, hint: g.hint || '', hasHint: !!g.hint, open, cls: open ? 'a-rgroup is-open' : 'a-rgroup', badge: n ? `выбрано: ${n}` : (open ? 'свернуть' : 'открыть'), badgeCls: n ? 'tag t-orange' : 'tag', toggle: () => setUi(key), roles: g.roles.map(optView) };
+      }),
+      unsure: f.unsure || '', unsureOn: arr(v).includes(f.unsure), unsureToggle: toggleIn(f.unsure),
+      checked: !!v, toggle: () => update(f.id, !data[f.id])
+    };
+  });
+}
+
+const freshProgress = () => ({ done: {}, best: null, attempts: 0, meeting: null });
+const loadCandidate = () => demoRead('candidate', null);
+const loadProgress = () => Object.assign(freshProgress(), demoRead('onboarding', {}));
+const DEMO_CANDIDATE = { firstName: 'Анна', lastName: 'Соколова', name: 'Анна Соколова', birthdate: '1994-05-12', phone: '+7 (916) 123-45-67', email: 'anna@example.com', channels: ['Telegram'], telegram: '@anna_sokolova', area: 'Центр Москвы', roles: ['Ассистент педагога в мастерской', 'Ведущий мастер-класса'], directions: ['Творческие занятия', 'Помощь на занятиях'], skills: ['Керамика', 'Живопись и рисунок'], sphere: 'Дизайн, фото, медиа', volExp: 'Нет', specialExp: 'Нет, но готов(а) попробовать', participation: 'Постоянно — в одной программе, раз в неделю или чаще', places: ['Студия на Дмитровском переулке (м. Театральная)', 'Загородная мастерская Марии Елисеевой — Арт-субботы'], slots: ['Будни·Утро', 'Суббота·День'], source: 'ВКонтакте', record: 'Да', consentPD: true, submittedAt: new Date().toISOString() };
+
+const BLOCK_FLAGS = ['isLead','isText','isFacts','isTimeline','isCards','isList','isSteps','isPhrases','isSituations','isPillars','isCheck','isVideo','isCallout','isMore'];
+const PILLAR_COLORS = ['a-pillar a-p-o','a-pillar a-p-b','a-pillar a-p-g','a-pillar a-p-v'];
+function blockView(b){
+ const v={};BLOCK_FLAGS.forEach(k=>v[k]=false);
+ const key='is'+b.type[0].toUpperCase()+b.type.slice(1);v[key]=true;
+ v.text=b.text||'';v.title=b.title||'';v.hasTitle=!!b.title;v.intro=b.intro||'';v.duration=b.duration||'';
+ v.ordered=!!b.ordered;v.bullets=!b.ordered;v.cls=b.tone==='warn'?'error':'hint';
+ v.paras=String(b.text||'').split(/\n\s*\n/);
+ const it=b.items||[];
+ if(b.type==='facts')v.items=it.map(([n,l])=>({n,l}));
+ else if(b.type==='timeline')v.items=it.map(([y,t,d])=>({y,t,d}));
+ else if(b.type==='cards')v.items=it.map(([t,d])=>({t,d}));
+ else if(b.type==='list')v.items=it.map((t,i)=>({t,n:i+1}));
+ else if(b.type==='steps')v.items=it.map(([t,d],i)=>({t,d,n:i+1}));
+ else if(b.type==='phrases'){v.title=b.title||'Как говорить';v.items=it.map(([say,avoid,why])=>({say,avoid,why:why||'',hasWhy:!!why}));}
+ else if(b.type==='situations')v.items=it.map(x=>({title:x.title,do:x.do,dont:x.dont}));
+ else if(b.type==='pillars')v.items=it.map((x,i)=>({...x,cls:PILLAR_COLORS[i%4]}));
+ else if(b.type==='check')v.items=it;
+ else v.items=[];
+ v.blocks=b.type==='more'?b.blocks.map(blockView):[];
+ return v;
+}
+class Component extends DCLogic {
+ constructor(p){super(p);const q=new URLSearchParams(location.search);this.state={me:loadCandidate(),pr:loadProgress(),view:q.get('view')==='test'?'test':'hub',read:{},run:null,ui:{}};this.onScroll=this.onScroll.bind(this);}
+ componentDidMount(){window.addEventListener('scroll',this.onScroll,{passive:true});window.addEventListener('resize',this.onScroll);this.onScroll();}
+ componentDidUpdate(){this.onScroll();}
+ componentWillUnmount(){window.removeEventListener('scroll',this.onScroll);window.removeEventListener('resize',this.onScroll);}
+ // Как с пользовательским соглашением: «дальше» открывается, когда модуль долистан до конца
+ onScroll(){const bar=document.getElementById('a-readbar');if(!bar)return;const h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?Math.min(100,100*h.scrollTop/max):100)+'%';
+  const id=this.state.view,end=document.getElementById('a-read-end');if(!end||this.state.read[id]||this.state.pr.done[id])return;if(end.getBoundingClientRect().top<=window.innerHeight)this.setState({read:{...this.state.read,[id]:true}});}
+ save(pr){demoWrite('onboarding',pr);this.setState({pr});}
+ open(view){this.setState({view,run:view==='test'?this.state.run:null});window.scrollTo(0,0);}
+ setMe(me){demoWrite('candidate',me);this.setState({me});}
+ renderVals(){const s=this.state,pr=s.pr,me=s.me,mods=ONB.modules,T=ONB.test,N=T.questions.length,nDone=mods.filter(m=>pr.done[m.id]).length,allDone=nDone===mods.length,passed=pr.best!=null&&pr.best>=T.pass;
+  const i=mods.findIndex(m=>m.id===s.view),m=mods[i],isModule=!!me&&i>=0,isTest=!!me&&s.view==='test'&&allDone,isHub=!!me&&!isModule&&!isTest;
+  const unlocked=isModule&&(pr.done[m.id]||s.read[m.id]),nxt=isModule?mods[i+1]:null;
+  const run=s.run,inQ=!!run&&run.i<N,showRes=!!run&&run.i>=N,q=inQ?T.questions[run.i]:null,ans=inQ?run.answers[run.i]:null,answered=ans!=null;
+  const score=run?run.answers.filter((a,k)=>a===T.questions[k].a).length:0;
+  const v={noCandidate:!me,isHub,isModule,isTest,fillDemo:()=>this.setMe(DEMO_CANDIDATE),toHub:()=>this.open('hub'),
+   hubTitle:ONB.title,hubIntro:ONB.intro,hubBar:'width:'+Math.round(100*nDone/mods.length)+'%',hubCount:nDone+' из '+mods.length,
+   mods:mods.map((x,k)=>({title:x.title,minutes:x.minutes,mark:pr.done[x.id]?'✓':String(k+1),cls:pr.done[x.id]?'a-mod is-done':'a-mod',open:()=>this.open(x.id)})),
+   testCls:'a-mod'+(passed?' is-done':'')+(allDone?'':' is-locked'),testMark:passed?'✓':String(mods.length+1),testTitle:T.title,testSub:N+' вопросов'+(allDone?'':' · откроется после всех шагов'),testLocked:!allDone,openTest:()=>this.open('test'),
+   pills:mods.map((x,k)=>({n:k+1,title:x.title,cls:'a-pill'+(k===i?' is-on':(pr.done[x.id]?' is-done':'')),open:()=>this.open(x.id)})),
+   modEyebrow:isModule?'Шаг '+(i+1)+' из '+mods.length+' · '+m.minutes+' мин':'',modTitle:isModule?m.title:'',
+   isForm:isModule&&!!m.form,formIntro:FORM.matching.intro,
+   fields:isModule&&m.form&&me?fieldViews(FORM.matching.fields,me,{},(id,val)=>this.setMe({...this.state.me,[id]:val}),s.ui,key=>this.setState({ui:{...this.state.ui,[key]:!this.state.ui[key]}})):[],
+   blocks:isModule&&m.blocks?m.blocks.map(blockView):[],
+   hasPrev:isModule&&i>0,prev:()=>this.open(mods[i-1].id),
+   doneLocked:isModule&&!unlocked,doneCls:'btn btn-lg '+(unlocked?'btn-primary':'btn-subtle'),doneLabel:!isModule?'':(unlocked?(nxt?'Понятно, дальше':'Понятно, к тесту'):'Дочитайте до конца ↓'),
+   done:()=>{if(!isModule)return;this.save({...pr,done:{...pr.done,[m.id]:true}});this.open(nxt?nxt.id:'test');},
+   testIntro:isTest&&!run,testTitle:T.title,testText:T.intro,hasBest:pr.best!=null,bestLine:pr.best==null?'':pr.best+' из '+N+(passed?' — пройден':''),passed,startLabel:pr.attempts?'Пройти ещё раз':'Начать тест',
+   start:()=>{this.setState({run:{i:0,answers:[]}});window.scrollTo(0,0);},
+   testQuestion:isTest&&inQ,qNum:inQ?run.i+1:0,qTotal:N,qBar:'width:'+(inQ?Math.round(100*run.i/N):0)+'%',qText:q?q.q:'',
+   qOpts:q?q.o.map((o,j)=>({text:o,locked:answered,cls:'a-answer'+(answered&&j===q.a?' is-right':'')+(answered&&j===ans&&ans!==q.a?' is-wrong':''),pick:()=>{const answers=[...run.answers];answers[run.i]=j;this.setState({run:{...run,answers}});}})):[],
+   answered,explCls:answered&&ans===q.a?'hint':'error',explHead:answered&&ans===q.a?'Верно.':'Не совсем.',expl:q?q.e:'',nextQLabel:inQ&&run.i+1<N?'Следующий вопрос':'Посмотреть результат',
+   nextQ:()=>{const r={...run,i:run.i+1};if(r.i>=N){const sc=r.answers.filter((a,k)=>a===T.questions[k].a).length;this.save({...pr,attempts:pr.attempts+1,best:Math.max(pr.best==null?0:pr.best,sc)});}this.setState({run:r});window.scrollTo(0,0);},
+   testResult:isTest&&showRes,scoreLine:score+' из '+N,resultPassed:score>=T.pass,resultText:score>=T.pass?'Отлично, знакомство пройдено! Теперь можно выбрать время встречи с координатором.':'Нужно '+T.pass+' правильных ответов. Посмотрите разбор ниже и попробуйте ещё раз.',
+   wrong:showRes?T.questions.map((x,k)=>({q:x.q,a:x.o[x.a],e:x.e,ok:run.answers[k]===x.a})).filter(x=>!x.ok):[]};
+  v.hasWrong=v.wrong.length>0;return v;}
+}
+
+</script></body></html>

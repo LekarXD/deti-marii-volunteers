@@ -340,7 +340,7 @@
           <div class="mods">
             ${ONB.modules.map((m, i) => `<a class="mod ${S.done[m.id] ? "done" : ""}" href="#/learn/${m.id}">
               <span class="num">${S.done[m.id] ? "✓" : i + 1}</span>
-              <span class="stack" style="gap:2px"><h3>${esc(m.title)}</h3><span class="meta">${m.minutes} мин${m.draft ? ' <span class="badge draft">Черновик</span>' : ""}</span></span>
+              <span class="stack" style="gap:2px"><h3>${esc(m.title)}</h3><span class="meta">${m.minutes} мин</span></span>
               <span class="muted">→</span></a>`).join("")}
             <a class="mod ${testPassed() ? "done" : ""} ${allModulesDone() ? "" : "locked"}" href="#/test">
               <span class="num">${testPassed() ? "✓" : ONB.modules.length + 1}</span>
@@ -384,7 +384,7 @@
 
   function videoHtml(b) {
     const head = `<div class="vmeta"><b>${esc(b.title)}</b>${b.duration ? `<span class="muted">${esc(b.duration)}</span>` : ""}</div>`;
-    if (!b.src) return `<figure class="video"><div class="vbox empty"><span class="play">▶</span><span>Видео появится здесь</span></div>${head}${b.note ? `<figcaption class="draft-note">${esc(b.note)}</figcaption>` : ""}</figure>`;
+    if (!b.src) return `<figure class="video"><div class="vbox empty"><span class="play">▶</span><span>Видео скоро появится</span></div>${head}${b.note ? `<figcaption class="draft-note">${esc(b.note)}</figcaption>` : ""}</figure>`;
     let src = b.src, m;
     if ((m = src.match(/(?:youtu\.be\/|v=)([\w-]{11})/))) src = `https://www.youtube.com/embed/${m[1]}`;
     else if ((m = src.match(/rutube\.ru\/video\/([\w]+)/))) src = `https://rutube.ru/play/embed/${m[1]}`;
@@ -410,7 +410,6 @@
           </div>
           <p class="eyebrow">Шаг ${i + 1} из ${ONB.modules.length} · ${m.minutes} мин</p>
           <h1>${esc(m.title)}</h1>
-          ${m.draft ? `<p class="draft-note"><b>Черновик.</b> ${esc(m.source)}</p>` : `<p class="muted" style="font-size:.85rem">Источник: ${esc(m.source)}</p>`}
         </div>
         ${m.form ? matchingHtml() : `<div class="blocks">${m.blocks.map(blockHtml).join("")}</div>`}
         <div id="read-end" aria-hidden="true"></div>
@@ -439,8 +438,7 @@
     } else if (!S.run) {
       body = `<div class="card stack"><h1>${esc(T.title)}</h1><p class="muted">${esc(T.intro)}</p>
         ${S.test.best != null ? `<p>Лучший результат: <b>${S.test.best} из ${N}</b>${testPassed() ? ' <span class="badge ok">пройден</span>' : ""}</p>` : ""}
-        <div class="row"><button class="btn" data-act="start">${S.test.attempts ? "Пройти ещё раз" : "Начать тест"}</button>${testPassed() ? `<a class="btn sec" href="#/meet">К записи на встречу</a>` : ""}</div>
-        <p class="muted" style="font-size:.8rem">${esc(T.source)}</p></div>`;
+        <div class="row"><button class="btn" data-act="start">${S.test.attempts ? "Пройти ещё раз" : "Начать тест"}</button>${testPassed() ? `<a class="btn sec" href="#/meet">К записи на встречу</a>` : ""}</div></div>`;
     } else if (S.run.i >= N) {
       const score = S.run.answers.filter((a, k) => a === T.questions[k].a).length, ok = score >= T.pass;
       const wrong = T.questions.map((q, k) => ({ q, k })).filter(x => S.run.answers[x.k] !== x.q.a);

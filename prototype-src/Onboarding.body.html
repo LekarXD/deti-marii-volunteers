@@ -1,0 +1,44 @@
+<sc-if value="{{noCandidate}}"><section class="card a-empty"><h1 class="h2">Сначала анкета</h1><p class="lead">Знакомство с фондом открывается после анкеты волонтёра.</p><div class="actions"><a class="btn btn-primary btn-lg" href="Apply.dc.html">Заполнить анкету</a><button class="btn btn-ghost" onClick="{{fillDemo}}">Продолжить на демо-кандидате</button></div></section></sc-if>
+
+<sc-if value="{{isHub}}"><div class="head"><div><p class="eyebrow">Перед встречей с координатором</p><h1 class="h1">{{hubTitle}}</h1><p class="lead a-intro">{{hubIntro}}</p></div><a class="btn btn-ghost" href="ApplicationStatus.dc.html">Моя заявка</a></div>
+<div class="row a-progress"><div class="bar grow"><i style="{{hubBar}}"></i></div><span class="strong num">{{hubCount}}</span></div>
+<section class="section a-mods"><sc-for list="{{mods}}" as="m"><button class="{{m.cls}}" onClick="{{m.open}}"><span class="a-num">{{m.mark}}</span><span class="grow a-modtext"><b>{{m.title}}</b><small>{{m.minutes}} мин</small></span><span class="a-chev" aria-hidden="true">ICON_RIGHT</span></button></sc-for>
+<button class="{{testCls}}" onClick="{{openTest}}" disabled="{{testLocked}}"><span class="a-num">{{testMark}}</span><span class="grow a-modtext"><b>{{testTitle}}</b><small>{{testSub}}</small></span><span class="a-chev" aria-hidden="true">ICON_RIGHT</span></button></section>
+</sc-if>
+
+<sc-if value="{{isModule}}"><div class="a-readbar" aria-hidden="true"><i id="a-readbar"></i></div>
+<div class="row a-modnav"><button class="btn btn-ghost" onClick="{{toHub}}">ICON_LEFT Все шаги</button><span class="grow"></span><nav class="a-pills" aria-label="Шаги"><sc-for list="{{pills}}" as="p"><button class="{{p.cls}}" aria-label="{{p.title}}" onClick="{{p.open}}">{{p.n}}</button></sc-for></nav></div>
+<p class="eyebrow">{{modEyebrow}}</p><h1 class="h1 a-modtitle">{{modTitle}}</h1>
+<sc-if value="{{isForm}}"><p class="lead">{{formIntro}}</p><section class="card a-form a-form-1"><!--FIELDS--></section></sc-if>
+<div class="a-blocks"><sc-for list="{{blocks}}" as="b">
+<sc-if value="{{b.isLead}}"><p class="a-lead">{{b.text}}</p></sc-if>
+<sc-if value="{{b.isText}}"><div class="a-text"><sc-for list="{{b.paras}}" as="t"><p>{{t}}</p></sc-for></div></sc-if>
+<sc-if value="{{b.isFacts}}"><div class="grid-4 a-facts"><sc-for list="{{b.items}}" as="x"><div class="kpi"><span class="blob blob-y"></span><span class="kpi-num">{{x.n}}</span><span class="kpi-label">{{x.l}}</span></div></sc-for></div></sc-if>
+<sc-if value="{{b.isTimeline}}"><div class="card a-timeline"><sc-for list="{{b.items}}" as="x"><div class="a-tl"><span class="a-year">{{x.y}}</span><div><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></div></sc-for></div></sc-if>
+<sc-if value="{{b.isCards}}"><div class="grid-3 a-cards"><sc-for list="{{b.items}}" as="x"><div class="card-soft"><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></sc-for></div></sc-if>
+<sc-if value="{{b.isList}}"><div class="card"><sc-if value="{{b.hasTitle}}"><h3 class="h3 a-bt">{{b.title}}</h3></sc-if><div class="list"><sc-for list="{{b.items}}" as="x"><div class="li a-li"><sc-if value="{{b.ordered}}"><span class="a-num a-num-o">{{x.n}}</span></sc-if><sc-if value="{{b.bullets}}"><span class="a-dot" aria-hidden="true"></span></sc-if><span class="grow">{{x.t}}</span></div></sc-for></div></div></sc-if>
+<sc-if value="{{b.isSteps}}"><div><sc-if value="{{b.hasTitle}}"><h3 class="h3 a-bt">{{b.title}}</h3></sc-if><div class="a-steps-v"><sc-for list="{{b.items}}" as="x"><div class="card a-step"><span class="a-num">{{x.n}}</span><div><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></div></sc-for></div></div></sc-if>
+<sc-if value="{{b.isPhrases}}"><div class="card"><h3 class="h3 a-bt">{{b.title}}</h3><div class="list"><sc-for list="{{b.items}}" as="x"><div class="li a-phrase"><span class="a-say">✓ {{x.say}}</span><span class="a-avoid">✕ {{x.avoid}}</span><sc-if value="{{x.hasWhy}}"><span class="meta a-pwhy">{{x.why}}</span></sc-if></div></sc-for></div></div></sc-if>
+<sc-if value="{{b.isSituations}}"><div><h3 class="h3 a-bt">Если случилось…</h3><sc-for list="{{b.items}}" as="x"><details class="card a-sit"><summary class="h4">{{x.title}}</summary><div class="grid-2 a-sitbody"><div class="a-do"><b>Что делать</b><sc-for list="{{x.do}}" as="d"><p>{{d}}</p></sc-for></div><div class="a-dont"><b>Чего не делать</b><sc-for list="{{x.dont}}" as="d"><p>{{d}}</p></sc-for></div></div></details></sc-for></div></sc-if>
+<sc-if value="{{b.isPillars}}"><div class="grid-2 a-pillars"><sc-for list="{{b.items}}" as="x"><div class="{{x.cls}}"><h3 class="h3">{{x.title}}</h3><p>{{x.text}}</p><p class="eyebrow">На занятии это значит</p><sc-for list="{{x.items}}" as="i"><p class="a-pi">{{i}}</p></sc-for><p class="meta a-from">Из кодекса: {{x.from}}</p></div></sc-for></div></sc-if>
+<sc-if value="{{b.isCheck}}"><div><h3 class="h3 a-bt">{{b.title}}</h3><p class="meta">{{b.intro}}</p><sc-for list="{{b.items}}" as="x"><details class="card a-sit"><summary class="h4">{{x.q}}</summary><p>{{x.a}}</p><p class="meta">{{x.p}}</p></details></sc-for></div></sc-if>
+<sc-if value="{{b.isVideo}}"><figure class="a-video"><div class="a-vbox"><span class="a-play" aria-hidden="true">▶</span><span>Видео скоро появится</span></div><figcaption><b>{{b.title}}</b> <span class="meta">{{b.duration}}</span></figcaption></figure></sc-if>
+<sc-if value="{{b.isCallout}}"><p class="{{b.cls}}">{{b.text}}</p></sc-if>
+<sc-if value="{{b.isMore}}"><details class="card-soft a-more"><summary class="h4">{{b.title}}</summary><div class="a-blocks">
+<sc-for list="{{b.blocks}}" as="c">
+<sc-if value="{{c.isList}}"><div class="list"><sc-for list="{{c.items}}" as="x"><div class="li a-li"><span class="a-dot" aria-hidden="true"></span><span class="grow">{{x.t}}</span></div></sc-for></div></sc-if>
+<sc-if value="{{c.isCards}}"><div class="grid-2 a-cards"><sc-for list="{{c.items}}" as="x"><div class="card"><h3 class="h4">{{x.t}}</h3><p class="meta">{{x.d}}</p></div></sc-for></div></sc-if>
+<sc-if value="{{c.isSteps}}"><div class="list"><sc-for list="{{c.items}}" as="x"><div class="li a-li"><span class="a-num a-num-o">{{x.n}}</span><span class="grow"><b>{{x.t}}.</b> {{x.d}}</span></div></sc-for></div></sc-if>
+<sc-if value="{{c.isPhrases}}"><div class="list"><sc-for list="{{c.items}}" as="x"><div class="li a-phrase"><span class="a-say">✓ {{x.say}}</span><span class="a-avoid">✕ {{x.avoid}}</span><sc-if value="{{x.hasWhy}}"><span class="meta a-pwhy">{{x.why}}</span></sc-if></div></sc-for></div></sc-if>
+</sc-for></div></details></sc-if>
+</sc-for></div>
+<div id="a-read-end"></div>
+<div class="actions a-nav"><sc-if value="{{hasPrev}}"><button class="btn btn-ghost btn-lg" onClick="{{prev}}">ICON_LEFT Назад</button></sc-if><span class="grow"></span><button class="{{doneCls}}" disabled="{{doneLocked}}" onClick="{{done}}">{{doneLabel}}</button></div>
+</sc-if>
+
+<sc-if value="{{isTest}}"><div class="row a-modnav"><button class="btn btn-ghost" onClick="{{toHub}}">ICON_LEFT Все шаги</button></div>
+<sc-if value="{{testIntro}}"><section class="card-hero"><p class="eyebrow">Последний шаг знакомства</p><h1 class="hero-title">{{testTitle}}</h1><p class="lead">{{testText}}</p><sc-if value="{{hasBest}}"><p class="lead">Лучший результат: <b>{{bestLine}}</b></p></sc-if><div class="actions"><button class="btn btn-dark btn-lg" onClick="{{start}}">{{startLabel}}</button><sc-if value="{{passed}}"><a class="btn btn-ghost" href="ApplicationStatus.dc.html">К записи на встречу</a></sc-if></div></section></sc-if>
+<sc-if value="{{testQuestion}}"><div class="row a-progress"><span class="eyebrow">Вопрос {{qNum}} из {{qTotal}}</span><div class="bar grow"><i style="{{qBar}}"></i></div></div><section class="card"><h2 class="h2">{{qText}}</h2><div class="a-answers"><sc-for list="{{qOpts}}" as="o"><button class="{{o.cls}}" disabled="{{o.locked}}" onClick="{{o.pick}}">{{o.text}}</button></sc-for></div><sc-if value="{{answered}}"><p class="{{explCls}}"><b>{{explHead}}</b> {{expl}}</p><div class="actions"><span class="grow"></span><button class="btn btn-primary btn-lg" onClick="{{nextQ}}">{{nextQLabel}}</button></div></sc-if></section></sc-if>
+<sc-if value="{{testResult}}"><section class="card-hero"><p class="eyebrow">Результат</p><h1 class="hero-title">{{scoreLine}}</h1><p class="lead">{{resultText}}</p><div class="actions"><sc-if value="{{resultPassed}}"><a class="btn btn-dark btn-lg" href="ApplicationStatus.dc.html">Выбрать время встречи</a></sc-if><button class="btn btn-ghost btn-lg" onClick="{{start}}">Пройти ещё раз</button></div></section>
+<sc-if value="{{hasWrong}}"><section class="section"><div class="section-head"><h2 class="h2">Разбор ошибок</h2></div><sc-for list="{{wrong}}" as="w"><div class="card a-wrong"><h3 class="h4">{{w.q}}</h3><p>Правильно: {{w.a}}</p><p class="meta">{{w.e}}</p></div></sc-for></section></sc-if></sc-if>
+</sc-if>

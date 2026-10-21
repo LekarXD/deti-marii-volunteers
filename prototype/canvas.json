@@ -21,18 +21,18 @@
     },
     "Apply.dc.html": {
       "x": 1520,
-      "y": 0,
+      "y": 17900,
       "w": 1440,
-      "h": 1240,
-      "title": "Кандидат: стать волонтёром",
+      "h": 2600,
+      "title": "Кандидат: анкета волонтёра",
       "expand": "fill",
       "is_interactive": true
     },
     "ApplicationStatus.dc.html": {
-      "x": 3040,
-      "y": 0,
+      "x": 4560,
+      "y": 17900,
       "w": 1440,
-      "h": 1520,
+      "h": 1700,
       "title": "Кандидат: моя заявка",
       "expand": "fill",
       "is_interactive": true
@@ -350,6 +350,15 @@
       "title": "Участие: от отклика до занятия",
       "expand": "fill",
       "is_interactive": true
+    },
+    "Onboarding.dc.html": {
+      "x": 3040,
+      "y": 17900,
+      "w": 1440,
+      "h": 2400,
+      "title": "Кандидат: знакомство с фондом",
+      "expand": "fill",
+      "is_interactive": true
     }
   },
   "order": [
@@ -390,7 +399,10 @@
     "Groups.dc.html",
     "Group.dc.html",
     "FirstShift.dc.html",
-    "Participation.dc.html"
+    "Participation.dc.html",
+    "Apply.dc.html",
+    "Onboarding.dc.html",
+    "ApplicationStatus.dc.html"
   ],
   "notes": {
     "row0": {

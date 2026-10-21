@@ -21,7 +21,13 @@ SCREENS = {
     'Group': ('Волонтёр: кто будет на занятии', 'volunteer', 1590),
     'FirstShift': ('Волонтёр: первый выход', 'volunteer', 1940),
     'Participation': ('Участие: от отклика до занятия', 'volunteer', 1320),
+    # Путь кандидата: тексты в prototype/content/, общая логика в candidate-store.js
+    'Apply': ('Кандидат: анкета волонтёра', 'candidate', 2600),
+    'Onboarding': ('Кандидат: знакомство с фондом', 'candidate', 2400),
+    'ApplicationStatus': ('Кандидат: моя заявка', 'candidate', 1700),
 }
+CONTENT = ROOT / 'prototype/content'
+CANDIDATE_HERE = {'Apply': 'applyHere', 'Onboarding': 'onbHere', 'ApplicationStatus': 'statusHere'}
 
 def subnav(role, current=''):
     links = [('Needs', 'Возможности'), ('Planning', 'Расписание'), ('Roles', 'Роли'), ('Participants', 'Участники'), ('Groups', 'Группы'), ('Reserve', 'Резерв')] if role == 'coordinator' else [('FirstShift', 'Первый выход'), ('FundCatalog', 'Направления фонда'), ('Group', 'Моя группа')]
@@ -49,6 +55,31 @@ for p in BASE.iterdir():
 helmet = (SRC/'helmet.html').read_text()
 css = (SRC/'extensions.css').read_text()
 for name,(title,role,height) in SCREENS.items():
+    if role == 'candidate':
+        head = (SRC/'candidate-header.html').read_text()
+        for screen,token in CANDIDATE_HERE.items():
+            head = head.replace('{{'+token+'}}', ' is-here" aria-current="page' if screen == name else '')
+        body = re.sub(r'<button(?![^>]*\btype=)', '<button type="button"', (SRC/f'{name}.body.html').read_text().replace('<!--FIELDS-->', (SRC/'form-fields.html').read_text()))
+        icons = dict(re.findall(r'^([\w-]+):\s*(<svg[^\n]+)', (ROOT/'materials/04-дизайн/прототип-до-фактуры/kit/icons.html').read_text(), re.M))
+        for token,key in [('PALETTE','palette'),('CALENDAR','calendar'),('RIGHT','chevron-right'),('LEFT','chevron-left')]:
+            body = body.replace('ICON_'+token, icons[key])
+        logic = (SRC/'demo-store.js').read_text() + '\n' + (CONTENT/'form.js').read_text() + '\n' + (CONTENT/'onboarding.js').read_text() + '\n' + (SRC/'candidate-store.js').read_text() + '\n' + (SRC/f'{name}.js').read_text()
+        h = helmet.replace('</style>', css + '\n' + (SRC/'candidate.css').read_text() + '\n</style>')
+        doc = f'''<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{title} — Опора</title><script src="./support.js"></script></head><body>
+<x-dc>
+{h}
+<div class="dm"><div class="shell">
+{head}
+{body}
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{{"$preview":{{"width":1440,"height":{height}}}}}'>
+{logic}
+</script></body></html>
+'''
+        (OUT/f'{name}.dc.html').write_text(doc)
+        continue
     head = (SRC/f'{role}-header.html').read_text()
     head = head.replace('{{meAvCls}}', 'avatar av-b' if role=='coordinator' else 'avatar av-o').replace('{{meInitials}}', 'ОЛ' if role=='coordinator' else 'АС').replace('{{meLabel}}', 'Ольга Лебедева, координатор' if role=='coordinator' else 'Анна Соколова, волонтёр')
     head = head.replace('class="is-active" aria-current="page" ', '')
@@ -79,10 +110,10 @@ for name,(title,role,height) in SCREENS.items():
 # Add a connected entry into the original map, without replacing its four role cards.
 p = OUT/'Main.dc.html'
 t = p.read_text()
-extension = '<section class="section"><div class="section-head"><h2 class="h2">Новые сценарии</h2></div><div class="grid-3">' + ''.join(f'<a class="card" href="{name}.dc.html"><h3 class="h3">{label}</h3></a>' for name,label in [('FirstShift','Первый выход'),('Needs','Возможности и подготовка'),('Planning','Расписание'),('Roles','Роли волонтёров'),('VolunteerRecord','Договорённости с волонтёром'),('Participants','Участники фонда'),('Groups','Группы и состав')]) + '</div></section>'
+extension = '<section class="section"><div class="section-head"><h2 class="h2">Новые сценарии</h2></div><div class="grid-3">' + ''.join(f'<a class="card" href="{name}.dc.html"><h3 class="h3">{label}</h3></a>' for name,label in [('Apply','Анкета волонтёра'),('Onboarding','Знакомство с фондом и тест'),('ApplicationStatus','Моя заявка и встреча с координатором'),('FirstShift','Первый выход'),('Needs','Возможности и подготовка'),('Planning','Расписание'),('Roles','Роли волонтёров'),('VolunteerRecord','Договорённости с волонтёром'),('Participants','Участники фонда'),('Groups','Группы и состав')]) + '</div></section>'
 t = t.replace('</div></div>\n</x-dc>', extension+'\n</div></div>\n</x-dc>')
 t = t.replace('class Component extends DCLogic', (SRC/'demo-store.js').read_text() + '\nclass Component extends DCLogic')
-t = t.replace('    return {\n      steps:', '    return {\n      demoReset:!!s.demoReset, resetDemo:()=>{["roles","role-directory","people","groups","reflection","schedule-v2","schedule-responses-v2"].forEach(k=>{try{sessionStorage.removeItem("opora-prototype-v1:"+k);}catch(_){}});this.setState({demoReset:true});},\n      steps:')
+t = t.replace('    return {\n      steps:', '    return {\n      demoReset:!!s.demoReset, resetDemo:()=>{["roles","role-directory","people","groups","reflection","schedule-v2","schedule-responses-v2","candidate","onboarding","apply-draft"].forEach(k=>{try{sessionStorage.removeItem("opora-prototype-v1:"+k);}catch(_){}});this.setState({demoReset:true});},\n      steps:')
 t = t.replace('<h2 class="h2">Новые сценарии</h2>', '<h2 class="h2">Новые сценарии</h2><button class="btn btn-ghost" onClick="{{resetDemo}}">Сбросить демо</button>')
 t = t.replace('</div></div>\n</x-dc>', '<sc-if value="{{demoReset}}"><p class="hint" role="status">Демо-данные сброшены</p></sc-if></div></div>\n</x-dc>')
 t=t.replace('"height":1670','"height":2450')
