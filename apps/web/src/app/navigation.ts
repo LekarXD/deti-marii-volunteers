@@ -13,8 +13,8 @@ export const candidatePrimaryNavigation=getCandidateNavigation(false).primary;
 export const candidateMoreNavigation=getCandidateNavigation(false).more;
 const allCoordinatorNavigation:NavigationGroup[]=[
  {label:'Волонтёры',icon:'users',links:[{label:'Кандидаты',to:'/fund/candidates'},{label:'Собеседования',to:'/fund/interviews'},{label:'Волонтёры',to:'/fund/volunteers'},{label:'Проверка контактов',to:'/fund/contacts/review'},{label:'Импорт контактов',to:'/fund/contacts/import'}]},
- {label:'Занятия',icon:'calendar',links:[{label:'Расписание',to:'/fund/schedule'},{label:'Возможности',to:'/fund/opportunities'},{label:'Отклики',to:'/fund/responses'},{label:'Роли',to:'/fund/roles'}]},
+ {label:'Занятия',icon:'calendar',links:[{label:'Расписание',to:'/fund/schedule'},{label:'Возможности',to:'/fund/opportunities'},{label:'Отклики',to:'/fund/responses'},{label:'Роли',to:'/fund/roles'},{label:'Вебинары',to:'/fund/webinars'},{label:'Записи уроков',to:'/fund/recordings'}]},
  {label:'Участники',icon:'heart',links:[{label:'Участники',to:'/fund/participants'},{label:'Группы',to:'/fund/groups'}]},
- {label:'Ещё',icon:'settings',links:[{label:'Сообщения',to:'/fund/messages'},{label:'Уведомления',to:'/fund/notifications'},{label:'Обучение',to:'/fund/learning'},{label:'База знаний',to:'/fund/knowledge'},{label:'Сценарии тренажёра',to:'/fund/scenarios'},{label:'Разбор попыток',to:'/fund/simulator/review'},{label:'Сигналы',to:'/fund/signals'},{label:'Отчёты',to:'/fund/reports'},{label:'Настройки',to:'/fund/settings'}]},
+ {label:'Ещё',icon:'settings',links:[{label:'Сообщения',to:'/fund/messages'},{label:'Уведомления',to:'/fund/notifications'},{label:'Обучение',to:'/fund/learning'},{label:'База знаний',to:'/fund/knowledge'},{label:'Сценарии тренажёра',to:'/fund/scenarios'},{label:'Разбор попыток',to:'/fund/simulator/review'},{label:'Сигналы',to:'/fund/signals'},{label:'Отчёты',to:'/fund/reports'},{label:'Настройки',to:'/fund/admin'}]},
 ];
 export const coordinatorNavigation=allCoordinatorNavigation.map(group=>({...group,links:group.links.filter(link=>enabledDestinations.has(link.to))})).filter(group=>group.links.length>0);

@@ -15,6 +15,7 @@ const notification=(name:string)=>page(()=>import('../features/notifications'),n
 const simulator=(name:string)=>page(()=>import('../features/simulator'),name);
 const followup=(name:string)=>page(()=>import('../features/followups'),name);
 const crm=(name:string)=>page(()=>import('../features/crm'),name);
+const recording=(name:string)=>page(()=>import('../features/lesson-recording'),name);
 const messages=(name:string)=>page(()=>import('../features/messaging'),name);
 function StaffBoundary(){const {session}=useSession();const location=useLocation();return session?.is_staff?<Outlet/>:<Navigate to={'/login?next='+encodeURIComponent(location.pathname+location.search)} replace/>;}
 async function staffWebinars(){const {WebinarsPage}=await import('../features/studio');return {Component:()=> <WebinarsPage staff/>};}
@@ -73,6 +74,8 @@ export const router=createBrowserRouter([{
    {path:'messages',lazy:messages('CoordinatorMessagesPage')},
    {path:'profile-review',lazy:profile('ProfileReviewPage')},
    {path:'webinars',lazy:staffWebinars},
+   {path:'recordings',lazy:recording('RecordingProjectsPage')},
+   {path:'recordings/:id',lazy:recording('RecordingProjectPage')},
    {path:'notifications',lazy:notification('NotificationAdminPage')},
    {path:'scenarios',lazy:simulator('ScenariosPage')},
    {path:'simulator/review',lazy:simulator('SimulatorReviewPage')},
