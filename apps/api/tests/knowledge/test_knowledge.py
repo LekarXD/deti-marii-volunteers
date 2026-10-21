@@ -18,7 +18,7 @@ from app.core.errors import install_error_handlers
 from app.core.models import Foundation,User,StaffMembership,PermissionGrant,RegistrationSession,Session,Job,OutboxMessage
 from app.modules.learning import models as learning_models
 from app.modules.messaging import models as messaging_models
-from app.modules.knowledge.models import KnowledgeQuestion,KnowledgeSource
+from app.modules.knowledge.models import KnowledgeQuestion,KnowledgeSource,SourceVersion
 from app.modules.knowledge.router import router
 from app.modules.knowledge.jobs import index_source,generate_ai
 from app.integrations.ai.models import AIRun,AISettings,AIDailyUsage
@@ -321,11 +321,31 @@ async def test_explicit_introduction_import_reuses_exact_published_content(setup
     from app.modules.knowledge.seed import seed_knowledge
     client,factory,foundation=setup
     async with factory() as db:
-        await seed_introduction(db,foundation)
+        await seed_introduction(db,foundation,source_version=1)
         assert await seed_knowledge(db,foundation)==4
         assert await seed_knowledge(db,foundation)==0
         await db.commit()
     for _ in range(4):await process_index(factory,foundation)
+    async with factory() as db:
+        originals=(await db.scalars(select(KnowledgeSource).where(KnowledgeSource.foundation_id==foundation))).all()
+        snapshots={source.id:(source.current_version_id,(await db.get(SourceVersion,source.current_version_id)).body) for source in originals}
+        edited,archived=[source for source in originals if source.title!='История фонда'][:2]
+        edited.draft_body='Coordinator private draft must survive';edited.draft_version+=1
+        archived.archived=True
+        await seed_introduction(db,foundation)
+        assert await seed_knowledge(db,foundation)==2
+        assert await seed_knowledge(db,foundation)==0
+        for source in originals:
+            previous_id,previous_body=snapshots[source.id]
+            assert (await db.get(SourceVersion,previous_id)).body==previous_body
+            if source.id in (edited.id,archived.id):assert source.current_version_id==previous_id
+            else:
+                assert source.current_version_id!=previous_id
+                assert (await db.get(SourceVersion,source.current_version_id)).number==2
+                assert source.draft_body==(await db.get(SourceVersion,source.current_version_id)).body
+                assert 'correct_option' not in source.draft_body
+        await db.commit()
+    for _ in range(2):await process_index(factory,foundation)
     client.cookies.set('opora_session','one'+str(foundation))
     hits=(await client.get('/api/v1/knowledge/search',params={'q':'Мария Елисеева'})).json()
     assert hits and any('1993' in item['text'] for item in hits)

@@ -57,6 +57,7 @@ class AttemptView(BaseModel):
 
 class LessonSummary(BaseModel):
     id: UUID
+    mode: str = "feed"
     lesson_id: UUID
     key: str
     title: str
@@ -66,6 +67,9 @@ class LessonSummary(BaseModel):
 
 class AssignmentView(BaseModel):
     id: UUID
+    source_revision: str | None = None
+    source_hash: str | None = None
+    change_note: str = ""
     track_id: UUID
     track_key: str
     release_id: UUID
@@ -89,6 +93,7 @@ class PreparationView(BaseModel):
 
 class LessonView(BaseModel):
     id: UUID
+    mode: str = "feed"
     title: str
     minutes: int
     blocks: list[dict[str, Any]]

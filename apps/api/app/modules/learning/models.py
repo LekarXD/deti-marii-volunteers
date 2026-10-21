@@ -38,6 +38,9 @@ class LearningRelease(Base):
     assessment_version_id: Mapped[UUID | None] = mapped_column(nullable=True)
     reacknowledgement_required: Mapped[bool] = mapped_column(Boolean, default=False)
     changed_required_items: Mapped[list] = mapped_column(JSONB, default=list)
+    source_revision: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    source_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    change_note: Mapped[str] = mapped_column(String(3000), default="", server_default="")
     published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -62,6 +65,7 @@ class LessonVersion(Base):
     title: Mapped[str] = mapped_column(String(300))
     minutes: Mapped[int] = mapped_column(Integer, default=0)
     source: Mapped[str] = mapped_column(String(3000), default="")
+    presentation_mode: Mapped[str] = mapped_column(String(20), default="feed", server_default="feed")
     published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -105,6 +109,7 @@ class AssessmentVersion(Base):
     foundation_id: Mapped[UUID] = mapped_column(ForeignKey("foundations.id"), index=True)
     title: Mapped[str] = mapped_column(String(300))
     intro: Mapped[str] = mapped_column(String(3000), default="")
+    allow_repeat: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
     published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

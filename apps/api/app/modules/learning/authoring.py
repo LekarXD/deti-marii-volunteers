@@ -302,7 +302,8 @@ async def publish_lesson_version(db, principal, lesson_id, expected_draft_versio
     if not validation["valid"]:
         raise ApiError(422, "lesson_invalid", "Материал не прошёл проверку", field_errors={"blocks": validation["errors"]})
     number = (await db.scalar(select(func.max(LessonVersion.number)).where(LessonVersion.lesson_id == value.id)) or 0) + 1
-    version = LessonVersion(lesson_id=value.id, number=number, title=draft.title, minutes=draft.minutes, source=draft.source)
+    previous = await db.get(LessonVersion, value.current_version_id) if value.current_version_id else None
+    version = LessonVersion(lesson_id=value.id, number=number, title=draft.title, minutes=draft.minutes, source=draft.source, presentation_mode=previous.presentation_mode if previous else "feed")
     db.add(version)
     await db.flush()
     for position, block in enumerate(draft.blocks):
@@ -349,7 +350,8 @@ async def publish_release(db, principal, track_id, body):
         errors = question_errors(assessment.questions)
         if errors:
             raise ApiError(422, "assessment_invalid", "Проверьте вопросы", field_errors={"questions":errors})
-        version = AssessmentVersion(foundation_id=principal.foundation_id, title=assessment.title, intro=assessment.intro)
+        previous_assessment = await db.get(AssessmentVersion, assessment_id) if assessment_id else None
+        version = AssessmentVersion(foundation_id=principal.foundation_id, title=assessment.title, intro=assessment.intro, allow_repeat=previous_assessment.allow_repeat if previous_assessment else parent.key != "introduction")
         db.add(version)
         await db.flush()
         assessment_id = version.id

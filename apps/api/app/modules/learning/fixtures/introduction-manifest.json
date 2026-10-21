@@ -1,0 +1,19 @@
+{
+  "current": 2,
+  "versions": {
+    "1": {
+      "revision": "7d07222cc46dbceb76306c91a31ba5ed8dc08d07",
+      "source_path": "prototype/content/onboarding.js",
+      "source_sha256": "c961658e2d208343687fdcdebacd6ddb78d3a83576cdfdd16fa24da32ff96f5f",
+      "fixture_file": "introduction.json",
+      "fixture_sha256": "83546d4697751ea4ef247351a482c3860428537372f0272a27cede2ad83451c1"
+    },
+    "2": {
+      "revision": "62fd0a11fdf019893d4202d78dca4132076080d7",
+      "source_path": "prototype/content/onboarding.js",
+      "source_sha256": "8637c856ebab6aa8a01b5a007fe9c47f07d4f83edf7938697934de59c00516c9",
+      "fixture_file": "introduction-aram-62fd0a1.json",
+      "fixture_sha256": "fa257862f49cd150018d03f284a62c06f35c4abb62ce1876d5614b834df57613"
+    }
+  }
+}

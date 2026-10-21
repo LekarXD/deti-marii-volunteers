@@ -52,9 +52,9 @@ async def preparation(db: AsyncSession, principal: Principal):
         for version_id in release.lesson_version_ids:
             version = await db.get(LessonVersion, UUID(version_id))
             lesson = await db.get(Lesson, version.lesson_id)
-            lessons.append(dict(id=version.id, lesson_id=lesson.id, key=lesson.key, title=version.title, minutes=version.minutes, completed=version.id in completed_versions))
+            lessons.append(dict(id=version.id, mode=version.presentation_mode, lesson_id=lesson.id, key=lesson.key, title=version.title, minutes=version.minutes, completed=version.id in completed_versions))
         latest = await db.scalar(select(AssessmentAttempt).where(AssessmentAttempt.assignment_id == item.id).order_by(AssessmentAttempt.started_at.desc(), AssessmentAttempt.id.desc()).limit(1))
-        views.append(dict(id=item.id, track_id=track.id, track_key=track.key, release_id=release.id, release_number=release.number, title=release.title, intro=release.intro, lessons=lessons, assessment_version_id=release.assessment_version_id, completed=item.completed_at is not None, acknowledged=item.acknowledged_at is not None, latest_attempt_id=latest.id if latest else None, latest_attempt_state=("submitted" if latest.submitted_at else "active") if latest else None, reacknowledgement_required=release.reacknowledgement_required))
+        views.append(dict(id=item.id, source_revision=release.source_revision, source_hash=release.source_hash, change_note=release.change_note, track_id=track.id, track_key=track.key, release_id=release.id, release_number=release.number, title=release.title, intro=release.intro, lessons=lessons, assessment_version_id=release.assessment_version_id, completed=item.completed_at is not None, acknowledged=item.acknowledged_at is not None, latest_attempt_id=latest.id if latest else None, latest_attempt_state=("submitted" if latest.submitted_at else "active") if latest else None, reacknowledgement_required=release.reacknowledgement_required))
     return dict(assignments=views, introduction_completed=introduction_completed, booking_requires_introduction=False)
 
 
@@ -71,7 +71,7 @@ async def lesson_view(db: AsyncSession, principal: Principal, version_id: UUID):
         raise ApiError(404, "lesson_not_found", "Материал не найден")
     version = await db.get(LessonVersion, version_id)
     blocks = (await db.scalars(select(LessonBlock).where(LessonBlock.lesson_version_id == version_id).order_by(LessonBlock.position))).all()
-    return dict(id=version.id, title=version.title, minutes=version.minutes, blocks=[learner_block(block) for block in blocks])
+    return dict(id=version.id, mode=version.presentation_mode, title=version.title, minutes=version.minutes, blocks=[learner_block(block) for block in blocks])
 
 
 async def mini_quiz(db: AsyncSession, principal: Principal, version_id: UUID, block_id: UUID, question_index: int, selected_option: int):
@@ -144,6 +144,11 @@ async def start_attempt(db: AsyncSession, principal: Principal, version_id: UUID
         raise ApiError(404, "assessment_not_found", "Тест не найден")
     active = await db.scalar(select(AssessmentAttempt).where(AssessmentAttempt.assignment_id == item.id, AssessmentAttempt.submitted_at.is_(None)))
     if active is None:
+        version = await db.get(AssessmentVersion, version_id)
+        if not version.allow_repeat:
+            submitted = await db.scalar(select(AssessmentAttempt.id).where(AssessmentAttempt.assignment_id == item.id, AssessmentAttempt.submitted_at.is_not(None)).limit(1))
+            if submitted:
+                raise ApiError(409, "repeat_not_available", "Тест этой версии уже завершён")
         active = AssessmentAttempt(assignment_id=item.id, assessment_version_id=version_id)
         db.add(active)
         await db.flush()

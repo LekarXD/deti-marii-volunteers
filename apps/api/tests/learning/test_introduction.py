@@ -33,7 +33,7 @@ async def setup():
     async with factory() as db:
         db.add(Foundation(id=foundation_id, name='Learning integration fixture'))
         await db.flush()
-        await seed_introduction(db, foundation_id)
+        await seed_introduction(db, foundation_id, source_version=1)
         for token in ['one', 'two']:
             registration = RegistrationSession(foundation_id=foundation_id, expires_at=datetime.now(timezone.utc)+timedelta(days=1))
             db.add(registration)
@@ -337,3 +337,55 @@ async def test_private_ready_recording_cannot_bypass_missing_publication_guard(s
         assert (await db.get(Lesson,lesson_id)).current_version_id==old_pointer
         assert (await db.get(LearningTrack,UUID(original['track_id']))).current_release_id==UUID(original['release_id'])
         assert await db.scalar(select(func.count()).select_from(LessonVersion).where(LessonVersion.lesson_id==lesson_id))==count
+
+
+@pytest.mark.asyncio
+async def test_updated_source_is_append_only_preserves_completion_and_disables_new_repeat(setup):
+    from app.modules.learning.models import LessonBlock, LessonVersion, AssessmentVersion
+    from app.modules.learning.seed import fixture_id, manifest, source_content
+    client,factory,foundation_id=setup
+    old=(await client.get('/api/v1/me/preparation')).json()['assignments'][0]
+    old_detail=(await client.get(f"/api/v1/learning/lessons/{old['lessons'][0]['id']}")).json()
+    old_attempt=(await post(client,f"/assessments/{old['assessment_version_id']}/attempts",{'assignment_id':old['id']})).json()
+    async def finish(attempt):
+        for question in attempt['questions']:
+            response=await post(client,f"/assessment-attempts/{attempt['id']}/answers",{'question_id':question['id'],'selected_option':0})
+            assert response.status_code==200,response.text
+        result=await post(client,f"/assessment-attempts/{attempt['id']}/submit")
+        assert result.status_code==200,result.text
+        return result.json()
+    old_result=await finish(old_attempt)
+    for lesson in old['lessons']:
+        await post(client,f"/learning/progress/{lesson['id']}/complete",{'assignment_id':old['id']})
+    await post(client,'/policy-acknowledgements',{'assignment_id':old['id']})
+    async with factory() as db:
+        await seed_introduction(db,foundation_id)
+        await seed_introduction(db,foundation_id) # idempotent, never third release
+        await db.commit()
+        releases=(await db.scalars(select(LearningRelease).where(LearningRelease.foundation_id==foundation_id))).all()
+        assert len(releases)==2
+        assert (await db.get(AssessmentVersion,UUID(old['assessment_version_id']))).allow_repeat is True
+    prep=(await client.get('/api/v1/me/preparation')).json()
+    assert prep['introduction_completed'] is True and prep['booking_requires_introduction'] is False
+    current,previous=prep['assignments']
+    assert previous['id']==old['id'] and previous['completed'] is True
+    assert current['completed'] is False and current['reacknowledgement_required'] is False
+    assert current['source_revision']==manifest()['versions']['2']['revision']
+    assert current['source_hash']==manifest()['versions']['2']['source_sha256']
+    assert current['change_note'] and [l['mode'] for l in current['lessons']]==['cards','feed','cards','feed']
+    assert len(current['lessons'])==4 and len(source_content()['test']['questions'])==10
+    for index,lesson in enumerate(current['lessons']):
+        detail=(await client.get(f"/api/v1/learning/lessons/{lesson['id']}")).json()
+        assert len(detail['blocks'])==[4,4,3,5][index]
+        assert detail['mode']==lesson['mode'] and 'correct_option' not in str(detail)
+    assert (await client.get(f"/api/v1/learning/lessons/{old['lessons'][0]['id']}")).json()==old_detail
+    assert (await client.get(f"/api/v1/assessment-attempts/{old_attempt['id']}/result")).json()==old_result
+    new_attempt=(await post(client,f"/assessments/{current['assessment_version_id']}/attempts",{'assignment_id':current['id']})).json()
+    assert len(new_attempt['questions'])==10 and new_attempt['score'] is None
+    new_result=await finish(new_attempt)
+    denied=await post(client,f"/assessments/{current['assessment_version_id']}/attempts",{'assignment_id':current['id']})
+    assert denied.status_code==409 and denied.json()['code']=='repeat_not_available'
+    assert (await client.get(f"/api/v1/assessment-attempts/{new_attempt['id']}/result")).json()==new_result
+    # Historical policy remains intact even after the new source is current.
+    legacy_repeat=await post(client,f"/assessments/{old['assessment_version_id']}/attempts",{'assignment_id':old['id']})
+    assert legacy_repeat.status_code==200 and legacy_repeat.json()['score'] is None
