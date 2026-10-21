@@ -1,0 +1,101 @@
+/* Opora source: Volunteers table, VolunteerRecord agreement form, Reserve hero. */
+.crm-page{min-width:0;color:var(--ink);font-size:16px}
+.crm-page .tag{font-size:15px}
+.crm-page small{display:block;font-size:15px;line-height:1.45;color:var(--mute)}
+.crm-page p{white-space:pre-wrap;overflow-wrap:anywhere}
+.crm-page .h2,.crm-page .h3{margin:0 0 18px}
+.crm-page .head .h1{margin:0}
+.crm-page .head>.row{flex:1 1 560px;min-width:0}
+.crm-page .head .row .h1{min-width:0}
+.crm-page .field+.field,.crm-page .combobox+.field,.crm-page .field+.combobox,.crm-page .combobox+.combobox{margin-top:20px}
+.crm-page .modal-body>.field,.crm-page .modal-body>.combobox{margin-top:20px}
+.crm-filters{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-bottom:24px}
+.crm-filters>.input{max-width:420px}
+.crm-search{position:relative;flex:0 1 400px;min-width:240px}
+.crm-search>.ic{position:absolute;left:17px;top:16px;color:var(--mute);pointer-events:none}
+.crm-search .input{padding-left:50px;border-color:transparent;border-radius:999px}
+.crm-directory.card{padding:12px 24px 20px}
+.crm-directory-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.2fr);align-items:center;gap:20px;padding:20px 12px;border-top:1px solid var(--line);font-size:16px;line-height:1.45;color:var(--ink-2)!important;text-decoration:none!important}
+.crm-directory-row:hover{background:var(--soft)}
+.crm-directory-head{font-size:15px;color:var(--mute)!important;border-top:0;padding-top:8px}
+.crm-person{display:flex;align-items:center;gap:14px;min-width:0;font-size:17px;color:var(--ink)}
+.crm-person .avatar{flex-shrink:0}
+.crm-no-contact{color:var(--red-ink)!important;margin-top:6px}
+.crm-status,.crm-status-ready{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:var(--ink-2)}
+.crm-status:before,.crm-status-ready:before{content:'';width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:var(--quiet)}
+.crm-status-ready:before{background:var(--green)}
+.crm-pagination{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:12px;margin-top:20px}
+.crm-pagination>.meta{margin-right:auto}
+.crm-section{margin-top:28px}
+.crm-next.card-hero{display:flex;flex-wrap:wrap;align-items:center;gap:20px;justify-content:space-between;padding:32px 36px}
+.crm-next .h2{font-size:36px;letter-spacing:-.03em;margin:0}
+.crm-next .meta{margin:0 0 12px;color:var(--ink-2)}
+.crm-next .actions{margin:0;max-width:320px}
+.crm-optout{display:flex;align-items:flex-start;gap:14px;padding:20px 24px;border-radius:24px;background:var(--red-tint);color:var(--red-ink);margin-top:24px}
+.crm-optout p{margin:0}
+.crm-tab-body{margin-top:20px}
+.crm-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 20px}
+.crm-form-grid>.field,.crm-form-grid>.combobox{margin:0!important;min-width:0}
+.crm-wide{grid-column:1/-1}
+.crm-verification{border-top:1px solid var(--line);margin-top:28px;padding-top:24px}
+.crm-history{margin-top:24px}
+.crm-history-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;padding:18px 0;border-top:1px solid var(--line)}
+.crm-history-row:first-child{border-top:0}
+.crm-history-row>div{flex:1 1 300px;min-width:0}
+.crm-history-row p{margin:0 0 6px}
+.crm-contacts{display:grid;gap:12px;margin:0 0 28px}
+.crm-contacts>div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px}
+.crm-contacts dt{color:var(--mute);font-size:15px}
+.crm-contacts dd{margin:0;overflow-wrap:anywhere}
+.crm-checkbox{display:flex;gap:12px;align-items:flex-start;margin:24px 0;font-size:16px;color:var(--ink)}
+.crm-checkbox input{width:20px;height:20px;flex:0 0 20px;margin:2px 0 0;accent-color:var(--ink)}
+.crm-error{padding:16px;border-radius:18px;background:var(--red-tint);color:var(--red-ink);font-size:15px;margin:20px 0 0}
+.crm-success{padding:18px 22px;border-radius:22px;background:var(--green-tint);color:var(--green-ink)}
+.crm-reserve-hero{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px}
+.crm-reserve-hero>div{flex:1 1 600px;min-width:0}
+.crm-reserve-hero .hero-title{font-size:44px;font-weight:600;line-height:1.05;letter-spacing:-.03em;margin:0}
+.crm-reserve-row{display:flex;align-items:center;gap:20px;width:100%;background:transparent;border:0;border-top:1px solid var(--line);padding:22px 0;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.crm-reserve-row:first-child{border-top:0}
+.crm-reserve-row .avatar{width:60px;height:60px;flex-basis:60px;font-size:20px}
+.crm-reserve-row .h3{display:block;margin:0 0 6px}
+.crm-reserve-row .meta{display:block}
+.crm-back{display:inline-flex;align-items:center;gap:8px;font-size:16px;margin-bottom:24px;color:var(--ink-2)!important}
+.crm-import-mapping{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 20px;margin-top:24px}
+.crm-import-mapping>.field,.crm-import-mapping>.combobox{margin:0!important;min-width:0}
+.crm-import-counts{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}
+.crm-import-counts .tag{height:auto;min-height:30px;white-space:normal;font-size:15px}
+.crm-import-table-wrap{overflow:auto;max-height:560px;border:1px solid var(--line);border-radius:18px;overscroll-behavior:contain}
+.crm-import-table{border-collapse:collapse;width:100%;font-size:15px;text-align:left}
+.crm-import-table th{position:sticky;top:0;background:var(--soft);font-weight:600}
+.crm-import-table th,.crm-import-table td{padding:14px;border-bottom:1px solid var(--line);vertical-align:top;min-width:90px;overflow-wrap:anywhere}
+.crm-import-table td:last-child{min-width:240px}
+.crm-row-error{color:var(--red-ink);margin:0 0 8px}
+.crm-row-resolution{background:var(--soft);border-radius:24px;padding:24px;margin-top:24px}
+.crm-row-resolution>.field,.crm-row-resolution>.combobox{margin-top:20px}
+.crm-checksum{display:block;word-break:break-all;font-size:15px}
+.crm-import-batch-row{display:flex;align-items:center;gap:20px;width:100%;padding:18px 0;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.crm-import-batch-row:first-child{border-top:0}
+.crm-import-batch-row>span:first-child{flex:1;min-width:0}
+@media(max-width:1000px){.crm-directory-row{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1.2fr)}.crm-directory-row>span:nth-child(2){display:none}}
+@media(max-width:720px){
+ .crm-search{min-width:0;width:100%;flex-basis:100%}
+ .crm-directory.card{padding:4px 16px 16px}
+ .crm-directory-head{display:none}
+ .crm-directory-row{grid-template-columns:minmax(0,1fr);gap:10px;padding:20px 0}
+ .crm-directory-row>span:nth-child(3),.crm-directory-row>span:nth-child(4){margin-left:58px}
+ .crm-person{font-size:18px}
+ .crm-next.card-hero{padding:28px 24px;border-radius:28px}
+ .crm-next .h2{font-size:30px}
+ .crm-next .actions{max-width:none}
+ .crm-form-grid,.crm-import-mapping{grid-template-columns:minmax(0,1fr)}
+ .crm-reserve-hero .hero-title{font-size:36px}
+ .crm-reserve-hero .hero-art{display:none}
+ .crm-reserve-row{gap:12px;align-items:flex-start}
+ .crm-reserve-row .avatar{width:48px;height:48px;flex-basis:48px;font-size:18px}
+ .crm-reserve-row>span:nth-last-child(2){display:none}
+ .crm-reserve-row>.ic{margin-top:14px}
+ .crm-contacts>div{grid-template-columns:minmax(0,1fr);gap:4px}
+ .crm-row-resolution{padding:20px 16px}
+ .crm-import-batch-row{gap:12px;flex-wrap:wrap}
+ .crm-import-batch-row>span:first-child{flex-basis:100%}
+}
