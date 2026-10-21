@@ -6,10 +6,11 @@ Final acceptance must record the integrator's final commit and runtime release.
 
 ## Verified
 
-- External HTTP G1: all 12 then-current cases passed against an actual localhost
-  API on port 8002 with PostgreSQL 16.14 (`opora_qa_g1_v2`). Two subsequently added
-  cases also passed independently: verified login claims only its registration,
-  and a migrated global assignment reservation blocks interview booking atomically.
+- External HTTP G1: all 14 cases passed together, with zero skipped, in 6.07
+  seconds through the actual `run-g1.sh` lifecycle (CLI seed, API startup, tests,
+  API stop, temporary-secret cleanup). It used fresh `opora_qa_http_test` on the
+  separate QA PostgreSQL 16.14 cluster, API port 8002. This includes verified login
+  claiming only its registration and global assignment busy conflicts.
 - The flows cover both questionnaire → booking → learning and questionnaire →
   completed learning → booking. Four published modules, ten questions, server
   score 4/10 for all-zero answers, repeat attempt history, acknowledgement without
@@ -25,6 +26,10 @@ Final acceptance must record the integrator's final commit and runtime release.
 - Empty migration to head and upgrade of the populated G1 database passed;
   `alembic check` reports no new upgrade operations after migration
   `30b4f832ef68`. The prior head was `b3566c48dbbb`.
+- The complete backend/contract aggregate passed 43 checks with zero skipped after
+  collecting all `apps/api`, including candidate tests nested under their module.
+  Its four domain database opt-ins were set, separately from the core and HTTP G1
+  databases. The no-skip plugin was enabled.
 - A separate QA PostgreSQL cluster was initialized at
   `/private/tmp/opora-qa-pg-data`, loopback port 56148, with private Unix socket.
   It is separate from the integrator's cluster on port 56147. Existing domain
@@ -53,7 +58,9 @@ Final acceptance must record the integrator's final commit and runtime release.
    one interview global-ledger test failed because ORM `create_all` omitted the
    exclusion constraint supplied by the migration. The actual migrated HTTP
    global-ledger check passed. The platform owner supplied metadata parity fix
-   `1291819`; aggregate confirmation after integration is tracked by the integrator.
+   `1291819`; the complete aggregate after integration passed: 43 tests, zero
+   skipped, in 7.62 seconds on the separate QA cluster. This includes nested
+   candidate tests, calendar, messaging and delivery tests present at that point.
 
 ## Proof boundaries
 

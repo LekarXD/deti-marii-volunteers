@@ -3,7 +3,8 @@
 set -eu
 cd "$(dirname "$0")/../.."
 : "${OPORA_DATABASE_URL:?set the disposable G1 PostgreSQL URL}"
-export PYTHONPATH="$PWD/apps/api${PYTHONPATH:+:$PYTHONPATH}"
+api_dir="${OPORA_G1_API_DIR:-$PWD/apps/api}"
+export PYTHONPATH="$api_dir${PYTHONPATH:+:$PYTHONPATH}"
 export OPORA_G1_BASE_URL="${OPORA_G1_BASE_URL:-http://127.0.0.1:8001}"
 export OPORA_G1_ORIGIN="${OPORA_G1_ORIGIN:-http://127.0.0.1:5174}"
 export OPORA_TRUSTED_ORIGINS='["http://127.0.0.1:5174","http://localhost:5174","http://testserver"]'
@@ -17,13 +18,13 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 if [ ! -s "$OPORA_G1_FIXTURE_FILE" ]; then
   umask 077
-  (cd apps/api && python3 -m app.cli fixtures g1 --json) > "$OPORA_G1_FIXTURE_FILE"
+  (cd "$api_dir" && python3 -m app.cli fixtures g1 --json) > "$OPORA_G1_FIXTURE_FILE"
   chmod 600 "$OPORA_G1_FIXTURE_FILE"
   fixture_created=1
 fi
 python3 -c 'import json,os; d=json.load(open(os.environ["OPORA_G1_FIXTURE_FILE"])); assert d["identities"]["coordinator@example.test"].get("totp_secret"), "Fresh G1 DB or original private fixture required"'
 api_port=$(python3 -c 'import os,urllib.parse; print(urllib.parse.urlparse(os.environ["OPORA_G1_BASE_URL"]).port or 8001)')
-(cd apps/api && exec python3 -m uvicorn app.main:app --host 127.0.0.1 --port "$api_port" --no-access-log) > /tmp/opora-g1-api.log 2>&1 &
+(cd "$api_dir" && exec python3 -m uvicorn app.main:app --host 127.0.0.1 --port "$api_port" --no-access-log) > /tmp/opora-g1-api.log 2>&1 &
 api_pid=$!
 python3 - <<'PY'
 import os,time,urllib.request
@@ -38,4 +39,4 @@ else:
     raise SystemExit('G1 API readiness failed; inspect /tmp/opora-g1-api.log locally')
 PY
 kill -0 "$api_pid" 2>/dev/null || { echo "The G1 API process exited before acceptance; inspect /tmp/opora-g1-api.log" >&2; exit 1; }
-python3 -m pytest -p infra.pytest_gate -c apps/api/pyproject.toml tests/e2e -q
+python3 -m pytest -p infra.pytest_gate -c "$api_dir/pyproject.toml" tests/e2e -q
