@@ -36,9 +36,9 @@ class Component extends DCLogic {
   return v;}
  renderVals(){const s=this.state,pr=s.pr,mods=ONB.modules,T=ONB.test,N=T.questions.length,cur=this.current(),total=mods.length+1;
   const m=cur.test?null:mods[cur.i],stepN=cur.test?total:cur.i+1,unlocked=!!m&&(pr.done[m.id]||s.read[m.id]),nxt=m?mods[cur.i+1]:null;
-  const run=s.run,inQ=!!run&&run.i<N,showRes=cur.test&&(pr.testDone||(!!run&&run.i>=N)),q=inQ?T.questions[run.i]:null,ans=inQ?run.answers[run.i]:null,answered=ans!=null,ok=answered&&ans===q.a;
-  const score=pr.testDone?pr.score:(run?run.answers.filter((a,k)=>a===T.questions[k].a).length:0);
-  return {stepLabel:'Знакомство с фондом · шаг '+stepN+' из '+total,
+  const run=s.run,inQ=!!run&&run.i<N,showRes=cur.test&&((!run&&pr.testDone)||(!!run&&run.i>=N)),q=inQ?T.questions[run.i]:null,ans=inQ?run.answers[run.i]:null,answered=ans!=null,ok=answered&&ans===q.a;
+  const score=run?run.answers.filter((a,k)=>a===T.questions[k].a).length:pr.score;
+  return {candidateUnlocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status==='completed',candidateLocked:interviewCurrent(interviewRead(),interviewIdentity(s.me))?.status!=='completed',candidateSection:'Знакомство',candidateName:fullName(s.me),candidateInitials:fullName(s.me).split(/\s+/).map(x=>x[0]).slice(0,2).join(''),repeatTest:()=>this.setState({run:{i:0,answers:[]}}),stepLabel:'Знакомство с фондом · шаг '+stepN+' из '+total,
    segs:Array.from({length:total},(_,k)=>({cls:k<stepN-1?'is-done':(k===stepN-1?'is-on':'')})),
    isModule:!!m,isTest:!!cur.test,modTitle:m?m.title:'',blocks:m?m.blocks.map((b,bi)=>this.blockView(b,cur.i,m.blocks.slice(0,bi).filter(x=>x.type==='icards').length+cur.i)):[],
    hasPrev:!!m&&cur.i>0,prev:()=>this.open(mods[cur.i-1].id),

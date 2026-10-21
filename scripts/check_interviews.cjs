@@ -1,16 +1,16 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
 const local=new Map(),candidateSession=new Map(),coordSession=new Map();
 const storage=map=>({getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)});
-function load(name,session=candidateSession){
+function load(name,session=candidateSession,search=''){
  const html=fs.readFileSync(path.resolve(__dirname,'../prototype',name+'.dc.html'),'utf8'),script=html.match(/<script type="text\/x-dc"[^>]*>([\s\S]*?)<\/script>/)[1];
  class DCLogic{constructor(p){this.props=p;}setState(p){this.state={...this.state,...p};}}
- const box={DCLogic,console,Date,URLSearchParams,location:{search:''},sessionStorage:storage(session),localStorage:storage(local),window:{scrollTo(){},addEventListener(){},removeEventListener(){}}};vm.createContext(box);
+ const box={DCLogic,console,Date,URLSearchParams,location:{search},sessionStorage:storage(session),localStorage:storage(local),window:{scrollTo(){},addEventListener(){},removeEventListener(){}}};vm.createContext(box);
  return {c:vm.runInContext(script+'\nnew Component({});',box),run:code=>vm.runInContext(code,box)};
 }
 // Registration publishes the real submitted answers into the coordinator registry.
-let a=load('Apply');assert.equal(a.run("birthdateInput('12051994')"),'1994-05-12');assert.equal(a.run("birthdateDisplay('1994-05-12')"),'12.05.1994');assert.ok(a.run("validateFields([{id:'birthdate',type:'date',required:true}],{birthdate:birthdateInput('31021994')}).birthdate"));a.c.renderVals().fillDemo();a.c.renderVals().next();assert.equal(a.run("location.href"),'ApplicationStatus.dc.html?welcome=1');
+let a=load('Apply');assert.equal(a.run("birthdateInput('12051994')"),'1994-05-12');assert.equal(a.run("birthdateDisplay('1994-05-12')"),'12.05.1994');assert.ok(a.run("validateFields([{id:'birthdate',type:'date',required:true}],{birthdate:birthdateInput('31021994')}).birthdate"));a.c.renderVals().fillDemo();a.c.renderVals().next();assert.equal(a.run("location.href"),'ApplicationStatus.dc.html');
 let coord=load('Interviews',coordSession);assert.ok(coord.c.renderVals().people.some(p=>p.name==='Анна Соколова'&&p.stage==='Новая анкета'));
-let status=load('ApplicationStatus');let free=status.c.renderVals().slotDays[0].slots[0];free.pick();status.c.renderVals().book();assert.ok(status.c.state.error.includes('Сначала'));
+let status=load('ApplicationStatus');let free=status.c.renderVals().slotDays[0].slots[0];free.pick();status.c.renderVals().book();assert.ok(status.c.renderVals().booked);status.c.renderVals().askCancel();status.c.renderVals().changeCancelReason({target:{value:'Проверка записи до знакомства'}});status.c.renderVals().cancelMeeting();assert.ok(!status.c.renderVals().booked);
 // Real module completion and test handlers update that same candidate.
 let onb=load('Onboarding'),mods=onb.run('ONB.modules.map(m=>m.id)');for(const id of mods){onb.c.open(id);onb.c.setState({read:{...onb.c.state.read,[id]:true}});onb.c.renderVals().done();}
 onb.c.renderVals().start();for(const answer of onb.run('ONB.test.questions.map(q=>q.a)')){onb.c.renderVals().qOpts[answer].pick();onb.c.renderVals().nextQ();}
@@ -36,6 +36,13 @@ status=load('ApplicationStatus');assert.ok(status.c.renderVals().booked);coord.c
 // Cancellation releases time; a candidate request is visible and can be resolved by the coordinator.
 second.c.renderVals().slotDays[0].slots[0].pick();second.c.renderVals().book();assert.ok(second.c.renderVals().booked);coord=load('Interviews',coordSession);coord.c.renderVals().bookings.find(b=>b.name==='Олег Тестовый').open();coord.c.renderVals().askCancel();coord.c.renderVals().changeCancelReason({target:{value:'Нужно согласовать другое время'}});coord.c.renderVals().confirmCancel();assert.ok(!load('ApplicationStatus',secondSession).c.renderVals().booked);
 second=load('ApplicationStatus',secondSession);second.c.renderVals().startRequest();second.c.renderVals().changeRequest({target:{value:'Могу в среду после 18'}});second.c.renderVals().sendRequest();coord=load('Interviews',coordSession);coord.c.renderVals().people.find(p=>p.name==='Олег Тестовый').pick();assert.ok(coord.c.renderVals().hasRequest);coord.c.renderVals().resolveRequest();assert.ok(!coord.c.renderVals().hasRequest);
+// Editing contact details keeps the same registry identity, progress and interview.
+const beforeEdit=load('ApplicationStatus').run("interviewCurrent(interviewRead(),interviewIdentity(loadCandidate())).id");
+const edit=load('Apply',candidateSession,'?edit=1');assert.ok(edit.c.state.edit);edit.c.update('email','anna.updated@example.com');for(let i=0;i<3;i++)edit.c.renderVals().next();assert.equal(edit.run('location.href'),'ApplicationStatus.dc.html?updated=1');
+const afterEdit=load('ApplicationStatus');assert.ok(afterEdit.run('interviewReady(interviewRead().profiles.find(p=>p.id===interviewIdentity(loadCandidate())))'));assert.equal(afterEdit.run('interviewCurrent(interviewRead(),interviewIdentity(loadCandidate())).id'),beforeEdit);assert.equal(afterEdit.run("interviewRead().profiles.filter(p=>p.person.email==='anna.updated@example.com').length"),1);
+assert.equal(coord.run("interviewTimeInput('1700')"),'17:00');
+// A coordinator reply is visible in that candidate's cabinet.
+second=load('ApplicationStatus',secondSession);second.c.renderVals().askQuestion();second.c.renderVals().changeRequest({target:{value:'Кто встретит?'}});second.c.renderVals().sendRequest();coord=load('Interviews',coordSession);coord.c.renderVals().people.find(p=>p.name==='Олег Тестовый').pick();assert.equal(coord.c.renderVals().requestTitle,'Вопрос кандидата');coord.c.renderVals().changeRequestReply({target:{value:'Встретим у входа в студию'}});coord.c.renderVals().replyRequest();assert.equal(load('ApplicationStatus',secondSession).c.renderVals().requestStatus,'Встретим у входа в студию');
 // Old URLs preserve answers/progress, and never replace an existing Opora session.
 const redirect=fs.readFileSync(path.resolve(__dirname,'../prototype-src/legacy-redirect.js'),'utf8');const migrationSession=new Map();let destination='';
 const legacy={me:{name:'Вера Демонстрационная',email:'legacy@example.org'},done:{intro:true},test:{best:12,attempts:2},meeting:{day:'Пт, 23 октября',time:'18:00',where:'Онлайн'}};

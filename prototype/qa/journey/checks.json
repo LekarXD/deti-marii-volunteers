@@ -1,0 +1,107 @@
+[
+  {
+    "route": "ApplicationStatus.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "route": "Apply.dc.html?edit=1",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "route": "Onboarding.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "route": "Interviews.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "route": "Candidates.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "route": "ApplicationStatus.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "route": "Apply.dc.html?edit=1",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "route": "Onboarding.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "route": "Interviews.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "route": "Candidates.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "route": "ApplicationStatus.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "route": "Apply.dc.html?edit=1",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "route": "Onboarding.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "route": "Interviews.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "route": "Candidates.dc.html",
+    "holes": false,
+    "native": 0,
+    "scrollWidth": 1440,
+    "width": 1440
+  }
+]

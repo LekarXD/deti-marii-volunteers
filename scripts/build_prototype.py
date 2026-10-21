@@ -67,19 +67,12 @@ for name,(title,role,height) in SCREENS.items():
     if role == 'candidate':
         if name == 'Apply':
             # анкета живёт на сайте фонда — без навигации платформы
-            head = (SRC/'site-header.html').read_text()
+            head = '<sc-if value="{{isRegistering}}">'+(SRC/'site-header.html').read_text()+'</sc-if><sc-if value="{{isEditing}}">'+(SRC/'candidate-header.html').read_text().replace('CANDIDATE_HOME','').replace('CANDIDATE_ONBOARDING','')+'</sc-if>'
         else:
-            # личный кабинет кандидата — та же шапка платформы, «Главная» ведёт в кабинет
-            head = (SRC/'volunteer-header.html').read_text().replace('{{meAvCls}}', 'avatar av-o').replace('{{meInitials}}', 'АС').replace('{{meLabel}}', 'Анна Соколова, кандидат')
-            head = head.replace('class="is-active" aria-current="page" ', '').replace('<a href="Home.dc.html">', '<a class="is-active" aria-current="page" href="ApplicationStatus.dc.html">', 1)
-            # Пока анкета проверяется, остальные разделы платформы закрыты
-            locked = ' class="is-locked" aria-disabled="true" title="Откроется после встречи с координатором"'
-            head = re.sub(r'<a href="(Catalog|Schedule|Academy|Messages|Hours)\.dc\.html">(.*?)</a>', lambda m: f'<span{locked}>' + re.sub(r'<span class="count">\d+</span>', '', m.group(2)) + '</span>', head)
-            head = re.sub(r'<a class="iconbtn" href="Mentor\.dc\.html" aria-label="ИИ-наставник">(.*?)</a>', lambda m: f'<span class="iconbtn is-locked" aria-disabled="true" aria-label="ИИ-наставник откроется после встречи" title="Откроется после встречи с координатором">{m.group(1)}</span>', head)
-            head = re.sub(r'<a href="Profile\.dc\.html" class="avatar av-o" aria-label="Профиль: Анна Соколова">АС</a>', '<span class="avatar av-o" aria-label="Анна Соколова">АС</span>', head)
-            head = head.replace('aria-label="Уведомления, 2 новых"', 'aria-label="Уведомления"').replace('<span class="pip"></span>', '')
+            head = (SRC/'candidate-header.html').read_text().replace('CANDIDATE_HOME','is-active' if name=='ApplicationStatus' else '').replace('CANDIDATE_ONBOARDING','is-active' if name=='Onboarding' else '')
         body = (SRC/f'{name}.body.html').read_text().replace('<!--FIELDS-->', (SRC/'form-fields.html').read_text())
         icons = dict(re.findall(r'^([\w-]+):\s*(<svg[^\n]+)', (ROOT/'materials/04-дизайн/прототип-до-фактуры/kit/icons.html').read_text(), re.M))
+        head = head.replace('ICON_CANDIDATE_DOWN', icons['chevron-down'])
         # ICONSWITCH(x) — иконка по имени из данных: x.ic_palette, x.ic_check_circle …
         def iconswitch(m):
             var = m.group(1)
@@ -152,7 +145,7 @@ t = p.read_text()
 extension = '<section class="section"><div class="section-head"><h2 class="h2">Новые сценарии</h2></div><div class="grid-3">' + ''.join(f'<a class="card" href="{name}.dc.html"><h3 class="h3">{label}</h3></a>' for name,label in [('Apply','Анкета волонтёра'),('Onboarding','Знакомство с фондом и тест'),('ApplicationStatus','Личный кабинет кандидата и встреча с координатором'),('FirstShift','Первый выход'),('Needs','Возможности и подготовка'),('Planning','Расписание'),('Candidates','Кандидаты и анкеты'),('Interviews','Собеседования и доступность'),('Roles','Роли волонтёров'),('VolunteerRecord','Договорённости с волонтёром'),('Participants','Участники фонда'),('Groups','Группы и состав')]) + '</div></section>'
 t = t.replace('</div></div>\n</x-dc>', extension+'\n</div></div>\n</x-dc>')
 t = t.replace('class Component extends DCLogic', (SRC/'demo-store.js').read_text() + '\nclass Component extends DCLogic')
-t = t.replace('    return {\n      steps:', '    return {\n      demoReset:!!s.demoReset, resetDemo:()=>{try{localStorage.removeItem("opora-interviews-v1");}catch(_){}["roles","role-directory","people","groups","reflection","schedule-v2","schedule-responses-v2","candidate","onboarding","apply-draft"].forEach(k=>{try{sessionStorage.removeItem("opora-prototype-v1:"+k);}catch(_){}});this.setState({demoReset:true});},\n      steps:')
+t = t.replace('    return {\n      steps:', '    return {\n      demoReset:!!s.demoReset, resetDemo:()=>{try{localStorage.removeItem("opora-interviews-v1");}catch(_){}["roles","role-directory","people","groups","reflection","schedule-v2","schedule-responses-v2","candidate","onboarding","apply-draft","apply-edit-draft"].forEach(k=>{try{sessionStorage.removeItem("opora-prototype-v1:"+k);}catch(_){}});this.setState({demoReset:true});},\n      steps:')
 t = t.replace('<h2 class="h2">Новые сценарии</h2>', '<h2 class="h2">Новые сценарии</h2><button class="btn btn-ghost" onClick="{{resetDemo}}">Сбросить демо</button>')
 t = t.replace('</div></div>\n</x-dc>', '<sc-if value="{{demoReset}}"><p class="hint" role="status">Демо-данные сброшены</p></sc-if></div></div>\n</x-dc>')
 t=t.replace('"height":1670','"height":2450')
@@ -196,7 +189,7 @@ c['notes']['extensions']={'x':0,'y':13000,'text':'Новые сценарии: �
 (OUT/'coordinator-nav.js').write_text((SRC/'coordinator-nav.js').read_text())
 for page in OUT.glob('*.dc.html'):
     text=page.read_text()
-    if 'class="work-app"' in text or 'class="dm work-app"' in text:
+    if 'class="work-app"' in text or 'class="dm work-app"' in text or 'class="candidate-top"' in text:
         page.write_text(text.replace('</body>', '<script src="./coordinator-nav.js"></script></body>'))
 print('Built',len(c['boards']),'artboards')
 

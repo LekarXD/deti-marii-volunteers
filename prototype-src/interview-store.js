@@ -3,10 +3,11 @@
 const INTERVIEW_KEY = 'opora-interviews-v1';
 const INTERVIEW_TODAY = '2026-10-21';
 const interviewMinutes = text => {const m=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(text||'');return m?Number(m[1])*60+Number(m[2]):NaN;};
+const interviewTimeInput = value => {const digits=String(value).replace(/\D/g,'').slice(0,4);return digits.length>2?digits.slice(0,2)+':'+digits.slice(2):digits;};
 const interviewTime = n => String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
 const interviewFuture = (date,time) => date>INTERVIEW_TODAY||(date===INTERVIEW_TODAY&&time>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()));
 const interviewDay = date => scheduleLabel(date,{weekday:'short',day:'numeric',month:'long',year:'numeric'});
-const interviewIdentity = person => String(person?.email||person?.phone||person?.name||'').trim().toLowerCase();
+const interviewIdentity = person => String(person?.interviewId||person?.email||person?.phone||person?.name||'').trim().toLowerCase();
 const interviewDefaults = () => ({
   windows: [
     {id:'thu',date:'2026-10-22',start:'18:00',end:'20:00',duration:30,gap:10,repeat:'weekly',until:'',exceptions:[],where:'Онлайн, Яндекс Телемост',link:'',active:true},
