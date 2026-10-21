@@ -140,3 +140,6 @@ for _action in ('assign','resolve','dismiss','reopen'):
 @router.post('/coord/assignment-questions/{question_id}/answer',response_model=AssignmentQuestionView)
 async def answer(question_id:UUID,body:QuestionAnswerCommand,db:AsyncSession=Depends(get_db),principal:Principal=Depends(get_principal),key:str|None=Header(default=None,alias='Idempotency-Key')):
     return await command(db,principal,f'followups.question.answer:{question_id}',key,body,lambda:service.staff_question(db,principal,question_id),lambda:service.answer_question(db,principal,question_id,body),'assignment_question',question_id,['public_answer'])
+
+from .rule_router import router as rule_router
+router.include_router(rule_router)

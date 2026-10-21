@@ -82,3 +82,11 @@ actual generated followups schemas.
 A1 owns the seven-table forward migration and model discovery. A0 owns route mounting,
 SDK generation and integrated visual acceptance. No production deployment, external
 message or browser microphone permission was requested or used.
+
+### Operational threshold signals
+
+`GET/POST /coord/followups/rules` exposes foundation settings; `/reset` restores source defaults and `/evaluate` explicitly queues a fresh check. Defaults match `prototype/Admin.dc.html:656`: 2 consecutive recorded absences, 21 days since a recorded CRM contact, 14 days since learning assignment/progress, 3 days since application submission without a public response, 7 days until a role has no confirmed volunteer. Thresholds are positive bounded integers. Foundation `followups.manage` configures them with CAS/receipts and an audit event; group grants cannot change foundation settings.
+
+The fenced `followups.rules` job evaluates real source tables and schedules the next hourly check. Revoked owner authorization blocks evaluation. Each source additionally requires the owner's current source-domain permission. Missing attendance is unknown and interrupts an absence streak; no CRM contact history is unknown rather than inferred silence. Learning uses canonical assignments/progress, never a service-time ledger. A source cap is reported unknown rather than silently truncating evaluation. Direct help/restricted reflection signals keep their original behavior.
+
+`/coord/followups/rule-signals` is an internal queue, scoped by current `followups.read` foundation/group access and source permission (`assignments.manage`, `crm.read`, `learning.read`, `candidates.read`, `schedule.read` respectively). Read checks precede query limiting. Dismiss requires current matching manage/read capabilities, CAS and a reason; receipt replay rechecks them. An unchanged observation stays dismissed; a changed source observation reopens it. Clean evaluations resolve conditions no longer matching; incomplete/unknown evaluations do not silently resolve old observations. No automatic message is sent to anyone.
