@@ -407,9 +407,11 @@ def test_verified_login_claims_only_own_registration_and_keeps_history(candidate
     assert stranger_application["id"] != application["id"]
     assert stranger.read("/me/interviews") == []
     old_cookie = candidate.http.cookies.get("opora_session")
-    challenge = candidate.command("POST", "/auth/challenges", {"email": duplicate["email"], "purpose": "login"})
+    verified_email = f"verified-owned-{uuid4().hex}@example.test"
+    assert verified_email != duplicate["email"]
+    challenge = candidate.command("POST", "/auth/challenges", {"email": verified_email, "purpose": "login"})
     process = subprocess.run(
-        [sys.executable, "-m", "app.cli", "dev-inbox", "--email", duplicate["email"]],
+        [sys.executable, "-m", "app.cli", "dev-inbox", "--email", verified_email],
         cwd=os.environ.get("OPORA_G1_API_DIR", str(Path(__file__).resolve().parents[2] / "apps/api")),
         check=True, capture_output=True, text=True,
     )
@@ -417,6 +419,7 @@ def test_verified_login_claims_only_own_registration_and_keeps_history(candidate
     candidate.command("POST", "/auth/challenges/verify", {"challenge_id": challenge["challenge_id"], "token": token})
     session = candidate.refresh()
     assert session["user_id"] and session["registration_id"] is None
+    assert candidate.read("/me/profile")["display_name"] == f"{duplicate['firstName']} {duplicate['lastName']}"
     assert candidate.read("/me/application")["id"] == application["id"]
     assert candidate.read("/me/interviews")[0]["id"] == booking["id"]
     claimed = candidate.read("/me/preparation")["assignments"][0]

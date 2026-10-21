@@ -133,6 +133,9 @@ checks, since their MFA enrollment consumes the same fixture TOTP counter.
 `OPORA_G1_FIXTURE_FILE` can point to the preserved initial seed output instead.
 The runner defaults to port 8001; set `OPORA_G1_BASE_URL=http://127.0.0.1:8002`
 for a separate QA port. Stop any previous API on the chosen port first.
+It forwards quoted pytest arguments, for example `sh infra/scripts/run-g1.sh -k
+'verified_login or csrf_origin'`. Backend fixture quota isolation never mutates
+the HTTP G1 database; its ordinary server limits remain active across requests.
 
 Domain test fixtures deliberately drop/recreate their model tables. Keep their
 eleven domain URLs separate from development/staging and the external G1 database. Their

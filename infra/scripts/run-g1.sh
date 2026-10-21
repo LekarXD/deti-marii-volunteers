@@ -39,4 +39,4 @@ else:
     raise SystemExit('G1 API readiness failed; inspect /tmp/opora-g1-api.log locally')
 PY
 kill -0 "$api_pid" 2>/dev/null || { echo "The G1 API process exited before acceptance; inspect /tmp/opora-g1-api.log" >&2; exit 1; }
-python3 -m pytest -p infra.pytest_gate -c "$api_dir/pyproject.toml" tests/e2e -q
+python3 -m pytest -p infra.pytest_gate -c "$api_dir/pyproject.toml" tests/e2e -q "$@"
