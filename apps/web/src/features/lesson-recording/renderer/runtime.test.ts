@@ -14,10 +14,10 @@ async function hash(scene:State['scene'],capture_plan:State['capture_plan']) {
  const bytes=new TextEncoder().encode(canonicalSerialize({scene,capture_plan,resolved_assets:[]}));
  return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),value=>value.toString(16).padStart(2,'0')).join('');
 }
-async function fixture():Promise<Bootstrap>{
- const scene=fictionScene('lesson_recording_project',{content_kind:'camera',layout:'camera_only',content_asset:null,deck_version_id:null,slide_id:null});
+async function fixture(kind:'live_event'|'lesson_recording_project'='lesson_recording_project'):Promise<Bootstrap>{
+ const scene=fictionScene(kind,{content_kind:'camera',layout:'camera_only',content_asset:null,deck_version_id:null,slide_id:null});
  const plan=fictionPlan(scene),capture_plan={...plan,allowed_tracks:[...plan.allowed_tracks]};
- return {scene,capture_plan,foundation_id:scene.foundation_id,project_id:scene.resource_id,take_id:plan.take_id,session_id:scene.session_id,generation:1,
+ return {scene,capture_plan,foundation_id:scene.foundation_id,project_id:kind==='live_event'?'10000000-0000-4000-8000-000000000099':scene.resource_id,resource_kind:scene.resource_kind,resource_id:scene.resource_id,take_id:plan.take_id,session_id:scene.session_id,generation:1,
   renderer_state_version:1,projection_hash:await hash(scene,capture_plan),resolved_assets:[],invalidated:false,
   access_token:'fictional-access',expires_at:new Date(Date.now()+60_000).toISOString(),
   provider_grant:{provider:'livekit',url:'wss://fictional-provider.invalid',token:'fictional-room-token',identity:'fictional-renderer',session_id:scene.session_id,generation:1,expires_in:60},
@@ -181,4 +181,14 @@ it('expires the authorized old frame even when conflict recovery is still verify
  vi.spyOn(crypto.subtle,'digest').mockImplementation(async(...args)=>{await gate;return digest(...args);});h.setState(next);h.rejectReadiness();h.observe(true);
  await vi.waitFor(()=>expect(h.reports.at(-1)?.renderer_state_version).toBe(2));expect(h.views.at(-1)?.frame?.stateVersion).toBe(1);
  await vi.advanceTimersByTimeAsync(1100);expect(h.views.at(-1)?.phase).toBe('failed');expect(h.views.at(-1)?.frame).toBeUndefined();release();await Promise.resolve();expect(h.connect).toHaveBeenCalledOnce();
+});
+it('renders a live-event take through the same media engine with a separately pinned recording project',async()=>{
+ const h=await harness(await fixture('live_event'));await h.runtime.start('fictional-ticket');expect(h.views.at(-1)?.phase).toBe('active');expect(h.boot.project_id).not.toBe(h.boot.resource_id);expect(h.connect).toHaveBeenCalledOnce();
+ const scene={...h.boot.scene,revision:2,presenter_size:29},capture_plan={...h.boot.capture_plan,scene_revision:2};
+ h.setState({...h.boot,scene,capture_plan,renderer_state_version:2,projection_hash:await hash(scene,capture_plan)});await vi.advanceTimersByTimeAsync(1000);
+ await vi.waitFor(()=>expect(h.updatePlan).toHaveBeenCalledOnce());expect(h.views.at(-1)?.frame?.scene.revision).toBe(2);expect(h.connect).toHaveBeenCalledOnce();
+ h.setState({...h.boot,project_id:h.boot.resource_id,renderer_state_version:3});await vi.advanceTimersByTimeAsync(1000);expect(h.views.at(-1)?.phase).toBe('failed');expect(h.views.at(-1)?.frame).toBeUndefined();
+});
+it.each(['resource_kind','resource_id','project_id'] as const)('rejects a mismatched solo wrapper %s before subscribing',async(field)=>{
+ const initial=await fixture(),h=await harness({...initial,[field]:field==='resource_kind'?'live_event':'10000000-0000-4000-8000-000000000099'});await h.runtime.start('fictional-ticket');expect(h.views.at(-1)?.phase).toBe('failed');expect(h.connect).not.toHaveBeenCalled();
 });

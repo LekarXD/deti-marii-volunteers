@@ -33,6 +33,7 @@ async function decodeAsset(lease:AssetLease,signal:AbortSignal,current:()=>boole
  * No URL/window/storage/session reader or capture-start command exists here. */
 export function createRendererRuntime(options:RendererRuntimeOptions) {
  const transportFactory=options.transportFactory??createRendererTransport;
+ let projectId:string|undefined;
  let started=false,closed=true,access:RendererTransport|null=null,bootstrap:RendererTransport|null=null;
  let fence:ReturnType<typeof createRendererFrameFence>|null=null,frame:RendererFrame|undefined,authoritativeFrame:RendererFrame|undefined,lease:AssetLease|undefined;
  let projectionHash='',displayHash='',media=emptyMedia(),visualReady=false,preparing=true,workEpoch=0,workingStamp:string|null=null;
@@ -100,9 +101,11 @@ export function createRendererRuntime(options:RendererRuntimeOptions) {
  }
  function parseState(value:State) {
   const scene=parseStudioScene(value.scene),plan=parseCapturePlan(value.capture_plan);
-  if(value.foundation_id!==scene.foundation_id||value.project_id!==scene.resource_id||value.take_id!==scene.take_id||value.session_id!==scene.session_id||value.generation!==plan.generation||scene.resource_kind!=='lesson_recording_project')throw new SceneContractError('renderer_scope_mismatch');
+  if(value.foundation_id!==scene.foundation_id||value.resource_kind!==scene.resource_kind||value.resource_id!==scene.resource_id||value.resource_id!==plan.resource_id||value.take_id!==scene.take_id||value.session_id!==scene.session_id||value.generation!==plan.generation||(scene.resource_kind==='lesson_recording_project'&&value.project_id!==scene.resource_id))throw new SceneContractError('renderer_scope_mismatch');
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value.project_id))throw new SceneContractError('renderer_project_invalid');
+  if(projectId&&value.project_id!==projectId)throw new SceneContractError('renderer_project_changed');
   if(value.invalidated!==false||plan.privacy_state!=='approved')throw new SceneContractError('recording_policy_not_approved');
-  return {scene,plan};
+  projectId=value.project_id;return {scene,plan};
  }
  async function prepare(value:State,renew=false,preserveMedia=false) {
   if(closed)return;const {scene,plan}=parseState(value);
