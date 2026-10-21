@@ -147,11 +147,14 @@ def main():
     original_api = args.api_source.resolve()
     repository = original_api.parents[1]
     source_sha = run(["git", "rev-parse", "HEAD"], cwd=repository).strip()
-    source_dirty = bool(run(["git", "status", "--porcelain", "--", "apps/api"], cwd=repository).strip())
+    source_dirty = bool(run(["git", "status", "--porcelain", "--", "apps/api", "packages/studio-core"], cwd=repository).strip())
     api = workspace / "source" / "apps" / "api"
     shutil.copytree(original_api, api, ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache", ".env", ".env.*", "*.pyc"))
-    source_manifest = tree_manifest(api)
-    (workspace / "api-source-manifest.json").write_text(json.dumps(source_manifest, indent=2, sort_keys=True))
+    schema_source = repository / "packages" / "studio-core"
+    if schema_source.is_dir():
+        shutil.copytree(schema_source, workspace / "source" / "packages" / "studio-core")
+    source_manifest = tree_manifest(workspace / "source")
+    (workspace / "source-manifest.json").write_text(json.dumps(source_manifest, indent=2, sort_keys=True))
     source_tree = digest(json.dumps(source_manifest, sort_keys=True, separators=(",", ":")).encode())
     source_assets, restored_assets = workspace / "source-assets", workspace / "restored-assets"
     source_assets.mkdir(mode=0o700)

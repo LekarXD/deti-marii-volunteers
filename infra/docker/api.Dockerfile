@@ -4,6 +4,7 @@ WORKDIR /app
 COPY apps/api/pyproject.toml apps/api/requirements.lock apps/api/alembic.ini ./
 COPY apps/api/app/ ./app/
 COPY apps/api/migrations/ ./migrations/
+COPY packages/studio-core/ ./packages/studio-core/
 RUN pip install -r requirements.lock && pip install --no-deps . && useradd --create-home --uid 10001 opora \
     && mkdir -p /var/lib/opora/assets && chown opora:opora /var/lib/opora/assets
 USER opora

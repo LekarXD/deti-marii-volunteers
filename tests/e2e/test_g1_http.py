@@ -17,7 +17,7 @@ def answers():
         "phone": "+7 (999) 123-45-67", "email": f"g1-{suffix}@example.test",
         "area": "Другой город", "directions": ["Творчество"],
         "participation": "Каждую неделю", "volExp": "Нет",
-        "specialExp": "Хочу обсудить на встрече", "record": "Хочу обсудить",
+        "specialExp": "Нет", "record": "Хочу обсудить",
         "source": "Друзья",
     }
 
@@ -101,11 +101,17 @@ def test_questionnaire_booking_learning_edit_and_coordinator(candidate, stranger
     assert denied.status_code in (403, 404)
 
     assignment = candidate.read("/me/preparation")["assignments"][0]
-    assert len(assignment["lessons"]) == 4
+    assert assignment["source_revision"] == "62fd0a11fdf019893d4202d78dca4132076080d7"
+    assert assignment["source_hash"] == "8637c856ebab6aa8a01b5a007fe9c47f07d4f83edf7938697934de59c00516c9"
+    assert [item["mode"] for item in assignment["lessons"]] == ["cards", "feed", "cards", "feed"]
+    block_counts = []
     for lesson in assignment["lessons"]:
         content = candidate.read(f"/learning/lessons/{lesson['id']}")
         assert content["blocks"], "A module must contain actual published material"
+        assert content["mode"] == lesson["mode"]
+        block_counts.append(len(content["blocks"]))
         candidate.command("POST", f"/learning/progress/{lesson['id']}/complete", {"assignment_id": assignment["id"]})
+    assert block_counts == [4, 4, 3, 5]
     attempt = candidate.command("POST", f"/assessments/{assignment['assessment_version_id']}/attempts", {})
     assert len(attempt["questions"]) == 10
     assert attempt["score"] is None
@@ -123,9 +129,9 @@ def test_questionnaire_booking_learning_edit_and_coordinator(candidate, stranger
     assert candidate.read(f"/assessment-attempts/{attempt['id']}/result")["score"] == 4
     candidate.command("POST", "/policy-acknowledgements", {"assignment_id": assignment["id"]})
     assert candidate.read("/me/preparation")["introduction_completed"] is True
-    second = candidate.command("POST", f"/assessments/{assignment['assessment_version_id']}/attempts", {})
-    assert second["id"] != attempt["id"]
-    assert second["score"] is None
+    second = candidate.request("POST", f"/assessments/{assignment['assessment_version_id']}/attempts", {})
+    assert second.status_code == 409
+    assert second.json()["code"] == "repeat_not_available"
     assert candidate.read(f"/assessment-attempts/{attempt['id']}/result")["score"] == 4
 
     current = candidate.read("/me/application")

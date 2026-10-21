@@ -13,8 +13,8 @@ not be skipped as optional. Run with `OPORA_G1_BASE_URL=http://127.0.0.1:8001` a
 `OPORA_G1_FIXTURE_FILE=/private/tmp/opora-g1-fixture.json` (mode 0600).
 
 Required evidence: ordinary questionnaire submission and reload; booking before
-learning; four real published modules and ten questions; server scoring and a
-second independent attempt; coordinator queue/review/public answer/outcome;
+learning; four published modules with pinned source provenance and card/feed modes plus ten questions; server scoring and a
+current-source repeat denial with unchanged prior result; coordinator queue/review/public answer/outcome;
 contact edit retains candidate identity/progress/booking; exact-origin + CSRF;
 cross-owner and scope denial; private note absent from self JSON; stale version;
 same-key retry and different-payload conflict; competing booking requests; fresh

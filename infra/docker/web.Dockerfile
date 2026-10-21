@@ -6,6 +6,9 @@ COPY apps/web/package.json ./apps/web/package.json
 RUN pnpm install --frozen-lockfile
 COPY apps/web/index.html apps/web/tsconfig.json apps/web/vite.config.ts ./apps/web/
 COPY apps/web/src/ ./apps/web/src/
+COPY apps/web/scripts/ ./apps/web/scripts/
+COPY packages/design-tokens/ ./packages/design-tokens/
+COPY packages/studio-core/ ./packages/studio-core/
 RUN pnpm --filter @opora/web build
 FROM nginx:1.29-alpine
 COPY infra/docker/nginx.conf /etc/nginx/nginx.conf

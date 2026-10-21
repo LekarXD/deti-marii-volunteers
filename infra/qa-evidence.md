@@ -4,6 +4,16 @@ This records local functional evidence from the integrated implementation workin
 tree. It is not a production deployment or immutable final-release certification.
 Final acceptance must record the integrator's final commit and runtime release.
 
+## Latest immutable checkpoint
+
+`c6e35434188d46cdd19d8f7a351d183909483f0f`: expanded API/contract gate **140 passed,
+zero skipped**. Updated current form/source HTTP G1: **26 passed, zero skipped**
+at `29f5048` (runtime unchanged by the subsequent test-only fixture fix).
+Migration head `c74a006971d4`, metadata parity passes. Exact commands, source
+manifest and proof boundaries are recorded in
+`infra/evidence/final-api-g1-gate-2026-10-21.md`. The earlier entries below retain
+the historical progression and do not replace that checkpoint.
+
 ## Verified
 
 - External HTTP G1: all 14 cases passed together, with zero skipped, in 6.07
