@@ -28,11 +28,13 @@ class TaskSpec:
     allowed_inputs: frozenset[str]
     max_input_bytes: int = 40000
     on_complete: object | None = None
+    on_validate: object | None = None
+    provider_mode: str = 'json'
 
 TASKS: dict[str, TaskSpec] = {}
 
-def register_task(name, prompt_version, system_prompt, output_model, allowed_inputs, max_input_bytes=40000, on_complete=None):
-    spec=TaskSpec(name,prompt_version,system_prompt,output_model,frozenset(allowed_inputs),max_input_bytes,on_complete)
+def register_task(name, prompt_version, system_prompt, output_model, allowed_inputs, max_input_bytes=40000, on_complete=None, on_validate=None, provider_mode='json'):
+    spec=TaskSpec(name,prompt_version,system_prompt,output_model,frozenset(allowed_inputs),max_input_bytes,on_complete,on_validate,provider_mode)
     if name in TASKS and TASKS[name] != spec:
         raise ValueError('duplicate_ai_task')
     if not issubclass(output_model,BaseModel) or not 100<=max_input_bytes<=100000:

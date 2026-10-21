@@ -13,6 +13,11 @@ class ProviderConfig(BaseSettings):
     api_key: str = ''
     model: str = ''
     enabled: bool = False
+    transcription_model: str = ''
+    def model_for(self,spec):
+        return self.transcription_model if spec.provider_mode=='transcription' else self.model
+    def configured_for(self,spec):
+        return bool(self.base_url and self.api_key and self.model_for(spec))
     def configured(self):
         return bool(self.base_url and self.api_key and self.model)
 

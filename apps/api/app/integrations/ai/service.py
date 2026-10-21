@@ -24,7 +24,7 @@ async def enqueue_ai_run(db,principal,task,input_data,source_refs=None,max_outpu
         raise ApiError(422,'ai_input_invalid','Проверьте объём и состав материалов')
     config=ProviderConfig()
     policy=await settings(db,principal.foundation_id)
-    run=AIRun(foundation_id=principal.foundation_id,actor_id=principal.actor_id,request_session_id=principal.session_id,task=task,prompt_version=spec.prompt_version,model=config.model or 'unconfigured',input_data=input_data,source_refs=source_refs or [],max_output_tokens=max_output_tokens,state='queued' if policy.enabled and config.configured() else 'unavailable',error_code=None if policy.enabled and config.configured() else 'provider_unconfigured' if not config.configured() else 'ai_disabled')
+    run=AIRun(foundation_id=principal.foundation_id,actor_id=principal.actor_id,request_session_id=principal.session_id,task=task,prompt_version=spec.prompt_version,model=config.model_for(spec) or 'unconfigured',input_data=input_data,source_refs=source_refs or [],max_output_tokens=max_output_tokens,state='queued' if policy.enabled and config.configured_for(spec) else 'unavailable',error_code=None if policy.enabled and config.configured_for(spec) else 'provider_unconfigured' if not config.configured_for(spec) else 'ai_disabled')
     db.add(run)
     await db.flush()
     if run.state=='queued':
@@ -42,6 +42,10 @@ async def run_view(db,principal,run_id):
         if len(visible)!=len(value.source_refs):state,error_code,output='sources_unavailable','sources_unavailable',None
         elif output and not set(output.get('citation_ids',[])).issubset(set(value.source_refs)):
             state,error_code,output='failed','citation_invalid',None
+    spec=TASKS.get(value.task)
+    if spec and spec.provider_mode=='transcription':
+        try:await spec.on_validate(db,principal,value,'view')
+        except ApiError as error:state,error_code,output='sources_unavailable',error.code,None
     if value.task=='profile.suggest':
         from .profile import profile_run_view
         profile=await profile_run_view(db,principal,value.id)
@@ -108,10 +112,10 @@ async def execute_run(db,context,transport=None):
     policy=await settings(db,run.foundation_id,lock=True)
     config=ProviderConfig()
     now=utcnow()
-    if config.model!=run.model:
+    if config.model_for(TASKS[run.task])!=run.model:
         run.state,run.error_code='unavailable','model_version_unavailable'
         return {'state':run.state}
-    if not policy.enabled or not config.configured():
+    if not policy.enabled or not config.configured_for(TASKS[run.task]):
         run.state,run.error_code='unavailable','provider_unconfigured'
         return {'state':run.state}
     if policy.circuit_open_until and policy.circuit_open_until>now:
@@ -125,10 +129,17 @@ async def execute_run(db,context,transport=None):
     await db.execute(insert(AIDailyUsage).values(foundation_id=run.foundation_id,day=day).on_conflict_do_nothing())
     daily=await db.scalar(select(AIDailyUsage).where(AIDailyUsage.foundation_id==run.foundation_id,AIDailyUsage.day==day).with_for_update())
     spec=TASKS[run.task]
-    reserved=len(json.dumps(run.input_data,ensure_ascii=False).encode())+len((spec.system_prompt+json.dumps(spec.output_model.model_json_schema())).encode())+run.max_output_tokens
+    reserved=(int(run.input_data['duration_seconds']*100)+1000) if spec.provider_mode=='transcription' else len(json.dumps(run.input_data,ensure_ascii=False).encode())+len((spec.system_prompt+json.dumps(spec.output_model.model_json_schema())).encode())+run.max_output_tokens
     if daily.requests>=policy.daily_requests or daily.charged_tokens+daily.reserved_tokens+reserved>policy.daily_tokens:
         run.state,run.error_code='budget_exceeded','daily_budget_exceeded'
         return {'state':run.state}
+    audio=None
+    if spec.provider_mode=='transcription':
+        from .transcription import validated_audio
+        try:audio=await validated_audio(db,principal,run,'before_io')
+        except ApiError as error:
+            run.state,run.error_code='cancelled',error.code
+            return {'state':run.state}
     daily.requests+=1
     daily.reserved_tokens+=reserved
     run.state,run.reserved_tokens,run.reservation_day,run.calling_started_at='calling',reserved,day,now
@@ -138,10 +149,21 @@ async def execute_run(db,context,transport=None):
     # silently replay a possibly billed request on the next worker attempt.
     await context.fence(db)
     await db.commit()
-    result=await request_json(spec,data,config,max_tokens,timeout,transport)
+    if spec.provider_mode=='transcription':
+        from .transcription import request_transcription
+        result=await request_transcription(audio,config,timeout,transport)
+    else:result=await request_json(spec,data,config,max_tokens,timeout,transport)
     await context.fence(db)
     run=await db.scalar(select(AIRun).where(AIRun.id==run.id).with_for_update().execution_options(populate_existing=True))
     current_policy=await settings(db,run.foundation_id,lock=True)
+    if run.state!='calling':
+        result=ProviderResult('cancelled',run.error_code or 'request_cancelled',tokens=result.tokens,request_id=result.request_id)
+    if spec.provider_mode=='transcription':
+        from .profile import current_principal
+        try:
+            principal=await current_principal(db,run)
+            await validated_audio(db,principal,run,'delivery')
+        except ApiError as error:result=ProviderResult('cancelled',error.code,tokens=result.tokens,request_id=result.request_id)
     if not current_policy.enabled:
         result=ProviderResult('cancelled','ai_disabled',tokens=result.tokens,request_id=result.request_id)
     await settle(db,run,result)
