@@ -227,4 +227,9 @@ async def test_matching_context_is_self_selected_and_has_actual_version_provenan
             assert context['evidence'][-1]['field']=='availability' and context['evidence'][-1]['version']==1
             assert 'contacts' not in context and 'email' not in str(context) and 'about' not in context
             blank=await matching_context(db,another);assert blank['profile_version']==0 and blank['skills']==[] and blank['availability'] is None
+            from app.modules.crm.models import CrmVolunteer
+            from app.modules.profile.models import VolunteerProfile
+            assert await db.scalar(select(func.count()).select_from(CrmVolunteer))==1
+            stored=await db.get(VolunteerProfile,principal.user_id);stored.paused_until=date.today()-timedelta(days=1);await db.flush()
+            assert not (await matching_context(db,principal))['paused']
     finally:await own.aclose();await other.aclose()

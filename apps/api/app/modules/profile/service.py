@@ -43,7 +43,7 @@ async def update_profile(db,principal,command,source='manual'):
     if command.photo_asset_id:
         from app.modules.assets.service import require_asset
         asset=await require_asset(db,principal,command.photo_asset_id)
-        if asset.owner_user_id!=user.id or asset.content_type not in ('image/jpeg','image/png','image/webp'):raise ApiError(422,'invalid_profile_photo','Выберите своё готовое изображение')
+        if asset.owner_user_id!=user.id or asset.purpose!='generic' or asset.content_type not in ('image/jpeg','image/png','image/webp'):raise ApiError(422,'invalid_profile_photo','Выберите своё готовое изображение')
     if profile is None:
         profile=VolunteerProfile(user_id=user.id,foundation_id=principal.foundation_id,version=1);db.add(profile);await db.flush()
     else:profile.version+=1
@@ -136,7 +136,7 @@ async def matching_context(db,principal):
     skills=[dict(label=tag.label,normalized=tag.label.casefold(),level=tag.level) for tag in view.tags if tag.kind=='skill']
     interests=[dict(kind=tag.kind,label=tag.label,normalized=tag.label.casefold()) for tag in view.tags if tag.kind!='skill']
     evidence=[]
-    if view.version:
+    if view.version and view.revisions:
         evidence=[dict(source_id=str(view.revisions[0].id),source_type='profile_revision',version=view.version,field=field) for field in ('skills','interests','lifecycle')]
     availability=None
     if rule:
