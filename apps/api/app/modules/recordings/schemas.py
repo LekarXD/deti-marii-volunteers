@@ -47,6 +47,8 @@ class RecordingTakeView(BaseModel):
     renderer_state_version:int
     projection_hash:str
     readiness_state:str
+    capture_job_id:UUID|None
+    capture_phase:str|None
     started_at:datetime|None
     stopped_at:datetime|None
     error_code:str|None

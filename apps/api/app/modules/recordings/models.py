@@ -48,11 +48,14 @@ class RecordingTake(Base):
     readiness_state:Mapped[str]=mapped_column(String(20),default='waiting')
     readiness:Mapped[dict|None]=mapped_column(JSONB)
     provider_capture_id:Mapped[str|None]=mapped_column(String(200),unique=True)
+    capture_job_id:Mapped[UUID|None]=mapped_column(ForeignKey('jobs.id',name='fk_recording_capture_job'))
+    capture_phase:Mapped[str|None]=mapped_column(String(30))
+    capture_checkpoint:Mapped[dict|None]=mapped_column(JSONB)
     started_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True))
     stopped_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True))
     error_code:Mapped[str|None]=mapped_column(String(100))
     created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
-    __table_args__=(UniqueConstraint('project_id','number'),CheckConstraint("state IN ('created','starting','capturing','stopping','captured','failed','discarded')",name='ck_recording_take_state'),)
+    __table_args__=(UniqueConstraint('project_id','number'),UniqueConstraint('capture_job_id',name='uq_recording_capture_job'),CheckConstraint("state IN ('created','starting','capturing','stopping','captured','failed','discarded')",name='ck_recording_take_state'),)
 
 class RecordingRendererGrant(Base):
     __tablename__='recording_renderer_grants'

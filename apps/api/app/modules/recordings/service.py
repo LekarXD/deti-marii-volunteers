@@ -53,7 +53,7 @@ def readiness_current(row,now=None):
     except (ValueError,TypeError):return False
     return expiry>(now or utcnow())
 def take_view(row):
-    value={k:getattr(row,k) for k in ('id','project_id','number','generation','state','version','renderer_state_version','projection_hash','readiness_state','started_at','stopped_at','error_code')}
+    value={k:getattr(row,k) for k in ('id','project_id','number','generation','state','version','renderer_state_version','projection_hash','readiness_state','capture_job_id','capture_phase','started_at','stopped_at','error_code')}
     if value['readiness_state']=='ready' and not readiness_current(row):value['readiness_state']='expired'
     return value
 async def prepare(db,p,row):
