@@ -13,6 +13,12 @@ older kernel deliberately returns unavailable.
   exact `playwright@1.58.2` package. The pinned upstream image source uses Node 24;
   the build also asserts Node >=22. Its full Chrome for Testing is selected through
   `chromium.executablePath()`, rather than the separate headless-shell binary.
+  The overlay pins `linux/amd64`: the exact Playwright v1.58.2
+  [executable registry](https://github.com/microsoft/playwright/blob/v1.58.2/packages/playwright-core/src/server/registry/index.ts)
+  selects Chrome for Testing there and a non-CfT Chromium build on Linux arm64.
+  On the available aarch64 Docker daemon this requires
+  emulation; any resulting smoke must record that fact, and cannot establish
+  long-recording throughput or latency acceptance.
 - Python 3.12, the API lockfile, ffmpeg/ffprobe and LibreOffice Impress support the
   capture/encode and slide-conversion processes. Canonical `packages/studio-core`
   schemas accompany the API source. The web image must separately copy/build

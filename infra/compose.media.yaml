@@ -2,6 +2,7 @@
 services:
   media-worker:
     profiles: [media]
+    platform: linux/amd64
     build: {context: .., dockerfile: infra/docker/media.Dockerfile}
     init: true
     user: "10001:10001"
