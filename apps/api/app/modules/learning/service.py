@@ -126,7 +126,7 @@ async def attempt_view(db: AsyncSession, principal: Principal, attempt_id: UUID,
 
 
 async def start_attempt(db: AsyncSession, principal: Principal, version_id: UUID):
-    item = await db.scalar(select(LearningAssignment).join(LearningRelease).where(LearningAssignment.foundation_id == principal.foundation_id, owner_scope(principal), LearningRelease.assessment_version_id == version_id).with_for_update(of=LearningAssignment))
+    item = await db.scalar(select(LearningAssignment).join(LearningRelease).where(LearningAssignment.foundation_id == principal.foundation_id, owner_scope(principal), LearningRelease.assessment_version_id == version_id).order_by(LearningAssignment.assigned_at.desc(), LearningAssignment.id.desc()).limit(1).with_for_update(of=LearningAssignment))
     if item is None:
         raise ApiError(404, "assessment_not_found", "Тест не найден")
     active = await db.scalar(select(AssessmentAttempt).where(AssessmentAttempt.assignment_id == item.id, AssessmentAttempt.submitted_at.is_(None)))
@@ -165,3 +165,20 @@ async def submit(db: AsyncSession, principal: Principal, attempt_id: UUID):
         await db.flush()
         await update_completion(db, owned)
     return (await attempt_view(db, principal, attempt_id))[1]
+
+
+async def claim_registration(db: AsyncSession, registration_id: UUID, user_id: UUID):
+    """Called only inside verified identity transaction; never match by contact."""
+    from app.core.models import RegistrationSession, User
+    registration = await db.get(RegistrationSession, registration_id)
+    user = await db.get(User, user_id)
+    if registration is None or user is None or registration.foundation_id != user.foundation_id:
+        raise ApiError(409, "learning_owner_conflict", "Не удалось перенести историю знакомства")
+    items = list((await db.scalars(select(LearningAssignment).where(LearningAssignment.registration_id == registration_id, LearningAssignment.foundation_id == user.foundation_id).with_for_update())).all())
+    for item in items:
+        collision = await db.scalar(select(LearningAssignment.id).where(LearningAssignment.user_id == user_id, LearningAssignment.release_id == item.release_id))
+        if collision:
+            raise ApiError(409, "learning_history_conflict", "У аккаунта уже есть история этой версии знакомства. Координатор поможет сохранить обе истории")
+    for item in items:
+        item.user_id, item.registration_id = user_id, None
+    await db.flush()
