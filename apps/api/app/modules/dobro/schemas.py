@@ -67,6 +67,14 @@ class DobroEnrollmentCommand(DobroCommand):
     state: DobroState
     expected_version: int = Field(ge=0)
 
+class DobroEnrollmentView(BaseModel):
+    state: DobroState
+    version: int
+
+class DobroProfileView(BaseModel):
+    profile_url: str
+    version: int
+
 class DobroSeriesCommand(DobroCommand):
     opportunity_id: UUID
     expected_version: int = Field(ge=0)
@@ -127,6 +135,8 @@ class DobroTransferRowView(BaseModel):
     minutes_in_period: int
     eligible_minutes: int
     capped_minutes: int
+    overlap_minutes: int = 0
+    duration_trimmed_minutes: int = 0
     carry_minutes: int
     entered_hours: int
     hours_due: int
