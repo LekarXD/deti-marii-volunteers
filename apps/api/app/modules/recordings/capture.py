@@ -3,6 +3,8 @@ import asyncio
 import json
 import os
 import shutil
+import math
+from fractions import Fraction
 from pathlib import Path
 from urllib.parse import urlsplit
 from dataclasses import dataclass
@@ -114,13 +116,21 @@ async def media_command(*arguments,timeout=90):
         if process.returncode is None:process.kill();await process.wait()
 
 async def encode_and_validate(settings,source,output,expected_duration_ms):
-    await media_command(settings.ffmpeg,'-nostdin','-v','error','-protocol_whitelist','file,pipe','-i',str(source),'-map','0:v:0','-map','0:a:0','-c:v','libx264','-preset','fast','-pix_fmt','yuv420p','-c:a','aac','-movflags','+faststart','-threads','2','-y',str(output),timeout=180)
+    await media_command(settings.ffmpeg,'-nostdin','-v','error','-protocol_whitelist','file,pipe','-i',str(source),'-map','0:v:0','-map','0:a:0','-vf','fps=25','-fps_mode','cfr','-c:v','libx264','-preset','fast','-pix_fmt','yuv420p','-c:a','aac','-movflags','+faststart','-threads','2','-y',str(output),timeout=180)
     probe=json.loads(await media_command(settings.ffprobe,'-v','error','-show_streams','-show_format','-of','json',str(output)))
     streams=probe.get('streams',[]);video=[s for s in streams if s.get('codec_type')=='video'];audio=[s for s in streams if s.get('codec_type')=='audio']
     duration=round(float(probe.get('format',{}).get('duration','0'))*1000)
     if len(video)!=1 or len(audio)!=1 or video[0].get('codec_name')!='h264' or (video[0].get('width'),video[0].get('height'))!=(1920,1080) or audio[0].get('codec_name')!='aac' or not 300<=duration<=1202000 or abs(duration-expected_duration_ms)>2000:raise MediaValidationError('media_profile_mismatch',{'duration_ms':duration,'expected_duration_ms':expected_duration_ms,'video':[{'codec':stream.get('codec_name'),'width':stream.get('width'),'height':stream.get('height')} for stream in video],'audio':[{'codec':stream.get('codec_name')} for stream in audio]})
+    # Linux tab WebM can advertise a nominal1000fps time base despite sparse
+    # real frames. Never infer the output CFR from that input metadata.
+    try:
+        rates=[Fraction(video[0][key]) for key in ('r_frame_rate','avg_frame_rate')]
+        frames=int(video[0]['nb_frames'])
+        if any(rate!=25 for rate in rates) or not 1<=frames<=math.ceil(duration*25/1000)+2:raise ValueError()
+    except (ValueError,TypeError,KeyError,ZeroDivisionError):
+        raise MediaValidationError('media_frame_rate_mismatch') from None
     await media_command(settings.ffmpeg,'-nostdin','-v','error','-xerror','-i',str(output),'-f','null','-',timeout=120)
-    return {'profile':'opora-stage/1','width':1920,'height':1080,'video_codec':'h264','audio_codec':'aac','duration_ms':duration,'full_decode':True}
+    return {'profile':'opora-stage/1','width':1920,'height':1080,'video_codec':'h264','audio_codec':'aac','duration_ms':duration,'frame_rate':25,'video_frames':frames,'full_decode':True}
 
 async def verify_provider_scope(db,row,owner):
     """Independent provider evidence: never rely only on what an unsubscribed renderer reports."""

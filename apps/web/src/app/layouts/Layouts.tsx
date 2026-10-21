@@ -16,3 +16,6 @@ function Navigation({staff,verified}:{staff:boolean;verified:boolean}){const {it
 function Layout({staff,children}:{staff:boolean;children?:ReactNode}){const {session}=useSession();const verified=Boolean(session?.user_id&&!session?.mfa_required);const home=getCandidateNavigation(verified).items.some(link=>link.to==='/home')?'/home':'/application';return <div className="dm opora-app"><a href="#main-content" className="skip-link">Перейти к содержимому</a><header className="opora-header"><Brand to={staff?'/fund':home} subtitle={staff?'команда фонда':'волонтёры «Дети Марии»'}/><Navigation staff={staff} verified={verified}/><AccountControl/></header><main id="main-content" tabIndex={-1} className="opora-content">{children??<Outlet/>}</main></div>;}
 export function CandidateLayout({children}:{children?:ReactNode}){return <Layout staff={false}>{children}</Layout>;}
 export function CoordinatorLayout({children}:{children?:ReactNode}){return <Layout staff>{children}</Layout>;}
+
+/** A room keeps the actual principal's shell; host rights remain server-owned. */
+export function StudioLayout({children}:{children?:ReactNode}){const {session}=useSession();return session?.is_staff?<CoordinatorLayout>{children}</CoordinatorLayout>:<CandidateLayout>{children}</CandidateLayout>;}

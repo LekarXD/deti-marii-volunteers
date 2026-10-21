@@ -1,7 +1,7 @@
 import {getAppBasePath} from '../basePath';
 import type {ComponentType} from 'react';
 import {createBrowserRouter,Navigate,Outlet,useLocation,Link} from 'react-router-dom';
-import {AppProviders,CandidateLayout,CoordinatorLayout,useSession} from './layouts';
+import {AppProviders,CandidateLayout,CoordinatorLayout,StudioLayout,useSession} from './layouts';
 import {PublicLayout} from './PublicLayout';
 import {Card} from '../ui';
 import {VerifiedBoundary} from '../features/auth/VerifiedBoundary';
@@ -50,7 +50,6 @@ export const router=createBrowserRouter([{
    {path:'opportunities/:id',lazy:activity('OpportunityPage')},
    {path:'my/schedule',lazy:activity('PersonalSchedulePage')},
    {path:'webinars',lazy:page(()=>import('../features/studio'),'WebinarsPage')},
-   {path:'studio/:sessionId',lazy:page(()=>import('../features/studio'),'LiveRoomPage')},
    {path:'my/assignments',lazy:activity('MyAssignmentsPage')},
    {path:'my/assignments/:id',lazy:activity('AssignmentPage')},
    {path:'my/assignments/:id/preparation',lazy:followup('FirstShiftPage')},
@@ -58,6 +57,7 @@ export const router=createBrowserRouter([{
    {path:'me/group',lazy:participant('GroupPage')},
    {path:'ui',lazy:page(()=>import('../ui/FoundationPreview'),'FoundationPreview')},
   ]},
+  {element:<StudioLayout/>,children:[{path:'studio/:sessionId',lazy:page(()=>import('../features/studio'),'LiveRoomPage')}]},
   {element:<StaffBoundary/>,children:[{path:'fund',element:<CoordinatorLayout/>,children:[
    {index:true,lazy:page(()=>import('./OverviewPage'),'OverviewPage')},
    {path:'candidates',lazy:application('CandidatesPage')},
