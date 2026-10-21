@@ -16,6 +16,6 @@ Each test creates and drops an isolated PostgreSQL schema. The suite checks comp
 
 ## Remaining integration boundaries
 
-- `next_contact_date` is a persisted public agreement. Creation of a real CRM `follow_up_tasks` record belongs to P11's shared service and remains a cross-package integration gate.
+- `next_contact_date` and the real CRM follow-up task now commit atomically through P11 `schedule_follow_up`. Completing or amending a result uses its stable ID and the booking revision; changing/clearing the date cancels older open tasks, and current no-contact preferences suppress task creation. Private CRM fields stay outside public booking DTOs.
 - Transactional internal outbox events include booking ID/version. P17 must resolve the current booking and drop stale versions before delivery. P06 does not claim external delivery or Telegram linkage.
 - The integration owner supplies Alembic revisions, router wiring and generated OpenAPI TypeScript. This package does not maintain competing schema or root entrypoints.

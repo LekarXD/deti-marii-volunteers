@@ -11,11 +11,12 @@ from app.core.db import Base
 from app.core.auth import Principal
 from app.core.models import Foundation, User, Session, StaffMembership, PermissionGrant, ResourceReservation
 from app.core.errors import ApiError
-from app.modules.applications.models import Application
+from app.modules.applications.models import Application,FormVersion,ApplicationRevision
 from app.modules.interviews.models import InterviewBooking, InterviewResult, InterviewPrivateNote, AvailabilitySeries
 from app.modules.interviews import router as handlers
 from app.modules.interviews.schemas import WindowInput, BookingInput, MoveInput, PauseCommand, CompleteInput
 from app.modules.interviews.recurrence import expand, local_instant
+from app.modules.crm.models import FollowUpTask,FollowUpSource,CrmVolunteer
 from app.modules.interviews import service
 
 @pytest.fixture
@@ -33,6 +34,7 @@ async def world():
     async with engine.begin() as c: await c.run_sync(Base.metadata.create_all)
     async with factory() as db:
         foundation=Foundation(name='Interview tests');db.add(foundation);await db.flush()
+        form=FormVersion(foundation_id=foundation.id,version=1,content={});db.add(form);await db.flush()
         coordinator=User(foundation_id=foundation.id,display_name='Test coordinator');db.add(coordinator);await db.flush()
         membership=StaffMembership(foundation_id=foundation.id,user_id=coordinator.id);db.add(membership);await db.flush()
         db.add(PermissionGrant(membership_id=membership.id,permission='interviews.manage'))
@@ -40,6 +42,7 @@ async def world():
         for i in range(3):
             user=User(foundation_id=foundation.id,display_name=f'Candidate {i}');db.add(user);await db.flush()
             app=Application(foundation_id=foundation.id,user_id=user.id,submission_state='submitted');db.add(app);await db.flush()
+            revision=ApplicationRevision(application_id=app.id,form_version_id=form.id,number=1,answers={'firstName':f'Candidate {i}','lastName':'Fixture'},author_id=str(user.id));db.add(revision);await db.flush();app.submitted_revision_id=revision.id
             people.append((user,app))
         def session(user,staff=False):
             row=Session(foundation_id=foundation.id,user_id=user.id,token_hash=uuid4().hex,csrf_hash=uuid4().hex,csrf_cipher='test',expires_at=datetime.now(timezone.utc)+timedelta(days=1),mfa_at=datetime.now(timezone.utc) if staff else None)
@@ -164,3 +167,50 @@ async def test_revoked_staff_cannot_replay_or_change_availability(world):
     async with w.factory() as db:
         with pytest.raises(ApiError) as denied:await handlers.create_window(body,db,w.staff,'staff-replay')
         assert denied.value.status_code==403
+
+@pytest.mark.asyncio
+async def test_result_follow_up_create_change_clear_no_contact_and_receipt_replay(world):
+    from sqlalchemy import func
+    w=world;day=date.today()+timedelta(days=25)
+    await create_window(w,day);choice=(await slots(w,day))[0]
+    booking=await book(w,w.candidates[0],choice)
+    async with w.factory() as db:
+        row=await db.get(InterviewBooking,booking['id']);row.starts_at=datetime.now(timezone.utc)-timedelta(hours=2);row.ends_at=row.starts_at+timedelta(minutes=30);row.busy_until=row.ends_at
+        await db.commit()
+    async def complete(version,due,key=None):
+        async with w.factory() as db:return await handlers.complete(booking['id'],CompleteInput(expected_version=version,outcome='Follow up',public_agreement='Agreement',private_note='Private only',next_contact_date=due),db,w.staff,key or uuid4().hex)
+    first_date=date.today()+timedelta(days=3)
+    first=await complete(1,first_date,'complete-once')
+    replay=await complete(1,first_date,'complete-once');assert replay==first
+    async with w.factory() as db:
+        result=await db.scalar(select(InterviewResult).where(InterviewResult.booking_id==booking['id']))
+        result_id=result.id
+        tasks=(await db.scalars(select(FollowUpTask).where(FollowUpTask.source_id==result_id))).all()
+        assert len(tasks)==1 and tasks[0].state=='open' and tasks[0].due_on==first_date
+        assert tasks[0].assigned_user_id==w.staff.user_id and tasks[0].source_revision==2
+        assert (await db.scalar(select(CrmVolunteer).where(CrmVolunteer.application_id==w.applications[0].id))).relationship_state=='unverified'
+    moved_date=first_date+timedelta(days=2)
+    changed=await complete(2,moved_date);assert changed['version']==3
+    async with w.factory() as db:
+        tasks=(await db.scalars(select(FollowUpTask).where(FollowUpTask.source_id==result_id).order_by(FollowUpTask.source_revision))).all()
+        assert [t.state for t in tasks]==['cancelled','open'] and tasks[1].due_on==moved_date
+    cleared=await complete(3,None);assert cleared['version']==4
+    async with w.factory() as db:
+        assert not await db.scalar(select(FollowUpTask.id).where(FollowUpTask.source_id==result_id,FollowUpTask.state=='open'))
+        source=await db.scalar(select(FollowUpSource).where(FollowUpSource.source_id==result_id));assert source.current_revision==4 and source.task_id is None
+        volunteer=await db.scalar(select(CrmVolunteer).where(CrmVolunteer.application_id==w.applications[0].id));volunteer.no_contact=True;await db.commit()
+    suppressed=await complete(4,moved_date);assert suppressed['version']==5
+    async with w.factory() as db:
+        assert await db.scalar(select(func.count()).select_from(FollowUpTask).where(FollowUpTask.source_id==result_id))==2
+        source=await db.scalar(select(FollowUpSource).where(FollowUpSource.source_id==result_id));assert source.current_revision==5 and source.task_id is None
+        public=await service.booking_view(db,await db.get(InterviewBooking,booking['id']))
+        assert 'Private only' not in str(public) and 'volunteer_id' not in str(public) and 'assigned_user_id' not in str(public)
+    with pytest.raises(ApiError) as stale:await complete(3,first_date)
+    assert stale.value.code=='version_conflict'
+    async with w.factory() as db:
+        source=await db.scalar(select(FollowUpSource).where(FollowUpSource.source_id==result_id));source.current_revision=99;await db.commit()
+    with pytest.raises(ApiError) as fenced:await complete(5,first_date)
+    assert fenced.value.code=='stale_follow_up_source'
+    async with w.factory() as db:
+        unchanged=await db.get(InterviewBooking,booking['id']);result=await db.scalar(select(InterviewResult).where(InterviewResult.id==result_id))
+        assert unchanged.version==5 and result.next_contact_date==moved_date

@@ -181,14 +181,30 @@ async def cancel(id:UUID,body:CancelInput,db:AsyncSession=Depends(get_db),p:Prin
     return await command(db,p,"interviews.cancel:"+str(id),key,body.model_dump(mode="json"),action)
 
 async def finish(db,p,id,body,missed):
+    from app.modules.crm.service import schedule_follow_up
     row=await s.get_booking(db,p,id,staff=True,lock=True);s.check_version(row,body.expected_version)
-    if row.status!="booked":s.fail("interview_not_active","Встреча уже завершена или отменена.")
+    if row.status not in ("booked","completed","missed"):s.fail("interview_not_active","Отменённую встречу нельзя завершить.")
     if row.starts_at>datetime.now(timezone.utc):s.fail("interview_not_started","Итог можно записать после начала встречи.")
     if not body.outcome.strip() or not body.public_agreement.strip():s.fail("agreement_required","Запишите итог и договорённость для волонтёра.",422)
+    result=await db.scalar(select(InterviewResult).where(InterviewResult.booking_id==id).with_for_update())
+    amended=result is not None
     before=s.snapshot(row);row.status="missed" if missed else "completed";row.version+=1
-    db.add(InterviewResult(booking_id=id,outcome=body.outcome.strip(),public_agreement=body.public_agreement.strip(),next_contact_date=body.next_contact_date,author_id=p.user_id))
-    if body.private_note.strip():db.add(InterviewPrivateNote(booking_id=id,author_id=p.user_id,text=body.private_note.strip()))
-    await db.flush();await s.reserve(db,row,False);s.record(db,p,row,row.status,before);await db.flush()
+    if result is None:
+        result=InterviewResult(id=uuid4(),booking_id=id,author_id=p.user_id)
+        db.add(result)
+    result.outcome=body.outcome.strip();result.public_agreement=body.public_agreement.strip()
+    result.next_contact_date=body.next_contact_date;result.author_id=p.user_id
+    note=await db.scalar(select(InterviewPrivateNote).where(InterviewPrivateNote.booking_id==id))
+    if body.private_note.strip():
+        if note is None:note=InterviewPrivateNote(booking_id=id,author_id=p.user_id,text=body.private_note.strip());db.add(note)
+        else:note.text=body.private_note.strip();note.author_id=p.user_id
+    elif note is not None:await db.delete(note)
+    await db.flush()
+    # CRM owns the sole follow-up ledger. Result revision, task replacement, private note,
+    # booking/reservation, audit, outbox and command receipt share this transaction.
+    await schedule_follow_up(db,p.foundation_id,row.application_id,row.coordinator_id,body.next_contact_date,
+        'interview_result',result.id,row.version,p.actor_id)
+    await s.reserve(db,row,False);s.record(db,p,row,"result_updated" if amended else row.status,before);await db.flush()
     return await s.booking_view(db,row,staff=True)
 
 @router.post("/interviews/{id}/complete",response_model=StaffBookingView)
