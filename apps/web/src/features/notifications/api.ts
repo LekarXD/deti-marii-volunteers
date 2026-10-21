@@ -1,0 +1,28 @@
+import type {components} from '../../api/generated/schema';
+import {api} from '../../api/transport';
+export type Preferences = components['schemas']['PreferenceView'];
+export type PreferenceCommand = components['schemas']['PreferenceCommand'];
+export type Template = components['schemas']['TemplateView'];
+export type TemplateInput = components['schemas']['TemplateInput'];
+export type TemplateUpdate = components['schemas']['TemplateUpdate'];
+export type TemplateList = components['schemas']['TemplateList'];
+export type Audience = components['schemas']['AudienceView'];
+export type Readiness = components['schemas']['NotificationReadinessView'];
+export type RecipientPage = components['schemas']['NotificationRecipientPage'];
+export type Delivery = components['schemas']['DeliveryView'];
+export type DeliveryList = components['schemas']['DeliveryList'];
+export type AttemptPage = components['schemas']['DeliveryAttemptPage'];
+export type Enqueued = components['schemas']['EnqueuedView'];
+export const topics = {assignments:'Занятия и записи',learning:'Обучение',messages:'Сообщения команды',news:'Новости фонда'};
+export const channelLabel = (channel:string) => channel==='in_app'?'В личном кабинете':channel==='email'?'Электронная почта':channel;
+export const readPreferences=(signal?:AbortSignal)=>api<Preferences>('/me/notification-preferences',{signal});
+export const savePreferences=(body:PreferenceCommand,key:string)=>api<Preferences>('/me/notification-preferences',{method:'PUT',body,idempotencyKey:key});
+export const readTemplates=(cursor:string|null,signal?:AbortSignal)=>api<TemplateList>(`/coord/notification-templates?limit=30${cursor?`&cursor=${encodeURIComponent(cursor)}`:''}`,{signal});
+export const readReadiness=(signal?:AbortSignal)=>api<Readiness>('/coord/notifications/provider-readiness',{signal});
+export const readRecipients=(q:string,cursor:string|null,signal?:AbortSignal)=>api<RecipientPage>(`/coord/notifications/recipients?limit=30&q=${encodeURIComponent(q)}${cursor?`&cursor=${encodeURIComponent(cursor)}`:''}`,{signal});
+export const readDeliveries=(cursor:string|null,signal?:AbortSignal)=>api<DeliveryList>(`/coord/notification-deliveries?limit=20${cursor?`&cursor=${encodeURIComponent(cursor)}`:''}`,{signal});
+export const readAttempts=(id:string,before:number,signal?:AbortSignal)=>api<AttemptPage>(`/coord/notification-deliveries/${id}/attempts?limit=20&before=${before}`,{signal});
+export const command=<T,>(path:string,body:unknown,method='POST',key:string=crypto.randomUUID())=>api<T>(path,{method,body,idempotencyKey:key});
+export function dateTime(value:string){return new Intl.DateTimeFormat('ru-RU',{dateStyle:'short',timeStyle:'short'}).format(new Date(value));}
+export const minuteTime=(value:number)=>`${Math.floor(value/60).toString().padStart(2,'0')}:${(value%60).toString().padStart(2,'0')}`;
+export const timeMinute=(value:string)=>{const [hour,minute]=value.split(':').map(Number);return hour*60+minute;};

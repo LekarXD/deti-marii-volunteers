@@ -1,0 +1,64 @@
+// @vitest-environment jsdom
+import React from 'react';
+import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
+import {cleanup,render,screen,waitFor,within} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {MemoryRouter} from 'react-router-dom';
+import {QueryClientProvider} from '@tanstack/react-query';
+import {queryClient} from '../../api/queryClient';
+import {ApiError} from '../../api/transport';
+import {ToastProvider} from '../../ui';
+import {AudiencePanel} from './AudiencePanel';
+import {DeliveryJournal} from './DeliveryJournal';
+import {NotificationAdminPage} from './NotificationAdminPage';
+import {PreferencesPanel} from './PreferencesPanel';
+import type {Audience,Preferences,Readiness,Template} from './api';
+const mocks=vi.hoisted(()=>({preferences:vi.fn(),savePreferences:vi.fn(),templates:vi.fn(),readiness:vi.fn(),recipients:vi.fn(),deliveries:vi.fn(),attempts:vi.fn(),command:vi.fn()}));
+vi.mock('./api',async(importOriginal)=>({...await importOriginal<typeof import('./api')>(),readPreferences:mocks.preferences,savePreferences:mocks.savePreferences,readTemplates:mocks.templates,readReadiness:mocks.readiness,readRecipients:mocks.recipients,readDeliveries:mocks.deliveries,readAttempts:mocks.attempts,command:mocks.command}));
+const preference:Preferences={version:3,no_contact:false,effective_no_contact:true,email_enabled:false,in_app_enabled:true,email_provider_state:'unavailable',topics:{assignments:true,learning:true,messages:true,news:false},quiet_enabled:false,quiet_from:1320,quiet_to:540,timezone:'Europe/Moscow',news_consent:false};
+const readiness:Readiness={channel:'email',state:'unavailable',reason:'Провайдер не настроен',external_send_enabled:false,webhook_state:'unavailable',channels:[{channel:'in_app',state:'available',reason:'Внутренние уведомления сохраняются в платформе'},{channel:'email',state:'unavailable',reason:'Провайдер не настроен'}]};
+const template:Template={id:'template',key:'test.internal',channel:'in_app',topic:'messages',subject:'Привет, {volunteer_name}',body:'Ждём вас в {foundation_name}',state:'published',version:2,published_version_id:'published-v1',fields:['volunteer_name','foundation_name'],allowed_actions:['edit','publish','archive']};
+const audience:Audience={id:'preview',template_version_id:'published-v1',members:[{user_id:'one',display_name:'Тестовый волонтёр',eligible:true,reason:null},{user_id:'two',display_name:'Тестовый отказ',eligible:false,reason:'no_contact'}],eligible_count:1,preview_hash:'a'.repeat(64),expires_at:'2099-01-01T00:00:00Z'};
+function page(child:React.ReactNode){return <MemoryRouter><QueryClientProvider client={queryClient}><ToastProvider>{child}</ToastProvider></QueryClientProvider></MemoryRouter>;}
+beforeEach(()=>{queryClient.clear();for(const mock of Object.values(mocks))mock.mockReset();mocks.preferences.mockResolvedValue(preference);mocks.recipients.mockResolvedValue({items:[{id:'one',display_name:'Тестовый волонтёр'},{id:'two',display_name:'Тестовый отказ'}],next_cursor:null});mocks.templates.mockResolvedValue({items:[template],next_cursor:null});mocks.readiness.mockResolvedValue(readiness);});
+afterEach(()=>{cleanup();queryClient.clear();});
+describe('notification preferences',()=>{
+ it('saves actual channel, topic and quiet-hour values with CAS; canonical no-contact and consent remain visible',async()=>{
+  const user=userEvent.setup();mocks.savePreferences.mockImplementation(async(body)=>({...preference,...body,version:4}));render(page(<PreferencesPanel/>));
+  const news=await screen.findByRole('switch',{name:'Новости фонда'});expect((news as HTMLButtonElement).disabled).toBe(true);expect(screen.getByRole('link',{name:'согласие на новости'}).getAttribute('href')).toBe('/profile?tab=privacy#profile-consents');
+  await user.click(screen.getByRole('button',{name:'Электронная почта'}));await user.click(screen.getByRole('switch',{name:'Обучение'}));await user.click(screen.getByRole('switch',{name:'Тихие часы'}));
+  await user.click(screen.getByRole('button',{name:'Начало тихих часов'}));await user.click(screen.getByRole('combobox',{name:'Часы'}));await user.click(screen.getByRole('option',{name:'21'}));await user.click(screen.getByRole('button',{name:'Выбрать 21:00'}));
+  await user.click(screen.getByRole('button',{name:'Сохранить настройки'}));await waitFor(()=>expect(mocks.savePreferences).toHaveBeenCalledWith({expected_version:3,no_contact:false,email_enabled:true,in_app_enabled:true,topics:{assignments:true,learning:false,messages:true,news:false},quiet_enabled:true,quiet_from:1260,quiet_to:540,timezone:'Europe/Moscow'},expect.any(String)));
+  expect(screen.getByText(/Команда уже зафиксировала просьбу/)).toBeTruthy();
+ });
+ it('reuses a receipt for a network retry instead of silently creating another command',async()=>{
+  const user=userEvent.setup();mocks.savePreferences.mockRejectedValueOnce(new ApiError(0,'network','Нет связи')).mockResolvedValueOnce({...preference,version:4});render(page(<PreferencesPanel/>));await user.click(await screen.findByRole('button',{name:'Сохранить настройки'}));await screen.findByText('Нет связи');await user.click(screen.getByRole('button',{name:'Сохранить настройки'}));await waitFor(()=>expect(mocks.savePreferences).toHaveBeenCalledTimes(2));expect(mocks.savePreferences.mock.calls[0][1]).toBe(mocks.savePreferences.mock.calls[1][1]);
+ });
+});
+describe('reviewed notification audience',()=>{
+ it('previews without sending, confirms explicitly, and retries the same exact receipt after a network error',async()=>{
+  const user=userEvent.setup();mocks.command.mockImplementation(async(path)=>{if(path.endsWith('audience-preview'))return audience;throw new ApiError(0,'network','Результат запроса не получен');});render(page(<AudiencePanel template={template} readiness={readiness}/>));
+  await user.click(await screen.findByRole('checkbox',{name:'Тестовый волонтёр'}));await user.click(screen.getByRole('button',{name:'Проверить аудиторию'}));await screen.findByRole('heading',{name:'Получат уведомление: 1'});expect(mocks.command).toHaveBeenCalledTimes(1);expect((screen.getByRole('button',{name:'Подтвердить и поставить в очередь'}) as HTMLButtonElement).disabled).toBe(true);expect(screen.getByText('Просьба не связываться')).toBeTruthy();
+  await user.click(screen.getByRole('checkbox',{name:/Проверил текст и аудиторию/}));await user.click(screen.getByRole('button',{name:'Подтвердить и поставить в очередь'}));await screen.findByText('Результат запроса не получен');const first=mocks.command.mock.calls[1];expect(first).toEqual(['/coord/notifications/send',{preview_id:'preview',preview_hash:'a'.repeat(64),confirmed:true},'POST',expect.any(String)]);
+  mocks.command.mockResolvedValueOnce({enqueued:1,delivery_ids:['delivery'],state:'queued'});await user.click(screen.getByRole('button',{name:'Подтвердить и поставить в очередь'}));await screen.findByRole('heading',{name:'Поставлено в очередь: 1'});expect(mocks.command.mock.calls[2][3]).toBe(first[3]);expect(screen.queryByText('Доставлено')).toBeNull();
+ });
+ it('invalidates confirmation when recipients change and after a server policy conflict',async()=>{
+  const user=userEvent.setup();mocks.command.mockResolvedValueOnce(audience).mockResolvedValueOnce(audience).mockRejectedValueOnce(new ApiError(409,'audience_changed','Правила контакта изменились'));
+  render(page(<AudiencePanel template={template} readiness={readiness}/>));await user.click(await screen.findByRole('checkbox',{name:'Тестовый волонтёр'}));await user.click(screen.getByRole('button',{name:'Проверить аудиторию'}));await screen.findByRole('heading',{name:'Получат уведомление: 1'});await user.click(screen.getByRole('checkbox',{name:/Проверил текст и аудиторию/}));await user.click(screen.getByRole('checkbox',{name:'Тестовый отказ'}));expect(screen.queryByRole('heading',{name:'Получат уведомление: 1'})).toBeNull();
+  await user.click(screen.getByRole('button',{name:'Проверить аудиторию'}));await screen.findByRole('heading',{name:'Получат уведомление: 1'});await user.click(screen.getByRole('checkbox',{name:/Проверил текст и аудиторию/}));await user.click(screen.getByRole('button',{name:'Подтвердить и поставить в очередь'}));await screen.findByText('Правила контакта изменились');expect(screen.queryByRole('checkbox',{name:/Проверил текст и аудиторию/})).toBeNull();expect(screen.getByRole('button',{name:'Проверить аудиторию'})).toBeTruthy();
+ });
+ it('blocks unavailable external email while the independently available in-app channel works',async()=>{
+  const user=userEvent.setup();mocks.command.mockResolvedValueOnce(audience);render(page(<AudiencePanel template={{...template,channel:'email'}} readiness={readiness}/>));await user.click(await screen.findByRole('checkbox',{name:'Тестовый волонтёр'}));await user.click(screen.getByRole('button',{name:'Проверить аудиторию'}));await screen.findByRole('heading',{name:'Получат уведомление: 1'});expect((screen.getByRole('checkbox',{name:/Проверил текст и аудиторию/}) as HTMLInputElement).disabled).toBe(true);expect((screen.getByRole('button',{name:'Подтвердить и поставить в очередь'}) as HTMLButtonElement).disabled).toBe(true);expect(mocks.command).toHaveBeenCalledTimes(1);
+ });
+});
+describe('template and delivery lifecycle',()=>{
+ it('saves a draft and requires a separate reviewed publication before audience preparation',async()=>{
+  const user=userEvent.setup();const draft={...template,state:'draft',published_version_id:null,version:1};mocks.templates.mockResolvedValue({items:[draft],next_cursor:null});mocks.command.mockResolvedValue(draft);render(page(<NotificationAdminPage/>));await screen.findByRole('heading',{name:template.subject});expect(screen.queryByRole('button',{name:'Подготовить отправку'})).toBeNull();await user.click(screen.getByRole('button',{name:'Опубликовать'}));const dialog=await screen.findByRole('dialog',{name:'Опубликовать эту версию?'});expect(mocks.command).not.toHaveBeenCalled();expect(within(dialog).getByText(template.body)).toBeTruthy();await user.click(within(dialog).getByRole('button',{name:'Опубликовать версию'}));await waitFor(()=>expect(mocks.command).toHaveBeenCalledWith('/coord/notification-templates/template/publish',{expected_version:1},'POST',expect.any(String)));
+ });
+ it('authors a real template command without publishing or sending it automatically',async()=>{
+  const user=userEvent.setup();mocks.command.mockResolvedValue({...template,state:'draft'});render(page(<NotificationAdminPage/>));await user.click(screen.getByRole('button',{name:'Создать шаблон'}));const dialog=await screen.findByRole('dialog',{name:'Новый шаблон'});await user.type(within(dialog).getByLabelText('Ключ шаблона'),'fixture.welcome');await user.type(within(dialog).getByLabelText('Заголовок'),'До встречи');await user.type(within(dialog).getByLabelText('Текст уведомления'),'Проверочный текст для внутренней тестовой записи.');await user.click(within(dialog).getByRole('button',{name:'Сохранить черновик'}));await waitFor(()=>expect(mocks.command).toHaveBeenCalledWith('/coord/notification-templates',{key:'fixture.welcome',channel:'in_app',topic:'messages',subject:'До встречи',body:'Проверочный текст для внутренней тестовой записи.'},'POST',expect.any(String)));expect(mocks.command).toHaveBeenCalledTimes(1);
+ });
+ it('labels uncertain delivery honestly and loads actual older attempts on demand',async()=>{
+  const user=userEvent.setup();mocks.deliveries.mockResolvedValue({items:[{id:'delivery',recipient_user_id:'one',template_version_id:'v1',channel:'email',state:'unknown',version:2,next_attempt_at:null,attempts:[{attempt_number:21,state:'accepted',error_code:null,started_at:'2028-01-01T00:00:00Z',completed_at:null}],attempts_next_cursor:21}],next_cursor:null});mocks.attempts.mockResolvedValue({items:[{attempt_number:20,state:'unknown',error_code:'timeout',started_at:'2028-01-01T00:00:00Z',completed_at:null}],next_cursor:null});render(page(<DeliveryJournal/>));await screen.findByRole('heading',{name:'Результат отправки неизвестен'});expect(mocks.attempts).not.toHaveBeenCalled();await user.click(screen.getByRole('button',{name:'Попытки доставки'}));expect(screen.getByText('Попытка 21 · Принято почтовым сервером')).toBeTruthy();await user.click(screen.getByRole('button',{name:'Предыдущие попытки'}));await screen.findByText('Попытка 20 · Результат отправки неизвестен');expect(mocks.attempts).toHaveBeenCalledWith('delivery',21,expect.any(AbortSignal));expect(screen.queryByRole('button',{name:/Повторить отправку/})).toBeNull();
+ });
+});
