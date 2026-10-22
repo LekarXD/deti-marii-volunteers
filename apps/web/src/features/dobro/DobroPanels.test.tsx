@@ -5,6 +5,7 @@ import {MemoryRouter} from 'react-router-dom';
 import {DobroMyPath} from './DobroMyPath';
 import {OpportunityDobroPanel} from './OpportunityDobroPanel';
 import {DobroSettingsPanel} from './DobroSettingsPanel';
+import {DobroOverviewTask} from './DobroOverviewTask';
 const test=vi.hoisted(()=>({data:{} as unknown,mutate:vi.fn(async(_path:string,_method:string,_body:unknown)=>({}))}));
 vi.mock('./api',async original=>{
  const real=await original<typeof import('./api')>();
@@ -42,5 +43,20 @@ describe('Dobro panels stay optional and truthful',()=>{
   expect((screen.getByRole('checkbox',{name:'Напоминать мне в Опоре о ежемесячном переносе и сроках'}) as HTMLInputElement).checked).toBe(false);
   expect(screen.getByText('Без API, координатор переносит часы вручную')).toBeTruthy();
   expect(test.mutate).not.toHaveBeenCalled();
+ });
+ it('tells the coordinator which month, how much and by when to enter in Dobro',()=>{
+  vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-10-22T12:00:00+03:00'));
+  try{
+   test.data={period:'2026-10',groups:[],total_hours_due:9,total_people:2,work_deadline:'2026-11-05',at_risk_count:3,rules_note:''};
+   const {rerender}=render(<MemoryRouter><DobroOverviewTask/></MemoryRouter>);
+   expect(screen.getByRole('heading',{name:'Внести часы за октябрь в Добро.рф'})).toBeTruthy();
+   expect(screen.getByText('9 часов у 2 человек. Внесите их до 5 ноября.')).toBeTruthy();
+   expect(screen.getByText('Срочно: 3 записи с близким или пропущенным крайним сроком')).toBeTruthy();
+   expect(screen.getByRole('link',{name:'Открыть список'}).getAttribute('href')).toBe('/fund/integrations/dobro/transfers?period=2026-10');
+   test.data={period:'2026-10',groups:[],total_hours_due:0,total_people:0,work_deadline:'2026-11-05',at_risk_count:0,rules_note:''};
+   rerender(<MemoryRouter><DobroOverviewTask/></MemoryRouter>);
+   expect(screen.getByText('За октябрь вносить нечего: часы уже отмечены или участий пока не было.')).toBeTruthy();
+   expect(screen.queryByText(/Срочно/)).toBeNull();
+  }finally{vi.useRealTimers();}
  });
 });
