@@ -14,6 +14,7 @@ os.environ["TEST_MODE"] = "on"
 
 from aiogram import Bot, Dispatcher  # noqa: E402
 from aiogram.client.session.base import BaseSession  # noqa: E402
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError  # noqa: E402
 from aiogram.fsm.storage.memory import MemoryStorage  # noqa: E402
 from aiogram.methods import AnswerCallbackQuery  # noqa: E402
 from aiogram.types import CallbackQuery, Chat, Message, PhotoSize, Update, User  # noqa: E402
@@ -34,6 +35,7 @@ class FakeSession(BaseSession):
     def __init__(self):
         super().__init__()
         self.calls = []
+        self.blocked = set()  # чаты, где человек остановил бот
 
     async def make_request(self, bot, method, timeout=None):
         self.calls.append(method)
@@ -42,6 +44,10 @@ class FakeSession(BaseSession):
         if type(method).__name__ == "GetMe":
             return User(id=8824299081, is_bot=True, first_name="Дети Марии", username="detimarie_bot")
         chat_id = getattr(method, "chat_id", None) or 0
+        if chat_id in self.blocked:
+            raise TelegramForbiddenError(method, "Forbidden: bot was blocked by the user")
+        if len(getattr(method, "text", None) or "") > 4096:
+            raise TelegramBadRequest(method, "Bad Request: message is too long")
         return Message(message_id=len(self.calls), date=datetime.now(), chat=Chat(id=chat_id, type="private"),
                        text=getattr(method, "text", None) or "")
 
@@ -61,15 +67,15 @@ dp.include_routers(common.router, menu.router, testmode.router, coordinator.logi
 n = 0
 
 
-def user(uid, name):
-    return User(id=uid, is_bot=False, first_name=name, username=name.lower())
+def user(uid, name, first_name=None):
+    return User(id=uid, is_bot=False, first_name=first_name or name, username=name.lower())
 
 
-async def say(uid, text=None, contact=None, photo=None, caption=None):
+async def say(uid, text=None, contact=None, photo=None, caption=None, first_name=None, chat_type="private"):
     global n
     n += 1
     sizes = [PhotoSize(file_id=photo, file_unique_id=photo + "u", width=800, height=600)] if photo else None
-    msg = Message(message_id=n, date=datetime.now(), chat=Chat(id=uid, type="private"), from_user=user(uid, f"U{uid}"),
+    msg = Message(message_id=n, date=datetime.now(), chat=Chat(id=uid, type=chat_type), from_user=user(uid, f"U{uid}", first_name),
                   text=text, contact=contact, photo=sizes, caption=caption)
     session.calls.clear()
     await dp.feed_update(bot, Update(update_id=n, message=msg))
@@ -332,6 +338,86 @@ async def main():
     assert db.user(COORD)["is_coordinator"] == 1 and db.user(COORD)["status"] == "new"
     assert any(b.text == ui.BTN_RESET for row in ui.menu(db.user(ANNA)).inline_keyboard for b in row)
     assert ui.BTN_TO_COORD in labels(db.user(COORD)), "после сброса координатор видит путь волонтёра и может вернуться"
+
+    # вход по почте: анкета — только той почты, на которую ушёл код; имя из Telegram в письмо не попадает
+    VERA, GUESS, EVIL = 300, 400, '<a href="//evil.example">Подтвердите анкету</a>'
+    profiles = {"vera@mail.ru": dict(site_id="s-vera"), "boss@mail.ru": dict(site_id="s-boss", name="Чужая", status="active")}
+    real_find = volunteer.site.find_by_email
+
+    async def fake_find(email):
+        return volunteer.site.Profile(email=email, **profiles[email])
+    volunteer.site.find_by_email = fake_find
+    await say(VERA, "/start")
+    await say(VERA, ui.BTN_LOGIN)
+    assert any("Ваш код" in t for t in texts(await say(VERA, "vera@mail.ru", first_name=EVIL)))
+    await press(VERA, ui.StepCB(name="login"))  # «Другая почта» сразу же — код на неё не уходит
+    assert any("через минуту" in t for t in texts(await say(VERA, "boss@mail.ru")))
+    db.now = lambda: datetime(2026, 10, 21, 12, 2, tzinfo=config.TZ)
+    out = texts(await press(VERA, ui.StepCB(name="resend")))  # код снова уходит на vera@mail.ru
+    code = next(m.group(1) for m in (re.search(r"Ваш код: <b>(\d{6})</b>", t) for t in out) if m)
+    await say(VERA, code)
+    u = db.user(VERA)
+    assert u["email"] == "vera@mail.ru" and u["site_id"] == "s-vera" and u["status"] == "candidate" and u["name"] != "Чужая", dict(u)
+    letters = [p.read_text() for p in unisender.DRY_DIR.glob("*vera_at_mail.ru.html")]
+    assert letters and all("evil.example" not in x and "Здравствуйте!" in x for x in letters)
+    volunteer.site.find_by_email = real_find
+
+    # код координатора: после 5 неверных за час не принимается даже верный; в группе код не вводят
+    for _ in range(5):
+        await say(GUESS, "/coordinator guess")
+    assert any("Слишком много попыток" in t for t in texts(await say(GUESS, "/coordinator test-code")))
+    assert not db.user(GUESS)["is_coordinator"]
+    db.now = lambda: datetime(2026, 10, 21, 13, 5, tzinfo=config.TZ)
+    assert any("Вы вошли как координатор" in t for t in texts(await say(GUESS, "/coordinator test-code")))
+    db.update_user(GUESS, is_coordinator=0)
+    assert any("личном чате" in t for t in texts(await say(-500, "/coordinator test-code", chat_type="group")))
+    assert not db.user(-500)
+
+    # координатор остановил бот, потом нажал «Старт» — снова получает вопросы; длинный вопрос укорочен
+    session.blocked.add(COORD)
+    await say(VERA, ui.BTN_ASK)
+    calls = await say(VERA, "в" * 4090)
+    assert texts(calls, COORD) and all(len(t) <= 4096 for t in texts(calls, COORD))
+    assert db.user(COORD)["blocked"] == 1 and not db.coordinators()
+    session.blocked.discard(COORD)
+    await say(COORD, "/start")
+    assert db.user(COORD)["blocked"] == 0 and db.coordinators()
+
+    # длинный ответ и личное сообщение укорачиваются и доходят; недоставленное — координатор об этом узнаёт
+    await press(COORD, ui.AnswerCB(qid=db.one("SELECT MAX(id) AS id FROM questions")["id"]))
+    calls = await say(COORD, "о" * 4090)
+    assert "Ответ отправлен." in texts(calls, COORD) and all(len(t) <= 4096 for t in texts(calls, VERA))
+    session.blocked.add(VERA)
+    await press(COORD, ui.StepCB(name=f"dm{VERA}"))
+    assert any("Не удалось доставить" in t for t in texts(await say(COORD, "Захватите фартук"), COORD))
+    session.blocked.discard(VERA)
+    # лента с длинными записями делится на сообщения до 4096 символов, кнопки — под последним
+    for _ in range(15):
+        db.log("feedback", VERA, "Сложности на занятии: " + "с" * 500)
+    calls = [c for c in await say(COORD, ui.BTN_FEED) if type(c).__name__ == "SendMessage"]
+    assert len(calls) > 3 and all(len(c.text) <= 4096 for c in calls)
+    assert any(b.text.startswith("Карточка: ") for row in calls[-1].reply_markup.inline_keyboard for b in row)
+
+    # время события проверяется: 24:00 и 18:60 не принимаются
+    await say(COORD, ui.BTN_NEW_EVENT)
+    await say(COORD, "Вечер")
+    await say(COORD, "31.10")
+    assert any("Напишите время" in t for t in texts(await say(COORD, "20:00-24:00")))
+    assert any("Напишите время" in t for t in texts(await say(COORD, "18:60")))
+    await say(COORD, "отмена")
+
+    # отмена даты снимает приглашения: в «Моих занятиях» её нет, старая кнопка «Приду» не срабатывает
+    db.set_invite("art", "2026-11-07", VERA, "confirmed")
+    db.set_invite("art", "2026-11-07", GUESS, "invited")
+    await press(COORD, ui.EvCB(action="cancel_yes", eid="art", d="20261107"))
+    assert not volunteer.my_upcoming(VERA) and db.invite("art", "2026-11-07", VERA)["status"] == "removed"
+    await press(GUESS, ui.InvCB(action="yes", eid="art", d="20261107"))
+    assert db.invite("art", "2026-11-07", GUESS)["status"] == "removed"
+
+    # «<» в названии события не ломает подпись к Excel (подписи — в HTML)
+    db.run("INSERT INTO events (id, title, start_date, need) VALUES ('lt', 'МК <3', '2026-10-31', 1)")
+    db.set_invite("lt", "2026-10-31", VERA, "confirmed")
+    assert any(c.caption.startswith("Команда: МК &lt;3") for c in docs(await press(COORD, ui.EvCB(action="xls", eid="lt", d="20261031")), COORD))
 
     print("PASS: меню кнопками под сообщениями, без нижней клавиатуры, вход координатора, режимы, лента вместо уведомлений, карточка волонтёра, рассылки с текстом и картинкой, анкета для новых, вход по почте и коду (Unisender Go, тестовый режим), запись на собеседование с сайта, плашка «Меню» после входа, допуск только после собеседования, приглашение → согласие → подтверждение, "
           "мои занятия и .ics, материалы с группой, вопрос и ответ, срочный отказ, новое событие и его отмена, выгрузки, пауза, тестовый сброс диалога")

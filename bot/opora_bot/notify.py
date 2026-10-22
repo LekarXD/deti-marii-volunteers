@@ -13,7 +13,7 @@ def is_quiet(moment=None) -> bool:
     if QUIET_FROM == QUIET_TO:
         return False
     h = (moment or db.now()).hour
-    return h >= QUIET_FROM or h < QUIET_TO
+    return QUIET_FROM <= h < QUIET_TO if QUIET_FROM < QUIET_TO else (h >= QUIET_FROM or h < QUIET_TO)
 
 
 def morning():

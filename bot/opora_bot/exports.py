@@ -1,6 +1,7 @@
 """Выгрузки: Excel для координатора и .ics для календаря волонтёра."""
 from datetime import date, datetime, timedelta
 import re
+from html import escape
 from io import BytesIO
 
 from openpyxl import Workbook
@@ -96,12 +97,12 @@ def month_summary(today: date) -> str:
             continue
         day = date.fromisoformat(r["date"])
         if starts_at(ev, day) - datetime.fromisoformat(r["answered_at"]) < timedelta(hours=24):
-            late_names.append(f"{r['name']} — {ev['title']}, {human(day, False)}")
+            late_names.append(f"{escape(r['name'] or '')} — {escape(ev['title'])}, {human(day, False)}")
     lines = [f"<b>Итоги с {human(first, False)} по {human(min(last, today), False)}</b>",
              f"Событий: {len(occ)}, из них с волонтёрами: {len(with_need)}",
              f"Вышли волонтёров: {went['n']}, часов: {went['h']:g}",
              f"Не хватало людей: {len(short)}"]
-    lines += [f"• {e['title']}, {human(d, False)} — {db.confirmed_count(e['id'], d.isoformat())} из {e['need']}" for e, d in short[:10]]
+    lines += [f"• {escape(e['title'])}, {human(d, False)} — {db.confirmed_count(e['id'], d.isoformat())} из {e['need']}" for e, d in short[:10]]
     lines.append(f"Отказались меньше чем за сутки: {len(late_names)}")
     lines += [f"• {x}" for x in late_names[:10]]
     return "\n".join(lines)
