@@ -18,3 +18,8 @@
 /* Phones: messages and signals live in the menu panel, so the menu button keeps its label. */
 @media(max-width:720px){.opora-header.is-staff .staff-shortcuts{display:none}}
 @media(max-width:720px){.staff-shortcuts{padding:4px}.staff-shortcuts .iconbtn{width:40px;height:40px}}
+.opora-app.vol>.opora-header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center}
+.opora-app.vol>.opora-header>.brand{justify-self:start}
+.opora-app.vol>.opora-header>.top-navigation{margin-left:0;justify-self:center}
+.opora-app.vol>.opora-header>.head-end{justify-self:end}
+@media(max-width:1100px){.opora-app.vol>.opora-header{display:flex}.opora-app.vol>.opora-header>.top-navigation{margin-left:auto}}
