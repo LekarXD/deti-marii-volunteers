@@ -52,8 +52,6 @@ async def test_two_volunteers_last_place_race_and_separate_approval(context):
     event,need,user1,user2,_=await setup(context)
     invited=await context.client.post(f"/api/v1/coord/staffing-needs/{need['id']}/invitations",headers=headers(),json={'expected_version':1,'user_id':str(user1)})
     row=invited.json()
-    blocked=await context.client.post(f"/api/v1/assignments/{row['id']}/confirm",headers=user_headers(),json={'expected_version':1})
-    assert blocked.status_code==409 and blocked.json()['code']=='approval_required'
     assert (await context.client.post(f"/api/v1/coord/assignments/{row['id']}/approve",headers=user_headers(),json={'expected_version':1,'reason':'Self approval'})).status_code==403
     approved=await context.client.post(f"/api/v1/coord/assignments/{row['id']}/approve",headers=headers(),json={'expected_version':1,'reason':'Согласовано.'})
     first=approved.json();second=await invite_approve(context,need,user2)
@@ -252,3 +250,13 @@ async def test_profile_pause_is_checked_for_new_invites_and_confirmation(context
         profile=await db.get(VolunteerProfile,user1);profile.paused_until=date(2029,1,1)
         await db.commit()
         assert (await db.get(Assignment,UUID(item['id']))).status=='confirmed'
+
+
+@pytest.mark.asyncio
+async def test_invitation_is_confirmed_by_the_volunteer_without_separate_approval(context):
+    # The coordinator's invitation is already the offer; only a volunteer's own sign-up can wait for approval.
+    _,need,user1,_,_=await setup(context)
+    invited=(await context.client.post(f"/api/v1/coord/staffing-needs/{need['id']}/invitations",headers=headers(),json={'expected_version':1,'user_id':str(user1)})).json()
+    confirmed=await context.client.post(f"/api/v1/assignments/{invited['id']}/confirm",headers=user_headers(),json={'expected_version':invited['version']})
+    assert confirmed.status_code==200,confirmed.text
+    assert confirmed.json()['status']=='confirmed'

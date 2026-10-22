@@ -330,8 +330,10 @@ async def sync_needs(db,entity,templates):
             if need.capacity_required:need.capacity_required=0;need.version+=1
         else:
             t=active[role_id]
-            if (need.capacity_required,need.preparation_requirements,need.approval_policy)!=(t.capacity_required,t.preparation_requirements,t.approval_policy):
-                need.capacity_required=t.capacity_required;need.preparation_requirements=t.preparation_requirements;need.approval_policy=t.approval_policy;need.version+=1
+            # approval_policy no longer decides anything, so changing it must not void open invitations.
+            if (need.capacity_required,need.preparation_requirements)!=(t.capacity_required,t.preparation_requirements):
+                need.capacity_required=t.capacity_required;need.preparation_requirements=t.preparation_requirements;need.version+=1
+            need.approval_policy=t.approval_policy
     for role_id,template in active.items():
         if role_id not in existing:await add_need_from_template(db,entity,template)
 
