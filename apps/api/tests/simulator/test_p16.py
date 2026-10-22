@@ -337,6 +337,9 @@ async def test_reviewer_queue_flags_a_zero_on_a_critical_criterion(context):
     assert appealed.status_code==200,appealed.text
     queued=(await context.client.get('/api/v1/coord/simulator/appeals',headers=headers('reviewer'))).json()
     assert [row['critical'] for row in queued]==[True]
+
+
+@pytest.mark.asyncio
 async def test_retry_evaluation_only_reruns_a_failed_evaluation(context):
     scenario=await published_scenario(context);session=await start(context,scenario)
     sent=await context.client.post(f"/api/v1/simulation-sessions/{session['id']}/turns",headers=headers('learner'),json={'expected_version':session['version'],'content':'Можешь выбрать краски или посидеть рядом.'})

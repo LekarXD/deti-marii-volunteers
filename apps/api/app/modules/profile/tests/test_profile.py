@@ -385,6 +385,8 @@ async def test_prize_photo_purpose_is_staff_bound_and_visible_through_catalog(en
         saved=await client_put(reviewer,f"/coord/prizes/{prize['id']}",dict(expected_version=1,title=prize['title'],price_points=50,stock=10,photo_asset_id=asset['id']));assert saved.status_code==200,saved.text
         photo=await own.get(f"/api/v1/prizes/{prize['id']}/photo");assert photo.status_code==200 and photo.content==data
         assert (await own.get(f"/api/v1/assets/{asset['id']}/content")).status_code==404
+    finally:await own.aclose();await reviewer.aclose()
+
 @pytest.mark.asyncio
 async def test_review_queues_keep_actionable_rows_ahead_of_settled_history(env):
     from app.core.clock import utcnow
