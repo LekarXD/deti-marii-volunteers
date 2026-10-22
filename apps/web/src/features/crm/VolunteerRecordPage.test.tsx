@@ -9,7 +9,7 @@ import type {Task,Volunteer} from './api';
 import {VolunteerRecordPage} from './VolunteerRecordPage';
 vi.mock('../../api/transport',async load=>({...await load<typeof import('../../api/transport')>(),api:vi.fn(),getSession:()=>({permissions:['crm.write'],user_id:'staff-1'})}));
 const task:Task={id:'task-1',volunteer_id:'vol-1',application_id:null,assigned_user_id:'staff-1',due_on:'2026-10-25',title:'Позвонить волонтёру',state:'open',version:1,source_type:'manual',source_id:'source-1',source_revision:1,completed_at:null};
-const fixture:Volunteer={id:'vol-1',version:5,display_name:'Анна Учебная',agreements:[],application_id:null,availability:null,blocked_reasons:[],can_invite:false,contact_events:[],contacts:{},context:'',follow_up_tasks:[task],import_provenance:[],latest_reflection:null,merged_into_id:null,merged_record_ids:[],next_task:task,no_contact:false,relationship_state:'contacted',reviews:[]};
+const fixture:Volunteer={id:'vol-1',version:5,display_name:'Анна Учебная',agreements:[],application_id:null,availability:null,blocked_reasons:[],can_invite:false,contact_events:[],contacts:{},context:'',follow_up_tasks:[task],latest_reflection:null,merged_into_id:null,merged_record_ids:[],next_task:task,no_contact:false,relationship_state:'contacted',trusted_with_newcomers:false};
 let current:Volunteer,foreign=0;const clients:QueryClient[]=[];
 beforeEach(()=>{current=structuredClone(fixture);foreign=0;vi.mocked(api).mockImplementation(async<T,>(path:string,options?:ApiOptions):Promise<T>=>{
  if(path==='/coord/volunteers/vol-1')return current as T;

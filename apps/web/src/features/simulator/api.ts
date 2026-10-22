@@ -3,11 +3,11 @@ import {useInfiniteQuery,useMutation,useQuery,useQueryClient} from '@tanstack/re
 import {api} from '../../api/transport';
 import {keys} from '../../api/keys';
 import type {components} from '../../api/generated/schema';
-export type ScenarioDraft=components['schemas']['SimulatorScenarioDraft-Output'];
+export type ScenarioDraft=components['schemas']['SimulatorScenarioDraft'];
 export type ScenarioStaff=components['schemas']['SimulatorScenarioStaffView'];
 export type ScenarioPublic=components['schemas']['SimulatorScenarioPublicView'];
 export type SimulationAttempt=components['schemas']['SimulatorSessionView'];
-export type SimulationAssessment=components['schemas']['SimulatorAssessmentOutput-Output'];
+export type SimulationAssessment=components['schemas']['SimulatorAssessmentOutput'];
 export type SimulationTestRun=components['schemas']['SimulatorTestRunView'];
 export type ReviewQueueItem=components['schemas']['SimulatorReviewQueueItem'];
 export type AppealDetail=components['schemas']['SimulatorAppealDetail'];
