@@ -50,9 +50,10 @@ def create_app() -> FastAPI:
                   responses={status: {"model": ErrorView} for status in (400, 401, 403, 404, 409, 422, 429, 503)})
     install_platform(app)
     app.dependency_overrides[get_assignment_access] = lambda: ActivityAssignmentAccess()
-    for router in (auth, staff, assets, applications, interviews, participants, learning, messaging, crm, knowledge, followups, notifications, studio, profile, simulator, recordings, reporting, admin, dobro, telegram, telegram_bot):
+    for router in (auth, staff, assets, applications, interviews, participants, learning, messaging, crm, knowledge, followups, notifications, studio, profile, recordings, reporting, admin, dobro, telegram, telegram_bot):
         app.include_router(router)
-    app.include_router(activities, prefix="/api/v1")
+    for router in (activities, simulator):
+        app.include_router(router, prefix="/api/v1")
     return app
 
 app = create_app()
