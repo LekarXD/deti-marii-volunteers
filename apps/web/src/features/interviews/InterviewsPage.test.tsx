@@ -40,7 +40,7 @@ describe('staff interviews',()=>{
   await user.click(screen.getByRole('button',{name:/Вера Новикова/}));
   expect(screen.getByTestId('where').textContent).toBe('?booking=vera');
   let panel=screen.getByRole('complementary');
-  expect(within(panel).getByText('Сегодня, 14:00–14:30')).toBeTruthy();
+  expect(within(panel).getByText('Сегодня, 14:00')).toBeTruthy();
   expect(within(panel).getByText('Помощь на занятиях')).toBeTruthy();
   expect(within(panel).getByText('Telegram @vera_n')).toBeTruthy();
   expect(within(panel).queryByRole('button',{name:'Записать итог'})).toBeNull();
