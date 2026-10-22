@@ -55,7 +55,7 @@ async def count_assignments(db,need_id):
 def staffing_need_view(need,revision,invited,confirmed):
     return StaffingNeedView(id=need.id,role_id=need.role_id,role_version_id=need.role_version_id,
         role_title=revision.snapshot['title'],version=need.version,required=need.capacity_required,invited=invited,
-        confirmed=confirmed,missing=max(0,need.capacity_required-confirmed),preparation_requirements=need.preparation_requirements,approval_policy=need.approval_policy)
+        confirmed=confirmed,missing=max(0,need.capacity_required-confirmed),preparation_requirements=need.preparation_requirements,approval_policy=need.approval_policy,points_multiplier=need.points_multiplier)
 
 
 async def needs_view(db,entity):
@@ -115,7 +115,7 @@ async def series_view(db,entity):
     templates=(await db.scalars(select(EventSeriesNeedTemplate).where(EventSeriesNeedTemplate.series_id==entity.id,EventSeriesNeedTemplate.active.is_(True)).order_by(EventSeriesNeedTemplate.id))).all()
     fields={field:getattr(entity,field) for field in SERIES_FIELDS}
     return EventSeriesView(**fields,id=entity.id,state=entity.state,version=entity.version,
-        staffing_needs=[{'role_id':t.role_id,'capacity_required':t.capacity_required,'preparation_requirements':t.preparation_requirements,'approval_policy':t.approval_policy} for t in templates],allowed_actions=['preview-change','cancel' if entity.state=='active' else 'restore'])
+        staffing_needs=[{'role_id':t.role_id,'capacity_required':t.capacity_required,'preparation_requirements':t.preparation_requirements,'approval_policy':t.approval_policy,'points_multiplier':t.points_multiplier} for t in templates],allowed_actions=['preview-change','cancel' if entity.state=='active' else 'restore'])
 
 
 async def record(db,principal,entity,kind):
@@ -138,7 +138,7 @@ def projected(entity,lower,upper):
 
 async def add_need_from_template(db,entity,template):
     db.add(StaffingNeed(occurrence_id=entity.id,foundation_id=entity.foundation_id,template_id=template.id,role_id=template.role_id,role_version_id=template.role_version_id,
-        capacity_required=template.capacity_required,preparation_requirements=template.preparation_requirements,approval_policy=template.approval_policy))
+        capacity_required=template.capacity_required,preparation_requirements=template.preparation_requirements,approval_policy=template.approval_policy,points_multiplier=template.points_multiplier))
 
 
 async def materialize(db,entity,lower,upper):
@@ -165,12 +165,13 @@ async def update_templates(db,principal,entity,inputs):
             revision=await db.scalar(select(VolunteerRoleVersion).where(VolunteerRoleVersion.role_id==role.id,VolunteerRoleVersion.version==role.version))
             template=EventSeriesNeedTemplate(series_id=entity.id,foundation_id=entity.foundation_id,role_id=role.id,role_version_id=revision.id,capacity_required=row.capacity_required,
                 preparation_requirements=row.model_dump(mode='json')['preparation_requirements'] if row.preparation_requirements is not None else role.preparation_defaults,
-                approval_policy=row.approval_policy or role.approval_policy)
+                approval_policy=row.approval_policy or role.approval_policy,points_multiplier=row.points_multiplier or 1)
             db.add(template)
         else:
             template.capacity_required=row.capacity_required
             if row.preparation_requirements is not None:template.preparation_requirements=row.model_dump(mode='json')['preparation_requirements']
             if row.approval_policy is not None:template.approval_policy=row.approval_policy
+            if row.points_multiplier is not None:template.points_multiplier=row.points_multiplier
             template.active=True
     for role_id,template in existing.items():
         if role_id not in new_ids:template.active=False
@@ -270,12 +271,16 @@ async def patch_staffing(db,principal,id,body):
             role=by_id[row.role_id]
             revision=await db.scalar(select(VolunteerRoleVersion).where(VolunteerRoleVersion.role_id==role.id,VolunteerRoleVersion.version==role.version))
             need=StaffingNeed(occurrence_id=id,foundation_id=principal.foundation_id,role_id=role.id,role_version_id=revision.id,capacity_required=row.capacity_required,
-                preparation_requirements=row.model_dump(mode='json')['preparation_requirements'] if row.preparation_requirements is not None else role.preparation_defaults,approval_policy=row.approval_policy or role.approval_policy)
+                preparation_requirements=row.model_dump(mode='json')['preparation_requirements'] if row.preparation_requirements is not None else role.preparation_defaults,approval_policy=row.approval_policy or role.approval_policy,points_multiplier=row.points_multiplier or 1)
             db.add(need)
         else:
-            need.capacity_required=row.capacity_required;need.version+=1
+            conditions=(need.capacity_required,need.preparation_requirements,need.approval_policy)
+            need.capacity_required=row.capacity_required
             if row.preparation_requirements is not None:need.preparation_requirements=row.model_dump(mode='json')['preparation_requirements']
             if row.approval_policy is not None:need.approval_policy=row.approval_policy
+            # The multiplier is not an invitation condition: changing only it keeps pending invitations valid.
+            if row.points_multiplier is not None:need.points_multiplier=row.points_multiplier
+            if row.points_multiplier is None or conditions!=(need.capacity_required,need.preparation_requirements,need.approval_policy):need.version+=1
     override=await db.get(OccurrenceOverride,id)
     if override is None:db.add(OccurrenceOverride(occurrence_id=id,fields={'staffing_needs':True},updated_by=principal.actor_id))
     else:override.fields={**override.fields,'staffing_needs':True};override.version+=1
@@ -332,6 +337,7 @@ async def sync_needs(db,entity,templates):
             t=active[role_id]
             if (need.capacity_required,need.preparation_requirements,need.approval_policy)!=(t.capacity_required,t.preparation_requirements,t.approval_policy):
                 need.capacity_required=t.capacity_required;need.preparation_requirements=t.preparation_requirements;need.approval_policy=t.approval_policy;need.version+=1
+            need.points_multiplier=t.points_multiplier
     for role_id,template in active.items():
         if role_id not in existing:await add_need_from_template(db,entity,template)
 

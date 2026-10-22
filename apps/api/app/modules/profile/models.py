@@ -159,3 +159,48 @@ class ProfileDataRequest(Base):
     created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
     updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
     __table_args__=(CheckConstraint("kind IN ('export','deletion') AND state IN ('requested','in_review','approved','ready','rejected','cancelled','completed')",name='ck_profile_data_request'),)
+
+class PointsEntry(Base):
+    """Bonuses and manual adjustments. Hours-based points are derived from the ledger, never stored."""
+    __tablename__='points_entries'
+    id:Mapped[UUID]=mapped_column(primary_key=True,default=uuid4)
+    foundation_id:Mapped[UUID]=mapped_column(ForeignKey('foundations.id'),index=True)
+    user_id:Mapped[UUID]=mapped_column(ForeignKey('users.id'),index=True)
+    kind:Mapped[str]=mapped_column(String(20))
+    bonus_key:Mapped[str|None]=mapped_column(String(40))
+    points:Mapped[int]=mapped_column(Integer)
+    reason:Mapped[str]=mapped_column(Text)
+    actor_id:Mapped[str]=mapped_column(String(100))
+    occurred_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+    created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+    __table_args__=(UniqueConstraint('foundation_id','user_id','bonus_key',name='uq_points_bonus_once'),CheckConstraint("kind IN ('bonus','adjustment') AND (kind = 'bonus') = (bonus_key IS NOT NULL) AND points <> 0",name='ck_points_entry'))
+
+class Prize(Base):
+    __tablename__='prizes'
+    id:Mapped[UUID]=mapped_column(primary_key=True,default=uuid4)
+    foundation_id:Mapped[UUID]=mapped_column(ForeignKey('foundations.id'),index=True)
+    title:Mapped[str]=mapped_column(String(200))
+    description:Mapped[str]=mapped_column(Text,default='')
+    photo_asset_id:Mapped[UUID|None]=mapped_column(ForeignKey('media_assets.id'))
+    price_points:Mapped[int]=mapped_column(Integer)
+    stock:Mapped[int]=mapped_column(Integer)
+    visible:Mapped[bool]=mapped_column(Boolean,default=True)
+    version:Mapped[int]=mapped_column(Integer,default=1)
+    created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+    updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+    __table_args__=(CheckConstraint('price_points > 0 AND stock >= 0 AND version > 0',name='ck_prize'),)
+
+class PrizeRequest(Base):
+    __tablename__='prize_requests'
+    id:Mapped[UUID]=mapped_column(primary_key=True,default=uuid4)
+    foundation_id:Mapped[UUID]=mapped_column(ForeignKey('foundations.id'),index=True)
+    user_id:Mapped[UUID]=mapped_column(ForeignKey('users.id'),index=True)
+    prize_id:Mapped[UUID]=mapped_column(ForeignKey('prizes.id'),index=True)
+    points:Mapped[int]=mapped_column(Integer)
+    state:Mapped[str]=mapped_column(String(20),default='requested')
+    version:Mapped[int]=mapped_column(Integer,default=1)
+    reason:Mapped[str]=mapped_column(Text,default='')
+    decided_by:Mapped[UUID|None]=mapped_column(ForeignKey('users.id'))
+    created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+    updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+    __table_args__=(CheckConstraint("points > 0 AND state IN ('requested','issued','rejected','cancelled')",name='ck_prize_request'),)

@@ -29,6 +29,7 @@ class StaffingNeedInput(BaseModel):
     capacity_required:int=Field(ge=0,le=1000)
     preparation_requirements:list[PreparationRequirement]|None=None
     approval_policy:ApprovalPolicy|None=None
+    points_multiplier:Literal[1,1.5]|None=None
 
 
 class EventSeriesCreate(BaseModel):
@@ -96,6 +97,7 @@ class StaffingNeedView(BaseModel):
     missing:int
     preparation_requirements:list[PreparationRequirement]
     approval_policy:ApprovalPolicy
+    points_multiplier:float=1
 
 
 class EventOccurrenceView(BaseModel):

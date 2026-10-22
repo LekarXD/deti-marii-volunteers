@@ -1,7 +1,9 @@
 """Append-only minute deltas backed by immutable attendance or coordinator reviews."""
 from datetime import date,timedelta
+from uuid import uuid4
 from zoneinfo import ZoneInfo
 from sqlalchemy import select,func,text
+from sqlalchemy.dialects.postgresql import insert
 from app.core.clock import utcnow
 from .dates import local_today
 from app.core.errors import ApiError
@@ -9,8 +11,8 @@ from app.core.models import User
 from app.modules.activities.assignment_models import Assignment,AttendanceEvent,Attendance
 from app.modules.activities.calendar_models import EventOccurrence
 from app.modules.applications.service import check_version
-from .models import ServiceTimeEntry,ManualTimeRequest,ManualTimeReview,Gratitude
-from .schemas import ServiceTimeEntryView,ManualTimeView,ManualTimeReviewView,HoursView,AchievementView,GratitudeView
+from .models import ServiceTimeEntry,ManualTimeRequest,ManualTimeReview,Gratitude,PointsEntry,Prize,PrizeRequest
+from .schemas import ServiceTimeEntryView,ManualTimeView,ManualTimeReviewView,HoursView,AchievementView,GratitudeView,LevelView,LevelStepView,PointsView,PointsHistoryView
 
 async def subject_lock(db,foundation_id,user_id):
     await db.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'ledger:{foundation_id}:{user_id}'})
@@ -106,7 +108,56 @@ async def hours_view(db,principal):
         basis=next((entry for entry in entries if entry.id==gratitude.basis_entry_id),None)
         basis_current=bool(basis and sum(entry.delta_minutes for entry in entries if entry.source_kind==basis.source_kind and entry.source_id==basis.source_id)>0)
         author=await db.get(User,gratitude.author_id);thanks.append(GratitudeView(id=gratitude.id,text=gratitude.text,author=author.display_name,created_at=gratitude.created_at,basis_current=basis_current))
-    return HoursView(total_minutes=sum(entry.delta_minutes for entry in entries),confirmed_assignments=count,pending_minutes=sum(row.requested_minutes for row in manuals if row.state=='pending'),ledger_pending=pending,entries=[entry_view(row) for row in entries],manual_requests=[await manual_view(db,row) for row in manuals],achievements=achievements,gratitudes=thanks)
+    total=sum(entry.delta_minutes for entry in entries)
+    return HoursView(total_minutes=total,confirmed_assignments=count,pending_minutes=sum(row.requested_minutes for row in manuals if row.state=='pending'),ledger_pending=pending,entries=[entry_view(row) for row in entries],manual_requests=[await manual_view(db,row) for row in manuals],achievements=achievements,gratitudes=thanks,level=level_view(total,count>=1),points=await points_view(db,principal.foundation_id,user.id,entries))
+
+# Levels follow all-time confirmed minutes (manual included) and are shown only to the volunteer.
+LEVELS=(('first_steps','Первые шаги',None),('team','В команде',20*60),('friend','Друг фонда',50*60),('pillar','Опора фонда',100*60))
+TRUSTED_MINUTES=100*60
+def level_view(total_minutes,first_class):
+    reached=[index for index,(_,_,minutes) in enumerate(LEVELS) if (first_class if minutes is None else total_minutes>=minutes)]
+    current=max(reached,default=None);following=LEVELS[0] if current is None else LEVELS[current+1] if current+1<len(LEVELS) else None
+    steps=[LevelStepView(key=key,title=title,minutes=minutes,reached=index in reached,current=index==current) for index,(key,title,minutes) in enumerate(LEVELS)]
+    return LevelView(key=LEVELS[current][0] if current is not None else None,title=LEVELS[current][1] if current is not None else None,next_title=following[1] if following else None,next_minutes=following[2] if following else None,letter_hint=current is not None and current>=2,steps=steps)
+
+async def trusted_with_newcomers(db,foundation_id,user_id):
+    total=await db.scalar(select(func.sum(ServiceTimeEntry.delta_minutes)).where(ServiceTimeEntry.foundation_id==foundation_id,ServiceTimeEntry.user_id==user_id))
+    return (total or 0)>=TRUSTED_MINUTES
+
+def rounded_points(minutes,multiplier=1):
+    # 10 points per hour, half-up on a whole assignment or manual request, never per ledger row.
+    scaled=minutes*10*round(multiplier*100)
+    return (scaled+3000)//6000 if scaled>=0 else -((-scaled+3000)//6000)
+
+async def ensure_intro_bonus(db,foundation_id,user_id):
+    # Derived from the first completed introduction; a later release never pays again.
+    from app.modules.learning.models import LearningAssignment,LearningRelease,LearningTrack
+    completed=await db.scalar(select(func.min(LearningAssignment.completed_at)).join(LearningRelease,LearningAssignment.release_id==LearningRelease.id).join(LearningTrack,LearningRelease.track_id==LearningTrack.id).where(LearningAssignment.foundation_id==foundation_id,LearningAssignment.user_id==user_id,LearningAssignment.completed_at.is_not(None),LearningTrack.key=='introduction'))
+    if completed:await db.execute(insert(PointsEntry).values(id=uuid4(),foundation_id=foundation_id,user_id=user_id,kind='bonus',bonus_key='introduction',points=100,reason='Знакомство с фондом',actor_id='system',occurred_at=completed,created_at=utcnow()).on_conflict_do_nothing(constraint='uq_points_bonus_once'))
+
+async def points_view(db,foundation_id,user_id,entries=None):
+    """Points live outside the hours ledger: reports and Добро.рф keep summing ServiceTimeEntry only."""
+    if entries is None:entries=(await db.scalars(select(ServiceTimeEntry).where(ServiceTimeEntry.foundation_id==foundation_id,ServiceTimeEntry.user_id==user_id))).all()
+    await ensure_intro_bonus(db,foundation_id,user_id)
+    groups={}
+    for entry in entries:
+        key=('attendance',entry.assignment_id) if entry.source_kind=='attendance' else ('manual',entry.source_id)
+        title,day,minutes=groups.get(key,(entry.title,entry.service_date,0));groups[key]=(title,min(day,entry.service_date),minutes+entry.delta_minutes)
+    ids=[id for kind,id in groups if kind=='attendance' and id]
+    multipliers=dict((await db.execute(select(Assignment.id,Assignment.points_multiplier).where(Assignment.id.in_(ids)))).all()) if ids else {}
+    history=[]
+    for (kind,id),(title,day,minutes) in groups.items():
+        multiplier=multipliers.get(id,1) if kind=='attendance' else 1;points=rounded_points(minutes,multiplier)
+        if points:history.append(PointsHistoryView(kind=kind,title=title,on=day,points=points,multiplier=multiplier if multiplier!=1 else None))
+    for row in (await db.scalars(select(PointsEntry).where(PointsEntry.foundation_id==foundation_id,PointsEntry.user_id==user_id))).all():
+        history.append(PointsHistoryView(kind=row.kind,title=row.reason,on=row.occurred_at.astimezone(ZoneInfo('Europe/Moscow')).date(),points=row.points))
+    earned=sum(item.points for item in history);reserved=spent=0
+    for row,title in (await db.execute(select(PrizeRequest,Prize.title).join(Prize,PrizeRequest.prize_id==Prize.id).where(PrizeRequest.foundation_id==foundation_id,PrizeRequest.user_id==user_id,PrizeRequest.state.in_(('requested','issued'))))).all():
+        if row.state=='requested':reserved+=row.points
+        else:spent+=row.points
+        history.append(PointsHistoryView(kind='prize',title=title,on=row.created_at.astimezone(ZoneInfo('Europe/Moscow')).date(),points=-row.points,state=row.state))
+    history.sort(key=lambda item:item.on,reverse=True);balance=earned-reserved-spent
+    return PointsView(balance=balance,earned=earned,reserved=reserved,spent=spent,can_request=balance>0,history=history)
 
 async def add_gratitude(db,principal,command):
     if command.user_id==principal.user_id:raise ApiError(403,'self_gratitude_forbidden','Благодарность пишет другой сотрудник')

@@ -22,11 +22,15 @@ Data reuse:
 - `followups/api.readPreparation`: the nearest confirmed assignment's contacts,
   location and checklist, on the same `assignment-preparation` key as FirstShiftPage.
   Checklist changes and questions stay on that existing page.
+- `profile/api.useHours`: the «Мой путь» card shows the level, confirmed hours,
+  points balance and hours left to the next level exactly as the server returns
+  them in `HoursView.level` and `HoursView.points`. The client does not compute
+  levels or points. The card links to `/hours`.
 
-Assignments refresh every 30 seconds and preparation every 15 seconds. All reads
+Assignments refresh every 30 seconds, preparation and hours every 15 seconds. All reads
 use domain APIs, principal-scoped cache keys and the sole ordinary API transport.
 Home never confirms an invitation, modifies a checklist, or invents attendance,
-hours, matching scores, personal names or milestones.
+hours, points, levels, matching scores, personal names or milestones.
 An empty date window does not prove that someone is a newcomer. Its copy names the
 90-day window and offers the application/interview path conditionally, alongside
 opportunities and the full personal schedule.

@@ -1,7 +1,7 @@
 """P08 calendar schema. Origins stay stable even when the effective date moves."""
 from datetime import date, datetime, time
 from uuid import UUID, uuid4
-from sqlalchemy import BigInteger, CheckConstraint, Date, DateTime, ForeignKey, ForeignKeyConstraint, Index, Integer, String, Text, Time, UniqueConstraint
+from sqlalchemy import BigInteger, CheckConstraint, Date, DateTime, ForeignKey, ForeignKeyConstraint, Index, Integer, Numeric, String, Text, Time, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base
@@ -48,8 +48,10 @@ class EventSeriesNeedTemplate(Base):
     capacity_required:Mapped[int]=mapped_column(Integer)
     preparation_requirements:Mapped[list]=mapped_column(JSONB,default=list)
     approval_policy:Mapped[str]=mapped_column(String(30),default='coordinator')
+    # Points only; never part of the invitation conditions or their version.
+    points_multiplier:Mapped[float]=mapped_column(Numeric(3,2,asdecimal=False),default=1,server_default='1')
     active:Mapped[bool]=mapped_column(default=True)
-    __table_args__=(CheckConstraint('capacity_required >= 0 AND capacity_required <= 1000'),UniqueConstraint('series_id','role_id'),
+    __table_args__=(CheckConstraint('capacity_required >= 0 AND capacity_required <= 1000'),CheckConstraint('points_multiplier IN (1, 1.5)',name='ck_need_template_points_multiplier'),UniqueConstraint('series_id','role_id'),
         ForeignKeyConstraint(['series_id','foundation_id'],['event_series.id','event_series.foundation_id']),
         ForeignKeyConstraint(['role_id','foundation_id'],['volunteer_roles.id','volunteer_roles.foundation_id']),
         ForeignKeyConstraint(['role_version_id','role_id'],['volunteer_role_versions.id','volunteer_role_versions.role_id']))
@@ -105,8 +107,10 @@ class StaffingNeed(Base):
     capacity_required:Mapped[int]=mapped_column(Integer)
     preparation_requirements:Mapped[list]=mapped_column(JSONB,default=list)
     approval_policy:Mapped[str]=mapped_column(String(30),default='coordinator')
+    # Points only; changing it keeps version so pending invitations stay valid.
+    points_multiplier:Mapped[float]=mapped_column(Numeric(3,2,asdecimal=False),default=1,server_default='1')
     version:Mapped[int]=mapped_column(BigInteger,default=1)
-    __table_args__=(UniqueConstraint('id','occurrence_id','foundation_id'),ForeignKeyConstraint(['occurrence_id','foundation_id'],['event_occurrences.id','event_occurrences.foundation_id']),
+    __table_args__=(UniqueConstraint('id','occurrence_id','foundation_id'),CheckConstraint('points_multiplier IN (1, 1.5)',name='ck_staffing_need_points_multiplier'),ForeignKeyConstraint(['occurrence_id','foundation_id'],['event_occurrences.id','event_occurrences.foundation_id']),
         ForeignKeyConstraint(['role_id','foundation_id'],['volunteer_roles.id','volunteer_roles.foundation_id']),
         ForeignKeyConstraint(['role_version_id','role_id'],['volunteer_role_versions.id','volunteer_role_versions.role_id']),
         CheckConstraint('capacity_required >= 0 AND capacity_required <= 1000'),
