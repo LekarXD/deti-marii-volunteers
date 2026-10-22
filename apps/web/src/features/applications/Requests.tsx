@@ -2,15 +2,16 @@ import {useState} from 'react';
 import {Button, Card, Combobox, Dialog, Field, Textarea, LoadingState, ErrorState} from '../../ui';
 import {CandidateRequest, useCommand, useRequests} from './api';
 const kindLabels={question:'Вопрос координатору',alternate_time:'Другое время встречи',road_help:'Помощь с дорогой'};
+const kindOptions=[{value:'question',label:kindLabels.question},{value:'alternate_time',label:kindLabels.alternate_time}];
 const states:Record<string,string>={open:'Ждёт ответа',answered:'Координатор ответил',resolved:'Вопрос решён'};
 export function RequestHistory({items}:{items:CandidateRequest[]}) {return <div className="ap-request-list">{items.map(item=><article className="ap-request" key={item.id}><div className="ap-row"><strong>{kindLabels[item.kind as keyof typeof kindLabels]||item.kind}</strong><span className="ap-tag">{states[item.state]}</span></div><p>{item.text}</p>{item.responses.map(reply=><div className="ap-public-reply" key={reply.id}><small>Ответ координатора, {new Date(reply.created_at).toLocaleDateString('ru')}</small><p>{reply.text}</p></div>)}</article>)}</div>;}
 export function CandidateRequestsPanel() {
   const requests=useRequests(), send=useCommand<CandidateRequest>('/api/v1/me/candidate-requests');
   const [open,setOpen]=useState(false),[kind,setKind]=useState('question'),[text,setText]=useState('');
   return <section className="ap-section"><div className="ap-section-head"><h2>Связь с координатором</h2><Button variant="secondary" onClick={()=>setOpen(true)}>Задать вопрос</Button></div>
-    {requests.isPending?<LoadingState/>:requests.error?<ErrorState error={requests.error} retry={()=>void requests.refetch()}/>:requests.data?.length?<Card><RequestHistory items={requests.data}/></Card>:<p className="ap-muted">Можно задать вопрос, попросить другое время или помощь с дорогой. Ответ останется здесь.</p>}
+    {requests.isPending?<LoadingState/>:requests.error?<ErrorState error={requests.error} retry={()=>void requests.refetch()}/>:requests.data?.length?<Card><RequestHistory items={requests.data}/></Card>:<p className="ap-muted">Можно задать вопрос или попросить другое время встречи. Ответ останется здесь.</p>}
     <Dialog open={open} onClose={()=>!send.isPending&&setOpen(false)} title="Написать координатору" footer={<><Button disabled={!text.trim()||send.isPending} onClick={()=>{void send.mutateAsync({body:{kind,text}}).then(()=>{setText('');setOpen(false);}).catch(()=>{});}}>{send.isPending?'Передаём…':'Передать координатору'}</Button><Button variant="ghost" onClick={()=>setOpen(false)} disabled={send.isPending}>Отмена</Button></>}>
-      <Combobox label="О чём хотите написать" value={kind} onChange={setKind} options={Object.entries(kindLabels).map(([value,label])=>({value,label}))}/><Field label="Ваше сообщение" htmlFor="candidate-request"><Textarea id="candidate-request" value={text} onChange={e=>setText(e.target.value)} maxLength={4000}/></Field>{send.error&&<p role="alert" className="ap-error">{send.error.message}</p>}
+      <Combobox label="О чём хотите написать" value={kind} onChange={setKind} options={kindOptions}/><Field label="Ваше сообщение" htmlFor="candidate-request"><Textarea id="candidate-request" value={text} onChange={e=>setText(e.target.value)} maxLength={4000}/></Field>{send.error&&<p role="alert" className="ap-error">{send.error.message}</p>}
     </Dialog>
   </section>;
 }
