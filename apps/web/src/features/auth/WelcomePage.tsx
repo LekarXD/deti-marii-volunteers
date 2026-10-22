@@ -24,8 +24,12 @@ function PasswordLoginForm({next,autoFocus,onSignedIn}:{next?:string;autoFocus:b
   const rejected=error instanceof ApiError && error.code==='invalid_credentials';
   async function login(event:FormEvent) {
     event.preventDefault();setBusy(true);setError(null);
-    try{await api<AuthSession>('/auth/login',{method:'POST',body:{email:email.trim(),password},retainSessionOnUnauthorized:true});console.log('[dbg] login ok, refreshing');setPassword('');const s=await refresh();console.log('[dbg] refreshed',s.user_id);onSignedIn?.(s);}
-    catch(value){console.log('[dbg] login catch',value);setError(value);}finally{setBusy(false);}
+    try{await api<AuthSession>('/auth/login',{method:'POST',body:{email:email.trim(),password},retainSessionOnUnauthorized:true});setPassword('');onSignedIn?.(await refresh());}
+    catch(value){
+      // A page left anonymous after this browser already signed in holds a stale CSRF token: continue with the actual session.
+      if(value instanceof ApiError&&(value.code==='already_authenticated'||value.code==='csrf_rejected')){const current=await refresh().catch(()=>null);if(current?.user_id){setPassword('');onSignedIn?.(current);return;}}
+      setError(value);
+    }finally{setBusy(false);}
   }
   return <form className="auth-form" onSubmit={login}><Field label="Электронная почта"><Input type="email" value={email} onChange={event=>{setEmail(event.target.value);setError(null);}} aria-invalid={rejected||undefined} autoComplete="email" maxLength={320} placeholder="name@example.ru" required autoFocus={autoFocus} disabled={busy}/></Field><PasswordField value={password} onChange={value=>{setPassword(value);setError(null);}} disabled={busy} error={rejected?'Неверная почта или пароль':undefined}/><Link className="auth-forgot" to={next?`/forgot-password?next=${encodeURIComponent(next)}`:'/forgot-password'}>Забыли пароль?</Link>{error&&!rejected?<FormError error={error}/>:null}<Button type="submit" loading={busy}>Войти</Button></form>;
 }

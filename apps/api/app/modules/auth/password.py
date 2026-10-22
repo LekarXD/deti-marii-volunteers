@@ -20,7 +20,7 @@ from app.core.db import get_db
 from app.core.errors import ApiError
 from app.core.model_loader import claim_registration
 from app.core.models import ContactChannel, RegistrationSession, Session, User
-from app.core.rate_limit import rate_limit
+from app.core.rate_limit import failure_limit, rate_limit, record_failure
 from app.worker.queue import enqueue_outbox
 from .password_models import PasswordChallenge, PasswordCredential
 from .schemas import AuthSessionView, ChallengeView
@@ -200,7 +200,11 @@ async def register_verify(body: CodeInput, response: Response, request: Request,
 async def login(body: PasswordInput, request: Request, response: Response, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
     await anonymous(db, principal)
     email = normalize_email(body.email)
-    await limits(db, principal, request, email, 'password_login', limit=10)
+    # One account may be used on many devices at once: only wrong passwords count per email and network.
+    host = request.client.host if request.client else 'unknown'
+    await rate_limit(db, principal.actor_id, 'password_login', limit=10)
+    await failure_limit(db, email, 'password_login_email', limit=10)
+    await failure_limit(db, host, 'password_login_ip', limit=30)
     channel = await contact(db, email)
     credential = None
     user = await db.get(User, channel.user_id) if channel else None
@@ -214,6 +218,8 @@ async def login(body: PasswordInput, request: Request, response: Response, princ
     encoded = credential.password_hash if credential else _DUMMY
     matches = await kdf(verify_password, body.password, encoded)
     if not matches or not credential or not user or user.account_state != 'active':
+        await record_failure(db, email, 'password_login_email')
+        await record_failure(db, host, 'password_login_ip')
         await db.commit()
         raise ApiError(401, 'invalid_credentials', 'Проверьте почту и пароль')
     audit(db, principal, 'auth.password.login', 'user', user.id)

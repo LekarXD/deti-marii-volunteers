@@ -1,6 +1,6 @@
 """Invented identities only; isolated real PostgreSQL HTTP contract tests."""
 import asyncio,json,os
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack,asynccontextmanager
 from datetime import timedelta
 from uuid import UUID,uuid4
 from urllib.parse import urlsplit
@@ -187,7 +187,25 @@ async def test_reset_generic_single_use_all_sessions_and_staff_mfa(env):
             assert (await post(fresh,'/login',{'email':FAKE_EMAIL,'password':FAKE_PASSWORD})).status_code==401
             good=await post(fresh,'/login',{'email':FAKE_EMAIL,'password':FAKE_NEXT_PASSWORD});assert good.status_code==200 and good.json()['mfa_required']
             fresh.headers['X-CSRF-Token']=good.json()['csrf_token'];assert (await post(fresh,'/logout',{})).status_code==200
-            assert (await resetter.get('/api/v1/me/application')).status_code==401
+            assert (await resetter.get('/api/v1/auth/session')).json()['user_id']==existing['user_id']
+
+@pytest.mark.asyncio
+async def test_many_devices_share_one_account(env,monkeypatch):
+    app,factory=env
+    monkeypatch.setattr('app.core.rate_limit.time',type('Clock',(),{'time':staticmethod(lambda:1_000_000.0)}))
+    async with AsyncExitStack() as stack:
+        owner=await stack.enter_async_context(actor(app));existing=await register(owner,factory)
+        devices=[await stack.enter_async_context(actor(app)) for _ in range(11)]
+        for device in devices:
+            result=await post(device,'/login',{'email':FAKE_EMAIL,'password':FAKE_PASSWORD});assert result.status_code==200,result.text
+            device.headers['X-CSRF-Token']=result.json()['csrf_token']
+        assert (await post(devices[0],'/logout',{})).status_code==200
+        assert (await devices[0].get('/api/v1/auth/session')).json()['user_id'] is None
+        for device in (owner,*devices[1:]):assert (await device.get('/api/v1/auth/session')).json()['user_id']==existing['user_id']
+        for _ in range(10):
+            guess=await stack.enter_async_context(actor(app));assert (await post(guess,'/login',{'email':FAKE_EMAIL,'password':FAKE_NEXT_PASSWORD})).status_code==401
+        late=await stack.enter_async_context(actor(app))
+        assert (await post(late,'/login',{'email':FAKE_EMAIL,'password':FAKE_PASSWORD})).status_code==429
 
 def test_demo_mode_forbidden_in_production():
     from app.core.config import Settings

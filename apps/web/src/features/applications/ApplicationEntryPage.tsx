@@ -7,6 +7,7 @@ export function ApplicationEntryPage(){
   const application=useApplication();
   if(application.isPending)return <LoadingState label="Открываем ваш кабинет…"/>;
   if(application.data)return <Navigate to="/application" replace/>;
-  if(application.error instanceof ApiError&&application.error.status===404)return <Navigate to="/apply" replace/>;
+  // An account without an application is a volunteer; registration itself opens /apply, and Home links to it.
+  if(application.error instanceof ApiError&&application.error.status===404)return <Navigate to="/home" replace/>;
   return <ErrorState error={application.error} retry={()=>void application.refetch()}/>;
 }

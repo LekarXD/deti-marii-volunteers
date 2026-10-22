@@ -90,6 +90,17 @@ describe('password sign-in errors',()=>{
     await user.type(screen.getByLabelText('Пароль'),'!');
     expect(screen.queryByText('Неверная почта или пароль')).toBeNull();
   });
+  it('continues into the cabinet when this browser is already signed in behind a stale page',async()=>{
+    const user=userEvent.setup();state.api.mockRejectedValueOnce(new ApiError(403,'csrf_rejected','Обновите страницу и повторите действие'));state.refresh.mockResolvedValue({...state.session,user_id:'volunteer'});
+    await submit(user);
+    await screen.findByRole('heading',{name:'Groups destination'});
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+  it('shows the stale-page error when the refreshed session is still anonymous',async()=>{
+    const user=userEvent.setup();state.api.mockRejectedValueOnce(new ApiError(403,'csrf_rejected','Обновите страницу и повторите действие'));state.refresh.mockResolvedValue(state.session);
+    await submit(user);
+    expect((await screen.findByRole('alert')).textContent).toBe('Обновите страницу и повторите действие');
+  });
   it('keeps other failures to one line with the server message',async()=>{
     const user=userEvent.setup();state.api.mockRejectedValueOnce(new ApiError(0,'network','Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.'));
     await submit(user);
