@@ -30,6 +30,8 @@ class WebinarView(WebinarInput):
     can_manage_summary:bool=False
     summary_available:bool=False
     session_id:UUID|None=None
+    host_name:str|None=None
+    enrolled_count:int=0
 class StudioSessionCreate(BaseModel):
     resource_kind:Literal['live_event','lesson_recording_project']
     resource_id:UUID

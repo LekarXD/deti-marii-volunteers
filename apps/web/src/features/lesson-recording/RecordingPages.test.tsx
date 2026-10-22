@@ -9,7 +9,7 @@ import type {components} from '../../api/generated/schema';
 import * as transport from '../../api/transport';
 import {fictionScene} from '../../ui/studio/fixtures';
 import type {StageReadiness} from '../../ui/studio/StudioStage';
-import {RecordingProjectsPage} from './RecordingProjectsPage';
+import {CreateRecordingDialog} from './CreateRecordingDialog';
 import {RecordingProjectPage} from './RecordingProjectPage';
 import {deviceError,recordingLimit,takeDuration} from './model';
 const media=vi.hoisted(()=>({connect:vi.fn(async()=>{}),disconnect:vi.fn(async()=>{}),camera:vi.fn(async()=>{}),microphone:vi.fn(async()=>{}),screen:vi.fn(async()=>{})}));
@@ -19,7 +19,7 @@ const project:components['schemas']['RecordingProjectView']={id:'project',live_e
 const take:components['schemas']['RecordingTakeView']={id:'take',project_id:'project',number:1,generation:1,state:'created',version:2,renderer_state_version:1,projection_hash:'0'.repeat(64),readiness_state:'waiting',max_duration_seconds:1190,stop_reason:null,privacy_state:'unknown',policy_scene_revision:1,policy_tracks:[],capture_job_id:null,capture_phase:null,started_at:null,stopped_at:null,error_code:null};
 const scene=fictionScene('lesson_recording_project',{content_kind:'camera',layout:'camera_only',content_asset:null,deck_version_id:null,slide_id:null});
 const session:components['schemas']['StudioSessionView']={id:'session',resource_kind:'lesson_recording_project',resource_id:'project',host_user_id:'owner',state:'live',generation:1,scene:{...scene},scene_revision:1,version:4,can_host:true,board_available:false,capabilities:{configured:true}};
-const track:components['schemas']['TrackView']={id:'track',key:'intro',title:'Вводный трек',archived:false,assessment:null,current_release_id:null,releases:[],version:1,lessons:[{id:'lesson',key:'lesson',title:'Реальный урок',track_id:'track',archived:false,current_version_id:null,draft:null,publication_revision:0}]};
+const track:components['schemas']['TrackView']={id:'track',key:'intro',title:'Вводный трек',description:'',audience:'volunteers',required:false,has_simulator:false,publish_state:'draft',archived:false,assessment:null,current_release_id:null,releases:[],version:1,lessons:[{id:'lesson',key:'lesson',title:'Реальный урок',track_id:'track',position:0,archived:false,current_version_id:null,draft:null,publication_revision:0}]};
 let currentSession:typeof session,currentProject:typeof project,currentTakes:typeof take[],spy:MockInstance<typeof transport.api>;const clients:QueryClient[]=[];
 beforeEach(()=>{currentSession=session;currentProject=project;currentTakes=[take];Object.values(media).forEach(mock=>mock.mockClear());spy=vi.spyOn(transport,'api').mockImplementation(async<T,>(path:string,options?:transport.ApiOptions):Promise<T>=>{
  if(path.startsWith('/recording-projects?'))return {items:[currentProject],next_cursor:null} as T;
@@ -35,11 +35,13 @@ beforeEach(()=>{currentSession=session;currentProject=project;currentTakes=[take
  });});
 afterEach(()=>{cleanup();clients.forEach(client=>client.clear());clients.length=0;vi.restoreAllMocks();});
 function Path(){return <output data-testid="path">{useLocation().pathname}</output>;}
-function view(detail=false){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});clients.push(client);return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[detail?'/fund/recordings/project':'/fund/recordings']}><Routes><Route path="/fund/recordings" element={<RecordingProjectsPage/>}/><Route path="/fund/recordings/:id" element={<RecordingProjectPage/>}/></Routes><Path/></MemoryRouter></QueryClientProvider>);}
-it('creates a project with an actual lesson selected through the custom picker',async()=>{
- view();const user=userEvent.setup();await user.click(await screen.findByRole('button',{name:'Новая запись'}));const dialog=screen.getByRole('dialog',{name:'Новая запись урока'});
+function view(detail=false){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});clients.push(client);return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[detail?'/fund/recordings/project':'/fund/recordings']}><Routes><Route path="/fund/recordings" element={<CreateRecordingDialog open onClose={()=>{}}/>}/><Route path="/fund/recordings/:id" element={<RecordingProjectPage/>}/></Routes><Path/></MemoryRouter></QueryClientProvider>);}
+it('creates a project with an actual lesson selected through the custom picker and opens its studio',async()=>{
+ view();const user=userEvent.setup();const dialog=await screen.findByRole('dialog',{name:'Новая запись урока'});
+ await waitFor(()=>expect(within(dialog).getByRole('combobox',{name:'Урок в Академии'}).hasAttribute('disabled')).toBe(false));
  await user.type(within(dialog).getByLabelText('Название записи'),'Мой урок');await user.click(within(dialog).getByRole('combobox',{name:'Урок в Академии'}));await user.click(screen.getByRole('option',{name:'Вводный трек, Реальный урок'}));await user.click(within(dialog).getByRole('button',{name:'Создать проект'}));
  await waitFor(()=>expect(spy.mock.calls.find(([path])=>path==='/recording-projects')?.[1]?.body).toEqual({title:'Мой урок',target_lesson_id:'lesson',mode:'solo'}));expect(document.querySelector('select')).toBeNull();
+ await waitFor(()=>expect(screen.getByTestId('path').textContent).toBe('/fund/recordings/created-project'));
 });
 it('shows server unavailability and never starts devices or capture on page load',async()=>{
  view(true);await screen.findByRole('region',{name:'Готовый кадр занятия'});expect(screen.getByRole('button',{name:'Начать запись'}).hasAttribute('disabled')).toBe(true);

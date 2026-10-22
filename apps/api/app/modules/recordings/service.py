@@ -49,7 +49,9 @@ def capabilities():
 async def project_view(db,row):
     capture=await db.scalar(select(StudioCaptureSession).where(StudioCaptureSession.project_id==row.id).order_by(StudioCaptureSession.generation.desc()).limit(1))
     takes=(await db.scalars(select(RecordingTake).where(RecordingTake.project_id==row.id).order_by(RecordingTake.number.desc()).limit(51))).all()
-    return {k:getattr(row,k) for k in ('id','owner_user_id','title','mode','live_event_id','target_lesson_id','state','privacy_state','version')}|{'studio_session_id':capture.studio_session_id if capture else None,'takes':[t.id for t in takes[:50]],'takes_next_cursor':takes[49].number if len(takes)>50 else None,'capabilities':capabilities()}
+    # Length of the newest viewable result, for list thumbnails; never a guess from take timestamps.
+    duration=await db.scalar(select(RecordingRenderVersion.duration_ms).where(RecordingRenderVersion.project_id==row.id,RecordingRenderVersion.state.in_(('preview_ready','degraded')),RecordingRenderVersion.duration_ms.is_not(None)).order_by(RecordingRenderVersion.created_at.desc(),RecordingRenderVersion.id.desc()).limit(1))
+    return {k:getattr(row,k) for k in ('id','owner_user_id','title','mode','live_event_id','target_lesson_id','state','privacy_state','version','created_at')}|{'duration_ms':duration,'studio_session_id':capture.studio_session_id if capture else None,'takes':[t.id for t in takes[:50]],'takes_next_cursor':takes[49].number if len(takes)>50 else None,'capabilities':capabilities()}
 def readiness_current(row,now=None):
     if row.readiness_state!='ready' or not row.readiness or row.readiness.get('renderer_state_version')!=row.renderer_state_version or row.readiness.get('projection_hash')!=row.projection_hash:return False
     try:expiry=datetime.fromisoformat(row.readiness.get('valid_until',''))

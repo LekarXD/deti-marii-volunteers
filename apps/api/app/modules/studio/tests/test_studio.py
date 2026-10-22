@@ -193,12 +193,14 @@ async def test_enrollment_roster_is_host_only_and_versions_survive_reload(world)
     async with w.factory() as db:await routes.enroll(id,None,db,w.viewer,uuid4().hex)
     async with w.factory() as db:
         own=await routes.webinar_detail(id,db,w.viewer);assert own['enrollment_version']==1 and not own['can_host']
+        assert own['host_name']=='Fixture Host' and own['enrolled_count']==1
         with pytest.raises(ApiError):await routes.webinar_participants(id,db,w.viewer)
     async with w.factory() as db:
         rows=await routes.webinar_participants(id,db,w.host);assert rows==[{'user_id':w.viewer.user_id,'display_name':'Fixture Viewer','enrollment_state':'enrolled','enrollment_version':1,'can_draw':False}]
     async with w.factory() as db:await routes.withdraw(id,StudioVersionCommand(expected_version=1),db,w.viewer,uuid4().hex)
     async with w.factory() as db:
         own=await routes.webinar_detail(id,db,w.viewer);assert own['enrollment_version']==2 and own['enrollment_state']=='withdrawn'
+        assert own['enrolled_count']==0
 
 @pytest.mark.asyncio
 async def test_room_close_marks_event_ended_only_after_provider_and_worker_ack(world,monkeypatch):

@@ -1,7 +1,8 @@
 # Solo lesson recording — P18D
 
-Exports `RecordingProjectsPage` and `RecordingProjectPage`; root owns routes and the
-coordinator layout. Expected routes are `/fund/recordings` and `/fund/recordings/:id`.
+Exports `RecordingProjectPage`, `CreateRecordingDialog` and `AttachLessonDialog`; root owns
+routes and the coordinator layout. `/fund/recordings` is the «Эфиры и записи» page
+(`features/broadcasts`) filtered to lesson videos; `/fund/recordings/:id` is the project page.
 The feature imports the existing author-track/lesson picker and the resource-neutral
 Studio API, `useLiveKit`, `useStageAsset`, slide uploader and canonical StudioStage.
 No separate room client, geometry, scene DTO or capture implementation exists here.

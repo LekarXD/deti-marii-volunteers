@@ -1,4 +1,8 @@
 import type {RecordingTake} from './api';
+import type {Track} from '../learning/authorApi';
+/** Current lessons of current courses as picker choices, «Курс, урок». */
+export const lessonChoices=(tracks:readonly Track[]|undefined)=>tracks?.filter(track=>!track.archived).flatMap(track=>track.lessons.filter(item=>!item.archived).map(item=>({value:item.id,label:`${track.title}, ${item.title}`})))??[];
+export const lessonTitle=(tracks:readonly Track[]|undefined,id:string)=>tracks?.flatMap(track=>track.lessons).find(item=>item.id===id)?.title;
 export const projectLabels:Record<string,string>={draft:'Черновик',prepared:'Студия подготовлена',has_takes:'Есть дубли',archived:'Проект закрыт'};
 export const takeLabels:Record<string,string>={created:'Дубль подготовлен',starting:'Готовим запись',capturing:'Идёт запись',stopping:'Завершаем запись',captured:'Дубль записан',failed:'Запись не завершилась',discarded:'Дубль удалён'};
 export const activeTake=(items:readonly RecordingTake[])=>items.find(take=>['created','starting','capturing','stopping'].includes(take.state));

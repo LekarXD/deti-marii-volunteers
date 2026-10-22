@@ -5,7 +5,7 @@ from uuid import UUID,uuid4
 import time
 from fastapi import APIRouter,Depends,Header,Request
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import select,or_,and_
+from sqlalchemy import select,or_,and_,func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import Principal,get_principal,authz_guard,resolve_principal
@@ -45,7 +45,9 @@ async def webinar_view(db,p,row):
     enrollment=await db.scalar(select(WebinarEnrollment).where(WebinarEnrollment.webinar_id==row.id,WebinarEnrollment.user_id==p.user_id)) if p.user_id else None
     current=await db.scalar(select(StudioSession).where(StudioSession.resource_kind=='live_event',StudioSession.resource_id==row.id,StudioSession.state.in_(['prepared','opening','live','closing'])))
     available=await db.scalar(select(WebinarSummary.id).where(WebinarSummary.webinar_id==row.id,WebinarSummary.foundation_id==p.foundation_id,WebinarSummary.published_revision.is_not(None))) if row.state=='ended' else None
-    return WebinarView.model_validate(row).model_dump()|{'summary_available':bool(available),'can_manage_summary':p.has_permission('studio.manage'),'enrollment_state':enrollment.state if enrollment else None,'enrollment_version':enrollment.version if enrollment else None,'can_host':p.user_id==row.host_user_id and (p.has_permission('studio.manage') or p.has_permission('studio.host','webinar',row.id)),'session_id':current.id if current else None}
+    host_name=await db.scalar(select(User.display_name).where(User.id==row.host_user_id))
+    enrolled=await db.scalar(select(func.count()).select_from(WebinarEnrollment).where(WebinarEnrollment.webinar_id==row.id,WebinarEnrollment.foundation_id==row.foundation_id,WebinarEnrollment.state=='enrolled'))
+    return WebinarView.model_validate(row).model_dump()|{'host_name':host_name,'enrolled_count':enrolled or 0,'summary_available':bool(available),'can_manage_summary':p.has_permission('studio.manage'),'enrollment_state':enrollment.state if enrollment else None,'enrollment_version':enrollment.version if enrollment else None,'can_host':p.user_id==row.host_user_id and (p.has_permission('studio.manage') or p.has_permission('studio.host','webinar',row.id)),'session_id':current.id if current else None}
 
 @router.get('/webinars',response_model=list[WebinarView])
 async def webinars(db:AsyncSession=Depends(get_db),p:Principal=Depends(get_principal)):

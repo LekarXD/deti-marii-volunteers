@@ -111,6 +111,7 @@ async def test_exact_render_approval_claim_expires_with_transaction(app):
             lesson=Lesson(foundation_id=fid,track_id=track.id,key='fixture');db.add(lesson);await db.flush()
             draft=LessonDraft(foundation_id=fid,lesson_id=lesson.id,title='Fixture',minutes=1,source='',blocks=[],version=1,status='reviewed');db.add(draft);await db.commit();lesson_id=lesson.id
         created=(await host.post('/api/v1/recording-projects',json={'title':'Approval fixture','target_lesson_id':str(lesson_id)},headers=headers)).json()
+        assert created['duration_ms'] is None and created['created_at']
         headers['Idempotency-Key']=uuid4().hex
         prepared=(await host.post(f"/api/v1/recording-projects/{created['id']}/prepare",json={'expected_version':created['version']},headers=headers)).json()
         headers['Idempotency-Key']=uuid4().hex
@@ -124,6 +125,7 @@ async def test_exact_render_approval_claim_expires_with_transaction(app):
             asset=MediaAsset(foundation_id=fid,owner_user_id=UUID(identity['user_id']),storage_key=uuid4().hex,content_type='video/mp4',expected_size=100,received_size=100,checksum='a'*64,state='ready',purpose='recording.output',resource_type='recording_render',resource_id=rid);db.add(asset);await db.flush()
             render=RecordingRenderVersion(id=rid,project_id=owner.id,take_id=tid,generation=take.generation,state='preview_ready',version=1,manifest={'synthetic_test_fixture':True},render_hash='b'*64,asset_id=asset.id,content_hash=asset.checksum,duration_ms=1000,quality='verified')
             db.add(render);await db.commit();asset_id=asset.id
+        assert (await host.get(f"/api/v1/recording-projects/{created['id']}")).json()['duration_ms']==1000
         headers['Idempotency-Key']=uuid4().hex
         approved=await host.post(f'/api/v1/recording-renders/{rid}/approve',json={'expected_version':1,'render_hash':'b'*64},headers=headers)
         assert approved.status_code==200 and approved.json()['approval_state']=='approved'

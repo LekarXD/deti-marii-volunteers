@@ -38,6 +38,8 @@ class RecordingProjectView(BaseModel):
     takes:list[UUID]
     takes_next_cursor:int|None
     capabilities:RecordingCapabilities
+    created_at:datetime|None=None
+    duration_ms:int|None=None
 class RecordingProjectPage(BaseModel):
     items:list[RecordingProjectView]
     next_cursor:UUID|None
