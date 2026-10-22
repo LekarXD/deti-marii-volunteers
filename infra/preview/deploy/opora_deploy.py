@@ -43,7 +43,7 @@ MIN_AVAILABLE_MEMORY_KB = 1024 * 1024
 CONTAINERS = ('api', 'web', 'board', 'media', 'io', 'outbox', 'postgres', 'livekit')
 HEALTHY = ('api', 'io', 'outbox', 'media', 'postgres')
 RUNNING = ('web', 'board', 'livekit')
-SERVICE_IMAGE = {'api': 'api', 'io': 'api', 'outbox': 'api', 'migrate': 'api', 'web': 'web', 'board': 'board', 'media': 'media'}
+SERVICE_IMAGE = {'api': 'api', 'io': 'api', 'outbox': 'api', 'migrate': 'api', 'web': 'web', 'board': 'board', 'media': 'media', 'bot': 'bot'}
 RELEASE_ENV_SERVICES = ('api', 'io', 'outbox', 'migrate', 'media')
 # An overlay is valid only while these inputs of the base build are byte-identical.
 BASE_INPUTS = {
@@ -288,6 +288,7 @@ def build_images(sha, release, web_context, bases, evidence):
                             '--build-arg', f'RUNTIME_USER={info["Config"].get("User") or "root"}',
                             '-f', str(release / '.opora-deploy/source-overlay.Dockerfile'), '-t', f'{PROJECT}/{kind}:{sha}', str(release)]))
     plan.append(('board', [*common, '--memory=512m', '-f', str(release / 'infra/preview/board.Dockerfile'), '-t', f'{PROJECT}/board:{sha}', str(release)]))
+    plan.append(('bot', [*common, '--memory=512m', '-f', str(release / 'infra/preview/bot.Dockerfile'), '-t', f'{PROJECT}/bot:{sha}', str(release)]))
     plan.append(('web', [*common, '--memory=512m', '--build-arg', f'BASE_IMAGE={PROJECT}/web:{bases["web"]}',
                          '-t', f'{PROJECT}/web:{sha}', str(web_context)]))
     for kind, command in plan:
@@ -428,7 +429,7 @@ def switch(sha, current, evidence):
 def cleanup(keep):
     """Drop this contour's own older release tags and source trees; other projects are never touched."""
     removed = 0
-    for kind in ('api', 'web', 'board', 'media'):
+    for kind in ('api', 'web', 'board', 'media', 'bot'):
         for tag in output(['docker', 'images', f'{PROJECT}/{kind}', '--format', '{{.Tag}}']).split():
             if SHA.fullmatch(tag) and tag not in keep:
                 if subprocess.run(['docker', 'image', 'rm', f'{PROJECT}/{kind}:{tag}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:

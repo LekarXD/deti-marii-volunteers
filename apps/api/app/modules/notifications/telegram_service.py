@@ -11,6 +11,7 @@ from app.core.errors import ApiError
 from app.core.idempotency import begin_command,finish_command
 from app.core.models import ContactChannel,Session,User
 from app.core.rate_limit import rate_limit
+from .telegram_bot import revoke_bot_sessions
 from .telegram_config import get_telegram_settings
 from .telegram_models import TelegramBinding,TelegramLinkToken
 from .telegram_schemas import TelegramBindingView,TelegramLinkTokenView
@@ -27,7 +28,7 @@ async def current_binding(db,principal,lock=False):
 
 async def status_view(db,principal):
     config=get_telegram_settings();configured=config.configured();binding=await current_binding(db,principal)
-    if binding:return TelegramBindingView(state='linked',configured=configured,binding_id=binding.id,version=binding.version,verified_at=binding.verified_at.astimezone(timezone.utc),reason='Привязка подтверждена. Отправка уведомлений в Telegram пока недоступна.')
+    if binding:return TelegramBindingView(state='linked',configured=configured,binding_id=binding.id,version=binding.version,verified_at=binding.verified_at.astimezone(timezone.utc),reason='Telegram подключён: приглашения, напоминания и сообщения координатора приходят в бот фонда.')
     if not configured:return TelegramBindingView(state='unavailable',configured=False,reason='Бот для привязки пока не настроен. Доступны уведомления в кабинете и настроенная почта.')
     token=await db.scalar(select(TelegramLinkToken).where(TelegramLinkToken.foundation_id==principal.foundation_id,TelegramLinkToken.user_id==principal.user_id,TelegramLinkToken.session_id==principal.session_id,TelegramLinkToken.purpose==PURPOSE,TelegramLinkToken.revoked_at.is_(None),TelegramLinkToken.expires_at>utcnow()).order_by(TelegramLinkToken.created_at.desc(),TelegramLinkToken.id.desc()).limit(1))
     if token and token.consumed_at is None:return TelegramBindingView(state='pending',configured=True,token_id=token.id,token_expires_at=token.expires_at.astimezone(timezone.utc),reason='Откройте личный чат с ботом по одноразовой ссылке и нажмите «Начать».')
@@ -71,7 +72,7 @@ async def disconnect(db,principal,command,key):
     if previous is not None:return await status_view(db,principal)
     binding=await current_binding(db,principal,True)
     if command.expected_version!=(binding.version if binding else 0):raise ApiError(409,'version_conflict','Привязка изменилась. Обновите состояние')
-    if binding:binding.revoked_at=utcnow();binding.version+=1
+    if binding:binding.revoked_at=utcnow();binding.version+=1;await revoke_bot_sessions(db,principal.foundation_id,principal.user_id)
     await revoke_tokens(db,principal)
     audit(db,principal,'notifications.telegram.disconnect','user',principal.user_id,('telegram_binding',))
     await finish_command(db,principal,'notifications.telegram.disconnect',key,{'state':'disconnected'})

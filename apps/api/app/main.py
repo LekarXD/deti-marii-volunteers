@@ -19,6 +19,7 @@ from app.modules.knowledge.router import router as knowledge
 from app.modules.followups.router import router as followups
 from app.modules.notifications.router import router as notifications
 from app.modules.notifications.telegram_router import router as telegram
+from app.modules.notifications.telegram_bot import router as telegram_bot
 from app.modules.studio.router import router as studio
 from app.modules.profile.router import router as profile
 from app.modules.simulator.router import router as simulator
@@ -49,7 +50,7 @@ def create_app() -> FastAPI:
                   responses={status: {"model": ErrorView} for status in (400, 401, 403, 404, 409, 422, 429, 503)})
     install_platform(app)
     app.dependency_overrides[get_assignment_access] = lambda: ActivityAssignmentAccess()
-    for router in (auth, staff, assets, applications, interviews, participants, learning, messaging, crm, knowledge, followups, notifications, studio, profile, simulator, recordings, reporting, admin, dobro, telegram):
+    for router in (auth, staff, assets, applications, interviews, participants, learning, messaging, crm, knowledge, followups, notifications, studio, profile, simulator, recordings, reporting, admin, dobro, telegram, telegram_bot):
         app.include_router(router)
     app.include_router(activities, prefix="/api/v1")
     return app

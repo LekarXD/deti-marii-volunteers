@@ -1,4 +1,4 @@
-"""Координатор: вход по коду, режимы, лента «Новые уведомления», карточка волонтёра, события и команда, итог встречи, ответы, новое событие, выгрузки."""
+"""Координатор: вход по коду, режимы, лента «Нужно решить», карточка волонтёра, события и команда, итог встречи, ответы, новое событие, выгрузки."""
 import json
 import secrets
 from datetime import date, datetime, timedelta
@@ -12,7 +12,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import BufferedInputFile, CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from . import db, exports, ui
+from . import db, exports, platform, ui
 from .config import COORDINATOR_CODE
 from .notify import send
 from .schedule import WEEKDAYS, human, occurrences, occurs, parse_day
@@ -31,6 +31,9 @@ login_router = Router(name="coordinator-login")
 router = Router(name="coordinator")
 router.message.filter(IsCoordinator())
 router.callback_query.filter(IsCoordinator())
+# С платформой разделы координатора — в pcoordinator; старые кнопки из истории чата сюда не попадают.
+router.message.filter(lambda _: not platform.enabled())
+router.callback_query.filter(lambda _: not platform.enabled())
 
 
 class NewEvent(StatesGroup):
@@ -55,7 +58,7 @@ async def login(msg: Message, command: CommandObject):
     p["mode"] = "coord"
     db.update_user(u["id"], is_coordinator=1, name=u["name"] or msg.from_user.full_name, prefs=json.dumps(p))
     await ui.send_menu(msg, db.user(u["id"]), "Вы вошли как координатор.\n\nСразу сообщением придут только вопросы "
-                       "волонтёров и отказы меньше чем за сутки. Остальное — в «Новые уведомления», а утром в 10:00 — "
+                       "волонтёров и отказы меньше чем за сутки. Остальное — в «Нужно решить», а утром в 10:00 — "
                        "короткая сводка: что решить и где не хватает людей.")
 
 
@@ -415,7 +418,7 @@ async def show_feed(target: Message):
     recent = db.all_("SELECT * FROM activity ORDER BY id DESC LIMIT 15")
     unseen = db.one("SELECT COUNT(*) AS n FROM activity WHERE seen=0")["n"]
     db.run("UPDATE activity SET seen=1 WHERE seen=0")
-    head = f"🔔 <b>Новые уведомления</b> · непрочитанных {unseen}\nНужно решить: {len(actions) or 'ничего'}"
+    head = f"🔔 <b>Нужно решить: {len(actions) or 'ничего'}</b>\nНепрочитанных уведомлений: {unseen}"
     await target.answer(head)
     for a in actions[:5]:
         await target.answer(f"{when(a['at'])} · {a['text']}", reply_markup=action_kb(a))

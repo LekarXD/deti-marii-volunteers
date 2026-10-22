@@ -36,7 +36,8 @@ async def resolve_principal(db, session):
         membership = await db.scalar(select(StaffMembership).where(StaffMembership.user_id == session.user_id, StaffMembership.foundation_id == session.foundation_id, StaffMembership.revoked_at.is_(None)))
         # Demo installs (dev/staging only, OPORA_DEMO_EMAIL_CODES) let staff work right
         # after the password, with no TOTP second factor. Never relaxes in production.
-        if membership and (session.mfa_at or get_settings().demo_email_codes):
+        # Telegram bot sessions become staff only after the explicit coordinator step (telegram_bot.elevate).
+        if membership and (session.mfa_at if session.channel == "telegram_bot" else (session.mfa_at or get_settings().demo_email_codes)):
             is_staff = True
             rows = (await db.scalars(select(PermissionGrant).where(PermissionGrant.membership_id == membership.id, PermissionGrant.revoked_at.is_(None)))).all()
             grants = tuple((g.permission,g.scope_type,g.scope_id) for g in rows)
@@ -50,13 +51,19 @@ async def get_session_row(request, db):
     raw = request.cookies.get("opora_session")
     if not raw:
         return None
-    return await db.scalar(select(Session).where(Session.token_hash == digest(raw), Session.revoked_at.is_(None), Session.expires_at > utcnow()))
+    session = await db.scalar(select(Session).where(Session.token_hash == digest(raw), Session.revoked_at.is_(None), Session.expires_at > utcnow()))
+    if session is not None and session.channel == "telegram_bot":
+        # A leaked bot session token is useless without the bot's service secret.
+        from app.modules.notifications.telegram_bot import check_bot_secret
+        check_bot_secret(request.headers.get("authorization", ""))
+    return session
 
 async def get_principal(request: Request, db: AsyncSession = Depends(get_db)) -> Principal:
     session = await get_session_row(request, db)
     if session is None:
         raise ApiError(401, "session_expired", "Войдите снова")
-    if request.method not in ("GET", "HEAD", "OPTIONS"):
+    # Bot sessions are server-to-server (secret checked in get_session_row): no browser Origin/CSRF.
+    if session.channel == "web" and request.method not in ("GET", "HEAD", "OPTIONS"):
         if request.headers.get("origin") not in get_settings().trusted_origins:
             raise ApiError(403, "origin_rejected", "Источник запроса не разрешён")
         csrf = request.headers.get("x-csrf-token", "")

@@ -22,13 +22,16 @@ def morning():
     return n.replace(year=day.year, month=day.month, day=day.day, hour=QUIET_TO, minute=0, second=0, microsecond=0)
 
 
-async def send(bot: Bot, chat_id: int, text: str, markup=None, urgent: bool = False, photo: str | None = None) -> bool:
+async def send(bot: Bot, chat_id: int, text: str, markup=None, urgent: bool = False, photo: str | None = None,
+               until=None) -> bool:
     """urgent=True — отправить сразу даже ночью (изменения на сегодня, отказ в последний момент).
-    photo — file_id картинки из Telegram, text тогда идёт подписью (до 1024 символов)."""
-    if not urgent and is_quiet():
+    photo — file_id картинки из Telegram, text тогда идёт подписью (до 1024 символов).
+    until — не раньше этого времени: личные тихие часы человека из настроек на сайте."""
+    later = None if urgent else max(x for x in (morning() if is_quiet() else None, until, db.now()) if x is not None)
+    if later is not None and later > db.now():
         db.run("INSERT INTO outbox (chat_id, text, markup, send_after, photo) VALUES (?,?,?,?,?)",
                chat_id, text, markup.model_dump_json(exclude_none=True) if markup else None,
-               morning().isoformat(), photo)
+               later.astimezone(db.now().tzinfo).isoformat(timespec="seconds"), photo)  # сравнивается строкой с db.stamp()
         return False
     try:
         if photo:

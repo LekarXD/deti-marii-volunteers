@@ -16,6 +16,7 @@ from app.core.models import AuthChallenge, ContactChannel, Foundation, User, Reg
 from app.core.rate_limit import rate_limit
 from app.core.audit import audit
 from app.worker.queue import enqueue_outbox
+from .mfa import consume_code
 from .schemas import AuthSessionView, MfaSessionView, ChallengeView, MfaEnrollmentView, AuthStatusView
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
@@ -138,18 +139,11 @@ async def mfa_verify(body: MfaInput, response: Response, principal: Principal = 
     if not principal.user_id:
         raise ApiError(403, "user_required", "Войдите в аккаунт")
     await rate_limit(db, principal.actor_id, "mfa", limit=10)
-    factor = await db.scalar(select(MfaFactor).where(MfaFactor.user_id == principal.user_id).with_for_update())
-    recovery = await db.scalar(select(MfaRecovery).where(MfaRecovery.user_id == principal.user_id, MfaRecovery.code_hash == digest(body.code), MfaRecovery.consumed_at.is_(None)).with_for_update())
-    counter = int(utcnow().timestamp()) // 30
-    matched_counter = next((c for c in (counter-1,counter,counter+1) if factor and pyotp.TOTP(unseal(factor.secret_cipher)).at(c*30) == body.code and c > factor.last_counter), None)
-    if not factor or (matched_counter is None and not recovery):
+    factor, accepted = await consume_code(db, principal.user_id, body.code)
+    if not accepted:
         await db.commit()
         raise ApiError(400, "mfa_invalid", "Код недействителен")
     first = factor.confirmed_at is None
-    if recovery:
-        recovery.consumed_at = utcnow()
-    else:
-        factor.last_counter = matched_counter
     factor.confirmed_at = factor.confirmed_at or utcnow()
     codes = []
     if first:
