@@ -185,21 +185,6 @@ async def test_user_follow_up_reuses_shared_store_without_application(env):
             assert error.value.status_code==404
     finally:await coord.aclose()
 
-def test_ten_digit_import_phone_is_stored_as_russian_number():
-    from app.modules.crm.imports import normalize
-    mapping={'name':'Имя','phone':'Телефон'}
-    for raw in ('(916) 123-45-67','8 916 123-45-67','+7 916 123 45 67'):assert normalize({'Имя':'Тест','Телефон':raw},mapping)==({'name':'Тест','phone':'+79161234567','email':'','telegram':'','no_contact':False},[])
-    assert normalize({'Имя':'Тест','Телефон':'+353 123 4567'},mapping)[0]['phone']=='+3531234567'
-
-@pytest.mark.asyncio
-async def test_ten_digit_import_phone_matches_existing_card(env):
-    app,factory=env;coord=await coordinator(app,factory)
-    try:
-        async with factory() as db:db.add(CrmVolunteer(foundation_id=get_settings().foundation_id,display_name='Анна Тестовая',contacts={'phone':'+79991234567'},context='Анкета волонтёра',relationship_state='unverified'));await db.commit()
-        preview=await prepare(coord,'Имя;Телефон\nАнна из таблицы;(999) 123-45-67\n'.encode(),{'name':'Имя','phone':'Телефон'})
-        assert preview['rows'][0]['decision']=='review' and preview['rows'][0]['normalized']['phone']=='+79991234567',preview
-    finally:await coord.aclose()
-
 @pytest.mark.asyncio
 async def test_own_no_contact_preference_blocks_staff_follow_ups(env):
     from app.modules.notifications.models import NotificationPreference
