@@ -121,7 +121,7 @@ async def test_coordinator_policy_request_is_confirmed_by_approval(context):
 
 
 @pytest.mark.asyncio
-async def test_full_role_reserve_queue_and_offer_on_cancellation(context):
+async def test_full_role_reserve_queue_waits_for_the_coordinator(context):
     users=await staff_and_volunteers(context,4)
     role=await post_role(context)
     for index,user_id in enumerate(users):await trust(context,role,index,user_id)
@@ -146,12 +146,14 @@ async def test_full_role_reserve_queue_and_offer_on_cancellation(context):
     assert cancelled.status_code==200,cancelled.text
     async with context.db() as db:
         offered=await db.scalar(select(Assignment).where(Assignment.occurrence_id==created['id'],Assignment.user_id==users[1]))
-        assert offered.status=='invited' and offered.origin=='reserve'
+        assert offered.status=='invited' and offered.origin=='reserve' and offered.approved_at is None
         assert (await db.scalar(select(StaffingNeedReserve).where(StaffingNeedReserve.user_id==users[2]))).state=='waiting'
         offered_id,offered_version=offered.id,offered.version
-    # One free place, one outstanding offer: nobody else is invited yet.
+    # One free place, one outstanding offer: nobody else is invited yet, and the coordinator decides.
     detail=(await context.client.get(f"/api/v1/me/events/{created['id']}",headers=as_user(1))).json()
     assert detail['my_assignment']['origin']=='reserve' and detail['my_reserve']['state']=='offered'
+    own_confirm=await context.client.post(f"/api/v1/assignments/{offered_id}/confirm",headers=as_user(1),json={'expected_version':offered_version})
+    assert own_confirm.status_code==409 and own_confirm.json()['code']=='approval_required'
     declined=await context.client.post(f"/api/v1/assignments/{offered_id}/decline",headers=as_user(1),json={'expected_version':offered_version})
     assert declined.status_code==200,declined.text
     async with context.db() as db:
@@ -159,8 +161,9 @@ async def test_full_role_reserve_queue_and_offer_on_cancellation(context):
         next_offer=await db.scalar(select(Assignment).where(Assignment.occurrence_id==created['id'],Assignment.user_id==users[2]))
         assert next_offer.status=='invited' and next_offer.origin=='reserve'
         next_id,next_version=next_offer.id,next_offer.version
-    confirmed=await context.client.post(f"/api/v1/assignments/{next_id}/confirm",headers=as_user(2),json={'expected_version':next_version})
-    assert confirmed.status_code==200,confirmed.text
+    confirmed=await context.client.post(f"/api/v1/coord/assignments/{next_id}/approve",headers=headers(),json={'expected_version':next_version,'reason':'Берём из резерва.'})
+    assert confirmed.status_code==200 and confirmed.json()['status']=='confirmed',confirmed.text
+    assert confirmed.json()['history'][-1]['reason']=='Место из резерва, координатор согласовал участие.'
     async with context.db() as db:
         assert (await db.scalar(select(StaffingNeedReserve).where(StaffingNeedReserve.user_id==users[2]))).state=='closed'
         assert await db.scalar(select(Assignment.id).where(Assignment.occurrence_id==created['id'],Assignment.user_id==users[3])) is None
