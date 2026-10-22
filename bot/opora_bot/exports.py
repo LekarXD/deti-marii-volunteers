@@ -1,5 +1,6 @@
 """Выгрузки: Excel для координатора и .ics для календаря волонтёра."""
 from datetime import date, datetime, timedelta
+import re
 from io import BytesIO
 
 from openpyxl import Workbook
@@ -14,12 +15,16 @@ from .ui import STATUS_RU, USER_STATUS_RU, days_text, roles_text
 def _book(title: str, header: list[str], rows: list[list]) -> bytes:
     wb = Workbook()
     ws = wb.active
-    ws.title = title[:31]
+    # Excel не принимает в названии листа : / ? * [ ] \ — в названиях событий они бывают («Мастер-класс: керамика»)
+    ws.title = (re.sub(r"[\[\]:*?/\\]", " ", title).strip() or "Лист")[:31]
     ws.append(header)
     for c in ws[1]:
         c.font = Font(bold=True)
     for r in rows:
         ws.append(r)
+        for c in ws[ws.max_row]:
+            if c.data_type == "f":  # имя вида «=…» из анкеты — это текст, а не формула
+                c.data_type = "s"
     for col in ws.columns:
         width = max(len(str(c.value or "")) for c in col)
         ws.column_dimensions[col[0].column_letter].width = min(max(10, width + 2), 60)

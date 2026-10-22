@@ -28,7 +28,7 @@ async def current_binding(db,principal,lock=False):
 
 async def status_view(db,principal):
     config=get_telegram_settings();configured=config.configured();binding=await current_binding(db,principal)
-    if binding:return TelegramBindingView(state='linked',configured=configured,binding_id=binding.id,version=binding.version,verified_at=binding.verified_at.astimezone(timezone.utc),reason='Привязка подтверждена. Отправка уведомлений в Telegram пока недоступна.')
+    if binding:return TelegramBindingView(state='linked',configured=configured,binding_id=binding.id,version=binding.version,verified_at=binding.verified_at.astimezone(timezone.utc),reason='Telegram подключён: приглашения, напоминания и сообщения координатора приходят в бот фонда.')
     if not configured:return TelegramBindingView(state='unavailable',configured=False,reason='Бот для привязки пока не настроен. Доступны уведомления в кабинете и настроенная почта.')
     token=await db.scalar(select(TelegramLinkToken).where(TelegramLinkToken.foundation_id==principal.foundation_id,TelegramLinkToken.user_id==principal.user_id,TelegramLinkToken.session_id==principal.session_id,TelegramLinkToken.purpose==PURPOSE,TelegramLinkToken.revoked_at.is_(None),TelegramLinkToken.expires_at>utcnow()).order_by(TelegramLinkToken.created_at.desc(),TelegramLinkToken.id.desc()).limit(1))
     if token and token.consumed_at is None:return TelegramBindingView(state='pending',configured=True,token_id=token.id,token_expires_at=token.expires_at.astimezone(timezone.utc),reason='Откройте личный чат с ботом по одноразовой ссылке и нажмите «Начать».')

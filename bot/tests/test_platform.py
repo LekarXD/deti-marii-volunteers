@@ -134,7 +134,7 @@ async def main():
         # новый человек: анкета и вход ведут на сайт, вход по почте не предлагается
         out, calls = await say(ANNA, "/start")
         assert any("Подключить Telegram" in t for t in out), out
-        welcome = [c for c in calls if "Впервые у нас?" in (getattr(c, "text", "") or "")][0]
+        welcome = [c for c in calls if "Ещё не волонтёр фонда?" in (getattr(c, "text", "") or "")][0]
         assert buttons(welcome) == [(ui.BTN_ANKETA, f"{config.OPORA_URL}/application"), (ui.BTN_CONNECT, f"{config.OPORA_URL}/profile")]
         out, _ = await say(ANNA, ui.BTN_LOGIN)
         assert any("Вход по почте больше не нужен" in t for t in out), out
@@ -158,7 +158,7 @@ async def main():
 
         # чужая или старая ссылка, тот же профиль на другом Telegram, сайт недоступен
         out, _ = await say(OLEG, "/start bind_" + "B" * 43)
-        assert any("Ссылка устарела" in t for t in out), out
+        assert any("ссылка уже не работает" in t for t in out), out
         out, _ = await say(OLEG, f"/start {BIND}")
         assert any("уже подключён к другому профилю" in t for t in out), out
         await runner.cleanup()

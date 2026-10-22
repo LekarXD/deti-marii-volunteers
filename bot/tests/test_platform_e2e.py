@@ -250,7 +250,7 @@ async def main():
         assert "Запись отменена" in out, out
         assert web("candidate").get("/me/interviews").json()[0]["status"] == "cancelled"
     else:
-        assert "Записи на собеседование сейчас нет" in out, out
+        assert "не записаны на собеседование" in out, out
 
     # Написать координатору → разговор на сайте
     await press(ANNA, ui.MenuCB(item="ask"))
@@ -264,6 +264,20 @@ async def main():
     await press(ANNA, ui.MenuCB(item="settings"))
     await press(ANNA, pvolunteer.PS(key="news"))
     assert web("volunteer").get("/me/notification-preferences").json()["topics"].get("news", False) is (not before)
+
+    # Пауза из бота меняет только паузу: «О себе» и навыки на сайте остаются (PUT /me/profile — полная замена)
+    p = web("volunteer").get("/me/profile").json()
+    res = web("volunteer").put("/me/profile", headers={"Idempotency-Key": str(uuid.uuid4())}, json={
+        "expected_version": p["version"], "display_name": p["display_name"], "about": "Люблю рисовать с детьми",
+        "tags": [{"kind": "skill", "label": "Рисование", "level": "sure"}], "lifecycle": p["lifecycle"]})
+    assert res.status_code == 200, res.text
+    keep = lambda v: (v["about"], v["tags"], v["photo_asset_id"])  # noqa: E731
+    before = res.json()
+    await press(ANNA, pvolunteer.PS(key="pause"))
+    paused = web("volunteer").get("/me/profile").json()
+    assert paused["lifecycle"] == "paused" and keep(paused) == keep(before), paused
+    await press(ANNA, pvolunteer.PS(key="pause"))
+    assert web("volunteer").get("/me/profile").json()["lifecycle"] == before["lifecycle"]
 
     # координатор: привязка, вход с кодом, лента, события, выгрузки
     out = joined(await say(COORD, link_command("coordinator")))
@@ -279,6 +293,12 @@ async def main():
     calls = await press(COORD, ui.MenuCB(item="feed"))
     out = joined(calls)
     assert "Нужно решить" in out, out
+    assert len([c for c in calls if type(c).__name__ == "SendMessage"]) == 1, "лента — одно сообщение, а не пачка"
+    item = next((d for _, d, _ in buttons(calls) if d and d.startswith("pc:o:")), None)
+    if item:
+        covered.append("карточка из ленты")
+        card = await press(COORD, item)
+        assert "← К ленте" in [b[0] for b in buttons(card)], buttons(card)
 
     # ответ волонтёру в разговоре из бота координатора и пересылка Анне фоновой задачей
     await pjobs.tick(bot, 1)  # первый проход запоминает, что уже было
@@ -318,8 +338,7 @@ async def main():
     calls = await say(COORD, "онлайн")
     role = next(d for _, d, _ in buttons(calls) if d and d.startswith("pn:role:") and d != "pn:role:")
     await press(COORD, role)
-    await say(COORD, "2")
-    out = joined(await press(COORD, pcoordinator.PN(step="once")))
+    out = joined(await say(COORD, "2"))  # событие на одну дату создаётся сразу, повтор — на сайте
     assert "Событие создано" in out, out
     titles = [o["title"] for o in await pcoordinator.occurrences(COORD, 120)]
     assert "Арт-суббота E2E" in titles
@@ -338,11 +357,11 @@ async def main():
     assert not [c for c in session.calls if getattr(c, "chat_id", None) == ANNA and "Арт-суббота E2E" in (getattr(c, "text", "") or "")]
     calls = await press(COORD, pcoordinator.PE(action="open", id=created["id"]))
     out = joined(await press(COORD, button(calls, "Подтвердить: [ДЕМО] Анна")))
-    assert "подтверждён" in out, out
+    assert "участие подтверждено" in out, out
     session.calls.clear()
     await pjobs.tick(bot, 0)  # раз в 5 минут — расписание и приглашения
     invite = [c for c in session.calls if getattr(c, "chat_id", None) == ANNA and "Арт-суббота E2E" in (getattr(c, "text", "") or "")]
-    assert invite and "Приглашаем" in invite[0].text, texts(session.calls)
+    assert invite and "приглашают" in invite[0].text, texts(session.calls)
     out = joined(await press(ANNA, button(invite, "Приду")))
     assert "ждём вас" in out, out
     team = (await platform.get(COORD, "/coord/assignments", occurrence_id=created["id"]))["items"]
@@ -350,7 +369,7 @@ async def main():
     covered.append("приглашение в боте → Приду")
     session.calls.clear()
     await pjobs.tick(bot, 0)
-    assert not [c for c in session.calls if "Приглашаем" in (getattr(c, "text", "") or "")], "приглашение не повторяется"
+    assert not [c for c in session.calls if "приглашают" in (getattr(c, "text", "") or "")], "приглашение не повторяется"
 
     assert docs(await press(COORD, pcoordinator.PX(kind="volunteers")))
     assert docs(await press(COORD, pcoordinator.PX(kind="teams")))

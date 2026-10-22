@@ -43,6 +43,20 @@ docker build --label org.opencontainers.image.revision=<SHA> -f infra/preview/bo
 с теми же файлами-переопределениями, что у работающего релиза. Миграция `b7e2c41d9a05` (колонка
 `sessions.channel`) применяется сервисом `migrate` как обычно.
 
+**Обязательно в том же релизе** обновить установленную копию скрипта выкладки — пуши её не обновляют
+(`README.md`, «Install or update on the host»):
+
+```sh
+cp releases/<SHA>/infra/preview/deploy/opora_deploy.py /opt/odschool/opora-preview/bin/
+```
+
+Без этого следующий пуш в `main` не соберёт `opora-preview/bot:<новый SHA>` и не впишет бота в
+`release-<SHA>-images.json`: автовыкладка откажется («runtime configuration would change») или упадёт
+на `up -d`, и так будет с каждым следующим коммитом. Ставить новую копию раньше релиза с ботом тоже
+нельзя: она попробует собрать `bot.Dockerfile`, которого в старых коммитах нет. Поэтому на время
+ручного релиза таймер лучше остановить: `systemctl stop opora-preview-autodeploy.timer`, после —
+`systemctl start …`.
+
 ## 4. Проверка
 
 ```sh

@@ -53,11 +53,10 @@ WELCOME = ("👋 Здравствуйте! Это бот фонда «Дети �
            "а ещё можно написать координатору.\n\n"
            "Впервые у нас? Заполните анкету волонтёра — это около 10 минут. "
            "Уже заполняли — войдите по почте, которую указали в анкете.")
-WELCOME_PLATFORM = ("👋 Здравствуйте! Это бот фонда «Дети Марии» для волонтёров.\n\n"
-                    "🎨 Здесь приходят приглашения на занятия и мероприятия фонда, напоминания и материалы, "
-                    "а ещё можно написать координатору.\n\n"
-                    "Впервые у нас? Заполните анкету волонтёра на сайте — это около 10 минут. "
-                    "Уже заполняли — откройте свой профиль на сайте и нажмите «Подключить Telegram».")
+WELCOME_PLATFORM = ("👋 Здравствуйте! Это бот фонда «Дети Марии» для волонтёров. Сюда приходят приглашения на занятия, "
+                    "напоминания и ответы координатора.\n\n"
+                    "Ещё не волонтёр фонда? Заполните анкету на сайте, это минут десять.\n"
+                    "Уже есть профиль на сайте? Откройте его и нажмите «Подключить Telegram».")
 
 
 async def welcome(target: Message, u) -> None:
@@ -72,6 +71,8 @@ async def start(msg: Message, state: FSMContext, command: CommandObject):
     u = db.ensure_user(msg.chat.id, msg.from_user.username)
     if platform.enabled() and (command.args or "").startswith("bind_"):
         await connect_from_profile(msg)
+    elif u["status"] == "new" and platform.enabled() and await reconnect(msg):
+        pass
     elif u["status"] == "new" and not ui.coord_mode(u):
         await welcome(msg, u)
     else:
@@ -79,8 +80,8 @@ async def start(msg: Message, state: FSMContext, command: CommandObject):
         await ui.send_menu(msg, u, f"👋 С возвращением{', ' + name if name else ''}!\n\n{ui.menu_text(u)}")
 
 
-CONNECT_STALE = ("Ссылка устарела или уже использована. Откройте профиль на сайте фонда, вкладка «Обо мне», "
-                 "и нажмите «Подключить Telegram» ещё раз — ссылка действует 10 минут.")
+CONNECT_STALE = ("Эта ссылка уже не работает: она одноразовая и действует 10 минут. Откройте профиль на сайте "
+                 "и нажмите «Подключить Telegram» ещё раз.")
 CONNECT_CONFLICT = ("Этот Telegram уже подключён к другому профилю на сайте. Отключите его там "
                     "или подключите другой аккаунт Telegram.")
 
@@ -98,7 +99,9 @@ async def connect_from_profile(msg: Message) -> None:
         result = await platform.link(who.id, who.is_bot, msg.chat.id, msg.chat.type, msg.text)
         profile = await platform.open_session(who.id) if result == "linked" else None
     except platform.PlatformError:
-        await msg.answer("Сайт фонда сейчас не отвечает. Попробуйте открыть ссылку из профиля чуть позже.")
+        # привязка на сайте могла уже случиться: тогда /start подхватит её (reconnect)
+        await msg.answer("Сайт фонда сейчас не отвечает. Через пару минут отправьте /start, а если не поможет, "
+                         "откройте ссылку из профиля ещё раз.")
         return
     if result == "conflict":
         await msg.answer(CONNECT_CONFLICT, reply_markup=profile_kb())
@@ -106,7 +109,23 @@ async def connect_from_profile(msg: Message) -> None:
     if not profile:
         await msg.answer(CONNECT_STALE, reply_markup=profile_kb())
         return
-    uid = msg.chat.id
+    await linked(msg, profile)
+
+
+async def reconnect(msg: Message) -> bool:
+    """Telegram уже подключён на сайте, а бот этого не знает (сайт не ответил при подключении, база бота
+    пропала): по /start берём сессию и продолжаем без новой ссылки."""
+    try:
+        profile = await platform.open_session(msg.from_user.id)
+    except platform.PlatformError:
+        return False
+    if profile:
+        await linked(msg, profile)
+    return bool(profile)
+
+
+async def linked(msg: Message, profile: dict) -> None:
+    uid, who = msg.chat.id, msg.from_user
     # один профиль — один чат: если человек подключил новый Telegram, старый чат отвязываем
     db.run("UPDATE users SET site_id='', status='new' WHERE site_id=? AND id!=? AND is_coordinator=0", profile["user_id"], uid)
     u = db.user(uid)
@@ -114,7 +133,8 @@ async def connect_from_profile(msg: Message) -> None:
     db.update_user(uid, site_id=profile["user_id"], name=profile["display_name"] or u["name"] or who.full_name,
                    status=u["status"] if u["status"] != "new" else "candidate")
     u = db.user(uid)
-    await ui.send_menu(msg, u, f"✅ Telegram подключён к вашему профилю на сайте фонда, {escape(u['name'])}.\n\n{ui.menu_text(u)}")
+    await ui.send_menu(msg, u, f"✅ Готово, {escape(u['name'])}! Telegram подключён к вашему профилю на сайте. "
+                               f"Приглашения и напоминания будут приходить сюда.\n\n{ui.menu_text(u)}")
     db.log("login", uid, f"{ui.person(u)} подключил(а) Telegram из профиля на сайте")
 
 

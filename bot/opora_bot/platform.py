@@ -7,6 +7,7 @@
   как сам человек в браузере. Права координатора у сессии появляются только после /coordinator с кодом
   из приложения-аутентификатора — так же, как на сайте.
 """
+import asyncio
 import logging
 import os
 import ssl
@@ -15,11 +16,14 @@ import uuid
 
 import aiohttp
 
-from . import config
+from . import config, db
 
 log = logging.getLogger(__name__)
+# Сессии хранятся и в базе бота (platform_sessions): выкладка каждого пуша перезапускает бота,
+# и без этого координатор после каждого пуша снова вводил бы код. Токен без секрета бота сайт не примет.
 _sessions: dict[int, tuple[str, float]] = {}  # telegram id → (токен сессии, когда истекает)
 _staff: set[int] = set()  # у чьих сессий сейчас есть права координатора
+_locks: dict[int, asyncio.Lock] = {}  # одна новая сессия за раз: каждая новая отзывает предыдущую
 
 
 class PlatformError(Exception):
@@ -56,7 +60,28 @@ def anketa_url() -> str:
     return site("/application") if enabled() else config.ANKETA_URL
 
 
+def _load(telegram_id: int) -> tuple[str, float]:
+    if telegram_id not in _sessions:
+        row = db.one("SELECT token, until, staff FROM platform_sessions WHERE user_id=?", telegram_id)
+        if row and row["until"] > time.time():
+            _sessions[telegram_id] = (row["token"], row["until"])
+            if row["staff"]:
+                _staff.add(telegram_id)
+    return _sessions.get(telegram_id, ("", 0.0))
+
+
+def _save(telegram_id: int) -> None:
+    if telegram_id in _sessions:
+        token, until = _sessions[telegram_id]
+        db.run("INSERT INTO platform_sessions (user_id, token, until, staff) VALUES (?,?,?,?) "
+               "ON CONFLICT(user_id) DO UPDATE SET token=excluded.token, until=excluded.until, staff=excluded.staff",
+               telegram_id, token, until, int(telegram_id in _staff))
+    else:
+        db.run("DELETE FROM platform_sessions WHERE user_id=?", telegram_id)
+
+
 def is_staff(telegram_id: int) -> bool:
+    _load(telegram_id)
     return telegram_id in _staff
 
 
@@ -100,6 +125,7 @@ async def link(telegram_id: int, is_bot: bool, chat_id: int, chat_type: str, tex
 def forget(telegram_id: int) -> None:
     _sessions.pop(telegram_id, None)
     _staff.discard(telegram_id)
+    _save(telegram_id)
 
 
 async def open_session(telegram_id: int) -> dict | None:
@@ -114,33 +140,43 @@ async def open_session(telegram_id: int) -> dict | None:
     _staff.discard(telegram_id)
     # запас в 10 минут, чтобы не упереться в истечение посреди запроса
     _sessions[telegram_id] = (body["session_token"], time.time() + 11.8 * 3600)
+    _save(telegram_id)
     return body
 
 
-async def call(telegram_id: int, method: str, path: str, json=None, headers=None, params=None, raw=False):
-    """Запрос к API платформы от имени человека. Возвращает (статус, тело); None — Telegram не подключён."""
+async def _token(telegram_id: int, stale: str = "") -> str | None:
+    """Действующий токен; stale — токен, который сайт только что не принял (его заменяем новым)."""
+    async with _locks.setdefault(telegram_id, asyncio.Lock()):
+        token, until = _load(telegram_id)
+        if token and token != stale and until > time.time():
+            return token  # пока ждали, другой запрос уже взял новую сессию
+        was_staff = telegram_id in _staff
+        if await open_session(telegram_id) is None:
+            return None
+        if was_staff:  # там, где сайт пускает сотрудников без кода (демо-стенд), права вернутся сами
+            await coordinator(telegram_id, "", quiet=True, fresh=_sessions[telegram_id][0])
+        return _sessions[telegram_id][0]
+
+
+async def call(telegram_id: int, method: str, path: str, json=None, headers=None, params=None, raw=False, token=None):
+    """Запрос к API платформы от имени человека. Возвращает (статус, тело); None — Telegram не подключён.
+    token — уже выданная сессия (вход координатора сразу после новой сессии); без повтора при 401."""
+    retry, token = token is None, token or await _token(telegram_id)
     for attempt in (1, 2):
-        token, until = _sessions.get(telegram_id, ("", 0.0))
-        if not token or until <= time.time():
-            was_staff = telegram_id in _staff
-            if await open_session(telegram_id) is None:
-                return None
-            token = _sessions[telegram_id][0]
-            if was_staff:  # там, где сайт пускает сотрудников без кода (демо-стенд), права вернутся сами
-                await coordinator(telegram_id, "", quiet=True)
-                token = _sessions[telegram_id][0]
+        if token is None:
+            return None
         status, body = await _request(method, "/api/v1" + path, json=json, params=params, raw=raw,
                                       cookies={"opora_session": token}, headers={**(headers or {}), **_bearer()})
-        if status == 401 and attempt == 1:
-            _sessions.pop(telegram_id, None)  # сессию отозвали или она истекла — берём новую один раз
+        if status == 401 and attempt == 1 and retry:
+            token = await _token(telegram_id, stale=token)  # сессию отозвали или она истекла — берём новую один раз
             continue
         return status, body
     return None
 
 
-async def _checked(telegram_id: int, method: str, path: str, json=None, params=None, idempotent=False, raw=False):
+async def _checked(telegram_id: int, method: str, path: str, json=None, params=None, idempotent=False, raw=False, token=None):
     headers = {"Idempotency-Key": str(uuid.uuid4())} if idempotent else None
-    res = await call(telegram_id, method, path, json=json, headers=headers, params=params, raw=raw)
+    res = await call(telegram_id, method, path, json=json, headers=headers, params=params, raw=raw, token=token)
     if res is None:
         raise NotLinked()
     status, body = res
@@ -166,15 +202,18 @@ async def put(telegram_id: int, path: str, body: dict):
     return await _checked(telegram_id, "PUT", path, json=body, idempotent=True)
 
 
-async def coordinator(telegram_id: int, code: str, quiet: bool = False) -> dict | None:
+async def coordinator(telegram_id: int, code: str, quiet: bool = False, fresh: str | None = None) -> dict | None:
     """Режим координатора для сессии бота: код из приложения-аутентификатора (на демо-стенде — без кода).
-    Возвращает {"is_staff", "permissions"}; ApiFailure — код не подошёл или профиль не сотрудник."""
+    Возвращает {"is_staff", "permissions"}; ApiFailure — код не подошёл или профиль не сотрудник.
+    fresh — только что выданная сессия (вызов из _token, который держит блокировку этого человека)."""
     try:
-        body = await post(telegram_id, "/integrations/telegram/bot/coordinator", {"code": code})
-    except ApiFailure:
+        body = await _checked(telegram_id, "POST", "/integrations/telegram/bot/coordinator", json={"code": code},
+                              idempotent=True, token=fresh)
+    except PlatformError:
         if quiet:
             return None
         raise
     if body.get("is_staff"):
         _staff.add(telegram_id)
+        _save(telegram_id)
     return body

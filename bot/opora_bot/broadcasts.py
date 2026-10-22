@@ -8,7 +8,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from . import db, ui
+from . import db, platform, ui
 from .coordinator import IsCoordinator
 from .notify import is_quiet, send
 from .schedule import WEEKDAYS
@@ -17,6 +17,9 @@ from .seed import ROLES
 router = Router(name="broadcasts")
 router.message.filter(IsCoordinator())
 router.callback_query.filter(IsCoordinator())
+# С платформой разделы координатора — в pcoordinator; старые кнопки из истории чата сюда не попадают.
+router.message.filter(lambda _: not platform.enabled())
+router.callback_query.filter(lambda _: not platform.enabled())
 
 IDLE_DAYS = 60
 KINDS = {"news": "Новость фонда", "important": "Важное"}
