@@ -34,7 +34,9 @@ async def resolve_principal(db, session):
         if user is None or user.account_state != "active" or user.foundation_id != session.foundation_id:
             raise ApiError(401, "session_invalid", "Сессия недействительна")
         membership = await db.scalar(select(StaffMembership).where(StaffMembership.user_id == session.user_id, StaffMembership.foundation_id == session.foundation_id, StaffMembership.revoked_at.is_(None)))
-        if membership and session.mfa_at:
+        # Demo installs (dev/staging only, OPORA_DEMO_EMAIL_CODES) let staff work right
+        # after the password, with no TOTP second factor. Never relaxes in production.
+        if membership and (session.mfa_at or get_settings().demo_email_codes):
             is_staff = True
             rows = (await db.scalars(select(PermissionGrant).where(PermissionGrant.membership_id == membership.id, PermissionGrant.revoked_at.is_(None)))).all()
             grants = tuple((g.permission,g.scope_type,g.scope_id) for g in rows)
@@ -93,7 +95,7 @@ async def issue_session(db, response, *, user_id=None, registration_id=None, mfa
 async def session_view(db, session):
     principal = await resolve_principal(db, session)
     verified_email = await db.scalar(select(ContactChannel.normalized_value).where(ContactChannel.user_id == principal.user_id, ContactChannel.type == "email", ContactChannel.verified_at.is_not(None)).order_by(ContactChannel.created_at).limit(1)) if principal.user_id else None
-    return {"demo_email_codes": get_settings().demo_email_codes, "verified_email": verified_email, "user_id": str(principal.user_id) if principal.user_id else None, "registration_id": str(principal.registration_id) if principal.registration_id else None, "foundation_id": str(principal.foundation_id), "is_staff": principal.is_staff, "permissions": sorted(principal.permissions), "csrf_token": unseal(session.csrf_cipher), "actor_id": principal.actor_id, "mfa_required": bool(principal.user_id and not session.mfa_at and await db.scalar(select(StaffMembership.id).where(StaffMembership.user_id == principal.user_id, StaffMembership.revoked_at.is_(None))))}
+    return {"demo_email_codes": get_settings().demo_email_codes, "verified_email": verified_email, "user_id": str(principal.user_id) if principal.user_id else None, "registration_id": str(principal.registration_id) if principal.registration_id else None, "foundation_id": str(principal.foundation_id), "is_staff": principal.is_staff, "permissions": sorted(principal.permissions), "csrf_token": unseal(session.csrf_cipher), "actor_id": principal.actor_id, "mfa_required": bool(principal.user_id and not session.mfa_at and not get_settings().demo_email_codes and await db.scalar(select(StaffMembership.id).where(StaffMembership.user_id == principal.user_id, StaffMembership.revoked_at.is_(None))))}
 
 @dataclass(frozen=True)
 class BackgroundStaffAuthorization:
