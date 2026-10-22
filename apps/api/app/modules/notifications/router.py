@@ -12,8 +12,9 @@ from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.errors import ApiError
 from app.core.models import OutboxMessage,User
-from . import service
+from . import inbox,service
 from .models import DeliveryAttempt,NotificationDelivery,NotificationTemplate,NotificationWebhookReceipt
+from .inbox_schemas import InboxSeenCommand,InboxView
 from .schemas import AudienceCommand,AudienceView,DeliveryList,EnqueuedView,NotificationPreferenceCommand,PreferenceView,SendAudienceCommand,TemplateInput,TemplateList,TemplateUpdate,TemplateView,NotificationVersionCommand,WebhookInput,WebhookView,DeliveryAttemptPage,NotificationReadinessView,NotificationRecipientPage
 router=APIRouter(prefix='/api/v1',tags=['notifications'])
 
@@ -26,6 +27,16 @@ async def preferences_save(body:NotificationPreferenceCommand,request:Request,pr
     result=await service.save_preferences(db,principal,body,request.headers.get('Idempotency-Key'))
     await db.commit()
     return result
+
+@router.get('/me/notifications',operation_id='own_notifications',response_model=InboxView)
+async def own_notifications(principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    return await inbox.inbox(db,principal)
+
+@router.post('/me/notifications/seen',operation_id='own_notifications_seen',response_model=InboxView)
+async def own_notifications_seen(body:InboxSeenCommand,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    await inbox.mark_seen(db,principal,body.at)
+    await db.commit()
+    return await inbox.inbox(db,principal)
 
 @router.get('/coord/notification-templates',operation_id='notification_template_list',response_model=TemplateList)
 async def templates(limit:int=Query(30,ge=1,le=100),cursor:str|None=Query(None,max_length=100),principal:Principal=Depends(require_permission('notifications.manage')),db:AsyncSession=Depends(get_db)):

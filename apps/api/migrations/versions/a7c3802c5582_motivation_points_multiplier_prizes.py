@@ -1,13 +1,13 @@
 """Points multiplier on needs and confirmed assignments, points bonuses/adjustments and prizes.
 
 Revision ID: a7c3802c5582
-Revises: 5b7e2c9d4f10
+Revises: b7e2c41d9a05
 """
 from alembic import op
 import sqlalchemy as sa
 
 revision = 'a7c3802c5582'
-down_revision = '5b7e2c9d4f10'
+down_revision = 'b7e2c41d9a05'
 branch_labels = None
 depends_on = None
 MULTIPLIED = (('assignments', 'ck_assignment_points_multiplier'), ('event_series_need_templates', 'ck_need_template_points_multiplier'), ('staffing_needs', 'ck_staffing_need_points_multiplier'))

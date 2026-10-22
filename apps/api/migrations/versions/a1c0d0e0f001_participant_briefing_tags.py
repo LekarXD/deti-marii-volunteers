@@ -1,13 +1,13 @@
 """Participant memo chips: communication, support and interests tags on the briefing.
 
 Revision ID: a1c0d0e0f001
-Revises: a7c3802c5582
+Revises: b81e4d2c7a90
 """
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 revision = 'a1c0d0e0f001'
-down_revision = 'a7c3802c5582'
+down_revision = 'b81e4d2c7a90'
 branch_labels = None
 depends_on = None
 

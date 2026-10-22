@@ -10,8 +10,11 @@ import {Avatar, RepeatIcon, buildEventRows, firstName, plural, responsesLabel, t
 import {OpportunityMatch} from './OpportunityMatch';
 import {OpportunityEditor} from './OpportunityEditor';
 import {OpportunityParticipation} from './Participation';
+import {EventsTabs} from './EventsTabs';
+import {eventIcon,toneFor} from './eventsApi';
 import './activities.css';
 import './coordEvents.css';
+import './events.css';
 const regularities:Record<string,string>={regular:'Регулярно',periodic:'Периодически',once:'Разово',tasks:'По задачам'};
 export function OpportunityFacts({item,personal=true}:{item:Opportunity;personal?:boolean}){return <><p className="lead">{item.audience}</p><p className="activity-prose">{item.task}</p><dl className="activity-facts"><div><dt>Участие</dt><dd>{regularities[item.regularity??'once']}</dd></div><div><dt>Где</dt><dd>{item.location}</dd></div><div><dt>Когда</dt><dd>{item.schedule}</dd></div></dl>{item.conditions&&<><h3 className="h3">Условия участия</h3><p className="activity-prose">{item.conditions}</p></>}<h3 className="h3">Подготовка</h3>{item.preparation_requirements.length?item.preparation_requirements.map(r=><div className="activity-requirement" key={r.key}><span>{r.title}</span><span className="meta">{r.level==='mandatory'?'Обязательно':'Рекомендуется'}</span></div>):<p className="meta">Дополнительная подготовка не указана.</p>}{personal&&<OpportunityMatch item={item}/>}</>}
 export function OpportunitiesPage(){
@@ -67,4 +70,56 @@ function OpportunityResponses({opportunity}:{opportunity:Opportunity}){
  if(!responses.data?.length&&!done)return null;
  return <section className="cev-drawer-block" aria-label="Отклики"><div className="row" style={{gap:12,marginBottom:12}}><h3 className="h3">Отклики</h3>{items.length>0&&<span className="cev-count">{items.length}</span>}</div>{done&&<p role="status" className="cev-done"><Icon name="check"/>{done}</p>}{(all?items:items.slice(0,4)).map(item=><div key={item.id} className="cev-resp-card"><span className="cev-person"><Avatar id={item.user_id} name={item.display_name}/><span style={{minWidth:0}}><span className="cev-name">{item.display_name}</span></span></span>{String(item.history[0]?.reason??'')&&<p className="p">{String(item.history[0]?.reason)}</p>}<Button variant="secondary" size="sm" loading={command.isPending} onClick={()=>decide(item,'approve')}>Принять</Button><Button variant="ghost" size="sm" disabled={command.isPending} onClick={()=>decide(item,'decline')}>Отклонить</Button></div>)}{!all&&items.length>4&&<button type="button" className="cev-more" onClick={()=>setAll(true)}>Показать все</button>}{!items.length&&<p className="p">Все отклики разобраны.</p>}{command.isError&&<p role="alert" className="activity-error">{command.error.message}</p>}</section>;
 }
-export function OpportunityPage(){const {id}=useParams();const [params]=useSearchParams();const detail=useOpportunity(id,false);return <div className="activities"><Link to={`/opportunities${params.get('return')?`?${params.get('return')}`:''}`}>← Все направления</Link>{detail.isPending?<p role="status">Загружаем возможность…</p>:detail.isError?<Card className="action-card"><p role="alert">{detail.error.message}</p><div className="actions"><Button onClick={()=>detail.refetch()}>Повторить</Button></div></Card>:detail.data&&<><div className="head"><h1 className="h1">{detail.data.title}</h1></div><Card tone="hero"><p className="eyebrow">{detail.data.program}</p><h2 className="hero-title">Есть место в команде</h2><p className="lead">{detail.data.schedule}, {detail.data.location}</p></Card><section className="section"><Card><OpportunityFacts item={detail.data}/></Card></section><OpportunityParticipation opportunityId={detail.data.id}/></>}</div>}
+/* Volunteer side of «Направления фонда» (canvas Events, tab «Направления фонда»): no hero, a search, chips and tiles. */
+const directionFilters=[['all','Все'],['regular','Регулярно'],['once','Разово'],['online','Онлайн']] as const;
+export function VolunteerOpportunitiesPage(){
+ const [params,setParams]=useSearchParams();const q=params.get('q')??'';const filter=directionFilters.some(([value])=>value===params.get('filter'))?params.get('filter')!:'all';
+ const list=useOpportunityList(false,q,'',filter==='regular'||filter==='once'?filter:'',filter==='online'?'online':'');const rows=list.data?.pages.flatMap(page=>page.items)??[];
+ const set=(name:string,value:string)=>setParams(p=>{if(!value||value==='all')p.delete(name);else p.set(name,value);return p},{replace:name==='q'});
+ const back=params.toString()?`?return=${encodeURIComponent(params.toString())}`:'';
+ return <div className="dirs-page">
+  <div className="page-head"><h1 className="h1">Мероприятия</h1></div>
+  <EventsTabs/>
+  <div className="toolbar">
+   <label className="search"><Icon name="search"/><span className="sr-only">Поиск направления</span><input className="input" type="search" placeholder="Роль, навык или программа" value={q} onChange={e=>set('q',e.target.value)}/></label>
+   <div className="chips" role="group" aria-label="Как часто">{directionFilters.map(([value,label])=><button key={value} type="button" className={`chip${filter===value?' is-on':''}`} aria-pressed={filter===value} onClick={()=>set('filter',value)}>{label}</button>)}</div>
+  </div>
+  {list.isPending?<p className="p" role="status">Загружаем направления…</p>
+  :list.isError?<div className="card action-card"><p role="alert">{list.error.message}</p><div className="actions"><Button onClick={()=>void list.refetch()}>Повторить</Button></div></div>
+  :rows.length?<div className="grid-3">{rows.map(item=><div className="card action-card" key={item.id}>
+    <span className={`art ${toneFor(item.title).art}`} aria-hidden="true"><Icon name={eventIcon(item)}/></span>
+    <h3 className="h3">{item.title}</h3>
+    <p className="p">{item.schedule||regularities[item.regularity]}</p>
+    <div className="actions"><Link className="btn btn-secondary" aria-label={`Подробнее: ${item.title}`} to={`/opportunities/${item.id}${back}`}>Подробнее</Link></div>
+   </div>)}</div>
+  :<div className="card action-card"><h3 className="h3">Пока нет подходящих направлений</h3>{(q||filter!=='all')&&<div className="actions"><Button variant="secondary" onClick={()=>setParams({})}>Сбросить фильтры</Button></div>}</div>}
+  {list.hasNextPage&&<div className="actions"><Button variant="secondary" loading={list.isFetchingNextPage} onClick={()=>void list.fetchNextPage()}>Показать ещё</Button></div>}
+ </div>;
+}
+
+/** The detail page takes the pale tint of its own tile; facts become the canvas info cards. */
+function VolunteerOpportunity({item}:{item:Opportunity}){
+ return <>
+  <div className="page-head"><h1 className="h1">{item.title}</h1></div>
+  <section className="card-hero" style={{background:toneFor(item.title).tint}}><div className="hero-grid"><div className="hero-copy">
+   <p className="eyebrow">{item.program||regularities[item.regularity]}</p>
+   <h2 className="hero-when">{item.schedule||regularities[item.regularity]}</h2>
+   {(item.location||item.format==='online')&&<p className="hero-sub">{item.location||'Онлайн'}</p>}
+  </div><span className="hero-art" aria-hidden="true"><Icon name={eventIcon(item)}/></span></div></section>
+  <section className="sec"><div className="grid-3">
+   {item.task&&<div className="card action-card"><h2 className="h3">Чем заняться</h2><p className="p ev-prose">{item.task}</p></div>}
+   {item.audience&&<div className="card action-card"><h2 className="h3">Кого ждём</h2><p className="p">{item.audience}</p></div>}
+   <div className="card action-card"><h2 className="h3">Перед выходом</h2>{item.preparation_requirements.length?<div className="rows">{item.preparation_requirements.map(req=><div className="rowi" key={req.key}><span className="st st-off" aria-hidden="true"><Icon name="check"/></span><span>{req.title}{req.level==='recommended'?', по желанию':''}</span></div>)}</div>:<p className="p">Дополнительная подготовка не нужна.</p>}</div>
+   <div className="card action-card"><h2 className="h3">Как устроено</h2>{item.conditions&&<p className="p ev-prose">{item.conditions}</p>}<p className="p">{item.approval_policy==='coordinator'?'Участие согласует координатор.':'Согласовывать участие с координатором не нужно.'}</p></div>
+   <OpportunityMatch item={item}/>
+  </div></section>
+  <OpportunityParticipation opportunityId={item.id}/>
+ </>;
+}
+export function OpportunityPage(){
+ const {id}=useParams();const [params]=useSearchParams();const detail=useOpportunity(id,false);
+ return <div className="dir-page">
+  <Link className="back" to={`/opportunities${params.get('return')?`?${params.get('return')}`:''}`}><Icon name="chevron-left"/>Направления фонда</Link>
+  {detail.isPending?<p role="status">Загружаем направление…</p>:detail.isError?<div className="card action-card"><p role="alert">{detail.error.message}</p><div className="actions"><Button onClick={()=>void detail.refetch()}>Повторить</Button></div></div>:detail.data&&<VolunteerOpportunity item={detail.data}/>}
+ </div>;
+}

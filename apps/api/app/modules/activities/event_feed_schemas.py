@@ -21,6 +21,14 @@ class ReserveView(BaseModel):
     allowed_actions:list[str]
 
 
+class VolunteerReadiness(BaseModel):
+    """The viewing volunteer's own state for one preparation requirement."""
+    key:str
+    title:str
+    level:Literal['mandatory','recommended']
+    state:Literal['fulfilled','pending']
+
+
 class VolunteerEventNeed(BaseModel):
     """One role on the occurrence. Counts only, never other volunteers' names."""
     id:UUID
@@ -32,8 +40,17 @@ class VolunteerEventNeed(BaseModel):
     confirmed:int
     missing:int
     approval_policy:ApprovalPolicy
+    # No schema default: generated clients keep it optional, older fixtures stay valid.
+    points_multiplier:float=Field(default=1,json_schema_extra=lambda schema:schema.pop('default',None))
     preparation_requirements:list[PreparationRequirement]
+    readiness:list[VolunteerReadiness]=Field(default_factory=list)
     allowed_actions:list[Literal['sign-up','reserve']]
+
+
+class EventContact(BaseModel):
+    """Staff the volunteer meets: the group's leader and coordinator, never other volunteers."""
+    role:str
+    display_name:str
 
 
 class VolunteerEventAssignment(BaseModel):
@@ -43,6 +60,8 @@ class VolunteerEventAssignment(BaseModel):
     status:str
     origin:str
     approved_at:datetime|None
+    # Own sign-up or reserve place the coordinator has not approved yet: «Ждёт ответа координатора».
+    awaiting_coordinator:bool=Field(default=False,json_schema_extra=lambda schema:schema.pop('default',None))
 
 
 class VolunteerEventCard(BaseModel):
@@ -89,6 +108,29 @@ class VolunteerEventDetail(VolunteerEventCard):
     locked_reason:str|None=None
     locked_message:str|None=None
     other_dates:list[VolunteerEventDate]
+    contacts:list[EventContact]=Field(default_factory=list)
+
+
+class VolunteerReserveItem(BaseModel):
+    """A waiting reserve place for «Мои занятия»; offered places already arrive as invitations."""
+    kind:Literal['reserve']='reserve'
+    reserve_id:UUID
+    version:int
+    position:int|None
+    state:Literal['waiting','offered','closed']
+    occurrence_id:UUID
+    staffing_need_id:UUID
+    title:str
+    role_title:str
+    starts_at:datetime
+    ends_at:datetime
+    location:str
+    timezone:str
+    allowed_actions:list[str]
+
+
+class VolunteerReservePage(BaseModel):
+    items:list[VolunteerReserveItem]
 
 
 class MatchingOptionsView(BaseModel):

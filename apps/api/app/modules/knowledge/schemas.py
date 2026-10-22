@@ -61,6 +61,14 @@ class MentorView(BaseModel):
     error_code:str|None
     model:str|None
     prompt_version:str|None
+    # Child-safety disclosure in the question (see safety.py); the UI asks to tell the leader at once.
+    urgent:bool=False
+class LibraryItemView(BaseModel):
+    id:UUID
+    title:str
+    kind:Literal['article','memo']
+class LibraryTextView(LibraryItemView):
+    text:str
 class BuilderAIInput(Command):
     request:str=Field(min_length=3,max_length=2000)
     source_chunk_ids:list[UUID]=Field(min_length=1,max_length=8)

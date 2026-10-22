@@ -40,3 +40,17 @@ export const requestLabels:Record<string,string>={pending:'Ждёт провер
 export const prizeLabels:Record<string,string>={requested:'Заявка отправлена',issued:'Выдан',rejected:'Отклонена',cancelled:'Отменена'};
 export const pointsLabel=(value:number)=>{const abs=Math.abs(value)%100,last=abs%10,word=abs>10&&abs<20?'баллов':last===1?'балл':last>=2&&last<=4?'балла':'баллов';return `${value<0?'−':''}${Math.abs(value).toLocaleString('ru')} ${word}`;};
 export const hoursLabel=(minutes:number,up=false)=>{const hours=up?Math.ceil(minutes/60):Math.floor(minutes/60),rest=hours%100,last=rest%10;return `${hours} ${rest>10&&rest<20?'часов':last===1?'час':last>=2&&last<=4?'часа':'часов'}`;};
+const monthsGenitive=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const monthsNominative=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+/** Moscow calendar day of a timestamp, as YYYY-MM-DD. */
+export const moscowDay=(value:string|number|Date)=>new Date(value).toLocaleDateString('sv-SE',{timeZone:'Europe/Moscow'});
+/** «13 июня»; the year is added only when it is not the current one. */
+export const dayMonth=(value:string)=>{const [year,month,day]=value.slice(0,10).split('-').map(Number);return `${day} ${monthsGenitive[month-1]}${String(year)===today().slice(0,4)?'':' '+year}`;};
+/** «июнь 2027». */
+export const monthYear=(value:string)=>{const [year,month]=value.slice(0,7).split('-').map(Number);return `${monthsNominative[month-1]} ${year}`;};
+export const monthName=(month:number)=>monthsNominative[month];
+/** «4 ч», «2 ч 5 мин», «−1 ч 5 мин»: the volunteer's own rows, without zero minutes. */
+export const shortHours=(minutes:number)=>{const abs=Math.abs(minutes),hours=Math.floor(abs/60),rest=abs%60,text=[hours?`${hours} ч`:'',rest?`${rest} мин`:''].filter(Boolean).join(' ');return text?`${minutes<0?'−':''}${text}`:'0 ч';};
+export const classesLabel=(count:number)=>{const rest=count%100,last=rest%10;return `${count} ${rest>10&&rest<20?'занятий':last===1?'занятие':last>=2&&last<=4?'занятия':'занятий'}`;};
+/** «+40», «−80»: a points delta without the word, as in the history list. */
+export const pointsDelta=(value:number)=>`${value<0?'−':'+'}${Math.abs(value).toLocaleString('ru')}`;

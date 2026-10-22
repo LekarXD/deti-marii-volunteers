@@ -19,6 +19,8 @@ class NotificationPreference(Base):
     quiet_from:Mapped[int]=mapped_column(Integer,default=1320,server_default='1320')
     quiet_to:Mapped[int]=mapped_column(Integer,default=540,server_default='540')
     timezone:Mapped[str]=mapped_column(String(80),default='Europe/Moscow',server_default='Europe/Moscow')
+    # Bell in the volunteer header: inbox items newer than this are unread. Not a preference, so it never bumps version.
+    inbox_seen_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True))
     version:Mapped[int]=mapped_column(BigInteger,default=1)
     updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
     __table_args__=(UniqueConstraint('foundation_id','user_id'),)

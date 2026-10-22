@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
@@ -79,6 +80,7 @@ class AssignmentView(BaseModel):
     lessons: list[LessonSummary]
     assessment_version_id: UUID | None
     completed: bool
+    completed_at: datetime | None = None
     acknowledged: bool
     latest_attempt_id: UUID | None
     latest_attempt_state: str | None

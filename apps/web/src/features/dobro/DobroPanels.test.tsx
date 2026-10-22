@@ -19,7 +19,9 @@ describe('Dobro panels stay optional and truthful',()=>{
   test.data={profile_url:'',profile_version:0,registration_url:'',verified_organization:false,total_minutes:120,entered_hours:0,hours_due:2,rules_note:'Перенос вручную',activities:[{activity,state:'none',enrollment_version:0,eligible_minutes:120,entered_hours:0,hours_due:2,carry_minutes:0,can_apply:true}]};
   render(<MemoryRouter><DobroMyPath/></MemoryRouter>);
   expect(test.mutate).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole('button',{name:/Вымышленное дело — Нужен отклик/}));
+  expect(screen.getByRole('heading',{name:'Книжка Добро.рф'})).toBeTruthy();
+  expect(screen.getByText('Чтобы часы попали в книжку, откликнись один раз на доброе дело фонда.')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:'Откликнуться'}));
   expect(screen.getByRole('dialog')).toBeTruthy();
   expect(screen.getByText(/Участие в занятиях доступно независимо/)).toBeTruthy();
   expect(screen.getByRole('link',{name:'Откликнуться на Добро.рф'}).getAttribute('href')).toBe('https://dobro.ru/');
@@ -27,6 +29,26 @@ describe('Dobro panels stay optional and truthful',()=>{
   fireEvent.click(screen.getByRole('button',{name:'Я откликнулся'}));
   await waitFor(()=>expect(test.mutate).toHaveBeenCalledWith('/me/dobro-enrollments/activity','POST',{state:'applied',expected_version:0}));
   expect(test.mutate.mock.calls).toHaveLength(1);
+ });
+ it('lets the volunteer say the book is not needed, only after a confirmation',async()=>{
+  test.data={profile_url:'',profile_version:0,registration_url:'',verified_organization:false,total_minutes:120,entered_hours:0,hours_due:2,rules_note:'',activities:[{activity,state:'none',enrollment_version:3,eligible_minutes:120,entered_hours:0,hours_due:2,carry_minutes:0,can_apply:true}]};
+  render(<MemoryRouter><DobroMyPath/></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button',{name:'Мне не нужно'}));
+  expect(screen.getByRole('dialog',{name:'Не переносить часы?'})).toBeTruthy();expect(test.mutate).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button',{name:'Да, мне это не нужно'}));
+  await waitFor(()=>expect(test.mutate).toHaveBeenCalledWith('/me/dobro-enrollments/activity','POST',{state:'not_needed',expected_version:3}));
+ });
+ it('shows what is already in the book and what moves at the start of next month',()=>{
+  vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(new Date('2026-10-22T12:00:00+03:00'));
+  try{
+   test.data={profile_url:'https://dobro.ru/volunteers/42',profile_version:1,registration_url:'',verified_organization:false,total_minutes:2760,entered_hours:38,hours_due:8,rules_note:'',activities:[{activity,state:'approved',enrollment_version:2,eligible_minutes:2760,entered_hours:38,hours_due:8,carry_minutes:0,can_apply:true}]};
+   const {rerender}=render(<MemoryRouter><DobroMyPath/></MemoryRouter>);
+   expect(screen.getByText('38 ч')).toBeTruthy();expect(screen.getByText('уже внесли')).toBeTruthy();expect(screen.getByText('8 ч')).toBeTruthy();expect(screen.getByText('за октябрь, перенесём в начале ноября')).toBeTruthy();
+   expect(screen.getByRole('link',{name:'Открыть Добро.рф'}).getAttribute('href')).toBe('https://dobro.ru/volunteers/42');expect(screen.queryByText(/откликнись/)).toBeNull();
+   test.data={profile_url:'',profile_version:0,registration_url:'',verified_organization:false,total_minutes:0,entered_hours:0,hours_due:0,rules_note:'',activities:[]};
+   rerender(<MemoryRouter><DobroMyPath/></MemoryRouter>);
+   expect(screen.queryByRole('heading',{name:'Книжка Добро.рф'})).toBeNull();
+  }finally{vi.useRealTimers();}
  });
  it('edits an unused link through its own versioned endpoint',async()=>{
   test.data=[activity];

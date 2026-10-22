@@ -67,6 +67,7 @@ async def test_server_score_reload_repeat_acl_and_version_history(setup):
     assert prep['booking_requires_introduction'] is False
     assignment = prep['assignments'][0]
     assert len(assignment['lessons']) == 4
+    assert assignment['completed'] is False and assignment['completed_at'] is None
     version_id = assignment['assessment_version_id']
     started = await post(client, f'/assessments/{version_id}/attempts', key='start')
     assert started.status_code == 200, started.text
@@ -98,7 +99,10 @@ async def test_server_score_reload_repeat_acl_and_version_history(setup):
                 assert feedback.status_code == 200 and feedback.json()['explanation']
         assert (await post(client, f"/learning/progress/{lesson['id']}/complete", {'assignment_id':assignment['id']})).status_code == 200
     await post(client, '/policy-acknowledgements', {'assignment_id':assignment['id']})
-    assert (await client.get('/api/v1/me/preparation')).json()['introduction_completed'] is True
+    finished = (await client.get('/api/v1/me/preparation')).json()
+    assert finished['introduction_completed'] is True
+    # The volunteer card says «Пройдено в октябре»: the completion moment is part of the read model.
+    assert finished['assignments'][0]['completed_at'] is not None
     repeat = (await post(client, f'/assessments/{version_id}/attempts')).json()
     assert repeat['id'] != attempt['id'] and repeat['score'] is None and repeat['answers'] == []
     assert (await client.get(f"/api/v1/assessment-attempts/{attempt['id']}/result")).json()['score'] == 0

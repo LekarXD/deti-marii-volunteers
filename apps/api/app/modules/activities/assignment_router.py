@@ -11,7 +11,7 @@ from app.core.errors import ApiError
 from app.core.models import User
 from .calendar_models import EventOccurrence
 from .assignment_models import Assignment,OpportunityResponse
-from .assignment_schemas import AssignmentInvite,AssignmentParticipationPage,AssignmentParticipationView,AssignmentRequirementDecision,AssignmentSuggestion,AttendanceCommand,ParticipationDecision,ParticipationResponseCreate,ParticipationResponsePage,ParticipationResponseView
+from .assignment_schemas import AssignmentInvite,AssignmentParticipationPage,AssignmentParticipationView,AssignmentRequirementDecision,AssignmentSuggestion,AttendanceCommand,OwnAssignmentDecision,ParticipationDecision,ParticipationResponseCreate,ParticipationResponsePage,ParticipationResponseView
 from .schemas import VersionCommand
 from .router import command
 from . import assignment_service as service
@@ -161,12 +161,12 @@ async def confirm(assignment_id:UUID,body:VersionCommand,request:Request,key:str
 
 
 @router.post('/assignments/{assignment_id}/decline',response_model=AssignmentParticipationView,operation_id='declineOwnAssignment')
-async def decline(assignment_id:UUID,body:VersionCommand,request:Request,key:str=Header(alias='Idempotency-Key'),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+async def decline(assignment_id:UUID,body:OwnAssignmentDecision,request:Request,key:str=Header(alias='Idempotency-Key'),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     return await command(db,principal,f'participation.decline:{assignment_id}',key,body,lambda:service.cancel(db,principal,assignment_id,body,'declined',True),request)
 
 
 @router.post('/assignments/{assignment_id}/cancel',response_model=AssignmentParticipationView,operation_id='cancelOwnAssignment')
-async def cancel_own(assignment_id:UUID,body:VersionCommand,request:Request,key:str=Header(alias='Idempotency-Key'),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+async def cancel_own(assignment_id:UUID,body:OwnAssignmentDecision,request:Request,key:str=Header(alias='Idempotency-Key'),principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     return await command(db,principal,f'participation.cancel:{assignment_id}',key,body,lambda:service.cancel(db,principal,assignment_id,body,'cancelled',True),request)
 
 

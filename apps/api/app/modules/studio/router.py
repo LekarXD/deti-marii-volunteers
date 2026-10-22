@@ -13,7 +13,7 @@ from app.core.db import get_db
 from app.core.errors import ApiError
 from app.core.audit import audit
 from app.core.idempotency import begin_command,finish_command
-from app.core.models import Session,User
+from app.core.models import Session,StaffMembership,User
 from app.core.rate_limit import rate_limit
 from app.worker.queue import enqueue_job
 from app.integrations.rtc.livekit import RtcSettings,LiveKitAdapter,RevocationPolicy,ProviderError,identity
@@ -41,13 +41,15 @@ async def execute(db,p,operation,key,payload,authorize,action):
         await db.rollback();raise ApiError(503,'rtc_provider_unavailable','Не удалось подтвердить действие на сервере видеосвязи. Повторите попытку.',retryable=True) from None
     except BaseException:await db.rollback();raise
 async def manage_scope(p):require_manage(p)
+async def host_name(db,row):
+    """Only the display name, and only while the host is an active staff member of this foundation."""
+    return await db.scalar(select(User.display_name).join(StaffMembership,StaffMembership.user_id==User.id).where(User.id==row.host_user_id,User.foundation_id==row.foundation_id,User.account_state=='active',StaffMembership.foundation_id==row.foundation_id,StaffMembership.revoked_at.is_(None)))
 async def webinar_view(db,p,row):
     enrollment=await db.scalar(select(WebinarEnrollment).where(WebinarEnrollment.webinar_id==row.id,WebinarEnrollment.user_id==p.user_id)) if p.user_id else None
     current=await db.scalar(select(StudioSession).where(StudioSession.resource_kind=='live_event',StudioSession.resource_id==row.id,StudioSession.state.in_(['prepared','opening','live','closing'])))
     available=await db.scalar(select(WebinarSummary.id).where(WebinarSummary.webinar_id==row.id,WebinarSummary.foundation_id==p.foundation_id,WebinarSummary.published_revision.is_not(None))) if row.state=='ended' else None
-    host_name=await db.scalar(select(User.display_name).where(User.id==row.host_user_id))
     enrolled=await db.scalar(select(func.count()).select_from(WebinarEnrollment).where(WebinarEnrollment.webinar_id==row.id,WebinarEnrollment.foundation_id==row.foundation_id,WebinarEnrollment.state=='enrolled'))
-    return WebinarView.model_validate(row).model_dump()|{'host_name':host_name,'enrolled_count':enrolled or 0,'summary_available':bool(available),'can_manage_summary':p.has_permission('studio.manage'),'enrollment_state':enrollment.state if enrollment else None,'enrollment_version':enrollment.version if enrollment else None,'can_host':p.user_id==row.host_user_id and (p.has_permission('studio.manage') or p.has_permission('studio.host','webinar',row.id)),'session_id':current.id if current else None}
+    return WebinarView.model_validate(row).model_dump()|{'summary_available':bool(available),'can_manage_summary':p.has_permission('studio.manage'),'enrollment_state':enrollment.state if enrollment else None,'enrollment_version':enrollment.version if enrollment else None,'can_host':p.user_id==row.host_user_id and (p.has_permission('studio.manage') or p.has_permission('studio.host','webinar',row.id)),'session_id':current.id if current else None,'host_name':await host_name(db,row),'enrolled_count':enrolled or 0}
 
 @router.get('/webinars',response_model=list[WebinarView])
 async def webinars(db:AsyncSession=Depends(get_db),p:Principal=Depends(get_principal)):

@@ -5,3 +5,64 @@
 .learning-cards .a-blocks>.card{min-height:280px;display:flex;flex-direction:column;justify-content:center}.learning-cards .learning-module-title h1{font-size:28px}.learning-cards .a-blocks>.card .a-lead{font-size:22px;line-height:1.45;margin:0}@media(max-width:720px){.learning-cards .a-blocks>.card{min-height:52vh}.learning-cards .learning-module-title h1{font-size:24px}.learning-cards .a-blocks>.card .a-lead{font-size:20px}}
 /* Lesson blocks added with the course editor: external video, picture, trainer link, formatted text. */
 .a-embed{position:relative;aspect-ratio:16/9;border-radius:24px;overflow:hidden;background:#1E2029}.a-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.a-image{margin:0}.a-image img{display:block;max-width:100%;height:auto;border-radius:24px}.a-image figcaption{margin-top:10px;color:var(--mute);font-size:15px}.a-sim{display:grid;gap:12px;justify-items:start}.a-sim p{margin:0}.a-list{margin:0;padding-left:22px;display:grid;gap:6px}
+
+/* Volunteer «Обучение» and lesson, canvas Learning.dc.html + Lesson.dc.html. Scoped so onboarding and the builder keep their look. */
+.learn-page .page-head+.sec{margin-top:0}
+.learn-page .learn-hero{background:var(--violet-tint)}
+.learn-page .learn-hero .eyebrow{margin:0}
+.learn-page .course .p{margin:0}
+.learn-page .learn-pull{margin-left:-16px}
+.learn-page .learn-all{margin:8px 0 0 -12px}
+.learn-page .learn-rec{width:64px;height:64px;flex:0 0 64px;border-radius:20px}
+.learn-page .learn-rec .ic{width:24px;height:24px}
+.learn-page .card>.p{margin:0 0 4px}
+.learn-page .ai-box>.h3{margin:0}
+.learn-page .learn-suggest{margin-top:14px}
+.learn-page .lib .art{flex:0 0 48px}
+.learn-page .grid-3:has(> .lib){grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.learn-page button.lib{width:100%;border:0;text-align:left;font-family:inherit;cursor:pointer}
+.learn-page button.lib:focus-visible,.learn-page .chips .chip:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.learn-page .sec-head .chips .chip{cursor:pointer;font-family:inherit}
+/* Library reader dialog (portaled, so scoped by its own class) */
+.modal-surface.learn-reader{width:min(760px,100%)}
+.learn-reader-text{display:grid;gap:14px}
+.learn-reader-text p{margin:0;font-size:18px;line-height:1.6;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere}
+/* Lesson: body card, side panel with steps */
+.learn-page .lesson-body{padding:36px 40px}
+.learn-page .lesson-body .a-blocks{display:grid;gap:22px}
+.learn-page .lesson-body .a-blocks>*{margin-top:0;margin-bottom:0}
+.learn-page .lesson-body h2{margin:12px 0 10px}
+.learn-page .lesson-body .a-lead{margin:0;font-size:20px;line-height:1.55;color:var(--ink)}
+.learn-page .lesson-body .card{background:var(--soft);border-radius:22px;padding:24px 26px;color:var(--ink)}
+.learn-page .lesson-body .card>h2:first-child,.learn-page .lesson-body .card>.h3:first-child{margin-top:0}
+.learn-page .lesson-body .callout.is-note{background:var(--blue-tint)}
+.learn-page .lesson-body .a-icards:has(> :nth-child(4):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}
+.learn-page .lesson-body .a-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.learn-page .lesson-body .kpi{display:grid;align-content:start;padding:22px 18px;background:var(--yellow-tint);border-radius:24px}
+.learn-page .lesson-body .kpi-num{font-size:44px;font-weight:600;letter-spacing:-.04em;color:var(--ink)}
+.learn-page .lesson-body .kpi-label{font-size:14px;line-height:1.45}
+.learn-page .lesson-body .a-tlcard,.learn-page .lesson-body .a-story{background:var(--soft)}
+.learn-page .lesson-body .a-tlcard p{margin:6px 0 0}
+.learn-page .lesson-body .a-quiz{display:grid;gap:14px;margin-bottom:12px}
+.learn-page .lesson-body .a-q{margin:0;font-size:19px;font-weight:600;color:var(--ink)}
+.learn-page .lesson-body .a-qopt{display:flex;align-items:center;min-height:58px;padding:12px 18px;border:1px solid var(--line-2);border-radius:18px;background:var(--paper);font-size:17px;color:var(--ink)}
+.learn-page .lesson-body .a-qopt.is-right{border-color:var(--green);background:var(--green-tint);color:var(--ink)}
+.learn-page .lesson-body .a-qopt.is-wrong{border-color:var(--red);background:var(--red-tint);color:var(--ink)}
+.learn-page .lesson-body .a-fb{margin:4px 0 0;padding:18px 22px;border-radius:18px}
+.learn-page .lesson-body .a-fb p{margin:6px 0 0}
+.learn-page .lesson-body .a-vbox{aspect-ratio:16/9;min-height:0;border-radius:24px;background:var(--ink);color:#fff}
+.learn-page .lesson-body .learn-task .field{margin:0}
+.learn-page .lesson-body .learn-task .p{margin:0}
+.learn-page .learn-task{display:flex;flex-direction:column;gap:16px}
+.learn-page .learn-nav{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:24px}
+.learn-page .lesson-side .big{display:block;font-size:44px}
+.learn-page .learn-progress{margin-top:14px}
+.learn-page .lesson-steps a{display:flex;align-items:center;gap:12px;min-height:48px;padding:6px 10px;border-radius:14px;font-size:16px;line-height:1.35;color:var(--ink-2);text-decoration:none}
+.learn-page .lesson-steps a:hover{background:var(--soft);color:var(--ink);text-decoration:none}
+.learn-page .lesson-steps a.is-on{background:var(--soft);color:var(--ink);font-weight:600}
+.learn-page .lesson-steps .n .ic{width:16px;height:16px;stroke-width:2.6}
+.learn-page .learn-mentor{margin-top:20px}
+.learn-page .learning-test>h1{margin:0 0 24px;font-size:40px;font-weight:600;line-height:1.08;letter-spacing:-.03em}
+.learn-page .learning-test .card-hero{background:var(--violet-tint)}
+@media(max-width:720px){.learn-page .learn-hero{padding:22px;border-radius:26px}.learn-page .learn-hero .hero-art{display:none}.learn-page .learn-hero .hero-title{font-size:30px}.learn-page .learn-hero .actions{margin-top:20px}.learn-page .lesson-body{padding:24px 20px}.learn-page .lesson-body .card{padding:18px}.learn-page .lesson-body .a-icards:has(> :nth-child(4):last-child){grid-template-columns:minmax(0,1fr)}.learn-page .lesson-body .a-facts{grid-template-columns:1fr 1fr}.learn-page .lesson-body .kpi-num{font-size:34px}.learn-page .lesson-side .big{font-size:36px}.learn-page .learning-test>h1{font-size:30px}.learn-page .lesson-body .swap-row{grid-template-columns:minmax(0,1fr);gap:8px}}
+@media(max-width:560px){.learn-page .rows .rowi{flex-wrap:wrap;row-gap:10px}.learn-page .rows .rowi>.grow{flex:1 1 calc(100% - 80px)}.learn-page .rows .rowi-end{margin-left:80px}.learn-page .ask{flex-direction:column}.learn-page .ask .btn{width:100%}}

@@ -1,7 +1,8 @@
 import {enabledDestinations} from './featureAvailability';
 import type {IconName} from '../ui/Icon';
 export interface NavigationLink {label:string;to:string;icon?:IconName;}
-export interface NavigationGroup {label:string;icon:IconName;links:NavigationLink[];}
+/** `direct` renders a one-link group as a plain top-level link instead of a dropdown. */
+export interface NavigationGroup {label:string;icon:IconName;links:NavigationLink[];direct?:boolean;}
 export const candidateNavigation:NavigationLink[]=[{label:'Главная',to:'/home'},{label:'Личный кабинет',to:'/application'},{label:'Знакомство с фондом',to:'/onboarding'},{label:'Направления',to:'/opportunities'},{label:'Мои занятия',to:'/my/assignments'},{label:'Обучение',to:'/academy'},{label:'Сообщения',to:'/messages'},{label:'Вопрос наставнику',to:'/mentor'},{label:'Тренажёр',to:'/simulator'},{label:'Вебинары',to:'/webinars'}].filter(link=>enabledDestinations.has(link.to));
 /** Presentation availability only: the router/server still authorize each route. */
 export function getCandidateNavigation(verified:boolean) {
@@ -35,8 +36,19 @@ export function coordinatorSectionOf(path:string){return [...coordinatorSections
 
 /** Current volunteer shell, limited to integrated routes with no invented detail context. */
 export const volunteerNavigation:NavigationGroup[]=[
- {label:'Возможности',icon:'search',links:[{label:'Мероприятия',to:'/events'},{label:'Направления фонда',to:'/opportunities'},{label:'Моё участие',to:'/my/assignments'}]},
- {label:'Смены',icon:'calendar',links:[{label:'Мои смены',to:'/my/schedule'}]},
+ {label:'Возможности',icon:'search',links:[{label:'Мероприятия',to:'/events'},{label:'Направления фонда',to:'/opportunities'}]},
+ {label:'Мои смены',icon:'calendar',direct:true,links:[{label:'Мои смены',to:'/my/schedule'}]},
  {label:'Академия',icon:'academy',links:[{label:'Курсы',to:'/academy'},{label:'Тренажёр',to:'/simulator'},{label:'Вебинары',to:'/webinars'}]},
  {label:'Ещё',icon:'settings',links:[{label:'Сообщения',to:'/messages'},{label:'Мой путь',to:'/hours'},{label:'Профиль',to:'/profile'},{label:'ИИ-наставник',to:'/mentor'},{label:'Знакомство с фондом',to:'/onboarding'}]},
 ].map(group=>({...group,icon:group.icon as IconName,links:group.links.filter(link=>enabledDestinations.has(link.to))})).filter(group=>group.links.length>0);
+
+/** Volunteer top bar from the canvas: five plain links, each staying current on its sub-pages. */
+export interface VolunteerSection {label:string;to:string;icon:IconName;match:string[];}
+export const volunteerSections:VolunteerSection[]=([
+ {label:'Главная',to:'/home',icon:'home',match:['/home']},
+ {label:'Мероприятия',to:'/my/schedule',icon:'calendar',match:['/my','/events','/opportunities','/me/group']},
+ {label:'Обучение',to:'/academy',icon:'academy',match:['/academy','/simulator','/webinars','/mentor','/onboarding']},
+ {label:'Сообщения',to:'/messages',icon:'message',match:['/messages']},
+ {label:'Мой путь',to:'/hours',icon:'award',match:['/hours','/profile']},
+] as VolunteerSection[]).filter(section=>enabledDestinations.has(section.to));
+export function volunteerSectionFor(path:string){return volunteerSections.find(section=>section.match.some(prefix=>path===prefix||path.startsWith(`${prefix}/`)));}
