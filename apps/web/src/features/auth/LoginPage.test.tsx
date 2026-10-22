@@ -68,6 +68,14 @@ describe('authentication stages',()=>{
   });
 });
 
+it('shows the welcome screen with the volunteer invitation as the password stage',()=>{
+ render(tree());
+ expect(screen.getByRole('heading',{name:'Вход в кабинет'})).toBeTruthy();
+ expect(screen.getByRole('heading',{name:'Впервые у нас?'})).toBeTruthy();
+ expect(screen.getByRole('link',{name:'Стать волонтёром'}).getAttribute('href')).toBe('/register');
+ expect(document.activeElement).toBe(screen.getByLabelText('Электронная почта'));
+});
+
 describe('password sign-in errors',()=>{
   async function submit(user:ReturnType<typeof userEvent.setup>){render(tree());await user.type(screen.getByLabelText('Электронная почта'),'person@example.ru');await user.type(screen.getByLabelText('Пароль'),'wrong-password');await user.click(screen.getByRole('button',{name:'Войти'}));}
   it('shows rejected credentials as a hint under the fields, not a failed page',async()=>{

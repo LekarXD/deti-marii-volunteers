@@ -4,9 +4,12 @@
 cookie/CSRF transport and generated `AuthSessionView`, `ChallengeView` and
 `MfaSessionView` schemas, with no independent auth store.
 
-`WelcomePage` (`/` for anonymous visitors) carries the same `PasswordLoginForm` next to
-the fund's drawing and a short invitation to the volunteer questionnaire; the public
-header is hidden there because the logo sits in the sign-in card. A rejected password
+`WelcomePage` holds the password form next to the fund's drawing and a short invitation
+to the volunteer questionnaire. It is the anonymous entry page `/` and also the password
+stage of `/login` (with `next` kept for the return and "Забыли пароль?"); the MFA, link,
+legacy-email and already-signed-in stages of `/login` stay compact cards. The public
+header is hidden whenever the welcome screen is on the page, because the logo sits in
+the sign-in card. A rejected password
 (`invalid_credentials`) is shown as one line under the password field and marks both
 fields invalid; it clears on the next edit. Other auth failures render the server
 message as one line (`FormError`), never the page-level `ErrorState`.
