@@ -440,7 +440,7 @@ def cleanup(keep):
     for override in PRIVATE.glob('release-*-images.json'):
         if override.name.removeprefix('release-').removesuffix('-images.json') not in keep:
             override.unlink()
-    log(f'Cleanup: removed {removed} old image tags; free disk {shutil.disk_usage("/").free // 2**30} GiB')
+    log(f'Cleanup: removed {removed} old image tags; free disk {shutil.disk_usage("/").free / 2**30:.1f} GiB')
 
 
 def main():
