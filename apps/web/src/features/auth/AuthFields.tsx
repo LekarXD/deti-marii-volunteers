@@ -10,9 +10,14 @@ export function AuthFrame({title, intro, children}: {title: string; intro: strin
   return <div className="auth-page"><Card className="auth-card"><h1 className="h1">{title}</h1>{intro&&<p className="auth-description">{intro}</p>}{children}</Card></div>;
 }
 
-export function PasswordField({value, onChange, disabled, fresh = false}: {value: string; onChange: (value: string) => void; disabled?: boolean; fresh?: boolean}) {
+export function PasswordField({value, onChange, disabled, fresh = false, error}: {value: string; onChange: (value: string) => void; disabled?: boolean; fresh?: boolean; error?: ReactNode}) {
   const [shown, setShown] = useState(false);
-  return <Field label={fresh ? 'Придумайте пароль' : 'Пароль'} hint={fresh ? 'От 12 символов' : undefined}><div className="auth-password"><Input value={value} onChange={event=>onChange(event.target.value)} type={shown ? 'text' : 'password'} autoComplete={fresh ? 'new-password' : 'current-password'} minLength={fresh ? 12 : 1} maxLength={128} required disabled={disabled}/><button type="button" aria-label={shown ? 'Скрыть пароль' : 'Показать пароль'} aria-pressed={shown} onClick={()=>setShown(current=>!current)} disabled={disabled}><Icon name="eye"/></button></div></Field>;
+  return <Field label={fresh ? 'Придумайте пароль' : 'Пароль'} hint={fresh ? 'От 12 символов' : undefined} error={error}><div className="auth-password"><Input value={value} onChange={event=>onChange(event.target.value)} type={shown ? 'text' : 'password'} autoComplete={fresh ? 'new-password' : 'current-password'} minLength={fresh ? 12 : 1} maxLength={128} required disabled={disabled}/><button type="button" aria-label={shown ? 'Скрыть пароль' : 'Показать пароль'} aria-pressed={shown} onClick={()=>setShown(current=>!current)} disabled={disabled}><Icon name="eye"/></button></div></Field>;
+}
+
+/** A form-level error is one line under the fields, not a page-sized empty state. */
+export function FormError({error}: {error: unknown}) {
+  return <div className="err auth-error" role="alert">{error instanceof Error ? error.message : 'Не удалось выполнить запрос. Попробуйте ещё раз.'}</div>;
 }
 
 export function OtpField({value, onChange, disabled, demo=false}: {value: string; onChange: (value: string) => void; disabled?: boolean; demo?: boolean}) {

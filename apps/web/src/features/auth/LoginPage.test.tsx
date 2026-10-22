@@ -4,6 +4,7 @@ import {afterEach,beforeEach,describe,it,expect,vi} from 'vitest';
 import {cleanup,render,screen,waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {MemoryRouter,Route,Routes,useLocation} from 'react-router-dom';
+import {ApiError} from '../../api/errors';
 import {LoginPage,safeReturnPath} from './LoginPage';
 
 const state=vi.hoisted(()=>({
@@ -64,6 +65,29 @@ describe('authentication stages',()=>{
     await user.click(screen.getByRole('button',{name:'Подтвердить вход'}));
     await screen.findByRole('heading',{name:'Groups destination'});
     expect(state.api).toHaveBeenCalledExactlyOnceWith('/auth/mfa/verify',{method:'POST',body:{code:'abcdef1234567890'}});
+  });
+});
+
+describe('password sign-in errors',()=>{
+  async function submit(user:ReturnType<typeof userEvent.setup>){render(tree());await user.type(screen.getByLabelText('Электронная почта'),'person@example.ru');await user.type(screen.getByLabelText('Пароль'),'wrong-password');await user.click(screen.getByRole('button',{name:'Войти'}));}
+  it('shows rejected credentials as a hint under the fields, not a failed page',async()=>{
+    const user=userEvent.setup();state.api.mockRejectedValueOnce(new ApiError(401,'invalid_credentials','Проверьте почту и пароль'));
+    await submit(user);
+    expect(await screen.findByText('Неверная почта или пароль')).toBeTruthy();
+    expect(screen.queryByText('Не удалось загрузить')).toBeNull();
+    expect(screen.getByLabelText('Пароль').getAttribute('aria-invalid')).toBe('true');
+    expect(screen.getByLabelText('Электронная почта').getAttribute('aria-invalid')).toBe('true');
+    expect((screen.getByLabelText('Пароль') as HTMLInputElement).value).toBe('wrong-password');
+    expect(state.refresh).not.toHaveBeenCalled();
+    await user.type(screen.getByLabelText('Пароль'),'!');
+    expect(screen.queryByText('Неверная почта или пароль')).toBeNull();
+  });
+  it('keeps other failures to one line with the server message',async()=>{
+    const user=userEvent.setup();state.api.mockRejectedValueOnce(new ApiError(0,'network','Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.'));
+    await submit(user);
+    expect((await screen.findByRole('alert')).textContent).toBe('Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.');
+    expect(screen.queryByRole('heading',{name:'Не удалось загрузить'})).toBeNull();
+    expect(screen.getByLabelText('Пароль').getAttribute('aria-invalid')).toBe('false');
   });
 });
 

@@ -4,6 +4,13 @@
 cookie/CSRF transport and generated `AuthSessionView`, `ChallengeView` and
 `MfaSessionView` schemas, with no independent auth store.
 
+`WelcomePage` (`/` for anonymous visitors) carries the same `PasswordLoginForm` next to
+the fund's drawing and a short invitation to the volunteer questionnaire; the public
+header is hidden there because the logo sits in the sign-in card. A rejected password
+(`invalid_credentials`) is shown as one line under the password field and marks both
+fields invalid; it clears on the next edit. Other auth failures render the server
+message as one line (`FormError`), never the page-level `ErrorState`.
+
 The email command queues a challenge. The UI distinguishes `dev_inbox` from `pending`
 and never claims provider delivery. Test-inbox proof is obtained through an operator
 CLI outside the product. Link parameters `challenge_id` and `token` populate only an
