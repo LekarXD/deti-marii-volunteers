@@ -103,7 +103,8 @@ describe('volunteer schedule', () => {
     expect(within(offers).getAllByRole('link').map(link => link.getAttribute('href'))).toEqual(['/events', '/events/Арт-суббота']);
     expect(within(offers).getByText('Осталось два места')).toBeTruthy();
     await user.click(within(offers).getByRole('button', {name:'Почему так'}));
-    expect(within(offers).getByText(/Здесь только то, что не пересекается с твоими занятиями\. Выше то, что совпадает с твоей анкетой/)).toBeTruthy();
+    expect(within(offers).getByText('Здесь только то, что не пересекается с твоими занятиями.')).toBeTruthy();
+    expect(within(offers).getByText('Выше то, что подходит тебе: навыки и направления из анкеты, удобное время и группы, где ты уже помогаешь.')).toBeTruthy();
     expect(within(offers).getAllByRole('link').filter(link => link.classList.contains('tile')).every(link => link.querySelector('.tile-foot > .ic'))).toBe(true);
 
     const past = section('Прошедшие');

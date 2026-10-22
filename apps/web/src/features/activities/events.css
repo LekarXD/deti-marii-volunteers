@@ -11,6 +11,9 @@
 .events-page .ev-tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
 .events-page .ev-why{margin-bottom:20px;padding:22px 26px}
 .events-page .ev-why .p{margin:0;font-size:17px;max-width:70ch}
+.ev-why-list{margin:0;padding:0;list-style:none;display:grid;gap:12px;font-size:17px;max-width:70ch}
+.ev-why-list ul{margin:4px 0 0;padding-left:20px}
+.events-page .ev-why>:not(:first-child),.sch-page .sch-why>:not(:first-child){margin-top:12px}
 
 /* «Чем помочь»: a single role keeps the size of a canvas role card instead of stretching across the page */
 .event-page .grid-2,.asg-page .grid-2{grid-template-columns:repeat(auto-fill,minmax(min(100%,max(340px,calc(50% - 8px))),1fr))}

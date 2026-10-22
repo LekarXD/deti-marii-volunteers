@@ -8,7 +8,7 @@ import {useActivityCommand} from './api';
 import {useOwnReserves,usePersonalSchedule,type AssignmentParticipation,type OwnReserve} from './participationApi';
 import {addDays,calendarDate,labelDate,labelTime,monday,monthRange,parseDate,today} from './calendarDates';
 import {bestNeed,eventDay,feedRange,useEventFeed,type EventCard,type EventFeed} from './eventsApi';
-import {EventTile} from './EventTile';
+import {EventTile,WhyCards} from './EventTile';
 import {awaitingCoordinator} from './participationApi';
 import {EventsTabs} from './EventsTabs';
 import {Pts,ReasonPick,cap,dateOf,iconOf,isFundCancelled,low,needsAnswer,reasonText,timeRange,toneOf,whenLabel,type Tone} from './OwnAssignment';
@@ -18,7 +18,7 @@ import './schedule.css';
 type Row={key:string;date:string;starts_at:string;ends_at:string;timezone:string;title:string;location:string;to:string;tone:Tone;multiplier:number;item?:AssignmentParticipation;reserve?:OwnReserve};
 type Mark={label:string;cls:string};
 type Done={card:EventCard;id:string;version:number;status:string};
-const why='Здесь только то, что не пересекается с твоими занятиями. Выше то, что совпадает с твоей анкетой: интересы, удобное время и группы, где ты уже помогаешь.';
+const why='Выше то, что подходит тебе: навыки и направления из анкеты, удобное время и группы, где ты уже помогаешь.';
 const weekdays=['пн','вт','ср','чт','пт','сб','вс'];
 
 function hours(minutes:number){return `${(Math.round(minutes/6)/10).toLocaleString('ru-RU')} ч`}
@@ -210,7 +210,7 @@ export function PersonalSchedulePage(){
     <div className="sec-head"><h2 className="h2">{canSignUp?'Можно записаться':'Что будет в ближайшие недели'}</h2>
      <div className="row wrap sch-head-actions">{canSignUp&&<Button variant="ghost" size="sm" aria-expanded={showWhy} onClick={()=>setShowWhy(!showWhy)}>Почему так</Button>}<Link className="btn btn-secondary btn-sm" to="/events">Все мероприятия</Link></div>
     </div>
-    {showWhy&&canSignUp&&<div className="card-soft sch-why"><p className="p">{why}</p></div>}
+    {showWhy&&canSignUp&&<div className="card-soft sch-why"><p className="p">Здесь только то, что не пересекается с твоими занятиями.</p><WhyCards cards={pick?[pick,...tiles]:tiles} fallback={why}/></div>}
     <div className="grid-3">{tiles.map(card=><EventTile key={card.occurrence_id} card={card}/>)}</div>
    </section>}
    {past.length>0&&<section className="sec">

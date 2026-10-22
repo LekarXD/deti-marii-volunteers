@@ -3,7 +3,7 @@ import {Link,useParams,useSearchParams} from 'react-router-dom';
 import {Button,Icon,type IconName} from '../../ui';
 import {useActivityCommand} from './api';
 import {EventsTabs} from './EventsTabs';
-import {EventTile,PlacesDot,PointsPill} from './EventTile';
+import {EventTile,PlacesDot,PointsPill,WhyCards} from './EventTile';
 import {awaitingCoordinator,type AssignmentParticipation} from './participationApi';
 import {bestNeed,eventDay,eventIcon,eventTime,eventUntil,eventWhen,eventWeekend,feedRange,needMultiplier,placesFor,toneFor,useEventFeed,useVolunteerEvent,type EventCard,type EventDetail,type EventNeed} from './eventsApi';
 import {ReasonPick,reasonText} from './OwnAssignment';
@@ -78,7 +78,7 @@ export function EventsFeedPage(){
       <div className="chips" role="group" aria-label="Когда">{filters.map(([value,label])=><button key={value} type="button" className={`chip${filter===value?' is-on':''}`} aria-pressed={filter===value} onClick={()=>pick(value)}>{label}</button>)}</div>
      </div>
     </div>
-    {why&&<div className="card-soft ev-why"><p className="p">Выше то, что совпадает с твоей анкетой: интересы, удобные дни и группы, где ты уже помогаешь. Если места закончились, мероприятие опускается вниз. Интересы и время можно поменять в <Link to="/profile">профиле</Link>.</p></div>}
+    {why&&<div className="card-soft ev-why"><WhyCards cards={hero?[hero,...rest]:rest} fallback="Выше то, что подходит тебе: навыки и направления из анкеты, удобное время и группы, где ты уже помогаешь. Если места закончились, мероприятие опускается вниз."/><p className="p">Удобное время можно поменять в <Link to="/profile">профиле</Link>.</p></div>}
     {rest.length?<div className="grid-3">{rest.map(card=><EventTile key={card.occurrence_id} card={card} arrow={false}/>)}</div>
      :<div className="card action-card"><h3 className="h3">{filter!=='all'?'Здесь пока ничего нет':withHero?'Других мероприятий пока нет':'Пока нет подходящих мероприятий'}</h3>{filter!=='all'&&<div className="actions"><Button variant="secondary" onClick={()=>pick('all')}>Показать все</Button></div>}</div>}
    </section>

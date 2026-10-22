@@ -93,6 +93,17 @@ describe('volunteer event feed', () => {
     expect(call[0]).toBe('/api/v1/assignments/assignment/cancel');
     expect(call[1]).toMatchObject({method:'POST', body:{expected_version:1, reason:''}});
   });
+  it('opens the personal reasons of each card under «Почему так»', async () => {
+    feed.items = [card('Арт-суббота', {reasons:['Навык «Рисование» из твоей анкеты', 'Обычно ты приходишь в это время: сб, днём']}), card('Онлайн-афиша', {series_id:'poster', format:'online'}), card('Будничная съёмка', {series_id:'photo', starts_at:'2026-11-05T13:00:00Z', ends_at:'2026-11-05T15:00:00Z', reasons:['Направление «Фото» из твоей анкеты']})];
+    view('/events');
+    await userEvent.setup().click(await screen.findByRole('button', {name:'Почему так'}));
+    const why = document.querySelector('.ev-why') as HTMLElement;
+    expect(Array.from(why.querySelectorAll('.ev-why-list > li')).map(item => [item.querySelector('.strong')?.textContent, Array.from(item.querySelectorAll('ul > li')).map(reason => reason.textContent)])).toEqual([
+      ['Арт-суббота', ['Навык «Рисование» из твоей анкеты', 'Обычно ты приходишь в это время: сб, днём']],
+      ['Будничная съёмка', ['Направление «Фото» из твоей анкеты']]]);
+    expect(within(why).queryByText(/Выше то, что подходит тебе/)).toBeNull();
+    expect(within(why).getByRole('link', {name:'профиле'}).getAttribute('href')).toBe('/profile');
+  });
   it('explains the order in plain words, filters the grid by the chips and shows the points pill', async () => {
     feed.items = [card('Арт-суббота'), card('Онлайн-афиша', {series_id:'poster', format:'online', needs:[need({points_multiplier:1.5, missing:6, required:8})]}), card('Будничная съёмка', {series_id:'photo', starts_at:'2026-11-05T13:00:00Z', ends_at:'2026-11-05T15:00:00Z'})];
     view('/events?when=online');
@@ -107,8 +118,10 @@ describe('volunteer event feed', () => {
     expect(why.getAttribute('aria-expanded')).toBe('false');
     await userEvent.setup().click(why);
     expect(why.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByText(/Выше то, что совпадает с твоей анкетой: интересы, удобные дни и группы, где ты уже помогаешь\. Если места закончились, мероприятие опускается вниз\./)).toBeTruthy();
+    expect(screen.getByText('Выше то, что подходит тебе: навыки и направления из анкеты, удобное время и группы, где ты уже помогаешь. Если места закончились, мероприятие опускается вниз.')).toBeTruthy();
+    expect(screen.getByText(/Удобное время можно поменять в/).textContent).toBe('Удобное время можно поменять в профиле.');
     expect(screen.getByRole('link', {name:'профиле'}).getAttribute('href')).toBe('/profile');
+    expect(screen.queryByText(/Интересы и время/)).toBeNull();
     await userEvent.setup().click(screen.getByRole('button', {name:'Будни'}));
     expect(screen.getByTestId('where').textContent).toBe('/events?when=weekday');
     expect(within(more).getAllByRole('link').filter(link => link.classList.contains('tile')).map(link => link.querySelector('.h3')?.textContent)).toEqual(['Будничная съёмка']);
