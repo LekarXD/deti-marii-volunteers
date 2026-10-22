@@ -2,7 +2,9 @@
 
 Что появилось: сервис `bot` в `compose.yml` (образ из `infra/preview/bot.Dockerfile`), переменные
 `OPORA_TELEGRAM_*` у `api`, образ `bot` в `opora_deploy.py`. Бот ходит в API по внутренней сети
-(`http://api:8001`) и в Telegram по `egress`. Как он устроен — `bot/README.md` и
+(`http://api:8001`) и в Telegram по своей сети `telegram` с IPv6: IPv4 до `api.telegram.org` с этого хоста
+не проходит (`telegram-v4-reject.service`), а в общей `egress` IPv6 нет. Признак в логах бота без IPv6:
+`Cannot connect to host api.telegram.org:443` и перезапуски по кругу. Как он устроен — `bot/README.md` и
 `apps/api/app/modules/notifications/TELEGRAM.md`.
 
 Первый релиз с ботом автоматическая выкладка **откажется ставить**: меняется конфигурация Compose
