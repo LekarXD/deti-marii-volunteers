@@ -2,9 +2,9 @@
 """Deploy one pushed main commit to the isolated preview at www.odschool.ru/deti-marii.
 
 Installed on the preview host as /opt/odschool/opora-preview/bin/opora_deploy.py and run
-as the forced command of the CI deploy key (`deploy <full sha>`), or by hand as
-`opora_deploy.py <full sha> < bundle.tgz`. stdin is a gzip tar with `source/` (git
-archive of build-context-paths.txt) and `dist/` (web build for /deti-marii).
+by opora_autodeploy.py, or by hand as `opora_deploy.py <full sha> < bundle.tgz`. stdin is
+a gzip tar with `source/` (git archive of build-context-paths.txt) and `dist/` (web build
+for /deti-marii). Exit code 75 means "try again later" (busy or low on resources).
 
 Images are thin overlays on fixed full-build bases (private/deploy-bases.json), so they
 do not grow with every release. The switch changes only image tags and the release line;
@@ -60,7 +60,9 @@ LOG = None
 
 
 class DeployError(Exception):
-    pass
+    def __init__(self, message, temporary=False):
+        super().__init__(message)
+        self.temporary = temporary
 
 
 def log(message):
@@ -171,7 +173,7 @@ def check_resources():
     free = shutil.disk_usage('/').free
     available = int(re.search(r'MemAvailable:\s+(\d+)', pathlib.Path('/proc/meminfo').read_text()).group(1))
     if free < MIN_FREE_DISK or available < MIN_AVAILABLE_MEMORY_KB:
-        raise DeployError(f'host resources below the preview floor: {free // 2**20} MiB disk, {available // 1024} MiB memory available')
+        raise DeployError(f'host resources below the preview floor: {free // 2**20} MiB disk, {available // 1024} MiB memory available', temporary=True)
 
 
 @contextlib.contextmanager
@@ -184,7 +186,7 @@ def lock(path, wait_seconds, busy_message):
             break
         except BlockingIOError:
             if time.monotonic() >= deadline:
-                raise DeployError(busy_message)
+                raise DeployError(busy_message, temporary=True)
             time.sleep(5)
     try:
         yield
@@ -379,7 +381,7 @@ def switch(sha, current, evidence):
         deadline = time.monotonic() + 300
         while compose_mutation_running():
             if time.monotonic() >= deadline:
-                raise DeployError('another docker compose rollout kept running for 5 minutes')
+                raise DeployError('another docker compose rollout kept running for 5 minutes', temporary=True)
             time.sleep(5)
         old_config, new_config = compose_config(old_files, working), compose_config(new_files, working)
         changed = differing_paths(normalized(old_config), normalized(new_config))
@@ -471,8 +473,8 @@ if __name__ == '__main__':
     try:
         main()
     except DeployError as error:
-        log(f'DEPLOY FAILED: {error}')
-        sys.exit(1)
+        log(f'DEPLOY {"POSTPONED" if error.temporary else "FAILED"}: {error}')
+        sys.exit(75 if error.temporary else 1)
     except Exception as error:
         log(f'DEPLOY FAILED: {error!r}')
         sys.exit(1)

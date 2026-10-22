@@ -1,0 +1,11 @@
+[Unit]
+Description=Deploy new main commits to the Opora preview
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/odschool/opora-preview/bin/opora_autodeploy.py
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=45min
