@@ -76,7 +76,7 @@ async def test_newcomer_sees_feed_but_signs_up_after_meeting(context):
 
 
 @pytest.mark.asyncio
-async def test_self_confirmation_sign_up_is_immediate_and_leaves_the_feed(context):
+async def test_sign_up_waits_for_the_coordinator_and_leaves_the_feed(context):
     users=await staff_and_volunteers(context)
     role=await post_role(context)
     await trust(context,role,0,users[0])
@@ -88,10 +88,16 @@ async def test_self_confirmation_sign_up_is_immediate_and_leaves_the_feed(contex
     signed=await context.client.post(f"/api/v1/staffing-needs/{need['id']}/sign-up",headers=as_user(0),json={'expected_version':need['version'],'message':'Возьму краски'})
     assert signed.status_code==200,signed.text
     row=signed.json()
-    assert row['status']=='confirmed' and row['origin']=='self' and [h['command'] for h in row['history']]==['sign_up','confirm']
+    # Owner's rule: a volunteer's own sign-up is a request until the coordinator accepts it.
+    assert row['status']=='invited' and row['approved_at'] is None and row['origin']=='self' and [h['command'] for h in row['history']]==['sign_up']
+    own_confirm=await context.client.post(f"/api/v1/assignments/{row['id']}/confirm",headers=as_user(0),json={'expected_version':row['version']})
+    assert own_confirm.status_code==409 and own_confirm.json()['code']=='approval_required'
     again=await context.client.post(f"/api/v1/staffing-needs/{need['id']}/sign-up",headers=as_user(0),json={'expected_version':need['version']})
     assert again.status_code==409 and again.json()['code']=='already_signed_up'
     assert created['id'] not in [item['occurrence_id'] for item in (await feed(context))['items']]
+    approved=await context.client.post(f"/api/v1/coord/assignments/{row['id']}/approve",headers=headers(),json={'expected_version':row['version'],'reason':'Ждём в субботу.'})
+    assert approved.status_code==200,approved.text
+    assert approved.json()['status']=='confirmed' and [h['command'] for h in approved.json()['history']]==['sign_up','approve','confirm']
     detail=(await context.client.get(f"/api/v1/me/events/{created['id']}",headers=as_user(0))).json()
     assert detail['my_assignment']['status']=='confirmed' and detail['needs'][0]['confirmed']==1 and detail['needs'][0]['allowed_actions']==[]
     staff=(await context.client.get(f"/api/v1/coord/event-occurrences/{created['id']}/staffing-needs")).json()[0]
@@ -123,7 +129,9 @@ async def test_full_role_reserve_queue_and_offer_on_cancellation(context):
     need=created['staffing_needs'][0]
     early=await context.client.post(f"/api/v1/staffing-needs/{need['id']}/reserve",headers=as_user(1),json={'expected_version':need['version']})
     assert early.status_code==409 and early.json()['code']=='places_available'
-    first=(await context.client.post(f"/api/v1/staffing-needs/{need['id']}/sign-up",headers=as_user(0),json={'expected_version':need['version']})).json()
+    signed=(await context.client.post(f"/api/v1/staffing-needs/{need['id']}/sign-up",headers=as_user(0),json={'expected_version':need['version']})).json()
+    first=(await context.client.post(f"/api/v1/coord/assignments/{signed['id']}/approve",headers=headers(),json={'expected_version':signed['version'],'reason':'Ждём.'})).json()
+    assert first['status']=='confirmed'
     full=await context.client.post(f"/api/v1/staffing-needs/{need['id']}/sign-up",headers=as_user(1),json={'expected_version':need['version']})
     assert full.status_code==409 and full.json()['code']=='capacity_full'
     card=next(item for item in (await feed(context,1))['items'] if item['occurrence_id']==created['id'])
