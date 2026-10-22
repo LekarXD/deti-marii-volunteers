@@ -107,8 +107,8 @@ async def drain(context,invalid_evidence=False,replay=False,transport=None):
     return processed
 
 
-async def reviewed_scenario(context):
-    created=await context.client.post('/api/v1/coord/simulator/scenarios',headers=headers(),json=draft())
+async def reviewed_scenario(context,content=None):
+    created=await context.client.post('/api/v1/coord/simulator/scenarios',headers=headers(),json=content or draft())
     assert created.status_code==200,created.text
     value=created.json()
     reviewed=await context.client.post(f"/api/v1/coord/simulator/scenarios/{value['id']}/review",headers=headers('reviewer'),json={'expected_version':value['version'],'decision':'approved','reason':'Проверены вымышленные данные, критерии и оба эталонных примера.'})
@@ -116,8 +116,8 @@ async def reviewed_scenario(context):
     return reviewed.json()
 
 
-async def published_scenario(context):
-    value=await reviewed_scenario(context)
+async def published_scenario(context,content=None):
+    value=await reviewed_scenario(context,content)
     tested=await context.client.post(f"/api/v1/coord/simulator/scenarios/{value['id']}/test",headers=headers(),json={'expected_version':value['version']})
     assert tested.status_code==200,tested.text
     assert tested.json()['state']=='running'
@@ -150,9 +150,12 @@ async def test_review_test_publish_scope_immutable_version_and_no_fixed_scores(c
     assert sorted(actual)==[0,2]
     publish=await context.client.post(f"/api/v1/coord/simulator/scenarios/{value['id']}/publish",headers=headers(),json={'expected_version':1,'review_id':value['reviews'][0]['id'],'test_run_id':tested.json()['id']})
     assert publish.status_code==200,publish.text
+    assert value['published_version'] is None and value['finished_count']==0
+    assert (publish.json()['published_version'],publish.json()['published_draft_version'],publish.json()['version'])==(1,1,2)
     old_id=publish.json()['publication_id']
     updated=await context.client.patch(f"/api/v1/coord/simulator/scenarios/{value['id']}",headers=headers(),json={**draft(),'title':'Новый черновик','expected_version':2})
     assert updated.status_code==200
+    assert (updated.json()['published_version'],updated.json()['published_draft_version'],updated.json()['version'])==(1,1,3) # the editor sees unpublished edits
     async with context.db() as db:
         old=await db.get(SimulatorScenarioVersion,UUID(old_id));assert old.content['title']=='Отказывается участвовать'
         rubric=await db.get(RubricVersion,old.rubric_version_id);assert len(rubric.criteria)==2
@@ -190,6 +193,10 @@ async def test_private_dialogue_idempotency_pause_replay_evidence_and_appeal(con
     assert (await context.client.get('/api/v1/coord/simulator/appeals',headers=headers('learner'))).status_code==403
     reviewer_context=await context.client.get(f"/api/v1/coord/simulator/appeals/{appeal['id']}",headers=headers('reviewer'))
     assert reviewer_context.status_code==200 and reviewer_context.json()['attempt']['allowed_actions']==[]
+    queued=(await context.client.get('/api/v1/coord/simulator/appeals',headers=headers('reviewer'))).json()[0]
+    assert queued['author_name']=='Invented learner' and queued['critical'] is False and queued['created_at']
+    assert reviewer_context.json()['appeal']['author_name']=='Invented learner'
+    assert (await context.client.get(f"/api/v1/coord/simulator/scenarios/{scenario['id']}",headers=headers())).json()['finished_count']==1
     resolved=await context.client.post(f"/api/v1/coord/simulator/appeals/{appeal['id']}/resolve",headers=headers('reviewer'),json={'expected_version':appeal['version'],'response':'Обсудили фрагменты диалога. Это учебная обратная связь.','corrected_result':{**ready['evaluation']['result'],'summary':'Специалист уточнил объяснение по сохранённому диалогу.'}})
     assert resolved.status_code==200,resolved.text
     own=(await context.client.get(f"/api/v1/simulation-sessions/{session['id']}",headers=headers('learner'))).json()
@@ -311,3 +318,22 @@ async def test_provider_timeout_and_budget_pause_without_extra_reply(context):
     result=(await context.client.get(f"/api/v1/simulation-sessions/{second['id']}",headers=headers('learner'))).json()
     assert result['state']=='paused' and result['provider_state']=='budget_exceeded'
     assert len(result['turns'])==2 and result['evaluation'] is None
+
+
+@pytest.mark.asyncio
+async def test_reviewer_queue_flags_a_zero_on_a_critical_criterion(context):
+    content=draft();content['criteria'][0]['critical']=True
+    scenario=await published_scenario(context,content);session=await start(context,scenario)
+    sent=await context.client.post(f"/api/v1/simulation-sessions/{session['id']}/turns",headers=headers('learner'),json={'expected_version':session['version'],'content':'Ты обязан рисовать, как все.'})
+    assert sent.status_code==200,sent.text
+    await drain(context)
+    current=(await context.client.get(f"/api/v1/simulation-sessions/{session['id']}",headers=headers('learner'))).json()
+    finished=await context.client.post(f"/api/v1/simulation-sessions/{session['id']}/finish",headers=headers('learner'),json={'expected_version':current['version']})
+    assert finished.status_code==200,finished.text
+    await drain(context)
+    ready=(await context.client.get(f"/api/v1/simulation-sessions/{session['id']}",headers=headers('learner'))).json()
+    assert {item['score'] for item in ready['evaluation']['result']['criteria']}=={0}
+    appealed=await context.client.post(f"/api/v1/simulation-evaluations/{ready['evaluation']['id']}/appeals",headers=headers('learner'),json={'text':'Почему ноль?'})
+    assert appealed.status_code==200,appealed.text
+    queued=(await context.client.get('/api/v1/coord/simulator/appeals',headers=headers('reviewer'))).json()
+    assert [row['critical'] for row in queued]==[True]

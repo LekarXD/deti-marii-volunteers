@@ -89,6 +89,9 @@ class SimulatorScenarioStaffView(BaseModel):
     reviews: list[dict]
     test_runs: list[dict]
     allowed_actions: list[str]
+    published_version: int | None = None
+    published_draft_version: int | None = None
+    finished_count: int = 0
 
 
 class SimulatorScenarioPublicView(BaseModel):
@@ -258,6 +261,9 @@ class SimulatorReviewQueueItem(BaseModel):
     title: str
     session_id: UUID
     response: str | None = None
+    created_at: datetime | None = None
+    author_name: str | None = None
+    critical: bool = False
 
 
 class SimulatorAppealDetail(BaseModel):

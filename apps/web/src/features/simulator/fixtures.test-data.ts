@@ -1,0 +1,9 @@
+// Invented scenario data shared by the trainer tests.
+export const draft={title:'Отказывается участвовать',character_name:'Миша',character_profile:'Миша, 9 лет. Живёт в ЦССУ',situation:'Все рисуют осенний пейзаж.',first_turn:'[натягивает капюшон] Не буду я ничего рисовать.',warning:'',methods:['TBRI'],hints:['Что Миша может сейчас чувствовать?'],
+ criteria:[{key:'contact',title:'Контакт до просьбы',guidance:'Сначала контакт, потом просьба.',critical:false},{key:'choice',title:'Выбор и голос',guidance:'Два посильных варианта.',critical:true}],
+ evaluation_cases:[{key:'good',title:'Сильный ответ',turns:[{speaker:'character' as const,content:'Не буду.'},{speaker:'volunteer' as const,content:'Можно я посижу рядом?'}],expected_scores:{contact:2 as const,choice:2 as const}},
+  {key:'bad',title:'Средний ответ',turns:[{speaker:'character' as const,content:'Не буду.'},{speaker:'volunteer' as const,content:'Все же рисуют.'}],expected_scores:{contact:0 as const,choice:0 as const}}]};
+export const staff=(over:Record<string,unknown>={})=>({id:'s1',version:1,draft,publication_id:null,archived_at:null,reviews:[],test_runs:[],allowed_actions:['update','test','publish','archive'],published_version:null,published_draft_version:null,finished_count:0,...over});
+export const review=(draft_version:number,decision='approved',reason='Одобрено без замечаний')=>({id:`r${draft_version}`,draft_version,decision,reason,at:'2026-10-20T10:00:00Z'});
+export const testRun=(draft_version:number,state:string)=>({id:`t${draft_version}`,draft_version,state,at:'2026-10-20T11:00:00Z'});
+export const queueItem=(id:string,over:Record<string,unknown>={})=>({id,version:1,state:'submitted',text:'Почему ноль?',title:'Отказывается участвовать',session_id:`session-${id}`,response:null,created_at:'2026-10-20T08:40:00Z',author_name:'Кирилл Осипов',critical:false,...over});

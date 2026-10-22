@@ -148,7 +148,7 @@ async def appeal_queue(principal: Principal = Depends(reviewer), db: AsyncSessio
         evaluation = await db.get(SimulationEvaluation, row.evaluation_id)
         attempt = await db.get(SimulationSession, evaluation.session_id)
         publication = await db.get(SimulatorScenarioVersion, attempt.scenario_version_id)
-        result.append(SimulatorReviewQueueItem(id=row.id, version=row.version, state=row.state, text=row.text, response=row.response, title=publication.content['title'], session_id=attempt.id))
+        result.append(await service.queue_item(db, row, attempt, publication.content['title'], evaluation))
     return result
 
 
@@ -161,7 +161,7 @@ async def appeal_context(appeal_id: UUID, principal: Principal = Depends(reviewe
     attempt = await service.find_attempt(db, principal, evaluation.session_id, reviewer=True)
     view = await service.session_view(db, attempt)
     view.allowed_actions=[]
-    return SimulatorAppealDetail(appeal=SimulatorReviewQueueItem(id=row.id, version=row.version, state=row.state, text=row.text, response=row.response, title=view.scenario.title, session_id=attempt.id), attempt=view)
+    return SimulatorAppealDetail(appeal=await service.queue_item(db, row, attempt, view.scenario.title, evaluation), attempt=view)
 
 
 @router.post('/coord/simulator/appeals/{appeal_id}/resolve', response_model=SimulatorSimpleResult, operation_id='resolveSimulatorAppeal')
@@ -176,7 +176,7 @@ async def support_queue(principal: Principal = Depends(reviewer), db: AsyncSessi
     for row in rows:
         attempt = await db.get(SimulationSession, row.session_id)
         publication = await db.get(SimulatorScenarioVersion, attempt.scenario_version_id)
-        result.append(SimulatorReviewQueueItem(id=row.id, version=row.version, state=row.state, text=row.text, response=row.response, title=publication.content['title'], session_id=attempt.id))
+        result.append(await service.queue_item(db, row, attempt, publication.content['title']))
     return result
 
 

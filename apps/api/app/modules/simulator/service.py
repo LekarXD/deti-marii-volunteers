@@ -5,12 +5,12 @@ from app.core.auth import resolve_principal
 from app.core.clock import utcnow
 from app.core.errors import ApiError
 from app.core.idempotency import payload_hash
-from app.core.models import Session
+from app.core.models import Session, User
 from app.integrations.ai.models import AIRun, AISettings
 from app.integrations.ai.provider import ProviderConfig
 from app.integrations.ai.service import enqueue_ai_run
 from .models import EvaluationAppeal, RubricVersion, SimulationEvaluation, SimulationSession, SimulationSupportRequest, SimulationTurn, SimulatorScenario, SimulatorScenarioReview, SimulatorScenarioVersion, SimulatorTestCaseRun, SimulatorTestRun
-from .schemas import SimulatorAssessmentOutput, SimulatorEvaluationView, SimulatorScenarioDraft, SimulatorScenarioPublicView, SimulatorScenarioStaffView, SimulatorSessionView, SimulatorTestRunView, SimulatorTurnView
+from .schemas import SimulatorAssessmentOutput, SimulatorEvaluationView, SimulatorReviewQueueItem, SimulatorScenarioDraft, SimulatorScenarioPublicView, SimulatorScenarioStaffView, SimulatorSessionView, SimulatorTestRunView, SimulatorTurnView
 from . import jobs  # register source-controlled gateway tasks for API and worker
 
 
@@ -71,9 +71,28 @@ async def staff_view(db, entity, principal):
         actions += ['update', 'test', 'publish', 'withdraw' if entity.publication_id else 'archive']
     if principal.has_permission('simulator.review'):
         actions.append('review')
+    # The editor shows which draft revision volunteers see; publishing bumps the draft revision by one.
+    publication = await db.get(SimulatorScenarioVersion, entity.publication_id) if entity.publication_id else None
+    published_review = await db.get(SimulatorScenarioReview, publication.review_id) if publication else None
+    owner = func.coalesce(SimulationSession.user_id, SimulationSession.registration_id)
+    finished = await db.scalar(select(func.count(func.distinct(owner))).select_from(SimulationSession).join(SimulatorScenarioVersion, SimulatorScenarioVersion.id == SimulationSession.scenario_version_id)
+        .where(SimulatorScenarioVersion.scenario_id == entity.id, SimulationSession.state == 'finished'))
     return SimulatorScenarioStaffView(id=entity.id, version=entity.version, draft=entity.draft, publication_id=entity.publication_id,
         archived_at=entity.archived_at, reviews=[{'id': str(row.id), 'draft_version': row.draft_version, 'decision': row.decision, 'reason': row.reason, 'at': row.created_at.isoformat()} for row in reviews],
-        test_runs=[{'id': str(row.id), 'draft_version': row.draft_version, 'state': row.state, 'at': row.created_at.isoformat()} for row in tests], allowed_actions=actions)
+        test_runs=[{'id': str(row.id), 'draft_version': row.draft_version, 'state': row.state, 'at': row.created_at.isoformat()} for row in tests], allowed_actions=actions,
+        published_version=publication.version if publication else None, published_draft_version=published_review.draft_version if published_review else None, finished_count=finished or 0)
+
+
+async def queue_item(db, row, attempt, title, evaluation=None):
+    """A reviewer queue row: who asked, when, and whether the AI scored a critical criterion at zero."""
+    user = await db.get(User, attempt.user_id) if attempt.user_id else None
+    critical = False
+    if evaluation is not None and evaluation.result:
+        rubric = await db.get(RubricVersion, evaluation.rubric_version_id)
+        flagged = {criterion['key'] for criterion in rubric.criteria if criterion.get('critical')} if rubric else set()
+        critical = any(item['criterion_key'] in flagged and item['score'] == 0 for item in evaluation.result.get('criteria', []))
+    return SimulatorReviewQueueItem(id=row.id, version=row.version, state=row.state, text=row.text, response=row.response, title=title, session_id=attempt.id,
+        created_at=row.created_at, author_name=user.display_name if user else None, critical=critical)
 
 
 async def public_view(db, version):
