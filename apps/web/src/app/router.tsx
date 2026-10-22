@@ -20,7 +20,8 @@ const crm=(name:string)=>page(()=>import('../features/crm'),name);
 const recording=(name:string)=>page(()=>import('../features/lesson-recording'),name);
 const messages=(name:string)=>page(()=>import('../features/messaging'),name);
 function StaffBoundary(){const {session,ended}=useSession();const location=useLocation();return session?.is_staff?<Outlet/>:ended?<SessionEnded/>:<Navigate to={'/login?next='+encodeURIComponent(location.pathname+location.search)} replace/>;}
-async function staffWebinars(){const {WebinarsPage}=await import('../features/studio');return {Component:()=> <WebinarsPage staff/>};}
+/** /fund/webinars and /fund/recordings are one «Эфиры и записи» page; recordings opens with lesson videos selected. */
+async function broadcasts(kind?:'lesson'){const {BroadcastsPage}=await import('../features/broadcasts');return {Component:()=> <BroadcastsPage kind={kind}/>};}
 async function entry(){const {WelcomePage}=await import('../features/auth/WelcomePage');const {ApplicationEntryPage}=await import('../features/applications/ApplicationEntryPage');return {Component:function Entry(){const {session}=useSession();return session?.mfa_required?<Navigate to="/login?next=%2Ffund" replace/>:session?.is_staff?<Navigate to="/fund" replace/>:session?.user_id?<ApplicationEntryPage/>:<WelcomePage/>;}};}
 function NotFound(){return <Card><h1 className="h1">Страница не найдена</h1><Link className="btn btn-primary" to="/">На главную</Link></Card>;}
 function LegacyGroup(){const location=useLocation();return <Navigate to={'/me/group'+location.search} replace/>;}
@@ -68,29 +69,35 @@ export const router=createBrowserRouter([{
    {path:'interviews/availability',lazy:interview('AvailabilityPage')},
    {path:'volunteers',lazy:crm('VolunteersPage')},
    {path:'volunteers/:id',lazy:crm('VolunteerRecordPage')},
-   {path:'contacts/review',lazy:crm('ReservePage')},
-   {path:'contacts/import',lazy:crm('CrmImportPage')},
+   {path:'contacts/review',element:<Navigate to="/fund/volunteers?state=unverified" replace/>},
+   {path:'contacts/import',element:<Navigate to="/fund/volunteers?state=unverified" replace/>},
    {path:'roles',lazy:activity('RolesPage')},
    {path:'responses',lazy:activity('StaffResponsesPage')},
    {path:'schedule',lazy:activity('CalendarPage')},
-   {path:'events/:id',lazy:activity('EventPage')},
+   {path:'events/:id',lazy:page(()=>import('../features/activities/StaffEventPage'),'StaffEventPage')},
    {path:'messages',lazy:messages('CoordinatorMessagesPage')},
    {path:'profile-review',lazy:profile('ProfileReviewPage')},
-   {path:'webinars',lazy:staffWebinars},
-   {path:'recordings',lazy:recording('RecordingProjectsPage')},
+   {path:'webinars',lazy:()=>broadcasts()},
+   {path:'recordings',lazy:()=>broadcasts('lesson')},
    {path:'recordings/:id',lazy:recording('RecordingProjectPage')},
    {path:'notifications',lazy:notification('NotificationAdminPage')},
    {path:'reports',lazy:page(()=>import('../features/reporting'),'ReportsPage')},
    {path:'integrations/dobro/transfers',lazy:page(()=>import('../features/dobro-transfer'),'DobroTransferPage')},
    {path:'admin',lazy:page(()=>import('../features/admin'),'AdminPage')},
    {path:'scenarios',lazy:simulator('ScenariosPage')},
+   {path:'scenarios/new',lazy:simulator('ScenarioNewPage')},
+   {path:'scenarios/:id',lazy:simulator('ScenarioEditorPage')},
    {path:'simulator/review',lazy:simulator('SimulatorReviewPage')},
    {path:'signals',lazy:followup('SignalsPage')},
    {path:'knowledge',lazy:knowledge('KnowledgePage')},
    {path:'learning',lazy:learning('BuilderPage')},
+   {path:'learning/courses/:id',lazy:learning('CoursePage')},
    {path:'learning/lessons/:id',lazy:learning('BuilderLessonPage')},
    {path:'opportunities',lazy:activity('StaffOpportunitiesPage')},
    {path:'participants',lazy:participant('ParticipantsPage')},
+   {path:'participants/new',lazy:participant('ParticipantFormPage')},
+   {path:'participants/:id',lazy:participant('ParticipantPage')},
+   {path:'participants/:id/edit',lazy:participant('ParticipantFormPage')},
    {path:'groups',lazy:participant('GroupsPage')},
   ]}]},
   {path:'group',element:<LegacyGroup/>},

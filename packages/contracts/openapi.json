@@ -1983,9 +1983,25 @@
             "title": "Key",
             "type": "string"
           },
+          "position": {
+            "default": 0,
+            "title": "Position",
+            "type": "integer"
+          },
           "publication_revision": {
             "title": "Publication Revision",
             "type": "integer"
+          },
+          "stage_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Title"
           },
           "title": {
             "title": "Title",
@@ -2057,49 +2073,6 @@
           "expected_version"
         ],
         "title": "AvailabilityCommand",
-        "type": "object"
-      },
-      "AvailabilityInput": {
-        "additionalProperties": false,
-        "properties": {
-          "preferred_channel": {
-            "default": "phone",
-            "enum": [
-              "telegram",
-              "phone",
-              "email",
-              "max",
-              "whatsapp",
-              "other"
-            ],
-            "title": "Preferred Channel",
-            "type": "string"
-          },
-          "summary": {
-            "maxLength": 4000,
-            "minLength": 1,
-            "title": "Summary",
-            "type": "string"
-          },
-          "timezone": {
-            "default": "Europe/Moscow",
-            "maxLength": 80,
-            "title": "Timezone",
-            "type": "string"
-          },
-          "windows": {
-            "items": {
-              "$ref": "#/components/schemas/AvailabilityWindowInput"
-            },
-            "maxItems": 28,
-            "title": "Windows",
-            "type": "array"
-          }
-        },
-        "required": [
-          "summary"
-        ],
-        "title": "AvailabilityInput",
         "type": "object"
       },
       "AvailabilityView": {
@@ -2203,6 +2176,50 @@
           "end_minute"
         ],
         "title": "AvailabilityWindowInput",
+        "type": "object"
+      },
+      "AwaitingResponses": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "opportunity_id": {
+            "format": "uuid",
+            "title": "Opportunity Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "opportunity_id",
+          "count"
+        ],
+        "title": "AwaitingResponses",
+        "type": "object"
+      },
+      "AwaitingSignUps": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "occurrence_id": {
+            "format": "uuid",
+            "title": "Occurrence Id",
+            "type": "string"
+          },
+          "staffing_need_id": {
+            "format": "uuid",
+            "title": "Staffing Need Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "occurrence_id",
+          "staffing_need_id",
+          "count"
+        ],
+        "title": "AwaitingSignUps",
         "type": "object"
       },
       "BookingInput": {
@@ -2367,6 +2384,209 @@
         "title": "BuilderAIInput",
         "type": "object"
       },
+      "CalendarSlotView": {
+        "description": "One slot of the coordinator's own grid; series fields are empty for a booking whose window changed.",
+        "properties": {
+          "booking_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking Id"
+          },
+          "booking_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking Status"
+          },
+          "buffer_after_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buffer After Minutes"
+          },
+          "candidate_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Name"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
+          },
+          "ends_at": {
+            "format": "date-time",
+            "title": "Ends At",
+            "type": "string"
+          },
+          "join_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Join Url"
+          },
+          "origin_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Date"
+          },
+          "origin_minute": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Minute"
+          },
+          "recurrence": {
+            "anyOf": [
+              {
+                "enum": [
+                  "once",
+                  "weekly"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurrence"
+          },
+          "series_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series Id"
+          },
+          "series_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series Version"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "free",
+              "booked",
+              "skipped"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
+          },
+          "venue": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue"
+          },
+          "window_end_minute": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Window End Minute"
+          },
+          "window_start_minute": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Window Start Minute"
+          }
+        },
+        "required": [
+          "starts_at",
+          "ends_at",
+          "state"
+        ],
+        "title": "CalendarSlotView",
+        "type": "object"
+      },
       "CancelInput": {
         "properties": {
           "expected_version": {
@@ -2435,6 +2655,44 @@
         "title": "CandidateProgressView",
         "type": "object"
       },
+      "CandidateSummaryView": {
+        "properties": {
+          "closed": {
+            "title": "Closed",
+            "type": "integer"
+          },
+          "done": {
+            "title": "Done",
+            "type": "integer"
+          },
+          "interview": {
+            "title": "Interview",
+            "type": "integer"
+          },
+          "intro": {
+            "title": "Intro",
+            "type": "integer"
+          },
+          "new": {
+            "title": "New",
+            "type": "integer"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "new",
+          "intro",
+          "interview",
+          "ready",
+          "done",
+          "closed"
+        ],
+        "title": "CandidateSummaryView",
+        "type": "object"
+      },
       "CandidateView": {
         "properties": {
           "assigned_coordinator_id": {
@@ -2485,6 +2743,30 @@
             "title": "Revisions",
             "type": "array"
           },
+          "stage": {
+            "enum": [
+              "new",
+              "intro",
+              "interview",
+              "ready",
+              "done",
+              "closed"
+            ],
+            "title": "Stage",
+            "type": "string"
+          },
+          "stage_since": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Since"
+          },
           "submission_state": {
             "title": "Submission State",
             "type": "string"
@@ -2510,7 +2792,8 @@
           "consents",
           "progress",
           "assigned_coordinator_id",
-          "revisions"
+          "revisions",
+          "stage"
         ],
         "title": "CandidateView",
         "type": "object"
@@ -3303,90 +3586,6 @@
         "title": "CrmReflectionView",
         "type": "object"
       },
-      "CrmReviewCommand": {
-        "additionalProperties": false,
-        "properties": {
-          "agreement_text": {
-            "default": "",
-            "maxLength": 8000,
-            "title": "Agreement Text",
-            "type": "string"
-          },
-          "availability": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AvailabilityInput"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "expected_version": {
-            "minimum": 1.0,
-            "title": "Expected Version",
-            "type": "integer"
-          },
-          "no_contact": {
-            "default": false,
-            "title": "No Contact",
-            "type": "boolean"
-          },
-          "note": {
-            "maxLength": 8000,
-            "minLength": 1,
-            "title": "Note",
-            "type": "string"
-          },
-          "outcome": {
-            "enum": [
-              "unverified",
-              "contacted",
-              "awaiting_reply",
-              "ready",
-              "paused",
-              "unavailable",
-              "unreachable"
-            ],
-            "title": "Outcome",
-            "type": "string"
-          },
-          "valid_until": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Valid Until"
-          }
-        },
-        "required": [
-          "expected_version",
-          "outcome",
-          "note"
-        ],
-        "title": "CrmReviewCommand",
-        "type": "object"
-      },
-      "CrmVersionCommand": {
-        "additionalProperties": false,
-        "properties": {
-          "expected_version": {
-            "minimum": 1.0,
-            "title": "Expected Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "expected_version"
-        ],
-        "title": "CrmVersionCommand",
-        "type": "object"
-      },
       "CrmVolunteerListView": {
         "properties": {
           "items": {
@@ -3602,14 +3801,6 @@
             "title": "Id",
             "type": "string"
           },
-          "import_provenance": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Import Provenance",
-            "type": "array"
-          },
           "latest_reflection": {
             "anyOf": [
               {
@@ -3658,13 +3849,6 @@
             "title": "Relationship State",
             "type": "string"
           },
-          "reviews": {
-            "items": {
-              "$ref": "#/components/schemas/ReserveReviewView"
-            },
-            "title": "Reviews",
-            "type": "array"
-          },
           "version": {
             "title": "Version",
             "type": "integer"
@@ -3687,9 +3871,7 @@
           "agreements",
           "contact_events",
           "follow_up_tasks",
-          "reviews",
-          "merged_record_ids",
-          "import_provenance"
+          "merged_record_ids"
         ],
         "title": "CrmVolunteerView",
         "type": "object"
@@ -5503,6 +5685,31 @@
         "title": "EventOccurrenceView",
         "type": "object"
       },
+      "EventResponsesSummary": {
+        "description": "What waits for a coordinator's answer: own sign-ups for upcoming dates and responses to opportunities.",
+        "properties": {
+          "responses": {
+            "items": {
+              "$ref": "#/components/schemas/AwaitingResponses"
+            },
+            "title": "Responses",
+            "type": "array"
+          },
+          "sign_ups": {
+            "items": {
+              "$ref": "#/components/schemas/AwaitingSignUps"
+            },
+            "title": "Sign Ups",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sign_ups",
+          "responses"
+        ],
+        "title": "EventResponsesSummary",
+        "type": "object"
+      },
       "EventSeriesApply": {
         "additionalProperties": false,
         "properties": {
@@ -6871,316 +7078,20 @@
         "title": "HoursView",
         "type": "object"
       },
-      "ImportBatchSummary": {
-        "properties": {
-          "applied_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Applied At"
-          },
-          "checksum": {
-            "title": "Checksum",
-            "type": "string"
-          },
-          "columns": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Columns",
-            "type": "array"
-          },
-          "counts": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "title": "Counts",
-            "type": "object"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "filename": {
-            "title": "Filename",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "mapping": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "Mapping",
-            "type": "object"
-          },
-          "source_system": {
-            "title": "Source System",
-            "type": "string"
-          },
-          "state": {
-            "title": "State",
-            "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "checksum",
-          "filename",
-          "columns",
-          "mapping",
-          "source_system",
-          "state",
-          "version",
-          "created_at",
-          "applied_at",
-          "counts"
-        ],
-        "title": "ImportBatchSummary",
-        "type": "object"
-      },
-      "ImportBatchView": {
-        "properties": {
-          "applied_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Applied At"
-          },
-          "checksum": {
-            "title": "Checksum",
-            "type": "string"
-          },
-          "columns": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Columns",
-            "type": "array"
-          },
-          "counts": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "title": "Counts",
-            "type": "object"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "filename": {
-            "title": "Filename",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "mapping": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "Mapping",
-            "type": "object"
-          },
-          "rows": {
-            "items": {
-              "$ref": "#/components/schemas/ImportRowView"
-            },
-            "title": "Rows",
-            "type": "array"
-          },
-          "source_system": {
-            "title": "Source System",
-            "type": "string"
-          },
-          "state": {
-            "title": "State",
-            "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "checksum",
-          "filename",
-          "columns",
-          "mapping",
-          "source_system",
-          "state",
-          "version",
-          "created_at",
-          "applied_at",
-          "counts",
-          "rows"
-        ],
-        "title": "ImportBatchView",
-        "type": "object"
-      },
-      "ImportMappingCommand": {
-        "additionalProperties": false,
-        "properties": {
-          "expected_version": {
-            "minimum": 1.0,
-            "title": "Expected Version",
-            "type": "integer"
-          },
-          "mapping": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "Mapping",
-            "type": "object"
-          },
-          "source_system": {
-            "maxLength": 80,
-            "minLength": 1,
-            "title": "Source System",
-            "type": "string"
-          }
-        },
-        "required": [
-          "expected_version",
-          "mapping",
-          "source_system"
-        ],
-        "title": "ImportMappingCommand",
-        "type": "object"
-      },
-      "ImportRowResolutionCommand": {
-        "additionalProperties": false,
-        "properties": {
-          "decision": {
-            "enum": [
-              "create",
-              "link",
-              "skip"
-            ],
-            "title": "Decision",
-            "type": "string"
-          },
-          "expected_version": {
-            "minimum": 1.0,
-            "title": "Expected Version",
-            "type": "integer"
-          },
-          "reason": {
-            "maxLength": 4000,
-            "minLength": 1,
-            "title": "Reason",
-            "type": "string"
-          },
-          "volunteer_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Volunteer Id"
-          }
-        },
-        "required": [
-          "expected_version",
-          "decision",
-          "reason"
-        ],
-        "title": "ImportRowResolutionCommand",
-        "type": "object"
-      },
-      "ImportRowView": {
-        "properties": {
-          "decision": {
-            "title": "Decision",
-            "type": "string"
-          },
-          "errors": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Errors",
-            "type": "array"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "line_number": {
-            "title": "Line Number",
-            "type": "integer"
-          },
-          "normalized": {
-            "additionalProperties": true,
-            "title": "Normalized",
-            "type": "object"
-          },
-          "raw": {
-            "additionalProperties": true,
-            "title": "Raw",
-            "type": "object"
-          },
-          "resolution_reason": {
-            "title": "Resolution Reason",
-            "type": "string"
-          },
-          "volunteer_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Volunteer Id"
-          }
-        },
-        "required": [
-          "id",
-          "line_number",
-          "raw",
-          "normalized",
-          "decision",
-          "volunteer_id",
-          "errors",
-          "resolution_reason"
-        ],
-        "title": "ImportRowView",
-        "type": "object"
-      },
       "InterviewProgressView": {
         "properties": {
+          "booking_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking Id"
+          },
           "starts_at": {
             "anyOf": [
               {
@@ -7250,6 +7161,18 @@
             "pattern": "^[a-z0-9_-]+$",
             "title": "Key",
             "type": "string"
+          },
+          "stage_title": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Title"
           },
           "title": {
             "maxLength": 300,
@@ -9157,6 +9080,38 @@
         "title": "OwnReflectionView",
         "type": "object"
       },
+      "ParticipantGroupRef": {
+        "description": "A current membership as staff see it next to the card; never part of the volunteer DTO.",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "membership_id": {
+            "format": "uuid",
+            "title": "Membership Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "valid_from": {
+            "format": "date",
+            "title": "Valid From",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "membership_id",
+          "valid_from"
+        ],
+        "title": "ParticipantGroupRef",
+        "type": "object"
+      },
       "ParticipantInput": {
         "properties": {
           "about": {
@@ -9184,6 +9139,14 @@
             "title": "Communication",
             "type": "string"
           },
+          "communication_tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Communication Tags",
+            "type": "array"
+          },
           "display_name": {
             "maxLength": 200,
             "minLength": 1,
@@ -9195,6 +9158,14 @@
             "maxLength": 10000,
             "title": "Interests",
             "type": "string"
+          },
+          "interests_tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Interests Tags",
+            "type": "array"
           },
           "lifecycle": {
             "default": "active",
@@ -9219,6 +9190,14 @@
             "maxLength": 10000,
             "title": "Support",
             "type": "string"
+          },
+          "support_tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Support Tags",
+            "type": "array"
           }
         },
         "required": [
@@ -9231,7 +9210,7 @@
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/SafeParticipant"
+              "$ref": "#/components/schemas/StaffParticipant"
             },
             "title": "Items",
             "type": "array"
@@ -9251,6 +9230,95 @@
           "offset"
         ],
         "title": "ParticipantList",
+        "type": "object"
+      },
+      "ParticipantOccurrence": {
+        "properties": {
+          "ends_at": {
+            "format": "date-time",
+            "title": "Ends At",
+            "type": "string"
+          },
+          "group_title": {
+            "title": "Group Title",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "volunteers": {
+            "items": {
+              "$ref": "#/components/schemas/ParticipantOccurrenceVolunteer"
+            },
+            "title": "Volunteers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "starts_at",
+          "ends_at",
+          "timezone",
+          "location",
+          "group_title",
+          "volunteers"
+        ],
+        "title": "ParticipantOccurrence",
+        "type": "object"
+      },
+      "ParticipantOccurrenceList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ParticipantOccurrence"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ParticipantOccurrenceList",
+        "type": "object"
+      },
+      "ParticipantOccurrenceVolunteer": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "display_name"
+        ],
+        "title": "ParticipantOccurrenceVolunteer",
         "type": "object"
       },
       "ParticipantStaffOption": {
@@ -9315,6 +9383,14 @@
             "title": "Communication",
             "type": "string"
           },
+          "communication_tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Communication Tags",
+            "type": "array"
+          },
           "display_name": {
             "maxLength": 200,
             "minLength": 1,
@@ -9331,6 +9407,14 @@
             "maxLength": 10000,
             "title": "Interests",
             "type": "string"
+          },
+          "interests_tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Interests Tags",
+            "type": "array"
           },
           "lifecycle": {
             "default": "active",
@@ -9355,6 +9439,14 @@
             "maxLength": 10000,
             "title": "Support",
             "type": "string"
+          },
+          "support_tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Support Tags",
+            "type": "array"
           }
         },
         "required": [
@@ -9717,6 +9809,10 @@
             "title": "Author Id",
             "type": "string"
           },
+          "author_name": {
+            "title": "Author Name",
+            "type": "string"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -9736,6 +9832,7 @@
           "id",
           "text",
           "author_id",
+          "author_name",
           "created_at"
         ],
         "title": "PrivateNoteView",
@@ -11004,6 +11101,29 @@
         "properties": {
           "capabilities": {
             "$ref": "#/components/schemas/RecordingCapabilities"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
           },
           "id": {
             "format": "uuid",
@@ -14439,41 +14559,6 @@
         "title": "RequestView",
         "type": "object"
       },
-      "ReserveReviewView": {
-        "properties": {
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "no_contact": {
-            "title": "No Contact",
-            "type": "boolean"
-          },
-          "note": {
-            "title": "Note",
-            "type": "string"
-          },
-          "outcome": {
-            "title": "Outcome",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "outcome",
-          "note",
-          "no_contact",
-          "created_at"
-        ],
-        "title": "ReserveReviewView",
-        "type": "object"
-      },
       "ReserveView": {
         "properties": {
           "allowed_actions": {
@@ -14992,6 +15077,11 @@
           "version": {
             "title": "Version",
             "type": "integer"
+          },
+          "volunteer_count": {
+            "default": 0,
+            "title": "Volunteer Count",
+            "type": "integer"
           }
         },
         "required": [
@@ -15103,6 +15193,13 @@
             "title": "Communication",
             "type": "string"
           },
+          "communication_tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Communication Tags",
+            "type": "array"
+          },
           "display_name": {
             "title": "Display Name",
             "type": "string"
@@ -15115,6 +15212,13 @@
           "interests": {
             "title": "Interests",
             "type": "string"
+          },
+          "interests_tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Interests Tags",
+            "type": "array"
           },
           "lifecycle": {
             "title": "Lifecycle",
@@ -15136,6 +15240,13 @@
             "title": "Support",
             "type": "string"
           },
+          "support_tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Support Tags",
+            "type": "array"
+          },
           "version": {
             "title": "Version",
             "type": "integer"
@@ -15149,6 +15260,9 @@
           "communication",
           "support",
           "interests",
+          "communication_tags",
+          "support_tags",
+          "interests_tags",
           "photo_asset_id",
           "version",
           "lifecycle"
@@ -16140,6 +16254,34 @@
       },
       "SimulatorReviewQueueItem": {
         "properties": {
+          "author_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author Name"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "critical": {
+            "default": false,
+            "title": "Critical",
+            "type": "boolean"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -16398,6 +16540,11 @@
           "draft": {
             "$ref": "#/components/schemas/SimulatorScenarioDraft"
           },
+          "finished_count": {
+            "default": 0,
+            "title": "Finished Count",
+            "type": "integer"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -16414,6 +16561,28 @@
               }
             ],
             "title": "Publication Id"
+          },
+          "published_draft_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published Draft Version"
+          },
+          "published_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published Version"
           },
           "reviews": {
             "items": {
@@ -17312,6 +17481,11 @@
             "title": "Candidate Name",
             "type": "string"
           },
+          "confirmed": {
+            "default": true,
+            "title": "Confirmed",
+            "type": "boolean"
+          },
           "coordinator_id": {
             "format": "uuid",
             "title": "Coordinator Id",
@@ -17692,6 +17866,112 @@
         "title": "StaffOptionView",
         "type": "object"
       },
+      "StaffParticipant": {
+        "properties": {
+          "about": {
+            "title": "About",
+            "type": "string"
+          },
+          "birth_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Year"
+          },
+          "communication": {
+            "title": "Communication",
+            "type": "string"
+          },
+          "communication_tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Communication Tags",
+            "type": "array"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/ParticipantGroupRef"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "interests": {
+            "title": "Interests",
+            "type": "string"
+          },
+          "interests_tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Interests Tags",
+            "type": "array"
+          },
+          "lifecycle": {
+            "title": "Lifecycle",
+            "type": "string"
+          },
+          "photo_asset_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Asset Id"
+          },
+          "support": {
+            "title": "Support",
+            "type": "string"
+          },
+          "support_tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Support Tags",
+            "type": "array"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "birth_year",
+          "about",
+          "communication",
+          "support",
+          "interests",
+          "communication_tags",
+          "support_tags",
+          "interests_tags",
+          "photo_asset_id",
+          "version",
+          "lifecycle",
+          "groups"
+        ],
+        "title": "StaffParticipant",
+        "type": "object"
+      },
       "StaffPermissionCatalogView": {
         "properties": {
           "items": {
@@ -17947,6 +18227,114 @@
         "title": "StaffReflectionView",
         "type": "object"
       },
+      "StaffReserveCommand": {
+        "additionalProperties": false,
+        "description": "Queue a volunteer for a full role; a pending own sign-up for the same date is withdrawn with the reason.",
+        "properties": {
+          "expected_assignment_version": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Assignment Version"
+          },
+          "expected_version": {
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "reason": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Reason",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_version",
+          "user_id"
+        ],
+        "title": "StaffReserveCommand",
+        "type": "object"
+      },
+      "StaffReserveView": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "occurrence_id": {
+            "format": "uuid",
+            "title": "Occurrence Id",
+            "type": "string"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          },
+          "role_title": {
+            "title": "Role Title",
+            "type": "string"
+          },
+          "staffing_need_id": {
+            "format": "uuid",
+            "title": "Staffing Need Id",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "waiting",
+              "offered"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "user_id",
+          "display_name",
+          "occurrence_id",
+          "staffing_need_id",
+          "role_title",
+          "state",
+          "position"
+        ],
+        "title": "StaffReserveView",
+        "type": "object"
+      },
       "StaffScopeOptionView": {
         "properties": {
           "id": {
@@ -18168,6 +18556,38 @@
         "title": "StaffingNeedsUpdate",
         "type": "object"
       },
+      "StageInput": {
+        "additionalProperties": false,
+        "properties": {
+          "lesson_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Lesson Ids",
+            "type": "array"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "required": [
+          "lesson_ids"
+        ],
+        "title": "StageInput",
+        "type": "object"
+      },
       "StartAttemptInput": {
         "additionalProperties": false,
         "properties": {
@@ -18185,6 +18605,31 @@
           }
         },
         "title": "StartAttemptInput",
+        "type": "object"
+      },
+      "StructureSave": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_version": {
+            "minimum": 0.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/StageInput"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Stages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "expected_version",
+          "stages"
+        ],
+        "title": "StructureSave",
         "type": "object"
       },
       "StudioBoardGrantInput": {
@@ -19530,6 +19975,93 @@
         "title": "TrackCreate",
         "type": "object"
       },
+      "TrackStats": {
+        "properties": {
+          "completed": {
+            "default": 0,
+            "title": "Completed",
+            "type": "integer"
+          },
+          "learning": {
+            "default": 0,
+            "title": "Learning",
+            "type": "integer"
+          },
+          "stuck": {
+            "default": 0,
+            "title": "Stuck",
+            "type": "integer"
+          }
+        },
+        "title": "TrackStats",
+        "type": "object"
+      },
+      "TrackUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "audience": {
+            "anyOf": [
+              {
+                "enum": [
+                  "new",
+                  "manual"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audience"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 3000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "expected_version": {
+            "minimum": 0.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "required": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "TrackUpdate",
+        "type": "object"
+      },
       "TrackView": {
         "properties": {
           "archived": {
@@ -19546,6 +20078,11 @@
               }
             ]
           },
+          "audience": {
+            "default": "manual",
+            "title": "Audience",
+            "type": "string"
+          },
           "current_release_id": {
             "anyOf": [
               {
@@ -19557,6 +20094,16 @@
               }
             ],
             "title": "Current Release Id"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "has_simulator": {
+            "default": false,
+            "title": "Has Simulator",
+            "type": "boolean"
           },
           "id": {
             "format": "uuid",
@@ -19574,6 +20121,16 @@
             "title": "Lessons",
             "type": "array"
           },
+          "publish_state": {
+            "default": "draft",
+            "enum": [
+              "draft",
+              "changed",
+              "published"
+            ],
+            "title": "Publish State",
+            "type": "string"
+          },
           "releases": {
             "items": {
               "additionalProperties": true,
@@ -19581,6 +20138,14 @@
             },
             "title": "Releases",
             "type": "array"
+          },
+          "required": {
+            "default": false,
+            "title": "Required",
+            "type": "boolean"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/TrackStats"
           },
           "title": {
             "title": "Title",
@@ -20395,6 +20960,11 @@
             "title": "Duration Minutes",
             "type": "integer"
           },
+          "enrolled_count": {
+            "default": 0,
+            "title": "Enrolled Count",
+            "type": "integer"
+          },
           "enrollment_state": {
             "anyOf": [
               {
@@ -20416,6 +20986,17 @@
               }
             ],
             "title": "Enrollment Version"
+          },
+          "host_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Host Name"
           },
           "host_user_id": {
             "format": "uuid",
@@ -27798,6 +28379,30 @@
           },
           {
             "in": "query",
+            "name": "stage",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "new",
+                    "intro",
+                    "interview",
+                    "ready",
+                    "done",
+                    "closed"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Stage"
+            }
+          },
+          {
+            "in": "query",
             "name": "offset",
             "required": false,
             "schema": {
@@ -27913,6 +28518,107 @@
           }
         },
         "summary": "Candidates",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
+    "/api/v1/coord/candidates/summary": {
+      "get": {
+        "operationId": "candidate_summary_api_v1_coord_candidates_summary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandidateSummaryView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Candidate Summary",
         "tags": [
           "applications"
         ]
@@ -28285,6 +28991,145 @@
         ]
       }
     },
+    "/api/v1/coord/candidates/{application_id}/remind": {
+      "post": {
+        "operationId": "remind_api_v1_coord_candidates__application_id__remind_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Application Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "idempotency-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__modules__applications__schemas__VersionCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandidateView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Remind",
+        "tags": [
+          "applications"
+        ]
+      }
+    },
     "/api/v1/coord/candidates/{application_id}/reopen": {
       "post": {
         "operationId": "reopen_api_v1_coord_candidates__application_id__reopen_post",
@@ -28560,298 +29405,6 @@
         "summary": "Review",
         "tags": [
           "applications"
-        ]
-      }
-    },
-    "/api/v1/coord/contact-reviews": {
-      "get": {
-        "operationId": "reviews_api_v1_coord_contact_reviews_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "state",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": "unverified",
-              "title": "State"
-            }
-          },
-          {
-            "in": "query",
-            "name": "q",
-            "required": false,
-            "schema": {
-              "default": "",
-              "title": "Q",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "minimum": 0,
-              "title": "Offset",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 30,
-              "maximum": 100,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmVolunteerListView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Too Many Requests"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Reviews",
-        "tags": [
-          "crm"
-        ]
-      }
-    },
-    "/api/v1/coord/contact-reviews/{volunteer_id}/record": {
-      "post": {
-        "operationId": "record_review_api_v1_coord_contact_reviews__volunteer_id__record_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "volunteer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Volunteer Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "idempotency-key",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Idempotency-Key"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CrmReviewCommand"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrmVolunteerView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Too Many Requests"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Record Review",
-        "tags": [
-          "crm"
         ]
       }
     },
@@ -29349,6 +29902,123 @@
         ]
       }
     },
+    "/api/v1/coord/event-occurrences/{occurrence_id}/reserve": {
+      "get": {
+        "operationId": "listEventReserve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "occurrence_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Occurrence Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StaffReserveView"
+                  },
+                  "title": "Response Listeventreserve",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Event Reserve",
+        "tags": [
+          "activities"
+        ]
+      }
+    },
     "/api/v1/coord/event-occurrences/{occurrence_id}/restore": {
       "post": {
         "operationId": "restoreCalendarOccurrence",
@@ -29728,6 +30398,107 @@
         "tags": [
           "activities",
           "calendar"
+        ]
+      }
+    },
+    "/api/v1/coord/event-responses": {
+      "get": {
+        "operationId": "summarizeEventResponses",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventResponsesSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Event Responses",
+        "tags": [
+          "activities"
         ]
       }
     },
@@ -32866,919 +33637,6 @@
         ]
       }
     },
-    "/api/v1/coord/import-batches": {
-      "get": {
-        "operationId": "batches_api_v1_coord_import_batches_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ImportBatchSummary"
-                  },
-                  "title": "Response Batches Api V1 Coord Import Batches Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Too Many Requests"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Batches",
-        "tags": [
-          "crm"
-        ]
-      }
-    },
-    "/api/v1/coord/import-batches/upload": {
-      "post": {
-        "operationId": "upload_api_v1_coord_import_batches_upload_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-filename",
-            "required": false,
-            "schema": {
-              "default": "contacts.csv",
-              "title": "X-Filename",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "idempotency-key",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Idempotency-Key"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportBatchView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Too Many Requests"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Upload",
-        "tags": [
-          "crm"
-        ]
-      }
-    },
-    "/api/v1/coord/import-batches/{batch_id}": {
-      "get": {
-        "operationId": "batch_api_v1_coord_import_batches__batch_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "batch_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Batch Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportBatchView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Too Many Requests"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Batch",
-        "tags": [
-          "crm"
-        ]
-      }
-    },
-    "/api/v1/coord/import-batches/{batch_id}/apply": {
-      "post": {
-        "operationId": "apply_batch_api_v1_coord_import_batches__batch_id__apply_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "batch_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Batch Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "idempotency-key",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Idempotency-Key"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CrmVersionCommand"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportBatchView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Too Many Requests"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Apply Batch",
-        "tags": [
-          "crm"
-        ]
-      }
-    },
-    "/api/v1/coord/import-batches/{batch_id}/dry-run": {
-      "post": {
-        "operationId": "dry_run_api_v1_coord_import_batches__batch_id__dry_run_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "batch_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Batch Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "idempotency-key",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Idempotency-Key"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CrmVersionCommand"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportBatchView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Too Many Requests"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Dry Run",
-        "tags": [
-          "crm"
-        ]
-      }
-    },
-    "/api/v1/coord/import-batches/{batch_id}/map": {
-      "post": {
-        "operationId": "map_batch_api_v1_coord_import_batches__batch_id__map_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "batch_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Batch Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "idempotency-key",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Idempotency-Key"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ImportMappingCommand"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportBatchView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Too Many Requests"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Map Batch",
-        "tags": [
-          "crm"
-        ]
-      }
-    },
-    "/api/v1/coord/import-batches/{batch_id}/rows/{row_id}/resolve": {
-      "post": {
-        "operationId": "resolve_row_api_v1_coord_import_batches__batch_id__rows__row_id__resolve_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "batch_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Batch Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "row_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Row Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "idempotency-key",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Idempotency-Key"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ImportRowResolutionCommand"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportBatchView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Conflict"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Too Many Requests"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorView"
-                }
-              }
-            },
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Resolve Row",
-        "tags": [
-          "crm"
-        ]
-      }
-    },
     "/api/v1/coord/interview-availability": {
       "get": {
         "operationId": "windows_api_v1_coord_interview_availability_get",
@@ -34657,6 +34515,143 @@
           }
         },
         "summary": "Preview Window",
+        "tags": [
+          "interviews"
+        ]
+      }
+    },
+    "/api/v1/coord/interview-calendar": {
+      "get": {
+        "operationId": "interview_calendar_api_v1_coord_interview_calendar_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "title": "From",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "title": "To",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "default": "Europe/Moscow",
+              "title": "Timezone",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CalendarSlotView"
+                  },
+                  "title": "Response Interview Calendar Api V1 Coord Interview Calendar Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Interview Calendar",
         "tags": [
           "interviews"
         ]
@@ -38719,6 +38714,143 @@
         "tags": [
           "learning"
         ]
+      },
+      "patch": {
+        "operationId": "update_track_api_v1_coord_learning_tracks__track_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "track_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Track Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Update Track",
+        "tags": [
+          "learning"
+        ]
       }
     },
     "/api/v1/coord/learning/tracks/{track_id}/archive": {
@@ -39411,6 +39543,145 @@
           }
         },
         "summary": "Rollback Release",
+        "tags": [
+          "learning"
+        ]
+      }
+    },
+    "/api/v1/coord/learning/tracks/{track_id}/structure": {
+      "put": {
+        "operationId": "save_structure_api_v1_coord_learning_tracks__track_id__structure_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "track_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Track Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StructureSave"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Save Structure",
         "tags": [
           "learning"
         ]
@@ -42259,7 +42530,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SafeParticipant"
+                  "$ref": "#/components/schemas/StaffParticipant"
                 }
               }
             },
@@ -42484,6 +42755,132 @@
           }
         },
         "summary": "Update Participant",
+        "tags": [
+          "participants"
+        ]
+      }
+    },
+    "/api/v1/coord/participants/{participant_id}/occurrences": {
+      "get": {
+        "description": "Upcoming sessions of the groups the participant belongs to on the session's local date.",
+        "operationId": "participant_occurrences_api_v1_coord_participants__participant_id__occurrences_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "participant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Participant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantOccurrenceList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Participant Occurrences",
         "tags": [
           "participants"
         ]
@@ -46129,6 +46526,33 @@
       "get": {
         "operationId": "getStaffOpportunityResponses",
         "parameters": [
+          {
+            "in": "query",
+            "name": "opportunity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Opportunity Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "awaiting",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Awaiting",
+              "type": "boolean"
+            }
+          },
           {
             "in": "query",
             "name": "cursor",
@@ -51830,6 +52254,138 @@
         "tags": [
           "activities",
           "participation"
+        ]
+      }
+    },
+    "/api/v1/coord/staffing-needs/{need_id}/reserve": {
+      "post": {
+        "operationId": "reserveVolunteerForNeed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "need_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Need Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffReserveCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffReserveView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Reserve Volunteer",
+        "tags": [
+          "activities"
         ]
       }
     },
