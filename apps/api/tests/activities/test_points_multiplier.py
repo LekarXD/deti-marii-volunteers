@@ -22,7 +22,7 @@ async def test_multiplier_keeps_invitation_valid_and_is_fixed_at_confirm(context
     boosted=await patch_needs(context,event,[{'role_id':need['role_id'],'capacity_required':1,'points_multiplier':1.5}])
     assert boosted['points_multiplier']==1.5 and boosted['version']==need['version']
     invited=(await context.client.get(f"/api/v1/assignments/{item['id']}",headers=user_headers())).json()
-    assert invited['points_multiplier']==1.5
+    assert invited['points_multiplier']==1.5 and invited['approval_required']
     confirmed=await context.client.post(f"/api/v1/assignments/{item['id']}/confirm",headers=user_headers(),json={'expected_version':item['version']})
     assert confirmed.status_code==200,confirmed.text
     assert confirmed.json()['points_multiplier']==1.5

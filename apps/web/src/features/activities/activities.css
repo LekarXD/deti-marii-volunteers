@@ -31,3 +31,4 @@
 .activity-suggestion{display:flex;flex-direction:column;gap:8px;margin:0 0 16px}.activity-suggestion ul{margin:0;padding-left:22px;color:var(--ink-2);line-height:1.6}
 .activity-points{display:inline-flex;align-items:center;gap:8px;font-weight:600}.activity-points .ic{width:20px;height:20px}
 .activity-points-switch{display:flex;align-items:center;gap:12px;min-height:44px;margin-top:16px;font-size:16px;font-weight:500}
+.activity-status{margin:16px 0 0;padding:14px 16px;border-radius:18px;background:var(--yellow-tint);font-size:16px;line-height:1.45}.activity-status.is-done{background:var(--green-tint)}

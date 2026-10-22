@@ -103,16 +103,13 @@ function MyPath({hours}: {hours: ReturnType<typeof useHours>}) {
   if (hours.isPending) return <section className="card home-path"><LoadingState label="Загружаем мой путь…"/></section>;
   if (hours.error) return <section className="card home-path"><ErrorState error={hours.error} retry={() => {void hours.refetch();}}/></section>;
   const {level, points, total_minutes: total} = hours.data, next = level.next_minutes;
-  const [count, ...word] = hoursLabel(total).split(' ');
   return <Link className="card home-path" to="/hours" aria-labelledby="home-path">
     <p className="eyebrow" id="home-path">Мой путь</p>
-    <h2 className="h3 home-card-title">{level.title ?? 'Первое занятие впереди'}</h2>
-    <span className="row home-path-numbers"><span className="big num">{count}</span><span className="h3">{word.join(' ')} помощи</span></span>
-    <span className="p home-line">{pointsLabel(points.balance)}</span>
-    {next != null && <>
-      <span className="bar home-path-bar" aria-hidden="true"><i style={{width: `${Math.min(100, Math.max(0, total) / next * 100)}%`}}/></span>
-      <span className="p home-line">До уровня «{level.next_title}» осталось {hoursLabel(next - total, true)}</span>
-    </>}
+    <h2 className="h2 home-path-title">{level.title ?? 'Первое занятие впереди'}</h2>
+    <span className="home-path-steps" aria-hidden="true">{level.steps.map(step => <i key={step.key} data-reached={step.reached}/>)}</span>
+    <span className="home-path-labels">{level.steps.map(step => <span key={step.key} data-current={step.current}>{step.title}</span>)}</span>
+    <span className="p home-line">{hoursLabel(total)} помощи{next != null && level.next_title ? `, до «${level.next_title}» ${hoursLabel(next - total, true)}` : ''}</span>
+    <span className="home-path-points"><Icon name="star"/>{pointsLabel(points.balance)}</span>
   </Link>;
 }
 function NextAssignment({item, now}: {item: AssignmentParticipation; now: number}) {

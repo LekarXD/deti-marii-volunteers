@@ -12,7 +12,7 @@ from app.modules.activities.assignment_models import Assignment,AttendanceEvent,
 from app.modules.activities.calendar_models import EventOccurrence
 from app.modules.applications.service import check_version
 from .models import ServiceTimeEntry,ManualTimeRequest,ManualTimeReview,Gratitude,PointsEntry,Prize,PrizeRequest
-from .schemas import ServiceTimeEntryView,ManualTimeView,ManualTimeReviewView,HoursView,AchievementView,GratitudeView,LevelView,PointsView,PointsHistoryView
+from .schemas import ServiceTimeEntryView,ManualTimeView,ManualTimeReviewView,HoursView,AchievementView,GratitudeView,LevelView,LevelStepView,PointsView,PointsHistoryView
 
 async def subject_lock(db,foundation_id,user_id):
     await db.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key,0))'),{'key':f'ledger:{foundation_id}:{user_id}'})
@@ -117,7 +117,8 @@ TRUSTED_MINUTES=100*60
 def level_view(total_minutes,first_class):
     reached=[index for index,(_,_,minutes) in enumerate(LEVELS) if (first_class if minutes is None else total_minutes>=minutes)]
     current=max(reached,default=None);following=LEVELS[0] if current is None else LEVELS[current+1] if current+1<len(LEVELS) else None
-    return LevelView(key=LEVELS[current][0] if current is not None else None,title=LEVELS[current][1] if current is not None else None,next_title=following[1] if following else None,next_minutes=following[2] if following else None,letter_hint=current is not None and current>=2)
+    steps=[LevelStepView(key=key,title=title,minutes=minutes,reached=index in reached,current=index==current) for index,(key,title,minutes) in enumerate(LEVELS)]
+    return LevelView(key=LEVELS[current][0] if current is not None else None,title=LEVELS[current][1] if current is not None else None,next_title=following[1] if following else None,next_minutes=following[2] if following else None,letter_hint=current is not None and current>=2,steps=steps)
 
 async def trusted_with_newcomers(db,foundation_id,user_id):
     total=await db.scalar(select(func.sum(ServiceTimeEntry.delta_minutes)).where(ServiceTimeEntry.foundation_id==foundation_id,ServiceTimeEntry.user_id==user_id))

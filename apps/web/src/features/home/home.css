@@ -2,9 +2,14 @@
 .home-newcomer{margin-top:24px}.home-newcomer a{text-decoration:underline;color:inherit}
 .volunteer-home{min-width:0}.home-greeting{margin-bottom:24px}.home-hero-copy{flex:1 1 560px;min-width:0}.home-hero-copy .lead{margin-top:18px}.home-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.home-line{display:block}.home-invitation .h3{display:block}.home-invitation .home-line{margin-top:6px}.home-invitation .match-foot{padding-top:6px}.home-invitation .match-foot .ic{flex:none}.home-card-title{margin-top:10px;margin-bottom:16px;font-size:24px}.home-support-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}.home-learning-progress{gap:14px;margin:18px 0}.home-learning-progress progress{min-width:0;flex:1;height:10px;accent-color:var(--orange)}.home-learning .btn,.home-preparation .btn{margin-top:22px}.home-contacts{padding:0;margin:18px 0;list-style:none}.home-contacts li{display:flex;gap:12px;align-items:center;margin:14px 0}.home-contacts .ic{flex:none}.home-location{display:flex;align-items:flex-start;gap:10px}.home-location .ic{flex:none}.home-checklist{padding-left:22px;color:var(--ink-2);line-height:1.5}.home-checklist li+li{margin-top:6px}.home-help{display:flex;flex-wrap:wrap;gap:20px;align-items:center}.home-help .grow{flex-basis:340px}.home-help .p{margin-top:8px}.home-path{display:flex;flex-direction:column;gap:12px;color:inherit;text-decoration:none}
 .home-path .eyebrow,.home-path .home-card-title{margin:0}
-.home-path-numbers{gap:14px;align-items:flex-end}
-.home-path-numbers .h3{padding-bottom:6px}
-.home-path-bar{display:block;margin-top:6px}
+.home-path-title{margin:0}
+.home-path-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:4px}
+.home-path-steps i{height:10px;border-radius:999px;background:var(--soft-2)}
+.home-path-steps i[data-reached=true]{background:var(--ink)}
+.home-path-labels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;font-size:15px;line-height:1.3;color:var(--mute)}
+.home-path-labels [data-current=true]{color:var(--ink);font-weight:600}
+.home-path-points{display:inline-flex;align-self:flex-start;align-items:center;gap:8px;background:var(--yellow-tint);color:var(--yellow-ink);border-radius:999px;padding:8px 14px;font-weight:600}
+.home-path-points .ic{width:18px;height:18px}
 .volunteer-home p,.volunteer-home h2,.home-invitation{overflow-wrap:anywhere}
 @media(max-width:720px){.volunteer-home .hero-when{font-size:36px;line-height:1.1}.home-hero-copy{flex-basis:100%}.volunteer-home .hero-art{width:112px;height:112px;flex-basis:112px}.volunteer-home .hero-art .ic{width:56px;height:56px}.home-actions .btn{height:auto;min-height:52px;white-space:normal;text-align:center}.home-help .btn{width:100%;height:auto;min-height:44px;white-space:normal}.home-learning-progress{flex-wrap:wrap}}
 .home-picked-actions{display:flex;flex-wrap:wrap;align-items:center;gap:4px}

@@ -128,12 +128,19 @@ class GratitudeView(BaseModel):
     author:str
     created_at:datetime
     basis_current:bool
+class LevelStepView(BaseModel):
+    key:str
+    title:str
+    minutes:int|None
+    reached:bool
+    current:bool
 class LevelView(BaseModel):
     key:str|None
     title:str|None
     next_title:str|None
     next_minutes:int|None
     letter_hint:bool
+    steps:list[LevelStepView]
 class PointsHistoryView(BaseModel):
     kind:Literal['attendance','manual','bonus','adjustment','prize']
     title:str

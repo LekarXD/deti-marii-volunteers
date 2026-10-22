@@ -290,6 +290,7 @@ async def test_levels_and_points_follow_ledger_with_multiplier_and_corrections(e
         async with factory() as db:await append_service_time(db,principal,principal.user_id,assignment_id,event_id);await db.commit()
         hours=(await own.get('/api/v1/me/hours')).json()
         assert hours['level']['key']=='first_steps' and hours['level']['next_title']=='В команде' and hours['level']['next_minutes']==1200
+        assert [(s['key'],s['reached'],s['current']) for s in hours['level']['steps']]==[('first_steps',True,True),('team',False,False),('friend',False,False),('pillar',False,False)]
         assert hours['points']['balance']==23 and hours['points']['history'][0]['multiplier']==1.5
         request=(await post(own,'/me/hours/requests',dict(title='Помощь на ярмарке',service_date=date.today().isoformat(),requested_minutes=1200))).json()
         assert (await post(reviewer,f"/coord/hours/requests/{request['id']}/review",dict(expected_version=1,decision='approved',approved_minutes=1200,reason='Проверено координатором'))).status_code==200
