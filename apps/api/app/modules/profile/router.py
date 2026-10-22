@@ -1,6 +1,6 @@
 from uuid import UUID
 from fastapi import APIRouter,Depends,Header
-from sqlalchemy import select
+from sqlalchemy import select,case,and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import Principal,get_principal,require_permission,authz_guard
 from app.core.audit import audit
@@ -73,7 +73,7 @@ async def cancel_hours(request_id:UUID,body:dto.ProfileVersionCommand,principal:
 
 @router.get('/coord/hours/requests',response_model=list[dto.ManualTimeView])
 async def review_hours_queue(principal:Principal=Depends(require_permission('hours.review')),db:AsyncSession=Depends(get_db)):
-    rows=(await db.scalars(select(ManualTimeRequest).where(ManualTimeRequest.foundation_id==principal.foundation_id).order_by(ManualTimeRequest.created_at.desc()).limit(200))).all()
+    rows=(await db.scalars(select(ManualTimeRequest).where(ManualTimeRequest.foundation_id==principal.foundation_id).order_by(case((ManualTimeRequest.state=='pending',0),else_=1),ManualTimeRequest.created_at.desc()).limit(200))).all()
     return [await ledger.manual_view(db,row) for row in rows]
 
 @router.post('/coord/hours/requests/{request_id}/review',response_model=dto.ManualTimeView)
@@ -97,7 +97,7 @@ async def request_document(body:dto.ProfileDocumentCommand,principal:Principal=D
 
 @router.get('/coord/profile/documents',response_model=list[dto.ProfileDocumentView])
 async def documents_queue(principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db)):
-    rows=(await db.scalars(select(ProfileDocument).where(ProfileDocument.foundation_id==principal.foundation_id).order_by(ProfileDocument.created_at.desc()).limit(200))).all()
+    rows=(await db.scalars(select(ProfileDocument).where(ProfileDocument.foundation_id==principal.foundation_id).order_by(case((ProfileDocument.state.in_(('requested','approved')),0),else_=1),ProfileDocument.created_at.desc()).limit(200))).all()
     return [documents.document_view(row).model_copy(update={'display_name':(await db.get(User,row.user_id)).display_name}) for row in rows]
 
 @router.post('/coord/profile/documents/{document_id}/review',response_model=dto.ProfileDocumentView)
@@ -120,7 +120,7 @@ async def data_cancel(request_id:UUID,body:dto.ProfileVersionCommand,principal:P
 
 @router.get('/coord/profile/data-requests',response_model=list[dto.ProfileDataView])
 async def data_queue(principal:Principal=Depends(require_permission('profile.requests.review')),db:AsyncSession=Depends(get_db)):
-    rows=(await db.scalars(select(ProfileDataRequest).where(ProfileDataRequest.foundation_id==principal.foundation_id).order_by(ProfileDataRequest.created_at.desc()).limit(200))).all()
+    rows=(await db.scalars(select(ProfileDataRequest).where(ProfileDataRequest.foundation_id==principal.foundation_id).order_by(case((and_(ProfileDataRequest.kind=='deletion',ProfileDataRequest.state.in_(('requested','in_review','approved'))),0),else_=1),ProfileDataRequest.created_at.desc()).limit(200))).all()
     return [data_requests.data_view(row).model_copy(update={'display_name':(await db.get(User,row.user_id)).display_name}) for row in rows]
 
 @router.post('/coord/profile/data-requests/{request_id}/review',response_model=dto.ProfileDataView)

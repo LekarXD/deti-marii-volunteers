@@ -15,7 +15,7 @@ from app.core.models import Foundation,User,MediaAsset,PermissionGrant
 from app.core.auth import get_principal,resolve_principal
 from app.modules.auth.router import router as auth_router
 from app.modules.assets.router import router as asset_router
-from app.modules.applications.tests.test_applications import staff,actor,post
+from app.modules.applications.tests.test_applications import staff,anonymous_actor,post
 from app.modules.applications.consents import newsletter_consent
 from app.modules.profile.router import router
 from app.modules.profile.models import ServiceTimeEntry,ProfileRevision,ProfileChangeSuggestion
@@ -56,7 +56,7 @@ async def put(client,body,key=None):return await client.put('/api/v1/me/profile'
 
 @pytest.mark.asyncio
 async def test_versioned_self_profile_and_verified_scope(env):
-    app,factory=env;own=await volunteer(app,factory);other=await volunteer(app,factory);limited=await actor(app)
+    app,factory=env;own=await volunteer(app,factory);other=await volunteer(app,factory);limited=await anonymous_actor(app)
     try:
         assert (await limited.get('/api/v1/me/profile')).status_code==403
         assert (await own.get('/api/v1/me/profile')).json()['version']==0
@@ -274,3 +274,22 @@ async def test_ai_snapshot_refreshes_cached_profile_after_owner_lock(env):
             fresh=await ai_snapshot(db,p,lock=True);assert fresh['version']==2 and fresh['fields']['about']=='Новый текст после сохранения'
             with pytest.raises(ApiError):await create_suggestion(db,p,expected_profile_version=2,patch={'about':'Предложение'},source_refs=[dict(source_id=str(uuid4()),version=2,fragment='public_profile')],producer=dict(run_id=str(uuid4()),model='contract-fixture',prompt_version='1'))
     finally:await own.aclose()
+
+@pytest.mark.asyncio
+async def test_review_queues_keep_actionable_rows_ahead_of_settled_history(env):
+    from app.core.clock import utcnow
+    from app.modules.profile.models import ManualTimeRequest,ProfileDocument,ProfileDataRequest
+    app,factory=env;own=await volunteer(app,factory);reviewer=await coord(app,factory)
+    try:
+        deletion=(await post(own,'/me/profile/data-requests',dict(kind='deletion',reason='Хочу завершить участие'))).json()
+        letter=(await post(own,'/me/profile/documents',dict(kind='letter',period_from=date.today().isoformat(),period_to=date.today().isoformat(),recipient='Для университета'))).json()
+        hours=(await post(own,'/me/hours/requests',dict(title='Помощь в мастерской',service_date=date.today().isoformat(),requested_minutes=60))).json()
+        p=await principal_for(own,factory)
+        async with factory() as db:
+            for index in range(201):
+                later=utcnow()+timedelta(minutes=1,seconds=index)
+                db.add_all([ProfileDataRequest(foundation_id=p.foundation_id,user_id=p.user_id,kind='export',state='ready',created_at=later),ProfileDocument(foundation_id=p.foundation_id,user_id=p.user_id,kind='certificate',period_from=date.today(),period_to=date.today(),recipient='Архив',state='ready',created_at=later),ManualTimeRequest(foundation_id=p.foundation_id,user_id=p.user_id,title='Решено',service_date=date.today(),requested_minutes=60,approved_minutes=60,state='approved',created_at=later)])
+            await db.commit()
+        for path,row in [('/coord/profile/data-requests',deletion),('/coord/profile/documents',letter),('/coord/hours/requests',hours)]:
+            queue=(await reviewer.get('/api/v1'+path)).json();assert len(queue)==200 and queue[0]['id']==row['id'],path
+    finally:await own.aclose();await reviewer.aclose()

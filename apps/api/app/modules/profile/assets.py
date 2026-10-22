@@ -13,12 +13,12 @@ async def authorize_export(db,principal,resource_type,resource_id):
     if resource_type!='profile_data_request':raise ApiError(404,'asset_not_found','Файл не найден')
     row=await db.scalar(select(ProfileDataRequest).where(ProfileDataRequest.id==resource_id,ProfileDataRequest.foundation_id==principal.foundation_id))
     if row is None or not ((principal.user_id is not None and row.user_id==principal.user_id) or principal.has_permission('profile.requests.review')):raise ApiError(404,'asset_not_found','Файл не найден')
-def validate_pdf(data,content_type):
+def validate_pdf(data,content_type,max_pages=20):
     if content_type!='application/pdf' or not data.startswith(b'%PDF-'):return False
     try:
         from pypdf import PdfReader
         document=PdfReader(io.BytesIO(data),strict=True)
-        return not document.is_encrypted and 1<=len(document.pages)<=20 and not document.trailer['/Root'].get('/OpenAction') and all(not page.get('/AA') for page in document.pages)
+        return not document.is_encrypted and 1<=len(document.pages)<=max_pages and not document.trailer['/Root'].get('/OpenAction') and all(not page.get('/AA') for page in document.pages)
     except Exception:return False
 
 def validate_export(data,content_type):
