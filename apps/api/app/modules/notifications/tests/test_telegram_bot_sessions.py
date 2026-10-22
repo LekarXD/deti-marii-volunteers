@@ -132,3 +132,22 @@ async def test_coordinator_step_follows_the_web_rule_where_demo_codes_admit_staf
             ok=await session.post(BOT.replace('sessions','coordinator'),json={})
             assert ok.status_code==200 and ok.json()['is_staff']
     finally:await client.aclose()
+
+@pytest.mark.asyncio
+async def test_bot_routes_webhook_and_bot_sessions_answer_only_inside_the_server(bot_app):
+    app,factory,_=bot_app;client,_=await linked(app,factory)
+    # every request from the internet passes the site's proxy (stage nginx sets these on /api/)
+    proxied={'X-Forwarded-Proto':'https','X-Forwarded-Prefix':'/deti-marii'}
+    try:
+        async with as_bot(app) as bot:
+            outside=await bot.post(BOT,json={'telegram_user_id':10001},headers=proxied);assert outside.status_code==404,outside.text
+            for header in ('X-Forwarded-For','X-Real-IP','Forwarded'):
+                assert (await bot.post(BOT,json={'telegram_user_id':10001},headers={header:'203.0.113.7'})).status_code==404
+            token=(await bot.post(BOT,json={'telegram_user_id':10001})).json()['session_token']
+        async with session_client(app,token) as session:
+            assert (await session.get(BASE)).status_code==200
+            assert (await session.get(BASE,headers=proxied)).status_code==401
+            assert (await session.post(BOT.replace('sessions','coordinator'),json={},headers=proxied)).status_code in (401,404)
+        hook=await client.post('/api/v1/integrations/telegram/webhook',json=update('bind_'+'a'*43),headers={'X-Telegram-Bot-Api-Secret-Token':'fixture_webhook_secret_'+('0'*32),**proxied})
+        assert hook.status_code==404,hook.text
+    finally:await client.aclose()

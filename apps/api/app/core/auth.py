@@ -53,9 +53,9 @@ async def get_session_row(request, db):
         return None
     session = await db.scalar(select(Session).where(Session.token_hash == digest(raw), Session.revoked_at.is_(None), Session.expires_at > utcnow()))
     if session is not None and session.channel == "telegram_bot":
-        # A leaked bot session token is useless without the bot's service secret.
-        from app.modules.notifications.telegram_bot import check_bot_secret
-        check_bot_secret(request.headers.get("authorization", ""))
+        # A leaked bot session token is useless without the bot's service secret and outside the server.
+        from app.modules.notifications.telegram_bot import check_bot_request
+        check_bot_request(request)
     return session
 
 async def get_principal(request: Request, db: AsyncSession = Depends(get_db)) -> Principal:

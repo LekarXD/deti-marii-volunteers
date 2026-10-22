@@ -40,7 +40,7 @@ SITE_API_URL = os.environ.get("SITE_API_URL", "")
 SITE_API_TOKEN = os.environ.get("SITE_API_TOKEN", "")
 # Платформа «Опора» (сайт фонда). Когда все три заданы, человек подключает Telegram из профиля на сайте,
 # а бот берёт его данные из платформы. Пока пусто — прежний режим: вход по почте и собственная база бота.
-OPORA_URL = os.environ.get("OPORA_URL", "").rstrip("/")  # например https://www.odschool.ru/deti-marii
+OPORA_URL = os.environ.get("OPORA_URL", "").rstrip("/")  # прямой адрес API: http://api:8001; через публичный сайт служебные адреса закрыты
 OPORA_BOT_API_SECRET = os.environ.get("OPORA_BOT_API_SECRET", "")  # = OPORA_TELEGRAM_BOT_API_SECRET на сервере платформы
 OPORA_WEBHOOK_SECRET = os.environ.get("OPORA_WEBHOOK_SECRET", "")  # = OPORA_TELEGRAM_WEBHOOK_SECRET на сервере платформы
 # Публичный адрес сайта для ссылок в сообщениях, если бот ходит в API по внутреннему адресу (на сервере — http://api:8001).
