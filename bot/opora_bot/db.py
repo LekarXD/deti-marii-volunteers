@@ -63,6 +63,13 @@ CREATE TABLE IF NOT EXISTS broadcasts (
     at TEXT, audience TEXT, kind TEXT, text TEXT, recipients INTEGER
 );
 CREATE TABLE IF NOT EXISTS sent (key TEXT PRIMARY KEY, at TEXT);
+CREATE TABLE IF NOT EXISTS platform_sessions (    -- сессия бота на сайте: переживает перезапуск (выкладку каждого пуша)
+    user_id INTEGER PRIMARY KEY, token TEXT NOT NULL, until REAL NOT NULL, staff INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS conv_seen (            -- до какого сообщения разговора на сайте человек уже получил пересылку
+    user_id INTEGER, conversation_id TEXT, seq INTEGER NOT NULL,
+    PRIMARY KEY (user_id, conversation_id)
+);
 CREATE TABLE IF NOT EXISTS outbox (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     chat_id INTEGER, text TEXT, markup TEXT, send_after TEXT
@@ -196,6 +203,10 @@ def mark_sent(key: str) -> bool:
         return True
     except sqlite3.IntegrityError:
         return False
+
+
+def was_sent(key: str) -> bool:
+    return one("SELECT 1 FROM sent WHERE key=?", key) is not None
 
 
 # --- лента «Новые уведомления» для координатора -----------------------------------------

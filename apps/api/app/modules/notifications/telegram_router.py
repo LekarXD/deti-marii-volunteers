@@ -5,6 +5,7 @@ from app.core.auth import Principal,get_principal
 from app.core.db import get_db
 from app.core.errors import ApiError
 from .telegram_config import get_telegram_settings
+from .telegram_bot import internal_only
 from .telegram_schemas import TelegramBindingView,TelegramLinkCommand,TelegramLinkTokenView,TelegramDisconnectCommand,TelegramWebhookView
 from . import telegram_service as service
 router=APIRouter(prefix='/api/v1',tags=['notifications'])
@@ -20,6 +21,7 @@ async def disconnect(body:TelegramDisconnectCommand,principal:Principal=Depends(
     result=await service.disconnect(db,principal,body,key);await db.commit();return result
 @router.post('/integrations/telegram/webhook',response_model=TelegramWebhookView,operation_id='telegram_binding_webhook')
 async def webhook(request:Request,db:AsyncSession=Depends(get_db)):
+    internal_only(request)  # the bot polls Telegram and forwards /start bind_… itself; nothing calls this from outside
     config=get_telegram_settings()
     if not config.configured():raise ApiError(503,'telegram_binding_unavailable','Бот для привязки пока не настроен')
     supplied=request.headers.get('X-Telegram-Bot-Api-Secret-Token','')

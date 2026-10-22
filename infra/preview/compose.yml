@@ -68,6 +68,13 @@ services:
       postgres: {condition: service_healthy}
   api:
     <<: *api
+    environment:
+      <<: *api-environment
+      # Telegram: привязка из профиля и доступ бота (bot/). Пусто — выключено, см. deploy/TELEGRAM-BOT.md.
+      OPORA_TELEGRAM_LINK_ENABLED: ${OPORA_TELEGRAM_LINK_ENABLED:-false}
+      OPORA_TELEGRAM_BOT_USERNAME: ${OPORA_TELEGRAM_BOT_USERNAME:-}
+      OPORA_TELEGRAM_WEBHOOK_SECRET: ${OPORA_TELEGRAM_WEBHOOK_SECRET:-}
+      OPORA_TELEGRAM_BOT_API_SECRET: ${OPORA_TELEGRAM_BOT_API_SECRET:-}
     volumes: ["assets:/var/lib/opora/assets", "${OPORA_STAGE_PRIVATE_DIR:?}/demo:/run/opora-private"]
     command: [uvicorn, app.main:app, --host, 0.0.0.0, --port, "8001", --root-path, /deti-marii, --no-access-log]
     depends_on:
@@ -111,6 +118,34 @@ services:
         aliases: [opora-preview-web]
     restart: unless-stopped
     mem_limit: 64m
+    cpus: 0.2
+    pids_limit: 32
+    depends_on:
+      api: {condition: service_healthy}
+  bot:
+    # Telegram-бот @detimarie_bot: ходит в API по внутренней сети (private) и в Telegram (telegram, с IPv6).
+    # Без OPORA_TELEGRAM_BOT_TOKEN ждёт настройки и ничего не делает.
+    image: opora-preview/bot:${OPORA_RELEASE:?}
+    init: true
+    user: "10001:10001"
+    environment:
+      BOT_TOKEN: ${OPORA_TELEGRAM_BOT_TOKEN:-}
+      BOT_WAIT_FOR_TOKEN: "1"
+      OPORA_URL: http://api:8001
+      OPORA_PUBLIC_URL: https://www.odschool.ru/deti-marii
+      OPORA_BOT_API_SECRET: ${OPORA_TELEGRAM_BOT_API_SECRET:-}
+      OPORA_WEBHOOK_SECRET: ${OPORA_TELEGRAM_WEBHOOK_SECRET:-}
+      QUIET_HOURS: "22-9"
+      TEST_MODE: "off"
+      TZ_NAME: Europe/Moscow
+    volumes: ["bot-data:/var/lib/opora-bot"]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=16777216,mode=1777"]
+    networks: [private, telegram]
+    restart: unless-stopped
+    mem_limit: 128m
     cpus: 0.2
     pids_limit: 32
     depends_on:
@@ -177,6 +212,11 @@ services:
 networks:
   private: {internal: true}
   egress:
+  # Только для бота. Российские магистрали роняют IPv4 до api.telegram.org, на хосте он отклоняется сразу
+  # (telegram-v4-reject.service), и Telegram доступен только по IPv6 — как у curator-bot и olymp-bot.
+  # Общую egress не трогаем: включить IPv6 в ней можно только пересозданием сети со всеми сервисами.
+  telegram:
+    enable_ipv6: true
   gateway:
     external: true
     name: curator-bot_default
@@ -184,3 +224,4 @@ volumes:
   pg-data:
   assets:
   board-data:
+  bot-data:

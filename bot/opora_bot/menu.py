@@ -7,7 +7,7 @@ from aiogram.exceptions import TelegramAPIError
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from . import broadcasts, coordinator, db, testmode, ui, volunteer
+from . import broadcasts, coordinator, db, pcoordinator, platform, pvolunteer, testmode, ui, volunteer
 
 router = Router(name="menu")
 
@@ -47,14 +47,15 @@ async def open_item(cb: CallbackQuery, callback_data: ui.MenuCB, state: FSMConte
                 pass
         await ui.send_menu(cb.message, u)
         return
+    on_site = platform.enabled()  # подключены к платформе — разделы берут данные с сайта
     if item in COORD_ITEMS:
         if not u["is_coordinator"]:
             return
-        handler = COORD_ITEMS[item]
+        handler = pcoordinator.ITEMS.get(item, COORD_ITEMS[item]) if on_site else COORD_ITEMS[item]
     elif item in VOLUNTEER_ITEMS:
         if item == "reset" and not testmode.TEST_MODE:
             return
-        handler = VOLUNTEER_ITEMS[item]
+        handler = pvolunteer.ITEMS.get(item, VOLUNTEER_ITEMS[item]) if on_site else VOLUNTEER_ITEMS[item]
     else:
         return
     await handler(cb.message, state)  # смену экрана (меню → раздел, кнопка «Меню») делает screen.py

@@ -3,14 +3,14 @@ from datetime import datetime, timedelta
 from html import escape
 
 from aiogram import Bot, F, Router
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import BufferedInputFile, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from . import auth, db, exports, site, ui, unisender
-from .config import ANKETA_URL, CODE_TTL_MINUTES, TZ
+from . import auth, db, exports, platform, site, ui, unisender
+from .config import CODE_TTL_MINUTES, TZ
 from .notify import send, to_coordinators
 from .schedule import WEEKDAYS, duration_hours, human, starts_at, time_range
 
@@ -34,8 +34,8 @@ class After(StatesGroup):
 
 
 def anketa_kb() -> InlineKeyboardMarkup:
-    # TODO: ANKETA_URL сейчас ведёт на Яндекс-форму фонда — заменить на анкету на сайте.
-    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Заполнить анкету", url=ANKETA_URL)]])
+    # Без платформы ANKETA_URL ведёт на Яндекс-форму фонда; с платформой — на анкету на сайте.
+    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Заполнить анкету", url=platform.anketa_url())]])
 
 
 def code_kb() -> InlineKeyboardMarkup:
@@ -53,23 +53,89 @@ WELCOME = ("👋 Здравствуйте! Это бот фонда «Дети �
            "а ещё можно написать координатору.\n\n"
            "Впервые у нас? Заполните анкету волонтёра — это около 10 минут. "
            "Уже заполняли — войдите по почте, которую указали в анкете.")
+WELCOME_PLATFORM = ("👋 Здравствуйте! Это бот фонда «Дети Марии» для волонтёров. Сюда приходят приглашения на занятия, "
+                    "напоминания и ответы координатора.\n\n"
+                    "Ещё не волонтёр фонда? Заполните анкету на сайте, это минут десять.\n"
+                    "Уже есть профиль на сайте? Откройте его и нажмите «Подключить Telegram».")
 
 
 async def welcome(target: Message, u) -> None:
     """Первое сообщение для нового человека: кнопки «Заполнить анкету» и «Войти по почте» прямо под ним."""
     await ui.drop_old_keyboard(target, u)
-    await target.answer(WELCOME, reply_markup=ui.menu(u))
+    await target.answer(WELCOME_PLATFORM if platform.enabled() else WELCOME, reply_markup=ui.menu(u))
 
 
 @router.message(CommandStart())
-async def start(msg: Message, state: FSMContext):
+async def start(msg: Message, state: FSMContext, command: CommandObject):
     await state.clear()
     u = db.ensure_user(msg.chat.id, msg.from_user.username)
-    if u["status"] == "new" and not ui.coord_mode(u):
+    if platform.enabled() and (command.args or "").startswith("bind_"):
+        await connect_from_profile(msg)
+    elif u["status"] == "new" and platform.enabled() and await reconnect(msg):
+        pass
+    elif u["status"] == "new" and not ui.coord_mode(u):
         await welcome(msg, u)
     else:
         name = escape(u["name"] or "")
         await ui.send_menu(msg, u, f"👋 С возвращением{', ' + name if name else ''}!\n\n{ui.menu_text(u)}")
+
+
+CONNECT_STALE = ("Эта ссылка уже не работает: она одноразовая и действует 10 минут. Откройте профиль на сайте "
+                 "и нажмите «Подключить Telegram» ещё раз.")
+CONNECT_CONFLICT = ("Этот Telegram уже подключён к другому профилю на сайте. Отключите его там "
+                    "или подключите другой аккаунт Telegram.")
+
+
+def profile_kb() -> InlineKeyboardMarkup:
+    b = InlineKeyboardBuilder()
+    b.button(text="Открыть профиль на сайте", url=platform.profile_url())
+    return b.as_markup()
+
+
+async def connect_from_profile(msg: Message) -> None:
+    """/start bind_… из кнопки «Подключить Telegram» в профиле: проверку делает платформа."""
+    who = msg.from_user
+    try:
+        result = await platform.link(who.id, who.is_bot, msg.chat.id, msg.chat.type, msg.text)
+        profile = await platform.open_session(who.id) if result == "linked" else None
+    except platform.PlatformError:
+        # привязка на сайте могла уже случиться: тогда /start подхватит её (reconnect)
+        await msg.answer("Сайт фонда сейчас не отвечает. Через пару минут отправьте /start, а если не поможет, "
+                         "откройте ссылку из профиля ещё раз.")
+        return
+    if result == "conflict":
+        await msg.answer(CONNECT_CONFLICT, reply_markup=profile_kb())
+        return
+    if not profile:
+        await msg.answer(CONNECT_STALE, reply_markup=profile_kb())
+        return
+    await linked(msg, profile)
+
+
+async def reconnect(msg: Message) -> bool:
+    """Telegram уже подключён на сайте, а бот этого не знает (сайт не ответил при подключении, база бота
+    пропала): по /start берём сессию и продолжаем без новой ссылки."""
+    try:
+        profile = await platform.open_session(msg.from_user.id)
+    except platform.PlatformError:
+        return False
+    if profile:
+        await linked(msg, profile)
+    return bool(profile)
+
+
+async def linked(msg: Message, profile: dict) -> None:
+    uid, who = msg.chat.id, msg.from_user
+    # один профиль — один чат: если человек подключил новый Telegram, старый чат отвязываем
+    db.run("UPDATE users SET site_id='', status='new' WHERE site_id=? AND id!=? AND is_coordinator=0", profile["user_id"], uid)
+    u = db.user(uid)
+    # TODO(шаг 4 плана): статус «кандидат / допущен», дни и роли брать из платформы, а не оставлять «кандидат».
+    db.update_user(uid, site_id=profile["user_id"], name=profile["display_name"] or u["name"] or who.full_name,
+                   status=u["status"] if u["status"] != "new" else "candidate")
+    u = db.user(uid)
+    await ui.send_menu(msg, u, f"✅ Готово, {escape(u['name'])}! Telegram подключён к вашему профилю на сайте. "
+                               f"Приглашения и напоминания будут приходить сюда.\n\n{ui.menu_text(u)}")
+    db.log("login", uid, f"{ui.person(u)} подключил(а) Telegram из профиля на сайте")
 
 
 @router.message(Command("menu"))
@@ -98,6 +164,10 @@ async def anketa(msg: Message):
 
 
 async def ask_email(target: Message, state: FSMContext):
+    if platform.enabled():
+        await target.answer("Вход по почте больше не нужен: откройте профиль на сайте фонда, вкладка «Обо мне», "
+                            "и нажмите «Подключить Telegram».", reply_markup=profile_kb())
+        return
     await state.set_state(Login.email)
     await target.answer("✉️ Напишите почту, которую вы указали в анкете на сайте. Пришлём на неё код для входа.", reply_markup=ui.cancel_kb())
 
