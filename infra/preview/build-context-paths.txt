@@ -20,3 +20,6 @@ infra/preview
 package.json
 pnpm-lock.yaml
 pnpm-workspace.yaml
+bot/requirements.txt
+bot/opora_bot
+bot/email_templates
