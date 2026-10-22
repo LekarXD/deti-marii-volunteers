@@ -1,7 +1,7 @@
 import {getAppBasePath} from '../basePath';
 import type {ComponentType} from 'react';
 import {createBrowserRouter,Navigate,Outlet,useLocation,Link} from 'react-router-dom';
-import {AppProviders,CandidateLayout,CoordinatorLayout,StudioLayout,useSession} from './layouts';
+import {AppProviders,CandidateLayout,CoordinatorLayout,SessionEnded,StudioLayout,useSession} from './layouts';
 import {PublicLayout} from './PublicLayout';
 import {Card} from '../ui';
 import {VerifiedBoundary} from '../features/auth/VerifiedBoundary';
@@ -19,7 +19,7 @@ const followup=(name:string)=>page(()=>import('../features/followups'),name);
 const crm=(name:string)=>page(()=>import('../features/crm'),name);
 const recording=(name:string)=>page(()=>import('../features/lesson-recording'),name);
 const messages=(name:string)=>page(()=>import('../features/messaging'),name);
-function StaffBoundary(){const {session}=useSession();const location=useLocation();return session?.is_staff?<Outlet/>:<Navigate to={'/login?next='+encodeURIComponent(location.pathname+location.search)} replace/>;}
+function StaffBoundary(){const {session,ended}=useSession();const location=useLocation();return session?.is_staff?<Outlet/>:ended?<SessionEnded/>:<Navigate to={'/login?next='+encodeURIComponent(location.pathname+location.search)} replace/>;}
 async function staffWebinars(){const {WebinarsPage}=await import('../features/studio');return {Component:()=> <WebinarsPage staff/>};}
 async function entry(){const {WelcomePage}=await import('../features/auth/WelcomePage');const {ApplicationEntryPage}=await import('../features/applications/ApplicationEntryPage');return {Component:function Entry(){const {session}=useSession();return session?.mfa_required?<Navigate to="/login?next=%2Ffund" replace/>:session?.is_staff?<Navigate to="/fund" replace/>:session?.user_id?<ApplicationEntryPage/>:<WelcomePage/>;}};}
 function NotFound(){return <Card><h1 className="h1">Страница не найдена</h1><Link className="btn btn-primary" to="/">На главную</Link></Card>;}
