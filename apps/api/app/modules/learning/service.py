@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import Principal
 from app.core.errors import ApiError
+from .video import video_embed
 from .models import AssessmentAnswer, AssessmentAttempt, AssessmentQuestion, AssessmentVersion, LearningAssignment, LearningRelease, LearningTrack, Lesson, LessonBlock, LessonProgress, LessonVersion
 
 
@@ -30,12 +31,17 @@ async def assignment(db: AsyncSession, principal: Principal, assignment_id: UUID
 
 
 async def ensure_introduction(db: AsyncSession, principal: Principal):
-    track = await db.scalar(select(LearningTrack).where(LearningTrack.foundation_id == principal.foundation_id, LearningTrack.key == "introduction", LearningTrack.archived.is_(False)))
-    if not track or not track.current_release_id:
-        return
-    values = dict(id=uuid4(), foundation_id=principal.foundation_id, release_id=track.current_release_id, user_id=principal.user_id, registration_id=None if principal.user_id else principal.registration_id)
+    """Courses set to "all new volunteers" get their current release assigned automatically.
+
+    The introduction keeps reaching candidates' registration sessions; other courses go to accounts only.
+    """
     owner_scope(principal)
-    await db.execute(insert(LearningAssignment).values(**values).on_conflict_do_nothing())
+    query = select(LearningTrack).where(LearningTrack.foundation_id == principal.foundation_id, LearningTrack.audience == "new", LearningTrack.archived.is_(False), LearningTrack.current_release_id.is_not(None))
+    if principal.user_id is None:
+        query = query.where(LearningTrack.key == "introduction")
+    for track in (await db.scalars(query.order_by(LearningTrack.key))).all():
+        values = dict(id=uuid4(), foundation_id=principal.foundation_id, release_id=track.current_release_id, user_id=principal.user_id, registration_id=None if principal.user_id else principal.registration_id)
+        await db.execute(insert(LearningAssignment).values(**values).on_conflict_do_nothing())
 
 
 async def preparation(db: AsyncSession, principal: Principal):
@@ -55,6 +61,8 @@ async def preparation(db: AsyncSession, principal: Principal):
             lessons.append(dict(id=version.id, mode=version.presentation_mode, lesson_id=lesson.id, key=lesson.key, title=version.title, minutes=version.minutes, completed=version.id in completed_versions))
         latest = await db.scalar(select(AssessmentAttempt).where(AssessmentAttempt.assignment_id == item.id).order_by(AssessmentAttempt.started_at.desc(), AssessmentAttempt.id.desc()).limit(1))
         views.append(dict(id=item.id, source_revision=release.source_revision, source_hash=release.source_hash, change_note=release.change_note, track_id=track.id, track_key=track.key, release_id=release.id, release_number=release.number, title=release.title, intro=release.intro, lessons=lessons, assessment_version_id=release.assessment_version_id, completed=item.completed_at is not None, acknowledged=item.acknowledged_at is not None, latest_attempt_id=latest.id if latest else None, latest_attempt_state=("submitted" if latest.submitted_at else "active") if latest else None, reacknowledgement_required=release.reacknowledgement_required))
+    # Courses assigned in the same moment as the introduction never push it from the top.
+    views.sort(key=lambda view: view["track_key"] != "introduction")
     return dict(assignments=views, introduction_completed=introduction_completed, booking_requires_introduction=False)
 
 
@@ -62,6 +70,13 @@ def learner_block(block: LessonBlock):
     content = {key: deepcopy(value) for key, value in block.content.items() if not key.startswith("_")}
     if content.get("type") == "quiz":
         content["items"] = [{"q": x["q"], "o": x["o"]} for x in content.get("items", [])]
+    if content.get("type") == "video" and content.get("url"):
+        # Rebuilt on every read: only a whitelisted embed address reaches the learner's iframe.
+        found = video_embed(content.get("url"))
+        content.pop("embed_url", None)
+        content.pop("provider", None)
+        if found:
+            content["provider"], content["embed_url"] = found
     return {"id": str(block.id), **content}
 
 

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -110,6 +110,25 @@ class TrackCreate(Command):
 
 class LessonCreate(TrackCreate):
     track_id: UUID
+    stage_title: str | None = Field(default=None, max_length=200)
+
+
+class TrackUpdate(Command):
+    expected_version: int = Field(ge=0)
+    title: str | None = Field(default=None, min_length=1, max_length=300)
+    description: str | None = Field(default=None, max_length=3000)
+    audience: Literal["new", "manual"] | None = None
+    required: bool | None = None
+
+
+class StageInput(Command):
+    title: str | None = Field(default=None, max_length=200)
+    lesson_ids: list[UUID] = Field(min_length=1, max_length=100)
+
+
+class StructureSave(Command):
+    expected_version: int = Field(ge=0)
+    stages: list[StageInput] = Field(min_length=1, max_length=100)
 
 
 class DraftSave(Command):
@@ -176,19 +195,34 @@ class AuthorLessonView(BaseModel):
     title: str
     track_id: UUID
     key: str
+    position: int = 0
+    stage_title: str | None = None
     current_version_id: UUID | None
     publication_revision: int
     archived: bool
     draft: LessonDraftView | None
 
 
+class TrackStats(BaseModel):
+    completed: int = 0
+    learning: int = 0
+    stuck: int = 0
+
+
 class TrackView(BaseModel):
     id: UUID
     key: str
     title: str
+    description: str = ""
+    audience: str = "manual"
+    required: bool = False
     version: int
     archived: bool
     current_release_id: UUID | None
+    # draft: never published; changed: drafts, order, stages or title differ from the current release.
+    publish_state: Literal["draft", "changed", "published"] = "draft"
+    has_simulator: bool = False
+    stats: TrackStats = Field(default_factory=TrackStats)
     lessons: list[AuthorLessonView]
     assessment: AssessmentDraftView | None
     releases: list[dict[str, Any]]

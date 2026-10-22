@@ -3,3 +3,5 @@
 .a-seg i{display:block;height:7px;border-radius:999px;background:var(--soft-2)}.learning-page>.card-soft{margin-bottom:24px}.a-ohead{scroll-margin-top:24px}
 
 .learning-cards .a-blocks>.card{min-height:280px;display:flex;flex-direction:column;justify-content:center}.learning-cards .learning-module-title h1{font-size:28px}.learning-cards .a-blocks>.card .a-lead{font-size:22px;line-height:1.45;margin:0}@media(max-width:720px){.learning-cards .a-blocks>.card{min-height:52vh}.learning-cards .learning-module-title h1{font-size:24px}.learning-cards .a-blocks>.card .a-lead{font-size:20px}}
+/* Lesson blocks added with the course editor: external video, picture, trainer link, formatted text. */
+.a-embed{position:relative;aspect-ratio:16/9;border-radius:24px;overflow:hidden;background:#1E2029}.a-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.a-image{margin:0}.a-image img{display:block;max-width:100%;height:auto;border-radius:24px}.a-image figcaption{margin-top:10px;color:var(--mute);font-size:15px}.a-sim{display:grid;gap:12px;justify-items:start}.a-sim p{margin:0}.a-list{margin:0;padding-left:22px;display:grid;gap:6px}

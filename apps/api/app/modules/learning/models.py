@@ -15,11 +15,15 @@ from app.core.db import Base
 
 class LearningTrack(Base):
     __tablename__ = "learning_tracks"
-    __table_args__ = (UniqueConstraint("foundation_id", "key"),)
+    __table_args__ = (UniqueConstraint("foundation_id", "key"), CheckConstraint("audience IN ('new','manual')", name="ck_learning_track_audience"))
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     foundation_id: Mapped[UUID] = mapped_column(ForeignKey("foundations.id"), index=True)
     key: Mapped[str] = mapped_column(String(100))
     title: Mapped[str] = mapped_column(String(300))
+    description: Mapped[str] = mapped_column(String(3000), default="", server_default="")
+    # Who gets the current release: "new" assigns it to everyone on their learning page, "manual" only by a coordinator.
+    audience: Mapped[str] = mapped_column(String(20), default="manual", server_default="manual")
+    required: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     current_release_id: Mapped[UUID | None] = mapped_column(nullable=True)
     version: Mapped[int] = mapped_column(BigInteger, default=1)
     archived: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -35,6 +39,8 @@ class LearningRelease(Base):
     title: Mapped[str] = mapped_column(String(300))
     intro: Mapped[str] = mapped_column(String(3000), default="")
     lesson_version_ids: Mapped[list] = mapped_column(JSONB)
+    # Stage titles as published: [{"title": str | None, "lesson_version_ids": [...]}] in lesson order.
+    stages: Mapped[list] = mapped_column(JSONB, default=list, server_default="[]")
     assessment_version_id: Mapped[UUID | None] = mapped_column(nullable=True)
     reacknowledgement_required: Mapped[bool] = mapped_column(Boolean, default=False)
     changed_required_items: Mapped[list] = mapped_column(JSONB, default=list)
@@ -51,6 +57,9 @@ class Lesson(Base):
     track_id: Mapped[UUID] = mapped_column(ForeignKey("learning_tracks.id"), index=True)
     foundation_id: Mapped[UUID] = mapped_column(ForeignKey("foundations.id"), index=True)
     key: Mapped[str] = mapped_column(String(100))
+    # Course order: lessons sort by position; consecutive lessons with the same stage title form one stage.
+    position: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    stage_title: Mapped[str | None] = mapped_column(String(200), nullable=True)
     current_version_id: Mapped[UUID | None] = mapped_column(nullable=True)
     publication_revision: Mapped[int] = mapped_column(BigInteger, default=0)
     archived: Mapped[bool] = mapped_column(Boolean, default=False)

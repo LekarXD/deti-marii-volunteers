@@ -30,7 +30,7 @@ async def import_source_version(db,foundation_id,source_version):
     assert len(content['modules'])==4 and len(content['test']['questions'])==10
     track=await db.get(LearningTrack,track_id)
     if track is None:
-        track=LearningTrack(id=track_id,foundation_id=foundation_id,key='introduction',title=content['title'])
+        track=LearningTrack(id=track_id,foundation_id=foundation_id,key='introduction',title=content['title'],audience='new',required=True)
         db.add(track);await db.flush()
     release_id=fixture_id(foundation_id,'release',source_version)
     # Do not overwrite a coordinator-authored current release when fixtures rerun.
@@ -40,12 +40,12 @@ async def import_source_version(db,foundation_id,source_version):
         # A rerun must preserve a coordinator rollback as well as custom releases.
         return track_id
     versions=[]
-    for module in content['modules']:
+    for lesson_position,module in enumerate(content['modules']):
         lesson_id=fixture_id(foundation_id,module['id'])
         version_id=fixture_id(foundation_id,module['id']+':v1',source_version)
         stable=await db.get(Lesson,lesson_id)
         if stable is None:
-            stable=Lesson(id=lesson_id,track_id=track_id,foundation_id=foundation_id,key=module['id'])
+            stable=Lesson(id=lesson_id,track_id=track_id,foundation_id=foundation_id,key=module['id'],position=lesson_position)
             db.add(stable);await db.flush()
         number=(await db.scalar(select(func.max(LessonVersion.number)).where(LessonVersion.lesson_id==lesson_id)) or 0)+1
         db.add(LessonVersion(id=version_id,lesson_id=lesson_id,number=number,title=module['title'],minutes=module['minutes'],source=module['source'],presentation_mode=module.get('mode','feed')))

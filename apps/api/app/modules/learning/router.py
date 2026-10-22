@@ -19,6 +19,7 @@ async def command(db, principal, request, key, operation, payload, action):
     # private draft content and answer keys, so never short-circuit revoked reads.
     author_actions = {
         "learning.create_track": "learning.write", "learning.create_lesson": "learning.write",
+        "learning.update_track": "learning.write", "learning.save_structure": "learning.write",
         "learning.begin_edit": "learning.write", "learning.save_draft": "learning.write", "learning.attach_recording": "learning.write",
         "learning.review": "learning.write", "learning.save_assessment": "learning.write",
         "learning.review_assessment": "learning.write", "learning.assign": "learning.write",
@@ -94,7 +95,7 @@ async def get_result(attempt_id: UUID, principal: Principal = Depends(get_princi
 
 # Authoring is deliberately separate from learner DTOs, including answer keys.
 from . import authoring
-from .schemas import AssessmentSave, AssignmentCreate, AuthorLessonView, DraftSave, LessonCreate, ReleasePublish, ReleaseRollback, TrackCreate, TrackView, VersionCommand
+from .schemas import AssessmentSave, AssignmentCreate, AuthorLessonView, DraftSave, LessonCreate, ReleasePublish, ReleaseRollback, StructureSave, TrackCreate, TrackUpdate, TrackView, VersionCommand
 
 
 @router.get("/coord/learning/tracks", response_model=list[TrackView])
@@ -112,9 +113,19 @@ async def author_track(track_id: UUID, principal: Principal = Depends(get_princi
     return await authoring.track_view(db, principal, track_id)
 
 
+@router.patch("/coord/learning/tracks/{track_id}", response_model=TrackView)
+async def update_track(track_id: UUID, body: TrackUpdate, request: Request, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db), key: str | None = Header(None, alias="Idempotency-Key")):
+    return await command(db, principal, request, key, "learning.update_track", {"id": str(track_id), **body.model_dump(mode="json", exclude_unset=True)}, lambda: authoring.update_track(db, principal, track_id, body))
+
+
+@router.put("/coord/learning/tracks/{track_id}/structure", response_model=TrackView)
+async def save_structure(track_id: UUID, body: StructureSave, request: Request, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db), key: str | None = Header(None, alias="Idempotency-Key")):
+    return await command(db, principal, request, key, "learning.save_structure", {"id": str(track_id), **body.model_dump(mode="json")}, lambda: authoring.save_structure(db, principal, track_id, body))
+
+
 @router.post("/coord/learning/lessons", response_model=AuthorLessonView)
 async def create_lesson(body: LessonCreate, request: Request, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db), key: str | None = Header(None, alias="Idempotency-Key")):
-    return await command(db, principal, request, key, "learning.create_lesson", body.model_dump(mode="json"), lambda: authoring.create_lesson(db, principal, body.track_id, body.key, body.title))
+    return await command(db, principal, request, key, "learning.create_lesson", body.model_dump(mode="json"), lambda: authoring.create_lesson(db, principal, body.track_id, body.key, body.title, body.stage_title))
 
 
 @router.get("/coord/learning/lessons/{lesson_id}", response_model=AuthorLessonView)
@@ -184,7 +195,7 @@ async def learning_asset(version_id: UUID, asset_id: UUID, principal: Principal 
     from app.modules.assets.service import asset_content
     from sqlalchemy import select
     detail = await service.lesson_view(db, principal, version_id)
-    if not any(str(block.get("asset_id")) == str(asset_id) and block.get("type") in {"video", "file"} for block in detail["blocks"]):
+    if not any(str(block.get("asset_id")) == str(asset_id) and block.get("type") in authoring.ASSET_BLOCKS for block in detail["blocks"]):
         raise ApiError(404, "asset_not_found", "Файл не найден")
     asset = await db.scalar(select(MediaAsset).where(MediaAsset.id == asset_id, MediaAsset.foundation_id == principal.foundation_id, MediaAsset.state == "ready"))
     if asset is None:
