@@ -164,6 +164,7 @@ class CrmReflectionView(BaseModel):
 
 class CrmVolunteerView(CrmVolunteerSummary):
     latest_reflection:CrmReflectionView|None=None
+    trusted_with_newcomers:bool=False
     agreements:list[AgreementView]
     contact_events:list[ContactEventView]
     follow_up_tasks:list[FollowUpTaskView]

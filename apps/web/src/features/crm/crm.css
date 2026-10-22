@@ -99,3 +99,4 @@
  .crm-import-batch-row{gap:12px;flex-wrap:wrap}
  .crm-import-batch-row>span:first-child{flex-basis:100%}
 }
+.crm-trusted{background:var(--yellow-tint);color:var(--ink)}.crm-trusted .ic{width:18px;height:18px}

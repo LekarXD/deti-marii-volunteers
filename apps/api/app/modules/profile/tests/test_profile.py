@@ -15,7 +15,7 @@ from app.core.models import Foundation,User,MediaAsset,PermissionGrant
 from app.core.auth import get_principal,resolve_principal
 from app.modules.auth.router import router as auth_router
 from app.modules.assets.router import router as asset_router
-from app.modules.applications.tests.test_applications import staff,actor,post
+from app.modules.applications.tests.test_applications import staff,anonymous_actor,post
 from app.modules.applications.consents import newsletter_consent
 from app.modules.profile.router import router
 from app.modules.profile.models import ServiceTimeEntry,ProfileRevision,ProfileChangeSuggestion
@@ -56,7 +56,7 @@ async def put(client,body,key=None):return await client.put('/api/v1/me/profile'
 
 @pytest.mark.asyncio
 async def test_versioned_self_profile_and_verified_scope(env):
-    app,factory=env;own=await volunteer(app,factory);other=await volunteer(app,factory);limited=await actor(app)
+    app,factory=env;own=await volunteer(app,factory);other=await volunteer(app,factory);limited=await anonymous_actor(app)
     try:
         assert (await limited.get('/api/v1/me/profile')).status_code==403
         assert (await own.get('/api/v1/me/profile')).json()['version']==0
@@ -139,7 +139,7 @@ async def test_consents_export_and_deletion_request_workflow(env):
         assert (await own.get('/api/v1/me/profile')).status_code==200
     finally:await own.aclose();await other.aclose();await reviewer.aclose()
 
-async def attendance_fixture(factory,user_id,day=None):
+async def attendance_fixture(factory,user_id,day=None,minutes=120,multiplier=1):
     from app.core.clock import utcnow
     from app.modules.activities.models import VolunteerRole,VolunteerRoleVersion
     from app.modules.activities.calendar_models import EventSeries,EventOccurrence,StaffingNeed
@@ -151,9 +151,9 @@ async def attendance_fixture(factory,user_id,day=None):
         series=EventSeries(foundation_id=foundation_id,anchor_date=day,origin_time=time(12),start_date=day,start_time=time(12),duration_minutes=120,recurrence={},title='Занятие',updated_by='fixture');db.add(series);await db.flush()
         occurrence=EventOccurrence(id=uuid4(),foundation_id=foundation_id,series_id=series.id,origin_local_date=day,origin_local_time=time(12),starts_at=datetime.combine(day,time(9),tzinfo=timezone.utc),ends_at=datetime.combine(day,time(11),tzinfo=timezone.utc),timezone='Europe/Moscow',title='Занятие',series_version=1,updated_by='fixture');db.add(occurrence);await db.flush()
         need=StaffingNeed(foundation_id=foundation_id,occurrence_id=occurrence.id,role_id=role.id,role_version_id=role_version.id,capacity_required=1);db.add(need);await db.flush()
-        assignment=Assignment(foundation_id=foundation_id,user_id=user_id,occurrence_id=occurrence.id,staffing_need_id=need.id,status='confirmed',confirmed_at=utcnow()-timedelta(days=2),conditions_version=1,conditions_snapshot={});db.add(assignment);await db.flush()
-        attendance=Attendance(foundation_id=foundation_id,assignment_id=assignment.id,outcome='attended',minutes=120,version=1);db.add(attendance);await db.flush()
-        event=AttendanceEvent(foundation_id=foundation_id,attendance_id=attendance.id,assignment_id=assignment.id,user_id=user_id,version=1,old_minutes=0,new_minutes=120,reason='Подтверждено посещение',actor_id='fixture');db.add(event);await db.flush();await db.commit()
+        assignment=Assignment(foundation_id=foundation_id,user_id=user_id,occurrence_id=occurrence.id,staffing_need_id=need.id,status='confirmed',confirmed_at=utcnow()-timedelta(days=2),conditions_version=1,conditions_snapshot={},points_multiplier=multiplier);db.add(assignment);await db.flush()
+        attendance=Attendance(foundation_id=foundation_id,assignment_id=assignment.id,outcome='attended',minutes=minutes,version=1);db.add(attendance);await db.flush()
+        event=AttendanceEvent(foundation_id=foundation_id,attendance_id=attendance.id,assignment_id=assignment.id,user_id=user_id,version=1,old_minutes=0,new_minutes=minutes,reason='Подтверждено посещение',actor_id='fixture');db.add(event);await db.flush();await db.commit()
         return assignment.id,attendance.id,event.id
 
 @pytest.mark.asyncio
@@ -274,3 +274,114 @@ async def test_ai_snapshot_refreshes_cached_profile_after_owner_lock(env):
             fresh=await ai_snapshot(db,p,lock=True);assert fresh['version']==2 and fresh['fields']['about']=='Новый текст после сохранения'
             with pytest.raises(ApiError):await create_suggestion(db,p,expected_profile_version=2,patch={'about':'Предложение'},source_refs=[dict(source_id=str(uuid4()),version=2,fragment='public_profile')],producer=dict(run_id=str(uuid4()),model='contract-fixture',prompt_version='1'))
     finally:await own.aclose()
+
+def png_bytes():
+    from PIL import Image
+    buffer=io.BytesIO();Image.new('RGB',(4,4),(240,200,60)).save(buffer,format='PNG');return buffer.getvalue()
+
+@pytest.mark.asyncio
+async def test_levels_and_points_follow_ledger_with_multiplier_and_corrections(env):
+    from app.modules.activities.assignment_models import AttendanceEvent,Attendance
+    app,factory=env;own=await volunteer(app,factory);reviewer=await coord(app,factory);principal=await principal_for(own,factory)
+    try:
+        hours=(await own.get('/api/v1/me/hours')).json()
+        assert hours['level']['key'] is None and hours['level']['next_title']=='Первые шаги' and hours['points']['balance']==0 and not hours['points']['can_request']
+        assignment_id,attendance_id,event_id=await attendance_fixture(factory,principal.user_id,minutes=90,multiplier=1.5)
+        async with factory() as db:await append_service_time(db,principal,principal.user_id,assignment_id,event_id);await db.commit()
+        hours=(await own.get('/api/v1/me/hours')).json()
+        assert hours['level']['key']=='first_steps' and hours['level']['next_title']=='В команде' and hours['level']['next_minutes']==1200
+        assert hours['points']['balance']==23 and hours['points']['history'][0]['multiplier']==1.5
+        request=(await post(own,'/me/hours/requests',dict(title='Помощь на ярмарке',service_date=date.today().isoformat(),requested_minutes=1200))).json()
+        assert (await post(reviewer,f"/coord/hours/requests/{request['id']}/review",dict(expected_version=1,decision='approved',approved_minutes=1200,reason='Проверено координатором'))).status_code==200
+        hours=(await own.get('/api/v1/me/hours')).json()
+        assert hours['total_minutes']==1290 and hours['level']['key']=='team' and not hours['level']['letter_hint'] and hours['points']['balance']==223
+        async with factory() as db:
+            attendance=await db.get(Attendance,attendance_id);attendance.minutes=60;attendance.version=2
+            correction=AttendanceEvent(foundation_id=principal.foundation_id,attendance_id=attendance_id,assignment_id=assignment_id,user_id=principal.user_id,version=2,old_minutes=90,new_minutes=60,reason='Уточнено время',actor_id='fixture');db.add(correction);await db.flush()
+            await append_service_time(db,principal,principal.user_id,assignment_id,correction.id);await db.commit()
+            kinds=set((await db.scalars(select(ServiceTimeEntry.source_kind))).all());assert kinds=={'attendance','manual_review'}
+        hours=(await own.get('/api/v1/me/hours')).json()
+        assert hours['points']['balance']==215 and [item['points'] for item in hours['points']['history'] if item['kind']=='attendance']==[15]
+        for minutes in (1440,1440,1440,1440):
+            row=(await post(own,'/me/hours/requests',dict(title='Мастерская',service_date=date.today().isoformat(),requested_minutes=minutes))).json()
+            assert (await post(reviewer,f"/coord/hours/requests/{row['id']}/review",dict(expected_version=1,decision='approved',approved_minutes=minutes,reason='Проверено'))).status_code==200
+        hours=(await own.get('/api/v1/me/hours')).json();assert hours['level']['key']=='pillar' and hours['level']['letter_hint'] and hours['level']['next_title'] is None
+    finally:await own.aclose();await reviewer.aclose()
+
+@pytest.mark.asyncio
+async def test_introduction_bonus_is_paid_once_across_releases(env):
+    from app.core.clock import utcnow
+    from app.modules.learning.seed import seed_introduction
+    from app.modules.learning.models import LearningAssignment,LearningRelease
+    from app.modules.profile.models import PointsEntry
+    app,factory=env;own=await volunteer(app,factory);principal=await principal_for(own,factory)
+    try:
+        async with factory() as db:
+            track_id=await seed_introduction(db,principal.foundation_id);await db.commit()
+            releases=(await db.scalars(select(LearningRelease).where(LearningRelease.track_id==track_id).order_by(LearningRelease.number))).all();assert len(releases)>=2
+            db.add(LearningAssignment(foundation_id=principal.foundation_id,release_id=releases[0].id,user_id=principal.user_id,completed_at=utcnow()-timedelta(days=30),acknowledged_at=utcnow()-timedelta(days=30)));await db.commit()
+        first=(await own.get('/api/v1/me/hours')).json()['points'];assert first['balance']==100 and first['history'][0]['kind']=='bonus'
+        async with factory() as db:
+            db.add(LearningAssignment(foundation_id=principal.foundation_id,release_id=releases[-1].id,user_id=principal.user_id,completed_at=utcnow(),acknowledged_at=utcnow()));await db.commit()
+        prize=(await post(await coord(app,factory),'/coord/prizes',dict(title='Открытка мастерской',price_points=10,stock=5))).json()
+        assert (await post(own,'/me/prize-requests',dict(prize_id=prize['id']))).status_code==200
+        assert (await own.get('/api/v1/me/hours')).json()['points']['earned']==100
+        async with factory() as db:assert await db.scalar(select(func.count()).select_from(PointsEntry))==1
+    finally:await own.aclose()
+
+@pytest.mark.asyncio
+async def test_prize_catalog_requests_reserve_points_and_review_rules(env):
+    app,factory=env;own=await volunteer(app,factory);reviewer=await coord(app,factory);second=await coord(app,factory);principal=await principal_for(own,factory);reviewer_principal=await principal_for(reviewer,factory)
+    try:
+        assert (await post(own,'/coord/prizes',dict(title='Чашка',price_points=100,stock=1))).status_code==403
+        created=await post(reviewer,'/coord/prizes',dict(title='Чашка из мастерской',description='Ручная работа',price_points=100,stock=1));assert created.status_code==200,created.text
+        prize=created.json();hidden=(await post(reviewer,'/coord/prizes',dict(title='Скрытый',price_points=10,stock=3,visible=False))).json()
+        assert [row['id'] for row in (await own.get('/api/v1/prizes')).json()]==[prize['id']]
+        assert (await post(own,'/me/prize-requests',dict(prize_id=hidden['id']))).status_code==404
+        denied=await post(own,'/me/prize-requests',dict(prize_id=prize['id']));assert denied.status_code==409 and denied.json()['code']=='points_insufficient'
+        assert (await post(reviewer,'/coord/points/adjustments',dict(user_id=str(reviewer_principal.user_id),points=500,reason='Себе'))).status_code==403
+        assert (await post(reviewer,'/coord/points/adjustments',dict(user_id=str(principal.user_id),points=150,reason='Помощь на выезде без отметки'))).status_code==200
+        key=str(uuid4());one,two=await asyncio.gather(post(own,'/me/prize-requests',dict(prize_id=prize['id']),key),post(own,'/me/prize-requests',dict(prize_id=prize['id']),key))
+        assert one.status_code==two.status_code==200 and one.json()==two.json(),one.text
+        claim=one.json();points=(await own.get('/api/v1/me/hours')).json()['points'];assert points['balance']==50 and points['reserved']==100
+        assert (await post(own,'/me/prize-requests',dict(prize_id=prize['id']))).json()['code']=='prize_out_of_stock'
+        cancelled=await post(own,f"/me/prize-requests/{claim['id']}/cancel",dict(expected_version=1));assert cancelled.status_code==200 and cancelled.json()['state']=='cancelled'
+        assert (await own.get('/api/v1/prizes')).json()[0]['stock']==1 and (await own.get('/api/v1/me/hours')).json()['points']['balance']==150
+        claim=(await post(own,'/me/prize-requests',dict(prize_id=prize['id']))).json()
+        assert (await post(reviewer,f"/coord/prize-requests/{claim['id']}/decision",dict(expected_version=1,decision='rejected',reason='x'))).status_code==422
+        issued=await post(reviewer,f"/coord/prize-requests/{claim['id']}/decision",dict(expected_version=1,decision='issued'));assert issued.status_code==200 and issued.json()['state']=='issued',issued.text
+        assert (await post(own,f"/me/prize-requests/{claim['id']}/cancel",dict(expected_version=2))).status_code==409
+        assert (await post(reviewer,'/coord/points/adjustments',dict(user_id=str(principal.user_id),points=-120,reason='Исправлена ошибочная отметка'))).status_code==200
+        points=(await own.get('/api/v1/me/hours')).json()['points'];assert points['balance']==-70 and points['spent']==100 and not points['can_request']
+        assert (await own.get('/api/v1/me/prize-requests')).json()[0]['state']=='issued'
+        assert (await post(second,'/coord/points/adjustments',dict(user_id=str(reviewer_principal.user_id),points=50,reason='Помощь на ярмарке'))).status_code==200
+        own_claim=(await post(reviewer,'/me/prize-requests',dict(prize_id=hidden['id'])))
+        assert own_claim.status_code==404
+        updated=await client_put(reviewer,f"/coord/prizes/{hidden['id']}",dict(expected_version=1,title='Скрытый',price_points=10,stock=3,visible=True));assert updated.status_code==200,updated.text
+        own_claim=(await post(reviewer,'/me/prize-requests',dict(prize_id=hidden['id']))).json()
+        forbidden=await post(reviewer,f"/coord/prize-requests/{own_claim['id']}/decision",dict(expected_version=1,decision='issued'));assert forbidden.status_code==403 and forbidden.json()['code']=='self_prize_review_forbidden'
+        queue=(await second.get('/api/v1/coord/prize-requests')).json();assert {row['state'] for row in queue}=={'requested','issued','cancelled'}
+    finally:await own.aclose();await reviewer.aclose();await second.aclose()
+
+async def client_put(client,path,body):return await client.put('/api/v1'+path,json=body,headers={'Idempotency-Key':str(uuid4())})
+
+@pytest.mark.asyncio
+async def test_prize_photo_purpose_is_staff_bound_and_visible_through_catalog(env):
+    import hashlib
+    app,factory=env;own=await volunteer(app,factory);reviewer=await coord(app,factory)
+    try:
+        prize=(await post(reviewer,'/coord/prizes',dict(title='Приглашение на праздник',price_points=50,stock=10))).json()
+        assert (await own.get(f"/api/v1/prizes/{prize['id']}/photo")).status_code==404
+        data=png_bytes();body=dict(content_type='image/png',expected_size=len(data),checksum=hashlib.sha256(data).hexdigest())
+        assert (await post(own,f"/coord/prizes/{prize['id']}/photo-intents",body)).status_code==403
+        intent=await post(reviewer,f"/coord/prizes/{prize['id']}/photo-intents",body);assert intent.status_code==200,intent.text
+        asset=intent.json()
+        assert (await own.patch(f"/api/v1/assets/{asset['id']}/upload",content=data,headers={'X-Upload-Offset':'0'})).status_code==404
+        assert (await reviewer.patch(f"/api/v1/assets/{asset['id']}/upload",content=data,headers={'X-Upload-Offset':'0'})).status_code==200
+        assert (await reviewer.post(f"/api/v1/assets/{asset['id']}/complete-upload")).json()['state']=='ready'
+        other=(await post(reviewer,'/coord/prizes',dict(title='Другой',price_points=5,stock=1))).json()
+        assert (await client_put(reviewer,f"/coord/prizes/{other['id']}",dict(expected_version=1,title='Другой',price_points=5,stock=1,photo_asset_id=asset['id']))).status_code==422
+        saved=await client_put(reviewer,f"/coord/prizes/{prize['id']}",dict(expected_version=1,title=prize['title'],price_points=50,stock=10,photo_asset_id=asset['id']));assert saved.status_code==200,saved.text
+        photo=await own.get(f"/api/v1/prizes/{prize['id']}/photo");assert photo.status_code==200 and photo.content==data
+        assert (await own.get(f"/api/v1/assets/{asset['id']}/content")).status_code==404
+    finally:await own.aclose();await reviewer.aclose()

@@ -1,6 +1,6 @@
 from datetime import datetime
 from uuid import UUID,uuid4
-from sqlalchemy import BigInteger,CheckConstraint,DateTime,ForeignKey,ForeignKeyConstraint,Index,Integer,String,Text,UniqueConstraint
+from sqlalchemy import BigInteger,CheckConstraint,DateTime,ForeignKey,ForeignKeyConstraint,Index,Integer,Numeric,String,Text,UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB,UUID as PGUUID
 from sqlalchemy.orm import Mapped,mapped_column
 from app.core.clock import utcnow
@@ -51,10 +51,12 @@ class Assignment(Base):
     confirmed_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True))
     conditions_version:Mapped[int]=mapped_column(BigInteger)
     conditions_snapshot:Mapped[dict]=mapped_column(JSONB)
+    # Copied from the staffing need when the volunteer confirms participation.
+    points_multiplier:Mapped[float]=mapped_column(Numeric(3,2,asdecimal=False),default=1,server_default='1')
     version:Mapped[int]=mapped_column(BigInteger,default=1)
     created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
     updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
-    __table_args__=(UniqueConstraint('occurrence_id','user_id'),UniqueConstraint('id','foundation_id'),
+    __table_args__=(UniqueConstraint('occurrence_id','user_id'),UniqueConstraint('id','foundation_id'),CheckConstraint('points_multiplier IN (1, 1.5)',name='ck_assignment_points_multiplier'),
         ForeignKeyConstraint(['occurrence_id','foundation_id'],['event_occurrences.id','event_occurrences.foundation_id']),
         ForeignKeyConstraint(['staffing_need_id','occurrence_id','foundation_id'],['staffing_needs.id','staffing_needs.occurrence_id','staffing_needs.foundation_id']),
         ForeignKeyConstraint(['group_id_snapshot','foundation_id'],['participant_groups.id','participant_groups.foundation_id']),

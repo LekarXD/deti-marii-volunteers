@@ -29,3 +29,5 @@
 @media(max-width:359px){.activity-calendar-weekly>.head{flex-wrap:wrap}.activity-week-day-month{display:none}.activity-week-strip button>b{font-size:15px;letter-spacing:normal}}
 .activity-role-skills{border:0;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:10px;min-width:0}.activity-role-skills .chip{border:1px solid var(--line-2)}
 .activity-suggestion{display:flex;flex-direction:column;gap:8px;margin:0 0 16px}.activity-suggestion ul{margin:0;padding-left:22px;color:var(--ink-2);line-height:1.6}
+.activity-points{display:inline-flex;align-items:center;gap:8px;font-weight:600}.activity-points .ic{width:20px;height:20px}
+.activity-points-switch{display:flex;align-items:center;gap:12px;min-height:44px;margin-top:16px;font-size:16px;font-weight:500}

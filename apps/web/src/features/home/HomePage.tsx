@@ -8,6 +8,7 @@ import {feedRange, useEventFeed} from '../activities/eventsApi';
 import {EventTile, WhyRanking} from '../activities/EventsPage';
 import {usePreparation} from '../learning/api';
 import {readPreparation} from '../followups/api';
+import {useHours, hoursLabel, pointsLabel} from '../profile/api';
 import {assignmentWhen, homeScheduleRange, learningDestination, upcomingAssignments} from './model';
 import './home.css';
 
@@ -17,6 +18,7 @@ export function HomePage() {
   const {from,to}=homeScheduleRange(now);
   const assignments = usePersonalSchedule(from,to,'active');
   const learning = usePreparation();
+  const hours = useHours();
   useEffect(() => {const timer = window.setInterval(() => {setNow(Date.now()); void assignments.refetch();}, 30_000); return () => window.clearInterval(timer);}, [assignments.refetch]);
   // Cursor order is by UUID: a partial date window cannot establish the nearest
   // event. Remaining pages require an explicit action rather than an unbounded scan.
@@ -91,9 +93,27 @@ export function HomePage() {
           <Link className="btn btn-secondary" to={`/my/assignments/${confirmed.id}/preparation`}>Открыть памятку</Link>
         </> : <><p className="p">После подтверждения участия здесь будут памятка, контакты и список подготовки к занятию.</p><Link className="btn btn-secondary" to={invitations.length ? '/my/assignments' : '/opportunities'}>{invitations.length ? 'Посмотреть приглашения' : 'Посмотреть возможности'}</Link></>}
       </section>
+      <MyPath hours={hours}/>
     </div>
     <section className="section card-soft home-help" aria-labelledby="home-help"><span className="art art-v" aria-hidden="true"><Icon name="message"/></span><div className="grow"><h2 className="h3" id="home-help">Есть вопрос перед занятием?</h2><p className="p">Договорённости и вопросы можно обсудить с координатором.</p></div><Link className="btn btn-secondary" to={confirmed ? `/my/assignments/${confirmed.id}/preparation#before-question` : '/messages'}>{confirmed ? 'Задать вопрос' : 'Открыть сообщения'}</Link></section>
   </div>;
+}
+/** Level, hours and points come from the server HoursView; nothing is computed here. */
+function MyPath({hours}: {hours: ReturnType<typeof useHours>}) {
+  if (hours.isPending) return <section className="card home-path"><LoadingState label="Загружаем мой путь…"/></section>;
+  if (hours.error) return <section className="card home-path"><ErrorState error={hours.error} retry={() => {void hours.refetch();}}/></section>;
+  const {level, points, total_minutes: total} = hours.data, next = level.next_minutes;
+  const [count, ...word] = hoursLabel(total).split(' ');
+  return <Link className="card home-path" to="/hours" aria-labelledby="home-path">
+    <p className="eyebrow" id="home-path">Мой путь</p>
+    <h2 className="h3 home-card-title">{level.title ?? 'Первое занятие впереди'}</h2>
+    <span className="row home-path-numbers"><span className="big num">{count}</span><span className="h3">{word.join(' ')} помощи</span></span>
+    <span className="p home-line">{pointsLabel(points.balance)}</span>
+    {next != null && <>
+      <span className="bar home-path-bar" aria-hidden="true"><i style={{width: `${Math.min(100, Math.max(0, total) / next * 100)}%`}}/></span>
+      <span className="p home-line">До уровня «{level.next_title}» осталось {hoursLabel(next - total, true)}</span>
+    </>}
+  </Link>;
 }
 function NextAssignment({item, now}: {item: AssignmentParticipation; now: number}) {
   const when = assignmentWhen(item, now);

@@ -128,6 +128,26 @@ class GratitudeView(BaseModel):
     author:str
     created_at:datetime
     basis_current:bool
+class LevelView(BaseModel):
+    key:str|None
+    title:str|None
+    next_title:str|None
+    next_minutes:int|None
+    letter_hint:bool
+class PointsHistoryView(BaseModel):
+    kind:Literal['attendance','manual','bonus','adjustment','prize']
+    title:str
+    on:date
+    points:int
+    multiplier:float|None=None
+    state:str|None=None
+class PointsView(BaseModel):
+    balance:int
+    earned:int
+    reserved:int
+    spent:int
+    can_request:bool
+    history:list[PointsHistoryView]
 class HoursView(BaseModel):
     total_minutes:int
     confirmed_assignments:int
@@ -137,6 +157,8 @@ class HoursView(BaseModel):
     manual_requests:list[ManualTimeView]
     achievements:list[AchievementView]
     gratitudes:list[GratitudeView]
+    level:LevelView
+    points:PointsView
 class ProfileDocumentCommand(StrictModel):
     kind:Literal['certificate','letter']
     period_from:date
@@ -203,3 +225,61 @@ class RecognitionBasisView(BaseModel):
 class StaffDocumentCommand(ProfileDocumentCommand):
     user_id:UUID
     basis_entry_id:UUID
+
+class PrizeCommand(StrictModel):
+    title:str=Field(min_length=1,max_length=200)
+    description:str=Field(default='',max_length=4000)
+    price_points:int=Field(ge=1,le=100000)
+    stock:int=Field(ge=0,le=10000)
+    visible:bool=True
+    photo_asset_id:UUID|None=None
+class PrizeUpdateCommand(PrizeCommand):
+    expected_version:int=Field(ge=1)
+class PrizeView(BaseModel):
+    id:UUID
+    title:str
+    description:str
+    price_points:int
+    stock:int
+    visible:bool
+    version:int
+    photo_asset_id:UUID|None
+class PrizePhotoIntentCommand(StrictModel):
+    content_type:Literal['image/png','image/jpeg']
+    expected_size:int=Field(ge=1,le=5*1024*1024)
+    checksum:str=Field(min_length=64,max_length=64)
+class PrizeRequestCommand(StrictModel):
+    prize_id:UUID
+class PrizeDecisionCommand(ProfileVersionCommand):
+    decision:Literal['issued','rejected']
+    reason:str=Field(default='',max_length=4000)
+    @model_validator(mode='after')
+    def rejection_reason(self):
+        if self.decision=='rejected' and len(self.reason.strip())<3:raise ValueError('Укажите причину отказа')
+        return self
+class PrizeRequestView(BaseModel):
+    id:UUID
+    user_id:UUID
+    display_name:str=''
+    prize_id:UUID
+    prize_title:str
+    points:int
+    state:str
+    version:int
+    reason:str
+    created_at:datetime
+    updated_at:datetime
+class PointsAdjustmentCommand(StrictModel):
+    user_id:UUID
+    points:int=Field(ge=-10000,le=10000)
+    reason:str=Field(min_length=3,max_length=4000)
+    @model_validator(mode='after')
+    def non_zero(self):
+        if not self.points:raise ValueError('Укажите, сколько баллов добавить или списать')
+        return self
+class PointsAdjustmentView(BaseModel):
+    id:UUID
+    user_id:UUID
+    points:int
+    reason:str
+    created_at:datetime
