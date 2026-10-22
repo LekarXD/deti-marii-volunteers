@@ -1,0 +1,27 @@
+Metadata-Version: 2.4
+Name: opora-api
+Version: 0.1.0
+Requires-Python: >=3.12
+Requires-Dist: fastapi==0.115.12
+Requires-Dist: uvicorn[standard]==0.34.2
+Requires-Dist: SQLAlchemy==2.0.41
+Requires-Dist: greenlet==3.2.2
+Requires-Dist: psycopg[binary]==3.2.9
+Requires-Dist: alembic==1.16.1
+Requires-Dist: pydantic-settings==2.9.1
+Requires-Dist: cryptography==45.0.3
+Requires-Dist: pyotp==2.9.0
+Requires-Dist: Pillow==11.2.1
+Requires-Dist: openpyxl==3.1.5
+Requires-Dist: defusedxml==0.7.1
+Requires-Dist: pypdf==6.10.0
+Requires-Dist: PyJWT==2.15.1
+Requires-Dist: jsonschema==4.25.1
+Requires-Dist: reportlab==4.4.9
+Requires-Dist: PyMuPDF==1.25.1
+Requires-Dist: rfc8785==0.1.4
+Requires-Dist: python-docx==1.2.0
+Provides-Extra: test
+Requires-Dist: pytest==8.3.5; extra == "test"
+Requires-Dist: pytest-asyncio==0.26.0; extra == "test"
+Requires-Dist: httpx==0.28.1; extra == "test"

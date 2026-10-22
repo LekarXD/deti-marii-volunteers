@@ -14,6 +14,15 @@ def test_operation_ids_are_unique_and_explicit():
     assert len(ids) == len(set(ids)), Counter(ids)
 
 
+def test_every_api_path_is_under_api_v1():
+    # The web client always prefixes /api/v1, so a router mounted without it
+    # answers 404 to every call (this is how the simulator broke).
+    paths = create_app().openapi()["paths"]
+    outside = [path for path in paths if not path.startswith("/api/v1/")
+               and path not in {"/health", "/ready", "/version.json"}]
+    assert not outside, outside
+
+
 def test_no_public_role_switch_or_demo_reset():
     paths = create_app().openapi()["paths"]
     assert not any(fragment in path.lower() for path in paths

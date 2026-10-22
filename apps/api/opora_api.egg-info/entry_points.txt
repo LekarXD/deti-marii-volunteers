@@ -1,0 +1,2 @@
+[console_scripts]
+opora = app.cli:main

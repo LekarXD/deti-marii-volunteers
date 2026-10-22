@@ -11,7 +11,7 @@ from .fixtures import authored_drafts
 from .models import EvaluationAppeal, SimulationEvaluation, SimulationSession, SimulationSupportRequest, SimulatorScenario, SimulatorScenarioVersion, SimulatorTestRun
 from .schemas import SimulatorAppealCommand, SimulatorAppealDetail, SimulatorDraftUpdate, SimulatorExampleCreate, SimulatorHumanReview, SimulatorPublishCommand, SimulatorReviewCommand, SimulatorReviewQueueItem, SimulatorScenarioDraft, SimulatorScenarioPage, SimulatorScenarioPublicView, SimulatorScenarioStaffView, SimulatorSessionPage, SimulatorSessionStart, SimulatorSessionView, SimulatorSimpleResult, SimulatorStaffScenarioPage, SimulatorSupportCommand, SimulatorTestRunView, SimulatorTurnCommand, SimulatorVersionCommand
 
-router = APIRouter(tags=['simulator'])
+router = APIRouter(prefix='/api/v1', tags=['simulator'])
 writer = require_permission('simulator.manage')
 reviewer = require_permission('simulator.review')
 

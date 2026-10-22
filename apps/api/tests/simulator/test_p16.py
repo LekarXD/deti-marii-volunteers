@@ -65,7 +65,7 @@ async def context(monkeypatch):
         registration=RegistrationSession(foundation_id=foundation.id,expires_at=utcnow()+timedelta(days=1));db.add(registration);await db.flush()
         db.add(Session(foundation_id=foundation.id,registration_id=registration.id,token_hash=digest('registration'),csrf_hash=digest('csrf-registration'),csrf_cipher='unused',expires_at=utcnow()+timedelta(hours=2)))
         db.add(AISettings(foundation_id=foundation.id,enabled=True,daily_tokens=100000,daily_requests=100,max_concurrent=2));await db.commit()
-    app=FastAPI();install_error_handlers(app);app.include_router(router,prefix='/api/v1')
+    app=FastAPI();install_error_handlers(app);app.include_router(router)
     async def override():
         async with factory() as db:
             try:yield db
