@@ -1,9 +1,14 @@
 """Trusted strip-proxy contract: cookie scope, local URLs and private renderer path."""
+import json
 import pytest
 import httpx
 from fastapi import FastAPI
 from pydantic import ValidationError
+from sqlalchemy import select
 from app.core.config import Settings,get_settings
+from app.core.crypto import unseal
+from app.core.db import SessionLocal
+from app.core.models import OutboxMessage
 from app.core.paths import normalize_mount_prefix,public_path
 from app.core.platform import install_platform
 from app.modules.auth.router import router as auth
@@ -40,6 +45,12 @@ async def test_prefixed_proxy_normal_auth_cookie_csrf_upload_and_logout(monkeypa
         session=response.json();headers={'Origin':'https://www.odschool.ru','X-CSRF-Token':session['csrf_token']}
         intent={'content_type':'image/png','expected_size':10,'checksum':'a'*64}
         denied=await client.post('/deti-marii/api/v1/assets/upload-intents',json=intent,headers={**headers,'Origin':'https://www.odschool.ru.evil.invalid'});assert denied.status_code==403
+        anonymous=await client.post('/deti-marii/api/v1/assets/upload-intents',json=intent,headers=headers);assert anonymous.json()['code']=='verified_account_required'
+        challenge=await client.post('/deti-marii/api/v1/auth/challenges',json={'email':'candidate-one@example.test'},headers=headers);assert challenge.status_code==200,challenge.text
+        async with SessionLocal() as db:
+            token=next(p['token'] for p in (json.loads(unseal(row.payload_cipher)) for row in (await db.scalars(select(OutboxMessage))).all()) if p.get('challenge_id')==challenge.json()['challenge_id'])
+        verified=await client.post('/deti-marii/api/v1/auth/challenges/verify',json={'challenge_id':challenge.json()['challenge_id'],'token':token},headers=headers);assert verified.status_code==200,verified.text
+        assert 'Path=/deti-marii;' in verified.headers['set-cookie'];headers['X-CSRF-Token']=verified.json()['csrf_token']
         upload=await client.post('/deti-marii/api/v1/assets/upload-intents',json=intent,headers=headers);assert upload.status_code==200,upload.text
         assert upload.json()['upload_url'].startswith('/deti-marii/api/v1/assets/')
         logout=await client.post('/deti-marii/api/v1/auth/logout',headers=headers);assert logout.status_code==200

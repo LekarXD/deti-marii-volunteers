@@ -143,6 +143,11 @@ async def test_private_upload_checks_full_image_and_other_identity(app):
         buffer=io.BytesIO()
         Image.new('RGB',(2,2),'blue').save(buffer,format='PNG')
         data=buffer.getvalue()
+        # Registration sessions are free to mint, so they never get private uploads.
+        response=await owner.post('/api/v1/assets/upload-intents',json={'content_type':'image/png','expected_size':len(data),'checksum':hashlib.sha256(data).hexdigest()},headers=headers)
+        assert response.status_code==403 and response.json()['code']=='verified_account_required'
+        session,_=await login(owner,'candidate-one@example.test')
+        headers['X-CSRF-Token']=session['csrf_token']
         response=await owner.post('/api/v1/assets/upload-intents',json={'content_type':'image/png','expected_size':len(data),'checksum':hashlib.sha256(data).hexdigest()},headers=headers)
         assert response.status_code==200,response.text
         aid=response.json()['id']
@@ -161,6 +166,22 @@ async def test_private_upload_checks_full_image_and_other_identity(app):
         await owner.patch(f'/api/v1/assets/{bad}/upload',content=malformed,headers={**headers,'X-Upload-Offset':'0'})
         assert (await owner.post(f'/api/v1/assets/{bad}/complete-upload',headers=headers)).status_code==422
         assert (await owner.get(f'/api/v1/assets/{bad}/content')).status_code==409
+
+@pytest.mark.asyncio
+async def test_generic_upload_intents_bound_outstanding_bytes_and_rate(app):
+    from uuid import UUID
+    from app.core.models import MediaAsset
+    await fixtures()
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as owner:
+        session,_=await login(owner,f'uploader-{uuid4().hex}@example.test')
+        headers={'Origin':'http://testserver','X-CSRF-Token':session['csrf_token']}
+        intent=lambda size:owner.post('/api/v1/assets/upload-intents',json={'content_type':'image/png','expected_size':size,'checksum':'a'*64},headers=headers)
+        for _ in range(10):assert (await intent(get_settings().max_asset_bytes)).status_code==200
+        full=await intent(1);assert full.status_code==429 and full.json()['code']=='upload_quota_exceeded'
+        async with SessionLocal() as db:
+            await db.execute(update(MediaAsset).where(MediaAsset.owner_user_id==UUID(session['user_id'])).values(state='rejected'));await db.commit()
+        for _ in range(49):assert (await intent(1)).status_code==200
+        limited=await intent(1);assert limited.status_code==429 and limited.json()['code']=='rate_limited'
 
 def test_auth_openapi_has_concrete_generated_session_contract(app):
     schema=app.openapi()

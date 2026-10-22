@@ -5,7 +5,7 @@ from PIL import Image, UnidentifiedImageError
 from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import Principal, get_principal, authz_guard
 from app.core.audit import audit
@@ -14,6 +14,7 @@ from app.core.config import get_settings
 from app.core.paths import public_path
 from app.core.errors import ApiError
 from app.core.models import MediaAsset
+from app.core.rate_limit import rate_limit
 from app.modules.assets.service import require_asset, asset_path, asset_content
 router = APIRouter(prefix="/api/v1/assets", tags=["assets"])
 validation_admission=asyncio.Semaphore(2)
@@ -59,8 +60,17 @@ def view(asset):
 
 @router.post("/upload-intents", operation_id="asset_upload_intent", response_model=AssetView)
 async def intent(body: UploadIntent, principal: Principal = Depends(get_principal), db: AsyncSession = Depends(get_db)):
+    # Anonymous sessions are free to mint, so they would make any per-owner disk budget meaningless.
+    if not principal.user_id:
+        raise ApiError(403, "verified_account_required", "Войдите в подтверждённый аккаунт")
     if body.content_type not in ("image/png", "image/jpeg", "image/webp", "application/pdf") or body.expected_size > get_settings().max_asset_bytes:
         raise ApiError(422, "unsupported_asset", "Допустимы PNG, JPEG, WebP и PDF в пределах лимита")
+    await authz_guard(db, principal)
+    await rate_limit(db, principal.actor_id, "asset.intent", limit=60, seconds=3600)
+    pending = await db.scalar(select(func.coalesce(func.sum(MediaAsset.expected_size), 0)).where(MediaAsset.owner_user_id == principal.user_id, MediaAsset.purpose == "generic", MediaAsset.state == "uploading"))
+    if pending + body.expected_size > 10 * get_settings().max_asset_bytes:
+        await db.commit()
+        raise ApiError(429, "upload_quota_exceeded", "Завершите начатые загрузки, прежде чем добавлять новые файлы", retryable=True)
     asset = MediaAsset(foundation_id=principal.foundation_id, owner_user_id=principal.user_id, owner_registration_id=principal.registration_id, storage_key=uuid4().hex, content_type=body.content_type, expected_size=body.expected_size, checksum=body.checksum)
     db.add(asset)
     await db.flush()
