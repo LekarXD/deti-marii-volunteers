@@ -26,10 +26,11 @@ async def respond(opportunity_id:UUID,body:ParticipationResponseCreate,request:R
     return await command(db,principal,f'participation.respond:{opportunity_id}',key,body,lambda:service.respond(db,principal,opportunity_id,body),request)
 
 
-async def responses_list(db,principal,staff,cursor,limit,opportunity_id=None):
+async def responses_list(db,principal,staff,cursor,limit,opportunity_id=None,awaiting=False):
     query=select(OpportunityResponse).where(OpportunityResponse.foundation_id==principal.foundation_id)
     if not staff:query=query.where(OpportunityResponse.user_id==principal.user_id)
     if opportunity_id:query=query.where(OpportunityResponse.opportunity_id==opportunity_id)
+    if awaiting:query=query.where(OpportunityResponse.state.in_(('submitted','under_review','preparation_requested')))
     if cursor:query=query.where(OpportunityResponse.id>cursor)
     rows=list((await db.scalars(query.order_by(OpportunityResponse.id).limit(limit+1))).all())
     return ParticipationResponsePage(items=[await service.response_view(db,row,principal) for row in rows[:limit]],next_cursor=rows[limit-1].id if len(rows)>limit else None)
@@ -42,8 +43,8 @@ async def own_responses(opportunity_id:UUID|None=None,cursor:UUID|None=None,limi
 
 
 @router.get('/coord/responses',response_model=ParticipationResponsePage,operation_id='getStaffOpportunityResponses')
-async def staff_responses(cursor:UUID|None=None,limit:int=Query(50,ge=1,le=100),principal:Principal=Depends(coordinator),db:AsyncSession=Depends(get_db)):
-    return await responses_list(db,principal,True,cursor,limit)
+async def staff_responses(opportunity_id:UUID|None=None,awaiting:bool=False,cursor:UUID|None=None,limit:int=Query(50,ge=1,le=100),principal:Principal=Depends(coordinator),db:AsyncSession=Depends(get_db)):
+    return await responses_list(db,principal,True,cursor,limit,opportunity_id,awaiting)
 
 
 @router.post('/responses/{response_id}/withdraw',response_model=ParticipationResponseView,operation_id='withdrawOpportunityResponse')

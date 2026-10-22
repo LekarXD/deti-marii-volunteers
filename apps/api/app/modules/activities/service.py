@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from uuid import UUID
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import Principal
@@ -9,11 +9,11 @@ from .models import Opportunity, OpportunityRoleLink, OpportunityVersion, Volunt
 from .schemas import MatchExplanation, OpportunityCreate, OpportunityView, RoleCreate, RoleView, normalized_title
 
 
-def role_view(role: VolunteerRole, staff=True):
+def role_view(role: VolunteerRole, staff=True, volunteer_count=0):
     return RoleView(id=role.id, title=role.title, task=role.task,
         preparation_defaults=role.preparation_defaults, approval_policy=role.approval_policy,
         direction=role.direction or '', skills=role.skills or [],
-        archived_at=role.archived_at, version=role.version,
+        archived_at=role.archived_at, version=role.version, volunteer_count=volunteer_count,
         allowed_actions=['update', 'restore' if role.archived_at else 'archive', 'history', 'usage'] if staff else [])
 
 
@@ -33,6 +33,20 @@ async def opportunity_view(db, opportunity, staff=False, match_context=None):
     return OpportunityView(**fields, role_ids=role_ids, id=opportunity.id, version=opportunity.version,
         state=opportunity.state, matching=matching,
         allowed_actions=(['update', 'history'] + {'draft':['publish'], 'published':['pause','close'], 'paused':['publish','close'], 'closed':['reopen']}[opportunity.state]) if staff else [])
+
+
+async def role_volunteer_counts(db: AsyncSession, principal: Principal, role_ids: list[UUID]) -> dict[UUID, int]:
+    """How many distinct volunteers have confirmed a shift in each role, past or upcoming."""
+    if not role_ids:
+        return {}
+    from .assignment_models import Assignment
+    from .calendar_models import StaffingNeed
+    rows = await db.execute(select(StaffingNeed.role_id, func.count(func.distinct(Assignment.user_id)))
+        .join(Assignment, Assignment.staffing_need_id == StaffingNeed.id)
+        .where(StaffingNeed.foundation_id == principal.foundation_id, Assignment.foundation_id == principal.foundation_id,
+               StaffingNeed.role_id.in_(role_ids), Assignment.status == 'confirmed')
+        .group_by(StaffingNeed.role_id))
+    return {role_id: count for role_id, count in rows.all()}
 
 
 async def find_role(db: AsyncSession, principal: Principal, role_id: UUID, lock=False):
@@ -173,3 +187,75 @@ async def change_opportunity_state(db, principal, opportunity_id, body, state):
     opportunity.updated_by = principal.actor_id
     await opportunity_history(db, opportunity, principal)
     return await opportunity_view(db, opportunity, True)
+
+
+AWAITING_RESPONSE = ('submitted', 'under_review', 'preparation_requested')
+
+
+async def event_responses(db, principal):
+    """Counts for the events list: own sign-ups and reserve places for upcoming dates still waiting for approval, and open responses."""
+    from app.core.clock import utcnow
+    from .assignment_models import Assignment, OpportunityResponse
+    from .calendar_models import EventOccurrence
+    from .schemas import EventResponsesSummary
+    sign_ups = (await db.execute(select(Assignment.occurrence_id, Assignment.staffing_need_id, func.count()).join(EventOccurrence, EventOccurrence.id == Assignment.occurrence_id).where(
+        Assignment.foundation_id == principal.foundation_id, Assignment.origin.in_(('self', 'reserve')), Assignment.status == 'invited', Assignment.approved_at.is_(None),
+        EventOccurrence.foundation_id == principal.foundation_id, EventOccurrence.status == 'scheduled', EventOccurrence.starts_at > utcnow()).group_by(Assignment.occurrence_id, Assignment.staffing_need_id))).all()
+    responses = (await db.execute(select(OpportunityResponse.opportunity_id, func.count()).where(OpportunityResponse.foundation_id == principal.foundation_id,
+        OpportunityResponse.state.in_(AWAITING_RESPONSE)).group_by(OpportunityResponse.opportunity_id))).all()
+    return EventResponsesSummary(sign_ups=[{'occurrence_id': o, 'staffing_need_id': n, 'count': c} for o, n, c in sign_ups], responses=[{'opportunity_id': o, 'count': c} for o, c in responses])
+
+
+async def reserve_views(db, principal, occurrence_id=None, row_ids=None):
+    from app.core.models import User
+    from .assignment_models import StaffingNeedReserve
+    from .calendar_models import StaffingNeed
+    from .schemas import StaffReserveView
+    query = select(StaffingNeedReserve, User.display_name, VolunteerRoleVersion.snapshot).join(User, User.id == StaffingNeedReserve.user_id).join(StaffingNeed, StaffingNeed.id == StaffingNeedReserve.staffing_need_id).join(
+        VolunteerRoleVersion, VolunteerRoleVersion.id == StaffingNeed.role_version_id).where(StaffingNeedReserve.foundation_id == principal.foundation_id, StaffingNeedReserve.state != 'closed')
+    query = query.where(StaffingNeedReserve.occurrence_id == occurrence_id) if row_ids is None else query.where(StaffingNeedReserve.id.in_(row_ids))
+    rows = (await db.execute(query.order_by(StaffingNeedReserve.queued_at, StaffingNeedReserve.id))).all()
+    result = []
+    for row, name, snapshot in rows:
+        position = None
+        if row.state == 'waiting':
+            position = 1 + await db.scalar(select(func.count()).select_from(StaffingNeedReserve).where(StaffingNeedReserve.staffing_need_id == row.staffing_need_id, StaffingNeedReserve.state == 'waiting',
+                (StaffingNeedReserve.queued_at < row.queued_at) | ((StaffingNeedReserve.queued_at == row.queued_at) & (StaffingNeedReserve.id < row.id))))
+        result.append(StaffReserveView(id=row.id, version=row.version, user_id=row.user_id, display_name=name, occurrence_id=row.occurrence_id, staffing_need_id=row.staffing_need_id,
+            role_title=snapshot['title'], state=row.state, position=position))
+    return result
+
+
+async def reserve_volunteer(db, principal, need_id, body):
+    """The coordinator answers «мест нет»: the volunteer waits in the reserve queue, a pending own sign-up is withdrawn."""
+    from app.core.clock import utcnow
+    from app.core.models import ResourceReservation, User
+    from app.modules.profile.service import active_for_invitations
+    from .assignment_models import Assignment, StaffingNeedReserve
+    from . import assignment_service as participation
+    event, need = await participation.open_need(db, principal, need_id, body.expected_version)
+    user = await db.get(User, body.user_id)
+    if user is None or user.foundation_id != principal.foundation_id or user.account_state != 'active':
+        raise ApiError(422, 'invalid_volunteer', 'Волонтёр недоступен.')
+    if not await active_for_invitations(db, principal.foundation_id, user.id):
+        raise ApiError(409, 'volunteer_paused', 'Волонтёр сейчас на паузе.')
+    item = await db.scalar(select(Assignment).where(Assignment.occurrence_id == event.id, Assignment.user_id == user.id).with_for_update())
+    if item is not None and item.status in ('invited', 'confirmed'):
+        if item.status == 'confirmed' or item.origin != 'self' or item.approved_at is not None:
+            raise ApiError(409, 'already_in_team', 'Волонтёр уже в составе или приглашён.', current_version=item.version)
+        if body.expected_assignment_version is not None:
+            check_version(item, body.expected_assignment_version)
+    row = await db.scalar(select(StaffingNeedReserve).where(StaffingNeedReserve.staffing_need_id == need.id, StaffingNeedReserve.user_id == user.id).with_for_update())
+    if row is not None and row.state != 'closed':
+        raise ApiError(409, 'already_in_reserve', 'Волонтёр уже в резерве на эту роль.', current_version=row.version)
+    reason = body.reason.strip() or 'Мест на эту дату нет. Вы в резерве: позовём, если кто-то отменит.'
+    if item is not None and item.status == 'invited':
+        item.status = 'cancelled'; item.version += 1; item.updated_at = utcnow()
+        await db.execute(update(ResourceReservation).where(ResourceReservation.source_type == 'activity', ResourceReservation.source_id == item.id).values(active=False))
+        await participation.assignment_event(db, principal, item, 'to_reserve', reason)
+    if row is None:
+        row = StaffingNeedReserve(foundation_id=principal.foundation_id, occurrence_id=event.id, staffing_need_id=need.id, user_id=user.id, state='waiting'); db.add(row)
+    else:
+        row.state = 'waiting'; row.version += 1; row.queued_at = utcnow(); row.updated_at = utcnow(); row.offered_assignment_id = None
+    await db.flush()
+    return (await reserve_views(db, principal, row_ids=[row.id]))[0]

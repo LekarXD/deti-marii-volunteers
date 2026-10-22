@@ -1,23 +1,68 @@
 import {useState} from 'react';
-import {Link, useSearchParams} from 'react-router-dom';
-import {Icon, Button, Card, Dialog, Field, Input, Textarea, Segmented, Combobox} from '../../ui';
-import {useActivityCommand, useActivityHistory, useRoles, useRoleUsage, type Role, type RoleCreate} from './api';
+import {useSearchParams} from 'react-router-dom';
+import {Icon, Button, Field, Input, Textarea, Segmented, SectionTabs, cx, type IconName} from '../../ui';
+import {ApiError} from '../../api/transport';
+import {eventsTabs} from '../../app/sectionTabs';
+import {useActivityCommand, useRoles, type Requirement, type Role} from './api';
 import {useMatchingOptions} from './eventsApi';
 import {PreparationEditor} from './PreparationEditor';
+import {volunteers} from './calendarPresentation';
 import './activities.css';
-const empty:RoleCreate={title:'',task:'',preparation_defaults:[],approval_policy:'coordinator',direction:'',skills:[]};
-const fromRole=(role:Role):RoleCreate=>({title:role.title,task:role.task,preparation_defaults:role.preparation_defaults,approval_policy:role.approval_policy,direction:role.direction??'',skills:role.skills??[]});
+type Draft={title:string;task:string;direction:string;skills:string[];preparation_defaults:Requirement[]};
+const blank:Draft={title:'',task:'',direction:'',skills:[],preparation_defaults:[]};
+const fromRole=(role:Role):Draft=>({title:role.title,task:role.task??'',direction:role.direction??'',skills:role.skills??[],preparation_defaults:role.preparation_defaults??[]});
+/** A role has no picture of its own: its questionnaire direction picks one. */
+const arts:Record<string,[string,IconName]>={'Помощь на занятиях':['art-o','hand'],'Творчество':['art-o','palette'],'Ярмарки':['art-y','heart'],'Мероприятия':['art-y','star'],'Фото, видео, соцсети':['art-b','camera'],'Обучение':['art-g','book'],'Психолог, логопед':['art-p','smile'],'Юрист, IT, маркетинг':['art-b','chart']};
+const toggled=(list:string[],value:string)=>list.includes(value)?list.filter(item=>item!==value):[...list,value];
 export function RolesPage(){
  const [params,setParams]=useSearchParams();const archived=params.get('archive')==='1',q=params.get('q')??'';
- const roles=useRoles(archived,q), rows=roles.data?.pages.flatMap(p=>p.items)??[];
- const selected=rows.find(r=>r.id===params.get('role'));const [draft,setDraft]=useState<RoleCreate|null>(null);const [editing,setEditing]=useState<Role|undefined>();const [confirm,setConfirm]=useState(false);const [notice,setNotice]=useState('');
- const command=useActivityCommand(),usage=useRoleUsage(editing?.id??selected?.id),history=useActivityHistory('roles',editing?.id??selected?.id);
- const select=(role:Role)=>{setParams(p=>{p.set('role',role.id);return p});setEditing(role);setDraft(fromRole(role));setNotice('');command.reset()};
- const effective=draft??(selected?fromRole(selected):null),entity=editing??selected;const options=useMatchingOptions();
- const change=(value:Partial<RoleCreate>)=>setDraft({...effective!,...value});
- async function save(){if(!effective)return;const result=await command.mutateAsync({path:entity?`/coord/roles/${entity.id}`:'/coord/roles',method:entity?'PATCH':'POST',body:{...effective,...(entity?{expected_version:entity.version}:{})},key:crypto.randomUUID()}) as Role;setEditing(result);setDraft(fromRole(result));setParams(p=>{p.set('role',result.id);return p});setNotice('Роль сохранена')}
- async function archive(){if(!entity)return;const result=await command.mutateAsync({path:`/coord/roles/${entity.id}/${entity.archived_at?'restore':'archive'}`,body:{expected_version:entity.version},key:crypto.randomUUID()}) as Role;setConfirm(false);setEditing(result);setParams(p=>{p.set('archive',result.archived_at?'1':'0');return p});setNotice(result.archived_at?'Роль перемещена в архив':'Роль восстановлена')}
- return <div className="activities"><div className="head"><h1 className="h1">Роли волонтёров</h1><Button variant="secondary" onClick={()=>{setParams(p=>{p.delete('role');return p});setEditing(undefined);setDraft({...empty});setNotice('');command.reset()}}>Добавить роль</Button></div><div className={`activity-tools ${effective?'activity-role-tools-detail':''}`}><Field label="Найти роль"><Input placeholder="Найти роль" value={q} onChange={e=>setParams(p=>{p.set('q',e.target.value);return p})}/></Field><Segmented label="Справочник ролей" value={archived?'archive':'active'} onChange={v=>{setParams(p=>{p.set('archive',v==='archive'?'1':'0');p.delete('role');return p});setDraft(null);setEditing(undefined)}} options={[{value:'active',label:'Действующие'},{value:'archive',label:'Архив'}]}/></div>
- <div className={`activity-role-workspace ${effective?'has-detail':''}`}><Card className="activity-role-list" aria-label="Справочник ролей">{roles.isPending?<p role="status">Загружаем роли…</p>:roles.isError?<p role="alert">{roles.error.message}<Button onClick={()=>roles.refetch()}>Повторить</Button></p>:rows.length?rows.map(role=><button className={`activity-role-row ${entity?.id===role.id?'is-on':''}`} key={role.id} aria-pressed={entity?.id===role.id} onClick={()=>select(role)}><span className="art art-v" aria-hidden="true"><Icon name="users"/></span><span className="h3">{role.title}</span><span aria-hidden="true">›</span></button>):<p>{q?'Ничего не найдено':archived?'Архив пуст':'Нет действующих ролей'}</p>}{roles.hasNextPage&&<Button variant="ghost" onClick={()=>roles.fetchNextPage()}>Показать ещё</Button>}</Card>
- <Card><Button className="activity-role-back" variant="ghost" onClick={()=>{setParams(p=>{p.delete('role');return p});setDraft(null);setEditing(undefined)}}>← К списку ролей</Button>{effective?<><div className="activity-identity"><span className="art art-y" aria-hidden="true"><Icon name="users"/></span><div><p className="meta">{entity?'Редактирование роли':'Новая роль'}</p><h2 className="h2">{effective.title||'Новая роль'}</h2>{entity?.archived_at&&<p className="meta">В архиве</p>}</div></div><Field label="Название роли"><Input value={effective.title} onChange={e=>change({title:e.target.value})}/></Field><Field label="Что делает волонтёр"><Textarea value={effective.task??''} onChange={e=>change({task:e.target.value})}/></Field><Combobox label="Направление из анкеты" value={effective.direction??''} options={[{value:'',label:'Не выбрано'},...(options.data?.directions??[]).map(value=>({value,label:value}))]} onChange={direction=>change({direction})}/><fieldset className="activity-role-skills"><legend className="label">Навыки из анкеты</legend><div className="chips">{(options.data?.skills??[]).map(skill=>{const on=(effective.skills??[]).includes(skill);return <button key={skill} type="button" className={`chip${on?' is-on':''}`} aria-pressed={on} onClick={()=>change({skills:on?(effective.skills??[]).filter(value=>value!==skill):[...(effective.skills??[]),skill]})}>{skill}</button>})}</div></fieldset><PreparationEditor value={effective.preparation_defaults??[]} onChange={preparation_defaults=>change({preparation_defaults})}/><Combobox label="Согласование участия" value={effective.approval_policy??'coordinator'} options={[{value:'coordinator',label:'Участие согласует координатор'},{value:'self_confirmation',label:'Волонтёр подтверждает участие сам'}]} onChange={value=>change({approval_policy:value as RoleCreate['approval_policy']})}/>{command.isError&&<p className="activity-error" role="alert">{command.error.message} <Button variant="ghost" onClick={()=>{roles.refetch();setDraft(null);setEditing(undefined);command.reset()}}>Загрузить актуальную версию</Button></p>}<div className="actions"><Button loading={command.isPending} onClick={()=>void save().catch(()=>{})}>Сохранить роль</Button><Button variant="ghost" onClick={()=>{setDraft(null);setEditing(undefined)}}>Отмена</Button>{entity&&<Button variant="ghost" disabled={command.isPending} onClick={()=>entity.archived_at?void archive().catch(()=>{}):setConfirm(true)}>{entity.archived_at?'Восстановить':'В архив'}</Button>}</div><div className="activity-usage"><p>{usage.data?.opportunity_count?`Возможностей с этой ролью: ${usage.data.opportunity_count}. Изменение роли не меняет существующие договорённости.`:'Изменение роли не меняет подготовку в созданных возможностях.'}</p><Link to="/fund/schedule">Открыть расписание</Link></div>{history.data&&<details><summary>История изменений ({history.data.length})</summary>{history.data.map(r=><p key={r.version}>Версия {r.version}, {new Date(r.created_at).toLocaleString('ru-RU')}</p>)}</details>}</>:<><h2 className="h2">Выберите роль</h2><p className="lead">Или добавьте новую — она появится при планировании занятия.</p></>}</Card></div>{notice&&<p role="status">{notice}</p>}<Dialog open={confirm} onClose={()=>setConfirm(false)} title="Убрать роль в архив?" footer={<><Button disabled={command.isPending} onClick={()=>void archive().catch(()=>{})}>В архив</Button><Button variant="ghost" onClick={()=>setConfirm(false)}>Оставить</Button></>}><p>«{effective?.title}» больше не появится при выборе роли. В созданных возможностях и назначенных занятиях она сохранится.</p>{command.isError&&<p role="alert">{command.error.message}</p>}</Dialog></div>
+ const roles=useRoles(archived),rows=roles.data?.pages.flatMap(p=>p.items)??[],options=useMatchingOptions(),command=useActivityCommand();
+ const [open,setOpen]=useState<string|null>(null),[draft,setDraft]=useState<Draft>(blank),[flash,setFlash]=useState(''),[errors,setErrors]=useState<Record<string,string>>({});
+ const needle=q.trim().toLocaleLowerCase('ru'),shown=rows.filter(role=>!needle||`${role.title} ${(role.skills??[]).join(' ')}`.toLocaleLowerCase('ru').includes(needle));
+ const known=rows.flatMap(role=>role.preparation_defaults??[]),current=rows.find(role=>role.id===open);
+ const close=()=>{setOpen(null);setErrors({});command.reset();};
+ const start=(id:string|null,next:Draft)=>{setOpen(id);setDraft(next);setErrors({});setFlash('');command.reset();};
+ const change=(value:Partial<Draft>)=>{setDraft({...draft,...value});setErrors(old=>Object.fromEntries(Object.entries(old).filter(([key])=>!(key in value))));};
+ async function save(){
+  if(!draft.title.trim()){setErrors({title:'Введите название роли'});return;}
+  try{const body={...draft,title:draft.title.trim(),task:draft.task.trim(),...(current?{approval_policy:current.approval_policy,expected_version:current.version}:{})};
+   await command.mutateAsync({path:current?`/coord/roles/${current.id}`:'/coord/roles',method:current?'PATCH':'POST',body,key:crypto.randomUUID()});close();setFlash(`Роль «${body.title}» сохранена`);}
+  catch(error){if(error instanceof ApiError)setErrors(error.field_errors);}
+ }
+ async function archive(role:Role){try{await command.mutateAsync({path:`/coord/roles/${role.id}/${role.archived_at?'restore':'archive'}`,body:{expected_version:role.version},key:crypto.randomUUID()});close();setFlash(role.archived_at?'Роль вернули из архива':'Роль убрана в архив');}catch{/* the form shows the error */}}
+ const form=<div className="role-edit">
+  <div className="role-edit-col">
+   <Field label="Название" error={errors.title}><Input autoFocus={open==='new'} value={draft.title} placeholder="Например, ассистент педагога" onChange={e=>change({title:e.target.value})}/></Field>
+   <Field label="Что делает волонтёр" error={errors.task}><Textarea className="role-task" value={draft.task} onChange={e=>change({task:e.target.value})}/></Field>
+  </div>
+  <div className="role-edit-col">
+   <div className="field"><span className="label">Направление из анкеты</span><div className="pick" role="radiogroup" aria-label="Направление">{(options.data?.directions??[]).map(direction=><button type="button" role="radio" key={direction} aria-checked={draft.direction===direction} className={cx(draft.direction===direction&&'is-on')} onClick={()=>change({direction:draft.direction===direction?'':direction})}>{direction}</button>)}</div></div>
+   <div className="field"><span className="label">Навыки</span><div className="pick" role="group" aria-label="Навыки">{(options.data?.skills??[]).map(skill=><button type="button" key={skill} aria-pressed={draft.skills.includes(skill)} className={cx(draft.skills.includes(skill)&&'is-on')} onClick={()=>change({skills:toggled(draft.skills,skill)})}>{skill}</button>)}</div></div>
+   <PreparationEditor value={draft.preparation_defaults} options={known} onChange={preparation_defaults=>change({preparation_defaults})}/>
+  </div>
+  {command.isError&&<p className="activity-error full" role="alert">{command.error.message}{command.error instanceof ApiError&&command.error.code==='version_conflict'&&<> <Button variant="ghost" size="sm" onClick={()=>{void roles.refetch();close();}}>Загрузить актуальную версию</Button></>}</p>}
+  <div className="full role-edit-actions"><div className="row"><Button loading={command.isPending} onClick={()=>void save()}>Сохранить</Button><Button variant="ghost" onClick={close}>Отмена</Button></div>{current&&<Button variant="ghost" disabled={command.isPending} onClick={()=>void archive(current)}>{current.archived_at?'Вернуть из архива':'В архив'}</Button>}</div>
+ </div>;
+ const row=(id:string,title:string,task:string,usage:string,art:[string,IconName])=><div key={id} className={cx('role-item',open===id&&'is-open')}>
+  <button type="button" className="role-row" aria-expanded={open===id} onClick={()=>open===id?close():start(id,id==='new'?blank:fromRole(rows.find(role=>role.id===id)!))}>
+   <span className={`art ${art[0]}`} aria-hidden="true"><Icon name={art[1]}/></span>
+   <span className="grow"><span className="h3">{title}</span><span className="p">{task}</span></span>
+   <span className="meta">{usage}</span><Icon name="chevron-down" className="chev"/>
+  </button>
+  {open===id&&form}</div>;
+ return <div className="activity-roles">
+  <SectionTabs label="Мероприятия" tabs={eventsTabs} actions={<Button variant="secondary" onClick={()=>{if(archived)setParams(p=>{p.delete('archive');return p});start('new',{...blank});}}><Icon name="plus"/>Новая роль</Button>}/>
+  <div className="toolbar">
+   <label className="search"><span className="sr-only">Найти роль</span><Icon name="search"/><Input type="search" placeholder="Название или навык" value={q} onChange={e=>setParams(p=>{if(e.target.value)p.set('q',e.target.value);else p.delete('q');return p},{replace:true})}/></label>
+   <Segmented label="Какие роли показать" value={archived?'archive':'active'} onChange={value=>{close();setParams(p=>{if(value==='archive')p.set('archive','1');else p.delete('archive');return p});}} options={[{value:'active',label:'Действующие'},{value:'archive',label:'Архив'}]}/>
+  </div>
+  {flash&&<p className="done-note" role="status"><Icon name="check"/>{flash}</p>}
+  {roles.isPending?<p role="status">Загружаем роли…</p>:roles.isError?<div role="alert"><p>{roles.error.message}</p><Button variant="secondary" onClick={()=>roles.refetch()}>Повторить</Button></div>:
+  <div className="role-list">
+   {open==='new'&&row('new',draft.title||'Новая роль',draft.task||'Опишите, что делает волонтёр','пока никого',['art-b','users'])}
+   {shown.map(role=>row(role.id,role.title,role.task||'Опишите, что делает волонтёр',role.volunteer_count?volunteers(role.volunteer_count):'пока никого',arts[role.direction??'']??['art-v','users']))}
+   {!shown.length&&open!=='new'&&<p className="empty-note">{q?'Ролей не нашли':archived?'В архиве пусто':'Ролей пока нет'}</p>}
+   {roles.hasNextPage&&<Button variant="ghost" loading={roles.isFetchingNextPage} onClick={()=>roles.fetchNextPage()}>Показать ещё</Button>}
+  </div>}
+ </div>;
 }

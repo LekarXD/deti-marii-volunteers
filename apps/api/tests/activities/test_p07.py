@@ -201,3 +201,29 @@ async def test_requirements_validation_and_archive_never_rewrites_links(context)
     assert (await context.client.patch(f"/api/v1/coord/opportunities/{item['id']}",headers=headers(),json=body)).status_code==200
     new=await context.client.post('/api/v1/coord/opportunities',headers=headers(),json={'title':'Недоступно','role_ids':[role['id']]})
     assert new.status_code==422
+
+
+@pytest.mark.asyncio
+async def test_role_list_counts_distinct_confirmed_volunteers(context):
+    from datetime import date, datetime, time, timezone
+    from app.modules.activities.assignment_models import Assignment
+    from app.modules.activities.calendar_models import EventOccurrence, EventSeries, StaffingNeed
+    busy=await post_role(context,'Ведущий');idle=await post_role(context,'Водитель')
+    async with context.db() as db:
+        people=[User(foundation_id=context.foundation.id,display_name=f'Invented helper {n}') for n in range(3)]
+        db.add_all(people);await db.flush()
+        series=EventSeries(foundation_id=context.foundation.id,anchor_date=date(2031,1,1),origin_time=time(12),start_date=date(2031,1,1),start_time=time(12),duration_minutes=60,recurrence={'frequency':'once'},title='Invented series',location='Room',updated_by='fixture')
+        db.add(series);await db.flush()
+        revision=await db.scalar(select(VolunteerRoleVersion.id).where(VolunteerRoleVersion.role_id==busy['id']))
+        for n in range(2):
+            start=datetime(2031,1,1+n,9,tzinfo=timezone.utc)
+            item=EventOccurrence(id=uuid4(),foundation_id=context.foundation.id,series_id=series.id,origin_local_date=date(2031,1,1+n),origin_local_time=time(12),starts_at=start,ends_at=start+timedelta(hours=1),timezone='Europe/Moscow',title='Invented shift',location='Room',series_version=1,updated_by='fixture')
+            db.add(item);await db.flush()
+            need=StaffingNeed(occurrence_id=item.id,foundation_id=context.foundation.id,role_id=busy['id'],role_version_id=revision,capacity_required=3)
+            db.add(need);await db.flush()
+            # The same volunteer twice counts once; an open invitation is not a volunteer of the role yet.
+            for person,status in ((people[0],'confirmed'),(people[1],'confirmed' if n else 'invited'),(people[2],'invited')):
+                db.add(Assignment(foundation_id=context.foundation.id,user_id=person.id,occurrence_id=item.id,staffing_need_id=need.id,status=status,confirmed_at=utcnow() if status=='confirmed' else None,conditions_version=1,conditions_snapshot={}))
+        await db.commit()
+    listed={row['id']:row['volunteer_count'] for row in (await context.client.get('/api/v1/coord/roles')).json()['items']}
+    assert listed[busy['id']]==2 and listed[idle['id']]==0

@@ -84,6 +84,8 @@ class RoleView(RoleCreate):
     version: int
     archived_at: datetime | None
     allowed_actions: list[str]
+    # Distinct volunteers with a confirmed shift in this role; only the role list counts them.
+    volunteer_count: int = 0
 
 
 class OpportunityCreate(BaseModel):
@@ -106,7 +108,7 @@ class OpportunityCreate(BaseModel):
     def valid_title(cls, value):
         value = value.strip()
         if not value:
-            raise ValueError('Введите название возможности.')
+            raise ValueError('Введите название.')
         return value
 
     @field_validator('preparation_requirements')
@@ -174,3 +176,39 @@ class ActivityRevisionView(BaseModel):
     version: int
     snapshot: dict
     created_at: datetime
+
+
+class AwaitingSignUps(BaseModel):
+    occurrence_id: UUID
+    staffing_need_id: UUID
+    count: int
+
+
+class AwaitingResponses(BaseModel):
+    opportunity_id: UUID
+    count: int
+
+
+class EventResponsesSummary(BaseModel):
+    """What waits for a coordinator's answer: own sign-ups for upcoming dates and responses to opportunities."""
+    sign_ups: list[AwaitingSignUps]
+    responses: list[AwaitingResponses]
+
+
+class StaffReserveCommand(VersionCommand):
+    """Queue a volunteer for a full role; a pending own sign-up for the same date is withdrawn with the reason."""
+    user_id: UUID
+    expected_assignment_version: int | None = Field(default=None, gt=0)
+    reason: str = Field(default='', max_length=2000)
+
+
+class StaffReserveView(BaseModel):
+    id: UUID
+    version: int
+    user_id: UUID
+    display_name: str
+    occurrence_id: UUID
+    staffing_need_id: UUID
+    role_title: str
+    state: Literal['waiting', 'offered']
+    position: int | None

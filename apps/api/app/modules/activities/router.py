@@ -10,7 +10,7 @@ from app.core.db import get_db
 from app.core.errors import ApiError
 from app.core.idempotency import begin_command, finish_command
 from .models import Opportunity, OpportunityRoleLink, OpportunityVersion, VolunteerRole, VolunteerRoleVersion
-from .schemas import OpportunityCreate, OpportunityPage, OpportunityUpdate, OpportunityView, ActivityRevisionView, RoleCreate, RolePage, RoleUpdate, RoleUsage, RoleView, VersionCommand
+from .schemas import OpportunityCreate, OpportunityPage, OpportunityUpdate, OpportunityView, ActivityRevisionView, EventResponsesSummary, RoleCreate, RolePage, RoleUpdate, RoleUsage, RoleView, StaffReserveCommand, StaffReserveView, VersionCommand
 from . import service
 
 router = APIRouter(tags=['activities'])
@@ -59,7 +59,8 @@ async def list_roles(archived: bool=False, q: str=Query('', max_length=200), cur
     if cursor:
         query = query.where(VolunteerRole.id > cursor)
     rows = list((await db.scalars(query.order_by(VolunteerRole.id).limit(limit+1))).all())
-    return RolePage(items=[service.role_view(r) for r in rows[:limit]], next_cursor=rows[limit-1].id if len(rows)>limit else None)
+    counts = await service.role_volunteer_counts(db, principal, [r.id for r in rows[:limit]])
+    return RolePage(items=[service.role_view(r, volunteer_count=counts.get(r.id, 0)) for r in rows[:limit]], next_cursor=rows[limit-1].id if len(rows)>limit else None)
 
 
 @router.get('/coord/roles/{role_id}', response_model=RoleView, operation_id='getRole')
@@ -174,6 +175,26 @@ async def opportunity_history(opportunity_id: UUID, principal: Principal=Depends
     await service.find_opportunity(db, principal, opportunity_id, True)
     rows = (await db.scalars(select(OpportunityVersion).where(OpportunityVersion.opportunity_id == opportunity_id).order_by(OpportunityVersion.version.desc()).limit(100))).all()
     return [ActivityRevisionView(version=r.version, snapshot=r.snapshot, created_at=r.created_at) for r in rows]
+
+
+assignments_staff = require_permission('assignments.manage')
+
+
+@router.get('/coord/event-responses', response_model=EventResponsesSummary, operation_id='summarizeEventResponses')
+async def event_responses(principal: Principal=Depends(assignments_staff), db: AsyncSession=Depends(get_db)):
+    return await service.event_responses(db, principal)
+
+
+@router.get('/coord/event-occurrences/{occurrence_id}/reserve', response_model=list[StaffReserveView], operation_id='listEventReserve')
+async def event_reserve(occurrence_id: UUID, principal: Principal=Depends(assignments_staff), db: AsyncSession=Depends(get_db)):
+    from .calendar_service import occurrence
+    await occurrence(db, principal, occurrence_id)
+    return await service.reserve_views(db, principal, occurrence_id)
+
+
+@router.post('/coord/staffing-needs/{need_id}/reserve', response_model=StaffReserveView, operation_id='reserveVolunteerForNeed')
+async def reserve_volunteer(need_id: UUID, body: StaffReserveCommand, request: Request, key: str=Header(alias='Idempotency-Key'), principal: Principal=Depends(assignments_staff), db: AsyncSession=Depends(get_db)):
+    return await command(db, principal, f'assignments.reserve:{need_id}', key, body, lambda: service.reserve_volunteer(db, principal, need_id, body), request)
 
 # One module export; calendar keeps the same API root and shared command boundary.
 from .calendar_router import router as calendar_router

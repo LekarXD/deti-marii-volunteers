@@ -122,13 +122,13 @@ async def populate(db, foundation_id):
         roles.append(await activities.create_role(db,actor,RoleCreate(title=title+' [ДЕМО]',task=task)))
     opportunities=[]; links=[]
     for index,title in enumerate(['Творческая мастерская','Ярмарка и упаковка']):
-        item=await activities.create_opportunity(db,actor,OpportunityCreate(title=title+' [ДЕМО]',role_ids=[roles[index].id],program='opora-stage-synthetic-v1',audience='Вымышленные участники демонстрационного контура',conditions='Это демонстрация, а не объявление реального фонда.',regularity='regular',location='Демонстрационная мастерская',schedule='Даты примера выбирает координатор'))
+        item=await activities.create_opportunity(db,actor,OpportunityCreate(title=title+' [ДЕМО]',role_ids=[roles[index].id],program='Творческие мастерские [ДЕМО]',audience='Вымышленные участники демонстрационного контура',conditions='Это демонстрация, а не объявление реального фонда.',regularity='regular',location='Демонстрационная мастерская',schedule='Даты примера выбирает координатор'))
         item=await activities.change_opportunity_state(db,actor,item.id,VersionCommand(expected_version=item.version),'published')
         opportunities.append(item)
         links.append(await dobro.create_link(db,actor,item.id,ds.DobroActivityCommand(title=title+' — демонстрационный сезон',url='https://dobro.ru/',kind='long_term',valid_from=previous,valid_until=(today+timedelta(days=180)))))
     events=[]; assignments={}
     async def event(day,title,minutes=120,hour=14,capacity=3,opportunity_index=0,with_group=False):
-        series=await calendar_service.create_series(db,actor,EventSeriesCreate(title=title+' [ДЕМО]',program='opora-stage-synthetic-v1',start_date=day,start_time=time(hour),timezone='Europe/Moscow',duration_minutes=minutes,location='Демонстрационная мастерская',group_id=group.id if with_group else None,staffing_needs=[StaffingNeedInput(role_id=roles[opportunity_index].id,capacity_required=capacity)]))
+        series=await calendar_service.create_series(db,actor,EventSeriesCreate(title=title+' [ДЕМО]',program='Творческие мастерские [ДЕМО]',start_date=day,start_time=time(hour),timezone='Europe/Moscow',duration_minutes=minutes,location='Демонстрационная мастерская',group_id=group.id if with_group else None,staffing_needs=[StaffingNeedInput(role_id=roles[opportunity_index].id,capacity_required=capacity)]))
         db.add(DobroSeriesOpportunity(series_id=series.id,foundation_id=foundation_id,opportunity_id=opportunities[opportunity_index].id,actor_id=actor.actor_id))
         await db.flush()
         occurrence=await db.scalar(select(EventOccurrence).where(EventOccurrence.series_id==series.id))
