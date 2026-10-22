@@ -10,7 +10,7 @@ from app.core.idempotency import begin_command, finish_command
 from . import service
 from .models import Application, ApplicationRevision, ApplicationPrivateNote, CandidateRequest
 from .schemas import (DraftCommand, SubmissionCommand, VersionCommand, ApplicationReviewCommand, NoteCommand, RequestCommand,
-    ResponseCommand, DraftView, ApplicationSelfView, CandidateView, CandidateListView, NoteView, RequestView)
+    ResponseCommand, DraftView, ApplicationSelfView, CandidateView, CandidateListView, CandidateStage, CandidateSummaryView, NoteView, RequestView)
 
 router = APIRouter(prefix="/api/v1", tags=["applications"])
 
@@ -65,7 +65,7 @@ async def withdraw(command: VersionCommand, principal: Principal=Depends(get_pri
 
 
 @router.get("/coord/candidates", response_model=CandidateListView)
-async def candidates(q: str=Query(default="",max_length=200), review_state: str|None=None, assigned_to:UUID|None=None,
+async def candidates(q: str=Query(default="",max_length=200), review_state: str|None=None, assigned_to:UUID|None=None, stage:CandidateStage|None=None,
     offset:int=Query(default=0,ge=0),limit:int=Query(default=30,ge=1,le=100), principal:Principal=Depends(require_permission("candidates.read")),db:AsyncSession=Depends(get_db)):
     statement=select(Application).join(ApplicationRevision,Application.submitted_revision_id==ApplicationRevision.id).where(Application.foundation_id==principal.foundation_id)
     if q.strip():
@@ -75,9 +75,28 @@ async def candidates(q: str=Query(default="",max_length=200), review_state: str|
         statement=statement.where(Application.review_state==review_state)
     if assigned_to:
         statement=statement.where(Application.assigned_coordinator_id==assigned_to)
-    total=(await db.execute(select(func.count()).select_from(statement.subquery()))).scalar_one()
-    rows=(await db.execute(statement.order_by(Application.submitted_at.desc(),Application.id).offset(offset).limit(limit))).scalars().all()
-    return CandidateListView(items=[await service.application_view(db,row,coordinator=True) for row in rows],total=total,offset=offset,limit=limit)
+    if stage is None:
+        total=(await db.execute(select(func.count()).select_from(statement.subquery()))).scalar_one()
+        rows=(await db.execute(statement.order_by(Application.submitted_at.desc(),Application.id).offset(offset).limit(limit))).scalars().all()
+        return CandidateListView(items=await service.candidate_views(db,principal.foundation_id,rows),total=total,offset=offset,limit=limit)
+    # A stage depends on learning and interview progress, so it is resolved for the narrowed set, then paged.
+    if stage=="new":
+        statement=statement.where(Application.submission_state=="submitted",Application.review_state=="new")
+    elif stage=="closed":
+        statement=statement.where(or_(Application.submission_state!="submitted",Application.review_state.in_(("paused","closed"))))
+    else:
+        statement=statement.where(Application.submission_state=="submitted",Application.review_state.in_(("reviewing","discussed")))
+    rows=(await db.execute(statement)).scalars().all()
+    facts=await service.candidate_facts(db,principal.foundation_id,rows)
+    matched=[row for row in rows if facts[row.id]["stage"]==stage]
+    views=await service.candidate_views(db,principal.foundation_id,matched,facts)
+    views.sort(key=lambda view:(*service.stage_order(stage,view),str(view.id)))
+    return CandidateListView(items=views[offset:offset+limit],total=len(views),offset=offset,limit=limit)
+
+
+@router.get("/coord/candidates/summary", response_model=CandidateSummaryView)
+async def candidate_summary(principal:Principal=Depends(require_permission("candidates.read")),db:AsyncSession=Depends(get_db)):
+    return await service.candidate_summary(db,principal)
 
 
 @router.get("/coord/candidates/{application_id}", response_model=CandidateView)
@@ -93,6 +112,11 @@ async def review(application_id:UUID, command:ApplicationReviewCommand,principal
 @router.post("/coord/candidates/{application_id}/reopen",response_model=CandidateView)
 async def reopen(application_id:UUID,command:VersionCommand,principal:Principal=Depends(require_permission("candidates.review")),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
     return await run_command(db,principal,f"application.reopen:{application_id}",idempotency_key,command,lambda:service.review(db,principal,application_id,command,reopen=True),permission="candidates.review")
+
+
+@router.post("/coord/candidates/{application_id}/remind",response_model=CandidateView)
+async def remind(application_id:UUID,command:VersionCommand,principal:Principal=Depends(require_permission("candidates.review")),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    return await run_command(db,principal,f"application.remind:{application_id}",idempotency_key,command,lambda:service.remind(db,principal,application_id,command),permission="candidates.review")
 
 
 @router.get("/coord/candidates/{application_id}/notes",response_model=list[NoteView])

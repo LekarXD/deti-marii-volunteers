@@ -1,5 +1,6 @@
+from datetime import timedelta
 from uuid import UUID, uuid5, NAMESPACE_URL
-from sqlalchemy import select, text, func, delete
+from sqlalchemy import select, text, func, delete, false, or_
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import Principal
@@ -7,7 +8,7 @@ from app.core.errors import ApiError
 from .form import FORM, FORM_VERSION, FORM_VERSIONS, validate_answers
 from .models import (Application, ApplicationDraft, ApplicationRevision, FormVersion, ConsentEvent,
     ApplicationReviewEvent, ApplicationPrivateNote, CandidateRequest, CandidateRequestResponse, now)
-from .schemas import (ApplicationSelfView, CandidateView, DraftView, FormView, RevisionView,
+from .schemas import (ApplicationSelfView, CandidateView, CandidateSummaryView, DraftView, FormView, RevisionView,
     ReviewEventView, RequestView, ResponseView, NoteView)
 
 
@@ -65,7 +66,13 @@ def revision_view(revision):
         answers=revision.answers, created_at=revision.created_at)
 
 
+def history_view(e):
+    return ReviewEventView(id=e.id, kind=e.kind, state=e.state, public_message=e.public_message, created_at=e.created_at)
+
+
 async def application_view(db, application, *, coordinator=False):
+    if coordinator:
+        return (await candidate_views(db, application.foundation_id, [application]))[0]
     revisions = (await db.execute(select(ApplicationRevision).where(ApplicationRevision.application_id == application.id).order_by(ApplicationRevision.number))).scalars().all()
     revision = next((r for r in revisions if r.id == application.submitted_revision_id), None)
     if revision is None:
@@ -74,12 +81,98 @@ async def application_view(db, application, *, coordinator=False):
     from .consents import consent_events
     events = await consent_events(db,application.foundation_id,user_id=application.user_id,application_id=application.id)
     consents = {event.purpose: event.granted for event in events}
-    values = dict(id=application.id, version=application.version, submission_state=application.submission_state,
+    return ApplicationSelfView(id=application.id, version=application.version, submission_state=application.submission_state,
         review_state=application.review_state, submitted_at=application.submitted_at, revision=revision_view(revision),
-        history=[ReviewEventView(id=e.id, kind=e.kind, state=e.state, public_message=e.public_message, created_at=e.created_at) for e in history], consents=consents)
-    if coordinator:
-        return CandidateView(**values, assigned_coordinator_id=application.assigned_coordinator_id, progress=await candidate_progress(db,application), revisions=[revision_view(r) for r in revisions])
-    return ApplicationSelfView(**values)
+        history=[history_view(e) for e in history], consents=consents)
+
+
+async def candidate_views(db, foundation_id, applications, facts=None):
+    """Coordinator DTOs for a page of candidates with a fixed number of queries, whatever the page size."""
+    if not applications:
+        return []
+    ids = [a.id for a in applications]
+    facts = facts or await candidate_facts(db, foundation_id, applications)
+    revisions = {}
+    for r in (await db.scalars(select(ApplicationRevision).where(ApplicationRevision.application_id.in_(ids)).order_by(ApplicationRevision.application_id, ApplicationRevision.number))).all():
+        revisions.setdefault(r.application_id, []).append(r)
+    users = {a.user_id for a in applications if a.user_id}
+    owners = ConsentEvent.application_id.in_(ids) | (ConsentEvent.subject_user_id.in_(users) if users else false())
+    consents = (await db.scalars(select(ConsentEvent).where(owners).order_by(ConsentEvent.created_at, ConsentEvent.id))).all()
+    views = []
+    for a in applications:
+        own = revisions.get(a.id, [])
+        revision = next((r for r in own if r.id == a.submitted_revision_id), None)
+        if revision is None:
+            raise ApiError(409, "application_incomplete", "Анкета не завершена")
+        fact = facts[a.id]
+        views.append(CandidateView(id=a.id, version=a.version, submission_state=a.submission_state, review_state=a.review_state,
+            submitted_at=a.submitted_at, revision=revision_view(revision), history=[history_view(e) for e in fact["history"]],
+            consents={e.purpose: e.granted for e in consents if e.application_id == a.id or (a.user_id and e.subject_user_id == a.user_id)},
+            assigned_coordinator_id=a.assigned_coordinator_id, progress=fact["progress"], revisions=[revision_view(r) for r in own],
+            stage=fact["stage"], stage_since=fact["since"]))
+    return views
+
+
+def candidate_stage(application, progress, attended=False):
+    """One funnel position from the review state, the introduction course and the latest interview booking."""
+    if application.submission_state != "submitted" or application.review_state in ("paused", "closed"):
+        return "closed"
+    if application.review_state == "new":
+        return "new"
+    if attended:
+        return "done"
+    interview = progress["interview"]["status"]
+    if interview == "completed" or application.review_state == "discussed":
+        return "ready"
+    if interview in ("booked", "missed", "cancelled") or progress["introduction"]["status"] in ("completed", "unavailable"):
+        return "interview"
+    return "intro"
+
+
+def stage_since(application, stage, progress, history):
+    accepted = next((e.created_at for e in history if e.state != "new"), None)
+    if stage == "new":
+        return application.submitted_at
+    if stage == "intro":
+        return accepted or application.submitted_at
+    if stage == "interview":
+        return progress["introduction"].get("completed_at") or accepted
+    if stage == "ready":
+        if progress["interview"]["status"] == "completed":
+            return progress["interview"]["starts_at"]
+        return next((e.created_at for e in reversed(history) if e.state == "discussed"), None) or accepted
+    return history[-1].created_at if history else application.submitted_at
+
+
+async def candidate_facts(db, foundation_id, applications):
+    """Progress, history and funnel stage for many candidates in a fixed number of queries."""
+    ids = [a.id for a in applications]
+    progress = await candidate_progress_many(db, foundation_id, applications)
+    attended = await attended_users(db, foundation_id, {a.user_id for a in applications if a.user_id})
+    history = {}
+    if ids:
+        for e in (await db.scalars(select(ApplicationReviewEvent).where(ApplicationReviewEvent.application_id.in_(ids)).order_by(ApplicationReviewEvent.created_at, ApplicationReviewEvent.id))).all():
+            history.setdefault(e.application_id, []).append(e)
+    facts = {}
+    for a in applications:
+        own, value = history.get(a.id, []), progress[a.id]
+        stage = candidate_stage(a, value, a.user_id in attended)
+        facts[a.id] = dict(progress=value, history=own, stage=stage, since=stage_since(a, stage, value, own))
+    return facts
+
+
+async def attended_users(db, foundation_id, user_ids):
+    """Users with at least one attended event: their first outing is behind them."""
+    if not user_ids:
+        return set()
+    try:
+        from app.modules.activities.assignment_models import Assignment, Attendance
+    except ModuleNotFoundError as error:
+        if not (error.name or "").startswith("app.modules.activities"):
+            raise
+        return set()
+    return set((await db.scalars(select(Assignment.user_id).join(Attendance, Attendance.assignment_id == Assignment.id).where(
+        Assignment.foundation_id == foundation_id, Assignment.user_id.in_(user_ids), Attendance.outcome == "attended").distinct())).all())
 
 
 async def verified_questionnaire_email(db, principal):
@@ -318,27 +411,105 @@ async def claim_registration(db, registration_id, user_id):
 
 
 async def candidate_progress(db, application):
-    """Compose independent read-only projections; unavailable is never zero progress."""
-    introduction = dict(status="unavailable", completed_lessons=0, total_lessons=0)
-    interview = dict(status="unavailable", starts_at=None)
+    return (await candidate_progress_many(db, application.foundation_id, [application]))[application.id]
+
+
+async def candidate_progress_many(db, foundation_id, applications):
+    """Compose independent read-only projections; unavailable is never zero progress.
+
+    Batched reads of the introduction course (learning) and the latest interview booking (interviews):
+    the same rules as their single-candidate projections, a fixed number of queries for any page.
+    """
+    result = {a.id: dict(introduction=dict(status="unavailable", completed_lessons=0, total_lessons=0),
+        interview=dict(status="unavailable", starts_at=None, booking_id=None)) for a in applications}
+    if not applications:
+        return result
     try:
-        from app.modules.learning.service import candidate_progress as learning_progress
+        from app.modules.learning.models import LearningTrack, LearningRelease, LearningAssignment, LessonProgress
     except ModuleNotFoundError as error:
         if not (error.name or "").startswith("app.modules.learning"):
             raise
     else:
-        progress = await learning_progress(db, application.foundation_id, user_id=application.user_id, registration_id=application.registration_id)
-        if progress.get("available", True):
-            introduction = dict(status="completed" if progress["completed"] else "in_progress" if progress["completed_lessons"] else "not_started",
-                completed_lessons=progress["completed_lessons"], total_lessons=progress["total_lessons"])
+        track = await db.scalar(select(LearningTrack).where(LearningTrack.foundation_id == foundation_id, LearningTrack.key == "introduction"))
+        release = await db.get(LearningRelease, track.current_release_id) if track and track.current_release_id else None
+        if release is not None:
+            users = {a.user_id for a in applications if a.user_id}
+            registrations = {a.registration_id for a in applications if not a.user_id and a.registration_id}
+            scopes = ([LearningAssignment.user_id.in_(users)] if users else []) + ([LearningAssignment.registration_id.in_(registrations)] if registrations else [])
+            items = (await db.scalars(select(LearningAssignment).where(LearningAssignment.foundation_id == foundation_id,
+                LearningAssignment.release_id == release.id, or_(*scopes)))).all() if scopes else []
+            done = {}
+            if items:
+                for assignment_id, lesson_id in (await db.execute(select(LessonProgress.assignment_id, LessonProgress.lesson_version_id).where(LessonProgress.assignment_id.in_([i.id for i in items])))).all():
+                    done.setdefault(assignment_id, set()).add(str(lesson_id))
+            by_user = {i.user_id: i for i in items if i.user_id}
+            by_registration = {i.registration_id: i for i in items if i.registration_id}
+            lessons = set(release.lesson_version_ids)
+            for a in applications:
+                item = by_user.get(a.user_id) if a.user_id else by_registration.get(a.registration_id)
+                count = len(done.get(item.id, set()) & lessons) if item else 0
+                completed = bool(item and item.completed_at)
+                result[a.id]["introduction"] = dict(status="completed" if completed else "in_progress" if count else "not_started",
+                    completed_lessons=count, total_lessons=len(release.lesson_version_ids), completed_at=item.completed_at if completed else None)
     try:
-        from app.modules.interviews.service import candidate_progress as interview_progress
+        from app.modules.interviews.models import InterviewBooking
     except ModuleNotFoundError as error:
         if not (error.name or "").startswith("app.modules.interviews"):
             raise
     else:
-        interview = await interview_progress(db, application.foundation_id, application.id)
-    return dict(introduction=introduction, interview=interview)
+        bookings = {}
+        for b in (await db.scalars(select(InterviewBooking).where(InterviewBooking.foundation_id == foundation_id,
+                InterviewBooking.application_id.in_([a.id for a in applications])).order_by(InterviewBooking.created_at.desc(), InterviewBooking.id.desc()))).all():
+            bookings.setdefault(b.application_id, []).append(b)
+        for a in applications:
+            rows = bookings.get(a.id, [])
+            row = next((b for b in rows if b.status == "booked"), rows[0] if rows else None)
+            result[a.id]["interview"] = dict(status=row.status if row else "none", starts_at=row.starts_at if row else None, booking_id=row.id if row else None)
+    return result
+
+
+async def candidate_summary(db, principal):
+    applications = (await db.scalars(select(Application).where(Application.foundation_id == principal.foundation_id,
+        Application.submitted_revision_id.is_not(None)))).all()
+    counts = dict.fromkeys(("new", "intro", "interview", "ready", "done", "closed"), 0)
+    for fact in (await candidate_facts(db, principal.foundation_id, applications)).values():
+        counts[fact["stage"]] += 1
+    return CandidateSummaryView(**counts)
+
+
+def stage_order(stage, view):
+    """Who needs the coordinator first: the longest waiting; booked interviews by date after those without one."""
+    if stage == "interview":
+        booked = view.progress.interview.status == "booked"
+        return (booked, view.progress.interview.starts_at if booked else view.stage_since or view.submitted_at)
+    since = view.stage_since or view.submitted_at
+    return (since.timestamp() * (-1 if stage in ("done", "closed") else 1),)
+
+
+REMINDER_GAP = timedelta(hours=20)
+
+
+async def remind(db, principal, application_id, command):
+    """One in-app reminder about the introduction course, at most once a day."""
+    from app.core.clock import utcnow
+    from app.modules.messaging.consumers import enqueue_notice
+    application = await coordinator_application(db, principal, application_id, lock=True)
+    check_version(application.version, command.expected_version)
+    fact = (await candidate_facts(db, principal.foundation_id, [application]))[application.id]
+    if fact["stage"] != "intro":
+        raise ApiError(409, "reminder_not_needed", "Напоминать нужно только тем, кто проходит знакомство")
+    if application.user_id is None:
+        raise ApiError(409, "candidate_without_account", "Кандидат ещё не подтвердил почту, напомнить не получится")
+    last = max((e.created_at for e in fact["history"] if e.kind == "reminded"), default=None)
+    if last and utcnow() - last < REMINDER_GAP:
+        raise ApiError(409, "already_reminded", "Напоминание уже отправлено сегодня")
+    enqueue_notice(db, application.foundation_id, application.user_id, "Знакомство с фондом",
+        "Координатор напоминает: пройдите знакомство с фондом, это несколько коротких уроков.\nОткрыть: /onboarding")
+    application.version += 1
+    db.add(ApplicationReviewEvent(application_id=application.id, kind="reminded", state=application.review_state,
+        public_message="", author_id=principal.actor_id))
+    await db.flush()
+    return await application_view(db, application, coordinator=True)
 
 
 async def learning_recipient_options(db, principal, search=""):

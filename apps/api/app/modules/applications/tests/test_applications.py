@@ -256,3 +256,134 @@ async def test_new_source_form_is_versioned_and_old_draft_edits_keep_identity(en
         assert revised.json()['id']==first['id'] and revised.json()['revision']['form_version_id']==str(form.id)
         assert revised.json()['revision']['answers']['participation']=='Иногда, когда получится'
     finally:await old.aclose();await fresh.aclose()
+
+
+def test_candidate_stage_follows_review_course_interview_and_first_event():
+    from types import SimpleNamespace
+    from app.modules.applications.service import candidate_stage
+    def stage(review='reviewing', intro='in_progress', interview='none', submission='submitted', attended=False):
+        return candidate_stage(SimpleNamespace(submission_state=submission, review_state=review), dict(introduction=dict(status=intro), interview=dict(status=interview)), attended)
+    assert stage(review='new', interview='booked') == 'new'
+    assert stage() == 'intro' and stage(intro='not_started') == 'intro'
+    assert stage(intro='completed') == 'interview' and stage(intro='unavailable') == 'interview'
+    assert stage(interview='booked') == 'interview' and stage(intro='completed', interview='missed') == 'interview'
+    assert stage(interview='completed') == 'ready' and stage(review='discussed') == 'ready'
+    assert stage(interview='completed', attended=True) == 'done'
+    assert stage(review='paused') == 'closed' and stage(review='closed') == 'closed' and stage(submission='withdrawn') == 'closed'
+
+
+async def seed_introduction(db, foundation_id, lessons=2):
+    from app.modules.learning.models import LearningTrack, LearningRelease, Lesson, LessonVersion
+    track = LearningTrack(foundation_id=foundation_id, key='introduction', title='Знакомство с фондом'); db.add(track); await db.flush()
+    versions = []
+    for number in range(lessons):
+        lesson = Lesson(track_id=track.id, foundation_id=foundation_id, key=f'lesson-{number}'); db.add(lesson); await db.flush()
+        version = LessonVersion(lesson_id=lesson.id, number=1, title=f'Урок {number + 1}'); db.add(version); await db.flush()
+        versions.append(version.id)
+    release = LearningRelease(track_id=track.id, foundation_id=foundation_id, number=1, title='Знакомство', lesson_version_ids=[str(v) for v in versions])
+    db.add(release); await db.flush()
+    track.current_release_id = release.id
+    return release, versions
+
+
+async def seed_booking(db, application, coordinator_id, status, starts_at):
+    from app.modules.interviews.models import AvailabilitySeries, InterviewSlot, InterviewBooking
+    series = AvailabilitySeries(foundation_id=application.foundation_id, coordinator_id=coordinator_id, local_start_date=starts_at.date(),
+        start_minute=600, end_minute=660, venue='Офис фонда'); db.add(series); await db.flush()
+    ends_at = starts_at + timedelta(minutes=30)
+    slot = InterviewSlot(foundation_id=application.foundation_id, series_id=series.id, coordinator_id=coordinator_id, origin_date=starts_at.date(),
+        origin_minute=600, starts_at=starts_at, ends_at=ends_at, busy_until=ends_at); db.add(slot); await db.flush()
+    booking = InterviewBooking(foundation_id=application.foundation_id, application_id=application.id, user_id=application.user_id,
+        candidate_key=f'user:{application.user_id}', slot_id=slot.id, coordinator_id=coordinator_id, starts_at=starts_at, ends_at=ends_at,
+        busy_until=ends_at, venue='Офис фонда', status=status)
+    db.add(booking); await db.flush()
+    return booking
+
+
+@pytest.mark.asyncio
+async def test_candidate_funnel_stages_summary_and_reminder(env):
+    from sqlalchemy import event
+    from app.modules.learning.models import LearningAssignment, LessonProgress
+    app, factory = env
+    names = ['Новая', 'Учится', 'Прошла', 'Записана', 'Готова', 'Отказ']
+    people = [await actor(app) for _ in names]
+    coord = await staff(app, factory)
+    try:
+        ids = []
+        for client, name in zip(people, names):
+            submitted = await post(client, '/applications/submit', body({**VALID, 'firstName': name}))
+            assert submitted.status_code == 200, submitted.text
+            ids.append(submitted.json()['id'])
+        new, intro, passed, booked, ready, declined = ids
+        for application_id in ids[1:]:
+            state = 'closed' if application_id == declined else 'reviewing'
+            accepted = await post(coord, f'/coord/candidates/{application_id}/review', dict(expected_version=1, state=state, public_message='Анкета принята'))
+            assert accepted.status_code == 200, accepted.text
+        now = utcnow()
+        async with factory() as db:
+            rows = {row.id: row for row in (await db.scalars(select(Application))).all()}
+            release, lessons = await seed_introduction(db, get_settings().foundation_id)
+            learning = LearningAssignment(foundation_id=release.foundation_id, release_id=release.id, user_id=rows[UUID(intro)].user_id); db.add(learning); await db.flush()
+            db.add(LessonProgress(assignment_id=learning.id, lesson_version_id=lessons[0]))
+            db.add(LearningAssignment(foundation_id=release.foundation_id, release_id=release.id, user_id=rows[UUID(passed)].user_id, completed_at=now))
+            coordinator = User(foundation_id=get_settings().foundation_id, display_name='Ведущий'); db.add(coordinator); await db.flush()
+            meeting = await seed_booking(db, rows[UUID(booked)], coordinator.id, 'booked', now + timedelta(days=1))
+            done = await seed_booking(db, rows[UUID(ready)], coordinator.id, 'completed', now - timedelta(days=1))
+            await db.commit()
+        summary = await coord.get('/api/v1/coord/candidates/summary')
+        assert summary.status_code == 200, summary.text
+        assert summary.json() == dict(new=1, intro=1, interview=2, ready=1, done=0, closed=1)
+        assert (await people[0].get('/api/v1/coord/candidates/summary')).status_code == 403
+
+        learning_row = (await coord.get('/api/v1/coord/candidates?stage=intro')).json()
+        assert [item['id'] for item in learning_row['items']] == [intro] and learning_row['total'] == 1
+        assert learning_row['items'][0]['progress']['introduction'] == dict(status='in_progress', completed_lessons=1, total_lessons=2)
+        interview = (await coord.get('/api/v1/coord/candidates?stage=interview')).json()
+        assert [item['id'] for item in interview['items']] == [passed, booked]
+        assert interview['items'][0]['progress']['interview']['status'] == 'none'
+        assert interview['items'][1]['progress']['interview']['booking_id'] == str(meeting.id)
+        assert (await coord.get('/api/v1/coord/candidates?stage=interview&limit=1&offset=1')).json()['items'][0]['id'] == booked
+        ready_row = (await coord.get('/api/v1/coord/candidates?stage=ready')).json()['items'][0]
+        assert ready_row['id'] == ready and ready_row['stage'] == 'ready' and UUID(ready_row['progress']['interview']['booking_id']) == done.id
+        from datetime import datetime
+        assert abs(datetime.fromisoformat(ready_row['stage_since'].replace('Z', '+00:00')) - done.starts_at) < timedelta(seconds=1)
+        assert [item['id'] for item in (await coord.get('/api/v1/coord/candidates?stage=new&q=Нова')).json()['items']] == [new]
+        assert (await coord.get('/api/v1/coord/candidates?stage=new&q=Учится')).json()['total'] == 0
+        assert (await coord.get('/api/v1/coord/candidates?stage=closed')).json()['items'][0]['id'] == declined
+        assert (await coord.get('/api/v1/coord/candidates?stage=unknown')).status_code == 422
+        # The old filters keep their meaning and every row carries its stage.
+        everyone = (await coord.get('/api/v1/coord/candidates')).json()
+        assert everyone['total'] == 6 and {item['id']: item['stage'] for item in everyone['items']}[booked] == 'interview'
+        assert [item['id'] for item in (await coord.get('/api/v1/coord/candidates?review_state=new')).json()['items']] == [new]
+        detail = (await coord.get(f'/api/v1/coord/candidates/{intro}')).json()
+        assert detail['stage'] == 'intro' and detail['progress']['introduction']['completed_lessons'] == 1
+
+        # The list reads a page with a fixed number of queries, not one batch per row.
+        engine = factory.kw['bind'].sync_engine
+        statements = []
+        def count(*_args):statements.append(1)
+        event.listen(engine, 'before_cursor_execute', count)
+        try:
+            await coord.get('/api/v1/coord/candidates?offset=4&limit=1'); one = len(statements); statements.clear()
+            await coord.get('/api/v1/coord/candidates?limit=6'); six = len(statements)
+        finally:
+            event.remove(engine, 'before_cursor_execute', count)
+        assert six == one
+
+        async with factory() as db:outbox = await db.scalar(select(func.count()).select_from(OutboxMessage))
+        reminded = await post(coord, f'/coord/candidates/{intro}/remind', dict(expected_version=detail['version']))
+        assert reminded.status_code == 200, reminded.text
+        assert reminded.json()['history'][-1]['kind'] == 'reminded' and reminded.json()['version'] == detail['version'] + 1
+        async with factory() as db:assert await db.scalar(select(func.count()).select_from(OutboxMessage)) == outbox + 1
+        again = await post(coord, f'/coord/candidates/{intro}/remind', dict(expected_version=detail['version'] + 1))
+        assert again.status_code == 409 and again.json()['code'] == 'already_reminded'
+        early = await post(coord, f'/coord/candidates/{new}/remind', dict(expected_version=1))
+        assert early.status_code == 409 and early.json()['code'] == 'reminder_not_needed'
+        reader = await staff(app, factory, permissions=('candidates.read',))
+        try:assert (await post(reader, f'/coord/candidates/{intro}/remind', dict(expected_version=detail['version'] + 1))).status_code == 403
+        finally:await reader.aclose()
+        own = (await people[1].get('/api/v1/me/application')).json()
+        assert 'stage' not in own and 'progress' not in own
+    finally:
+        for client in people:await client.aclose()
+        await coord.aclose()

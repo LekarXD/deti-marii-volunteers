@@ -83,22 +83,38 @@ class IntroductionProgressView(BaseModel):
 class InterviewProgressView(BaseModel):
     status: Literal["unavailable", "none", "booked", "completed", "missed", "cancelled"]
     starts_at: datetime | None = None
+    booking_id: UUID | None = None
 
 class CandidateProgressView(BaseModel):
     introduction: IntroductionProgressView
     interview: InterviewProgressView
 
 
+# new: waits for a review; intro: accepted, taking the introduction course; interview: needs or has a
+# booked interview; ready: interview passed, before the first event; done: attended an event; closed: paused, closed or withdrawn.
+CandidateStage = Literal["new", "intro", "interview", "ready", "done", "closed"]
+
+
 class CandidateView(ApplicationSelfView):
     progress: CandidateProgressView
     assigned_coordinator_id: UUID | None
     revisions: list[RevisionView]
+    stage: CandidateStage
+    stage_since: datetime | None = None
 
 class CandidateListView(BaseModel):
     items: list[CandidateView]
     total: int
     offset: int
     limit: int
+
+class CandidateSummaryView(BaseModel):
+    new: int
+    intro: int
+    interview: int
+    ready: int
+    done: int
+    closed: int
 
 class NoteView(BaseModel):
     id: UUID
