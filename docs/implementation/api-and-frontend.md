@@ -53,7 +53,7 @@ Staff MFA — отдельный P01 gate: enrollment, recovery и step-up дл�
 | Факт и часы | `POST /coord/assignments/{id}/attendance`, `/attendance/{id}/correct`; `GET /me/service-time`; `POST /me/time-requests`; staff `/time-requests/{id}/approve|decline` |
 | Рефлексия | `GET/PUT /me/assignments/{id}/reflection`; `POST .../reflection/submit`; `GET /coord/reflections`; `POST /coord/reflections/{id}/review` |
 | CRM | `GET /coord/volunteers`, `/{id}`; agreements, contact-events, availability-verifications и follow-up-tasks — отдельные collections/commands |
-| Резерв | `GET /coord/contact-reviews`; `POST /coord/contact-reviews/{id}/record`; status ready требует актуальной доступности |
+| Резерв | Удалён 2026-10-22: волонтёры регистрируются сами, `/coord/contact-reviews*` и `/coord/import-batches/*` сняты. Очередь — `GET /coord/volunteers?state=unverified`; подтверждение доступности и «Не связываться» требуют `contacts.review`; status ready требует актуальной доступности |
 | Участники | staff `GET/POST/PATCH /coord/participants`; private-notes отдельным endpoint; `GET /me/assignments/{id}/participants` — только safe DTO |
 | Группы | staff `GET/POST/PATCH /coord/groups`; membership add/end; `GET /me/groups/{id}` только по разрешённому назначению |
 | Файлы | `POST /assets/upload-intents`, `/assets/{id}/complete-upload`; `GET /assets/{id}/status`, `/content`; attach только обработанный разрешённый asset |

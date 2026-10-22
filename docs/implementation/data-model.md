@@ -110,7 +110,7 @@
 | `occurrence_group_links`, `occurrence_participants` | группа/уточнённый состав конкретного занятия; история состава не перезаписывается текущим списком |
 | `availability_rules`, `availability_verifications` | доступность волонтёра, timezone, valid_until/verified_at, источник и автор проверки |
 | `contact_events`, `agreements`, `follow_up_tasks` | история связи/договорённостей, ответственный, due_at, open/done/cancelled |
-| `reserve_reviews` | контакт, результат проверки, актуальность доступности, next_task, no-contact preference |
+| `reserve_reviews` | контакт, результат проверки, актуальность доступности, next_task, no-contact preference. С 2026-10-22 не используется (проверка контактов удалена); таблица остаётся до решения фонда о персональных данных |
 | `attendance_records` | assignment UNIQUE, attended/absent, actual minutes, approver, version |
 | `service_time_entries` | user, source attendance/manual review, signed delta_minutes, reason, unique command source; append-only ledger |
 | `manual_time_requests`, `certificates` | запрос часов и решение; документ с периодом, числом подтверждённых минут, asset/job и проверочным идентификатором |
@@ -148,7 +148,7 @@
 | `ai_runs`, `match_runs`, `match_suggestions` | model/prompt/rubric/source versions, разрешённый input, output, usage/cost, coordinator decision |
 | `signals`, `signal_events` | предмет сигнала, scope, ответственный, state, reason и следующее действие |
 | `webinars`, `webinar_enrollments`, `rtc_rooms`, `board_sessions`, `webinar_summaries` | доступ к комнате/общей доске, provider IDs и версионированные итоги; запись live использует те же projects/takes/renders P18, без второй таблицы recordings |
-| `import_batches`, `import_rows`, `merge_reviews`, `import_effects` | исходные строки, mapping, dry-run/errors, provenance, ручные дубли, обратимость |
+| `import_batches`, `import_rows`, `merge_reviews`, `import_effects` | исходные строки, mapping, dry-run/errors, provenance, ручные дубли, обратимость. С 2026-10-22 импорт удалён; `merge_reviews` по-прежнему пишет слияние дублей, таблицы импорта (и `import_external_references`) остаются без записи до решения фонда о персональных данных |
 | `report_exports`, `integration_connections`, `settings_versions` | экспорт и настройки; secrets только refs во внешнее хранилище/окружение |
 | `idempotency_records`, `outbox_events`, `jobs` | повторяемые команды, durable события, lease/retry/dead-letter |
 
@@ -238,7 +238,7 @@ Lock series/version → затронутые occurrences/needs/assignments по 
 
 Демо-данные генерируются отдельно и не попадают в production. `roles.json` нужно разделить на справочник ролей и предложения по программам; не заливать файл одной таблицей. Фиксированную дату октября 2026 и legacy IDs не использовать в логике сервера. Исходные методические документы импортируются как источники/черновики с provenance и отдельной публикацией.
 
-Миграция схемы и импорт фактической базы — разные процессы. Импорт CSV/XLSX сначала создаёт batch/rows, затем dry-run и preview дублей. Применение фиксирует `source + external_id`/checksum, row effects и очередь проверки. Объединение дублей меняет связи транзакционно, хранит alias/provenance и требует ручного решения при сомнении. Не откатывать импорт каскадным удалением записей с новым реальным участием.
+Миграция схемы и импорт фактической базы — разные процессы. Импорт CSV/XLSX сначала создаёт batch/rows, затем dry-run и preview дублей. Применение фиксирует `source + external_id`/checksum, row effects и очередь проверки. Объединение дублей меняет связи транзакционно, хранит alias/provenance и требует ручного решения при сомнении. Не откатывать импорт каскадным удалением записей с новым реальным участием. Импорт контактов удалён 2026-10-22 (волонтёры регистрируются сами); миграция удаления таблиц импорта и `reserve_reviews` ждёт решения фонда об уничтожении персональных данных.
 
 Старый localStorage можно конвертировать только в dev fixtures или отдельный явно разрешённый разовый импорт. Клиентскому `done`, `best`, роли staff и начисленным часам не доверять как production-факту.
 

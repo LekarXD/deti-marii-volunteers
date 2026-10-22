@@ -1,7 +1,5 @@
-import hashlib
-from urllib.parse import unquote
 from uuid import UUID
-from fastapi import APIRouter,Depends,Header,Query,Request
+from fastapi import APIRouter,Depends,Header,Query
 from sqlalchemy import select,func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import Principal,get_principal,require_permission,authz_guard
@@ -10,11 +8,11 @@ from app.core.errors import ApiError
 from app.core.audit import audit
 from app.core.idempotency import begin_command,finish_command
 from app.core.models import StaffMembership,User
-from . import service,imports
-from .models import CrmVolunteer,FollowUpTask,ImportBatch
-from .schemas import (CreateVolunteerCommand,AgreementCommand,ContactCommand,AvailabilityCommand,VerificationCommand,CrmPreferenceCommand,CrmReviewCommand,
-    TaskCreateCommand,TaskUpdateCommand,MergeCommand,ImportMappingCommand,ImportRowResolutionCommand,CrmVersionCommand,SelfAvailabilityCommand,
-    CrmVolunteerView,CrmVolunteerListView,FollowUpTaskView,ImportBatchView,ImportBatchSummary,OwnAvailabilityView,StaffOptionView,CrmApplicationOptionView)
+from . import service
+from .models import CrmVolunteer,FollowUpTask
+from .schemas import (CreateVolunteerCommand,AgreementCommand,ContactCommand,AvailabilityCommand,VerificationCommand,CrmPreferenceCommand,
+    TaskCreateCommand,TaskUpdateCommand,MergeCommand,SelfAvailabilityCommand,
+    CrmVolunteerView,CrmVolunteerListView,FollowUpTaskView,OwnAvailabilityView,StaffOptionView,CrmApplicationOptionView)
 router=APIRouter(prefix='/api/v1',tags=['crm'])
 
 
@@ -111,16 +109,6 @@ async def merge(volunteer_id:UUID,body:MergeCommand,principal:Principal=Depends(
     return await command(db,principal,f'crm.merge:{volunteer_id}',idempotency_key,body,lambda:service.merge_volunteers(db,principal,volunteer_id,body),'crm.write')
 
 
-@router.get('/coord/contact-reviews',response_model=CrmVolunteerListView)
-async def reviews(state:str|None='unverified',q:str='',offset:int=Query(default=0,ge=0),limit:int=Query(default=30,ge=1,le=100),principal:Principal=Depends(require_permission('contacts.review')),db:AsyncSession=Depends(get_db)):
-    return await volunteers(q,state,None,offset,limit,principal,db)
-
-
-@router.post('/coord/contact-reviews/{volunteer_id}/record',response_model=CrmVolunteerView)
-async def record_review(volunteer_id:UUID,body:CrmReviewCommand,principal:Principal=Depends(require_permission('contacts.review')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
-    return await command(db,principal,f'crm.review:{volunteer_id}',idempotency_key,body,lambda:service.record_review(db,principal,volunteer_id,body),'contacts.review')
-
-
 @router.get('/me/availability',response_model=OwnAvailabilityView)
 async def own_availability(principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     return await service.own_availability(db,principal)
@@ -129,49 +117,6 @@ async def own_availability(principal:Principal=Depends(get_principal),db:AsyncSe
 @router.put('/me/availability',response_model=OwnAvailabilityView)
 async def save_own_availability(body:SelfAvailabilityCommand,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
     return await command(db,principal,'crm.own_availability',idempotency_key,body,lambda:service.save_own_availability(db,principal,body))
-
-
-@router.post('/coord/import-batches/upload',response_model=ImportBatchView)
-async def upload(request:Request,x_filename:str=Header(default='contacts.csv'),principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
-    chunks=[];size=0
-    async for chunk in request.stream():
-        size+=len(chunk)
-        if size>imports.MAX_BYTES:raise ApiError(413,'import_too_large','Файл больше 5 МБ')
-        chunks.append(chunk)
-    blob=b''.join(chunks);filename=unquote(x_filename)
-    payload=dict(checksum=hashlib.sha256(blob).hexdigest(),filename=filename)
-    return await command(db,principal,'crm.import.upload',idempotency_key,payload,lambda:imports.upload(db,principal,blob,filename),'crm.write')
-
-
-@router.get('/coord/import-batches',response_model=list[ImportBatchSummary])
-async def batches(principal:Principal=Depends(require_permission('crm.read')),db:AsyncSession=Depends(get_db)):
-    rows=(await db.scalars(select(ImportBatch).where(ImportBatch.foundation_id==principal.foundation_id).order_by(ImportBatch.created_at.desc()).limit(30))).all()
-    return [await imports.batch_summary(db,batch) for batch in rows]
-
-
-@router.get('/coord/import-batches/{batch_id}',response_model=ImportBatchView)
-async def batch(batch_id:UUID,principal:Principal=Depends(require_permission('crm.read')),db:AsyncSession=Depends(get_db)):
-    return await imports.batch_view(db,await imports.scoped_batch(db,principal,batch_id))
-
-
-@router.post('/coord/import-batches/{batch_id}/map',response_model=ImportBatchView)
-async def map_batch(batch_id:UUID,body:ImportMappingCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
-    return await command(db,principal,f'crm.import.map:{batch_id}',idempotency_key,body,lambda:imports.map_batch(db,principal,batch_id,body),'crm.write')
-
-
-@router.post('/coord/import-batches/{batch_id}/dry-run',response_model=ImportBatchView)
-async def dry_run(batch_id:UUID,body:CrmVersionCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
-    return await command(db,principal,f'crm.import.preview:{batch_id}',idempotency_key,body,lambda:imports.dry_run(db,principal,batch_id,body),'crm.write')
-
-
-@router.post('/coord/import-batches/{batch_id}/rows/{row_id}/resolve',response_model=ImportBatchView)
-async def resolve_row(batch_id:UUID,row_id:UUID,body:ImportRowResolutionCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
-    return await command(db,principal,f'crm.import.resolve:{row_id}',idempotency_key,body,lambda:imports.resolve_row(db,principal,batch_id,row_id,body),'crm.write')
-
-
-@router.post('/coord/import-batches/{batch_id}/apply',response_model=ImportBatchView)
-async def apply_batch(batch_id:UUID,body:CrmVersionCommand,principal:Principal=Depends(require_permission('crm.write')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
-    return await command(db,principal,f'crm.import.apply:{batch_id}',idempotency_key,body,lambda:imports.apply_batch(db,principal,batch_id,body),'crm.write')
 
 
 from .schemas import FirstVisitOutcomeCommand

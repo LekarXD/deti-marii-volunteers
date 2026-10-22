@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, Literal
+from typing import Literal
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -47,14 +47,6 @@ class CrmPreferenceCommand(CrmVersionCommand):
     reason:str=Field(min_length=1,max_length=4000)
     renewed_consent_confirmed:bool=False
 
-class CrmReviewCommand(CrmVersionCommand):
-    outcome:Literal['unverified','contacted','awaiting_reply','ready','paused','unavailable','unreachable']
-    note:str=Field(min_length=1,max_length=8000)
-    no_contact:bool=False
-    availability:AvailabilityInput|None=None
-    valid_until:date|None=None
-    agreement_text:str=Field(default='',max_length=8000)
-
 class TaskCreateCommand(CrmVersionCommand):
     title:str=Field(min_length=1,max_length=400)
     due_on:date
@@ -70,15 +62,6 @@ class TaskUpdateCommand(CrmVersionCommand):
 class MergeCommand(CrmVersionCommand):
     target_id:UUID
     target_expected_version:int=Field(ge=1)
-    reason:str=Field(min_length=1,max_length=4000)
-
-class ImportMappingCommand(CrmVersionCommand):
-    mapping:dict[str,str]
-    source_system:str=Field(min_length=1,max_length=80)
-
-class ImportRowResolutionCommand(CrmVersionCommand):
-    decision:Literal['create','link','skip']
-    volunteer_id:UUID|None=None
     reason:str=Field(min_length=1,max_length=4000)
 
 class AgreementView(BaseModel):
@@ -120,13 +103,6 @@ class FollowUpTaskView(BaseModel):
     source_revision:int
     completed_at:datetime|None
 
-class ReserveReviewView(BaseModel):
-    id:UUID
-    outcome:str
-    note:str
-    no_contact:bool
-    created_at:datetime
-
 class CrmVolunteerSummary(BaseModel):
     id:UUID
     application_id:UUID|None
@@ -167,41 +143,13 @@ class CrmVolunteerView(CrmVolunteerSummary):
     agreements:list[AgreementView]
     contact_events:list[ContactEventView]
     follow_up_tasks:list[FollowUpTaskView]
-    reviews:list[ReserveReviewView]
     merged_record_ids:list[UUID]
-    import_provenance:list[dict[str,Any]]
 
 class CrmVolunteerListView(BaseModel):
     items:list[CrmVolunteerSummary]
     total:int
     offset:int
     limit:int
-
-class ImportRowView(BaseModel):
-    id:UUID
-    line_number:int
-    raw:dict[str,Any]
-    normalized:dict[str,Any]
-    decision:str
-    volunteer_id:UUID|None
-    errors:list[str]
-    resolution_reason:str
-
-class ImportBatchSummary(BaseModel):
-    id:UUID
-    checksum:str
-    filename:str
-    columns:list[str]
-    mapping:dict[str,str]
-    source_system:str
-    state:str
-    version:int
-    created_at:datetime
-    applied_at:datetime|None
-    counts:dict[str,int]
-
-class ImportBatchView(ImportBatchSummary):
-    rows:list[ImportRowView]
 
 class OwnAvailabilityView(BaseModel):
     volunteer_id:UUID|None

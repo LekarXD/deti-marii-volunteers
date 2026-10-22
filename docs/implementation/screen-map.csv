@@ -24,7 +24,7 @@ Builder.dc.html,surface,/fund/learning,learning,P14 P15 P18D P18E,Draft/edit/pre
 Knowledge.dc.html,surface,/fund/knowledge,knowledge,P15,Источники/Q&A/пробелы/index jobs/ошибки и версии
 Scenarios.dc.html,surface,/fund/scenarios,simulation,P16,Сценарии/критерии/test-run/review/publish и история версий
 Reports.dc.html,surface,/fund/reports,reporting,P19,"Сверенные метрики, narrative review и реальные exports/благодарности"
-Admin.dc.html,surface,/fund/settings,administration,P01 P11 P17A P17B P19,"Staff permissions, import preview, integrations/templates/budgets/audit"
+Admin.dc.html,surface,/fund/settings,administration,P01 P11 P17A P17B P19,"Staff permissions, integrations/templates/budgets/audit; импорт контактов удалён 2026-10-22"
 Phone.dc.html,service,storybook/mobile,ui,P02 P20,"Мобильные состояния входят в visual regression, отдельного приложения нет"
 FundCatalog.dc.html,surface,/opportunities,opportunities,P07,"Канонический каталог: поиск, фильтры, реальные условия, detail и отклик"
 Needs.dc.html,surface,/fund/opportunities,opportunities,P07,Редактируемые задачи/аудитория/условия/подготовка/согласование и публикация
@@ -33,7 +33,7 @@ Candidates.dc.html,surface,/fund/candidates,applications,P05,"Очередь, п
 Interviews.dc.html,surface,/fund/interviews; /fund/interviews/availability,interviews,P06,"Once/weekly/exceptions/buffer, конкурентная запись, перенос и итог"
 Planning.dc.html,surface,/fund/schedule; /fund/events/:id,planning,P08,"Любые периоды, месяц/неделя/список, series/occurrence и потребности по ролям; связанная карточка Event.html, возврат к дате и синхронный состав команды"
 VolunteerRecord.dc.html,surface,/fund/volunteers/:id,volunteer-crm,P11,"Договорённости, verified availability, contacts, следующий шаг и first-visit outcome"
-Reserve.dc.html,surface,/fund/contacts/review,contact-verification,P11,"Проверка старой базы, ready только с доступностью, no-contact и история"
+Reserve.dc.html,surface,/fund/volunteers?state=unverified,volunteer-crm,P11,"Удалён 2026-10-22: /fund/contacts/review и /fund/contacts/import ведут на фильтр «Проверить»; ready только с доступностью, no-contact в карточке"
 Participants.dc.html,surface,/fund/participants; /fund/participants/:id,participants,P10A P10B,"Фото CRUD, практическая памятка/private notes и safe preview"
 Groups.dc.html,surface,/fund/groups; /fund/groups/:id,groups,P10A P10B,"Условия, ведущий/волонтёры, состав с периодами и версия конкретного занятия"
 Group.dc.html,surface,/my/groups/:id,groups,P10B,"Только назначенная группа и разрешённые поля/фото, нет hardcoded art"

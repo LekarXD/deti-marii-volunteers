@@ -91,6 +91,7 @@ class AvailabilityVerification(Base):
     verified_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
+# Unused since contact review and import were removed (2026-10-22). The tables stay until the fund decides about the personal data in them.
 class ReserveReview(Base):
     __tablename__ = "reserve_reviews"
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -137,6 +138,7 @@ class FollowUpTaskEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
+# Import tables below: unused since 2026-10-22, kept for the same personal-data decision. MergeReview is still written by merges.
 class ImportBatch(Base):
     __tablename__ = "import_batches"
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)

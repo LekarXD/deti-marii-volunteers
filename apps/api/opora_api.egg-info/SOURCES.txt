@@ -95,7 +95,6 @@ app/modules/auth/password_models.py
 app/modules/auth/router.py
 app/modules/auth/schemas.py
 app/modules/crm/__init__.py
-app/modules/crm/imports.py
 app/modules/crm/models.py
 app/modules/crm/router.py
 app/modules/crm/schemas.py

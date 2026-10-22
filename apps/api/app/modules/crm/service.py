@@ -8,9 +8,9 @@ from app.core.contact_policy import contact_guard
 from app.core.models import StaffMembership, User
 from app.modules.applications.models import Application, ApplicationRevision
 from .models import (CrmVolunteer,Agreement,ContactEvent,AvailabilityRule,AvailabilityWindow,AvailabilityVerification,
-    ReserveReview,FollowUpTask,FollowUpTaskEvent,FollowUpSource,ImportBatch,ImportRow,ImportEffect,ImportExternalReference,MergeReview,utcnow)
+    FollowUpTask,FollowUpTaskEvent,FollowUpSource,MergeReview,utcnow)
 from .schemas import (CrmVolunteerSummary,CrmVolunteerView,AgreementView,ContactEventView,AvailabilityView,
-    AvailabilityWindowInput,FollowUpTaskView,ReserveReviewView,OwnAvailabilityView)
+    AvailabilityWindowInput,FollowUpTaskView,OwnAvailabilityView)
 
 
 def today():
@@ -106,17 +106,13 @@ async def volunteer_view(db,volunteer,detail=False,*,principal=None):
     if not detail:return CrmVolunteerSummary(**values)
     agreements=(await db.scalars(select(Agreement).where(Agreement.volunteer_id.in_(ids)).order_by(Agreement.created_at.desc(),Agreement.id))).all()
     events=(await db.scalars(select(ContactEvent).where(ContactEvent.volunteer_id.in_(ids)).order_by(ContactEvent.occurred_at.desc(),ContactEvent.id))).all()
-    reviews=(await db.scalars(select(ReserveReview).where(ReserveReview.volunteer_id.in_(ids)).order_by(ReserveReview.created_at.desc(),ReserveReview.id))).all()
-    provenance=(await db.execute(select(ImportEffect,ImportRow,ImportBatch).join(ImportRow,ImportEffect.row_id==ImportRow.id).join(ImportBatch,ImportRow.batch_id==ImportBatch.id)
-        .where(ImportEffect.volunteer_id.in_(ids),ImportBatch.foundation_id==volunteer.foundation_id).order_by(ImportEffect.created_at))).all()
     latest_reflection=None
     if volunteer.user_id is not None and principal is not None:
         from app.modules.followups.service import latest_reflection_for_user
         latest_reflection=await latest_reflection_for_user(db,volunteer.foundation_id,volunteer.user_id,principal=principal)
     return CrmVolunteerView(**values,latest_reflection=latest_reflection,agreements=[AgreementView(id=a.id,text=a.text,role_context=a.role_context,valid_until=a.valid_until,created_at=a.created_at) for a in agreements],
         contact_events=[ContactEventView(id=e.id,kind=e.kind,direction=e.direction,text=e.text,occurred_at=e.occurred_at) for e in events],
-        follow_up_tasks=[task_view(task) for task in tasks],reviews=[ReserveReviewView(id=r.id,outcome=r.outcome,note=r.note,no_contact=r.no_contact,created_at=r.created_at) for r in reviews],
-        merged_record_ids=ids[1:],import_provenance=[dict(batch_id=str(batch.id),filename=batch.filename,checksum=batch.checksum,source_system=batch.source_system,line_number=row.line_number,snapshot=effect.snapshot,created_at=effect.created_at.isoformat()) for effect,row,batch in provenance])
+        follow_up_tasks=[task_view(task) for task in tasks],merged_record_ids=ids[1:])
 
 
 async def valid_owner(db,foundation_id,user_id):
@@ -199,30 +195,6 @@ async def set_preference(db,principal,volunteer_id,command):
         raise ApiError(422,'renewed_consent_required','Подтвердите, что человек снова разрешил связываться')
     volunteer.no_contact=command.no_contact
     db.add(ContactEvent(volunteer_id=volunteer.id,kind='preference',direction='recorded',text=nonempty(command.reason),author_id=principal.actor_id))
-    if volunteer.no_contact:await cancel_open_tasks(db,volunteer,principal,'Просьба не связываться')
-    touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True,principal=principal)
-
-
-async def record_review(db,principal,volunteer_id,command):
-    await contact_guard(db,principal.foundation_id)
-    volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer_id,lock=True);check_version(volunteer.version,command.expected_version)
-    if volunteer.no_contact and not command.no_contact:raise ApiError(409,'renewed_consent_required','Просьба не связываться действует. Измените её отдельно после согласия человека')
-    if command.availability:
-        rule=await write_availability(db,volunteer,principal,command.availability)
-        if command.valid_until:
-            if command.valid_until<today():raise ApiError(422,'verification_expired','Укажите актуальный срок подтверждения')
-            db.add(AvailabilityVerification(rule_id=rule.id,valid_until=command.valid_until,source='contact_review',author_id=principal.actor_id))
-    if command.agreement_text.strip():db.add(Agreement(volunteer_id=volunteer.id,text=command.agreement_text.strip(),role_context='',author_id=principal.actor_id))
-    volunteer.no_contact=command.no_contact
-    await db.flush()
-    if command.outcome=='ready':
-        availability,reasons=await readiness(db,volunteer)
-        if volunteer.no_contact or not availability or not availability.verified or 'Нужна актуальная договорённость' in reasons:
-            raise ApiError(422,'readiness_requirements','Готовность требует актуальной доступности, договорённости и разрешения на связь')
-    volunteer.relationship_state=command.outcome
-    note=nonempty(command.note)
-    db.add(ReserveReview(volunteer_id=volunteer.id,outcome=command.outcome,note=note,no_contact=volunteer.no_contact,author_id=principal.actor_id))
-    db.add(ContactEvent(volunteer_id=volunteer.id,kind='contact_review',direction='recorded',text=note,author_id=principal.actor_id))
     if volunteer.no_contact:await cancel_open_tasks(db,volunteer,principal,'Просьба не связываться')
     touch(volunteer);await db.flush();return await volunteer_view(db,volunteer,True,principal=principal)
 
