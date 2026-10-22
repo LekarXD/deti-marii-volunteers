@@ -63,6 +63,10 @@ CREATE TABLE IF NOT EXISTS broadcasts (
     at TEXT, audience TEXT, kind TEXT, text TEXT, recipients INTEGER
 );
 CREATE TABLE IF NOT EXISTS sent (key TEXT PRIMARY KEY, at TEXT);
+CREATE TABLE IF NOT EXISTS conv_seen (            -- до какого сообщения разговора на сайте человек уже получил пересылку
+    user_id INTEGER, conversation_id TEXT, seq INTEGER NOT NULL,
+    PRIMARY KEY (user_id, conversation_id)
+);
 CREATE TABLE IF NOT EXISTS outbox (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     chat_id INTEGER, text TEXT, markup TEXT, send_after TEXT

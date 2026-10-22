@@ -10,8 +10,8 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from . import db
-from .config import ANKETA_URL, TEST_MODE
+from . import db, platform
+from .config import TEST_MODE
 from .schedule import WEEKDAYS, human, time_range
 from .seed import GROUPS, ROLES
 
@@ -122,6 +122,7 @@ BTN_NEW_EVENT = "✨ Новое событие"
 BTN_EXPORTS = "📊 Выгрузки"
 BTN_LOGIN = "✉️ Войти по почте"
 BTN_ANKETA = "📝 Заполнить анкету"
+BTN_CONNECT = "🔗 Подключить из профиля на сайте"
 BTN_RESET = "🧪 Сбросить диалог (тест)"
 
 
@@ -147,8 +148,12 @@ def menu(u) -> InlineKeyboardMarkup:
             item(key)
         sizes = [2, 2, 2]
     elif u["status"] == "new":
-        b.button(text=BTN_ANKETA, url=ANKETA_URL)
-        item("login")
+        b.button(text=BTN_ANKETA, url=platform.anketa_url())
+        if platform.enabled():
+            # Вход — только ссылкой из профиля на сайте: так платформа знает, чей это Telegram.
+            b.button(text=BTN_CONNECT, url=platform.profile_url())
+        else:
+            item("login")
         sizes = [1, 1]
     else:
         for key in ("my", "materials", "meeting", "ask", "settings"):
@@ -165,6 +170,9 @@ def menu(u) -> InlineKeyboardMarkup:
 
 
 def menu_text(u) -> str:
+    if coord_mode(u) and platform.enabled():
+        n = db.prefs(u).get("todo")  # обновляется лентой и утренней сводкой (pcoordinator, pjobs)
+        return "🧭 <b>Меню координатора</b>" + (f"\nНужно решить: {n or 'ничего'}" if n is not None else "")
     if coord_mode(u):
         n = len(db.open_actions())
         return f"🧭 <b>Меню координатора</b>\nНужно решить: {n or 'ничего'}"

@@ -11,7 +11,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand, MenuButtonCommands, Message
 
-from . import broadcasts, common, coordinator, db, menu, jobs, screen, seed, testmode, ui, volunteer
+from . import broadcasts, common, coordinator, db, menu, jobs, pcoordinator, pjobs, platform, pvolunteer, screen, seed, testmode, ui, volunteer
 from .config import TEST_MODE, TOKEN
 
 fallback = Router(name="fallback")
@@ -47,14 +47,22 @@ def make_session() -> AiohttpSession | None:
 async def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     if not TOKEN:
+        if os.environ.get("BOT_WAIT_FOR_TOKEN"):
+            # На сервере сервис бота есть всегда; пока токен не вписан, он ждёт, а не перезапускается по кругу.
+            logging.warning("BOT_TOKEN не задан — бот не запущен, ждём настройки")
+            while True:
+                await asyncio.sleep(3600)
         raise SystemExit("Нет BOT_TOKEN. Скопируйте .env.example в .env и вставьте токен от @BotFather.")
     db.init()
-    seed.seed()
+    if not platform.enabled():  # с платформой события и люди — на сайте, демо-данные бота не нужны
+        seed.seed()
     bot = Bot(TOKEN, session=make_session(), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher(storage=MemoryStorage())
     dp.callback_query.outer_middleware(screen.ScreenCallbacks())
     bot.session.middleware(screen.ScreenRequests())
-    dp.include_routers(common.router, menu.router, testmode.router, coordinator.login_router, coordinator.router, broadcasts.router, volunteer.router, fallback)
+    # Разделы на данных сайта стоят раньше прежних: без платформы они выключены своим фильтром.
+    dp.include_routers(common.router, menu.router, testmode.router, pcoordinator.router, pvolunteer.router,
+                       coordinator.login_router, coordinator.router, broadcasts.router, volunteer.router, fallback)
     commands = [BotCommand(command="menu", description="Меню"), BotCommand(command="start", description="Начать сначала")]
     if TEST_MODE:
         commands.append(BotCommand(command="reset", description="Сбросить диалог (тест)"))
@@ -62,7 +70,9 @@ async def main() -> None:
     await bot.set_chat_menu_button(menu_button=MenuButtonCommands())  # кнопка «Меню» у поля ввода
     await bot.set_my_description(description=DESCRIPTION)
     await bot.set_my_short_description(short_description=SHORT_DESCRIPTION)
-    asyncio.create_task(jobs.loop(bot))
+    # Бот получает сообщения опросом; если у токена остался webhook (старый запуск), Telegram опрос не отдаст.
+    await bot.delete_webhook(drop_pending_updates=False)
+    asyncio.create_task(pjobs.loop(bot) if platform.enabled() else jobs.loop(bot))
     await dp.start_polling(bot)
 
 
