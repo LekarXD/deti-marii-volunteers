@@ -6,3 +6,11 @@ export const timeLabel=(date:string,zone='Europe/Moscow')=>new Intl.DateTimeForm
 export const minutes=(s:string)=>Number(s.slice(0,2))*60+Number(s.slice(3));
 export const hhmm=(n:number)=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`;
 export const localDay=(instant:string,zone:string)=>new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:zone}).format(new Date(instant));
+const calendarDay=(date:string,options:Intl.DateTimeFormatOptions)=>new Intl.DateTimeFormat('ru-RU',{...options,timeZone:'UTC'}).format(new Date(`${date}T12:00:00Z`));
+const capitalize=(text:string)=>text.charAt(0).toUpperCase()+text.slice(1);
+export const dayNumber=(date:string)=>calendarDay(date,{day:'numeric'});
+export const dayTitle=(date:string)=>capitalize(calendarDay(date,{weekday:'long',day:'numeric',month:'long'}));
+export const monthStart=(date:string)=>`${date.slice(0,7)}-01`;
+export const addMonths=(month:string,n:number)=>{const d=new Date(`${month}T12:00:00Z`);d.setUTCMonth(d.getUTCMonth()+n,1);return d.toISOString().slice(0,10);};
+export const monthEnd=(month:string)=>addDays(addMonths(month,1),-1);
+export const monthLabel=(month:string)=>`${capitalize(calendarDay(month,{month:'long'}))} ${month.slice(0,4)}`;

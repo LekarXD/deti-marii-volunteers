@@ -7,6 +7,8 @@ export type StaffBooking = components['schemas']['StaffBookingView'];
 export type Slot = components['schemas']['SlotView'];
 export type Availability = components['schemas']['WindowView'];
 export type WindowInput = components['schemas']['WindowInput'];
+/** Interviews are a fixed online step of the candidate journey; slot venues are not shown. */
+export const meetingFormat = 'Онлайн-собеседование';
 export const useInterviews = (staff=false) => useQuery({queryKey:keys.list('interviews',{staff}),queryFn:({signal})=>api<StaffBooking[] | Booking[]>(staff?'/api/v1/coord/interviews':'/api/v1/me/interviews',{signal}),refetchInterval:15000});
 export const useAvailability = () => useQuery({queryKey:keys.all('interview-availability'),queryFn:({signal})=>api<Availability[]>('/api/v1/coord/interview-availability',{signal}),refetchInterval:15000});
 export const useSlots = (from:string,to:string,timezone:string) => useQuery({queryKey:keys.list('interview-slots',{from,to,timezone}),queryFn:({signal})=>api<Slot[]>(`/api/v1/interview-slots?from=${from}&to=${to}&timezone=${encodeURIComponent(timezone)}`,{signal}),refetchInterval:10000});
