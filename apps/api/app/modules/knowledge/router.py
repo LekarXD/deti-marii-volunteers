@@ -13,7 +13,7 @@ from app.integrations.ai.models import AIDailyUsage,AISettings
 from app.integrations.ai.provider import ProviderConfig
 from app.integrations.ai.service import run_view,settings
 from . import service
-from .schemas import AISettingsInput,AISettingsView,AIRunView,AnswerInput,ApplyBuilderAI,BuilderAIInput,EmptyInput,FragmentView,MentorInput,MentorView,QuestionView,SourceCreate,SourceSave,SourceView,VersionInput
+from .schemas import AISettingsInput,AISettingsView,AIRunView,AnswerInput,ApplyBuilderAI,BuilderAIInput,EmptyInput,FragmentView,LibraryItemView,LibraryTextView,MentorInput,MentorView,QuestionView,SourceCreate,SourceSave,SourceView,VersionInput
 router=APIRouter(prefix='/api/v1',tags=['knowledge'])
 
 async def command(db,principal,request,key,operation,payload,action,permissions=()):
@@ -69,6 +69,12 @@ async def fragment(chunk_id:UUID,principal:Principal=Depends(get_principal),db:A
     items=await service.fragments_by_id(db,principal,[chunk_id])
     if not items:raise ApiError(404,'fragment_unavailable','Источник недоступен')
     return items[0]
+@router.get('/knowledge/library',response_model=list[LibraryItemView],operation_id='knowledge_library')
+async def library(principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    return await service.library(db,principal)
+@router.get('/knowledge/library/{source_id}',response_model=LibraryTextView,operation_id='knowledge_library_item')
+async def library_item(source_id:UUID,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    return await service.library_item(db,principal,source_id)
 @router.get('/mentor/runs',response_model=list[MentorView])
 async def mentor_history(principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
     return await service.mentor_history(db,principal)

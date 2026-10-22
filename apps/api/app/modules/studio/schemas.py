@@ -30,6 +30,8 @@ class WebinarView(WebinarInput):
     can_manage_summary:bool=False
     summary_available:bool=False
     session_id:UUID|None=None
+    # Display name of a current staff host for «ведёт …»; nothing else about the host is exposed.
+    host_name:str|None=None
 class StudioSessionCreate(BaseModel):
     resource_kind:Literal['live_event','lesson_recording_project']
     resource_id:UUID

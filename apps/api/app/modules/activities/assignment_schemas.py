@@ -16,6 +16,14 @@ class ParticipationDecision(VersionCommand):
         if not value.strip():raise ValueError('Укажите причину.')
         return value.strip()
 
+class OwnAssignmentDecision(VersionCommand):
+    """The volunteer's own decline or cancel; the reason is optional and goes to the coordinator's history."""
+    reason:str=Field(default='',max_length=500)
+    @field_validator('reason')
+    @classmethod
+    def reason_trimmed(cls,value):
+        return value.strip()
+
 class ParticipationResponseView(BaseModel):
     id:UUID
     opportunity_id:UUID

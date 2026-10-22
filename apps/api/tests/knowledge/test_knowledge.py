@@ -67,9 +67,9 @@ async def setup(monkeypatch):
 async def post(client,path,body=None,key=None):
     return await client.post('/api/v1'+path,json=body or {},headers={'Idempotency-Key':key or str(uuid4())})
 
-async def publish(client,factory,foundation,text='Личные контакты не даём и не берём — только через фонд.',visibility='all'):
+async def publish(client,factory,foundation,text='Личные контакты не даём и не берём — только через фонд.',visibility='all',title='Кодекс общения'):
     client.cookies.set('opora_session','staff'+str(foundation))
-    created=await post(client,'/coord/knowledge/sources',{'title':'Кодекс общения','body':text,'visibility':visibility})
+    created=await post(client,'/coord/knowledge/sources',{'title':title,'body':text,'visibility':visibility})
     assert created.status_code==200,created.text
     source=created.json()
     assert (await post(client,f"/coord/knowledge/sources/{source['id']}/publish",{'expected_version':source['version']})).status_code==409
@@ -365,3 +365,50 @@ async def test_lock_reload_does_not_use_cached_source_revision(setup):
             newer.draft_version+=1;await second.commit()
         locked=await source(first,principal,before.id,True)
         assert locked.draft_version==previous+1
+
+
+@pytest.mark.asyncio
+async def test_volunteer_library_shows_only_current_publications_for_everyone(setup):
+    client,factory,foundation=setup
+    article=await publish(client,factory,foundation)
+    memo=await publish(client,factory,foundation,'Не обещай хранить секреты и сразу зови ведущую.',title='Памятка: личные границы')
+    private=await publish(client,factory,foundation,'Секретный регламент сотрудников содержит закрытые контакты.',visibility='staff',title='Регламент сотрудников')
+    client.cookies.set('opora_session','staff'+str(foundation))
+    draft=(await post(client,'/coord/knowledge/sources',{'title':'Черновик памятки','body':'Черновик не виден волонтёрам никогда.'})).json()
+    edited=await client.put(f"/api/v1/coord/knowledge/sources/{article['id']}",json={'title':'Кодекс общения','body':'Новая редакция ещё не согласована.','visibility':'all','expected_version':article['version']},headers={'Idempotency-Key':str(uuid4())})
+    assert edited.status_code==200,edited.text
+    # A published coordinator answer is titled with a volunteer's own question: never listed.
+    client.cookies.set('opora_session','one'+str(foundation))
+    asked=(await post(client,'/mentor/runs',{'question':'Несуществующий вопрос волонтёра zzzzz?'})).json()
+    assert asked['question_id'],asked
+    client.cookies.set('opora_session','staff'+str(foundation))
+    await client.put(f"/api/v1/coord/knowledge/questions/{asked['question_id']}/answer",json={'body':'Ответ координатора для одного волонтёра.','expected_version':0},headers={'Idempotency-Key':str(uuid4())})
+    await post(client,f"/coord/knowledge/questions/{asked['question_id']}/answer/review",{'expected_version':1})
+    assert (await post(client,f"/coord/knowledge/questions/{asked['question_id']}/answer/publish",{'expected_version':1})).status_code==200
+    await process_index(factory,foundation)
+
+    client.cookies.set('opora_session','one'+str(foundation))
+    listed=(await client.get('/api/v1/knowledge/library')).json()
+    assert sorted((item['title'],item['kind']) for item in listed)==[('Кодекс общения','article'),('Памятка: личные границы','memo')]
+    assert set(listed[0])=={'id','title','kind'}
+    opened=(await client.get(f"/api/v1/knowledge/library/{article['id']}")).json()
+    assert opened['text']=='Личные контакты не даём и не берём — только через фонд.' and opened['kind']=='article'
+    for hidden in (private['id'],draft['id'],str(uuid4())):
+        assert (await client.get(f'/api/v1/knowledge/library/{hidden}')).status_code==404
+
+    client.cookies.set('opora_session','staff'+str(foundation))
+    current=(await client.get(f"/api/v1/coord/knowledge/sources/{memo['id']}")).json()
+    assert (await post(client,f"/coord/knowledge/sources/{memo['id']}/archive",{'expected_version':current['version']})).status_code==200
+    client.cookies.set('opora_session','two'+str(foundation))
+    assert [item['title'] for item in (await client.get('/api/v1/knowledge/library')).json()]==['Кодекс общения']
+    assert (await client.get(f"/api/v1/knowledge/library/{memo['id']}")).status_code==404
+
+@pytest.mark.asyncio
+async def test_mentor_run_flags_a_child_safety_disclosure(setup):
+    client,factory,foundation=setup
+    client.cookies.set('opora_session','one'+str(foundation))
+    urgent=(await post(client,'/mentor/runs',{'question':'Мальчик рассказал, что его обижают дома'})).json()
+    ordinary=(await post(client,'/mentor/runs',{'question':'Ребёнок попросил мой номер телефона'})).json()
+    assert urgent['urgent'] is True and ordinary['urgent'] is False
+    history={item['id']:item['urgent'] for item in (await client.get('/api/v1/mentor/runs')).json()}
+    assert history=={urgent['id']:True,ordinary['id']:False}

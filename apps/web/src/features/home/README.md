@@ -1,40 +1,59 @@
 # Volunteer home
 
-Export `HomePage` from `features/home`. The router supplies `CandidateLayout` and the
+Export `HomePage` from `features/home`. The router supplies the volunteer layout and the
 verified-user route/landing decision; this feature does not bootstrap a session.
 
-Composition follows `prototype/Home.dc.html`: the greeting and yellow upcoming
-class hero, invitation cards in the source `match` grid, learning/preparation cards,
-and a coordinator question panel. Colours, fonts, radii, spacing and SVGs reuse the
-shared original Opora kit. There is no sidebar or demonstration mode selector.
+Composition follows the canvas board `Home.dc.html` on desktop and `Phone.dc.html`
+(phone 1) at ≤720px: greeting, one hero, the state section, «Тебя приглашают»,
+«Подобрано для тебя», the «Обучение» and «Мой путь» cards and the link to
+«Что делать, если…». Shared blocks come from `ui/volunteer.css`; `home.css` holds
+only the board's own rules, scoped by `.volunteer-home`.
+
+Hero states (`model.ts`, all from real data):
+
+- **Сегодня**: the nearest confirmed занятие starts today in the event timezone or is
+  in progress. Time range, place and «{имя} встретит у входа» when the memo has a
+  contact. «Открыть памятку» and «Опаздываю»; the latter posts an ordinary question
+  (`POST /me/assignments/:id/questions`, text «Опаздываю на занятие») and the note
+  «Координатор знает, что ты задержишься» stays while that question exists. Below it,
+  «Сегодня в группе» shows the confirmed group briefing and the meeting contact.
+- **Ближайшее занятие**: the nearest confirmed занятие. «Подготовиться» and «Не смогу».
+- **Тебя приглашают**: the nearest item is a coordinator's invitation (always answered
+  by the volunteer, even when the role needs approval). «Я приду» confirms
+  (`POST /assignments/:id/confirm`), «Не смогу» declines.
+- **Твой первый выход**: there is no confirmed занятие that already ended in the past
+  year of `/me/schedule` (read page by page until one is found; `/me/hours` is not
+  used for this). An invitation offers «Я приду» and «Подробнее»; the page adds
+  «Как проходит начало», whose current step follows the status (invited → step 2,
+  confirmed → step 3).
+- **Ждёт ответа координатора** / **Освободилось место из резерва**: a self sign-up or a
+  freed reserve place (`participationApi.awaitingCoordinator`) has nothing to answer;
+  a calm hero with «Подробнее» and «Отменить заявку» / «Не смогу» (decline).
+- Nothing ahead, an incomplete schedule or a just declined занятие get a calm (paper)
+  hero; the yellow one is for a real занятие.
+
+«Не смогу» always asks inline first (FirstExit.dc.html) and then calls
+`/assignments/:id/decline` for an invitation or `/cancel` for a confirmed занятие with
+`expected_version`. Rows in «Тебя приглашают» answer inline and keep the answer
+(«Ты придёшь» / «Ты не придёшь»).
 
 Data reuse:
 
-- `activities/participationApi.usePersonalSchedule`: a bounded window of 90 inclusive
-  Moscow calendar days, with server `state=active`. No historical assignment scan.
-  Pagination remains explicit: a partial window asks the user to load another page
-  before claiming which event is nearest. An in-progress class remains relevant
-  until it ends. Cancelled/postponed occurrences and closed/attended assignments
-  never appear as upcoming. Failed pagination is never presented as an empty list.
-- `learning/api.usePreparation`: assigned learning tracks and the actual completed
-  lesson count. Links use the existing Academy routes; absent lessons never become
-  an `undefined` lesson route.
-- `followups/api.readPreparation`: the nearest confirmed assignment's contacts,
-  location and checklist, on the same `assignment-preparation` key as FirstShiftPage.
-  Checklist changes and questions stay on that existing page.
-- `profile/api.useHours`: the «Мой путь» card shows the level, confirmed hours,
-  points balance and hours left to the next level exactly as the server returns
-  them in `HoursView.level` and `HoursView.points`. The client does not compute
-  levels or points. The card links to `/hours`.
+- `activities/participationApi.usePersonalSchedule`: 90 inclusive Moscow calendar
+  days, server `state=active`. Pagination stays explicit: a partial window asks to
+  load the next page before claiming which занятие is nearest. Failed pagination is
+  never shown as an empty list.
+- `followups/api.readPreparation`: contacts and questions of the confirmed hero item,
+  on the same `assignment-preparation` key as the preparation page.
+- `participants/api.readAssignmentBriefing`: the group on the day of the занятие, only
+  when the memo says the briefing is available.
+- `activities/eventsApi.useEventFeed`: the first three open events in server order,
+  without ones that are full, conflicting or already the volunteer's, drawn with the
+  feed's own `EventTile` (places and «Баллы ×1,5» exactly as in «Все мероприятия»).
+- `learning/api.usePreparation`: the current track and completed lessons.
+- `profile/api.useHours`: level, hours and points exactly as `HoursView` returns them.
+- `profile/api.useProfile`: the first name for the greeting; without one it is «Привет!».
 
-Assignments refresh every 30 seconds, preparation and hours every 15 seconds. All reads
-use domain APIs, principal-scoped cache keys and the sole ordinary API transport.
-Home never confirms an invitation, modifies a checklist, or invents attendance,
-hours, points, levels, matching scores, personal names or milestones.
-An empty date window does not prove that someone is a newcomer. Its copy names the
-90-day window and offers the application/interview path conditionally, alongside
-opportunities and the full personal schedule.
-
-`HomePage.test.tsx` exercises these actual hooks with typed DTO fixtures and mocked
-sole transport reads, including pagination and recovery. Browser screenshot proof
-belongs to the integrated `/home` route; a component test is not a visual gate.
+Home never invents names, dates, hours, points, levels or matching scores.
+`HomePage.test.tsx` exercises the real hooks with typed DTO fixtures and a mocked
+transport, including pagination, recovery and every command the page sends.

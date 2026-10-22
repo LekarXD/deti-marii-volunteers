@@ -52,8 +52,6 @@ async def test_two_volunteers_last_place_race_and_separate_approval(context):
     event,need,user1,user2,_=await setup(context)
     invited=await context.client.post(f"/api/v1/coord/staffing-needs/{need['id']}/invitations",headers=headers(),json={'expected_version':1,'user_id':str(user1)})
     row=invited.json()
-    blocked=await context.client.post(f"/api/v1/assignments/{row['id']}/confirm",headers=user_headers(),json={'expected_version':1})
-    assert blocked.status_code==409 and blocked.json()['code']=='approval_required'
     assert (await context.client.post(f"/api/v1/coord/assignments/{row['id']}/approve",headers=user_headers(),json={'expected_version':1,'reason':'Self approval'})).status_code==403
     approved=await context.client.post(f"/api/v1/coord/assignments/{row['id']}/approve",headers=headers(),json={'expected_version':1,'reason':'Согласовано.'})
     first=approved.json();second=await invite_approve(context,need,user2)

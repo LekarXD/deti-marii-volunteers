@@ -151,9 +151,10 @@ async def approve(db,principal,id,body):
     if item.conditions_version!=need.version:raise ApiError(409,'conditions_changed','Условия изменились. Пригласите волонтёра с обновлёнными условиями.')
     item.approved_at=utcnow();item.version+=1;item.updated_at=utcnow()
     await assignment_event(db,principal,item,'approve',body.reason)
-    if item.origin=='self' and event.starts_at>utcnow():
-        # The volunteer already said «записаться»; approval completes it unless a check fails.
-        try:await confirm_locked(db,principal,item,event,need,'Волонтёр записался сам, координатор согласовал участие.')
+    if item.origin in ('self','reserve') and event.starts_at>utcnow():
+        # The volunteer already asked for the place; approval completes it unless a check fails.
+        reason='Волонтёр записался сам, координатор согласовал участие.' if item.origin=='self' else 'Место из резерва, координатор согласовал участие.'
+        try:await confirm_locked(db,principal,item,event,need,reason)
         except ApiError:pass
     return await assignment_view(db,item,principal)
 
@@ -168,7 +169,8 @@ async def confirm_locked(db,principal,item,event,need,reason=''):
     """Every check runs before the first write, so a caller may keep the transaction after an ApiError."""
     if not await active_for_invitations(db,item.foundation_id,item.user_id):raise ApiError(409,'volunteer_paused','Участие сейчас на паузе. Сначала возобновите его в профиле.')
     if item.conditions_version!=need.version:raise ApiError(409,'conditions_changed','Условия изменились. Координатор должен обновить приглашение.')
-    if item.conditions_snapshot['approval_policy']=='coordinator' and item.approved_at is None:raise ApiError(409,'approval_required','Сначала участие должен согласовать координатор.')
+    # A volunteer's own sign-up and a reserve place wait for the coordinator; an invitation is the coordinator's offer already.
+    if item.origin in ('self','reserve') and item.approved_at is None:raise ApiError(409,'approval_required','Сначала участие должен согласовать координатор.')
     pending=[r for r in await readiness(db,item) if r.level=='mandatory' and r.state=='pending']
     if pending:raise ApiError(409,'preparation_pending','Сначала выполните обязательную подготовку.',field_errors={r.key:r.title for r in pending})
     if await confirmed_count(db,need.id)>=need.capacity_required:raise ApiError(409,'capacity_full','Все места уже подтверждены.')
@@ -207,7 +209,7 @@ async def open_need(db,principal,need_id,expected_version):
 
 
 async def sign_up(db,principal,need_id,body):
-    """Volunteer's own sign-up: confirmed at once for self_confirmation, a request to the coordinator otherwise."""
+    """Volunteer's own sign-up is a request: the coordinator's approval confirms it (approve)."""
     await require_sign_up(db,principal)
     event,need=await open_need(db,principal,need_id,body.expected_version)
     item=await db.scalar(select(Assignment).where(Assignment.occurrence_id==event.id,Assignment.user_id==principal.user_id).with_for_update())
@@ -219,8 +221,7 @@ async def sign_up(db,principal,need_id,body):
     item.status='invited';item.origin='self';item.staffing_need_id=need.id;item.conditions_version=need.version;item.updated_at=utcnow()
     item.conditions_snapshot=conditions_snapshot(need)
     await assignment_event(db,principal,item,'sign_up',body.message)
-    if need.approval_policy=='self_confirmation':await confirm_locked(db,principal,item,event,need)
-    else:await close_reserve(db,need.id,item.user_id)
+    await close_reserve(db,need.id,item.user_id)
     return await assignment_view(db,item,principal)
 
 
@@ -284,7 +285,7 @@ async def offer_reserved_places(db,principal,event,need):
         else:item.version+=1;item.approved_at=None;item.confirmed_at=None
         item.status='invited';item.origin='reserve';item.staffing_need_id=need.id;item.conditions_version=need.version;item.updated_at=utcnow()
         item.conditions_snapshot=conditions_snapshot(need)
-        await assignment_event(db,principal,item,'reserve_offer','Освободилось место. Подтвердите участие, если сможете прийти.')
+        await assignment_event(db,principal,item,'reserve_offer','Освободилось место из резерва. Участие подтвердит координатор.')
         row.state='offered';row.offered_assignment_id=item.id;row.version+=1;row.updated_at=utcnow()
         free-=1
 

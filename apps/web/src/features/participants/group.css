@@ -1,0 +1,58 @@
+/* Volunteer group briefing (canvas Group.dc.html): big photo cards and a profile overlay.
+   Scoped to .group-page and the portaled .group-pf so nothing leaks into staff participant pages. */
+.group-page .back .ic{width:20px;height:20px}
+.group-page .card-hero .actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.group-page .hero-sub{overflow-wrap:anywhere}
+.group-page .kids{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.group-page .kid-card{display:flex;flex-direction:column;gap:14px;padding:14px 14px 20px;border-radius:28px;background:var(--paper);border:0;text-align:left;font:inherit;color:inherit;cursor:pointer;min-width:0}
+.group-page .kid-card:hover{box-shadow:0 0 0 2px var(--line-2)}
+.group-page .kid-card:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.group-page .photo,.group-pf .photo{aspect-ratio:1/1;border-radius:20px;display:grid;place-items:end center;overflow:hidden}
+.group-page .photo svg,.group-pf .photo svg{width:78%;height:78%;fill:none;stroke:currentColor;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;margin-bottom:-6%}
+.group-page .photo.has-img,.group-pf .photo.has-img{display:block;background:var(--soft)}
+.group-page .photo img,.group-pf .photo img{display:block;width:100%;height:100%;object-fit:cover}
+.group-page .ph-a,.group-pf .ph-a{background:#F6D9C4;color:#A0613A}
+.group-page .ph-b2,.group-pf .ph-b2{background:#DCD3F2;color:#5B3FB0}
+.group-page .ph-c,.group-pf .ph-c{background:#D3DDF2;color:#0F3DA7}
+.group-page .ph-d,.group-pf .ph-d{background:#D3EBDA;color:#1E7A46}
+.group-page .kid-name{font-size:20px;font-weight:600;padding:0 6px;overflow-wrap:anywhere}
+.group-page .kid-about{padding:0 6px;color:var(--ink-2);font-size:16px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.group-page .group-empty{padding:28px 32px}
+.group-page .mates{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.group-page .mate{display:flex;align-items:center;gap:16px;padding:20px 22px;border-radius:28px;background:var(--paper);min-width:0}
+.group-page .mate .photo{width:72px;height:72px;flex:0 0 72px;border-radius:50%;aspect-ratio:auto}
+.group-page .mate .grow{min-width:0}
+.group-page .mate b{display:block;font-size:18px;overflow-wrap:anywhere}
+.group-page .mate .grow .meta{display:block;margin-bottom:10px}
+
+/* Profile overlay (portaled to body, so it carries its own .dm token scope) */
+.group-pf.pf-back{position:fixed;inset:0;z-index:500;background:rgba(18,20,26,.4);display:grid;place-items:center;padding:24px;min-height:0}
+.group-pf .pf{position:relative;width:min(920px,100%);max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);overflow:auto;background:var(--paper);border-radius:36px;padding:28px;display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:32px;color:var(--ink);font-family:inherit}
+.group-pf .pf .photo{border-radius:28px;align-self:start}
+.group-pf .pf-close{position:absolute;top:20px;right:20px;z-index:1;width:48px;height:48px;border-radius:50%;border:0;background:var(--soft);display:grid;place-items:center;color:var(--ink);cursor:pointer}
+.group-pf .pf-close:hover{background:var(--soft-2)}
+.group-pf .pf-close .ic{width:22px;height:22px}
+.group-pf .pf-close:focus-visible,.group-pf .pf-nav .btn:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.group-pf .pf-body{display:flex;flex-direction:column;gap:18px;padding:12px 40px 8px 0;min-width:0}
+.group-pf .pf-body h2{margin:0;font-size:36px;font-weight:600;line-height:1.1;letter-spacing:-.03em;overflow-wrap:anywhere}
+.group-pf .pf-about{font-size:18px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.group-pf .chips .tag{white-space:normal;height:auto;min-height:30px;padding:4px 12px}
+.group-pf .pf-block{padding:16px 18px;border-radius:20px;background:var(--soft)}
+.group-pf .pf-block b{display:block;margin-bottom:4px}
+.group-pf .pf-block p{margin:0;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:anywhere}
+.group-pf .pf-nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.group-pf button.btn{font-weight:600;font-size:16px}
+
+@media(max-width:760px){.group-pf .pf{grid-template-columns:minmax(0,1fr);gap:20px;padding:20px;border-radius:28px}.group-pf .pf .photo{max-width:320px;width:100%}.group-pf .pf-body{padding:0}.group-pf .pf-body h2{font-size:28px;padding-right:56px}}
+@media(max-width:720px){
+ .group-page .card-hero{padding:22px;border-radius:26px}
+ .group-page .card-hero .hero-art{display:none}
+ .group-page .card-hero .hero-title{font-size:30px}
+ .group-page .card-hero .hero-sub{font-size:17px}
+ .group-page .card-hero .actions{margin-top:18px}
+ .group-page .kids{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .group-page .kid-card{padding:10px 10px 16px;border-radius:22px;gap:10px}
+ .group-page .kid-name{font-size:17px}
+ .group-page .kid-about{font-size:15px}
+ .group-pf.pf-back{padding:12px}
+}

@@ -201,6 +201,19 @@ async def test_enrollment_roster_is_host_only_and_versions_survive_reload(world)
         own=await routes.webinar_detail(id,db,w.viewer);assert own['enrollment_version']==2 and own['enrollment_state']=='withdrawn'
 
 @pytest.mark.asyncio
+async def test_volunteer_view_names_only_a_current_staff_host(world):
+    w=world;event=await webinar(w);id=UUID(event['id'])
+    async with w.factory() as db:
+        listed=await routes.webinars(db,w.viewer)
+        assert [item['host_name'] for item in listed]==['Fixture Host']
+        assert (await routes.webinar_detail(id,db,w.viewer))['host_name']=='Fixture Host'
+    async with w.factory() as db:
+        membership=await db.scalar(select(StaffMembership).where(StaffMembership.user_id==w.host.user_id))
+        membership.revoked_at=datetime.now(timezone.utc);await db.commit()
+    async with w.factory() as db:
+        assert (await routes.webinar_detail(id,db,w.viewer))['host_name'] is None
+
+@pytest.mark.asyncio
 async def test_room_close_marks_event_ended_only_after_provider_and_worker_ack(world,monkeypatch):
     from app.modules.studio.models import Webinar
     from app.integrations.rtc.livekit import ProviderError

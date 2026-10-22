@@ -1,0 +1,81 @@
+/* «Мероприятия → Мои занятия» (canvas Mine.dc.html) and the volunteer's own занятие (Event.dc.html).
+   Shared blocks (page-head, subnav, sec, rows/rowi, day, st, tile, places, pick, timeline) come from ui/volunteer.css;
+   only the board's own <helmet> rules live here, scoped so they cannot leak. */
+.sch-page .page-head .seg{flex:0 0 auto}
+.sch-head-actions{gap:8px}
+
+/* Exception marks: a dot and a word, only when something is not as usual */
+.st-mark{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.st-mark::before{content:"";width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:var(--quiet)}
+.st-mark.m-ask::before{background:var(--orange)}
+.st-mark.m-coord::before{background:var(--blue)}
+.st-mark.m-res::before{background:var(--yellow)}
+.st-mark.m-off::before{background:var(--red)}
+.sch-page .rowi.is-off .rowi-title{text-decoration:line-through;color:var(--mute)}
+.sch-page .day.o{background:var(--orange-tint)}
+.sch-page .pts,.asg-page .pts{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;background:var(--yellow-tint);color:var(--yellow-ink);font-size:15px;font-weight:600;white-space:nowrap}
+.sch-page .pts .ic,.asg-page .pts .ic{width:16px;height:16px;stroke-width:2}
+.hours-st{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sch-more{margin:8px 0 0 -12px}
+.sch-why{margin-bottom:20px;padding:22px 26px}
+.sch-why .p{margin:0;font-size:17px;max-width:70ch}
+.sch-pause{justify-content:space-between}
+.sch-pause .h3{margin:0}
+.sch-pause .p{margin:4px 0 0}
+.own-reasons{margin-top:22px}
+.own-error{margin:16px 0 0;color:var(--red-ink)}
+.own-pts{margin:14px 0 0}
+
+/* Calendar: own занятия as tinted chips, open places only in the day card */
+.sch-monthnav{gap:10px;margin:28px 0 14px}
+.sch-monthnav .h2{min-width:220px;text-align:center;margin:0}
+.sch-monthnav .iconbtn-soft{background:var(--paper)}
+.sch-monthnav .iconbtn-soft:hover{background:var(--soft-2)}
+.cal-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px);gap:20px;align-items:start}
+.mcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.mcal-wd{padding:0 10px 6px;font-size:15px;font-weight:600;color:var(--mute)}
+.mcal-cell{min-height:96px;padding:8px;border-radius:16px;background:var(--paper);border:0;display:flex;flex-direction:column;gap:5px;min-width:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.mcal-cell.out{background:transparent;color:var(--quiet);cursor:default}
+.mcal-cell.today .mcal-n{background:var(--ink);color:#fff;border-radius:999px;padding:0 8px}
+.mcal-cell.picked{box-shadow:inset 0 0 0 2px var(--ink)}
+.mcal-n{align-self:flex-start;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;line-height:26px}
+.mcal-ev{display:block;padding:4px 7px;border-radius:9px;font-size:13px;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-y{background:var(--yellow-tint)}.ev-o{background:var(--orange-tint)}.ev-v{background:var(--violet-tint)}.ev-b{background:var(--blue-tint)}.ev-g{background:var(--green-tint)}
+.ev-ask{box-shadow:inset 0 0 0 2px var(--orange)}
+.ev-past{opacity:.5}
+.ev-off{text-decoration:line-through;opacity:.6}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:15px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{width:14px;height:14px;border-radius:5px;background:var(--yellow-tint)}
+.legend i.l-ask{box-shadow:inset 0 0 0 2px var(--orange)}
+.legend i.l-past{opacity:.5}
+.day-card{position:sticky;top:20px}
+.day-card>.h3{font-size:22px;margin:0}
+.day-card>.rows,.day-card>.p{margin-top:8px}
+.day-card>h3.h3{margin:18px 0 0;font-size:17px}
+.day-card .st-mark{margin-top:6px}
+
+/* Own занятие page: the pale tint of its event, steps and checks below */
+.asg-page .page-head{margin-top:0}
+.asg-page .action-card>.h3{margin:0}
+.asg-page .timeline .tl b{font-size:17px}
+.own-link{flex-direction:row!important;align-items:center!important;justify-content:space-between;color:inherit!important;text-decoration:none!important}
+.own-link:hover .h3{color:var(--blue)}
+
+@media(max-width:1000px){.cal-wrap{grid-template-columns:minmax(0,1fr)}.day-card{position:static}}
+@media(max-width:760px){.mcal-cell{min-height:56px;padding:5px}.mcal-ev{font-size:0;height:7px;padding:0}.mcal-wd{padding:0 4px 6px}}
+@media(max-width:720px){
+ .sch-page .page-head .seg{width:100%}
+ .sch-page .page-head .seg button{flex:1;justify-content:center}
+ .sch-page .hero-art,.asg-page .hero-art{display:none}
+ .sch-page .hero-when,.asg-page .hero-when{font-size:36px;line-height:1.1}
+ /* Phone: hero buttons stacked, full width */
+ .sch-page .card-hero .actions>.btn,.asg-page .card-hero .actions>.btn{flex:1 1 100%;white-space:normal;text-align:center;line-height:1.3}
+ .sch-page .rowi{flex-wrap:wrap}
+ .sch-page .rowi>.grow{flex:1 1 calc(100% - 84px)}
+ .sch-page .rowi-end{margin-left:80px;flex-wrap:wrap}
+ .sch-page .rowi-end>.ic{display:none}
+ .day-card .rowi-end,.day-card .rowi>.grow{margin-left:0}
+ .sch-monthnav{justify-content:space-between}
+ .sch-monthnav .h2{min-width:0;font-size:22px}
+}

@@ -8,6 +8,7 @@ from app.worker.queue import enqueue_job
 from app.integrations.ai.models import AIRun
 from app.integrations.ai.service import enqueue_ai_run
 from .models import ApprovedAnswer, KnowledgeChunk, KnowledgeQuestion, KnowledgeSource, MentorRun, SourceVersion
+from .safety import is_urgent
 
 
 def permission(principal,name):
@@ -154,6 +155,26 @@ def visible_query(principal):
         query=query.where(SourceVersion.visibility=='all')
     return query
 
+def library_query(principal):
+    """Current publications for all volunteers. Drafts never leave the source row; coordinator
+    answers stay out because their title is a volunteer's own question."""
+    answers=select(ApprovedAnswer.published_source_id).where(ApprovedAnswer.foundation_id==principal.foundation_id,ApprovedAnswer.published_source_id.is_not(None))
+    return select(KnowledgeSource,SourceVersion).join(SourceVersion,SourceVersion.id==KnowledgeSource.current_version_id).where(KnowledgeSource.foundation_id==principal.foundation_id,SourceVersion.foundation_id==principal.foundation_id,KnowledgeSource.archived.is_(False),SourceVersion.visibility=='all',KnowledgeSource.id.not_in(answers))
+
+def library_kind(source,version):
+    # Source kinds are text, lesson and pdf; a PDF or a text titled «Памятка…» reads as a memo.
+    return 'memo' if source.kind=='pdf' or version.title.strip().casefold().startswith('памятка') else 'article'
+
+async def library(db,principal):
+    rows=(await db.execute(library_query(principal).order_by(SourceVersion.published_at.desc(),SourceVersion.id).limit(60))).all()
+    return [dict(id=source.id,title=version.title,kind=library_kind(source,version)) for source,version in rows]
+
+async def library_item(db,principal,source_id):
+    row=(await db.execute(library_query(principal).where(KnowledgeSource.id==source_id))).first()
+    if row is None:raise ApiError(404,'material_not_found','Материал недоступен')
+    source,version=row
+    return dict(id=source.id,title=version.title,kind=library_kind(source,version),text=version.body)
+
 def fragment_view(chunk,version):
     return dict(id=chunk.id,source_id=version.source_id,source_version_id=version.id,title=version.title,text=chunk.text)
 
@@ -240,7 +261,7 @@ async def mentor_view(db,principal,run_id):
                 citations=[fragment_view(chunk,source_version) for chunk,source_version in rows]
             else:
                 state,answer,citations='sources_unavailable',None,[]
-    return dict(id=item.id,question=item.question,state=state,answer=answer,fragments=fragments,citations=citations,question_id=item.question_id,error_code=run.error_code if run else None,model=run.model if run else None,prompt_version=run.prompt_version if run else None)
+    return dict(id=item.id,question=item.question,state=state,answer=answer,fragments=fragments,citations=citations,question_id=item.question_id,error_code=run.error_code if run else None,model=run.model if run else None,prompt_version=run.prompt_version if run else None,urgent=is_urgent(item.question))
 
 async def mentor_history(db,principal):
     ids=(await db.scalars(select(MentorRun.id).where(MentorRun.foundation_id==principal.foundation_id,owner_scope(principal,MentorRun)).order_by(MentorRun.created_at.desc()).limit(30))).all()

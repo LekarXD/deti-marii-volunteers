@@ -7,12 +7,13 @@ from datetime import datetime,timedelta,timezone
 from sqlalchemy import func,select
 from app.core.clock import utcnow
 from app.core.errors import ApiError
-from app.core.models import ResourceReservation
+from app.core.models import ResourceReservation,User
 from .assignment_models import Assignment,StaffingNeedReserve
-from .assignment_service import require_user,reserve_view,sign_up_gate
+from .assignment_service import readiness,require_user,reserve_view,sign_up_gate
 from .calendar_models import EventOccurrence,EventSeries,StaffingNeed
 from .calendar_service import materialize
-from .event_feed_schemas import VolunteerEventAssignment,VolunteerEventCard,VolunteerEventDate,VolunteerEventDetail,VolunteerEventFeed,VolunteerEventNeed
+from .event_feed_schemas import (EventContact,VolunteerEventAssignment,VolunteerEventCard,VolunteerEventDate,VolunteerEventDetail,VolunteerEventFeed,VolunteerEventNeed,
+    VolunteerReadiness,VolunteerReserveItem,VolunteerReservePage)
 from .models import VolunteerRoleVersion
 from . import ranking
 
@@ -36,6 +37,36 @@ def reason_text(reason):
     if reason.code=='time_history':return f'Обычно ты приходишь в это время: {reason.value}'
     if reason.code=='time_window':return f'Удобно по твоему графику: {reason.value}'
     return ''
+
+
+async def own_readiness(db,foundation_id,user_id,requirements,assignment=None):
+    """The volunteer's own preparation: coordinator reviews on their assignment win, else version-bound learning evidence."""
+    if assignment is not None:
+        return [VolunteerReadiness(key=row.key,title=row.title,level=row.level,state='pending' if row.state=='pending' else 'fulfilled') for row in await readiness(db,assignment)]
+    try:
+        from app.modules.learning.service import requirement_status
+    except ModuleNotFoundError as exc:
+        if not exc.name.startswith('app.modules.learning'):raise
+        requirement_status=None
+    result=[]
+    for row in requirements:
+        status=await requirement_status(db,foundation_id,user_id,row['key']) if requirement_status else None
+        result.append(VolunteerReadiness(key=row['key'],title=row['title'],level=row.get('level','recommended'),state='fulfilled' if status and status['status']=='fulfilled' else 'pending'))
+    return result
+
+
+async def event_contacts(db,foundation_id,group_id):
+    """Same people the first-exit memo names: the group's active leader and coordinator."""
+    if group_id is None:return []
+    from app.modules.followups.service import owner_eligible
+    from app.modules.participants.models import ParticipantGroup
+    group=await db.get(ParticipantGroup,group_id)
+    if group is None or group.foundation_id!=foundation_id:return []
+    contacts=[]
+    for user_id,label in ((group.leader_id,'Ведущий'),(group.coordinator_id,'Координатор')):
+        user=await db.get(User,user_id) if user_id else None
+        if user and await owner_eligible(db,foundation_id,user.id,group.id,False):contacts.append(EventContact(role=label,display_name=user.display_name))
+    return contacts
 
 
 async def materialize_window(db,foundation_id,lower,upper):
@@ -85,8 +116,10 @@ async def cards(db,principal,occurrences,*,feed):
                 elif reserve is None:actions.append('reserve')
             revision=revisions.get(need.role_version_id)
             snapshot=revision.snapshot if revision else {}
+            mine_here=own if own and own.staffing_need_id==need.id and own.status in ('invited','confirmed') else None
             views.append(VolunteerEventNeed(id=need.id,version=need.version,role_id=need.role_id,role_title=snapshot.get('title',''),task=snapshot.get('task',''),
-                required=need.capacity_required,confirmed=taken,missing=missing,approval_policy=need.approval_policy,preparation_requirements=need.preparation_requirements,allowed_actions=actions))
+                required=need.capacity_required,confirmed=taken,missing=missing,approval_policy=need.approval_policy,points_multiplier=float(getattr(need,'points_multiplier',1) or 1),
+                preparation_requirements=need.preparation_requirements,readiness=await own_readiness(db,fid,uid,need.preparation_requirements,mine_here),allowed_actions=actions))
             score=ranking.score_need(facts,item,roles.get(need.role_id),now) if facts else None
             scored.append((need,missing,score))
         open_needs=[row for row in scored if row[1]>0]
@@ -101,7 +134,8 @@ async def cards(db,principal,occurrences,*,feed):
         reserve=next((reserves[need.id] for need in rows if need.id in reserves),None)
         card=VolunteerEventCard(occurrence_id=item.id,series_id=item.series_id,title=item.title,program=item.program,kind=item.kind,format=item.format,location=item.location,
             audience=item.audience,status=item.status,starts_at=item.starts_at,ends_at=item.ends_at,timezone=item.timezone,needs=views,best_need_id=best_id,reasons=reasons,full=full,conflict=conflict,
-            my_assignment=VolunteerEventAssignment(id=own.id,version=own.version,staffing_need_id=own.staffing_need_id,status=own.status,origin=own.origin,approved_at=own.approved_at) if own else None,
+            my_assignment=VolunteerEventAssignment(id=own.id,version=own.version,staffing_need_id=own.staffing_need_id,status=own.status,origin=own.origin,approved_at=own.approved_at,
+                awaiting_coordinator=own.status=='invited' and own.origin in ('self','reserve') and own.approved_at is None) if own else None,
             my_reserve=await reserve_view(db,reserve) if reserve else None)
         result.append((card,score.score if score else 0.0,score.familiar_visits if score else 0))
     return result
@@ -158,7 +192,24 @@ async def detail(db,principal,occurrence_id):
                 full=not any(need.capacity_required>taken.get(need.id,0) for need in own_needs)))
     gate=await sign_up_gate(db,principal.foundation_id,principal.user_id)
     return VolunteerEventDetail(**card.model_dump(),algorithm_version=ranking.ALGORITHM_VERSION,can_sign_up=gate is None,
-        locked_reason=gate[0] if gate else None,locked_message=gate[1] if gate else None,other_dates=dates)
+        locked_reason=gate[0] if gate else None,locked_message=gate[1] if gate else None,other_dates=dates,
+        contacts=await event_contacts(db,principal.foundation_id,item.group_id))
+
+
+async def own_reserves(db,principal):
+    require_user(principal)
+    rows=(await db.execute(select(StaffingNeedReserve,EventOccurrence,StaffingNeed).join(EventOccurrence,EventOccurrence.id==StaffingNeedReserve.occurrence_id)
+        .join(StaffingNeed,StaffingNeed.id==StaffingNeedReserve.staffing_need_id).where(StaffingNeedReserve.foundation_id==principal.foundation_id,
+        StaffingNeedReserve.user_id==principal.user_id,StaffingNeedReserve.state=='waiting',EventOccurrence.status=='scheduled',EventOccurrence.starts_at>utcnow())
+        .order_by(EventOccurrence.starts_at,StaffingNeedReserve.id).limit(100))).all()
+    revisions={row.id:row for row in (await db.scalars(select(VolunteerRoleVersion).where(VolunteerRoleVersion.id.in_({need.role_version_id for _,_,need in rows})))).all()} if rows else {}
+    items=[]
+    for reserve,event,need in rows:
+        view=await reserve_view(db,reserve);revision=revisions.get(need.role_version_id)
+        items.append(VolunteerReserveItem(reserve_id=reserve.id,version=reserve.version,position=view.position,state=reserve.state,occurrence_id=event.id,staffing_need_id=need.id,
+            title=event.title,role_title=revision.snapshot.get('title','') if revision else '',starts_at=event.starts_at,ends_at=event.ends_at,location=event.location,timezone=event.timezone,
+            allowed_actions=view.allowed_actions))
+    return VolunteerReservePage(items=items)
 
 
 def window(from_date,to_date,zone):

@@ -7,7 +7,7 @@ from app.core.auth import Principal,get_principal,require_permission
 from app.core.db import get_db
 from app.core.errors import ApiError
 from .assignment_schemas import AssignmentParticipationView
-from .event_feed_schemas import MatchingOptionsView,ReserveView,SignUpCommand,VolunteerEventDetail,VolunteerEventFeed
+from .event_feed_schemas import MatchingOptionsView,ReserveView,SignUpCommand,VolunteerEventDetail,VolunteerEventFeed,VolunteerReservePage
 from .schemas import VersionCommand
 from .router import command
 from . import assignment_service as service
@@ -25,6 +25,11 @@ async def own_feed(from_date:date=Query(alias='from'),to_date:date=Query(alias='
     # Reading the feed projects recurring series into the period, like the staff calendar does.
     await db.commit()
     return result
+
+
+@router.get('/me/reserves',response_model=VolunteerReservePage,operation_id='listOwnReserves')
+async def own_reserves(principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    return await event_feed.own_reserves(db,principal)
 
 
 @router.get('/me/events/{occurrence_id}',response_model=VolunteerEventDetail,operation_id='getOwnEvent')

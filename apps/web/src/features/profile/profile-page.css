@@ -1,0 +1,99 @@
+/* Volunteer profile from the canvas board Profile.dc.html. Everything is scoped to .vol-profile so it cannot leak into other screens.
+   Shared pieces (card-hero, tabs, pick, when-grid, set-row, toggle, rows, ai-box) come from the Opora kit and ui/volunteer.css. */
+.vol-profile{min-width:0}
+.vol-profile .err{margin:0;font-size:15px;color:var(--red-ink)}
+
+/* Hero: a calm blue tint, not the yellow «important» hero */
+.vol-profile .prof-hero{background:var(--blue-tint);padding:32px 40px}
+.vol-profile .prof-hero-row{display:flex;flex-wrap:wrap;align-items:center;gap:28px}
+.vol-profile .prof-hero-row>.grow{flex:1 1 320px}
+/* The eyebrow keeps the paragraph margins, as on the board */
+.vol-profile .prof-hero .hero-title{font-size:44px;overflow-wrap:anywhere}
+/* Without a photo: the board's silhouette on the blue tint */
+.vol-profile .prof-av{width:132px;height:132px;flex:0 0 132px;border-radius:50%;background:#D3DDF2;color:var(--blue);display:grid;place-items:end center;overflow:hidden}
+.vol-profile .prof-av svg{width:80%;height:80%;fill:none;stroke:currentColor;stroke-width:1.1;margin-bottom:-6%}
+.vol-profile .prof-av.has-photo{place-items:center}
+.vol-profile .prof-av img{width:100%;height:100%;object-fit:cover}
+.vol-profile .prof-hero-note{margin:16px 0 0;font-size:16px;color:var(--ink-2)}
+.vol-profile .prof-hero-note.err{color:var(--red-ink)}
+
+.vol-profile .prof-tabs{margin:28px 0;scrollbar-width:none}
+.vol-profile .prof-tabs::-webkit-scrollbar{display:none}
+.vol-profile .prof-alert{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:-8px 0 20px;padding:16px 20px;border-radius:22px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--orange)}
+.vol-profile .prof-alert .p{margin:0;flex:1 1 260px;color:var(--ink)}
+
+/* Cards and their inner rhythm */
+.vol-profile .prof-stack{display:flex;flex-direction:column;gap:16px}
+.vol-profile .prof-card-head{justify-content:space-between;flex-wrap:wrap}
+.vol-profile .prof-card-title{margin-bottom:8px}
+.vol-profile .action-card .p,.vol-profile .card>.p{margin:0}
+.vol-profile .card>.p+.prof-rows{margin-top:8px}
+.vol-profile .prof-about{font-size:17px;line-height:1.55;white-space:pre-line;overflow-wrap:anywhere}
+.vol-profile .prof-field{margin-top:22px}
+.vol-profile .action-card .prof-field{margin-top:8px}
+.vol-profile .prof-actions{margin-top:24px}
+.vol-profile .prof-note{margin:8px 0 0}
+.vol-profile .prof-pick-sm button{min-height:36px;padding:6px 14px}
+.vol-profile .pick-add{margin-top:0}
+/* «+ Своё» reads as one more pick and opens the field only when asked */
+.vol-profile .pick .prof-pick-add{border-style:dashed;color:var(--ink-2)}
+.vol-profile .pick .prof-pick-add .ic{width:16px;height:16px}
+.vol-profile .rowi .err,.vol-profile .rowi .prof-row-text{display:block;margin-top:4px}
+.vol-profile .set-row .meta{display:block;margin-top:2px}
+.vol-profile .set-row .meta a{color:var(--ink);text-decoration:underline}
+.vol-profile .prof-card-title+.set-row,.vol-profile .prof-card-title+.prof-rows>.set-row:first-child{border-top:0}
+
+/* Native checkbox drawn as the kit toggle (keeps checkbox semantics for consents) */
+.vol-profile .prof-set-label{cursor:pointer}
+.vol-profile .prof-switch{appearance:none;-webkit-appearance:none;position:relative;width:48px;height:28px;flex:0 0 48px;margin:0;border-radius:999px;border:0;cursor:pointer;background:radial-gradient(circle at 14px 50%,#fff 10.5px,transparent 11.5px),var(--line-2);transition:background .15s}
+.vol-profile .prof-switch:checked{background:radial-gradient(circle at 34px 50%,#fff 10.5px,transparent 11.5px),var(--green)}
+.vol-profile .prof-switch:disabled{opacity:.5;cursor:not-allowed}
+
+/* «Когда свободна» */
+.vol-profile .prof-time-title{margin-bottom:18px}
+.vol-profile .prof-time .prof-field{margin-top:26px}
+.vol-profile .prof-pause-until{margin-top:10px}
+.vol-profile .prof-when-mark{display:none;width:20px;height:20px;stroke-width:2.4}
+.vol-profile .prof-quiet{display:grid;grid-template-columns:repeat(2,minmax(0,200px));gap:16px;padding:0 0 18px}
+
+/* AI proposal, shown only when one is waiting */
+.vol-profile .prof-ai{display:flex;flex-direction:column;gap:12px}
+.vol-profile .prof-ai .actions{margin-top:4px}
+.vol-profile .prof-ai-head{gap:12px}
+.vol-profile .prof-ai-mark{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:grid;place-items:center;background:var(--paper);color:var(--violet)}
+.vol-profile .prof-ai-mark .ic{width:20px;height:20px}
+.vol-profile .prof-ai-field{display:flex;flex-direction:column;gap:4px}
+.vol-profile .prof-ai-field .p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
+.vol-profile .prof-details summary{cursor:pointer;font-weight:600;color:var(--ink);padding:12px 0}
+.vol-profile .prof-quotes{margin:0;padding-left:20px;color:var(--ink-2);line-height:1.55}
+.vol-profile .prof-ai-run .actions{margin-top:16px}
+
+/* Contacts, history */
+.vol-profile .prof-contacts .rows{margin-top:4px}
+.vol-profile .prof-contact-change{display:flex;flex-direction:column;gap:14px;margin-top:12px;padding-top:20px;border-top:1px solid var(--line);max-width:560px}
+.vol-profile .prof-contact-change .p{margin:0}
+.vol-profile .prof-history .prof-details{border-top:1px solid var(--line)}
+.vol-profile .prof-history .prof-details:first-child{border-top:0}
+.vol-profile .prof-history .prof-about{margin:0 0 14px;font-size:16px}
+.vol-profile .prof-requests{margin-top:8px;border-top:1px solid var(--line)}
+
+/* Documents tab reuses the certificate form from «Мой путь» */
+.vol-profile .prof-docs .prof-card-head{margin-bottom:20px}
+.vol-profile .prof-docs .path-form-actions{margin-top:22px}
+.vol-profile .prof-docs .path-alert{display:block;margin:12px 0 0;color:var(--red-ink);font-size:16px;line-height:1.5}
+
+@media(max-width:720px){
+ .vol-profile .prof-hero{padding:26px 22px}
+ .vol-profile .prof-hero-row{gap:18px}
+ .vol-profile .prof-av{width:80px;height:80px;flex-basis:80px;font-size:28px}
+ .vol-profile .prof-hero .hero-title{font-size:28px;overflow-wrap:break-word;hyphens:auto}
+ /* Six tabs scroll sideways: let the row run to the screen edge so the cut-off tab reads as «more» */
+ .vol-profile .prof-tabs{margin-left:-16px;margin-right:-16px;padding:0 16px;scroll-padding:0 16px}
+ .vol-profile .when-grid{grid-template-columns:40px repeat(3,minmax(0,1fr));gap:6px}
+ .vol-profile .when-grid button{display:grid;place-items:center;padding:0}
+ .vol-profile .prof-when-word{display:none}
+ .vol-profile .prof-when-mark{display:block}
+ .vol-profile .prof-quiet{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .vol-profile .set-row{flex-wrap:wrap}
+ .vol-profile .set-row>.grow{flex-basis:calc(100% - 72px)}
+}

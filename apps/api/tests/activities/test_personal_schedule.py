@@ -36,8 +36,10 @@ async def test_own_schedule_window_states_pagination_and_foreign_scope(context):
     # A normal volunteer can read own dates but cannot query the staff/global calendar.
     assert (await context.client.get('/api/v1/event-occurrences?from=2034-03-31&to=2034-04-01',headers={'Cookie':'opora_session=self'})).status_code==403
     assert (await context.client.get(f"/api/v1/assignments/{other['id']}",headers={'Cookie':'opora_session=self'})).status_code==404
-    cancelled=await context.client.post(f"/api/v1/assignments/{own['id']}/decline",headers=user_headers(),json={'expected_version':own['version']})
+    cancelled=await context.client.post(f"/api/v1/assignments/{own['id']}/decline",headers=user_headers(),json={'expected_version':own['version'],'reason':'  Не смогу прийти: болезнь '})
     assert cancelled.status_code==200
+    # The volunteer's reason reaches the coordinator through the assignment history.
+    assert cancelled.json()['history'][-1]['reason']=='Не смогу прийти: болезнь'
     assert (await get('from=2034-03-31&to=2034-04-01&state=active')).json()['items']==[]
     inactive=(await get('from=2034-03-31&to=2034-04-01&state=cancelled')).json()['items']
     assert len(inactive)==1 and inactive[0]['status']=='declined'
