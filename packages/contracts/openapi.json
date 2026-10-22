@@ -1030,6 +1030,16 @@
             "title": "Occurrence Status",
             "type": "string"
           },
+          "origin": {
+            "default": "invitation",
+            "enum": [
+              "invitation",
+              "self",
+              "reserve"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
           "readiness": {
             "items": {
               "$ref": "#/components/schemas/AssignmentReadinessItem"
@@ -1402,10 +1412,29 @@
         "type": "object"
       },
       "AssignmentSuggestion": {
+        "description": "Ordered by a private rules-v3 score; the number itself is never sent.",
         "properties": {
           "display_name": {
             "title": "Display Name",
             "type": "string"
+          },
+          "facts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Facts",
+            "type": "object"
+          },
+          "invitation_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invitation Status"
           },
           "missing_data": {
             "items": {
@@ -7632,6 +7661,30 @@
           "constraints"
         ],
         "title": "MatchExplanation",
+        "type": "object"
+      },
+      "MatchingOptionsView": {
+        "properties": {
+          "directions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Directions",
+            "type": "array"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Skills",
+            "type": "array"
+          }
+        },
+        "required": [
+          "directions",
+          "skills"
+        ],
+        "title": "MatchingOptionsView",
         "type": "object"
       },
       "MemberCommand": {
@@ -14421,6 +14474,84 @@
         "title": "ReserveReviewView",
         "type": "object"
       },
+      "ReserveView": {
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Actions",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "occurrence_id": {
+            "format": "uuid",
+            "title": "Occurrence Id",
+            "type": "string"
+          },
+          "offered_assignment_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offered Assignment Id"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          },
+          "queued_at": {
+            "format": "date-time",
+            "title": "Queued At",
+            "type": "string"
+          },
+          "staffing_need_id": {
+            "format": "uuid",
+            "title": "Staffing Need Id",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "waiting",
+              "offered",
+              "closed"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "occurrence_id",
+          "staffing_need_id",
+          "state",
+          "queued_at",
+          "allowed_actions"
+        ],
+        "title": "ReserveView",
+        "type": "object"
+      },
       "ResetVerifyInput": {
         "properties": {
           "challenge_id": {
@@ -14633,12 +14764,26 @@
             "title": "Approval Policy",
             "type": "string"
           },
+          "direction": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Direction",
+            "type": "string"
+          },
           "preparation_defaults": {
             "items": {
               "$ref": "#/components/schemas/PreparationRequirement"
             },
             "maxItems": 100,
             "title": "Preparation Defaults",
+            "type": "array"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 30,
+            "title": "Skills",
             "type": "array"
           },
           "task": {
@@ -14700,6 +14845,12 @@
             "title": "Approval Policy",
             "type": "string"
           },
+          "direction": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Direction",
+            "type": "string"
+          },
           "expected_version": {
             "exclusiveMinimum": 0.0,
             "title": "Expected Version",
@@ -14711,6 +14862,14 @@
             },
             "maxItems": 100,
             "title": "Preparation Defaults",
+            "type": "array"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 30,
+            "title": "Skills",
             "type": "array"
           },
           "task": {
@@ -14791,6 +14950,12 @@
             ],
             "title": "Archived At"
           },
+          "direction": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Direction",
+            "type": "string"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -14802,6 +14967,14 @@
             },
             "maxItems": 100,
             "title": "Preparation Defaults",
+            "type": "array"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 30,
+            "title": "Skills",
             "type": "array"
           },
           "task": {
@@ -15192,6 +15365,27 @@
           "created_at"
         ],
         "title": "ServiceTimeEntryView",
+        "type": "object"
+      },
+      "SignUpCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_version": {
+            "exclusiveMinimum": 0.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "message": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "SignUpCommand",
         "type": "object"
       },
       "SignalActionCommand": {
@@ -19498,6 +19692,520 @@
           "expected_version"
         ],
         "title": "VersionInput",
+        "type": "object"
+      },
+      "VolunteerEventAssignment": {
+        "properties": {
+          "approved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "staffing_need_id": {
+            "format": "uuid",
+            "title": "Staffing Need Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "staffing_need_id",
+          "status",
+          "origin",
+          "approved_at"
+        ],
+        "title": "VolunteerEventAssignment",
+        "type": "object"
+      },
+      "VolunteerEventCard": {
+        "properties": {
+          "audience": {
+            "title": "Audience",
+            "type": "string"
+          },
+          "best_need_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Need Id"
+          },
+          "conflict": {
+            "title": "Conflict",
+            "type": "boolean"
+          },
+          "ends_at": {
+            "format": "date-time",
+            "title": "Ends At",
+            "type": "string"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "full": {
+            "title": "Full",
+            "type": "boolean"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "my_assignment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VolunteerEventAssignment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "my_reserve": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReserveView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "needs": {
+            "items": {
+              "$ref": "#/components/schemas/VolunteerEventNeed"
+            },
+            "title": "Needs",
+            "type": "array"
+          },
+          "occurrence_id": {
+            "format": "uuid",
+            "title": "Occurrence Id",
+            "type": "string"
+          },
+          "program": {
+            "title": "Program",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "series_id": {
+            "format": "uuid",
+            "title": "Series Id",
+            "type": "string"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "occurrence_id",
+          "series_id",
+          "title",
+          "program",
+          "kind",
+          "format",
+          "location",
+          "audience",
+          "status",
+          "starts_at",
+          "ends_at",
+          "timezone",
+          "needs",
+          "best_need_id",
+          "reasons",
+          "full",
+          "conflict"
+        ],
+        "title": "VolunteerEventCard",
+        "type": "object"
+      },
+      "VolunteerEventDate": {
+        "properties": {
+          "ends_at": {
+            "format": "date-time",
+            "title": "Ends At",
+            "type": "string"
+          },
+          "full": {
+            "title": "Full",
+            "type": "boolean"
+          },
+          "mine": {
+            "title": "Mine",
+            "type": "boolean"
+          },
+          "occurrence_id": {
+            "format": "uuid",
+            "title": "Occurrence Id",
+            "type": "string"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "occurrence_id",
+          "starts_at",
+          "ends_at",
+          "full",
+          "mine"
+        ],
+        "title": "VolunteerEventDate",
+        "type": "object"
+      },
+      "VolunteerEventDetail": {
+        "properties": {
+          "algorithm_version": {
+            "title": "Algorithm Version",
+            "type": "string"
+          },
+          "audience": {
+            "title": "Audience",
+            "type": "string"
+          },
+          "best_need_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Need Id"
+          },
+          "can_sign_up": {
+            "title": "Can Sign Up",
+            "type": "boolean"
+          },
+          "conflict": {
+            "title": "Conflict",
+            "type": "boolean"
+          },
+          "ends_at": {
+            "format": "date-time",
+            "title": "Ends At",
+            "type": "string"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "full": {
+            "title": "Full",
+            "type": "boolean"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "locked_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locked Message"
+          },
+          "locked_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locked Reason"
+          },
+          "my_assignment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VolunteerEventAssignment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "my_reserve": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReserveView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "needs": {
+            "items": {
+              "$ref": "#/components/schemas/VolunteerEventNeed"
+            },
+            "title": "Needs",
+            "type": "array"
+          },
+          "occurrence_id": {
+            "format": "uuid",
+            "title": "Occurrence Id",
+            "type": "string"
+          },
+          "other_dates": {
+            "items": {
+              "$ref": "#/components/schemas/VolunteerEventDate"
+            },
+            "title": "Other Dates",
+            "type": "array"
+          },
+          "program": {
+            "title": "Program",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "series_id": {
+            "format": "uuid",
+            "title": "Series Id",
+            "type": "string"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "occurrence_id",
+          "series_id",
+          "title",
+          "program",
+          "kind",
+          "format",
+          "location",
+          "audience",
+          "status",
+          "starts_at",
+          "ends_at",
+          "timezone",
+          "needs",
+          "best_need_id",
+          "reasons",
+          "full",
+          "conflict",
+          "algorithm_version",
+          "can_sign_up",
+          "other_dates"
+        ],
+        "title": "VolunteerEventDetail",
+        "type": "object"
+      },
+      "VolunteerEventFeed": {
+        "properties": {
+          "algorithm_version": {
+            "title": "Algorithm Version",
+            "type": "string"
+          },
+          "can_sign_up": {
+            "title": "Can Sign Up",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VolunteerEventCard"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "locked_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locked Message"
+          },
+          "locked_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locked Reason"
+          }
+        },
+        "required": [
+          "algorithm_version",
+          "can_sign_up",
+          "items"
+        ],
+        "title": "VolunteerEventFeed",
+        "type": "object"
+      },
+      "VolunteerEventNeed": {
+        "description": "One role on the occurrence. Counts only, never other volunteers' names.",
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "sign-up",
+                "reserve"
+              ],
+              "type": "string"
+            },
+            "title": "Allowed Actions",
+            "type": "array"
+          },
+          "approval_policy": {
+            "enum": [
+              "coordinator",
+              "self_confirmation"
+            ],
+            "title": "Approval Policy",
+            "type": "string"
+          },
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "missing": {
+            "title": "Missing",
+            "type": "integer"
+          },
+          "preparation_requirements": {
+            "items": {
+              "$ref": "#/components/schemas/PreparationRequirement"
+            },
+            "title": "Preparation Requirements",
+            "type": "array"
+          },
+          "required": {
+            "title": "Required",
+            "type": "integer"
+          },
+          "role_id": {
+            "format": "uuid",
+            "title": "Role Id",
+            "type": "string"
+          },
+          "role_title": {
+            "title": "Role Title",
+            "type": "string"
+          },
+          "task": {
+            "title": "Task",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "role_id",
+          "role_title",
+          "task",
+          "required",
+          "confirmed",
+          "missing",
+          "approval_policy",
+          "preparation_requirements",
+          "allowed_actions"
+        ],
+        "title": "VolunteerEventNeed",
         "type": "object"
       },
       "WebhookView": {
@@ -45949,6 +46657,108 @@
         ]
       }
     },
+    "/api/v1/coord/role-matching-options": {
+      "get": {
+        "operationId": "getRoleMatchingOptions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchingOptionsView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Matching Options",
+        "tags": [
+          "activities",
+          "event-feed"
+        ]
+      }
+    },
     "/api/v1/coord/roles": {
       "get": {
         "operationId": "listRoles",
@@ -58009,6 +58819,266 @@
         ]
       }
     },
+    "/api/v1/me/events": {
+      "get": {
+        "operationId": "listOwnEventFeed",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "title": "From",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "title": "To",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "default": "Europe/Moscow",
+              "title": "Timezone",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 60,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerEventFeed"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Own Feed",
+        "tags": [
+          "activities",
+          "event-feed"
+        ]
+      }
+    },
+    "/api/v1/me/events/{occurrence_id}": {
+      "get": {
+        "operationId": "getOwnEvent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "occurrence_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Occurrence Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolunteerEventDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Own Event",
+        "tags": [
+          "activities",
+          "event-feed"
+        ]
+      }
+    },
     "/api/v1/me/external-profiles/dobro": {
       "put": {
         "operationId": "own_profile_api_v1_me_external_profiles_dobro_put",
@@ -65151,6 +66221,139 @@
         ]
       }
     },
+    "/api/v1/reserves/{reserve_id}/leave": {
+      "post": {
+        "operationId": "leaveStaffingNeedReserve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reserve_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reserve Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__modules__activities__schemas__VersionCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReserveView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Leave Reserve",
+        "tags": [
+          "activities",
+          "event-feed"
+        ]
+      }
+    },
     "/api/v1/responses/{response_id}/resubmit": {
       "post": {
         "operationId": "resubmitOpportunityResponse",
@@ -66287,6 +67490,272 @@
         "summary": "Finalize",
         "tags": [
           "staff"
+        ]
+      }
+    },
+    "/api/v1/staffing-needs/{need_id}/reserve": {
+      "post": {
+        "operationId": "joinStaffingNeedReserve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "need_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Need Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__modules__activities__schemas__VersionCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReserveView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Join Reserve",
+        "tags": [
+          "activities",
+          "event-feed"
+        ]
+      }
+    },
+    "/api/v1/staffing-needs/{need_id}/sign-up": {
+      "post": {
+        "operationId": "signUpForStaffingNeed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "need_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Need Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUpCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentParticipationView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorView"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Sign Up",
+        "tags": [
+          "activities",
+          "event-feed"
         ]
       }
     },

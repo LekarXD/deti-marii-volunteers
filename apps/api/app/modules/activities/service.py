@@ -12,6 +12,7 @@ from .schemas import MatchExplanation, OpportunityCreate, OpportunityView, RoleC
 def role_view(role: VolunteerRole, staff=True):
     return RoleView(id=role.id, title=role.title, task=role.task,
         preparation_defaults=role.preparation_defaults, approval_policy=role.approval_policy,
+        direction=role.direction or '', skills=role.skills or [],
         archived_at=role.archived_at, version=role.version,
         allowed_actions=['update', 'restore' if role.archived_at else 'archive', 'history', 'usage'] if staff else [])
 

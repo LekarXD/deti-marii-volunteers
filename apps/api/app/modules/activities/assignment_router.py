@@ -15,6 +15,7 @@ from .assignment_schemas import AssignmentInvite,AssignmentParticipationPage,Ass
 from .schemas import VersionCommand
 from .router import command
 from . import assignment_service as service
+from .event_feed import plural
 
 router=APIRouter(tags=['participation'])
 coordinator=require_permission('assignments.manage')
@@ -72,11 +73,25 @@ async def prepare_response(response_id:UUID,body:ParticipationDecision,request:R
 
 @router.get('/coord/staffing-needs/{need_id}/suggestions',response_model=list[AssignmentSuggestion],operation_id='suggestAssignmentVolunteers')
 async def suggestions(need_id:UUID,q:str=Query('',max_length=200),principal:Principal=Depends(coordinator),db:AsyncSession=Depends(get_db)):
+    from app.core.clock import utcnow
     from .calendar_models import StaffingNeed
+    from . import ranking
     need=await db.get(StaffingNeed,need_id)
     if need is None or need.foundation_id!=principal.foundation_id:raise ApiError(404,'need_not_found','Потребность не найдена.')
-    rows=(await db.scalars(select(User).where(User.foundation_id==principal.foundation_id,User.account_state=='active',User.display_name.ilike('%'+q.replace('\\','\\\\').replace('%','\\%').replace('_','\\_')+'%',escape='\\')).order_by(User.display_name,User.id).limit(50))).all()
-    return [AssignmentSuggestion(user_id=user.id,display_name=user.display_name,reasons=[],missing_data=['availability','preparation']) for user in rows]
+    occurrence=await db.get(EventOccurrence,need.occurrence_id);now=utcnow()
+    names=dict((await db.execute(select(User.id,User.display_name).where(User.foundation_id==principal.foundation_id,User.account_state=='active',User.display_name.ilike('%'+q.replace('\\','\\\\').replace('%','\\%').replace('_','\\_')+'%',escape='\\')))).all())
+    facts=await ranking.load_facts(db,principal.foundation_id,list(names),now)
+    role=(await ranking.load_roles(db,principal.foundation_id,[need.role_id])).get(need.role_id)
+    statuses=dict((await db.execute(select(Assignment.user_id,Assignment.status).where(Assignment.foundation_id==principal.foundation_id,Assignment.occurrence_id==need.occurrence_id))).all())
+    ranked=sorted(((ranking.score_need(item,occurrence,role,now),item) for item in facts.values() if ranking.exclusion(item,occurrence) is None),
+        key=lambda pair:(-pair[0].score,-pair[0].familiar_visits,names[pair[1].user_id],str(pair[1].user_id)))[:50]
+    texts={'skill':'Подходит по навыку «{value}»','direction':'Подходит по направлению «{value}»','unknown_direction':'В анкете: «Пока не знаю»',
+        'familiar_new':'Недавно в этой группе','time_history':'Обычно приходит: {value}','time_window':'Удобно по графику: {value}'}
+    def text(reason):
+        if reason.code!='familiar':return texts[reason.code].format(value=reason.value)
+        return f'{reason.count} {plural(reason.count,"посещение","посещения","посещений")} этой группы за полгода'
+    return [AssignmentSuggestion(user_id=item.user_id,display_name=names[item.user_id],reasons=[text(reason) for reason in score.reasons],missing_data=ranking.missing_data(item),
+        facts={'invited':item.invited_count,'confirmed':item.confirmed_count,'attended':item.attended_count},invitation_status=statuses.get(item.user_id)) for score,item in ranked]
 
 
 @router.post('/coord/staffing-needs/{need_id}/invitations',response_model=AssignmentParticipationView,operation_id='inviteAssignmentVolunteer')

@@ -4,6 +4,8 @@ import {keys} from '../../api/keys';
 import type {components} from '../../api/generated/schema';
 export type AssignmentParticipation=components['schemas']['AssignmentParticipationView'];
 export type OpportunityResponse=components['schemas']['ParticipationResponseView'];
+/** The volunteer's own sign-up that the coordinator has not approved yet: nothing to answer. */
+export function awaitingCoordinator(item:Pick<AssignmentParticipation,'status'|'origin'|'approved_at'>){return item.status==='invited'&&item.origin==='self'&&!item.approved_at}
 export function useAssignments(staff=false,occurrenceId?:string){return useInfiniteQuery({queryKey:keys.list('activities',{kind:'assignments',staff,occurrenceId}),initialPageParam:'',queryFn:({signal,pageParam})=>api<components['schemas']['AssignmentParticipationPage']>(`${staff?'/coord':'/me'}/assignments?limit=100${occurrenceId?`&occurrence_id=${occurrenceId}`:''}${pageParam?`&cursor=${pageParam}`:''}`,{signal}),getNextPageParam:last=>last.next_cursor??undefined})}
 export function useAssignment(id:string|undefined){return useQuery({queryKey:keys.detail('activities',`assignment:${id}`),enabled:!!id,queryFn:({signal})=>api<AssignmentParticipation>(`/assignments/${id}`,{signal})})}
 export function useResponses(staff=false,opportunityId?:string){return useInfiniteQuery({queryKey:keys.list('activities',{kind:'responses',staff,opportunityId}),initialPageParam:'',queryFn:({signal,pageParam})=>api<components['schemas']['ParticipationResponsePage']>(`${staff?'/coord':'/me'}/responses?limit=100${opportunityId?`&opportunity_id=${opportunityId}`:''}${pageParam?`&cursor=${pageParam}`:''}`,{signal}),getNextPageParam:last=>last.next_cursor??undefined})}

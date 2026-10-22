@@ -11,8 +11,9 @@ from app.modules.profile.ledger import append_service_time,post_pending_attendan
 from app.modules.profile.service import active_for_invitations
 from app.modules.participants.access import AssignmentParticipantAccess
 from app.modules.participants.models import GroupMembership
-from .assignment_models import Assignment,AssignmentEvent,AssignmentParticipantSnapshot,AssignmentRequirementReview,Attendance,AttendanceEvent,OpportunityResponse,OpportunityResponseEvent
+from .assignment_models import Assignment,AssignmentEvent,AssignmentParticipantSnapshot,AssignmentRequirementReview,Attendance,AttendanceEvent,OpportunityResponse,OpportunityResponseEvent,StaffingNeedReserve
 from .assignment_schemas import AssignmentParticipationView,AssignmentReadinessItem,ParticipationResponseView
+from .event_feed_schemas import ReserveView
 from .calendar_models import EventOccurrence,StaffingNeed
 from .calendar_service import occurrence
 from .models import Opportunity,VolunteerRoleVersion
@@ -79,7 +80,7 @@ async def assignment_view(db,item,principal):
             if event.ends_at<=utcnow():actions.append('correct-attendance' if attendance else 'attendance')
     return AssignmentParticipationView(id=item.id,version=item.version,user_id=item.user_id,display_name=user.display_name,
         occurrence_id=item.occurrence_id,staffing_need_id=item.staffing_need_id,title=event.title,role_title=revision.snapshot['title'],
-        starts_at=event.starts_at,ends_at=event.ends_at,timezone=event.timezone,location=event.location,status=item.status,occurrence_status=event.status,approved_at=item.approved_at,
+        starts_at=event.starts_at,ends_at=event.ends_at,timezone=event.timezone,location=event.location,status=item.status,origin=item.origin or 'invitation',occurrence_status=event.status,approved_at=item.approved_at,
         confirmed_at=item.confirmed_at,conditions_version=item.conditions_version,readiness=await readiness(db,item),allowed_actions=list(dict.fromkeys(actions)),
         history=[{'command':h.command,'status':h.status,'reason':h.reason,'at':h.created_at.isoformat()} for h in history],
         attendance={'id':str(attendance.id),'version':attendance.version,'outcome':attendance.outcome,'minutes':attendance.minutes,'ledger_state':latest_attendance_event.ledger_state if latest_attendance_event else 'pending'} if attendance else None)
@@ -88,8 +89,33 @@ async def assignment_view(db,item,principal):
 async def assignment_event(db,principal,item,command,reason=''):
     await db.flush()
     db.add(AssignmentEvent(assignment_id=item.id,version=item.version,command=command,status=item.status,reason=reason,actor_id=principal.actor_id))
-    event_name={'invite':'invited','approve':'approved','confirm':'confirmed','declined':'declined','cancelled':'cancelled'}.get(command)
+    event_name={'invite':'invited','approve':'approved','confirm':'confirmed','declined':'declined','cancelled':'cancelled','reserve_offer':'offered'}.get(command)
     if event_name:enqueue_outbox(db,principal.foundation_id,'internal',{'event':f'assignment.{event_name}','assignment_id':str(item.id),'assignment_version':item.version})
+
+
+def conditions_snapshot(need):
+    return {'role_version_id':str(need.role_version_id),'preparation_requirements':need.preparation_requirements,'approval_policy':need.approval_policy}
+
+
+async def confirmed_count(db,need_id):
+    return await db.scalar(select(func.count()).select_from(Assignment).where(Assignment.staffing_need_id==need_id,Assignment.status=='confirmed'))
+
+
+async def sign_up_gate(db,foundation_id,user_id):
+    """None when the volunteer may sign up alone; otherwise (code, message) for the locked state."""
+    if not await active_for_invitations(db,foundation_id,user_id):
+        return 'volunteer_paused','Участие сейчас на паузе. Возобновите его в профиле, чтобы записаться.'
+    # Volunteers who already took part are trusted; newcomers sign up after the coordinator meeting.
+    if await db.scalar(select(Assignment.id).where(Assignment.foundation_id==foundation_id,Assignment.user_id==user_id,Assignment.confirmed_at.is_not(None)).limit(1)):return None
+    from app.modules.interviews.models import InterviewBooking
+    if await db.scalar(select(InterviewBooking.id).where(InterviewBooking.foundation_id==foundation_id,InterviewBooking.user_id==user_id,InterviewBooking.status=='completed').limit(1)):return None
+    return 'meeting_required','Записаться можно после встречи с координатором.'
+
+
+async def require_sign_up(db,principal):
+    require_user(principal)
+    gate=await sign_up_gate(db,principal.foundation_id,principal.user_id)
+    if gate:raise ApiError(409,gate[0],gate[1])
 
 
 async def invite(db,principal,need_id,body):
@@ -111,8 +137,8 @@ async def invite(db,principal,need_id,body):
     else:
         item=Assignment(foundation_id=principal.foundation_id,user_id=user.id,occurrence_id=event.id,staffing_need_id=need.id)
         db.add(item)
-    item.staffing_need_id=need.id;item.conditions_version=need.version;item.updated_at=utcnow()
-    item.conditions_snapshot={'role_version_id':str(need.role_version_id),'preparation_requirements':need.preparation_requirements,'approval_policy':need.approval_policy}
+    item.staffing_need_id=need.id;item.conditions_version=need.version;item.updated_at=utcnow();item.origin='invitation'
+    item.conditions_snapshot=conditions_snapshot(need)
     await assignment_event(db,principal,item,'invite')
     return await assignment_view(db,item,principal)
 
@@ -123,20 +149,28 @@ async def approve(db,principal,id,body):
     if item.conditions_version!=need.version:raise ApiError(409,'conditions_changed','Условия изменились. Пригласите волонтёра с обновлёнными условиями.')
     item.approved_at=utcnow();item.version+=1;item.updated_at=utcnow()
     await assignment_event(db,principal,item,'approve',body.reason)
+    if item.origin=='self' and event.starts_at>utcnow():
+        # The volunteer already said «записаться»; approval completes it unless a check fails.
+        try:await confirm_locked(db,principal,item,event,need,'Волонтёр записался сам, координатор согласовал участие.')
+        except ApiError:pass
     return await assignment_view(db,item,principal)
 
 
-async def confirm(db,principal,id,body):
-    require_user(principal)
-    item,event,need=await locked_assignment(db,principal,id,True);check_version(item,body.expected_version)
-    if item.status!='invited' or event.status!='scheduled' or event.ends_at<=utcnow():raise ApiError(409,'assignment_state_conflict','Подтверждение больше недоступно.')
-    if not await active_for_invitations(db,principal.foundation_id,item.user_id):raise ApiError(409,'volunteer_paused','Участие сейчас на паузе. Сначала возобновите его в профиле.')
+async def overlapping_commitment(db,item,event):
+    return await db.scalar(select(ResourceReservation.id).where(ResourceReservation.foundation_id==item.foundation_id,ResourceReservation.owner_key==f'user:{item.user_id}',
+        ResourceReservation.active.is_(True),ResourceReservation.starts_at<event.ends_at,ResourceReservation.busy_until>event.starts_at,
+        or_(ResourceReservation.source_type!='activity',ResourceReservation.source_id!=item.id)).limit(1))
+
+
+async def confirm_locked(db,principal,item,event,need,reason=''):
+    """Every check runs before the first write, so a caller may keep the transaction after an ApiError."""
+    if not await active_for_invitations(db,item.foundation_id,item.user_id):raise ApiError(409,'volunteer_paused','Участие сейчас на паузе. Сначала возобновите его в профиле.')
     if item.conditions_version!=need.version:raise ApiError(409,'conditions_changed','Условия изменились. Координатор должен обновить приглашение.')
     if item.conditions_snapshot['approval_policy']=='coordinator' and item.approved_at is None:raise ApiError(409,'approval_required','Сначала участие должен согласовать координатор.')
     pending=[r for r in await readiness(db,item) if r.level=='mandatory' and r.state=='pending']
     if pending:raise ApiError(409,'preparation_pending','Сначала выполните обязательную подготовку.',field_errors={r.key:r.title for r in pending})
-    confirmed=await db.scalar(select(func.count()).select_from(Assignment).where(Assignment.staffing_need_id==need.id,Assignment.status=='confirmed'))
-    if confirmed>=need.capacity_required:raise ApiError(409,'capacity_full','Все места уже подтверждены.')
+    if await confirmed_count(db,need.id)>=need.capacity_required:raise ApiError(409,'capacity_full','Все места уже подтверждены.')
+    if await overlapping_commitment(db,item,event):raise ApiError(409,'participation_overlap','В это время уже есть подтверждённое занятие или встреча.')
     reservation=await db.scalar(select(ResourceReservation).where(ResourceReservation.source_type=='activity',ResourceReservation.source_id==item.id).with_for_update())
     if reservation is None:
         reservation=ResourceReservation(foundation_id=principal.foundation_id,user_id=item.user_id,owner_key=f'user:{item.user_id}',source_type='activity',source_id=item.id,starts_at=event.starts_at,busy_until=event.ends_at,active=True);db.add(reservation)
@@ -148,8 +182,109 @@ async def confirm(db,principal,id,body):
         ids=(await db.scalars(select(GroupMembership.participant_id).where(GroupMembership.foundation_id==principal.foundation_id,GroupMembership.group_id==event.group_id,
             GroupMembership.valid_from<=event_date,or_(GroupMembership.valid_until.is_(None),GroupMembership.valid_until>event_date)))).all()
         for participant_id in ids:db.add(AssignmentParticipantSnapshot(assignment_id=item.id,participant_id=participant_id,foundation_id=principal.foundation_id))
-    await assignment_event(db,principal,item,'confirm')
+    await close_reserve(db,need.id,item.user_id)
+    await assignment_event(db,principal,item,'confirm',reason)
+
+
+async def confirm(db,principal,id,body):
+    require_user(principal)
+    item,event,need=await locked_assignment(db,principal,id,True);check_version(item,body.expected_version)
+    if item.status!='invited' or event.status!='scheduled' or event.ends_at<=utcnow():raise ApiError(409,'assignment_state_conflict','Подтверждение больше недоступно.')
+    await confirm_locked(db,principal,item,event,need)
     return await assignment_view(db,item,principal)
+
+
+async def open_need(db,principal,need_id,expected_version):
+    before=await db.get(StaffingNeed,need_id)
+    if before is None or before.foundation_id!=principal.foundation_id:raise ApiError(404,'need_not_found','Роль на занятии не найдена.')
+    event=await occurrence(db,principal,before.occurrence_id,True)
+    need=await db.scalar(select(StaffingNeed).where(StaffingNeed.id==need_id).with_for_update().execution_options(populate_existing=True))
+    check_version(need,expected_version)
+    if event.status!='scheduled' or event.starts_at<=utcnow() or need.capacity_required==0:raise ApiError(409,'event_not_open','Запись на это занятие закрыта.')
+    return event,need
+
+
+async def sign_up(db,principal,need_id,body):
+    """Volunteer's own sign-up: confirmed at once for self_confirmation, a request to the coordinator otherwise."""
+    await require_sign_up(db,principal)
+    event,need=await open_need(db,principal,need_id,body.expected_version)
+    item=await db.scalar(select(Assignment).where(Assignment.occurrence_id==event.id,Assignment.user_id==principal.user_id).with_for_update())
+    if item and item.status in ('invited','confirmed'):raise ApiError(409,'already_signed_up','Вы уже записаны на это занятие или ждёте ответа.',current_version=item.version)
+    if await confirmed_count(db,need.id)>=need.capacity_required:raise ApiError(409,'capacity_full','Все места уже заняты. Можно встать в резерв.')
+    if item is None:
+        item=Assignment(foundation_id=principal.foundation_id,user_id=principal.user_id,occurrence_id=event.id,staffing_need_id=need.id);db.add(item)
+    else:item.version+=1;item.approved_at=None;item.confirmed_at=None
+    item.status='invited';item.origin='self';item.staffing_need_id=need.id;item.conditions_version=need.version;item.updated_at=utcnow()
+    item.conditions_snapshot=conditions_snapshot(need)
+    await assignment_event(db,principal,item,'sign_up',body.message)
+    if need.approval_policy=='self_confirmation':await confirm_locked(db,principal,item,event,need)
+    else:await close_reserve(db,need.id,item.user_id)
+    return await assignment_view(db,item,principal)
+
+
+async def close_reserve(db,need_id,user_id):
+    await db.execute(update(StaffingNeedReserve).where(StaffingNeedReserve.staffing_need_id==need_id,StaffingNeedReserve.user_id==user_id,StaffingNeedReserve.state!='closed').values(
+        state='closed',version=StaffingNeedReserve.version+1,updated_at=utcnow()))
+
+
+async def reserve_view(db,row):
+    ahead=0
+    if row.state=='waiting':
+        ahead=await db.scalar(select(func.count()).select_from(StaffingNeedReserve).where(StaffingNeedReserve.staffing_need_id==row.staffing_need_id,StaffingNeedReserve.state=='waiting',
+            or_(StaffingNeedReserve.queued_at<row.queued_at,(StaffingNeedReserve.queued_at==row.queued_at)&(StaffingNeedReserve.id<row.id))))
+    return ReserveView(id=row.id,version=row.version,occurrence_id=row.occurrence_id,staffing_need_id=row.staffing_need_id,state=row.state,
+        position=ahead+1 if row.state=='waiting' else None,offered_assignment_id=row.offered_assignment_id,queued_at=row.queued_at,
+        allowed_actions=['leave'] if row.state in ('waiting','offered') else [])
+
+
+async def join_reserve(db,principal,need_id,body):
+    await require_sign_up(db,principal)
+    event,need=await open_need(db,principal,need_id,body.expected_version)
+    item=await db.scalar(select(Assignment).where(Assignment.occurrence_id==event.id,Assignment.user_id==principal.user_id))
+    if item and item.status in ('invited','confirmed'):raise ApiError(409,'already_signed_up','Вы уже записаны на это занятие или ждёте ответа.')
+    if await confirmed_count(db,need.id)<need.capacity_required:raise ApiError(409,'places_available','Места ещё есть — можно записаться.')
+    row=await db.scalar(select(StaffingNeedReserve).where(StaffingNeedReserve.staffing_need_id==need.id,StaffingNeedReserve.user_id==principal.user_id).with_for_update())
+    if row and row.state!='closed':raise ApiError(409,'already_in_reserve','Вы уже в резерве на эту роль.',current_version=row.version)
+    if row is None:
+        row=StaffingNeedReserve(foundation_id=principal.foundation_id,occurrence_id=event.id,staffing_need_id=need.id,user_id=principal.user_id,state='waiting');db.add(row)
+    else:row.state='waiting';row.version+=1;row.queued_at=utcnow();row.updated_at=utcnow();row.offered_assignment_id=None
+    await db.flush()
+    return await reserve_view(db,row)
+
+
+async def leave_reserve(db,principal,reserve_id,body):
+    require_user(principal)
+    row=await db.scalar(select(StaffingNeedReserve).where(StaffingNeedReserve.id==reserve_id,StaffingNeedReserve.foundation_id==principal.foundation_id,StaffingNeedReserve.user_id==principal.user_id).with_for_update())
+    if row is None:raise ApiError(404,'reserve_not_found','Запись в резерве не найдена.')
+    check_version(row,body.expected_version)
+    if row.state=='closed':raise ApiError(409,'reserve_state_conflict','Вы уже не в резерве.')
+    row.state='closed';row.version+=1;row.updated_at=utcnow()
+    await db.flush()
+    return await reserve_view(db,row)
+
+
+async def offer_reserved_places(db,principal,event,need):
+    """A freed place becomes an invitation for the next volunteer in the reserve queue, in queue order."""
+    if event.status!='scheduled' or event.starts_at<=utcnow():return
+    outstanding=await db.scalar(select(func.count()).select_from(Assignment).where(Assignment.staffing_need_id==need.id,Assignment.status=='invited',Assignment.origin=='reserve'))
+    free=need.capacity_required-await confirmed_count(db,need.id)-outstanding
+    if free<=0:return
+    rows=(await db.scalars(select(StaffingNeedReserve).where(StaffingNeedReserve.staffing_need_id==need.id,StaffingNeedReserve.state=='waiting')
+        .order_by(StaffingNeedReserve.queued_at,StaffingNeedReserve.id).with_for_update())).all()
+    for row in rows:
+        if free<=0:break
+        if not await active_for_invitations(db,row.foundation_id,row.user_id):continue
+        item=await db.scalar(select(Assignment).where(Assignment.occurrence_id==event.id,Assignment.user_id==row.user_id).with_for_update())
+        if item and item.status in ('invited','confirmed'):
+            row.state='closed';row.version+=1;row.updated_at=utcnow();continue
+        if item is None:
+            item=Assignment(foundation_id=row.foundation_id,user_id=row.user_id,occurrence_id=event.id,staffing_need_id=need.id);db.add(item)
+        else:item.version+=1;item.approved_at=None;item.confirmed_at=None
+        item.status='invited';item.origin='reserve';item.staffing_need_id=need.id;item.conditions_version=need.version;item.updated_at=utcnow()
+        item.conditions_snapshot=conditions_snapshot(need)
+        await assignment_event(db,principal,item,'reserve_offer','Освободилось место. Подтвердите участие, если сможете прийти.')
+        row.state='offered';row.offered_assignment_id=item.id;row.version+=1;row.updated_at=utcnow()
+        free-=1
 
 
 async def cancel(db,principal,id,body,status='cancelled',own=False):
@@ -160,7 +295,9 @@ async def cancel(db,principal,id,body,status='cancelled',own=False):
     if status=='declined' and item.status!='invited':raise ApiError(409,'already_confirmed','Для подтверждённого участия используйте отмену.')
     item.status=status;item.version+=1;item.updated_at=utcnow()
     await db.execute(update(ResourceReservation).where(ResourceReservation.source_type=='activity',ResourceReservation.source_id==item.id).values(active=False))
+    if item.origin=='reserve':await close_reserve(db,need.id,item.user_id)
     await assignment_event(db,principal,item,status,getattr(body,'reason',''))
+    await offer_reserved_places(db,principal,event,need)
     return await assignment_view(db,item,principal)
 
 

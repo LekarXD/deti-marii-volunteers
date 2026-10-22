@@ -21,7 +21,7 @@ export const coordinatorNavigation=allCoordinatorNavigation.map(group=>({...grou
 
 /** Current volunteer shell, limited to integrated routes with no invented detail context. */
 export const volunteerNavigation:NavigationGroup[]=[
- {label:'Возможности',icon:'search',links:[{label:'Направления фонда',to:'/opportunities'},{label:'Моё участие',to:'/my/assignments'}]},
+ {label:'Возможности',icon:'search',links:[{label:'Мероприятия',to:'/events'},{label:'Направления фонда',to:'/opportunities'},{label:'Моё участие',to:'/my/assignments'}]},
  {label:'Смены',icon:'calendar',links:[{label:'Мои смены',to:'/my/schedule'}]},
  {label:'Академия',icon:'academy',links:[{label:'Курсы',to:'/academy'},{label:'Тренажёр',to:'/simulator'},{label:'Вебинары',to:'/webinars'}]},
  {label:'Ещё',icon:'settings',links:[{label:'Сообщения',to:'/messages'},{label:'Мой путь',to:'/hours'},{label:'Профиль',to:'/profile'},{label:'ИИ-наставник',to:'/mentor'},{label:'Знакомство с фондом',to:'/onboarding'}]},

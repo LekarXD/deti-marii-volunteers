@@ -3,7 +3,9 @@ import {useQuery} from '@tanstack/react-query';
 import {Link} from 'react-router-dom';
 import {keys} from '../../api/keys';
 import {Button, Card, ErrorState, Icon, LoadingState} from '../../ui';
-import {usePersonalSchedule, type AssignmentParticipation} from '../activities/participationApi';
+import {awaitingCoordinator, usePersonalSchedule, type AssignmentParticipation} from '../activities/participationApi';
+import {feedRange, useEventFeed} from '../activities/eventsApi';
+import {EventTile, WhyRanking} from '../activities/EventsPage';
 import {usePreparation} from '../learning/api';
 import {readPreparation} from '../followups/api';
 import {assignmentWhen, homeScheduleRange, learningDestination, upcomingAssignments} from './model';
@@ -28,7 +30,11 @@ export function HomePage() {
     queryFn: ({signal}) => readPreparation(confirmed!.id, signal),
     enabled: Boolean(confirmed), staleTime: 0, refetchInterval: 15_000,
   });
-  const invitations = upcoming.filter(item => item.status === 'invited');
+  const invitations = upcoming.filter(item => item.status === 'invited' && !awaitingCoordinator(item));
+  const feedPeriod = feedRange();
+  const feed = useEventFeed(feedPeriod.from, feedPeriod.to);
+  const picked = (feed.data?.can_sign_up ? feed.data.items : []).filter(card => !card.full && !card.conflict).slice(0, 3);
+  const [why, setWhy] = useState(false);
   const retryAssignments = () => {void (assignments.isFetchNextPageError ? assignments.fetchNextPage() : assignments.refetch());};
   const tracks = learning.data?.assignments ?? [];
   const track = tracks.find(item => !item.completed) ?? tracks[0];
@@ -53,6 +59,12 @@ export function HomePage() {
       <div className="grid-3">{invitations.slice(0, 3).map(item => <Link className="card match home-invitation" key={item.id} to={`/my/assignments/${item.id}`}>
         <span className="art art-y" aria-hidden="true"><Icon name="calendar"/></span><span><span className="h3">{item.title}</span><span className="p home-line">{assignmentWhen(item, now).date}, {assignmentWhen(item, now).time}</span><span className="meta home-line">{item.timezone}</span></span><span className="match-foot"><span>Ответить на приглашение</span><Icon name="arrow-right"/></span>
       </Link>)}</div>
+    </section>}
+
+    {picked.length > 0 && <section className="section" aria-labelledby="home-picked">
+      <div className="section-head"><h2 className="h2" id="home-picked">Подобрано для тебя</h2><div className="home-picked-actions"><Button variant="ghost" size="sm" aria-expanded={why} onClick={() => setWhy(!why)}>Почему так</Button><Link className="btn btn-ghost btn-sm" to="/events">Все мероприятия</Link></div></div>
+      {why && <WhyRanking/>}
+      <div className="grid-3">{picked.map((card, index) => <EventTile key={card.occurrence_id} card={card} index={index}/>)}</div>
     </section>}
 
     <div className="grid-2 section home-support-grid">
@@ -87,10 +99,10 @@ function NextAssignment({item, now}: {item: AssignmentParticipation; now: number
   const when = assignmentWhen(item, now);
   const confirmed = item.status === 'confirmed';
   return <Card tone="hero" aria-labelledby="home-next"><div className="hero-grid"><div className="home-hero-copy">
-    <p className="eyebrow">{confirmed ? 'Ближайшее занятие' : 'Ближайшее приглашение'}</p>
+    <p className="eyebrow">{confirmed ? 'Ближайшее занятие' : awaitingCoordinator(item) ? 'Заявка у координатора' : 'Ближайшее приглашение'}</p>
     <h2 className="hero-when" id="home-next">{when.date}{' '}<span className="home-line">{when.time}</span></h2>
     <p className="lead">{item.title}</p><p className="p">{[item.location, item.timezone].filter(Boolean).join(', ')}</p>
-    <div className="home-actions"><Link className="btn btn-primary btn-lg" to={`/my/assignments/${item.id}${confirmed ? '/preparation' : ''}`}>{confirmed ? 'Подготовиться к выходу' : 'Ответить на приглашение'}</Link><Link className="btn btn-secondary btn-lg" to="/my/assignments">Моё участие</Link></div>
+    <div className="home-actions"><Link className="btn btn-primary btn-lg" to={`/my/assignments/${item.id}${confirmed ? '/preparation' : ''}`}>{confirmed ? 'Подготовиться к выходу' : awaitingCoordinator(item) ? 'Открыть участие' : 'Ответить на приглашение'}</Link><Link className="btn btn-secondary btn-lg" to="/my/assignments">Моё участие</Link></div>
     {confirmed && <div className="hero-note"><span className="row strong"><Icon name="check"/>Участие подтверждено</span></div>}
   </div><span className="hero-art" aria-hidden="true"><Icon name="palette"/></span></div></Card>;
 }

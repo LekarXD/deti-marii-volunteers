@@ -181,3 +181,6 @@ router.include_router(calendar_router)
 
 from .assignment_router import router as assignment_router
 router.include_router(assignment_router)
+
+from .event_feed_router import router as event_feed_router
+router.include_router(event_feed_router)

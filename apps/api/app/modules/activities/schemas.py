@@ -33,6 +33,26 @@ class RoleCreate(BaseModel):
     task: str = Field(default='', max_length=20000)
     preparation_defaults: list[PreparationRequirement] = Field(default_factory=list, max_length=100)
     approval_policy: ApprovalPolicy = 'coordinator'
+    direction: str = Field(default='', max_length=100)
+    skills: list[str] = Field(default_factory=list, max_length=30)
+
+    @field_validator('direction')
+    @classmethod
+    def known_direction(cls, value):
+        from .directions import matching_options
+        value = value.strip()
+        if value and value not in matching_options()['directions']:
+            raise ValueError('Выберите направление из анкеты.')
+        return value
+
+    @field_validator('skills')
+    @classmethod
+    def known_skills(cls, value):
+        from .directions import matching_options
+        known = set(matching_options()['skills'])
+        if any(skill not in known for skill in value):
+            raise ValueError('Выберите навыки из анкеты.')
+        return list(dict.fromkeys(value))
 
     @field_validator('preparation_defaults')
     @classmethod

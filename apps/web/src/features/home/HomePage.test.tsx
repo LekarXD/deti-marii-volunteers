@@ -15,7 +15,7 @@ import {assignmentWhen, homeScheduleRange, learningDestination, upcomingAssignme
 const now = Date.parse('2026-10-21T22:00:00Z');
 const assignment = (changes: Partial<AssignmentParticipation> = {}): AssignmentParticipation => ({
   id:'first', user_id:'volunteer', display_name:'Тестовый волонтёр', occurrence_id:'event', staffing_need_id:'need',
-  occurrence_status:'scheduled', title:'Мастерская', role_title:'Помощь на занятии', status:'confirmed', approved_at:null, confirmed_at:null,
+  occurrence_status:'scheduled', title:'Мастерская', role_title:'Помощь на занятии', status:'confirmed', origin:'invitation', approved_at:null, confirmed_at:null,
   starts_at:'2026-10-22T09:00:00Z', ends_at:'2026-10-22T11:00:00Z', timezone:'Europe/Moscow', location:'Мастерская фонда',
   readiness:[], history:[], allowed_actions:[], conditions_version:1, version:1, ...changes,
 });
@@ -31,6 +31,12 @@ const preparation: components['schemas']['AssignmentPreparationView'] = {
   checklist:[{key:'read',title:'Прочитать памятку',checked:true},{key:'bring',title:'Взять сменную обувь',checked:false}],
   checklist_version:1, questions:[], allowed_actions:[], version:1,
 };
+const eventCard = (title: string, changes: Partial<components['schemas']['VolunteerEventCard']> = {}): components['schemas']['VolunteerEventCard'] => ({
+  occurrence_id:title, series_id:'series', title, program:'Творческие мастерские', kind:'activity', format:'onsite', location:'Мастерская фонда', audience:'',
+  status:'scheduled', starts_at:'2026-10-24T11:00:00Z', ends_at:'2026-10-24T13:00:00Z', timezone:'Europe/Moscow', best_need_id:'need', reasons:[], full:false, conflict:false,
+  needs:[{id:'need', version:1, role_id:'role', role_title:'Ассистент педагога', task:'', required:4, confirmed:2, missing:2, approval_policy:'self_confirmation', preparation_requirements:[], allowed_actions:['sign-up']}], ...changes,
+});
+let feed: components['schemas']['VolunteerEventFeed'];
 let rows: AssignmentParticipation[];
 let nextRows: AssignmentParticipation[] | undefined;
 let learningError: Error | undefined;
@@ -41,7 +47,9 @@ const clients: QueryClient[] = [];
 beforeEach(() => {
   vi.spyOn(Date, 'now').mockReturnValue(now);
   rows = []; nextRows = undefined; learningError = undefined; assignmentsError = undefined; nextPageError = undefined;
+  feed = {algorithm_version:'rules-v3', can_sign_up:true, items:[]};
   apiSpy = vi.spyOn(transport, 'api').mockImplementation(async <T,>(path: string): Promise<T> => {
+    if (path.startsWith('/me/events?')) return feed as T;
     if(path.startsWith('/me/schedule?')) {
       if (assignmentsError) throw assignmentsError;
       if (path.includes('cursor=next') && nextPageError) throw nextPageError;
@@ -129,5 +137,24 @@ describe('volunteer home', () => {
     nextPageError=undefined;
     await userEvent.setup().click(screen.getByRole('button',{name:'Попробовать ещё раз'}));
     expect(await screen.findByText('Участие подтверждено')).toBeTruthy();
+  });
+  it('shows the top three open events from the server-ranked feed, never full ones or a score', async () => {
+    feed={algorithm_version:'rules-v3',can_sign_up:true,items:[eventCard('Арт-суббота'),eventCard('Выезд',{full:true}),eventCard('Шерстяной Базар'),eventCard('Экскурсия'),eventCard('Онлайн-афиша')]};
+    view();
+    const section=(await screen.findByRole('heading',{name:'Подобрано для тебя'})).closest('section') as HTMLElement;
+    const tiles=within(section).getAllByRole('link').filter(link=>link.getAttribute('href')?.startsWith('/events/'));
+    expect(tiles.map(link=>link.querySelector('.h3')?.textContent)).toEqual(['Арт-суббота','Шерстяной Базар','Экскурсия']);
+    expect(tiles[0].getAttribute('href')).toBe('/events/Арт-суббота');
+    expect(tiles[0].textContent).toContain('Записались 2 из 4');
+    expect(within(section).getByRole('link',{name:'Все мероприятия'}).getAttribute('href')).toBe('/events');
+    await userEvent.setup().click(within(section).getByRole('button',{name:'Почему так'}));
+    expect(within(section).getByText('роль подходит к твоей анкете;')).toBeTruthy();
+    expect(section.textContent).not.toMatch(/балл|score|%/i);
+  });
+  it('hides the picked events while sign-up is locked for a newcomer', async () => {
+    feed={algorithm_version:'rules-v3',can_sign_up:false,locked_reason:'meeting_required',locked_message:'Записаться можно после встречи с координатором.',items:[eventCard('Арт-суббота')]};
+    view();await screen.findByRole('heading',{name:'Впереди новые встречи'});
+    await waitFor(()=>expect(apiSpy.mock.calls.some(call=>String(call[0]).startsWith('/me/events?'))).toBe(true));
+    expect(screen.queryByText('Подобрано для тебя')).toBeNull();
   });
 });

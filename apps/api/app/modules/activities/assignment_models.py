@@ -45,6 +45,8 @@ class Assignment(Base):
     staffing_need_id:Mapped[UUID]=mapped_column(PGUUID(as_uuid=True))
     group_id_snapshot:Mapped[UUID|None]=mapped_column(PGUUID(as_uuid=True))
     status:Mapped[str]=mapped_column(String(20),default='invited')
+    # invitation: coordinator invited; self: volunteer signed up; reserve: offered from the reserve queue.
+    origin:Mapped[str]=mapped_column(String(20),default='invitation',server_default='invitation')
     approved_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True))
     confirmed_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True))
     conditions_version:Mapped[int]=mapped_column(BigInteger)
@@ -58,7 +60,27 @@ class Assignment(Base):
         ForeignKeyConstraint(['group_id_snapshot','foundation_id'],['participant_groups.id','participant_groups.foundation_id']),
         CheckConstraint("status IN ('invited','confirmed','declined','cancelled','expired')"),
         CheckConstraint("status <> 'confirmed' OR confirmed_at IS NOT NULL"),
+        CheckConstraint("origin IN ('invitation','self','reserve')",name='ck_assignment_origin'),
         Index('ix_assignment_user_scope','foundation_id','user_id','status','id'),Index('ix_assignment_need_status','staffing_need_id','status'))
+
+
+class StaffingNeedReserve(Base):
+    """A volunteer queued for a full role; a freed place becomes an invitation, never a silent booking."""
+    __tablename__='staffing_need_reserves'
+    id:Mapped[UUID]=mapped_column(PGUUID(as_uuid=True),primary_key=True,default=uuid4)
+    foundation_id:Mapped[UUID]=mapped_column(ForeignKey('foundations.id'))
+    occurrence_id:Mapped[UUID]=mapped_column(PGUUID(as_uuid=True))
+    staffing_need_id:Mapped[UUID]=mapped_column(PGUUID(as_uuid=True))
+    user_id:Mapped[UUID]=mapped_column(ForeignKey('users.id'))
+    state:Mapped[str]=mapped_column(String(20),default='waiting')
+    offered_assignment_id:Mapped[UUID|None]=mapped_column(ForeignKey('assignments.id'))
+    queued_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+    version:Mapped[int]=mapped_column(BigInteger,default=1)
+    updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=utcnow)
+    __table_args__=(UniqueConstraint('staffing_need_id','user_id'),
+        ForeignKeyConstraint(['staffing_need_id','occurrence_id','foundation_id'],['staffing_needs.id','staffing_needs.occurrence_id','staffing_needs.foundation_id']),
+        CheckConstraint("state IN ('waiting','offered','closed')",name='ck_reserve_state'),
+        Index('ix_reserve_queue','staffing_need_id','state','queued_at','id'),Index('ix_reserve_user','foundation_id','user_id','state'))
 
 
 class AssignmentEvent(Base):

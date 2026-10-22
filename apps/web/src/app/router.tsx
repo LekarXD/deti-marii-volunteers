@@ -49,6 +49,8 @@ export const router=createBrowserRouter([{
    {path:'opportunities',lazy:activity('OpportunitiesPage')},
    {path:'opportunities/:id',lazy:activity('OpportunityPage')},
    {path:'my/schedule',lazy:activity('PersonalSchedulePage')},
+   {path:'events',lazy:activity('EventsFeedPage')},
+   {path:'events/:id',lazy:activity('VolunteerEventPage')},
    {path:'webinars',lazy:page(()=>import('../features/studio'),'WebinarsPage')},
    {path:'my/assignments',lazy:activity('MyAssignmentsPage')},
    {path:'my/assignments/:id',lazy:activity('AssignmentPage')},

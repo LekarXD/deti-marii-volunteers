@@ -70,6 +70,7 @@ class AssignmentParticipationView(BaseModel):
     timezone:str
     location:str
     status:str
+    origin:Literal['invitation','self','reserve']='invitation'
     occurrence_status:str
     approved_at:datetime|None
     confirmed_at:datetime|None
@@ -84,10 +85,13 @@ class AssignmentParticipationPage(BaseModel):
     next_cursor:UUID|None=None
 
 class AssignmentSuggestion(BaseModel):
+    """Ordered by a private rules-v3 score; the number itself is never sent."""
     user_id:UUID
     display_name:str
     reasons:list[str]
     missing_data:list[str]
+    facts:dict[str,int]=Field(default_factory=dict) # lifetime: invited, confirmed, attended
+    invitation_status:str|None=None # this volunteer's assignment on the need's occurrence
 
 class AttendanceCommand(VersionCommand):
     outcome:Literal['attended','absent']

@@ -27,3 +27,5 @@
 /* Keep the mobile agenda controls aligned with the current prototype. */
 @media(max-width:767.98px){.activity-calendar-weekly>.head{flex-wrap:nowrap;justify-content:space-between;gap:8px}.activity-calendar-weekly>.head .h1{font-size:30px}.activity-calendar-weekly>.head .btn{flex:0 0 auto;white-space:nowrap;font-size:13px;padding:10px 12px}.activity-calendar-weekly>.head .btn>.ic{display:none}.activity-week-period{flex-wrap:wrap;gap:8px 4px}.activity-period-picker{flex:0 0 100%;min-width:0;padding-right:28px}.activity-period-picker h2{white-space:nowrap}.activity-week-strip button,.activity-week-strip button>b{font-size:13px;letter-spacing:normal}}
 @media(max-width:359px){.activity-calendar-weekly>.head{flex-wrap:wrap}.activity-week-day-month{display:none}.activity-week-strip button>b{font-size:15px;letter-spacing:normal}}
+.activity-role-skills{border:0;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:10px;min-width:0}.activity-role-skills .chip{border:1px solid var(--line-2)}
+.activity-suggestion{display:flex;flex-direction:column;gap:8px;margin:0 0 16px}.activity-suggestion ul{margin:0;padding-left:22px;color:var(--ink-2);line-height:1.6}

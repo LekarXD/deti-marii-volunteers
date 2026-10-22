@@ -22,6 +22,9 @@ class VolunteerRole(Base):
     task: Mapped[str] = mapped_column(Text, default="")
     preparation_defaults: Mapped[list] = mapped_column(JSONB, default=list)
     approval_policy: Mapped[str] = mapped_column(String(30), default="coordinator")
+    # Questionnaire vocabulary for event ranking; empty means «not authored yet».
+    direction: Mapped[str] = mapped_column(String(100), default="", server_default="")
+    skills: Mapped[list] = mapped_column(JSONB, default=list, server_default=text("'[]'::jsonb"))
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     version: Mapped[int] = mapped_column(BigInteger, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
@@ -103,4 +106,4 @@ class OpportunityVersion(Base):
 
 # Imported here for the shared model loader and Alembic registry.
 from .calendar_models import EventSeries, EventSeriesNeedTemplate, EventOccurrence, OccurrenceOverride, StaffingNeed, EventRevision  # noqa: E402,F401
-from .assignment_models import Assignment, AssignmentEvent, AssignmentParticipantSnapshot, AssignmentRequirementReview, Attendance, AttendanceEvent, OpportunityResponse, OpportunityResponseEvent  # noqa: E402,F401
+from .assignment_models import Assignment, AssignmentEvent, AssignmentParticipantSnapshot, AssignmentRequirementReview, Attendance, AttendanceEvent, OpportunityResponse, OpportunityResponseEvent, StaffingNeedReserve  # noqa: E402,F401
