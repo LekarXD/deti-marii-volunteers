@@ -29,15 +29,17 @@ from app.modules.auth.mfa import consume_code
 from app.core.rate_limit import rate_limit
 from .telegram_config import get_telegram_settings
 from .telegram_models import TelegramBinding
-router=APIRouter(prefix='/api/v1/integrations/telegram/bot',tags=['notifications'])
 SESSION_HOURS=12
 # Set by the proxies in front of the API (stage nginx: /api/ → api:8001 always sets X-Forwarded-Proto and -Prefix).
 PROXY_HEADERS=('x-forwarded-for','x-forwarded-proto','x-forwarded-prefix','x-forwarded-host','forwarded','x-real-ip')
 
 def via_proxy(request):return any(name in request.headers for name in PROXY_HEADERS)
 
-def internal_only(request):
+def internal_only(request:Request):
     if via_proxy(request):raise ApiError(404,'not_found','Не найдено')
+
+# Router-level, so it runs before sign-in checks: from outside these routes look absent, not protected.
+router=APIRouter(prefix='/api/v1/integrations/telegram/bot',tags=['notifications'],dependencies=[Depends(internal_only)])
 
 def check_bot_request(request):
     """A bot session counts only on a direct call with the service secret."""
@@ -63,8 +65,8 @@ class BotSessionView(BaseModel):
     expires_at:str
 
 @router.post('/sessions',response_model=BotSessionView,operation_id='telegram_bot_session_create')
-async def open_session(body:BotSessionCommand,request:Request,authorization:str=Header(''),db:AsyncSession=Depends(get_db)):
-    internal_only(request);check_bot_secret(authorization)
+async def open_session(body:BotSessionCommand,authorization:str=Header(''),db:AsyncSession=Depends(get_db)):
+    check_bot_secret(authorization)
     await rate_limit(db,f'telegram-bot:{body.telegram_user_id}','telegram_bot_session',limit=30,seconds=300)
     binding=await db.scalar(select(TelegramBinding).where(TelegramBinding.foundation_id==get_settings().foundation_id,TelegramBinding.telegram_user_id==body.telegram_user_id,TelegramBinding.revoked_at.is_(None)))
     user=await db.get(User,binding.user_id) if binding else None
@@ -86,7 +88,7 @@ class BotCoordinatorView(BaseModel):
 
 @router.post('/coordinator',response_model=BotCoordinatorView,operation_id='telegram_bot_coordinator')
 async def elevate(body:BotCoordinatorCommand,request:Request,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
-    internal_only(request);session=await get_session_row(request,db)
+    session=await get_session_row(request,db)
     if session.channel!='telegram_bot':raise ApiError(403,'telegram_bot_session_required','Только для сессии бота')
     await rate_limit(db,principal.actor_id,'telegram_bot_coordinator',limit=10,seconds=300)
     if not await db.scalar(select(StaffMembership.id).where(StaffMembership.user_id==principal.user_id,StaffMembership.foundation_id==principal.foundation_id,StaffMembership.revoked_at.is_(None))):

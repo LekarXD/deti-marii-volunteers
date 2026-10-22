@@ -147,7 +147,9 @@ async def test_bot_routes_webhook_and_bot_sessions_answer_only_inside_the_server
         async with session_client(app,token) as session:
             assert (await session.get(BASE)).status_code==200
             assert (await session.get(BASE,headers=proxied)).status_code==401
-            assert (await session.post(BOT.replace('sessions','coordinator'),json={},headers=proxied)).status_code in (401,404)
+            assert (await session.post(BOT.replace('sessions','coordinator'),json={},headers=proxied)).status_code==404
+        async with as_bot(app,None) as stranger:  # no session at all: still absent, not «войдите снова»
+            assert (await stranger.post(BOT.replace('sessions','coordinator'),json={},headers=proxied)).status_code==404
         hook=await client.post('/api/v1/integrations/telegram/webhook',json=update('bind_'+'a'*43),headers={'X-Telegram-Bot-Api-Secret-Token':'fixture_webhook_secret_'+('0'*32),**proxied})
         assert hook.status_code==404,hook.text
     finally:await client.aclose()
