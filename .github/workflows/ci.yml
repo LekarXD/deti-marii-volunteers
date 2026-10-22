@@ -38,11 +38,12 @@ jobs:
       OPORA_TELEGRAM_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_telegram_test
       OPORA_STAGE_DEMO_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_stage
       OPORA_PASSWORD_TEST_DATABASE_URL: postgresql+psycopg://opora:ci-local-only@127.0.0.1:5432/opora_welcome_auth_test
-      OPORA_ASSET_ROOT: ${{ runner.temp }}/opora-private-test-assets
       OPORA_ENVIRONMENT: development
       PYTHONPATH: apps/api
     steps:
       - uses: actions/checkout@v4
+      - name: Private test asset root
+        run: echo "OPORA_ASSET_ROOT=$RUNNER_TEMP/opora-private-test-assets" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - uses: actions/setup-node@v4
