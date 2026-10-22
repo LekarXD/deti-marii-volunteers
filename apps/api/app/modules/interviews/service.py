@@ -134,6 +134,15 @@ async def available_slot(db,p,id,version):
     if not any(a==base.starts_at and b==base.ends_at and busy==base.busy_until for _,_,a,b,busy in expand(row,base.origin_date,base.origin_date,excs)): fail("slot_unavailable","Это время больше недоступно.")
     return base,row
 
+def display_name(answers):
+    return " ".join(str((answers or {}).get(k,"")).strip() for k in ("firstName","lastName")).strip() or "Кандидат"
+
+async def candidate_names(db,application_ids):
+    ids={i for i in application_ids if i}
+    if not ids: return {}
+    rows=(await db.execute(select(Application.id,ApplicationRevision.answers).outerjoin(ApplicationRevision,ApplicationRevision.id==Application.submitted_revision_id).where(Application.id.in_(ids)))).all()
+    return {id:display_name(answers) for id,answers in rows}
+
 async def booking_view(db,row,staff=False):
     result=await db.scalar(select(InterviewResult).where(InterviewResult.booking_id==row.id))
     events=(await db.scalars(select(BookingEvent).where(BookingEvent.booking_id==row.id).order_by(BookingEvent.created_at))).all()
@@ -143,11 +152,48 @@ async def booking_view(db,row,staff=False):
     if staff:
         app=await db.get(Application,row.application_id)
         revision=await db.get(ApplicationRevision,app.submitted_revision_id) if app and app.submitted_revision_id else None
-        answers=revision.answers if revision else {}
-        out["candidate_name"]=" ".join(str(answers.get(k,"")).strip() for k in ("firstName","lastName")).strip() or "Кандидат"
+        out["candidate_name"]=display_name(revision.answers if revision else {})
         note=await db.scalar(select(InterviewPrivateNote).where(InterviewPrivateNote.booking_id==row.id))
         out["private_note"]=note.text if note else None
+        # The current time counts as confirmed when the candidate picked it; a staff move waits for them.
+        placed=[e for e in events if e.kind in ("booked","rescheduled")]
+        candidate={str(x) for x in (row.user_id,row.registration_id,app.user_id if app else None,app.registration_id if app else None) if x}
+        out["confirmed"]=not placed or placed[-1].actor_id in candidate
     return out
+
+async def calendar(db,p,start,end,view_timezone="Europe/Moscow"):
+    """The coordinator's own expanded slots for the week grid. A pure read: nothing is materialized."""
+    if end<start or (end-start).days>92: fail("range_too_large","Выберите период до 93 дней; можно перейти к любой дате.",422)
+    first=local_instant(start,0,view_timezone);last=local_instant(end+timedelta(days=1),0,view_timezone)
+    if first is None or last is None: fail("invalid_local_boundary","Выберите другой диапазон дат.",422)
+    series=(await db.scalars(select(AvailabilitySeries).where(AvailabilitySeries.foundation_id==p.foundation_id,AvailabilitySeries.coordinator_id==p.user_id,AvailabilitySeries.active.is_(True)).order_by(AvailabilitySeries.local_start_date,AvailabilitySeries.id))).all()
+    excs=(await db.scalars(select(AvailabilityException).where(AvailabilityException.series_id.in_([row.id for row in series])))).all() if series else []
+    bookings=(await db.scalars(select(InterviewBooking).where(InterviewBooking.foundation_id==p.foundation_id,InterviewBooking.coordinator_id==p.user_id,InterviewBooking.status.in_(("booked","completed","missed")),InterviewBooking.starts_at<last,InterviewBooking.busy_until>first).order_by(InterviewBooking.starts_at))).all()
+    names=await candidate_names(db,[b.application_id for b in bookings])
+    def booked(b):
+        return {"booking_id":b.id,"booking_status":b.status,"candidate_name":names.get(b.application_id,"Кандидат")}
+    items,used=[],set()
+    lo,hi=start-timedelta(days=2),end+timedelta(days=2)
+    for row in series:
+        own=[e for e in excs if e.series_id==row.id];by_date={e.origin_date:e for e in own}
+        def item(state,day,minute,a,b,**extra):
+            e=by_date.get(day);override=e is not None and e.kind=="override"
+            return {"starts_at":a,"ends_at":b,"state":state,"series_id":row.id,"series_version":row.version,"recurrence":row.recurrence,"timezone":row.timezone,"origin_date":day,"origin_minute":minute,
+                "window_start_minute":e.start_minute if override else row.start_minute,"window_end_minute":e.end_minute if override else row.end_minute,
+                "duration_minutes":row.duration_minutes,"buffer_after_minutes":row.buffer_after_minutes,"venue":row.venue,"join_url":row.join_url,**extra}
+        for day,minute,a,b,busy in expand(row,lo,hi,own):
+            match=next((x for x in bookings if x.starts_at==a and x.id not in used),None)
+            if match is not None:
+                used.add(match.id);items.append(item("booked",day,minute,a,b,**booked(match)));continue
+            # Another active booking covers this time; it is listed on its own.
+            if any(x.status=="booked" and x.starts_at<busy and x.busy_until>a for x in bookings): continue
+            items.append(item("free",day,minute,a,b))
+        for e in own:
+            if e.kind=="skip" and lo<=e.origin_date<=hi:
+                items.extend(item("skipped",day,minute,a,b) for day,minute,a,b,_ in expand(row,e.origin_date,e.origin_date))
+    # Bookings whose window was later changed or paused keep their own time.
+    items.extend({"starts_at":b.starts_at,"ends_at":b.ends_at,"state":"booked","venue":b.venue,"join_url":b.join_url,**booked(b)} for b in bookings if b.id not in used)
+    return sorted((x for x in items if first<=x["starts_at"]<last),key=lambda x:(x["starts_at"],x["state"]!="booked"))
 
 def snapshot(row):
     return {"starts_at":row.starts_at.isoformat(),"ends_at":row.ends_at.isoformat(),"status":row.status,"version":row.version,"slot_id":str(row.slot_id)}

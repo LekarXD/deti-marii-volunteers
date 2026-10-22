@@ -11,7 +11,7 @@ from app.core.errors import ApiError
 from app.core.idempotency import begin_command, finish_command
 from app.core.audit import audit
 from .models import AvailabilitySeries, AvailabilityException, InterviewSlot, InterviewBooking, InterviewResult, InterviewPrivateNote
-from .schemas import WindowInput, WindowUpdate, WindowView, PauseCommand, ExceptionCommand, BookingInput, MoveInput, CancelInput, CompleteInput, BookingView, StaffBookingView, SlotView
+from .schemas import WindowInput, WindowUpdate, WindowView, PauseCommand, ExceptionCommand, BookingInput, MoveInput, CancelInput, CompleteInput, BookingView, StaffBookingView, SlotView, CalendarSlotView
 from . import service as s
 
 router=APIRouter(prefix="/api/v1",tags=["interviews"])
@@ -52,6 +52,13 @@ async def slots(from_:date=Query(alias="from"),to:date=Query(),timezone_:str=Que
     result=await s.materialize(db,p,from_,to,timezone_)
     await db.commit()
     return result
+
+@router.get("/coord/interview-calendar",response_model=list[CalendarSlotView])
+async def interview_calendar(from_:date=Query(alias="from"),to:date=Query(),timezone_:str=Query(default="Europe/Moscow",alias="timezone"),db:AsyncSession=Depends(get_db),p:Principal=Depends(staff_dep)):
+    from zoneinfo import ZoneInfo,ZoneInfoNotFoundError
+    try: ZoneInfo(timezone_)
+    except (ValueError,ZoneInfoNotFoundError): raise ApiError(422,"invalid_timezone","Неизвестный часовой пояс")
+    return await s.calendar(db,p,from_,to,timezone_)
 
 @router.get("/coord/interview-availability",response_model=list[WindowView])
 async def windows(db:AsyncSession=Depends(get_db),p:Principal=Depends(staff_dep)):

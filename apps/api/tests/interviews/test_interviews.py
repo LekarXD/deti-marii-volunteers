@@ -214,3 +214,33 @@ async def test_result_follow_up_create_change_clear_no_contact_and_receipt_repla
     async with w.factory() as db:
         unchanged=await db.get(InterviewBooking,booking['id']);result=await db.scalar(select(InterviewResult).where(InterviewResult.id==result_id))
         assert unchanged.version==5 and result.next_contact_date==moved_date
+
+@pytest.mark.asyncio
+async def test_coordinator_calendar_states_without_writes_and_staff_move_waits_for_candidate(world):
+    from sqlalchemy import func
+    from app.modules.interviews.schemas import ExceptionCommand
+    from app.modules.interviews.models import InterviewSlot
+    w=world;start=date.today()-timedelta(days=date.today().weekday())+timedelta(weeks=2);msk=lambda day,minute:local_instant(day,minute,'Europe/Moscow')
+    weekly=await create_window(w,start,start_minute=600,end_minute=630,recurrence='weekly',weekdays=[0],buffer_after_minutes=0)
+    await create_window(w,start+timedelta(days=1),start_minute=600,end_minute=690,buffer_after_minutes=0)
+    async with w.factory() as db:await handlers.exception(weekly['id'],ExceptionCommand(expected_version=1,origin_date=start+timedelta(days=7),kind='skip'),db,w.staff,uuid4().hex)
+    async with w.factory() as db:
+        other=User(foundation_id=w.foundation.id,display_name='Other coordinator');db.add(other);await db.flush()
+        db.add(AvailabilitySeries(foundation_id=w.foundation.id,coordinator_id=other.id,local_start_date=start,start_minute=720,end_minute=750,venue='Elsewhere'));await db.commit()
+    tuesday=await slots(w,start+timedelta(days=1));booking=await book(w,w.candidates[0],tuesday[0])
+    async with w.factory() as db:before=await db.scalar(select(func.count()).select_from(InterviewSlot))
+    async with w.factory() as db:grid=await service.calendar(db,w.staff,start,start+timedelta(days=13))
+    async with w.factory() as db:assert await db.scalar(select(func.count()).select_from(InterviewSlot))==before
+    assert [(x['starts_at'],x['state']) for x in grid]==[(msk(start,600),'free'),(msk(start+timedelta(days=1),600),'booked'),(msk(start+timedelta(days=1),630),'free'),(msk(start+timedelta(days=1),660),'free'),(msk(start+timedelta(days=7),600),'skipped')]
+    assert grid[0]['recurrence']=='weekly' and grid[0]['window_start_minute']==600 and grid[0]['window_end_minute']==630 and str(grid[0]['series_id'])==weekly['id']
+    assert str(grid[1]['booking_id'])==booking['id'] and grid[1]['candidate_name']=='Candidate 0 Fixture' and grid[1]['recurrence']=='once'
+    async with w.factory() as db:assert (await handlers.staff_bookings(db,w.staff))[0]['confirmed'] is True
+    async with w.factory() as db:await handlers.move(booking['id'],MoveInput(slot_id=tuesday[1]['id'],slot_version=tuesday[1]['version'],expected_version=1),db,w.staff,uuid4().hex)
+    async with w.factory() as db:assert (await handlers.staff_bookings(db,w.staff))[0]['confirmed'] is False
+    async with w.factory() as db:await handlers.move(booking['id'],MoveInput(slot_id=tuesday[2]['id'],slot_version=tuesday[2]['version'],expected_version=2),db,w.candidates[0],uuid4().hex)
+    async with w.factory() as db:assert (await handlers.staff_bookings(db,w.staff))[0]['confirmed'] is True
+    async with w.factory() as db:grid=await service.calendar(db,w.staff,start+timedelta(days=1),start+timedelta(days=1))
+    assert [x['state'] for x in grid]==['free','free','booked']
+    with pytest.raises(ApiError) as wide:
+        async with w.factory() as db:await service.calendar(db,w.staff,start,start+timedelta(days=100))
+    assert wide.value.code=='range_too_large'

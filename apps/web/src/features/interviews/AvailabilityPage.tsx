@@ -1,26 +1,101 @@
-const windowCount=(count:number)=>`${count} ${{zero:'окон',one:'окно',two:'окна',few:'окна',many:'окон',other:'окна'}[new Intl.PluralRules('ru').select(count)]}`;
-import {useRef,useState} from 'react';
+import {useState} from 'react';
 import {Link} from 'react-router-dom';
-import {Button,Card,DatePicker,TimePicker,Combobox,Dialog,Field,Input,LoadingState,normalizeTime} from '../../ui';
-import {Availability,WindowInput,useAvailability,useInterviewCommand} from './api';
-import {today,addDays,dateLabel,hhmm,minutes,monday} from './date';
+import {Button,Icon,LoadingState,ErrorState,cx} from '../../ui';
+import {Availability,CalendarSlot,WindowInput,useAvailability,useCalendar,useInterviewCommand} from './api';
+import {initials} from './StaffInterviewPanel';
+import {addDays,hhmm,monday,mskDay,mskInstant,mskMinute,shortDate,today,weekLabel,weekdayIndex} from './date';
 import './interviews.css';
-const defaults=(day:string):WindowInput=>({local_start_date:day,start_minute:600,end_minute:720,timezone:'Europe/Moscow',recurrence:'once',interval_weeks:1,weekdays:[],duration_minutes:30,buffer_after_minutes:10,venue:'Онлайн, Яндекс Телемост',join_url:null,active:true,last_date:null});
-function WindowEditor({window,day,onClose}:{window:Availability|null;day:string;onClose:()=>void}){
- const [draft,setDraft]=useState<WindowInput>(window||defaults(day)),[exceptionDate,setExceptionDate]=useState(''),[exceptionKind,setExceptionKind]=useState('skip'),[exceptionStart,setExceptionStart]=useState('10:00'),[exceptionEnd,setExceptionEnd]=useState('12:00');
- const form=useRef<HTMLDivElement>(null);const [startText,setStartText]=useState(hhmm(draft.start_minute)),[endText,setEndText]=useState(hhmm(draft.end_minute)),[timeErrors,setTimeErrors]=useState<Record<string,string>>({});
- const focusError=()=>setTimeout(()=>form.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus(),0);
- const command=useInterviewCommand();
- const set=<K extends keyof WindowInput>(key:K,value:WindowInput[K])=>setDraft(d=>({...d,[key]:value}));
- const save=()=>{const start=normalizeTime(startText),end=normalizeTime(endText),errors:Record<string,string>={};if(!start)errors.start='Укажите время от 00:00 до 23:59';if(!end)errors.end='Укажите время от 00:00 до 23:59';else if(start&&end<=start)errors.end='Окончание должно быть позже начала';setTimeErrors(errors);if(Object.keys(errors).length){focusError();return;}command.mutate({path:window?`/coord/interview-availability/${window.id}`:'/coord/interview-availability',method:window?'PATCH':'POST',body:{...draft,start_minute:minutes(start!),end_minute:minutes(end!),join_url:draft.join_url||null,...(window?{expected_version:window.version}:{})}},{onSuccess:onClose});};
- const except=(kind:string,date=exceptionDate)=>{if(!window)return;const start=normalizeTime(exceptionStart),end=normalizeTime(exceptionEnd),errors:Record<string,string>={};if(kind==='override'){if(!start)errors.exceptionStart='Укажите время от 00:00 до 23:59';if(!end)errors.exceptionEnd='Укажите время от 00:00 до 23:59';else if(start&&end<=start)errors.exceptionEnd='Окончание должно быть позже начала';}setTimeErrors(errors);if(Object.keys(errors).length){focusError();return;}command.mutate({path:`/coord/interview-availability/${window.id}/exceptions`,body:{expected_version:window.version,origin_date:date,kind,...(kind==='override'?{start_minute:minutes(start!),end_minute:minutes(end!)}:{})}},{onSuccess:onClose});};
- return <Dialog open onClose={onClose} title={window?'Редактировать доступность':'Добавить свободное время'} footer={<><Button disabled={command.isPending} onClick={save}>Сохранить доступность</Button><Button variant="ghost" onClick={onClose}>Отмена</Button></>}><div ref={form} className="iv-form"><DatePicker label="Первая дата" value={draft.local_start_date} onChange={v=>set('local_start_date',v)}/><div className="iv-grid"><TimePicker label="С" value={startText} onDraftChange={v=>{setStartText(v);setTimeErrors({});}} onChange={setStartText} error={timeErrors.start}/><TimePicker label="До" value={endText} onDraftChange={v=>{setEndText(v);setTimeErrors({});}} onChange={setEndText} error={timeErrors.end}/></div><div className="iv-grid"><Combobox label="Длительность встречи" value={String(draft.duration_minutes)} onChange={v=>set('duration_minutes',Number(v))} options={[15,20,30,45,60].map(n=>({value:String(n),label:`${n} минут`}))}/><Field label="Перерыв после встречи, мин"><Input type="number" min={0} max={120} value={draft.buffer_after_minutes} onChange={e=>set('buffer_after_minutes',Number(e.target.value))}/></Field></div><Field label="Где встречаемся"><Input value={draft.venue} onChange={e=>set('venue',e.target.value)}/></Field><Field label="Ссылка на встречу"><Input type="url" value={draft.join_url||''} onChange={e=>set('join_url',e.target.value||null)} placeholder="https:// — если встреча онлайн"/></Field><Combobox label="Часовой пояс" value={draft.timezone||'Europe/Moscow'} onChange={v=>set('timezone',v)} options={['Europe/Moscow','Asia/Yekaterinburg','Asia/Novosibirsk','Europe/Berlin'].map(value=>({value,label:value}))}/><Combobox label="Повторение" value={draft.recurrence||'once'} onChange={v=>set('recurrence',v as 'once'|'weekly')} options={[{value:'once',label:'Только в этот день'},{value:'weekly',label:'По неделям'}]}/>{draft.recurrence==='weekly'&&<><Field label="Каждые N недель"><Input type="number" min={1} max={52} value={draft.interval_weeks} onChange={e=>set('interval_weeks',Number(e.target.value))}/></Field><div className="iv-weekdays" role="group" aria-label="Дни повторения">{['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((label,i)=><Button key={i} variant={(draft.weekdays||[]).includes(i)?'primary':'secondary'} aria-pressed={(draft.weekdays||[]).includes(i)} onClick={()=>set('weekdays',(draft.weekdays||[]).includes(i)?(draft.weekdays||[]).filter(d=>d!==i):[...(draft.weekdays||[]),i])}>{label}</Button>)}</div><p className="iv-meta">Если дни не выбраны, повторяем в день первой даты.</p><DatePicker label="Последняя дата (необязательно)" value={draft.last_date||''} min={draft.local_start_date} onChange={v=>set('last_date',v||null)}/>{draft.last_date&&<Button variant="ghost" onClick={()=>set('last_date',null)}>Без даты окончания</Button>}</>}
- {window&&<details><summary>Исключения для отдельных дат</summary><div className="iv-form"><DatePicker label="Дата исключения" value={exceptionDate} min={window.local_start_date} onChange={setExceptionDate}/><Combobox label="Что изменить" value={exceptionKind} onChange={setExceptionKind} options={[{value:'skip',label:'Не принимать записи'},{value:'override',label:'Другое время в этот день'}]}/>{exceptionKind==='override'&&<div className="iv-grid"><TimePicker label="С" value={exceptionStart} onDraftChange={v=>{setExceptionStart(v);setTimeErrors({});}} onChange={setExceptionStart} error={timeErrors.exceptionStart}/><TimePicker label="До" value={exceptionEnd} onDraftChange={v=>{setExceptionEnd(v);setTimeErrors({});}} onChange={setExceptionEnd} error={timeErrors.exceptionEnd}/></div>}<Button variant="secondary" disabled={!exceptionDate||command.isPending} onClick={()=>except(exceptionKind)}>Сохранить исключение</Button>{(window.exceptions||[]).map((e,i)=><div key={i} className="iv-heading"><span>{dateLabel(String(e.origin_date))}, {e.kind==='skip'?'Пропуск':'Другое время'}</span><Button variant="ghost" disabled={command.isPending} onClick={()=>except('restore',String(e.origin_date))}>Вернуть дату</Button></div>)}</div></details>}
- <p className="iv-hint">Изменение окна применяется ко всей серии. Если условия назначенных встреч изменятся, сначала перенесите их. Закрытие записи сохраняет встречи.</p>{command.error&&<p role="alert" className="iv-error">{command.error.message}</p>}</div></Dialog>;
+
+const weekdays=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],weekdaysLower=['пн','вт','ср','чт','пт','сб','вс'];
+const AHEAD=26,FIRST=600,LAST=1110;
+const longDate=(day:string)=>new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',timeZone:'UTC'}).format(new Date(`${day}T12:00:00Z`));
+const shortName=(name:string)=>{const [first,last]=name.split(/\s+/);return last?`${first} ${last[0]}.`:first;};
+const slotsWord=(n:number)=>({one:'слот',few:'слота',many:'слотов',other:'слота'} as Record<string,string>)[new Intl.PluralRules('ru').select(n)];
+const rank={booked:0,free:1,skipped:2};
+type Command={path:string;body:unknown;method?:'POST'|'PATCH'};
+const base=(venue:string,join_url:string|null):WindowInput=>({local_start_date:'',start_minute:0,end_minute:30,timezone:'Europe/Moscow',recurrence:'once',interval_weeks:1,weekdays:[],duration_minutes:30,buffer_after_minutes:0,venue,join_url,active:true,last_date:null});
+
+/** What closes one free slot: a skipped date of a single-slot window, a paused one-off window, or a narrower day of a longer window. */
+export function closeSlot(slot:CalendarSlot):Command[]{
+ const id=slot.series_id!,version=slot.series_version!,day=slot.origin_date!,m=slot.origin_minute!,start=slot.window_start_minute!,end=slot.window_end_minute!,length=slot.duration_minutes!,step=length+slot.buffer_after_minutes!;
+ const positions:number[]=[];for(let at=start;at+length<=end;at+=step)positions.push(at);
+ const exception=(body:object)=>({path:`/coord/interview-availability/${id}/exceptions`,body:{expected_version:version,origin_date:day,...body}});
+ if(positions.length<=1)return [slot.recurrence==='weekly'?exception({kind:'skip'}):{path:`/coord/interview-availability/${id}/pause`,body:{expected_version:version,active:false}}];
+ if(m===positions[0])return [exception({kind:'override',start_minute:start+step,end_minute:end})];
+ const narrowed=exception({kind:'override',start_minute:start,end_minute:m});
+ if(m===positions.at(-1))return [narrowed];
+ // A slot from the middle splits the day: the window keeps the first part, a one-off window takes the rest.
+ return [narrowed,{path:'/coord/interview-availability',body:{...base(slot.venue??'Онлайн',slot.join_url??null),local_start_date:day,start_minute:m+step,end_minute:end,timezone:slot.timezone??'Europe/Moscow',duration_minutes:length,buffer_after_minutes:slot.buffer_after_minutes}}];
 }
+
+/** One week of the coordinator's interview slots in Moscow time; a click opens or closes a half-hour slot. */
 export function AvailabilityPage(){
- const query=useAvailability(),command=useInterviewCommand(),[focus,setFocus]=useState(today),[editing,setEditing]=useState<Availability|null|undefined>(undefined);
- const first=monday(focus),rows=query.data||[];
- const occurs=(w:Availability,d:string)=>{if(d<w.local_start_date||(w.last_date&&d>w.last_date))return false;if(w.recurrence==='once')return w.local_start_date===d;const delta=Math.round((new Date(d+'T12:00Z').getTime()-new Date(monday(w.local_start_date)+'T12:00Z').getTime())/86400000);return ((w.weekdays?.length?w.weekdays:[(new Date(w.local_start_date+'T12:00Z').getUTCDay()+6)%7])).includes((new Date(d+'T12:00Z').getUTCDay()+6)%7)&&Math.floor(delta/7)%(w.interval_weeks||1)===0;};
- return <div className="iv-page"><div className="iv-heading"><h1>Моя доступность</h1><Link className="btn btn-ghost" to="/fund/interviews">← К собеседованиям</Link></div><div className="iv-period"><Button variant="ghost" onClick={()=>setFocus(addDays(focus,-7))} aria-label="Предыдущая неделя">←</Button><span>{dateLabel(first)} — {dateLabel(addDays(first,6))}</span><Button variant="ghost" onClick={()=>setFocus(addDays(focus,7))} aria-label="Следующая неделя">→</Button><Button variant="ghost" onClick={()=>setFocus(today())}>Сегодня</Button></div><DatePicker label="Перейти к дате" value={focus} onChange={setFocus}/><p className="iv-meta">У каждого окна свой часовой пояс</p><div className="iv-availability-layout"><div className="iv-day-list" role="tablist" aria-label="День недели">{Array.from({length:7},(_,i)=>addDays(first,i)).map(d=><button key={d} className={`iv-day ${focus===d?'is-on':''}`} role="tab" aria-selected={focus===d} onClick={()=>setFocus(d)}><b>{dateLabel(d)}</b><small>{windowCount(rows.filter(w=>occurs(w,d)).length)}</small></button>)}</div><Card><div className="iv-heading"><h2>{dateLabel(focus)}</h2><Button size="sm" onClick={()=>setEditing(null)}>Добавить время</Button></div>{query.isLoading?<LoadingState/>:query.error?<p role="alert">{query.error.message}</p>:rows.filter(w=>occurs(w,focus)).length?rows.filter(w=>occurs(w,focus)).map(w=><section key={w.id} className="iv-window"><div className="iv-heading"><h3>{hhmm(w.start_minute)}–{hhmm(w.end_minute)}</h3><span className="iv-badge">{w.active?'Открыта запись':'Закрыто'}</span></div><p>{w.duration_minutes} мин, перерыв {w.buffer_after_minutes} мин, {w.venue}</p><p className="iv-meta">{w.timezone}, {w.recurrence==='once'?'Один день':`Каждые ${w.interval_weeks} нед.`}</p>{(w.exceptions||[]).some(e=>e.origin_date===focus)&&<p className="iv-hint">Для этой даты сохранено исключение</p>}<div className="iv-actions"><Button variant="secondary" size="sm" onClick={()=>setEditing(w)}>Редактировать окно</Button><Button variant="ghost" size="sm" disabled={command.isPending} onClick={()=>command.mutate({path:`/coord/interview-availability/${w.id}/pause`,body:{expected_version:w.version,active:!w.active}})}>{w.active?'Закрыть свободное время':'Открыть запись'}</Button></div></section>):<div className="iv-empty"><h3>Запись на этот день не открыта</h3><p>Добавьте время, в которое можете проводить собеседования.</p></div>}{command.error&&<p role="alert" className="iv-error">{command.error.message}</p>}</Card></div>{editing!==undefined&&<WindowEditor key={editing?.id||'new'} window={editing} day={focus} onClose={()=>setEditing(undefined)}/>}</div>;
+ const current=monday(today()),[week,setWeek]=useState(current),[repeat,setRepeat]=useState(true),[flash,setFlash]=useState(''),[focus,setFocus]=useState<string|null>(null),[busy,setBusy]=useState(false);
+ const calendar=useCalendar(week,addDays(week,13)),windows=useAvailability(),command=useInterviewCommand(),now=Date.now();
+ const cells=new Map<string,CalendarSlot>();
+ for(const slot of calendar.data??[]){const key=`${mskDay(slot.starts_at)} ${Math.floor(mskMinute(slot.starts_at)/30)*30}`,seen=cells.get(key);if(!seen||rank[slot.state]<rank[seen.state])cells.set(key,slot);}
+ const days=Array.from({length:7},(_,i)=>addDays(week,i)),inWeek=(calendar.data??[]).filter(s=>days.includes(mskDay(s.starts_at)));
+ const lo=Math.min(FIRST,...inWeek.map(s=>Math.floor(mskMinute(s.starts_at)/30)*30)),hi=Math.max(LAST,...inWeek.map(s=>Math.floor(mskMinute(s.starts_at)/30)*30));
+ const times=Array.from({length:(hi-lo)/30+1},(_,i)=>lo+i*30);
+ // Venue and link follow the coordinator's latest window; interviews are online by default.
+ const latest=[...(windows.data??[])].filter(w=>w.active).at(-1),venue=latest?.venue??'Онлайн',link=latest?.join_url??null;
+ const run=async(commands:Command[])=>{for(const c of commands)await command.mutateAsync(c);};
+ const act=async(work:()=>Promise<string|void>)=>{if(busy)return;setBusy(true);setFlash('');setFocus(null);command.reset();try{const message=await work();if(message)setFlash(message);}catch{/* the command error is shown below the grid */}finally{setBusy(false);}};
+ const open=(day:string,minute:number,slot?:CalendarSlot)=>act(async()=>{
+  if(slot?.state==='skipped'&&slot.series_id)return void await run([{path:`/coord/interview-availability/${slot.series_id}/exceptions`,body:{expected_version:slot.series_version,origin_date:slot.origin_date,kind:'restore'}}]);
+  const paused=(windows.data??[]).find((w:Availability)=>!w.active&&w.recurrence==='once'&&w.local_start_date===day&&w.start_minute===minute&&w.end_minute===minute+30&&w.timezone==='Europe/Moscow');
+  if(paused)return void await run([{path:`/coord/interview-availability/${paused.id}/pause`,body:{expected_version:paused.version,active:true}}]);
+  await run([{path:'/coord/interview-availability',body:{...base(venue,link),local_start_date:day,start_minute:minute,end_minute:minute+30,...(repeat?{recurrence:'weekly',weekdays:[weekdayIndex(day)]}:{})}}]);
+ });
+ const copy=()=>act(async()=>{
+  let count=0;
+  for(const slot of inWeek.filter(s=>s.state==='free')){
+   const day=addDays(mskDay(slot.starts_at),7),minute=mskMinute(slot.starts_at),target=cells.get(`${day} ${Math.floor(minute/30)*30}`);
+   if(target&&target.state!=='skipped')continue;
+   await run(target?.series_id?[{path:`/coord/interview-availability/${target.series_id}/exceptions`,body:{expected_version:target.series_version,origin_date:target.origin_date,kind:'restore'}}]:[{path:'/coord/interview-availability',body:{...base(slot.venue??venue,slot.join_url??link),local_start_date:day,start_minute:minute,end_minute:minute+(slot.duration_minutes??30),duration_minutes:slot.duration_minutes??30}}]);
+   count++;
+  }
+  setWeek(addDays(week,7));
+  return count?`Скопировали ${count} ${slotsWord(count)}`:'Это время на следующей неделе уже открыто';
+ });
+ const focused=focus?cells.get(focus):undefined;
+ return <div className="iv-slots">
+  <Link className="iv-back" to="/fund/interviews"><Icon name="chevron-left"/>Собеседования</Link>
+  <div className="page-head"><h1 className="h1 iv-h1">Свободные слоты для собеседований</h1></div>
+  <section className="iv-wk" aria-label="Неделя">
+   <div className="iv-wk-bar">
+    <div className="iv-wk-nav">
+     <div className="iv-week-switch">
+      <button type="button" className="iconbtn" aria-label="Предыдущая неделя" disabled={week<=current} onClick={()=>{setWeek(addDays(week,-7));setFocus(null);setFlash('');}}><Icon name="chevron-left"/></button>
+      <b aria-live="polite">{weekLabel(week)}</b>
+      <button type="button" className="iconbtn" aria-label="Следующая неделя" disabled={week>=addDays(current,AHEAD*7)} onClick={()=>{setWeek(addDays(week,7));setFocus(null);setFlash('');}}><Icon name="chevron-right"/></button>
+     </div>
+     {week!==current&&<Button variant="ghost" size="sm" onClick={()=>{setWeek(current);setFocus(null);setFlash('');}}>Эта неделя</Button>}
+    </div>
+    <div className="iv-wk-tools">
+     <label className="iv-toggle-line"><button type="button" className={cx('toggle',repeat&&'is-on')} role="switch" aria-checked={repeat} aria-label="Повторять каждую неделю" onClick={()=>setRepeat(!repeat)}/>Повторять каждую неделю</label>
+     <Button variant="secondary" size="sm" disabled={busy||calendar.isLoading} onClick={()=>void copy()}>Скопировать на следующую</Button>
+    </div>
+   </div>
+   {flash&&<div className="iv-done iv-wk-note" role="status"><Icon name="check"/>{flash}</div>}
+   {command.error&&<p role="alert" className="iv-error iv-wk-note">{command.error.message}</p>}
+   {focused?.booking_id&&<div className="iv-focus">
+    <span className="iv-person"><span className="iv-ph iv-ph-sm iv-ph-b" aria-hidden="true">{initials(focused.candidate_name??'')}</span><span><span className="iv-person-name">{focused.candidate_name}</span><span className="meta">{weekdaysLower[weekdayIndex(mskDay(focused.starts_at))]}, {longDate(mskDay(focused.starts_at))}, {hhmm(mskMinute(focused.starts_at))}</span></span></span>
+    <Link className="btn btn-secondary btn-sm" to={`/fund/interviews?booking=${focused.booking_id}`}>Открыть собеседование</Link>
+   </div>}
+   {calendar.isLoading?<LoadingState/>:calendar.error?<ErrorState error={calendar.error} retry={()=>void calendar.refetch()}/>:<div className="iv-wk-scroll"><div className="iv-wk-grid" aria-busy={busy||undefined}>
+    <span className="iv-wk-corner">МСК</span>
+    {days.map((day,i)=><span key={day} className={cx('iv-wk-day',day===today()&&'is-today')}><b>{weekdays[i]}</b><span>{shortDate(day)}</span></span>)}
+    {times.map(minute=>[<span key={`t${minute}`} className="iv-wk-time">{hhmm(minute)}</span>,...days.map((day,i)=>{
+     const key=`${day} ${minute}`,slot=cells.get(key),past=mskInstant(day,minute).getTime()<=now,state=slot?.state==='skipped'?undefined:slot?.state;
+     const where=`${weekdaysLower[i]}, ${longDate(day)}, ${hhmm(minute)}`;
+     const cls=cx('iv-cell',state==='free'&&'free',state==='booked'&&'booked',past&&'past',!state&&!past&&'add');
+     if(state==='booked')return <button key={key} type="button" className={cls} aria-label={`${where}, занято: ${slot!.candidate_name}`} onClick={()=>{setFocus(key);setFlash('');}}>{shortName(slot!.candidate_name??'')}</button>;
+     if(past)return <span key={key} className={cls}>{state==='free'?'Свободно':''}</span>;
+     if(state==='free')return <button key={key} type="button" className={cls} aria-label={`${where}, свободно, убрать`} onClick={()=>void act(async()=>run(closeSlot(slot!)))}>Свободно</button>;
+     return <button key={key} type="button" className={cls} aria-label={`${where}, открыть время`} onClick={()=>void open(day,minute,slot)}/>;
+    })])}
+   </div></div>}
+  </section>
+ </div>;
 }

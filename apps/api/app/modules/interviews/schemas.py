@@ -90,3 +90,24 @@ class BookingView(BaseModel):
 class StaffBookingView(BookingView):
     candidate_name: str
     private_note: str | None = None
+    confirmed: bool = True
+class CalendarSlotView(BaseModel):
+    """One slot of the coordinator's own grid; series fields are empty for a booking whose window changed."""
+    starts_at: datetime
+    ends_at: datetime
+    state: Literal["free", "booked", "skipped"]
+    series_id: UUID | None = None
+    series_version: int | None = None
+    recurrence: Literal["once", "weekly"] | None = None
+    timezone: str | None = None
+    origin_date: date | None = None
+    origin_minute: int | None = None
+    window_start_minute: int | None = None
+    window_end_minute: int | None = None
+    duration_minutes: int | None = None
+    buffer_after_minutes: int | None = None
+    venue: str | None = None
+    join_url: str | None = None
+    booking_id: UUID | None = None
+    booking_status: str | None = None
+    candidate_name: str | None = None
