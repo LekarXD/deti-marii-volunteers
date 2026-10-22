@@ -64,3 +64,4 @@
  .crm-form-grid{grid-template-columns:minmax(0,1fr)}
  .crm-contacts>div{grid-template-columns:minmax(0,1fr);gap:4px}
 }
+.crm-trusted{background:var(--yellow-tint);color:var(--ink)}.crm-trusted .ic{width:18px;height:18px}

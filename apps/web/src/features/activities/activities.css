@@ -67,3 +67,6 @@
 .activity-prep-field .pick-add{display:flex;gap:8px;margin-top:12px;max-width:520px}.activity-prep-field .pick-add .input{min-height:44px;padding:10px 14px}.activity-prep-field .pick-add .btn{flex:0 0 auto}
 @media(max-width:900px){.activity-roles .role-row{grid-template-columns:52px minmax(0,1fr) 24px}.activity-roles .role-row>.meta{display:none}.activity-roles .role-edit{grid-template-columns:minmax(0,1fr);padding-left:16px}}
 @media(max-width:600px){.activity-roles .search{flex:1 1 100%;min-width:0}.activity-roles .toolbar .seg{width:100%}.activity-roles .toolbar .seg button{flex:1}.activity-roles .role-row{gap:12px;padding:14px 10px}.activity-roles .role-edit{padding:8px 10px 22px}}
+.activity-points{display:inline-flex;align-items:center;gap:8px;font-weight:600}.activity-points .ic{width:20px;height:20px}
+.activity-points-switch{display:flex;align-items:center;gap:12px;min-height:44px;margin-top:16px;font-size:16px;font-weight:500}
+.activity-status{margin:16px 0 0;padding:14px 16px;border-radius:18px;background:var(--yellow-tint);font-size:16px;line-height:1.45}.activity-status.is-done{background:var(--green-tint)}

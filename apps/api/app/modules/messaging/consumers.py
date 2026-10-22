@@ -62,7 +62,7 @@ async def deliver_internal(db,outbox,payload):
         if assignment is None or assignment.version!=payload.get('assignment_version'):
             return "suppressed_stale"
         event=payload['event']
-        labels={"assignment.invited":"Приглашение на занятие","assignment.approved":"Участие согласовано координатором","assignment.confirmed":"Участие подтверждено","assignment.declined":"Отказ от участия сохранён","assignment.cancelled":"Участие отменено","assignment.offered":"Освободилось место на занятии, подтвердите участие"}
+        labels={"assignment.invited":"Приглашение на занятие","assignment.approved":"Участие согласовано координатором","assignment.confirmed":"Участие подтверждено","assignment.declined":"Отказ от участия сохранён","assignment.cancelled":"Участие отменено","assignment.offered":"Освободилось место из резерва, координатор подтвердит участие"}
         expected={"assignment.invited":"invited","assignment.approved":"invited","assignment.confirmed":"confirmed","assignment.declined":"declined","assignment.cancelled":"cancelled","assignment.offered":"invited"}
         if event not in labels:
             return "unavailable"

@@ -69,6 +69,8 @@ async def assignment_view(db,item,principal):
     history=(await db.scalars(select(AssignmentEvent).where(AssignmentEvent.assignment_id==item.id).order_by(AssignmentEvent.version))).all()
     attendance=await db.scalar(select(Attendance).where(Attendance.assignment_id==item.id))
     latest_attendance_event=await db.scalar(select(AttendanceEvent).where(AttendanceEvent.attendance_id==attendance.id).order_by(AttendanceEvent.version.desc()).limit(1)) if attendance else None
+    # Until confirmation the volunteer sees the need's current multiplier; after it, the copy fixed at confirm.
+    multiplier=item.points_multiplier if item.confirmed_at else await db.scalar(select(StaffingNeed.points_multiplier).where(StaffingNeed.id==item.staffing_need_id))
     actions=[]
     if item.status=='invited' and event.status=='scheduled':
         if staff(principal):actions=['approve','review-requirement','cancel']
@@ -81,7 +83,7 @@ async def assignment_view(db,item,principal):
     return AssignmentParticipationView(id=item.id,version=item.version,user_id=item.user_id,display_name=user.display_name,
         occurrence_id=item.occurrence_id,staffing_need_id=item.staffing_need_id,title=event.title,role_title=revision.snapshot['title'],
         starts_at=event.starts_at,ends_at=event.ends_at,timezone=event.timezone,location=event.location,status=item.status,origin=item.origin or 'invitation',occurrence_status=event.status,approved_at=item.approved_at,
-        confirmed_at=item.confirmed_at,conditions_version=item.conditions_version,readiness=await readiness(db,item),allowed_actions=list(dict.fromkeys(actions)),
+        confirmed_at=item.confirmed_at,conditions_version=item.conditions_version,points_multiplier=multiplier,approval_required=item.origin in ('self','reserve'),readiness=await readiness(db,item),allowed_actions=list(dict.fromkeys(actions)),
         history=[{'command':h.command,'status':h.status,'reason':h.reason,'at':h.created_at.isoformat()} for h in history],
         attendance={'id':str(attendance.id),'version':attendance.version,'outcome':attendance.outcome,'minutes':attendance.minutes,'ledger_state':latest_attendance_event.ledger_state if latest_attendance_event else 'pending'} if attendance else None)
 
@@ -177,7 +179,7 @@ async def confirm_locked(db,principal,item,event,need,reason=''):
     if reservation is None:
         reservation=ResourceReservation(foundation_id=principal.foundation_id,user_id=item.user_id,owner_key=f'user:{item.user_id}',source_type='activity',source_id=item.id,starts_at=event.starts_at,busy_until=event.ends_at,active=True);db.add(reservation)
     else:reservation.starts_at=event.starts_at;reservation.busy_until=event.ends_at;reservation.active=True
-    item.status='confirmed';item.confirmed_at=utcnow();item.version+=1;item.updated_at=utcnow();item.group_id_snapshot=event.group_id
+    item.status='confirmed';item.confirmed_at=utcnow();item.version+=1;item.updated_at=utcnow();item.group_id_snapshot=event.group_id;item.points_multiplier=need.points_multiplier
     await db.execute(delete(AssignmentParticipantSnapshot).where(AssignmentParticipantSnapshot.assignment_id==item.id))
     if event.group_id:
         event_date=event.starts_at.astimezone(ZoneInfo(event.timezone)).date()

@@ -75,6 +75,8 @@ class AssignmentParticipationView(BaseModel):
     approved_at:datetime|None
     confirmed_at:datetime|None
     conditions_version:int
+    points_multiplier:float=1
+    approval_required:bool=False
     readiness:list[AssignmentReadinessItem]
     allowed_actions:list[str]
     history:list[dict]

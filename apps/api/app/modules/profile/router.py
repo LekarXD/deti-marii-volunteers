@@ -134,3 +134,62 @@ async def recognition_bases(principal:Principal=Depends(require_permission('reco
 @router.post('/coord/profile/documents',response_model=dto.ProfileDocumentView)
 async def staff_document_request(body:dto.StaffDocumentCommand,principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
     return await command(db,principal,'profile.document.staff_request',idempotency_key,body,lambda:documents.request_staff_document(db,principal,body),'recognition.manage')
+
+from . import prizes
+from app.modules.assets.router import AssetView,view as asset_view
+@router.get('/prizes',response_model=list[dto.PrizeView])
+async def prize_catalog(principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    service.require_user(principal)
+    return await prizes.catalog(db,principal)
+
+@router.get('/prizes/{prize_id}/photo')
+async def prize_photo(prize_id:UUID,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    from app.core.models import MediaAsset
+    from app.modules.assets.service import asset_content
+    service.require_user(principal)
+    row=await prizes.visible_prize(db,principal,prize_id)
+    asset=await db.get(MediaAsset,row.photo_asset_id) if row.photo_asset_id else None
+    if asset is None:raise ApiError(404,'asset_not_found','Файл не найден')
+    return await asset_content(db,asset)
+
+@router.get('/me/prize-requests',response_model=list[dto.PrizeRequestView])
+async def own_prize_requests(principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db)):
+    service.require_user(principal)
+    return await prizes.own_requests(db,principal)
+
+@router.post('/me/prize-requests',response_model=dto.PrizeRequestView)
+async def request_prize(body:dto.PrizeRequestCommand,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    return await command(db,principal,'profile.prize.request',idempotency_key,body,lambda:prizes.request_prize(db,principal,body))
+
+@router.post('/me/prize-requests/{request_id}/cancel',response_model=dto.PrizeRequestView)
+async def cancel_prize_request(request_id:UUID,body:dto.ProfileVersionCommand,principal:Principal=Depends(get_principal),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    return await command(db,principal,f'profile.prize.cancel:{request_id}',idempotency_key,body,lambda:prizes.close_request(db,principal,request_id,body.expected_version,'cancelled',own=True))
+
+@router.get('/coord/prizes',response_model=list[dto.PrizeView])
+async def staff_prize_catalog(principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db)):
+    return await prizes.catalog(db,principal,True)
+
+@router.post('/coord/prizes',response_model=dto.PrizeView)
+async def create_prize(body:dto.PrizeCommand,principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    return await command(db,principal,'profile.prize.create',idempotency_key,body,lambda:prizes.create_prize(db,principal,body),'recognition.manage')
+
+@router.put('/coord/prizes/{prize_id}',response_model=dto.PrizeView)
+async def update_prize(prize_id:UUID,body:dto.PrizeUpdateCommand,principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    return await command(db,principal,f'profile.prize.update:{prize_id}',idempotency_key,body,lambda:prizes.update_prize(db,principal,prize_id,body),'recognition.manage')
+
+@router.post('/coord/prizes/{prize_id}/photo-intents',response_model=AssetView)
+async def prize_photo_intent(prize_id:UUID,body:dto.PrizePhotoIntentCommand,principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    async def action():return asset_view(await prizes.photo_intent(db,principal,prize_id,body))
+    return await command(db,principal,f'profile.prize.photo:{prize_id}',idempotency_key,body,action,'recognition.manage')
+
+@router.get('/coord/prize-requests',response_model=list[dto.PrizeRequestView])
+async def prize_queue(principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db)):
+    return await prizes.queue(db,principal)
+
+@router.post('/coord/prize-requests/{request_id}/decision',response_model=dto.PrizeRequestView)
+async def decide_prize(request_id:UUID,body:dto.PrizeDecisionCommand,principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    return await command(db,principal,f'profile.prize.decision:{request_id}',idempotency_key,body,lambda:prizes.close_request(db,principal,request_id,body.expected_version,body.decision,body.reason),'recognition.manage')
+
+@router.post('/coord/points/adjustments',response_model=dto.PointsAdjustmentView)
+async def adjust_points(body:dto.PointsAdjustmentCommand,principal:Principal=Depends(require_permission('recognition.manage')),db:AsyncSession=Depends(get_db),idempotency_key:str|None=Header(default=None)):
+    return await command(db,principal,'profile.points.adjust',idempotency_key,body,lambda:prizes.adjust_points(db,principal,body),'recognition.manage')

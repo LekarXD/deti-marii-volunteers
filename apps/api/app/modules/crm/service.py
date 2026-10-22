@@ -110,7 +110,10 @@ async def volunteer_view(db,volunteer,detail=False,*,principal=None):
     if volunteer.user_id is not None and principal is not None:
         from app.modules.followups.service import latest_reflection_for_user
         latest_reflection=await latest_reflection_for_user(db,volunteer.foundation_id,volunteer.user_id,principal=principal)
-    return CrmVolunteerView(**values,latest_reflection=latest_reflection,agreements=[AgreementView(id=a.id,text=a.text,role_context=a.role_context,valid_until=a.valid_until,created_at=a.created_at) for a in agreements],
+    # «Опора фонда» level: shown to staff only, never to the volunteer.
+    from app.modules.profile.ledger import trusted_with_newcomers
+    trusted=volunteer.user_id is not None and await trusted_with_newcomers(db,volunteer.foundation_id,volunteer.user_id)
+    return CrmVolunteerView(**values,latest_reflection=latest_reflection,trusted_with_newcomers=trusted,agreements=[AgreementView(id=a.id,text=a.text,role_context=a.role_context,valid_until=a.valid_until,created_at=a.created_at) for a in agreements],
         contact_events=[ContactEventView(id=e.id,kind=e.kind,direction=e.direction,text=e.text,occurred_at=e.occurred_at) for e in events],
         follow_up_tasks=[task_view(task) for task in tasks],merged_record_ids=ids[1:])
 

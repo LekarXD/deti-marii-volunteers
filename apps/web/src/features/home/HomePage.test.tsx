@@ -17,7 +17,7 @@ const assignment = (changes: Partial<AssignmentParticipation> = {}): AssignmentP
   id:'first', user_id:'volunteer', display_name:'Тестовый волонтёр', occurrence_id:'event', staffing_need_id:'need',
   occurrence_status:'scheduled', title:'Мастерская', role_title:'Помощь на занятии', status:'confirmed', origin:'invitation', approved_at:null, confirmed_at:null,
   starts_at:'2026-10-22T09:00:00Z', ends_at:'2026-10-22T11:00:00Z', timezone:'Europe/Moscow', location:'Мастерская фонда',
-  readiness:[], history:[], allowed_actions:[], conditions_version:1, version:1, ...changes,
+  readiness:[], history:[], allowed_actions:[], conditions_version:1, points_multiplier:1, approval_required:false, version:1, ...changes,
 });
 const track: Assignment = {id:'learning', track_id:'track', track_key:'intro', release_id:'release', release_number:1, change_note:'',
   title:'Подготовка к занятию', intro:'Полезные материалы', acknowledged:false, completed:false,
@@ -37,6 +37,9 @@ const eventCard = (title: string, changes: Partial<components['schemas']['Volunt
   needs:[{id:'need', version:1, role_id:'role', role_title:'Ассистент педагога', task:'', required:4, confirmed:2, missing:2, approval_policy:'self_confirmation', preparation_requirements:[], allowed_actions:['sign-up']}], ...changes,
 });
 let feed: components['schemas']['VolunteerEventFeed'];
+const blankHours: components['schemas']['HoursView'] = {total_minutes:0, confirmed_assignments:0, pending_minutes:0, ledger_pending:0, entries:[], manual_requests:[], achievements:[], gratitudes:[],
+  level:{key:null, title:null, next_title:'Первые шаги', next_minutes:null, letter_hint:false, steps:[{key:'first_steps',title:'Первые шаги',minutes:null,reached:false,current:false},{key:'team',title:'В команде',minutes:1200,reached:false,current:false},{key:'friend',title:'Друг фонда',minutes:3000,reached:false,current:false},{key:'pillar',title:'Опора фонда',minutes:6000,reached:false,current:false}]}, points:{balance:0, earned:0, reserved:0, spent:0, can_request:false, history:[]}};
+let hours: components['schemas']['HoursView'];
 let rows: AssignmentParticipation[];
 let nextRows: AssignmentParticipation[] | undefined;
 let learningError: Error | undefined;
@@ -46,7 +49,7 @@ let apiSpy: MockInstance<typeof transport.api>;
 const clients: QueryClient[] = [];
 beforeEach(() => {
   vi.spyOn(Date, 'now').mockReturnValue(now);
-  rows = []; nextRows = undefined; learningError = undefined; assignmentsError = undefined; nextPageError = undefined;
+  rows = []; hours = blankHours; nextRows = undefined; learningError = undefined; assignmentsError = undefined; nextPageError = undefined;
   feed = {algorithm_version:'rules-v3', can_sign_up:true, items:[]};
   apiSpy = vi.spyOn(transport, 'api').mockImplementation(async <T,>(path: string): Promise<T> => {
     if (path.startsWith('/me/events?')) return feed as T;
@@ -57,6 +60,7 @@ beforeEach(() => {
     }
     if (path === '/api/v1/me/preparation') {if(learningError) throw learningError; return learning as T;}
     if (path === '/me/assignments/first/preparation') return preparation as T;
+    if (path === '/me/hours') return hours as T;
     throw new Error(`Unexpected home API: ${path}`);
   });
 });
@@ -116,6 +120,13 @@ describe('volunteer home', () => {
     expect(screen.getByRole('link',{name:'Знакомство с координатором'}).getAttribute('href')).toBe('/interviews');
     expect(screen.getByRole('link',{name:'Посмотреть возможности'}).getAttribute('href')).toBe('/opportunities');
     expect(screen.queryByText(/Анна|недель подряд|Совпадение|Подобрано для тебя/)).toBeNull();
+  });
+  it('shows level, hours and points from the server on the my path card', async () => {
+    hours={...blankHours, total_minutes:2760, level:{key:'team', title:'В команде', next_title:'Друг фонда', next_minutes:3000, letter_hint:false, steps:[{key:'first_steps',title:'Первые шаги',minutes:null,reached:true,current:false},{key:'team',title:'В команде',minutes:1200,reached:true,current:true},{key:'friend',title:'Друг фонда',minutes:3000,reached:false,current:false},{key:'pillar',title:'Опора фонда',minutes:6000,reached:false,current:false}]}, points:{...blankHours.points, balance:460}};
+    view();const card=await screen.findByRole('link',{name:'Мой путь'});
+    expect(card.getAttribute('href')).toBe('/hours');
+    expect(within(card).getByRole('heading',{name:'В команде'})).toBeTruthy();expect(within(card).getByText('46 часов помощи, до «Друг фонда» 4 часа')).toBeTruthy();
+    expect(within(card).getByText('460 баллов')).toBeTruthy();expect(within(card).getByText('Опора фонда')).toBeTruthy();
   });
   it('retains the confirmed assignment when learning fails and retries only the failed read', async () => {
     rows=[assignment()];learningError=new Error('Обучение временно недоступно');view();
