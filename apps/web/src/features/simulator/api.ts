@@ -3,11 +3,11 @@ import {useInfiniteQuery,useMutation,useQuery,useQueryClient} from '@tanstack/re
 import {api} from '../../api/transport';
 import {keys} from '../../api/keys';
 import type {components} from '../../api/generated/schema';
-export type ScenarioDraft=components['schemas']['SimulatorScenarioDraft'];
+export type ScenarioDraft=components['schemas']['SimulatorScenarioDraft-Output'];
 export type ScenarioStaff=components['schemas']['SimulatorScenarioStaffView'];
 export type ScenarioPublic=components['schemas']['SimulatorScenarioPublicView'];
 export type SimulationAttempt=components['schemas']['SimulatorSessionView'];
-export type SimulationAssessment=components['schemas']['SimulatorAssessmentOutput'];
+export type SimulationAssessment=components['schemas']['SimulatorAssessmentOutput-Output'];
 export type SimulationTestRun=components['schemas']['SimulatorTestRunView'];
 export function useScenarios(staff=false){return useInfiniteQuery({queryKey:keys.list('simulator',{staff}),initialPageParam:'',queryFn:({signal,pageParam})=>api<{items:(ScenarioStaff|ScenarioPublic)[];next_cursor?:string|null}>(`${staff?'/coord':''}/simulator/scenarios?limit=100${pageParam?`&cursor=${pageParam}`:''}`,{signal}),getNextPageParam:last=>last.next_cursor??undefined})}
 export function usePublishedScenario(id:string|undefined){return useQuery({queryKey:keys.detail('simulator',`published:${id}`),enabled:!!id,queryFn:({signal})=>api<ScenarioPublic>(`/simulator/scenarios/${id}`,{signal})})}

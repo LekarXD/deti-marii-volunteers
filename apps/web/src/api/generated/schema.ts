@@ -12896,7 +12896,7 @@ export interface components {
         };
         /** SimulatorAppealView */
         SimulatorAppealView: {
-            corrected_result?: components["schemas"]["SimulatorAssessmentOutput"] | null;
+            corrected_result?: components["schemas"]["SimulatorAssessmentOutput-Output"] | null;
             /**
              * Id
              * Format: uuid
@@ -12912,7 +12912,14 @@ export interface components {
             version: number;
         };
         /** SimulatorAssessmentOutput */
-        SimulatorAssessmentOutput: {
+        "SimulatorAssessmentOutput-Input": {
+            /** Criteria */
+            criteria: components["schemas"]["SimulatorCriterionAssessment"][];
+            /** Summary */
+            summary: string;
+        };
+        /** SimulatorAssessmentOutput */
+        "SimulatorAssessmentOutput-Output": {
             /** Criteria */
             criteria: components["schemas"]["SimulatorCriterionAssessment"][];
             /** Summary */
@@ -13016,7 +13023,7 @@ export interface components {
             model: string;
             /** Prompt Version */
             prompt_version: string;
-            result: components["schemas"]["SimulatorAssessmentOutput"] | null;
+            result: components["schemas"]["SimulatorAssessmentOutput-Output"] | null;
             /**
              * Rubric Version Id
              * Format: uuid
@@ -13054,7 +13061,7 @@ export interface components {
         };
         /** SimulatorHumanReview */
         SimulatorHumanReview: {
-            corrected_result?: components["schemas"]["SimulatorAssessmentOutput"] | null;
+            corrected_result?: components["schemas"]["SimulatorAssessmentOutput-Input"] | null;
             /** Expected Version */
             expected_version: number;
             /** Response */
@@ -13111,7 +13118,45 @@ export interface components {
             version: number;
         };
         /** SimulatorScenarioDraft */
-        SimulatorScenarioDraft: {
+        "SimulatorScenarioDraft-Input": {
+            /**
+             * Character Name
+             * @default
+             */
+            character_name: string;
+            /**
+             * Character Profile
+             * @default
+             */
+            character_profile: string;
+            /** Criteria */
+            criteria?: components["schemas"]["SimulatorCriterion"][];
+            /** Evaluation Cases */
+            evaluation_cases?: components["schemas"]["SimulatorEvaluationCase"][];
+            /**
+             * First Turn
+             * @default
+             */
+            first_turn: string;
+            /** Hints */
+            hints?: string[];
+            /** Methods */
+            methods?: string[];
+            /**
+             * Situation
+             * @default
+             */
+            situation: string;
+            /** Title */
+            title: string;
+            /**
+             * Warning
+             * @default
+             */
+            warning: string;
+        };
+        /** SimulatorScenarioDraft */
+        "SimulatorScenarioDraft-Output": {
             /**
              * Character Name
              * @default
@@ -13194,7 +13239,7 @@ export interface components {
             allowed_actions: string[];
             /** Archived At */
             archived_at: string | null;
-            draft: components["schemas"]["SimulatorScenarioDraft"];
+            draft: components["schemas"]["SimulatorScenarioDraft-Output"];
             /**
              * Id
              * Format: uuid
@@ -36525,7 +36570,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SimulatorScenarioDraft"][];
+                    "application/json": components["schemas"]["SimulatorScenarioDraft-Output"][];
                 };
             };
             /** @description Bad Request */
@@ -36708,7 +36753,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SimulatorScenarioDraft"];
+                "application/json": components["schemas"]["SimulatorScenarioDraft-Input"];
             };
         };
         responses: {
