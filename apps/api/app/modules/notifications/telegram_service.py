@@ -11,6 +11,7 @@ from app.core.errors import ApiError
 from app.core.idempotency import begin_command,finish_command
 from app.core.models import ContactChannel,Session,User
 from app.core.rate_limit import rate_limit
+from .telegram_bot import revoke_bot_sessions
 from .telegram_config import get_telegram_settings
 from .telegram_models import TelegramBinding,TelegramLinkToken
 from .telegram_schemas import TelegramBindingView,TelegramLinkTokenView
@@ -71,7 +72,7 @@ async def disconnect(db,principal,command,key):
     if previous is not None:return await status_view(db,principal)
     binding=await current_binding(db,principal,True)
     if command.expected_version!=(binding.version if binding else 0):raise ApiError(409,'version_conflict','Привязка изменилась. Обновите состояние')
-    if binding:binding.revoked_at=utcnow();binding.version+=1
+    if binding:binding.revoked_at=utcnow();binding.version+=1;await revoke_bot_sessions(db,principal.foundation_id,principal.user_id)
     await revoke_tokens(db,principal)
     audit(db,principal,'notifications.telegram.disconnect','user',principal.user_id,('telegram_binding',))
     await finish_command(db,principal,'notifications.telegram.disconnect',key,{'state':'disconnected'})

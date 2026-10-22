@@ -39,9 +39,11 @@ class RegistrationSession(IdentityMixin, Base):
 
 class Session(IdentityMixin, Base):
     __tablename__ = "sessions"
-    __table_args__ = (CheckConstraint("(user_id IS NULL) <> (registration_id IS NULL)", name="session_one_owner"),)
+    __table_args__ = (CheckConstraint("(user_id IS NULL) <> (registration_id IS NULL)", name="session_one_owner"),CheckConstraint("channel IN ('web','telegram_bot') AND (channel = 'web' OR user_id IS NOT NULL)", name="session_channel"))
     foundation_id: Mapped[UUID] = mapped_column(ForeignKey("foundations.id"))
     token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    # telegram_bot: issued to the bot for one bound user; never a browser cookie, staff only after the bot's MFA step.
+    channel: Mapped[str] = mapped_column(String(20), default="web", server_default="web")
     csrf_hash: Mapped[str] = mapped_column(String(64))
     csrf_cipher: Mapped[str] = mapped_column(Text)
     user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
