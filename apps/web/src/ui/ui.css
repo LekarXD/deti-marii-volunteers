@@ -26,6 +26,11 @@
 .title-tabs a:hover{color:var(--ink-2);text-decoration:none}
 .title-tabs h1{color:var(--ink)}
 @media(max-width:720px){.title-tabs{gap:4px 20px}.title-tabs a,.title-tabs h1{font-size:26px}}
+/* Staff disclosures: a chevron after the title instead of the browser's triangle. */
+.is-staff details>summary{list-style:none;display:flex;align-items:center;gap:10px}
+.is-staff details>summary::-webkit-details-marker{display:none}
+.is-staff details>summary::after{content:"";flex:none;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg)}
+.is-staff details[open]>summary::after{transform:translateY(2px) rotate(-135deg)}
 .page-section{display:grid;gap:0;min-width:0}
 .page-section+.page-section{margin-top:48px}
 .opora-content section>.h2:first-child{margin-bottom:16px}

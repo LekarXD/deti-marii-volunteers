@@ -8,7 +8,7 @@ type RecurrenceRule=components['schemas']['RecurrenceRule'];
 export const plural=(n:number,one:string,few:string,many:string)=>{const a=n%10,b=n%100;return a===1&&b!==11?one:a>=2&&a<=4&&(b<12||b>14)?few:many;};
 export const responsesLabel=(n:number)=>`${n} ${plural(n,'отклик','отклика','откликов')}`;
 export const firstName=(name:string)=>name.trim().split(/\s+/)[0]||name;
-const initials=(name:string)=>name.trim().split(/\s+/).slice(0,2).map(part=>part[0]??'').join('').toUpperCase();
+const initials=(name:string)=>name.trim().split(/\s+/).filter(part=>/^\p{L}/u.test(part)).slice(0,2).map(part=>part[0]).join('').toUpperCase();
 const tones=['ph-o','ph-g','ph-b','ph-v','ph-p'];
 export function Avatar({id,name}:{id:string;name:string}){return <span className={`cev-ph ${tones[[...id].reduce((sum,char)=>sum+char.charCodeAt(0),0)%tones.length]}`} aria-hidden="true">{initials(name)}</span>;}
 export function RepeatIcon(){return <svg className="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>;}

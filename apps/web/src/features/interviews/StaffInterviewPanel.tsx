@@ -62,7 +62,7 @@ export function StaffInterviewPanel({booking,onClose}:{booking:StaffBooking;onCl
    <div className="iv-person"><span className={cx('iv-ph iv-ph-lg',toneOf(booking.application_id))} aria-hidden="true">{initials(booking.candidate_name)}</span><div className="iv-min"><h2 className="h3 iv-panel-name" id="iv-panel-name">{booking.candidate_name}</h2>{answer(answers.directions)&&<span className="meta">{answer(answers.directions)}</span>}</div></div>
    <button type="button" className="iv-close" aria-label="Закрыть" onClick={onClose}><Icon name="x"/></button>
   </div>
-  <p className="iv-when-big">{whenLabel(booking.starts_at)}, {endLabel(booking)}</p>
+  <p className="iv-when-big">{whenLabel(booking.starts_at)}, {timeLabel(booking.starts_at)}</p>
   <p className="p iv-place">{isOnline(booking)?<>Онлайн{booking.join_url?<>, <a href={appResourceUrl(booking.join_url)} target="_blank" rel="noreferrer">ссылка на встречу</a></>:', ссылка придёт обоим'}</>:booking.venue}</p>
   {mode==='view'&&<>
    {flash&&<div className="iv-done" role="status"><Icon name="check"/>{flash}</div>}
