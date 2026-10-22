@@ -52,7 +52,8 @@ BASE_INPUTS = {
               'infra/docker/media-package.json', 'infra/docker/media-package-lock.json'),
     'web': ('infra/docker/web.Dockerfile', 'infra/docker/nginx.conf'),
 }
-# compose.yml reads these by relative path, so Compose takes them from the running working directory, not the new release.
+# compose.yml reads these by relative path, so Compose takes them from the running working directory, not the new release:
+# a commit that changes them would report success without the change ever going live.
 RUNTIME_FILES = ('infra/preview/nginx.conf', 'infra/docker/media-seccomp-sandbox.json')
 PUBLIC_CHECKS = ('/deti-marii/', '/deti-marii/ready', '/deti-marii/version.json')
 # Other projects behind the same gateway: recorded after the switch, never a reason to roll back.
@@ -279,12 +280,16 @@ def check_bases(bases, release):
     log('Dependency inputs match the full-build bases')
 
 
-def check_runtime_files(working_root, release):
+def check_runtime_files(live_root, release):
+    """Refuse a commit that changes a runtime file since the live release; older drift is already known."""
+    if not live_root.is_dir():
+        log(f'Live release tree {live_root.name[:7]} is missing; runtime files not compared')
+        return
     for relative in RUNTIME_FILES:
-        old, new = working_root / relative, release / relative
-        if not old.is_file() or not new.is_file() or old.read_bytes() != new.read_bytes():
-            raise DeployError(f'{relative} differs from the running Compose working directory {working_root.name[:7]}: '
-                              'runtime configuration change, deploy by hand after review (infra/preview/deploy/README.md)')
+        old, new = live_root / relative, release / relative
+        if old.is_file() != new.is_file() or (new.is_file() and old.read_bytes() != new.read_bytes()):
+            raise DeployError(f'{relative} changed since the live release {live_root.name[:7]}, but Compose reads it from the '
+                              'running working directory: runtime configuration change, deploy by hand after review (infra/preview/deploy/README.md)')
 
 
 def build_images(sha, release, web_context, bases, evidence):
@@ -474,7 +479,7 @@ def main():
         protected = {*bases.values(), working_revision}
         release, web_context = unpack(bundle, sha, protected)
         check_bases(bases, release)
-        check_runtime_files(ROOT / 'releases' / working_revision, release)
+        check_runtime_files(ROOT / 'releases' / current['source_revision'], release)
         build_images(sha, release, web_context, bases, evidence)
         result = switch(sha, current, evidence)
         cleanup({sha, current['source_revision'], *protected})

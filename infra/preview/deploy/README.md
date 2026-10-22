@@ -28,9 +28,9 @@ rollout or low resources (exit code 75) only postpone the deploy to the next min
    `board` from `board.Dockerfile`. Images therefore do not grow with each release.
    The overlay is refused when a dependency input of a base build changed
    (`requirements.lock`, `pyproject.toml`, `alembic.ini`, the API/media/web Dockerfiles,
-   media package files, `infra/docker/nginx.conf`). It is also refused when
-   `infra/preview/nginx.conf` or `infra/docker/media-seccomp-sandbox.json` differs from
-   the Compose working directory, because Compose keeps reading them from there.
+   media package files, `infra/docker/nginx.conf`). It is also refused when the commit
+   changes `infra/preview/nginx.conf` or `infra/docker/media-seccomp-sandbox.json` since
+   the live release, because Compose keeps reading them from its working directory.
 4. Under the shared `/var/lock/odschool-deploy.lock`, verifies that the rendered Compose
    configuration differs only in image tags and release variables, rewrites only the
    `OPORA_RELEASE` line of `runtime.env`, and runs `docker compose up -d` (migrations run
