@@ -54,7 +54,8 @@ async def challenge(body: ChallengeInput, request: Request, principal: Principal
         raise ApiError(422, "invalid_contact", "Укажите корректную почту")
     await rate_limit(db, principal.actor_id, "challenge")
     await rate_limit(db, email, "challenge_contact")
-    await rate_limit(db, request.client.host if request.client else "unknown", "challenge_ip", limit=30)
+    if get_settings().client_ip_rate_limits:
+        await rate_limit(db, request.client.host if request.client else "unknown", "challenge_ip", limit=30)
     raw = secrets.token_urlsafe(32)
     row = AuthChallenge(foundation_id=principal.foundation_id, registration_id=principal.registration_id, token_hash=digest(raw), normalized_contact=email, purpose="login", expires_at=utcnow()+timedelta(minutes=15))
     db.add(row)

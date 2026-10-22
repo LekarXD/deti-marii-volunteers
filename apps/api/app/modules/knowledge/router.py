@@ -15,6 +15,7 @@ from app.integrations.ai.service import run_view,settings
 from . import service
 from .schemas import AISettingsInput,AISettingsView,AIRunView,AnswerInput,ApplyBuilderAI,BuilderAIInput,EmptyInput,FragmentView,LibraryItemView,LibraryTextView,MentorInput,MentorView,QuestionView,SourceCreate,SourceSave,SourceView,VersionInput
 router=APIRouter(prefix='/api/v1',tags=['knowledge'])
+REGISTRATION_LIMIT=200
 
 async def command(db,principal,request,key,operation,payload,action,permissions=()):
     await authz_guard(db,principal)
@@ -30,6 +31,8 @@ async def command(db,principal,request,key,operation,payload,action,permissions=
     if operation in {'mentor.ask','mentor.report'}:
         from app.core.rate_limit import rate_limit
         await rate_limit(db,principal.actor_id,operation,limit=20,seconds=3600)
+        # Anyone can mint a registration session, so their questions also share one foundation-wide budget.
+        if principal.user_id is None:await rate_limit(db,f'{principal.foundation_id}:registration',operation,limit=REGISTRATION_LIMIT,seconds=3600)
     result=jsonable_encoder(await action())
     audit(db,principal,operation,'knowledge',payload.get('id','self'),fields=tuple(payload),request_id=getattr(request.state,'request_id',None))
     await finish_command(db,principal,operation,key,result)

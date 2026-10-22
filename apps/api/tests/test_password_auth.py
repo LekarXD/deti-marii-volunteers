@@ -245,3 +245,38 @@ async def test_demo_cannot_reset_real_credential_or_claim_existing(env,monkeypat
         async with factory() as db:
             credential=await db.scalar(select(PasswordCredential));assert not credential.demo_created and verify_password(FAKE_PASSWORD,credential.password_hash)
             assert (await db.get(User,UUID(existing['user_id']))).account_state=='active'
+
+@pytest.mark.asyncio
+async def test_demo_reset_never_reaches_staff(env,monkeypatch):
+    app,factory=env
+    monkeypatch.setattr(get_settings(),'demo_email_codes',True)
+    async with actor(app) as owner,actor(app) as early,actor(app) as attacker:
+        pending=await post(owner,'/register',{'email':FAKE_EMAIL,'password':FAKE_PASSWORD})
+        uid=UUID((await post(owner,'/register/verify',{'challenge_id':pending.json()['challenge_id'],'code':'любая строка'})).json()['user_id'])
+        before=await post(early,'/password/reset',{'email':FAKE_EMAIL});assert before.json()['demo_code_allowed']
+        async with factory() as db:
+            db.add(StaffMembership(user_id=uid,foundation_id=get_settings().foundation_id));await db.commit()
+        reset=await post(attacker,'/password/reset',{'email':FAKE_EMAIL});assert reset.status_code==200 and not reset.json()['demo_code_allowed']
+        # A demo proof issued before the staff grant is refused at verify too.
+        for client,pending in ((attacker,reset),(early,before)):
+            denied=await post(client,'/password/reset/verify',{'challenge_id':pending.json()['challenge_id'],'code':'anything','password':FAKE_NEXT_PASSWORD})
+            assert denied.status_code==400 and denied.json()['code']=='challenge_invalid'
+        async with factory() as db:
+            credential=await db.scalar(select(PasswordCredential));assert credential.version==1 and verify_password(FAKE_PASSWORD,credential.password_hash)
+            assert (await db.get(PasswordChallenge,UUID(before.json()['challenge_id']))).consumed_at
+
+@pytest.mark.asyncio
+async def test_proxy_peer_address_is_not_one_platform_wide_bucket(env,monkeypatch):
+    # Every test request shares one client.host, like every visitor behind the untrusted proxy hop.
+    app,factory=env
+    async def strangers():
+        codes=[]
+        for _ in range(31):
+            async with actor(app) as client:
+                codes.append((await post(client,'/register/verify',{'challenge_id':str(uuid4()),'code':'000000'})).status_code)
+                codes.append((await post(client,'/challenges',{'email':f'{uuid4().hex}@fixture.example.test'})).status_code)
+                codes.append((await post(client,'/login',{'email':f'{uuid4().hex}@fixture.example.test','password':'Wrong-password-1'})).status_code)
+        return codes
+    assert 429 not in await strangers()
+    monkeypatch.setattr(get_settings(),'client_ip_rate_limits',True)
+    assert (await strangers()).count(429)==3

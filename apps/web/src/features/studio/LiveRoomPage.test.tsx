@@ -17,3 +17,11 @@ it('keeps rehearsal on failed server start and never requests physical devices o
  expect(await screen.findByText('Репетиция')).toBeTruthy();expect(devices.getUserMedia).not.toHaveBeenCalled();expect(devices.getDisplayMedia).not.toHaveBeenCalled();
  fireEvent.click(screen.getByRole('button',{name:'Открыть видеокомнату'}));expect(await screen.findAllByText('Видеосвязь ещё не настроена.')).not.toHaveLength(0);expect(screen.getByText('Репетиция')).toBeTruthy();expect(screen.queryByText('Занятие идёт')).toBeNull();expect(devices.getUserMedia).not.toHaveBeenCalled();expect(devices.getDisplayMedia).not.toHaveBeenCalled();client.clear();
 });
+it('lets the host re-issue close while the room is stuck in closing',async()=>{
+ const scene=fictionScene('live_event',{content_kind:'camera',layout:'camera_only',content_asset:null,deck_version_id:null,slide_id:null});
+ const session={id:scene.session_id,resource_kind:'live_event',resource_id:scene.resource_id,host_user_id:'fixture-host',state:'closing',generation:1,scene,scene_revision:scene.revision,version:4,capabilities:{configured:true},can_host:true,board_available:false};
+ vi.mocked(api).mockImplementation(async (path,options)=>{if(path===`/studio-sessions/${scene.session_id}`)return session as never;if(path.endsWith('/enrollments'))return [] as never;if(path.endsWith('/close'))return {...session,version:(options?.body as {expected_version:number}).expected_version+1} as never;throw new Error('unexpected '+path);});
+ const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/studio/${scene.session_id}`]}><Routes><Route path="/studio/:sessionId" element={<LiveRoomPage/>}/></Routes></MemoryRouter></QueryClientProvider>);
+ fireEvent.click(await screen.findByRole('button',{name:'Повторить завершение'}));fireEvent.click(await screen.findByRole('button',{name:'Завершить'}));
+ await vi.waitFor(()=>expect(vi.mocked(api)).toHaveBeenCalledWith(`/studio-sessions/${scene.session_id}/close`,expect.objectContaining({body:{expected_version:4}})));
+});

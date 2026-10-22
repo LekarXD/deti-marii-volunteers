@@ -386,3 +386,22 @@ async def test_prize_photo_purpose_is_staff_bound_and_visible_through_catalog(en
         photo=await own.get(f"/api/v1/prizes/{prize['id']}/photo");assert photo.status_code==200 and photo.content==data
         assert (await own.get(f"/api/v1/assets/{asset['id']}/content")).status_code==404
     finally:await own.aclose();await reviewer.aclose()
+
+@pytest.mark.asyncio
+async def test_review_queues_keep_actionable_rows_ahead_of_settled_history(env):
+    from app.core.clock import utcnow
+    from app.modules.profile.models import ManualTimeRequest,ProfileDocument,ProfileDataRequest
+    app,factory=env;own=await volunteer(app,factory);reviewer=await coord(app,factory)
+    try:
+        deletion=(await post(own,'/me/profile/data-requests',dict(kind='deletion',reason='Хочу завершить участие'))).json()
+        letter=(await post(own,'/me/profile/documents',dict(kind='letter',period_from=date.today().isoformat(),period_to=date.today().isoformat(),recipient='Для университета'))).json()
+        hours=(await post(own,'/me/hours/requests',dict(title='Помощь в мастерской',service_date=date.today().isoformat(),requested_minutes=60))).json()
+        p=await principal_for(own,factory)
+        async with factory() as db:
+            for index in range(201):
+                later=utcnow()+timedelta(minutes=1,seconds=index)
+                db.add_all([ProfileDataRequest(foundation_id=p.foundation_id,user_id=p.user_id,kind='export',state='ready',created_at=later),ProfileDocument(foundation_id=p.foundation_id,user_id=p.user_id,kind='certificate',period_from=date.today(),period_to=date.today(),recipient='Архив',state='ready',created_at=later),ManualTimeRequest(foundation_id=p.foundation_id,user_id=p.user_id,title='Решено',service_date=date.today(),requested_minutes=60,approved_minutes=60,state='approved',created_at=later)])
+            await db.commit()
+        for path,row in [('/coord/profile/data-requests',deletion),('/coord/profile/documents',letter),('/coord/hours/requests',hours)]:
+            queue=(await reviewer.get('/api/v1'+path)).json();assert len(queue)==200 and queue[0]['id']==row['id'],path
+    finally:await own.aclose();await reviewer.aclose()

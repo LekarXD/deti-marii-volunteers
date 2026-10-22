@@ -50,6 +50,9 @@ CREATE TABLE IF NOT EXISTS auth_codes (
     email TEXT, code_hash TEXT, expires_at TEXT,
     attempts INTEGER NOT NULL DEFAULT 0, sent_at TEXT, sends_hour INTEGER NOT NULL DEFAULT 0, hour_start TEXT
 );
+CREATE TABLE IF NOT EXISTS coord_attempts (    -- неверные коды /coordinator: не больше 5 в час с одного чата
+    chat_id INTEGER PRIMARY KEY, fails INTEGER NOT NULL DEFAULT 0, window_start TEXT
+);
 CREATE TABLE IF NOT EXISTS activity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     at TEXT, kind TEXT, user_id INTEGER,
@@ -140,6 +143,7 @@ def user(uid: int):
 def ensure_user(uid: int, username: str | None):
     if not user(uid):
         run("INSERT INTO users (id, username, created_at) VALUES (?,?,?)", uid, username or "", stamp())
+    run("UPDATE users SET blocked=0 WHERE id=? AND blocked=1", uid)  # человек пишет боту — значит, разблокировал его
     return user(uid)
 
 

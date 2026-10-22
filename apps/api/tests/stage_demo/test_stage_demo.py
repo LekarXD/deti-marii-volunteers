@@ -88,10 +88,10 @@ async def test_passwords_only_for_exact_seeded_demo_people_without_mfa_changes(s
         assert (await db.execute(select(MfaFactor.id,MfaFactor.secret_cipher,MfaFactor.confirmed_at))).all()==factors_before
         assert await db.scalar(select(func.count()).select_from(Session))==0
         assert await db.scalar(select(func.count()).select_from(OutboxMessage))==0
-        for value in saved['accounts'].values():
+        for role,value in saved['accounts'].items():
             from uuid import UUID
             credential=await db.scalar(select(PasswordCredential).where(PasswordCredential.user_id==UUID(value['user_id'])))
-            assert credential.demo_created and verify_password(value['password'],credential.password_hash)
+            assert credential.demo_created==(role!='coordinator') and verify_password(value['password'],credential.password_hash)
         monkeypatch.setattr(get_settings(),'demo_email_codes',False)
         with pytest.raises(RuntimeError):await provision(db,path,output)
     async with AsyncClient(transport=ASGITransport(app=app),base_url='https://stage.example.test') as client:

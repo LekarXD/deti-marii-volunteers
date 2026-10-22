@@ -157,3 +157,13 @@ async def test_dismissed_observation_stays_closed_until_source_facts_change(scen
     async with f.w.factory() as db:db.add(ContactEvent(volunteer_id=data.person.id,kind='phone',direction='incoming',text='Дополнительный исходный факт',author_id='fixture',occurred_at=utcnow()-timedelta(days=25)));await db.commit()
     assert (await post(f,'rules/evaluate',{'expected_version':2})).status_code==200;await run(f)
     reopened=next(x for x in (await f.client.get('/api/v1/coord/followups/rule-signals')).json() if x['rule']=='quiet');assert reopened['id']==quiet['id'] and reopened['version']>quiet['version']
+
+@pytest.mark.asyncio
+async def test_quiet_rule_respects_the_volunteers_own_no_contact_preference(scenario):
+    from app.modules.notifications.models import NotificationPreference
+    f=scenario;data=await facts(f)
+    async with f.w.factory() as db:
+        alias=CrmVolunteer(foundation_id=f.w.foundation.id,display_name='Старая карточка',relationship_state='active',merged_into_id=data.person.id);db.add(alias);await db.commit()
+        assert len((await collect(db,f.w.foundation.id,'quiet',21,utcnow()))[0])==1
+        db.add(NotificationPreference(foundation_id=f.w.foundation.id,user_id=f.w.recipient.user_id,no_contact=True));await db.commit()
+        found,result=await collect(db,f.w.foundation.id,'quiet',21,utcnow());assert found==[] and result['matched']==0

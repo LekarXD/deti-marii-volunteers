@@ -136,6 +136,8 @@ def normalize(raw,mapping):
     phone=re.sub(r'\D','',value.get('phone',''))
     if phone:
         if len(phone)==11 and phone[0]=='8':phone='7'+phone[1:]
+        # Ten local digits without '+' are a Russian number, stored like the application form (+7XXXXXXXXXX).
+        elif len(phone)==10 and not value.get('phone','').startswith('+'):phone='7'+phone
         if not 10<=len(phone)<=15:errors.append('Некорректный телефон')
         phone='+'+phone
     telegram=value.get('telegram','').strip().lstrip('@').lower()

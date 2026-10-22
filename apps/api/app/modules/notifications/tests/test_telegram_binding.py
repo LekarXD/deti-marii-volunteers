@@ -23,7 +23,7 @@ from app.modules.notifications.telegram_config import TelegramSettings
 from app.modules.notifications.telegram_models import TelegramBinding,TelegramLinkToken
 from app.modules.notifications.telegram_router import router
 from app.modules.notifications import telegram_service,telegram_router
-from app.modules.applications.tests.test_applications import actor
+from app.modules.applications.tests.test_applications import anonymous_actor
 load_models()
 BASE='/api/v1/me/notification-channels/telegram'
 SECRET='fixture_webhook_secret_'+('0'*32)
@@ -65,7 +65,7 @@ async def callback(client,value,secret=SECRET):return await client.post('/api/v1
 
 @pytest.mark.asyncio
 async def test_unconfigured_and_unverified_are_explicitly_unavailable_without_tokens_or_messages(env):
-    app,factory,config=env;client,_,_=await volunteer(app,factory);anonymous=await actor(app)
+    app,factory,config=env;client,_,_=await volunteer(app,factory);anonymous=await anonymous_actor(app)
     try:
         assert (await anonymous.get(BASE)).status_code==403
         config.link_enabled=False

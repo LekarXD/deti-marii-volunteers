@@ -236,6 +236,21 @@ async def test_room_close_marks_event_ended_only_after_provider_and_worker_ack(w
         assert (await db.get(Webinar,UUID(event['id']))).state=='ended';assert fences==[True]
 
 @pytest.mark.asyncio
+async def test_close_job_outlasts_provider_outage_and_dead_job_can_be_reissued(world):
+    w=world;event=await webinar(w);prepared=await prepare(w,event);id=UUID(prepared['id'])
+    async with w.factory() as db:
+        row=await db.get(StudioSession,id);row.state='live';await db.commit()
+    async with w.factory() as db:closing=await routes.close(id,StudioVersionCommand(expected_version=prepared['version']),db,w.host,uuid4().hex)
+    assert closing['state']=='closing'
+    async with w.factory() as db:
+        first=await db.scalar(select(Job).where(Job.kind=='studio.close'));assert first.max_attempts==20
+        first.state='dead';first.attempts=20;first.error_code='handler_failed';await db.commit()
+    async with w.factory() as db:again=await routes.close(id,StudioVersionCommand(expected_version=closing['version']),db,w.host,uuid4().hex)
+    assert again['state']=='closing' and again['version']==closing['version']+1
+    async with w.factory() as db:
+        retry=await db.scalar(select(Job).where(Job.kind=='studio.close',Job.state=='queued'));assert retry and retry.id!=first.id and retry.max_attempts==20
+
+@pytest.mark.asyncio
 async def test_board_draw_revoke_denies_existing_pass_and_next_grant_is_readonly(world,monkeypatch):
     from starlette.requests import Request
     from app.modules.studio.schemas import StudioBoardGrantInput

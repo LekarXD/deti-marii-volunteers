@@ -12,6 +12,7 @@ from app.integrations.ai.service import enqueue_ai_run
 from .models import EvaluationAppeal, RubricVersion, SimulationEvaluation, SimulationSession, SimulationSupportRequest, SimulationTurn, SimulatorScenario, SimulatorScenarioReview, SimulatorScenarioVersion, SimulatorTestCaseRun, SimulatorTestRun
 from .schemas import SimulatorAssessmentOutput, SimulatorEvaluationView, SimulatorScenarioDraft, SimulatorScenarioPublicView, SimulatorScenarioStaffView, SimulatorSessionView, SimulatorTestRunView, SimulatorTurnView
 from . import jobs  # register source-controlled gateway tasks for API and worker
+RETRYABLE_EVALUATION = ('unavailable', 'failed', 'unknown', 'budget_exceeded', 'cancelled')
 
 
 def check_version(entity, expected):
@@ -211,7 +212,7 @@ async def session_view(db, entity):
     elif entity.state == 'waiting_reply': actions += ['pause', 'stop']
     elif entity.state == 'finished':
         actions += ['retry']
-        if evaluation and evaluation.state in ('unavailable', 'failed', 'unknown', 'budget_exceeded', 'cancelled'): actions.append('retry-evaluation')
+        if evaluation and evaluation.state in RETRYABLE_EVALUATION: actions.append('retry-evaluation')
         if evaluation and evaluation.state == 'ready' and appeal is None: actions.append('appeal')
     elif entity.state == 'stopped': actions += ['retry']
     scenario = await db.get(SimulatorScenario, publication.scenario_id)
@@ -328,6 +329,10 @@ async def finish_session(db, principal, id, body, retry=False):
     check_version(entity, body.expected_version)
     if not retry and entity.state not in ('active', 'paused') or retry and entity.state != 'finished':
         raise ApiError(409, 'simulation_state_conflict', 'Сейчас нельзя запросить разбор.')
+    if retry:
+        latest = await db.scalar(select(SimulationEvaluation).where(SimulationEvaluation.session_id == id).order_by(SimulationEvaluation.version.desc()).limit(1))
+        if latest is None or latest.state not in RETRYABLE_EVALUATION:
+            raise ApiError(409, 'simulation_state_conflict', 'Сейчас нельзя запросить разбор.')
     if entity.pending_ai_run_id:
         old = await db.get(AIRun, entity.pending_ai_run_id)
         if old and old.state in ('queued', 'calling'):

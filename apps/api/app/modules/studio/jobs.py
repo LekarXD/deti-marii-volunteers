@@ -38,11 +38,10 @@ async def converted_pages(data,workdir):
             pages.append(page)
         return pages
     finally:
-        if process.returncode is None:
-            # Kill the converter AND its LibreOffice child on timeout/lease cancellation.
-            try:os.killpg(process.pid,signal.SIGKILL)
-            except ProcessLookupError:pass
-            await process.wait()
+        # Kill the converter AND its LibreOffice child, even after a clean exit: its 180s timeout kills only the soffice wrapper.
+        try:os.killpg(process.pid,signal.SIGKILL)
+        except ProcessLookupError:pass
+        if process.returncode is None:await process.wait()
 
 async def convert_slides(db,context):
     asset=await db.get(MediaAsset,UUID(context.payload['asset_id']))

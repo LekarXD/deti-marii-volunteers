@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from app.core.auth import Principal
 from app.core.errors import ApiError
 from app.core.models import PermissionGrant, StaffMembership, User
@@ -69,8 +69,11 @@ async def create_source(db,principal,body):
     if body.asset_id:
         value.ingest_state='queued'
         value.ingest_error=None
-        enqueue_job(db,principal.foundation_id,'knowledge.ingest',{'source_id':str(value.id),'draft_version':value.draft_version,'asset_id':str(value.asset_id)})
+        enqueue_ingest(db,principal,value)
     return source_view(principal,value)
+
+def enqueue_ingest(db,principal,value):
+    enqueue_job(db,principal.foundation_id,'knowledge.ingest',{'source_id':str(value.id),'draft_version':value.draft_version,'asset_id':str(value.asset_id)})
 
 async def save_source(db,principal,source_id,body):
     permission(principal,'knowledge.write')
@@ -94,7 +97,10 @@ async def save_source(db,principal,source_id,body):
         value.kind='pdf'
         value.ingest_state='queued'
         value.ingest_error=None
-        enqueue_job(db,principal.foundation_id,'knowledge.ingest',{'source_id':str(value.id),'draft_version':value.draft_version,'asset_id':str(value.asset_id)})
+        enqueue_ingest(db,principal,value)
+    elif value.ingest_state=='queued':
+        # The pending import is keyed by draft_version and would go stale; re-key it.
+        enqueue_ingest(db,principal,value)
     return source_view(principal,value)
 
 async def review_source(db,principal,source_id,expected_version):
@@ -134,6 +140,7 @@ async def archive_source(db,principal,source_id,expected_version):
     value.index_generation+=1
     value.index_state='withdrawn'
     value.draft_version+=1
+    if value.ingest_state=='queued':enqueue_ingest(db,principal,value)
     return source_view(principal,value)
 
 async def reindex(db,principal,source_id,expected_version):
@@ -198,6 +205,8 @@ async def fragments_by_id(db,principal,ids):
 
 async def notify_staff(db,foundation_id,question):
     from app.modules.messaging.consumers import enqueue_notice
+    # One ping per burst: the queue lists every question, so a flood must not page staff per row.
+    if await db.scalar(select(KnowledgeQuestion.id).where(KnowledgeQuestion.foundation_id==foundation_id,KnowledgeQuestion.id!=question.id,KnowledgeQuestion.state=='pending',KnowledgeQuestion.created_at>func.now()-timedelta(minutes=15)).limit(1)):return
     users=(await db.scalars(select(User).join(StaffMembership,StaffMembership.user_id==User.id).join(PermissionGrant,PermissionGrant.membership_id==StaffMembership.id).where(User.foundation_id==foundation_id,User.account_state=='active',StaffMembership.revoked_at.is_(None),PermissionGrant.revoked_at.is_(None),PermissionGrant.permission=='knowledge.write',PermissionGrant.scope_type=='foundation').distinct().limit(20))).all()
     for user in users:
         enqueue_notice(db,foundation_id,user.id,'Вопрос по материалам фонда','В очереди базы знаний появился вопрос. Открыть: /fund/knowledge')
@@ -292,7 +301,7 @@ async def claim_registration(db,registration_id,user_id):
 
 async def question_list(db,principal):
     permission(principal,'knowledge.read')
-    items=(await db.scalars(select(KnowledgeQuestion).where(KnowledgeQuestion.foundation_id==principal.foundation_id).order_by(KnowledgeQuestion.created_at.desc()).limit(200))).all()
+    items=(await db.scalars(select(KnowledgeQuestion).where(KnowledgeQuestion.foundation_id==principal.foundation_id).order_by(case((KnowledgeQuestion.state=='pending',0),else_=1),KnowledgeQuestion.created_at.desc()).limit(200))).all()
     result=[]
     for item in items:
         answer=await db.scalar(select(ApprovedAnswer).where(ApprovedAnswer.question_id==item.id))

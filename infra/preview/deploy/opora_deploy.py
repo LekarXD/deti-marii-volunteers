@@ -52,6 +52,9 @@ BASE_INPUTS = {
               'infra/docker/media-package.json', 'infra/docker/media-package-lock.json'),
     'web': ('infra/docker/web.Dockerfile', 'infra/docker/nginx.conf'),
 }
+# compose.yml reads these by relative path, so Compose takes them from the running working directory, not the new release:
+# a commit that changes them would report success without the change ever going live.
+RUNTIME_FILES = ('infra/preview/nginx.conf', 'infra/docker/media-seccomp-sandbox.json')
 PUBLIC_CHECKS = ('/deti-marii/', '/deti-marii/ready', '/deti-marii/version.json')
 # Other projects behind the same gateway: recorded after the switch, never a reason to roll back.
 NEIGHBOUR_CHECKS = ('/ertad/', '/api/web/health')
@@ -277,6 +280,18 @@ def check_bases(bases, release):
     log('Dependency inputs match the full-build bases')
 
 
+def check_runtime_files(live_root, release):
+    """Refuse a commit that changes a runtime file since the live release; older drift is already known."""
+    if not live_root.is_dir():
+        log(f'Live release tree {live_root.name[:7]} is missing; runtime files not compared')
+        return
+    for relative in RUNTIME_FILES:
+        old, new = live_root / relative, release / relative
+        if old.is_file() != new.is_file() or (new.is_file() and old.read_bytes() != new.read_bytes()):
+            raise DeployError(f'{relative} changed since the live release {live_root.name[:7]}, but Compose reads it from the '
+                              'running working directory: runtime configuration change, deploy by hand after review (infra/preview/deploy/README.md)')
+
+
 def build_images(sha, release, web_context, bases, evidence):
     common = ['docker', 'build', '--rm', '--force-rm', '--cpu-period=100000', '--cpu-quota=100000',
               '--label', 'io.opora.preview=true', '--label', f'org.opencontainers.image.revision={sha}']
@@ -410,7 +425,8 @@ def switch(sha, current, evidence):
             detail = error.stderr.strip().splitlines()[-5:] if isinstance(error, subprocess.CalledProcessError) and error.stderr else []
             log(f'Rollout failed, restoring {current["source_revision"][:7]}: {error} {" | ".join(detail)}')
             write_private(ENV, old_env)
-            subprocess.run([*compose(old_files, working), 'up', '-d'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # Not migrate: the old image cannot `upgrade head` a schema the new release already moved, and api/io/outbox wait on it.
+            subprocess.run([*compose(old_files, working), 'up', '-d', '--no-deps', *CONTAINERS], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             try:
                 wait_healthy(180)
                 log('Previous release restored')
@@ -463,6 +479,7 @@ def main():
         protected = {*bases.values(), working_revision}
         release, web_context = unpack(bundle, sha, protected)
         check_bases(bases, release)
+        check_runtime_files(ROOT / 'releases' / current['source_revision'], release)
         build_images(sha, release, web_context, bases, evidence)
         result = switch(sha, current, evidence)
         cleanup({sha, current['source_revision'], *protected})
