@@ -7,7 +7,7 @@ import type {ReactNode} from 'react';
 import {api,ApiError,getPrincipalKey,getSession} from '../../api/transport';
 import {useProfileCommand,minutesLabel,pointsLabel,type Hours} from './api';
 import {HoursPage} from './HoursPage';
-import {ProfileReviewPage} from './ReviewPage';
+import {PrizesPage} from './PrizesPage';
 import {ConsentPanel} from './PrivacyPanels';
 import {ContactChangePanel} from './ContactChangePanel';
 import {ProfilePage} from './ProfilePage';
@@ -53,15 +53,16 @@ it('shows the server level, points and prize requests on my path',async()=>{
  expect(pointsLabel(1)).toBe('1 балл');expect(pointsLabel(23)).toBe('23 балла');expect(pointsLabel(-70)).toBe('−70 баллов');client.clear();
 });
 
-it('shows the prize showcase tab only next to prize requests and names the action «Выдать»',async()=>{
+it('shows prize requests and the showcase on one page and asks a reason before declining',async()=>{
  const {client,wrapper}=harness();vi.mocked(getSession).mockReturnValue({user_id:'staff',permissions:['recognition.manage']} as never);
- vi.mocked(api).mockImplementation(async path=>path==='/coord/prize-requests'?[{id:'claim',user_id:'volunteer',display_name:'Тестовый волонтёр',prize_id:'cup',prize_title:'Чашка',points:30,state:'requested',version:1,reason:'',created_at:'2026-10-22T10:00:00Z',updated_at:'2026-10-22T10:00:00Z'}] as never:path==='/coord/prizes'?[{id:'cup',title:'Чашка',description:'',price_points:30,stock:2,visible:false,version:1,photo_asset_id:null}] as never:[] as never);
- render(<ProfileReviewPage/>,{wrapper});
- expect(screen.queryByRole('radio',{name:'Витрина призов'})).toBeNull();
- fireEvent.click(screen.getByRole('radio',{name:'Заявки на призы'}));
+ vi.mocked(api).mockImplementation(async path=>path==='/coord/prize-requests'?[{id:'claim',user_id:'volunteer',display_name:'Тестовый волонтёр',prize_id:'cup',prize_title:'Чашка',points:30,state:'requested',version:1,reason:'',created_at:'2026-10-22T10:00:00Z',updated_at:'2026-10-22T10:00:00Z'},{id:'old',user_id:'volunteer',display_name:'Тестовый волонтёр',prize_id:'cup',prize_title:'Чашка',points:30,state:'issued',version:2,reason:'',created_at:'2026-10-01T10:00:00Z',updated_at:'2026-10-02T10:00:00Z'}] as never:path==='/coord/prizes'?[{id:'cup',title:'Чашка',description:'',price_points:30,stock:2,visible:false,version:1,photo_asset_id:null}] as never:[] as never);
+ render(<PrizesPage/>,{wrapper});
  expect(await screen.findByRole('button',{name:'Выдать'})).toBeTruthy();
- fireEvent.click(screen.getByRole('radio',{name:'Витрина призов'}));
- expect(await screen.findByText('Скрыт от волонтёров')).toBeTruthy();expect(screen.getByRole('button',{name:'Добавить приз'})).toBeTruthy();
- fireEvent.click(screen.getByRole('radio',{name:'Документы'}));
- expect(screen.queryByRole('radio',{name:'Витрина призов'})).toBeNull();client.clear();
+ expect(screen.getAllByRole('button',{name:'Выдать'})).toHaveLength(1);
+ expect(await screen.findByText('Скрыт')).toBeTruthy();expect(screen.getByText('1 заявка')).toBeTruthy();
+ expect(screen.getByRole('switch',{name:'Показывать волонтёрам: Чашка'}).getAttribute('aria-checked')).toBe('false');
+ fireEvent.click(screen.getByRole('button',{name:'Отклонить'}));
+ const decline=screen.getByRole('button',{name:'Отклонить и вернуть баллы'}) as HTMLButtonElement;expect(decline.disabled).toBe(true);
+ fireEvent.change(screen.getByLabelText('Причина отказа'),{target:{value:'Чашки закончились'}});expect(decline.disabled).toBe(false);
+ expect(screen.queryByRole('radio',{name:'Подтверждение часов'})).toBeNull();client.clear();
 });

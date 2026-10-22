@@ -20,7 +20,7 @@ const enabled=(item:NavigationSection)=>landing(item)!==undefined;
 /** Five sections without dropdowns; messages and signals are icons on the right, rare pages sit in the profile menu. */
 export const coordinatorSections:NavigationSection[]=([
  {label:'Обзор',to:'/fund',icon:'chart',match:['/fund']},
- {label:'Волонтёры',to:'/fund/candidates',icon:'users',match:['/fund/candidates','/fund/interviews','/fund/volunteers','/fund/profile-review']},
+ {label:'Волонтёры',to:'/fund/candidates',icon:'users',match:['/fund/candidates','/fund/interviews','/fund/volunteers','/fund/prizes']},
  {label:'Мероприятия',to:'/fund/opportunities',icon:'calendar',match:['/fund/opportunities','/fund/responses','/fund/schedule','/fund/events','/fund/roles']},
  {label:'Подопечные',to:'/fund/participants',icon:'heart',match:['/fund/participants','/fund/groups']},
  {label:'Обучение',to:'/fund/learning',icon:'academy',match:['/fund/learning','/fund/webinars','/fund/recordings','/fund/knowledge','/fund/scenarios','/fund/simulator']},
@@ -29,7 +29,7 @@ export const coordinatorShortcuts:NavigationSection[]=([
  {label:'Сообщения',to:'/fund/messages',icon:'message',match:['/fund/messages','/fund/notifications']},
  {label:'Сигналы',to:'/fund/signals',icon:'bell',match:['/fund/signals']},
 ] as NavigationSection[]).filter(enabled);
-export const coordinatorAccountLinks:NavigationLink[]=[{label:'Рассылки',to:'/fund/notifications'},{label:'Отчёты',to:'/fund/reports'},{label:'Перенос в Добро.рф',to:'/fund/integrations/dobro/transfers'},{label:'Настройки',to:'/fund/admin'}].filter(link=>enabledDestinations.has(link.to));
+export const coordinatorAccountLinks:NavigationLink[]=[{label:'Рассылки',to:'/fund/notifications'},{label:'Отчёты',to:'/fund/reports'},{label:'Перенос в Добро.рф',to:'/fund/integrations/dobro/transfers'},{label:'Запросы на данные',to:'/fund/data-requests'},{label:'Настройки',to:'/fund/admin'}].filter(link=>enabledDestinations.has(link.to));
 /** The section a staff path belongs to: the longest matching prefix wins, «Обзор» only on /fund itself. */
 export function coordinatorSectionOf(path:string){return [...coordinatorSections,...coordinatorShortcuts].map(section=>({section,length:Math.max(-1,...section.match.filter(prefix=>under(path,prefix)).map(prefix=>prefix.length))})).filter(row=>row.length>=0).sort((a,b)=>b.length-a.length)[0]?.section;}
 

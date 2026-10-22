@@ -1,6 +1,6 @@
 # Reports P19
 
-Export `ReportsPage` for `/fund/reports`. Tabs use `tab=letters` and `tab=weekly`. The coordinator shell owns navigation; this feature adds no sidebar.
+Export `ReportsPage` for `/fund/reports`. Tabs: the grant report and `tab=weekly`. Thank-you letters were removed with the 22 Oct redesign; hours are credited automatically. The coordinator shell owns navigation; this feature adds no sidebar.
 
 The page requests only server-listed scopes and canonical metric definitions. It creates immutable report snapshots, edits/reviews each narrative section, explicitly refreshes facts, confirms the report and downloads real private CSV/PDF/DOCX assets. Unknown child attendance stays unknown. AI narrative is visibly unavailable; manual text remains usable. Добро.рф shows the actual internal mapping preview and stays unavailable until its adapter is agreed.
 

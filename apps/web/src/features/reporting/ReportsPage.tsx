@@ -2,14 +2,13 @@ import {useCallback,useEffect,useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 import {Button,Card,Combobox,DatePicker,EmptyState,ErrorState,Field,Icon,Input,LoadingState,Textarea} from '../../ui';
 import {downloadAsset,today} from '../profile/api';
-import {ReportLetters} from './ReportLetters';
 import {DigestPanel} from './DigestPanel';
 import {useReportQuery,useReportCommand,scopeQuery,reportDate,valueLabel,dateTime,type Report,type ReportSummary,type Scope,type Metrics,type Export,type Dobro} from './api';
 import './reporting.css';
 export function ReportsPage(){
  const [params,setParams]=useSearchParams(),tab=params.get('tab')||'grant';
  const scopes=useReportQuery<Scope[]>('scopes','/coord/reports/scopes');
- return <div className="report-page"><h1 className="h1">Отчёты</h1><nav className="report-tabs" aria-label="Разделы отчётов">{[['grant','Грант'],['letters','Письма'],['weekly','Сводка']].map(([id,label])=><button key={id} className={tab===id?'is-current':''} aria-current={tab===id?'page':undefined} onClick={()=>setParams(id==='grant'?{}:{tab:id})}>{label}</button>)}</nav>{tab==='letters'?<ReportLetters/>:scopes.isPending?<LoadingState/>:scopes.error?<ErrorState error={scopes.error} retry={()=>void scopes.refetch()}/>:scopes.data?.length?<ReportWorkspace key={tab} scopes={scopes.data} weekly={tab==='weekly'}/>:<EmptyState title="Нет доступных областей отчёта" description="Обратитесь к сотруднику, который управляет доступом."/>}</div>;
+ return <div className="report-page"><h1 className="h1">Отчёты</h1><nav className="report-tabs" aria-label="Разделы отчётов">{[['grant','Грант'],['weekly','Сводка']].map(([id,label])=><button key={id} className={tab===id?'is-current':''} aria-current={tab===id?'page':undefined} onClick={()=>setParams(id==='grant'?{}:{tab:id})}>{label}</button>)}</nav>{scopes.isPending?<LoadingState/>:scopes.error?<ErrorState error={scopes.error} retry={()=>void scopes.refetch()}/>:scopes.data?.length?<ReportWorkspace key={tab} scopes={scopes.data} weekly={tab==='weekly'}/>:<EmptyState title="Нет доступных областей отчёта" description="Обратитесь к сотруднику, который управляет доступом."/>}</div>;
 }
 function ReportWorkspace({scopes,weekly}:{scopes:Scope[];weekly:boolean}){
  const [scopeIndex,setScopeIndex]=useState('0'),scope=scopes[Number(scopeIndex)]??scopes[0];

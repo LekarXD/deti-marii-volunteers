@@ -5,7 +5,8 @@ Pages export from `index.ts` for the shared top layouts:
 - `ProfilePage`: `/profile` (tabs `?tab=about|skills|avail|docs|notif|privacy`).
 - `HoursPage`: `/hours`.
 - `CertificatesPage`: `/hours/documents`.
-- `ProfileReviewPage`: `/fund/profile-review`, independently gated server queues for `hours.review`, `recognition.manage`, `profile.requests.review`.
+- `PrizesPage`: `/fund/prizes` (old `/fund/profile-review` redirects), prize requests waiting to be issued and the showcase on one screen, `recognition.manage`.
+- `DataRequestsPage`: `/fund/data-requests` in the account menu, data export and deletion requests, `profile.requests.review`. Hours are credited automatically and the coordinator side has no hours or letter queues.
 
 The profile uses generated DTOs and the sole transport. Edits pin the opened version; uncertain retries preserve their receipt. Explicit conflict reload discards the open input only when selected. Registration-only access leads to the real login flow. Contact change uses A1's bound canonical challenge, proves the new email, and refreshes the rotated session; it never adopts an identity by an email match. Notifications embed A6's canonical `PreferencesPanel`.
 

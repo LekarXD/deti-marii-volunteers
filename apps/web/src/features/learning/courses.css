@@ -1,7 +1,5 @@
 /* Courses list and course editor (canvas boards Courses / CourseBuilder). Scoped to the two pages. */
 .courses-page .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:24px}
-/* auto-fill keeps a lone course at the board's card width instead of stretching it across the row */
-.courses-page .grid-3{grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr))}
 .courses-page .course-card{display:flex;flex-direction:column;gap:16px;padding:26px 28px;border-radius:28px;background:var(--paper);color:inherit!important;text-decoration:none!important;min-height:230px;min-width:0}
 .courses-page .course-card:hover{box-shadow:0 0 0 2px var(--line-2)}
 .courses-page .course-card .meta{display:block}

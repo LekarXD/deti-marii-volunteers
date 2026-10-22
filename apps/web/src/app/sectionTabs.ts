@@ -5,7 +5,7 @@ export const volunteersTabs:SectionTab[]=[
  {label:'Кандидаты',to:'/fund/candidates'},
  {label:'Собеседования',to:'/fund/interviews'},
  {label:'Все волонтёры',to:'/fund/volunteers'},
- {label:'Призы',to:'/fund/profile-review'},
+ {label:'Призы',to:'/fund/prizes'},
 ];
 export const eventsTabs:SectionTab[]=[
  {label:'Мероприятия',to:'/fund/opportunities',also:['/fund/responses']},

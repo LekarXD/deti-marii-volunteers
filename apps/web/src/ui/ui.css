@@ -26,6 +26,8 @@
 .title-tabs a:hover{color:var(--ink-2);text-decoration:none}
 .title-tabs h1{color:var(--ink)}
 @media(max-width:720px){.title-tabs{gap:4px 20px}.title-tabs a,.title-tabs h1{font-size:26px}}
+/* Staff card grids: never more than three cards a row (RULES_V2), a short list keeps the card width. */
+.is-staff .grid-3{grid-template-columns:repeat(auto-fill,minmax(max(min(100%,280px),calc((100% - 32px)/3)),1fr))}
 /* Staff disclosures: a chevron after the title instead of the browser's triangle. */
 .is-staff details>summary{list-style:none;display:flex;align-items:center;gap:10px}
 .is-staff details>summary::-webkit-details-marker{display:none}
