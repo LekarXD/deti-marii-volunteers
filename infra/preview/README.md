@@ -6,6 +6,11 @@ private/egress networks and image tags `opora-preview/*:<full-SHA>`. Only its we
 edge joins the existing gateway network under alias `opora-preview-web`.
 The existing app projects, databases, assets and secrets are never reused.
 
+Releases are automatic: a timer on the host deploys every new `main` commit within a
+few minutes, keeping the guarded checks and rollback described below
+([deploy/README.md](deploy/README.md)). The manual procedure below remains for full
+image rebuilds and runtime configuration changes the automatic deploy refuses.
+
 Use only a final pushed main commit. Stream `git archive <SHA> <paths from
 build-context-paths.txt>` into a fresh `releases/<SHA>` directory; do not archive
 reference materials/prototypes or use local mutable web output. Build API, web,
