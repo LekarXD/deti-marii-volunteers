@@ -110,7 +110,7 @@ function VolunteerOpportunity({item}:{item:Opportunity}){
    {item.task&&<div className="card action-card"><h2 className="h3">Чем заняться</h2><p className="p ev-prose">{item.task}</p></div>}
    {item.audience&&<div className="card action-card"><h2 className="h3">Кого ждём</h2><p className="p">{item.audience}</p></div>}
    <div className="card action-card"><h2 className="h3">Перед выходом</h2>{item.preparation_requirements.length?<div className="rows">{item.preparation_requirements.map(req=><div className="rowi" key={req.key}><span className="st st-off" aria-hidden="true"><Icon name="check"/></span><span>{req.title}{req.level==='recommended'?', по желанию':''}</span></div>)}</div>:<p className="p">Дополнительная подготовка не нужна.</p>}</div>
-   <div className="card action-card"><h2 className="h3">Как устроено</h2>{item.conditions&&<p className="p ev-prose">{item.conditions}</p>}<p className="p">{item.approval_policy==='coordinator'?'Участие согласует координатор.':'Согласовывать участие с координатором не нужно.'}</p></div>
+   <div className="card action-card"><h2 className="h3">Как устроено</h2>{item.conditions&&<p className="p ev-prose">{item.conditions}</p>}<p className="p">Участие согласует координатор.</p></div>
    <OpportunityMatch item={item}/>
   </div></section>
   <OpportunityParticipation opportunityId={item.id}/>
