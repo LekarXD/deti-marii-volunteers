@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from app.core.clock import utcnow
 
 from fastapi import APIRouter, Depends, Header, Query, Response
-from sqlalchemy import or_, select
+from sqlalchemy import Date, and_, cast, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit import audit
@@ -15,10 +15,11 @@ from app.core.idempotency import begin_command, finish_command
 from app.core.models import MediaAsset, StaffMembership, User
 from .access import AssignmentAccess, get_assignment_access
 from .models import GroupMembership, Participant, ParticipantBriefing, ParticipantGroup, ParticipantPrivateNote
-from .schemas import AssignmentGroupBriefing, ParticipantStaffOptions, AssignmentParticipantList, GroupDetail, GroupList, MembershipResult, ParticipantList, PrivateNoteList, PrivateNoteView, SafeParticipant, GroupInput, GroupUpdate, GroupView, MembershipEnd, MembershipInput, ParticipantInput, ParticipantUpdate, PrivateNoteInput
-from .service import add_membership, check_version, foundation_permission, get_group, get_participant, group_scope, participant_scope, safe_participant
+from .schemas import MEMO_TAG_FIELDS, StaffParticipant, AssignmentGroupBriefing, ParticipantStaffOptions, AssignmentParticipantList, GroupDetail, GroupList, MembershipResult, ParticipantList, ParticipantOccurrenceList, PrivateNoteList, PrivateNoteView, SafeParticipant, GroupInput, GroupUpdate, GroupView, MembershipEnd, MembershipInput, ParticipantInput, ParticipantUpdate, PrivateNoteInput
+from .service import add_membership, check_version, current_membership, foundation_permission, get_group, get_participant, group_scope, moscow_today, participant_scope, safe_participant, staff_participants, visible_group
 
 router = APIRouter(prefix="/api/v1", tags=["participants"])
+BRIEFING_FIELDS = ("communication", "support", "interests", *MEMO_TAG_FIELDS)
 
 
 def denied():
@@ -66,15 +67,20 @@ async def list_participants(query: str = Query(default="", max_length=200), arch
     stmt = select(Participant).where(participant_scope(principal, "participants.read"),
         Participant.lifecycle == ("archived" if archived else "active"))
     if query.strip():
-        # Search only the display name; notes and briefings never enter a search projection.
-        stmt = stmt.where(Participant.display_name.icontains(query.strip(), autoescape=True))
+        # Search the name and today's visible group titles; notes and briefings never enter a search projection.
+        in_group = exists(select(GroupMembership.id).join(ParticipantGroup, ParticipantGroup.id == GroupMembership.group_id).where(
+            GroupMembership.participant_id == Participant.id, GroupMembership.foundation_id == principal.foundation_id,
+            current_membership(moscow_today()), visible_group(principal),
+            ParticipantGroup.title.icontains(query.strip(), autoescape=True)))
+        stmt = stmt.where(or_(Participant.display_name.icontains(query.strip(), autoescape=True), in_group))
     rows = (await db.scalars(stmt.order_by(Participant.display_name, Participant.id).limit(limit).offset(offset))).all()
-    return {"items": [(await safe_participant(db, row)).model_dump(mode="json") for row in rows], "limit": limit, "offset": offset}
+    return {"items": [item.model_dump(mode="json") for item in await staff_participants(db, principal, list(rows))], "limit": limit, "offset": offset}
 
 
-@router.get("/coord/participants/{participant_id}", response_model=SafeParticipant)
+@router.get("/coord/participants/{participant_id}", response_model=StaffParticipant)
 async def read_participant(participant_id: UUID, db: AsyncSession = Depends(get_db), principal: Principal = Depends(get_principal)):
-    return await safe_participant(db, await get_participant(db, principal, participant_id))
+    [item] = await staff_participants(db, principal, [await get_participant(db, principal, participant_id)])
+    return item
 
 
 @router.post("/coord/participants", response_model=SafeParticipant)
@@ -86,11 +92,11 @@ async def create_participant(data: ParticipantInput, db: AsyncSession = Depends(
     if cached := await begin_command(db, principal, operation, key, data.model_dump(mode="json")):
         return cached
     await validate_photo(db, principal, data.photo_asset_id)
-    values = data.model_dump(exclude={"communication", "support", "interests"})
+    values = data.model_dump(exclude=set(BRIEFING_FIELDS))
     item = Participant(foundation_id=principal.foundation_id, **values)
     db.add(item)
     await db.flush()
-    db.add(ParticipantBriefing(participant_id=item.id, communication=data.communication, support=data.support, interests=data.interests))
+    db.add(ParticipantBriefing(participant_id=item.id, **data.model_dump(include=set(BRIEFING_FIELDS))))
     await db.flush()
     result = (await safe_participant(db, item)).model_dump(mode="json")
     return await complete(db, principal, operation, key, result, "participant", item.id, list(values))
@@ -106,19 +112,54 @@ async def update_participant(participant_id: UUID, data: ParticipantUpdate, db: 
     check_version(item, data.expected_version)
     if data.photo_asset_id != item.photo_asset_id:
         await validate_photo(db, principal, data.photo_asset_id)
-    values = data.model_dump(exclude={"communication", "support", "interests", "expected_version"})
+    values = data.model_dump(exclude={*BRIEFING_FIELDS, "expected_version"})
     for field, value in values.items():
         setattr(item, field, value)
     briefing = await db.get(ParticipantBriefing, item.id)
     if briefing is None:
         briefing = ParticipantBriefing(participant_id=item.id)
         db.add(briefing)
-    for field in ("communication", "support", "interests"):
+    for field in BRIEFING_FIELDS:
         setattr(briefing, field, getattr(data, field))
     briefing.version = item.version + 1
     item.version += 1
     await db.flush()
     return await complete(db, principal, operation, key, (await safe_participant(db, item)).model_dump(mode="json"), "participant", item.id, list(values) + ["briefing"])
+
+
+def note_view(note, author):
+    return {"id": str(note.id), "text": note.text, "author_id": str(note.author_id), "author_name": author or "",
+            "created_at": note.created_at.isoformat()}
+
+
+@router.get("/coord/participants/{participant_id}/occurrences", response_model=ParticipantOccurrenceList)
+async def participant_occurrences(participant_id: UUID, limit: int = Query(default=10, ge=1, le=50),
+                                  db: AsyncSession = Depends(get_db), principal: Principal = Depends(get_principal)):
+    """Upcoming sessions of the groups the participant belongs to on the session's local date."""
+    from app.modules.activities.assignment_models import Assignment
+    from app.modules.activities.calendar_models import EventOccurrence
+    item = await get_participant(db, principal, participant_id)
+    if not (principal.has_permission("schedule.read") or principal.has_permission("schedule.manage")):
+        denied()
+    local_day = cast(func.timezone(EventOccurrence.timezone, EventOccurrence.starts_at), Date)
+    rows = (await db.execute(select(EventOccurrence, ParticipantGroup.title).join(
+        ParticipantGroup, and_(ParticipantGroup.id == EventOccurrence.group_id, ParticipantGroup.foundation_id == principal.foundation_id)
+    ).join(GroupMembership, and_(GroupMembership.group_id == EventOccurrence.group_id, GroupMembership.participant_id == item.id,
+        GroupMembership.foundation_id == principal.foundation_id)).where(
+        EventOccurrence.foundation_id == principal.foundation_id, EventOccurrence.status == "scheduled",
+        EventOccurrence.ends_at > utcnow(), GroupMembership.valid_from <= local_day,
+        or_(GroupMembership.valid_until.is_(None), GroupMembership.valid_until > local_day),
+    ).order_by(EventOccurrence.starts_at, EventOccurrence.id).limit(limit))).all()
+    volunteers: dict[UUID, list[dict]] = {}
+    if rows:
+        people = (await db.execute(select(Assignment.occurrence_id, User.id, User.display_name).join(User, User.id == Assignment.user_id).where(
+            Assignment.foundation_id == principal.foundation_id, Assignment.occurrence_id.in_([event.id for event, _ in rows]),
+            Assignment.status.in_(("invited", "confirmed"))).order_by(Assignment.created_at, Assignment.id))).all()
+        for occurrence_id, user_id, name in people:
+            volunteers.setdefault(occurrence_id, []).append({"id": str(user_id), "display_name": name})
+    return {"items": [{"id": str(event.id), "title": event.title, "starts_at": event.starts_at.isoformat(), "ends_at": event.ends_at.isoformat(),
+                       "timezone": event.timezone, "location": event.location, "group_title": title, "volunteers": volunteers.get(event.id, [])}
+                      for event, title in rows]}
 
 
 async def private_permission(db, principal, item):
@@ -136,9 +177,10 @@ async def private_permission(db, principal, item):
 async def private_notes(participant_id: UUID, db: AsyncSession = Depends(get_db), principal: Principal = Depends(get_principal)):
     item = await get_participant(db, principal, participant_id)
     await private_permission(db, principal, item)
-    rows = (await db.scalars(select(ParticipantPrivateNote).where(ParticipantPrivateNote.participant_id == item.id,
-        ParticipantPrivateNote.foundation_id == principal.foundation_id).order_by(ParticipantPrivateNote.created_at.desc(), ParticipantPrivateNote.id.desc()))).all()
-    return {"items": [{"id": str(row.id), "text": row.text, "author_id": str(row.author_id), "created_at": row.created_at.isoformat()} for row in rows]}
+    rows = (await db.execute(select(ParticipantPrivateNote, User.display_name).join(User, User.id == ParticipantPrivateNote.author_id).where(
+        ParticipantPrivateNote.participant_id == item.id, ParticipantPrivateNote.foundation_id == principal.foundation_id
+    ).order_by(ParticipantPrivateNote.created_at.desc(), ParticipantPrivateNote.id.desc()))).all()
+    return {"items": [note_view(row, author) for row, author in rows]}
 
 
 @router.post("/coord/participants/{participant_id}/private-notes", response_model=PrivateNoteView)
@@ -152,7 +194,8 @@ async def add_private_note(participant_id: UUID, data: PrivateNoteInput, db: Asy
     note = ParticipantPrivateNote(foundation_id=principal.foundation_id, participant_id=item.id, author_id=principal.user_id, text=data.text)
     db.add(note)
     await db.flush()
-    return await complete(db, principal, operation, key, {"id": str(note.id), "text": note.text, "author_id": str(note.author_id), "created_at": note.created_at.isoformat()}, "participant", item.id, ["private_note"])
+    author = await db.scalar(select(User.display_name).where(User.id == note.author_id))
+    return await complete(db, principal, operation, key, note_view(note, author), "participant", item.id, ["private_note"])
 
 
 @router.get("/coord/groups/staff-options", response_model=ParticipantStaffOptions)
@@ -305,5 +348,5 @@ async def assignment_photo(assignment_id: UUID, participant_id: UUID, db: AsyncS
         denied()
     item = await db.scalar(select(Participant).where(Participant.id == participant_id, Participant.foundation_id == principal.foundation_id))
     if item is None:
-        raise ApiError(404, "participant_not_found", "Участник недоступен.")
+        raise ApiError(404, "participant_not_found", "Подопечный недоступен.")
     return await photo_response(db, item)

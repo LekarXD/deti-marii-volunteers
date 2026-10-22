@@ -2,7 +2,8 @@
 from datetime import date, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import BigInteger, CheckConstraint, Date, DateTime, ForeignKey, ForeignKeyConstraint, Index, String, Text, UniqueConstraint, func
+from sqlalchemy import BigInteger, CheckConstraint, Date, DateTime, ForeignKey, ForeignKeyConstraint, Index, String, Text, UniqueConstraint, func, text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -35,6 +36,10 @@ class ParticipantBriefing(Base):
     communication: Mapped[str] = mapped_column(Text, default="")
     support: Mapped[str] = mapped_column(Text, default="")
     interests: Mapped[str] = mapped_column(Text, default="")
+    # Short memo chips (presets live in the web app); the text fields above are an optional note.
+    communication_tags: Mapped[list[str]] = mapped_column(JSONB, default=list, server_default=text("'[]'::jsonb"))
+    support_tags: Mapped[list[str]] = mapped_column(JSONB, default=list, server_default=text("'[]'::jsonb"))
+    interests_tags: Mapped[list[str]] = mapped_column(JSONB, default=list, server_default=text("'[]'::jsonb"))
     version: Mapped[int] = mapped_column(BigInteger, default=1)
 
 

@@ -20,6 +20,15 @@ for overlap. Ending participation shortens its interval and preserves the histor
 The `at` parameter returns group composition on a particular Moscow calendar date;
 it does not replace an occurrence's historical snapshot.
 
+The briefing memo is three chip lists (`communication_tags`, `support_tags`,
+`interests_tags`, up to 12 chips of up to 40 characters, normalized and de-duplicated)
+plus the older text fields, which stay as an optional short note. Presets live in the
+web app. Staff reads (`/coord/participants`, `/coord/participants/{id}`) add today's
+memberships in groups the caller may see; name search also matches those group titles.
+`/coord/participants/{id}/occurrences` lists upcoming scheduled sessions of the ward's
+groups (membership checked on the session's local date) with invited or confirmed
+volunteers, and additionally requires `schedule.read` or `schedule.manage`.
+
 Private notes are available exclusively at `/coord/participants/{id}/private-notes`.
 They do not enter participant/group JSON, name search or volunteer DTOs. Photo upload
 uses the shared private asset lifecycle, validates ready images before attachment and

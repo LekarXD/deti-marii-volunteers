@@ -1,35 +1,53 @@
-import {appPath} from '../../basePath';
-import {useState, type FormEvent, type ReactNode} from 'react';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {useEffect, useState, type ReactNode} from 'react';
+import {Link, useSearchParams} from 'react-router-dom';
+import {keepPreviousData, useQuery} from '@tanstack/react-query';
 import {keys} from '../../api/keys';
-import {Button, Card, EmptyState, ErrorState, Field, Input, LoadingState, Segmented, Textarea, useToast} from '../../ui';
-import {command, readNotes, readParticipant, readParticipants, uploadPhoto, type Participant, type ParticipantInput} from './api';
+import {wardsTabs} from '../../app/sectionTabs';
+import {Button, ErrorState, Icon, LoadingState, PageSection, SectionTabs, Segmented, cx} from '../../ui';
+import {readParticipants, type Participant} from './api';
+import {MemoCards, WardPhoto, ageLabel, initials, wardLine, wardPhotoUrl} from './wards';
 import './participants.css';
 
-const blank = (): ParticipantInput => ({display_name:'', birth_year:null, about:'', communication:'', support:'', interests:'', photo_asset_id:null, lifecycle:'active'});
+/** Small photo or initials; also used by the volunteer group page and the groups page. */
 export function ParticipantAvatar({person, large=false, assignmentId}: {person: Pick<Participant,'id'|'display_name'|'photo_asset_id'>;large?:boolean;assignmentId?:string}) {
-  const cls=`participant-avatar${large?' participant-avatar-large':''}`;
-  return person.photo_asset_id ? <img className={cls} src={assignmentId ? appPath(`/api/v1/me/assignments/${assignmentId}/participants/${person.id}/photo`) : appPath(`/api/v1/coord/participants/${person.id}/photo`)} alt={person.display_name}/> : <span className={cls} aria-hidden="true">{person.display_name.trim().slice(0,1)}</span>;
+  const cls=cx('participant-avatar',large&&'participant-avatar-large');
+  const url=wardPhotoUrl(person,assignmentId);
+  return url ? <img className={cls} src={url} alt={person.display_name}/> : <span className={cls} aria-hidden="true">{initials(person.display_name)}</span>;
 }
+/** The safe memo a volunteer sees: the hero and «Как помочь на занятии», never private notes. */
 export function ParticipantSafeCard({person, assignmentId, actions}: {person:Participant;assignmentId?:string;actions?:ReactNode}) {
-  return <><Card tone="hero"><div className="participant-hero"><div className="participant-copy"><p className="eyebrow">Знакомство</p><h2 className="hero-title">{person.display_name}</h2>{person.birth_year && <p className="participant-caption">Год рождения: {person.birth_year}</p>}<p className="lead">{person.about || 'Информация о знакомстве пока не добавлена.'}</p>{actions&&<div className="participant-actions">{actions}</div>}</div><ParticipantAvatar person={person} large assignmentId={assignmentId}/></div></Card><section className="participant-section"><h2 className="h2">Как помочь на занятии</h2><div className="participants-grid"><Card><h3 className="h3">Как общаться</h3><p>{person.communication || 'Памятка уточняется.'}</p></Card><Card><h3 className="h3">Какая поддержка нужна</h3><p>{person.support || 'Памятка уточняется.'}</p></Card></div>{person.interests && <Card className="participant-section"><h3 className="h3">Интересы</h3><p>{person.interests}</p></Card>}</section></>;
+  const age=ageLabel(person.birth_year);
+  return <>
+    <section className="card-hero ward-hero"><div className="hero-grid">
+      <div className="hero-copy"><p className="eyebrow">Знакомство</p><h2 className="hero-title">{person.display_name}</h2>{age&&<p className="ward-hero-line">{age}</p>}<p className="lead">{person.about || 'Информация о знакомстве пока не добавлена.'}</p>{actions&&<div className="actions">{actions}</div>}</div>
+      <WardPhoto person={person} size="xl" alt={person.display_name} assignmentId={assignmentId}/>
+    </div></section>
+    <PageSection title="Как помочь на занятии" className="ward-section"><MemoCards person={person}/></PageSection>
+  </>;
 }
-function PrivateNotes({id}: {id:string}) {
-  const [opened,setOpened]=useState(false),[text,setText]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState<unknown>(null);
-  const client=useQueryClient();
-  const notes=useQuery({queryKey:keys.detail('participant-private-notes',id), queryFn:({signal})=>readNotes(id,signal), enabled:opened, retry:false});
-  async function save(e:FormEvent) {e.preventDefault();setBusy(true);setError(null);try{await command(`/coord/participants/${id}/private-notes`,{text});setText('');await client.invalidateQueries({queryKey:keys.detail('participant-private-notes',id)});}catch(e){setError(e);}finally{setBusy(false);}}
-  return <section className="participant-section participant-private"><h2 className="h2">Для координатора</h2>{!opened ? <Button variant="secondary" onClick={()=>setOpened(true)}>Открыть закрытые заметки</Button> : <>{notes.isPending ? <LoadingState/> : notes.error ? <ErrorState error={notes.error} retry={()=>notes.refetch()}/> : <><p className="participant-caption">Эти заметки доступны только сотрудникам с отдельным разрешением.</p>{notes.data?.items.length ? notes.data.items.map(note=><Card key={note.id}><p style={{whiteSpace:'pre-wrap'}}>{note.text}</p><p className="participant-caption">{new Date(note.created_at).toLocaleString('ru-RU',{timeZone:'Europe/Moscow'})} МСК</p></Card>) : <p>Закрытых заметок пока нет.</p>}<form onSubmit={save}><Field label="Новая внутренняя заметка"><Textarea value={text} onChange={e=>setText(e.target.value)} required maxLength={20000}/></Field>{error ? <ErrorState error={error}/> : null}<Button type="submit" loading={busy} disabled={!text.trim()}>Добавить заметку</Button></form></>}</>}</section>;
-}
+
+const PAGE=100;
 export function ParticipantsPage() {
-  const [offset,setOffset]=useState(0);
-  const [query,setQuery]=useState(''),[archived,setArchived]=useState(false),[selected,setSelected]=useState<string|null>(null),[draft,setDraft]=useState<ParticipantInput|null>(null),[editingVersion,setEditingVersion]=useState<number|null>(null),[preview,setPreview]=useState(false),[busy,setBusy]=useState(false),[uploading,setUploading]=useState(false),[error,setError]=useState<unknown>(null);
-  const client=useQueryClient(),{toast}=useToast();
-  const people=useQuery({queryKey:keys.list('participants',{query,archived,offset}),queryFn:({signal})=>readParticipants(query,archived,signal,offset)});
-  const person=useQuery({queryKey:keys.detail('participants',selected??''),queryFn:({signal})=>readParticipant(selected!,signal),enabled:!!selected});
-  function edit(item?:Participant) {setDraft(item?{display_name:item.display_name,birth_year:item.birth_year,about:item.about,communication:item.communication,support:item.support,interests:item.interests,photo_asset_id:item.photo_asset_id,lifecycle:item.lifecycle}:blank());setEditingVersion(item?.version??null);setError(null);}
-  async function save(e:FormEvent) {e.preventDefault();if(!draft)return;setBusy(true);setError(null);try{const saved=await command<Participant>(editingVersion?`/coord/participants/${selected}`:'/coord/participants',editingVersion?{...draft,expected_version:editingVersion}:draft,editingVersion?'PATCH':'POST');await client.invalidateQueries({queryKey:keys.all('participants')});setSelected(saved.id);setDraft(null);setPreview(false);toast('Карточка сохранена');}catch(e){setError(e);}finally{setBusy(false);}}
-  async function photo(file?:File) {if(!file || !draft)return;setUploading(true);setError(null);try{const asset=await uploadPhoto(file);setDraft(current=>current?{...current,photo_asset_id:asset}:current);toast('Фотография загружена. Сохраните карточку.');}catch(e){setError(e);}finally{setUploading(false);}}
-  const patch=(field:keyof ParticipantInput,value:unknown)=>setDraft(current=>current?{...current,[field]:value}:current);
-  return <><div className="head"><h1 className="h1">Участники</h1>{!draft && <Button onClick={()=>edit()}>Добавить участника</Button>}{selected && <Button variant="ghost" onClick={()=>{setSelected(null);setDraft(null);setPreview(false);}}>К списку участников</Button>}</div>{draft ? <form onSubmit={save}><Card tone="hero"><p className="eyebrow">{editingVersion?'Редактирование':'Новая карточка'}</p><h2 className="hero-title">{draft.display_name || 'Новый участник'}</h2><div className="participant-actions"><Button type="submit" loading={busy} disabled={uploading}>Сохранить карточку</Button><Button variant="ghost" onClick={()=>setDraft(null)}>Отмена</Button></div></Card>{error ? <ErrorState error={error}/> : null}<section className="participant-section"><h2 className="h2">Фотография и знакомство</h2><Card className="participants-fields"><Field label="Фото участника" hint="PNG, JPEG или WebP до 5 МБ. Прежнее фото сохранится при ошибке загрузки."><Input className="participant-photo-input" type="file" accept="image/png,image/jpeg,image/webp" disabled={uploading||busy} onChange={e=>void photo(e.target.files?.[0])}/>{uploading && <p role="status">Загружаем фотографию…</p>}{draft.photo_asset_id && <><img className="participant-avatar" src={editingVersion && person.data?.photo_asset_id===draft.photo_asset_id ? appPath(`/api/v1/coord/participants/${selected}/photo`) : appPath(`/api/v1/assets/${draft.photo_asset_id}/content`)} alt="Предпросмотр фотографии"/><Button variant="ghost" onClick={()=>patch('photo_asset_id',null)}>Убрать фото</Button></>}</Field><Field label="Имя"><Input value={draft.display_name} onChange={e=>patch('display_name',e.target.value)} required maxLength={200}/></Field><Field label="Год рождения" hint="Можно оставить пустым."><Input inputMode="numeric" value={draft.birth_year??''} onChange={e=>patch('birth_year',e.target.value?Number(e.target.value):null)} type="number" min={1900} max={2200}/></Field><Field label="О человеке" className="participant-full"><Textarea value={draft.about??''} onChange={e=>patch('about',e.target.value)} maxLength={10000}/></Field></Card></section><section className="participant-section"><h2 className="h2">Практическая памятка</h2><Card className="participants-fields">{([['communication','Как общаться'],['support','Какая поддержка нужна'],['interests','Интересы']] as const).map(([field,label])=><Field key={field} label={label} className="participant-full"><Textarea value={draft[field]??''} onChange={e=>patch(field,e.target.value)} maxLength={10000}/></Field>)}</Card></section>{editingVersion && <div className="participant-actions"><Segmented label="Состояние карточки" value={draft.lifecycle??'active'} onChange={v=>patch('lifecycle',v)} options={[{value:'active',label:'Активная'},{value:'archived',label:'В архиве'}]}/></div>}</form> : selected ? person.isPending ? <LoadingState/> : person.error ? <ErrorState error={person.error} retry={()=>person.refetch()}/> : person.data && <>{preview && <p className="participant-preview-label">Предпросмотр памятки. Доступ волонтёра будет проверяться по назначению.</p>}<ParticipantSafeCard person={person.data} actions={<><Button onClick={()=>edit(person.data)}>Редактировать карточку</Button><Button variant="secondary" onClick={()=>setPreview(v=>!v)}>{preview?'Вид координатора':'Предпросмотр безопасной памятки'}</Button></>}/>{!preview && <PrivateNotes key={selected} id={selected}/>}</> : <section><div className="section-head"><h2 className="h2">Карточки участников</h2><Field label="Найти участника"><Input placeholder="Поиск по имени" value={query} onChange={e=>{setQuery(e.target.value);setOffset(0);}}/></Field></div><Segmented label="Список участников" value={archived?'archive':'active'} onChange={v=>{setArchived(v==='archive');setOffset(0);}} options={[{value:'active',label:'Активные'},{value:'archive',label:'Архив'}]}/>{people.isPending ? <LoadingState/> : people.error ? <ErrorState error={people.error} retry={()=>people.refetch()}/> : people.data?.items.length ? <div className="participants-grid participant-section">{people.data.items.map(item=><button className="card participant-row" key={item.id} onClick={()=>{setSelected(item.id);setPreview(false);}}><ParticipantAvatar person={item}/><span className="participant-copy"><span className="h3">{item.display_name}</span>{item.birth_year && <span className="participant-caption" style={{display:'block'}}>Год рождения: {item.birth_year}</span>}</span><span aria-hidden="true">→</span></button>)}</div> : <EmptyState title={query?'Участник не найден':'Здесь будут карточки участников'} description={query?'Попробуйте другое имя.':'Добавьте участника, а затем включите его в группу.'}/>}<div className="participant-actions">{offset>0&&<Button variant="ghost" onClick={()=>setOffset(v=>Math.max(0,v-100))}>Предыдущие</Button>}{people.data?.items.length===100&&<Button variant="ghost" onClick={()=>setOffset(v=>v+100)}>Следующие</Button>}</div></section>}</>;
+  const [params,setParams]=useSearchParams();
+  const archived=params.get('archived')==='1',offset=Number(params.get('offset'))||0;
+  const [text,setText]=useState(params.get('q')??''),query=params.get('q')??'';
+  const set=(changes:Record<string,string>)=>setParams(current=>{const next=new URLSearchParams(current);Object.entries(changes).forEach(([key,value])=>value?next.set(key,value):next.delete(key));return next;},{replace:true});
+  useEffect(()=>{if(text.trim()===query)return;const timer=setTimeout(()=>set({q:text.trim(),offset:''}),250);return()=>clearTimeout(timer);},[text]);
+  const people=useQuery({queryKey:keys.list('participants',{query,archived,offset}),queryFn:({signal})=>readParticipants(query,archived,signal,offset),placeholderData:keepPreviousData});
+  const items=people.data?.items??[];
+  return <>
+    <SectionTabs label="Подопечные" tabs={wardsTabs} actions={<Link className="btn btn-primary" to="/fund/participants/new"><Icon name="plus"/>Добавить подопечного</Link>}/>
+    <div className="ward-toolbar">
+      <label className="ward-search"><span className="sr-only">Найти подопечного</span><Icon name="search"/><input className="input" type="search" placeholder="Имя или группа" value={text} onChange={e=>setText(e.target.value)}/></label>
+      <Segmented label="Какие карточки показать" value={archived?'archive':'active'} onChange={value=>set({archived:value==='archive'?'1':'',offset:''})} options={[{value:'active',label:'Активные'},{value:'archive',label:'Архив'}]}/>
+    </div>
+    {people.isPending ? <LoadingState/> : people.error ? <ErrorState error={people.error} retry={()=>void people.refetch()}/> : items.length ? <>
+      <div className="grid-3">{items.map(ward=>{const line=wardLine(ward.birth_year,ward.groups);return <Link className="ward-card" key={ward.id} to={`/fund/participants/${ward.id}`}>
+        <WardPhoto person={ward} size="lg"/>
+        <span className="grow"><span className="h3">{ward.display_name}</span>{line&&<span className="meta">{line}</span>}</span>
+        <Icon name="arrow-right"/>
+      </Link>;})}</div>
+      {(offset>0||items.length===PAGE)&&<div className="actions">{offset>0&&<Button variant="ghost" onClick={()=>set({offset:String(Math.max(0,offset-PAGE))})}>Предыдущие</Button>}{items.length===PAGE&&<Button variant="ghost" onClick={()=>set({offset:String(offset+PAGE)})}>Следующие</Button>}</div>}
+    </> : <div className="card ward-empty">{query ? <><p className="h3">Никого не нашли</p><p className="p">Проверьте имя или посмотрите в архиве.</p></> : archived ? <p className="h3">В архиве пусто</p> : <><p className="h3">Пока нет подопечных</p><p className="p">Добавьте первую карточку, а потом включите человека в группу.</p></>}</div>}
+  </>;
 }

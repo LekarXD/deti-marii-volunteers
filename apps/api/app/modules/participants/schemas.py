@@ -2,22 +2,41 @@ from datetime import date, datetime
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+MEMO_TAGS_MAX = 12
+MEMO_TAG_LENGTH = 40
+MEMO_TAG_FIELDS = ("communication_tags", "support_tags", "interests_tags")
+
 
 class ParticipantInput(BaseModel):
     display_name: str = Field(min_length=1, max_length=200)
     birth_year: int | None = Field(default=None, ge=1900, le=2200)
     about: str = Field(default="", max_length=10000)
+    # The text fields are an optional short note next to the memo chips.
     communication: str = Field(default="", max_length=10000)
     support: str = Field(default="", max_length=10000)
     interests: str = Field(default="", max_length=10000)
+    communication_tags: list[str] = Field(default_factory=list, max_length=MEMO_TAGS_MAX)
+    support_tags: list[str] = Field(default_factory=list, max_length=MEMO_TAGS_MAX)
+    interests_tags: list[str] = Field(default_factory=list, max_length=MEMO_TAGS_MAX)
     photo_asset_id: UUID | None = None
     lifecycle: str = Field(default="active", pattern="^(active|archived)$")
     @field_validator("display_name")
     @classmethod
     def clean_name(cls, value):
         if not value.strip():
-            raise ValueError("Укажите имя участника")
+            raise ValueError("Укажите имя подопечного")
         return value.strip()
+    @field_validator(*MEMO_TAG_FIELDS)
+    @classmethod
+    def clean_tags(cls, value):
+        tags = []
+        for tag in value:
+            tag = " ".join(tag.split())
+            if len(tag) > MEMO_TAG_LENGTH:
+                raise ValueError(f"Пункт памятки длиннее {MEMO_TAG_LENGTH} символов")
+            if tag and tag not in tags:
+                tags.append(tag)
+        return tags
 
 
 class ParticipantUpdate(ParticipantInput):
@@ -32,9 +51,24 @@ class SafeParticipant(BaseModel):
     communication: str
     support: str
     interests: str
+    communication_tags: list[str]
+    support_tags: list[str]
+    interests_tags: list[str]
     photo_asset_id: UUID | None
     version: int
     lifecycle: str
+
+
+class ParticipantGroupRef(BaseModel):
+    """A current membership as staff see it next to the card; never part of the volunteer DTO."""
+    id: UUID
+    title: str
+    membership_id: UUID
+    valid_from: date
+
+
+class StaffParticipant(SafeParticipant):
+    groups: list[ParticipantGroupRef]
 
 
 class GroupInput(BaseModel):
@@ -90,7 +124,7 @@ class PrivateNoteInput(BaseModel):
 
 
 class ParticipantList(BaseModel):
-    items: list[SafeParticipant]
+    items: list[StaffParticipant]
     limit: int
     offset: int
 
@@ -123,11 +157,32 @@ class PrivateNoteView(BaseModel):
     id: UUID
     text: str
     author_id: UUID
+    author_name: str
     created_at: datetime
 
 
 class PrivateNoteList(BaseModel):
     items: list[PrivateNoteView]
+
+
+class ParticipantOccurrenceVolunteer(BaseModel):
+    id: UUID
+    display_name: str
+
+
+class ParticipantOccurrence(BaseModel):
+    id: UUID
+    title: str
+    starts_at: datetime
+    ends_at: datetime
+    timezone: str
+    location: str
+    group_title: str
+    volunteers: list[ParticipantOccurrenceVolunteer]
+
+
+class ParticipantOccurrenceList(BaseModel):
+    items: list[ParticipantOccurrence]
 
 
 class AssignmentParticipantList(BaseModel):

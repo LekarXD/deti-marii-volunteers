@@ -46,7 +46,7 @@ async def assigned(env):
         return response.json()
     group_a=await create('/coord/groups', {'title':'Первая группа'})
     group_b=await create('/coord/groups', {'title':'Вторая группа'})
-    a=await create('/coord/participants', {'display_name':'Участник первой группы','about':'Любит рисовать','communication':'Дайте время ответить','support':'Предложите тихое место','interests':'Краски'})
+    a=await create('/coord/participants', {'display_name':'Участник первой группы','about':'Любит рисовать','communication':'Дайте время ответить','support':'Предложите тихое место','interests':'Краски','communication_tags':['Давать время ответить'],'support_tags':['Тихий угол при перегрузке'],'interests_tags':['Рисование']})
     b=await create('/coord/participants', {'display_name':'Участник второй группы','communication':'Короткие понятные просьбы'})
     ended=await create('/coord/participants', {'display_name':'Период завершён в день занятия'})
     future=await create('/coord/participants', {'display_name':'Начинает на следующий день'})
@@ -65,7 +65,7 @@ async def assigned(env):
     uploaded=await first.patch(f"/api/v1/assets/{asset['id']}/upload",content=image_data,headers={'X-Upload-Offset':'0','Content-Type':'application/octet-stream'})
     assert uploaded.status_code==200,uploaded.text
     await create(f"/assets/{asset['id']}/complete-upload",{},first)
-    attached=await mutate(admin,f"/api/v1/coord/participants/{a['id']}",{'display_name':a['display_name'],'about':a['about'],'communication':a['communication'],'support':a['support'],'interests':a['interests'],'photo_asset_id':asset['id'],'expected_version':a['version']},'PATCH')
+    attached=await mutate(admin,f"/api/v1/coord/participants/{a['id']}",{'display_name':a['display_name'],'about':a['about'],'communication':a['communication'],'support':a['support'],'interests':a['interests'],'communication_tags':a['communication_tags'],'support_tags':a['support_tags'],'interests_tags':a['interests_tags'],'photo_asset_id':asset['id'],'expected_version':a['version']},'PATCH')
     assert attached.status_code==200,attached.text
     a=attached.json()
     role=await create('/coord/roles',{'title':'Помощник ведущей','task':'Поддержать участников','preparation_defaults':[]})
@@ -112,6 +112,8 @@ async def test_real_confirmed_assignment_safe_photo_and_frozen_local_date_roster
     assert 'PRIVATE NOTE' not in result.text and 'private_note' not in result.text and 'author_id' not in result.text
     group=await x.first.get(briefing)
     assert group.status_code==200 and group.json()['groups']==[{'id':x.group_a['id'],'title':'Первая группа'}]
+    memo=next(item for item in group.json()['items'] if item['id']==x.a['id'])
+    assert (memo['communication_tags'],memo['support_tags'],memo['interests_tags'])==(['Давать время ответить'],['Тихий угол при перегрузке'],['Рисование'])
     assert 'PRIVATE NOTE' not in group.text and 'Вторая группа' not in group.text
     image=await x.first.get(photo)
     assert image.status_code==200 and image.content==x.image_data and 'no-store' in image.headers['cache-control']
@@ -135,6 +137,23 @@ async def test_real_confirmed_assignment_safe_photo_and_frozen_local_date_roster
     cancelled=await x.create(f"/assignments/{confirmed['id']}/cancel",{'expected_version':confirmed['version']},x.first)
     await assert_closed(x.first,cancelled,x.a,403)
     assert (await x.first.get(f"/api/v1/assets/{x.asset['id']}/content")).status_code==404
+
+
+@pytest.mark.asyncio
+async def test_ward_card_lists_upcoming_group_sessions_with_their_volunteers(assigned):
+    x=assigned
+    upcoming=await x.admin.get(f"/api/v1/coord/participants/{x.a['id']}/occurrences")
+    assert upcoming.status_code==200,upcoming.text
+    [session]=upcoming.json()['items']
+    assert (session['id'],session['group_title'],session['timezone'])==(x.event_a['id'],'Первая группа','Pacific/Auckland')
+    assert [v['display_name'] for v in session['volunteers']]==['Volunteer']
+    # The membership must cover the session's local date (start inclusive, end exclusive).
+    for outside in (x.future,x.ended):
+        assert (await x.admin.get(f"/api/v1/coord/participants/{outside['id']}/occurrences")).json()['items']==[]
+    assert [s['id'] for s in (await x.admin.get(f"/api/v1/coord/participants/{x.starts['id']}/occurrences")).json()['items']]==[x.event_a['id']]
+    assert [s['id'] for s in (await x.admin.get(f"/api/v1/coord/participants/{x.b['id']}/occurrences")).json()['items']]==[x.event_b['id']]
+    await x.create(f"/coord/event-occurrences/{x.event_a['id']}/cancel",{'expected_version':x.event_a['version']})
+    assert (await x.admin.get(f"/api/v1/coord/participants/{x.a['id']}/occurrences")).json()['items']==[]
 
 
 @pytest.mark.asyncio

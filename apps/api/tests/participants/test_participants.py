@@ -220,3 +220,57 @@ async def test_concurrent_membership_writers_and_leader_change_revoke(env):
     changed=await mutate(c,f"/api/v1/coord/groups/{g1['id']}",{'title':group['title'],'leader_id':None,'expected_version':group['version']},'PATCH')
     assert changed.status_code==200
     assert (await clients['leader'].get(f"/api/v1/coord/participants/{a['id']}")).status_code==404
+
+
+@pytest.mark.asyncio
+async def test_memo_tags_are_normalized_limited_and_kept_with_the_short_note(env):
+    _,clients,_,_,_=env
+    c=clients['admin']
+    created=await mutate(c,'/api/v1/coord/participants',{'display_name':'Tags person','support':'Короткая приписка',
+        'communication_tags':['  Говорить   коротко ','Говорить коротко','','Давать время ответить'],'interests_tags':['Рисование']})
+    assert created.status_code==200,created.text
+    person=created.json()
+    assert person['communication_tags']==['Говорить коротко','Давать время ответить']
+    assert person['support_tags']==[] and person['interests_tags']==['Рисование'] and person['support']=='Короткая приписка'
+    assert (await c.get(f"/api/v1/coord/participants/{person['id']}")).json()['communication_tags']==person['communication_tags']
+    updated=await mutate(c,f"/api/v1/coord/participants/{person['id']}",{'display_name':'Tags person','support_tags':['Тихий угол при перегрузке'],'expected_version':person['version']},'PATCH')
+    assert updated.status_code==200,updated.text
+    assert updated.json()['support_tags']==['Тихий угол при перегрузке'] and updated.json()['communication_tags']==[] and updated.json()['support']==''
+    listed=(await c.get('/api/v1/coord/participants?query=Tags')).json()['items']
+    assert listed[0]['support_tags']==['Тихий угол при перегрузке']
+    too_many=await mutate(c,'/api/v1/coord/participants',{'display_name':'Too many','interests_tags':[f'Тег {n}' for n in range(13)]})
+    assert too_many.status_code==422
+    too_long=await mutate(c,'/api/v1/coord/participants',{'display_name':'Too long','support_tags':['х'*41]})
+    assert too_long.status_code==422
+    blank=await mutate(c,'/api/v1/coord/participants',{'display_name':'   '})
+    assert blank.status_code==422 and 'подопечного' in blank.text
+
+
+@pytest.mark.asyncio
+async def test_private_notes_name_the_author_and_upcoming_sessions_need_schedule_access(env):
+    _,clients,_,_,_=env
+    a,b,g1,g2=await setup_people(env);c=clients['admin']
+    note=await mutate(c,f"/api/v1/coord/participants/{a['id']}/private-notes",{'text':'Мама просила не давать сладкое.'})
+    assert note.status_code==200 and note.json()['author_name']=='Coordinator'
+    notes=(await c.get(f"/api/v1/coord/participants/{a['id']}/private-notes")).json()['items']
+    assert [(n['text'],n['author_name']) for n in notes]==[('Мама просила не давать сладкое.','Coordinator')]
+    # Participant access alone does not open the schedule.
+    assert (await c.get(f"/api/v1/coord/participants/{a['id']}/occurrences")).status_code==403
+    assert (await clients['volunteer'].get(f"/api/v1/coord/participants/{a['id']}/occurrences")).status_code==404
+
+
+@pytest.mark.asyncio
+async def test_staff_list_shows_current_visible_groups_and_finds_by_group_title(env):
+    _,clients,_,_,_=env
+    a,b,g1,g2=await setup_people(env);c=clients['admin']
+    joined=await mutate(c,f"/api/v1/coord/groups/{g2['id']}/memberships",{'participant_id':a['id'],'valid_from':'2020-01-01','expected_version':g2['version']})
+    assert joined.status_code==200,joined.text
+    items={p['display_name']:p for p in (await c.get('/api/v1/coord/participants')).json()['items']}
+    assert [g['title'] for g in items['Alice']['groups']]==['Group one','Group two'] and [g['title'] for g in items['Boris']['groups']]==['Group two']
+    assert {'id','title','membership_id','valid_from'}<=set(items['Alice']['groups'][0])
+    assert [p['display_name'] for p in (await c.get('/api/v1/coord/participants?query=group%20two')).json()['items']]==['Alice','Boris']
+    assert [g['title'] for g in (await c.get(f"/api/v1/coord/participants/{a['id']}")).json()['groups']]==['Group one','Group two']
+    # A scoped leader sees the ward but only the group they lead, and cannot find it by another group's title.
+    led=(await clients['leader'].get('/api/v1/coord/participants')).json()['items']
+    assert [(p['display_name'],[g['title'] for g in p['groups']]) for p in led]==[('Alice',['Group one'])]
+    assert (await clients['leader'].get('/api/v1/coord/participants?query=Group%20two')).json()['items']==[]
