@@ -7,3 +7,4 @@ export * from './ErrorBoundary';
 import './ui.css';
 export {LoadingState as Loading, EmptyState as Empty, ErrorState as ErrorAlert} from './overlays';
 export * from './UploadControl';
+export * from './sections';
