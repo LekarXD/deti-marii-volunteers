@@ -65,7 +65,7 @@ async def context(monkeypatch):
         registration=RegistrationSession(foundation_id=foundation.id,expires_at=utcnow()+timedelta(days=1));db.add(registration);await db.flush()
         db.add(Session(foundation_id=foundation.id,registration_id=registration.id,token_hash=digest('registration'),csrf_hash=digest('csrf-registration'),csrf_cipher='unused',expires_at=utcnow()+timedelta(hours=2)))
         db.add(AISettings(foundation_id=foundation.id,enabled=True,daily_tokens=100000,daily_requests=100,max_concurrent=2));await db.commit()
-    app=FastAPI();install_error_handlers(app);app.include_router(router)
+    app=FastAPI();install_error_handlers(app);app.include_router(router,prefix='/api/v1')
     async def override():
         async with factory() as db:
             try:yield db
@@ -337,3 +337,37 @@ async def test_reviewer_queue_flags_a_zero_on_a_critical_criterion(context):
     assert appealed.status_code==200,appealed.text
     queued=(await context.client.get('/api/v1/coord/simulator/appeals',headers=headers('reviewer'))).json()
     assert [row['critical'] for row in queued]==[True]
+async def test_retry_evaluation_only_reruns_a_failed_evaluation(context):
+    scenario=await published_scenario(context);session=await start(context,scenario)
+    sent=await context.client.post(f"/api/v1/simulation-sessions/{session['id']}/turns",headers=headers('learner'),json={'expected_version':session['version'],'content':'Можешь выбрать краски или посидеть рядом.'})
+    assert sent.status_code==200
+    await drain(context)
+    current=(await context.client.get(f"/api/v1/simulation-sessions/{session['id']}",headers=headers('learner'))).json()
+    finished=await context.client.post(f"/api/v1/simulation-sessions/{session['id']}/finish",headers=headers('learner'),json={'expected_version':current['version']})
+    assert finished.status_code==200
+    await drain(context,invalid_evidence=True)
+    failed=(await context.client.get(f"/api/v1/simulation-sessions/{session['id']}",headers=headers('learner'))).json()
+    assert failed['evaluation']['state']=='failed' and 'retry-evaluation' in failed['allowed_actions']
+    retried=await context.client.post(f"/api/v1/simulation-sessions/{session['id']}/retry-evaluation",headers=headers('learner'),json={'expected_version':failed['version']})
+    assert retried.status_code==200,retried.text
+    await drain(context)
+    ready=(await context.client.get(f"/api/v1/simulation-sessions/{session['id']}",headers=headers('learner'))).json()
+    assert ready['evaluation']['state']=='ready' and ready['evaluation']['version']==2 and 'retry-evaluation' not in ready['allowed_actions']
+    async with context.db() as db:
+        before=(await db.scalar(select(func.count()).select_from(SimulationEvaluation)),await db.scalar(select(func.count()).select_from(AIRun)))
+    rerolled=await context.client.post(f"/api/v1/simulation-sessions/{session['id']}/retry-evaluation",headers=headers('learner'),json={'expected_version':ready['version']})
+    assert rerolled.status_code==409 and rerolled.json()['code']=='simulation_state_conflict'
+    async with context.db() as db:
+        assert (await db.scalar(select(func.count()).select_from(SimulationEvaluation)),await db.scalar(select(func.count()).select_from(AIRun)))==before
+
+
+@pytest.mark.asyncio
+async def test_support_queue_keeps_open_requests_ahead_of_resolved_history(context):
+    scenario=await published_scenario(context);session=await start(context,scenario)
+    support=await context.client.post(f"/api/v1/simulation-sessions/{session['id']}/support-requests",headers=headers('learner'),json={'expected_version':session['version'],'text':'Хочу обсудить ситуацию со специалистом.'})
+    assert support.status_code==200,support.text
+    async with context.db() as db:
+        db.add_all([SimulationSupportRequest(foundation_id=context.foundation.id,session_id=UUID(session['id']),text=f'Решено {index}',state='resolved',response='Ответили.',created_at=utcnow()+timedelta(minutes=1,seconds=index)) for index in range(101)])
+        await db.commit()
+    queue=(await context.client.get('/api/v1/coord/simulator/support-requests',headers=headers('reviewer'))).json()
+    assert len(queue)==100 and queue[0]['id']==support.json()['support_requests'][0]['id']

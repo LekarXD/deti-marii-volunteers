@@ -18,7 +18,7 @@ export function useCrmCommand<T>(path:string,method='POST',baseVersion?:number){
   const refresh=async()=>{await client.invalidateQueries({queryKey:keys.all('crm')});};
   const mutation=useMutation({mutationFn:(input:unknown)=>{const body=version.current!==undefined&&typeof input==='object'&&input!==null?{...input,expected_version:version.current}:input;const signature=JSON.stringify(body);if(signature!==logical.current.signature)logical.current={signature,key:crypto.randomUUID()};return api<T>(path,{method,body,idempotencyKey:logical.current.key,retries:0});},onSuccess:async result=>{if(version.current!==undefined&&result&&typeof result==='object'&&'version' in result)version.current=Number(result.version);await refresh();},
     onError:async error=>{if(error instanceof ApiError&&error.status===409)await refresh();}});
-  return {...mutation,rebase:(next:number)=>{version.current=next;}};
+  return {...mutation,rebase:(next:number)=>{version.current=next;},pinned:()=>version.current};
 }
 export const stateLabels:Record<string,string>={unverified:'Актуальность не проверена',contacted:'Связались',awaiting_reply:'Ждём ответа',ready:'Готов помогать',active:'Регулярно участвует',paused:'Сейчас на паузе',unavailable:'Сейчас не готов помогать',unreachable:'Не удалось связаться',closed:'Участие завершено'};
 export const channels=[{value:'telegram',label:'Telegram'},{value:'phone',label:'Телефонный звонок'},{value:'email',label:'Электронная почта'},{value:'max',label:'Max'},{value:'whatsapp',label:'WhatsApp'},{value:'other',label:'Другой канал'}];

@@ -167,3 +167,48 @@ async def test_staff_document_request_uses_canonical_profile_basis_and_rechecks_
         blocked=await post(f['coord'],f"/coord/profile/documents/{letter['id']}/review",dict(expected_version=1,decision='approved',body='Спасибо за помощь',public_response='Письмо проверено'));assert blocked.status_code==409 and blocked.json()['code']=='document_basis_invalid'
     finally:
         for client in (f['first'],f['second'],f['coord']):await client.aclose()
+
+@pytest.mark.asyncio
+async def test_metrics_load_only_their_window_and_still_exclude_earlier_first_visits(env,monkeypatch):
+    app,factory=env;f=await fixture_facts(app,factory);group=await group_reporter(app,factory,f['g1'].id)
+    try:
+        assignment_id,_,event_id=await attendance_fixture(factory,f['p1'].user_id,date.today()-timedelta(days=200))
+        async with factory() as db:
+            assignment=await db.get(Assignment,assignment_id);assignment.group_id_snapshot=f['g1'].id
+            await append_service_time(db,f['p1'],f['p1'].user_id,assignment_id,event_id);await db.commit()
+        monkeypatch.setattr('app.modules.reporting.metrics.MAX_FACTS',5)
+        params=dict(period_from=f['period_from'].isoformat(),period_to=date.today().isoformat())
+        response=await f['coord'].get('/api/v1/coord/reports/metrics',params=params);assert response.status_code==200,response.text
+        values={m['key']:m for m in response.json()['metrics']};assert values['volunteer_minutes']['value']==225 and values['retention_90']['value'] is None
+        scoped=(await group.get('/api/v1/coord/reports/metrics',params=dict(params,scope_type='group',scope_id=str(f['g1'].id)))).json()
+        assert next(m for m in scoped['metrics'] if m['key']=='retention_90')['status']=='empty' and len(scoped['source_refs'])==3
+    finally:
+        for client in (f['first'],f['second'],f['coord'],group):await client.aclose()
+
+@pytest.mark.asyncio
+async def test_long_confirmed_report_exports_as_pdf(env):
+    app,factory=env;coord=await reporter(app,factory)
+    try:
+        report=await create(coord,date.today()-timedelta(days=20))
+        text='\n'.join(f'{index:03d}. '+('Проверенный пункт о помощи волонтёров в мастерской фонда; '*2)[:89] for index in range(160))
+        for section in report['sections']:
+            if section['key']!='stories':
+                response=await coord.put(f"/api/v1/coord/reports/{report['id']}/sections/{section['key']}",json=dict(expected_version=report['version'],text=text),headers={'Idempotency-Key':str(uuid4())});assert response.status_code==200,response.text;report=response.json()
+            response=await post(coord,f"/coord/reports/{report['id']}/sections/{section['key']}/decision",dict(expected_version=report['version'],decision='confirm'));report=response.json()
+        report=(await post(coord,f"/coord/reports/{report['id']}/confirm",dict(expected_version=report['version']))).json()
+        exported=await post(coord,f"/coord/reports/{report['id']}/exports",dict(expected_version=report['version'],format='pdf'));assert exported.status_code==200,exported.text
+        content=await coord.get('/api/v1/assets/'+exported.json()['asset_id']+'/content');assert len(PdfReader(io.BytesIO(content.content)).pages)>20
+    finally:await coord.aclose()
+
+@pytest.mark.asyncio
+async def test_locked_report_reload_does_not_use_cached_version(env):
+    from app.modules.reporting.service import scoped_report
+    app,factory=env;coord=await reporter(app,factory)
+    try:
+        report=await create(coord,date.today()-timedelta(days=20));p=await principal(coord,factory)
+        async with factory() as first:
+            cached=await scoped_report(first,p,UUID(report['id']));assert cached.version==1
+            async with factory() as second:
+                newer=await second.get(ReportDraft,cached.id);newer.version+=1;await second.commit()
+            assert (await scoped_report(first,p,cached.id,'reports.write',True)).version==2
+    finally:await coord.aclose()

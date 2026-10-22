@@ -188,7 +188,8 @@ async def close(id:UUID,body:StudioVersionCommand,db:AsyncSession=Depends(get_db
         if row.state=='prepared':row.state='closed';row.closed_at=datetime.now(timezone.utc)
         else:
             row.state='closing'
-            enqueue_job(db,p.foundation_id,'studio.close',{'session_id':str(row.id),'generation':row.generation})
+            # ~1h of capped backoff: a dead close job would leave the session 'closing' for good.
+            enqueue_job(db,p.foundation_id,'studio.close',{'session_id':str(row.id),'generation':row.generation},max_attempts=20)
         row.version+=1;audit(db,p,'studio.session.close','studio_session',id,('state',));return s.session_view(row,context)
     return await execute(db,p,'studio.session.close:'+str(id),key,body.model_dump(mode='json'),lambda:s.session(db,p,id,True,True),action)
 

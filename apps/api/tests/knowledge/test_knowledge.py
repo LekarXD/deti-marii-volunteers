@@ -365,3 +365,61 @@ async def test_lock_reload_does_not_use_cached_source_revision(setup):
             newer.draft_version+=1;await second.commit()
         locked=await source(first,principal,before.id,True)
         assert locked.draft_version==previous+1
+
+@pytest.mark.asyncio
+async def test_metadata_save_while_pdf_import_queued_rekeys_the_import(setup):
+    from io import BytesIO
+    import hashlib
+    from reportlab.pdfgen import canvas
+    from app.core.models import MediaAsset
+    from app.modules.assets.service import asset_path
+    from app.modules.knowledge.jobs import ingest_pdf
+    client,factory,foundation=setup
+    buffer=BytesIO();page=canvas.Canvas(buffer);page.drawString(72,720,'Volunteers never share personal contacts with families.');page.save();data=buffer.getvalue()
+    async with factory() as db:
+        principal=await resolve_principal(db,await db.scalar(select(Session).where(Session.token_hash==digest('staff'+str(foundation)))))
+        asset=MediaAsset(foundation_id=foundation,owner_user_id=principal.user_id,storage_key=uuid4().hex,content_type='application/pdf',expected_size=len(data),received_size=len(data),checksum=hashlib.sha256(data).hexdigest(),state='ready')
+        db.add(asset);await db.commit()
+        path=asset_path(asset);path.parent.mkdir(exist_ok=True,parents=True);path.write_bytes(data)
+    created=(await post(client,'/coord/knowledge/sources',{'title':'Памятка','asset_id':str(asset.id)})).json()
+    assert created['ingest_state']=='queued' and created['version']==1
+    saved=await client.put(f"/api/v1/coord/knowledge/sources/{created['id']}",json={'title':'Памятка для волонтёров','body':'','visibility':'staff','expected_version':1},headers={'Idempotency-Key':str(uuid4())})
+    assert saved.status_code==200 and saved.json()['ingest_state']=='queued',saved.text
+    async with factory() as db:
+        jobs=(await db.scalars(select(Job).where(Job.foundation_id==foundation,Job.kind=='knowledge.ingest').order_by(Job.created_at))).all()
+        for job in jobs:
+            job=await db.scalar(select(Job).where(Job.id==job.id).with_for_update())
+            job.state='running';job.claim_token=uuid4();job.lease_until=utcnow()+timedelta(minutes=2)
+            await db.commit();context=JobContext(job.id,job.claim_token,foundation,job.payload)
+            result=await ingest_pdf(db,context);await complete(db,job.id,job.claim_token,result);await db.commit()
+        source=await db.get(KnowledgeSource,UUID(created['id']),populate_existing=True)
+        assert source.ingest_state=='ready' and 'personal contacts' in source.draft_body and source.title=='Памятка для волонтёров'
+    path.unlink()
+
+@pytest.mark.asyncio
+async def test_question_queue_keeps_pending_ahead_of_answered_history(setup):
+    client,factory,foundation=setup
+    client.cookies.set('opora_session','one'+str(foundation))
+    pending=(await post(client,'/mentor/runs',{'question':'Несуществующий вопрос qqqqq?'})).json()
+    async with factory() as db:
+        registration=await db.scalar(select(Session.registration_id).where(Session.token_hash==digest('two'+str(foundation))))
+        db.add_all([KnowledgeQuestion(foundation_id=foundation,registration_id=registration,text=f'Решённый вопрос {index}',state='answered',created_at=utcnow()+timedelta(minutes=1,seconds=index)) for index in range(201)])
+        await db.commit()
+    client.cookies.set('opora_session','staff'+str(foundation))
+    queue=(await client.get('/api/v1/coord/knowledge/questions')).json()
+    assert len(queue)==200 and queue[0]['id']==pending['question_id']
+
+@pytest.mark.asyncio
+async def test_registration_question_flood_is_coalesced_and_foundation_bounded(setup,monkeypatch):
+    from app.modules.knowledge import router as knowledge_router
+    client,factory,foundation=setup
+    for label in ['one','two']:
+        client.cookies.set('opora_session',label+str(foundation))
+        asked=(await post(client,'/mentor/runs',{'question':f'Несуществующий вопрос {label} wwwww?'})).json()
+        assert asked['state']=='unknown' and asked['question_id']
+    async with factory() as db:
+        assert await db.scalar(select(func.count()).select_from(KnowledgeQuestion).where(KnowledgeQuestion.foundation_id==foundation))==2
+        assert await db.scalar(select(func.count()).select_from(OutboxMessage).where(OutboxMessage.foundation_id==foundation,OutboxMessage.channel=='in_app'))==1
+    monkeypatch.setattr(knowledge_router,'REGISTRATION_LIMIT',2)
+    limited=await post(client,'/mentor/runs',{'question':'Несуществующий вопрос третий wwwww?'})
+    assert limited.status_code==429,limited.text

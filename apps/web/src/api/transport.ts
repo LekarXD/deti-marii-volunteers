@@ -32,6 +32,7 @@ export function clearSession(broadcast = true) {
 const channel = typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('opora-session') : null;
 channel?.addEventListener('message', () => clearSession(false));
 const failure=readApiError;
+const sessionLost=new Set(['session_expired','session_invalid','session_required']);
 
 export async function initializeSession(force = false): Promise<Session> {
   if (force) clearSession();
@@ -76,7 +77,8 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
       if (body !== undefined && !isRaw) headers.set('Content-Type','application/json');
       const response = await fetch(url, {...request, method, headers, body:body === undefined ? undefined : isRaw ? body as BodyInit : JSON.stringify(body), credentials:'same-origin', cache:'no-store', signal:controller.signal});
       if (epoch !== generation) throw new ApiError(0, 'principal_changed', 'Сессия изменилась.');
-      if (response.status === 401) { if (!retainSessionOnUnauthorized) clearSession(); throw await failure(response); }
+      // A valid anonymous session also gets 401 for user-only actions; clearing it would remount and loop.
+      if (response.status === 401) { const error = await failure(response); if (!retainSessionOnUnauthorized && sessionLost.has(error.code)) clearSession(); throw error; }
       if (!response.ok) {
         const error = await failure(response);
         const retryAfter = response.headers.get('Retry-After');

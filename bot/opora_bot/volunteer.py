@@ -12,7 +12,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from . import auth, db, exports, platform, site, ui, unisender
 from .config import CODE_TTL_MINUTES, TZ
 from .notify import send, to_coordinators
-from .schedule import WEEKDAYS, duration_hours, human, starts_at, time_range
+from .schedule import WEEKDAYS, duration_hours, human, occurs, starts_at, time_range
 
 router = Router(name="volunteer")
 
@@ -183,16 +183,16 @@ async def login_inline(cb: CallbackQuery, state: FSMContext):
     await cb.answer()
 
 
-async def send_code(target: Message, chat_id: int, email: str, state: FSMContext, bot: Bot, first_name: str = ""):
-    """Выдаёт код и отправляет письмо через Unisender Go. Ответ — в чат."""
+async def send_code(target: Message, chat_id: int, email: str, state: FSMContext, bot: Bot, profile: dict):
+    """Выдаёт код и отправляет письмо через Unisender Go. Ответ — в чат.
+    Профиль попадает в состояние только вместе с почтой, на которую ушёл код."""
     blocked = auth.can_send(chat_id)
     if blocked:
         await target.answer(blocked, reply_markup=code_kb())
         return
     code = auth.issue(chat_id, email)
     me = await bot.me()
-    data = await state.get_data()
-    name = (data.get("profile") or {}).get("name") or first_name
+    name = profile.get("name") or ""  # только имя из анкеты: имя в Telegram выбирает кто угодно, а письмо уходит от фонда
     subs = {"greeting": f"Здравствуйте, {name}!" if name else "Здравствуйте!", "code": code,
             "minutes": str(CODE_TTL_MINUTES), "bot_link": f"https://t.me/{me.username}", "bot_name": f"@{me.username}"}
     res = await unisender.send_login_code(email, subs, f"login-{chat_id}-{int(db.now().timestamp())}")
@@ -201,7 +201,7 @@ async def send_code(target: Message, chat_id: int, email: str, state: FSMContext
                             "Если не выходит — напишите координатору фонда.", reply_markup=code_kb())
         return
     await state.set_state(Login.code)
-    await state.update_data(email=email)
+    await state.update_data(email=email, profile=profile)
     text = (f"📨 Отправили код на {escape(auth.mask(email))}. Введите его сюда — 6 цифр. "
             f"Код действует {CODE_TTL_MINUTES} минут. Если письма нет, проверьте «Спам».")
     if res.dry_run:
@@ -224,17 +224,16 @@ async def login_email(msg: Message, state: FSMContext, bot: Bot):
         await msg.answer("Не нашли анкету с этой почтой. Проверьте адрес — или заполните анкету, если ещё не заполняли.",
                          reply_markup=anketa_kb())
         return
-    await state.update_data(profile=profile.__dict__)
-    await send_code(msg, msg.chat.id, email, state, bot, msg.from_user.first_name or "")
+    await send_code(msg, msg.chat.id, email, state, bot, profile.__dict__)
 
 
 @router.callback_query(ui.StepCB.filter(F.name == "resend"))
 async def resend(cb: CallbackQuery, state: FSMContext, bot: Bot):
-    email = (await state.get_data()).get("email")
-    if not email:
+    data = await state.get_data()
+    if not data.get("email"):
         await ask_email(cb.message, state)
     else:
-        await send_code(cb.message, cb.message.chat.id, email, state, bot, cb.from_user.first_name or "")
+        await send_code(cb.message, cb.message.chat.id, data["email"], state, bot, data.get("profile") or {})
     await cb.answer()
 
 
@@ -249,6 +248,12 @@ async def login_code(msg: Message, state: FSMContext, bot: Bot):
         await msg.answer(f"{why} Запросите новый.", reply_markup=code_kb())
         return
     p = (await state.get_data()).get("profile") or {}
+    if p.get("email") != email:  # анкету искали по другой почте — берём анкету той, что подтверждена кодом
+        try:
+            prof = await site.find_by_email(email)
+        except Exception:
+            prof = None
+        p = prof.__dict__ if prof else {}
     await state.clear()
     uid = msg.chat.id
     # одна почта — один чат: если человек вошёл с нового телефона, старый чат отвязываем
@@ -375,6 +380,9 @@ async def invite_answer(cb: CallbackQuery, callback_data: ui.InvCB, bot: Bot):
     if not ev or not inv:
         await cb.answer("Приглашение не найдено.")
         return
+    if not occurs(ev, day):
+        await cb.answer("Это событие отменено.")
+        return
     if callback_data.action in ("more", "mat"):
         await cb.message.answer(ui.materials_text(ev, day, with_group=inv["status"] in ("confirmed", "attended")))
         await cb.answer()
@@ -473,7 +481,7 @@ async def ask_text(msg: Message, state: FSMContext, bot: Bot):
     kb.button(text="Карточка волонтёра", callback_data=ui.CardCB(uid=msg.chat.id))
     who = ui.person(db.user(msg.chat.id))
     db.log("question", msg.chat.id, f"Вопрос от {who}: {escape(msg.text[:300])}", ref=str(qid), action="answer")
-    await to_coordinators(bot, f"💬 <b>Вопрос от {who}</b>\n{escape(msg.text)}", kb.as_markup())  # человек ждёт ответа
+    await to_coordinators(bot, f"💬 <b>Вопрос от {who}</b>\n{escape(msg.text[:3500])}", kb.as_markup())  # человек ждёт ответа
     await msg.answer("✅ Передали координатору. Ответ придёт в этот чат.")
 
 

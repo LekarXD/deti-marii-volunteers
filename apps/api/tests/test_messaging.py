@@ -105,6 +105,25 @@ async def test_attachment_permission_link_and_photo_clearance(app):
         assert messages['items'][0]['assets'][0]['id']==aid
 
 @pytest.mark.asyncio
+async def test_assets_manage_cannot_attach_another_persons_upload(app):
+    await fixtures()
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as staff,httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as candidate:
+        ss,sh=await actor(staff,'coordinator@example.test',True)
+        cs,ch=await actor(candidate,f'owner-{uuid4().hex}@example.test')
+        cid=(await candidate.post('/api/v1/conversations/direct',json={'recipient_id':ss['user_id']},headers=ch)).json()['id']
+        image=io.BytesIO()
+        Image.new('RGB',(3,3),'blue').save(image,format='PNG')
+        data=image.getvalue()
+        aid=(await candidate.post('/api/v1/assets/upload-intents',json={'content_type':'image/png','expected_size':len(data),'checksum':hashlib.sha256(data).hexdigest()},headers=ch)).json()['id']
+        await candidate.patch(f'/api/v1/assets/{aid}/upload',content=data,headers={**ch,'X-Upload-Offset':'0'})
+        await candidate.post(f'/api/v1/assets/{aid}/complete-upload',headers=ch)
+        assert (await staff.get(f'/api/v1/assets/{aid}/content')).status_code==200 # assets.manage may read it
+        sh['Idempotency-Key']=uuid4().hex
+        forwarded=await staff.post(f'/api/v1/conversations/{cid}/messages',json={'text':'Чужой файл','asset_ids':[aid],'photo_policy':'no_people'},headers=sh)
+        assert forwarded.status_code==403 and forwarded.json()['code']=='asset_not_shareable',forwarded.text
+        assert (await candidate.get(f'/api/v1/assets/{aid}/content')).content==data
+
+@pytest.mark.asyncio
 async def test_internal_outbox_consumer_is_atomic_deduplicated_and_readonly(app):
     seed=await fixtures()
     recipient=UUID(seed['identities']['candidate-two@example.test']['user_id'])

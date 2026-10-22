@@ -127,6 +127,34 @@ def main():
     cal = exports.ics([(art, day)]).decode()
     assert "DTSTART;TZID=Europe/Moscow:20261024T140000" in cal and cal.count("BEGIN:VEVENT") == 1
 
+    # имя из Telegram «=HYPERLINK(…)» в Excel остаётся текстом, а не формулой
+    trap = '=HYPERLINK("http://x","y")'
+    db.ensure_user(5, "anya"); db.update_user(5, name=trap, status="active")
+    cell = next(c for row in load_workbook(BytesIO(exports.volunteers_xlsx())).active.iter_rows() for c in row if c.value == trap)
+    assert cell.data_type == "s", cell.data_type
+    # «<» в имени не ломает итоги месяца (сообщение в HTML)
+    db.update_user(5, name="Аня <3")
+    db.set_invite("art", "2026-10-17", 5, "invited")
+    db.set_invite("art", "2026-10-17", 5, "declined", answered_at=at(2026, 10, 17, 9).isoformat())
+    summary = exports.month_summary(date(2026, 10, 28))
+    assert "• Аня &lt;3 — Арт-суббота, 17 октября" in summary and "<3" not in summary, summary
+
+    # тихие часы без перехода через полночь (QUIET_HOURS=0-8): днём сообщения уходят
+    notify.QUIET_FROM, notify.QUIET_TO = 0, 8
+    assert notify.is_quiet(at(2026, 10, 22, 3)) and not notify.is_quiet(at(2026, 10, 22, 12))
+    notify.QUIET_FROM, notify.QUIET_TO = 22, 9
+    assert notify.is_quiet(at(2026, 10, 22, 23)) and not notify.is_quiet(at(2026, 10, 22, 12))
+
+    # событие с временем «24:00» (записанное до проверки ввода) не мешает напоминанию о следующем событии
+    for eid, start, end in (("bad", "20:00", "24:00"), ("good", "21:00", "22:00")):
+        db.run("INSERT INTO events (id, title, start_date, time, end_time, need) VALUES (?,?,?,?,?,1)", eid, eid, "2026-11-18", start, end)
+        db.set_invite(eid, "2026-11-18", 2, "confirmed")
+    bot.sent.clear()
+    jobs.log.disabled = True  # ожидаемая ошибка по «bad» — в журнал, не в вывод теста
+    asyncio.run(jobs.event_reminders(bot, at(2026, 11, 17, 18, 5)))
+    jobs.log.disabled = False
+    assert [t for c, t, _ in bot.sent if c == 2 and "Завтра" in t and "good" in t], bot.sent
+
     print("PASS: даты и серии, подбор людей, приглашения, материалы и группа, тихие часы, одно напоминание накануне, "
           "лента и утренняя сводка координатору, собеседования (за сутки и за 15 минут), выгрузки Excel и .ics")
 

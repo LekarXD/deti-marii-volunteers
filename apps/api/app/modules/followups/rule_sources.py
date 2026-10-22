@@ -9,6 +9,7 @@ from app.modules.activities.calendar_models import EventOccurrence,StaffingNeed
 from app.modules.crm.models import CrmVolunteer,ContactEvent
 from app.modules.learning.models import LearningAssignment,LessonProgress,LearningRelease
 from app.modules.applications.models import Application,ApplicationReviewEvent
+from app.modules.notifications.models import NotificationPreference
 
 PERMISSIONS={'miss':'assignments.manage','quiet':'crm.read','learn':'learning.read','app':'candidates.read','shift':'schedule.read'}
 LABELS={'miss':'Пропуски подряд','quiet':'Давно не было контакта','learn':'Обучение без прогресса','app':'Заявка без ответа','shift':'На роль нет подтверждённых волонтёров'}
@@ -36,8 +37,11 @@ async def collect(db,foundation_id,rule,threshold,now):
     elif rule=='quiet':
         rows=(await db.scalars(select(CrmVolunteer).where(CrmVolunteer.foundation_id==foundation_id).limit(LIMIT+1))).all()
         latest=dict((await db.execute(select(ContactEvent.volunteer_id,func.max(ContactEvent.occurred_at)).join(CrmVolunteer,CrmVolunteer.id==ContactEvent.volunteer_id).where(CrmVolunteer.foundation_id==foundation_id,ContactEvent.kind.in_(['phone','telegram','meeting','email','other']),ContactEvent.direction.in_(['incoming','outgoing','recorded']),ContactEvent.occurred_at<=now).group_by(ContactEvent.volunteer_id))).all())
+        # The person's own «не связываться» preference silences the card and the cards merged into it, like the CRM flag.
+        opted=set((await db.scalars(select(NotificationPreference.user_id).where(NotificationPreference.foundation_id==foundation_id,NotificationPreference.no_contact.is_(True)))).all())
+        silenced={person.merged_into_id or person.id for person in rows if person.user_id in opted}
         for person in rows:
-            if person.merged_into_id or person.no_contact or person.relationship_state not in ('active','contacted','awaiting_reply','ready'):continue
+            if person.merged_into_id or person.no_contact or person.id in silenced or person.relationship_state not in ('active','contacted','awaiting_reply','ready'):continue
             last=latest.get(person.id)
             if last is None:unknown+=1;continue
             days=(now-last).days

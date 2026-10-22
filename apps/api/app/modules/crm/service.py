@@ -7,6 +7,7 @@ from app.core.errors import ApiError
 from app.core.contact_policy import contact_guard
 from app.core.models import StaffMembership, User
 from app.modules.applications.models import Application, ApplicationRevision
+from app.modules.notifications.models import NotificationPreference
 from .models import (CrmVolunteer,Agreement,ContactEvent,AvailabilityRule,AvailabilityWindow,AvailabilityVerification,
     FollowUpTask,FollowUpTaskEvent,FollowUpSource,MergeReview,utcnow)
 from .schemas import (CrmVolunteerSummary,CrmVolunteerView,AgreementView,ContactEventView,AvailabilityView,
@@ -67,6 +68,13 @@ async def alias_ids(db,volunteer):
     return [volunteer.id,*list((await db.scalars(select(CrmVolunteer.id).where(CrmVolunteer.foundation_id==volunteer.foundation_id,CrmVolunteer.merged_into_id==volunteer.id))).all())]
 
 
+async def opted_out(db,volunteer):
+    """Staff-recorded opt-out or the person's own 'do not contact' preference; only the CRM flag needs renewed consent."""
+    if volunteer.no_contact:return True
+    users=select(CrmVolunteer.user_id).where(CrmVolunteer.foundation_id==volunteer.foundation_id,or_(CrmVolunteer.id==volunteer.id,CrmVolunteer.merged_into_id==volunteer.id),CrmVolunteer.user_id.is_not(None))
+    return await db.scalar(select(NotificationPreference.id).where(NotificationPreference.foundation_id==volunteer.foundation_id,NotificationPreference.user_id.in_(users),NotificationPreference.no_contact.is_(True)).limit(1)) is not None
+
+
 async def availability_view(db,volunteer):
     rule=await db.scalar(select(AvailabilityRule).where(AvailabilityRule.volunteer_id==volunteer.id).order_by(AvailabilityRule.number.desc()).limit(1))
     if not rule:return None
@@ -88,7 +96,7 @@ async def readiness(db,volunteer):
     availability=await availability_view(db,volunteer)
     agreement=await db.scalar(select(Agreement).where(Agreement.volunteer_id==volunteer.id).order_by(Agreement.created_at.desc(),Agreement.id).limit(1))
     reasons=[]
-    if volunteer.no_contact:reasons.append('Человек попросил не связываться')
+    if await opted_out(db,volunteer):reasons.append('Человек попросил не связываться')
     if not availability or not availability.verified:reasons.append('Уточните актуальную доступность')
     if not agreement or (agreement.valid_until and agreement.valid_until<today()):reasons.append('Нужна актуальная договорённость')
     if volunteer.relationship_state not in ('ready','active'):reasons.append('Участие пока не согласовано')
@@ -145,7 +153,7 @@ async def add_agreement(db,principal,volunteer_id,command):
 
 async def add_contact(db,principal,volunteer_id,command):
     volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer_id,lock=True);check_version(volunteer.version,command.expected_version)
-    if volunteer.no_contact and command.direction=='outgoing':raise ApiError(409,'no_contact','Человек попросил не связываться')
+    if command.direction=='outgoing' and await opted_out(db,volunteer):raise ApiError(409,'no_contact','Человек попросил не связываться')
     when=command.occurred_at or utcnow()
     if when.tzinfo is None:raise ApiError(422,'timezone_required','Укажите время связи с часовым поясом')
     if when>utcnow():raise ApiError(422,'future_contact','Будущую связь запишите следующим действием')
@@ -204,7 +212,7 @@ async def set_preference(db,principal,volunteer_id,command):
 
 async def create_task(db,principal,volunteer_id,command):
     volunteer=await scoped_volunteer(db,principal.foundation_id,volunteer_id,lock=True);check_version(volunteer.version,command.expected_version)
-    if volunteer.no_contact:raise ApiError(409,'no_contact','Человек попросил не связываться')
+    if await opted_out(db,volunteer):raise ApiError(409,'no_contact','Человек попросил не связываться')
     await valid_owner(db,principal.foundation_id,command.assigned_user_id)
     task=FollowUpTask(foundation_id=principal.foundation_id,volunteer_id=volunteer.id,application_id=volunteer.application_id,
         assigned_user_id=command.assigned_user_id,due_on=command.due_on,title=nonempty(command.title),source_type='manual',source_id=uuid4(),source_revision=1)
@@ -264,7 +272,8 @@ async def schedule_follow_up(db,foundation_id,application_id,assigned_user_id,du
         if task.state=='open':
             before=task_view(task).model_dump(mode='json');task.state='cancelled';task.version+=1
             db.add(FollowUpTaskEvent(task_id=task.id,kind='superseded',reason='Итог встречи изменился',before=before,after=task_view(task).model_dump(mode='json'),author_id=actor_id))
-    if due_on is None or volunteer.no_contact:
+    # A support signal is the volunteer's own request for help, so only the staff-recorded opt-out suppresses it.
+    if due_on is None or volunteer.no_contact or (source_type!='support_signal' and await opted_out(db,volunteer)):
         await db.flush();return None
     await valid_owner(db,foundation_id,assigned_user_id)
     task=FollowUpTask(foundation_id=foundation_id,volunteer_id=volunteer.id,application_id=volunteer.application_id,assigned_user_id=assigned_user_id,
@@ -374,7 +383,7 @@ async def first_visit_outcome(db,principal,volunteer_id,command):
     volunteer.relationship_state='paused' if command.outcome=='pause' else 'closed' if command.outcome=='finish' else 'contacted'
     if command.due_on:
         if not command.assigned_user_id:raise ApiError(422,'task_owner_required','Укажите ответственного за следующий шаг')
-        if volunteer.no_contact:raise ApiError(409,'no_contact','Человек попросил не связываться')
+        if await opted_out(db,volunteer):raise ApiError(409,'no_contact','Человек попросил не связываться')
         await valid_owner(db,principal.foundation_id,command.assigned_user_id)
         task=FollowUpTask(foundation_id=principal.foundation_id,volunteer_id=volunteer.id,application_id=volunteer.application_id,
             assigned_user_id=command.assigned_user_id,due_on=command.due_on,title=labels[command.outcome],source_type='first_visit_outcome',source_id=uuid4(),source_revision=1)

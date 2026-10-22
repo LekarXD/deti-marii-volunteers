@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     asset_root: str = "/tmp/opora-assets"
     max_asset_bytes: int = 10 * 1024 * 1024
     demo_email_codes: bool = False
+    # Per-IP auth limits key on request.client.host; behind a proxy that is not trusted to forward
+    # the visitor's address that is the proxy itself, i.e. one platform-wide bucket. Enable only then.
+    client_ip_rate_limits: bool = False
     dev_inbox: bool = True
     session_hours: int = 24
     worker_kinds: list[str] = ["outbox.deliver"]

@@ -14,7 +14,7 @@ from app.core.config import get_settings
 from app.core.crypto import digest
 from app.core.model_loader import load_models
 from app.core.models import ContactChannel, MutationReceipt, User
-from app.modules.auth.password import hash_password, kdf, verify_password
+from app.modules.auth.password import hash_password, kdf, staff, verify_password
 from app.modules.auth.password_models import PasswordCredential
 from .operator import (CONFIRMATION, SEED_KEY, database_guard, private_directory,
                        read_credentials, validate_runtime, write_new_private)
@@ -65,7 +65,8 @@ async def provision(db, source_path, output_path):
         if await db.scalar(select(PasswordCredential).where(PasswordCredential.user_id == user_id)):
             raise RuntimeError('Refusing to replace an existing password')
         password = 'Marii-' + secrets.token_urlsafe(12)
-        db.add(PasswordCredential(user_id=user_id, password_hash=await kdf(hash_password, password), demo_created=True))
+        # Staff passwords are never demo-resettable (no "any code" reset of the coordinator).
+        db.add(PasswordCredential(user_id=user_id, password_hash=await kdf(hash_password, password), demo_created=not await staff(db, user_id)))
         accounts[role] = {'user_id': str(user_id), 'name': user.display_name, 'email': email, 'password': password}
         manifest[role] = {'user_id': str(user_id), 'email': email}
     db.add(MutationReceipt(actor_id=KEY, operation=KEY, key=KEY, payload_hash=digest(KEY), result=manifest))

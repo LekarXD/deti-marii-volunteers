@@ -1,6 +1,6 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, Header, Query, Request
-from sqlalchemy import select
+from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import Principal, get_principal, require_permission
 from app.core.db import get_db
@@ -11,7 +11,7 @@ from .fixtures import authored_drafts
 from .models import EvaluationAppeal, SimulationEvaluation, SimulationSession, SimulationSupportRequest, SimulatorScenario, SimulatorScenarioVersion, SimulatorTestRun
 from .schemas import SimulatorAppealCommand, SimulatorAppealDetail, SimulatorDraftUpdate, SimulatorExampleCreate, SimulatorHumanReview, SimulatorPublishCommand, SimulatorReviewCommand, SimulatorReviewQueueItem, SimulatorScenarioDraft, SimulatorScenarioPage, SimulatorScenarioPublicView, SimulatorScenarioStaffView, SimulatorSessionPage, SimulatorSessionStart, SimulatorSessionView, SimulatorSimpleResult, SimulatorStaffScenarioPage, SimulatorSupportCommand, SimulatorTestRunView, SimulatorTurnCommand, SimulatorVersionCommand
 
-router = APIRouter(prefix='/api/v1', tags=['simulator'])
+router = APIRouter(tags=['simulator'])
 writer = require_permission('simulator.manage')
 reviewer = require_permission('simulator.review')
 
@@ -142,7 +142,7 @@ async def support(session_id: UUID, body: SimulatorSupportCommand, request: Requ
 
 @router.get('/coord/simulator/appeals', response_model=list[SimulatorReviewQueueItem], operation_id='listSimulatorAppeals')
 async def appeal_queue(principal: Principal = Depends(reviewer), db: AsyncSession = Depends(get_db)):
-    rows = (await db.scalars(select(EvaluationAppeal).where(EvaluationAppeal.foundation_id == principal.foundation_id).order_by(EvaluationAppeal.created_at.desc()).limit(100))).all()
+    rows = (await db.scalars(select(EvaluationAppeal).where(EvaluationAppeal.foundation_id == principal.foundation_id).order_by(case((EvaluationAppeal.state != 'resolved', 0), else_=1), EvaluationAppeal.created_at.desc()).limit(100))).all()
     result = []
     for row in rows:
         evaluation = await db.get(SimulationEvaluation, row.evaluation_id)
@@ -171,7 +171,7 @@ async def resolve_appeal(appeal_id: UUID, body: SimulatorHumanReview, request: R
 
 @router.get('/coord/simulator/support-requests', response_model=list[SimulatorReviewQueueItem], operation_id='listSimulationSupportRequests')
 async def support_queue(principal: Principal = Depends(reviewer), db: AsyncSession = Depends(get_db)):
-    rows = (await db.scalars(select(SimulationSupportRequest).where(SimulationSupportRequest.foundation_id == principal.foundation_id).order_by(SimulationSupportRequest.created_at.desc()).limit(100))).all()
+    rows = (await db.scalars(select(SimulationSupportRequest).where(SimulationSupportRequest.foundation_id == principal.foundation_id).order_by(case((SimulationSupportRequest.state != 'resolved', 0), else_=1), SimulationSupportRequest.created_at.desc()).limit(100))).all()
     result = []
     for row in rows:
         attempt = await db.get(SimulationSession, row.session_id)

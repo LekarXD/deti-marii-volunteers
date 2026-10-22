@@ -31,7 +31,8 @@ def validate_docx(data):
     except Exception:return False
 
 def validate_export(data,content_type):
-    if content_type=='application/pdf':return validate_pdf(data,content_type)
+    # Three full sections render to roughly 30 pages; the 20-page limit is sized for certificates.
+    if content_type=='application/pdf':return validate_pdf(data,content_type,max_pages=100)
     if content_type=='application/vnd.openxmlformats-officedocument.wordprocessingml.document':return validate_docx(data)
     if content_type=='text/csv':
         try:

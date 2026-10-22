@@ -19,7 +19,7 @@ from app.core.crypto import digest
 from app.core.db import get_db
 from app.core.errors import ApiError
 from app.core.model_loader import claim_registration
-from app.core.models import ContactChannel, RegistrationSession, Session, User
+from app.core.models import ContactChannel, RegistrationSession, Session, StaffMembership, User
 from app.core.rate_limit import failure_limit, rate_limit, record_failure
 from app.worker.queue import enqueue_outbox
 from .password_models import PasswordChallenge, PasswordCredential
@@ -103,11 +103,16 @@ async def anonymous(db, principal):
 async def limits(db, principal, request, email, operation, limit=3):
     await rate_limit(db, principal.actor_id, operation, limit=limit)
     await rate_limit(db, email, operation+'_email', limit=limit)
-    await rate_limit(db, request.client.host if request.client else 'unknown', operation+'_ip', limit=30)
+    if get_settings().client_ip_rate_limits:
+        await rate_limit(db, request.client.host if request.client else 'unknown', operation+'_ip', limit=30)
 
 
 async def contact(db, email):
     return await db.scalar(select(ContactChannel).where(ContactChannel.type == 'email', ContactChannel.normalized_value == email))
+
+
+async def staff(db, user_id):
+    return await db.scalar(select(StaffMembership.id).where(StaffMembership.user_id == user_id, StaffMembership.revoked_at.is_(None)).limit(1))
 
 
 async def lock_user(db, foundation_id, user_id):
@@ -201,10 +206,10 @@ async def login(body: PasswordInput, request: Request, response: Response, princ
     await anonymous(db, principal)
     email = normalize_email(body.email)
     # One account may be used on many devices at once: only wrong passwords count per email and network.
-    host = request.client.host if request.client else 'unknown'
+    host = (request.client.host if request.client else 'unknown') if get_settings().client_ip_rate_limits else None
     await rate_limit(db, principal.actor_id, 'password_login', limit=10)
     await failure_limit(db, email, 'password_login_email', limit=10)
-    await failure_limit(db, host, 'password_login_ip', limit=30)
+    if host:await failure_limit(db, host, 'password_login_ip', limit=30)
     channel = await contact(db, email)
     credential = None
     user = await db.get(User, channel.user_id) if channel else None
@@ -219,7 +224,7 @@ async def login(body: PasswordInput, request: Request, response: Response, princ
     matches = await kdf(verify_password, body.password, encoded)
     if not matches or not credential or not user or user.account_state != 'active':
         await record_failure(db, email, 'password_login_email')
-        await record_failure(db, host, 'password_login_ip')
+        if host:await record_failure(db, host, 'password_login_ip')
         await db.commit()
         raise ApiError(401, 'invalid_credentials', 'Проверьте почту и пароль')
     audit(db, principal, 'auth.password.login', 'user', user.id)
@@ -237,7 +242,9 @@ async def reset_request(body: EmailInput, request: Request, principal: Principal
     credential = await db.scalar(select(PasswordCredential).where(PasswordCredential.user_id == user.id)) if eligible else None
     # Equal KDF work for known and unknown emails reduces obvious timing disclosure.
     await kdf(verify_password, secrets.token_urlsafe(20), _DUMMY)
-    return await create_challenge(db, principal, email, 'password_reset', user_id=user.id if eligible else None, credential_version=credential.version if credential else 0, demo_code_allowed=bool(get_settings().demo_email_codes and credential and credential.demo_created))
+    # Demo "any code" resets never reach staff: that would hand out a coordinator session.
+    demo = bool(get_settings().demo_email_codes and credential and credential.demo_created and not await staff(db, user.id))
+    return await create_challenge(db, principal, email, 'password_reset', user_id=user.id if eligible else None, credential_version=credential.version if credential else 0, demo_code_allowed=demo)
 
 
 @router.post('/password/reset/verify', operation_id='auth_password_reset_verify', response_model=AuthSessionView)
@@ -252,7 +259,7 @@ async def reset_verify(body: ResetVerifyInput, request: Request, response: Respo
     user = await db.get(User, row.user_id) if row.user_id else None
     channel = await contact(db, row.normalized_contact)
     credential = await db.scalar(select(PasswordCredential).where(PasswordCredential.user_id == row.user_id)) if user else None
-    if not user or user.foundation_id != principal.foundation_id or user.account_state != 'active' or not channel or channel.user_id != user.id or (credential.version if credential else 0) != row.credential_version:
+    if not user or user.foundation_id != principal.foundation_id or user.account_state != 'active' or not channel or channel.user_id != user.id or (credential.version if credential else 0) != row.credential_version or (row.demo_code_allowed and await staff(db, user.id)):
         row.consumed_at = utcnow()
         await db.commit()
         raise ApiError(400, 'challenge_invalid', 'Код недействителен или истёк')

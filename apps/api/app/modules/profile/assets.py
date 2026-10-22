@@ -21,12 +21,12 @@ def validate_photo(data,content_type):
     # Full decoding and the pixel limit run in the shared upload check.
     signature={'image/png':b'\x89PNG\r\n\x1a\n','image/jpeg':b'\xff\xd8\xff'}.get(content_type)
     return bool(signature) and data.startswith(signature)
-def validate_pdf(data,content_type):
+def validate_pdf(data,content_type,max_pages=20):
     if content_type!='application/pdf' or not data.startswith(b'%PDF-'):return False
     try:
         from pypdf import PdfReader
         document=PdfReader(io.BytesIO(data),strict=True)
-        return not document.is_encrypted and 1<=len(document.pages)<=20 and not document.trailer['/Root'].get('/OpenAction') and all(not page.get('/AA') for page in document.pages)
+        return not document.is_encrypted and 1<=len(document.pages)<=max_pages and not document.trailer['/Root'].get('/OpenAction') and all(not page.get('/AA') for page in document.pages)
     except Exception:return False
 
 def validate_export(data,content_type):

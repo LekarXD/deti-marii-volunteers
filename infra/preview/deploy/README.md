@@ -28,14 +28,18 @@ rollout or low resources (exit code 75) only postpone the deploy to the next min
    `board` from `board.Dockerfile`. Images therefore do not grow with each release.
    The overlay is refused when a dependency input of a base build changed
    (`requirements.lock`, `pyproject.toml`, `alembic.ini`, the API/media/web Dockerfiles,
-   media package files, `infra/docker/nginx.conf`).
+   media package files, `infra/docker/nginx.conf`). It is also refused when the commit
+   changes `infra/preview/nginx.conf` or `infra/docker/media-seccomp-sandbox.json` since
+   the live release, because Compose keeps reading them from its working directory.
 4. Under the shared `/var/lock/odschool-deploy.lock`, verifies that the rendered Compose
    configuration differs only in image tags and release variables, rewrites only the
    `OPORA_RELEASE` line of `runtime.env`, and runs `docker compose up -d` (migrations run
    through the `migrate` service).
 5. Waits for healthy services and checks `/deti-marii/`, `/ready` and `/version.json`.
    Any failure restores the previous `runtime.env` and Compose files and brings the
-   previous release back. Ertad and OD routes are recorded, never touched.
+   previous release back without re-running `migrate`, so a migration the failed release
+   applied stays and the old code runs on that schema. Ertad and OD routes are recorded,
+   never touched.
 6. Keeps the new release, its predecessor, the base builds and the Compose working
    directory; removes this preview's older image tags and source trees only.
 
@@ -50,7 +54,8 @@ rollout or low resources (exit code 75) only postpone the deploy to the next min
 - **Dependency input changed**: build full images by hand from the release source
   (`infra/docker/*.Dockerfile`, web with `--build-arg VITE_APP_BASE_PATH=/deti-marii`),
   roll them out, then point `private/deploy-bases.json` at that revision.
-- **Runtime configuration change** (Compose, gateway, secrets): review and roll out by
+- **Runtime configuration change** (Compose, `infra/preview/nginx.conf`, the media
+  seccomp profile, gateway, secrets): review and roll out by
   hand as described in `../README.md`; later commits then deploy automatically again.
 - **Retry the same commit**: delete `autodeploy/state.json`.
 

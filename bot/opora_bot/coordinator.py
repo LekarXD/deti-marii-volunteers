@@ -1,5 +1,6 @@
 """Координатор: вход по коду, режимы, лента «Нужно решить», карточка волонтёра, события и команда, итог встречи, ответы, новое событие, выгрузки."""
 import json
+import logging
 import secrets
 from datetime import date, datetime, timedelta
 from html import escape
@@ -17,6 +18,9 @@ from .config import COORDINATOR_CODE
 from .notify import send
 from .schedule import WEEKDAYS, human, occurrences, occurs, parse_day
 from .seed import ROLES
+
+log = logging.getLogger(__name__)
+
 
 class IsCoordinator(BaseFilter):
     """Хендлеры координатора видят только координаторы; остальные события уходят дальше, волонтёрскому роутеру."""
@@ -48,12 +52,27 @@ class Reply(StatesGroup):
     text = State()
 
 
+LOGIN_MAX_FAILS, LOGIN_WINDOW = 5, timedelta(hours=1)
+
+
 @login_router.message(Command("coordinator"))
 async def login(msg: Message, command: CommandObject):
+    if msg.chat.type != "private":
+        await msg.answer("Код координатора вводите только в личном чате с ботом.")
+        return
     u = db.ensure_user(msg.chat.id, msg.from_user.username)
-    if not COORDINATOR_CODE or (command.args or "").strip() != COORDINATOR_CODE:
+    row = db.one("SELECT * FROM coord_attempts WHERE chat_id=?", u["id"])
+    fresh = not row or db.now() - datetime.fromisoformat(row["window_start"]) >= LOGIN_WINDOW
+    if not fresh and row["fails"] >= LOGIN_MAX_FAILS:
+        await msg.answer("Слишком много попыток. Попробуйте через час.")
+        return
+    if not COORDINATOR_CODE or not secrets.compare_digest((command.args or "").strip().encode(), COORDINATOR_CODE.encode()):
+        db.run("INSERT OR REPLACE INTO coord_attempts (chat_id, fails, window_start) VALUES (?,?,?)", u["id"],
+               1 if fresh else row["fails"] + 1, db.stamp() if fresh else row["window_start"])
+        log.warning("Неверный код координатора из чата %s", u["id"])
         await msg.answer("Код не подошёл. Код координатора выдаёт администратор бота.")
         return
+    db.run("DELETE FROM coord_attempts WHERE chat_id=?", u["id"])
     p = db.prefs(u)
     p["mode"] = "coord"
     db.update_user(u["id"], is_coordinator=1, name=u["name"] or msg.from_user.full_name, prefs=json.dumps(p))
@@ -178,7 +197,7 @@ async def event_action(cb: CallbackQuery, callback_data: ui.EvCB, state: FSMCont
         await cb.message.edit_text(text, reply_markup=kb)
     elif callback_data.action == "xls":
         await cb.message.answer_document(BufferedInputFile(exports.team_xlsx(ev, day), filename=f"team-{ev['id']}-{day}.xlsx"),
-                                         caption=f"Команда: {ev['title']}, {human(day)}")
+                                         caption=f"Команда: {escape(ev['title'])}, {human(day)}")
     elif callback_data.action == "cancel":
         b = InlineKeyboardBuilder()
         b.button(text="Да, отменить", callback_data=ui.EvCB(action="cancel_yes", eid=ev["id"], d=callback_data.d))
@@ -195,6 +214,9 @@ async def event_action(cb: CallbackQuery, callback_data: ui.EvCB, state: FSMCont
                 await send(bot, r["user_id"], f"❗️ <b>Отменено:</b> {escape(ev['title'])}, {human(day)}. "
                                               "Извините за изменения — позовём в следующий раз.", urgent=urgent)
                 told += 1
+        db.run("UPDATE invites SET status='removed', answered_at=? WHERE event_id=? AND date=? "
+               "AND status IN ('invited','accepted','confirmed')", db.stamp(), ev["id"], day.isoformat())
+        db.resolve("confirm", ref=ev["id"], date=day.isoformat())
         await cb.message.edit_text(f"«{escape(ev['title'])}» {human(day)} отменено. Сообщили: {told}.")
     elif callback_data.action == "call":
         await state.update_data(pick_eid=ev["id"], pick_d=callback_data.d, picked=[])
@@ -349,6 +371,9 @@ async def meeting_outcome(cb: CallbackQuery, callback_data: ui.AdmitCB, bot: Bot
     await cb.answer()
 
 
+NOT_DELIVERED = "Не удалось доставить сообщение волонтёру."
+
+
 @router.callback_query(ui.AnswerCB.filter())
 async def answer_start(cb: CallbackQuery, callback_data: ui.AnswerCB, state: FSMContext):
     await state.set_state(Reply.text)
@@ -364,8 +389,9 @@ async def answer_send(msg: Message, state: FSMContext, bot: Bot):
     q = db.one("SELECT * FROM questions WHERE id=?", qid)
     db.run("UPDATE questions SET answer=? WHERE id=?", msg.text[:2000], qid)
     db.resolve("answer", ref=str(qid))
-    await send(bot, q["user_id"], f"💬 <b>Ответ координатора</b>\n<i>{escape(q['text'][:300])}</i>\n\n{escape(msg.text)}", urgent=True)
-    await msg.answer("Ответ отправлен.")
+    ok = await send(bot, q["user_id"], f"💬 <b>Ответ координатора</b>\n<i>{escape(q['text'][:300])}</i>\n\n"
+                                       f"{escape(msg.text[:3500])}", urgent=True)
+    await msg.answer("Ответ отправлен." if ok else NOT_DELIVERED)
 
 
 # --- режимы ------------------------------------------------------------------------------
@@ -436,7 +462,15 @@ async def show_feed(target: Message):
             if u:
                 b.button(text=f"Карточка: {card_label(u)}", callback_data=ui.CardCB(uid=uid))
         b.adjust(1)
-        await target.answer("\n".join(lines), reply_markup=b.as_markup())
+        chunks = [lines[0]]  # Telegram не принимает сообщения длиннее 4096 символов — длинные записи делим на части
+        for line in lines[1:]:
+            if len(chunks[-1]) + len(line) > 3500:
+                chunks.append(line)
+            else:
+                chunks[-1] += "\n" + line
+        for chunk in chunks[:-1]:
+            await target.answer(chunk)
+        await target.answer(chunks[-1], reply_markup=b.as_markup())
     else:
         await target.answer("🌿 Пока ничего не произошло.")
 
@@ -528,8 +562,8 @@ async def direct_start(cb: CallbackQuery, callback_data: ui.StepCB, state: FSMCo
 async def direct_send(msg: Message, state: FSMContext, bot: Bot):
     uid = (await state.get_data())["dm"]
     await state.clear()
-    await send(bot, uid, f"💬 <b>Сообщение от координатора</b>\n{escape(msg.text)}", urgent=True)
-    await msg.answer("Отправлено.")
+    ok = await send(bot, uid, f"💬 <b>Сообщение от координатора</b>\n{escape(msg.text[:3500])}", urgent=True)
+    await msg.answer("Отправлено." if ok else NOT_DELIVERED)
 
 
 # --- выгрузки ---------------------------------------------------------------------
@@ -588,13 +622,21 @@ async def ne_day(msg: Message, state: FSMContext):
     await msg.answer("Время? Например: 14:00-18:00. Если ещё не известно — напишите «-».", reply_markup=ui.cancel_kb())
 
 
+def hhmm(p: str) -> bool:
+    """«14:00» — да; «24:00», «18:60», «9:00» — нет."""
+    try:
+        return len(p) == 5 and bool(datetime.strptime(p, "%H:%M"))
+    except ValueError:
+        return False
+
+
 @router.message(NewEvent.time, F.text)
 async def ne_time(msg: Message, state: FSMContext):
     text = msg.text.replace("—", "-").replace("–", "-").replace(" ", "")
     start = end = ""
     if text != "-":
         parts = text.split("-")
-        ok = all(len(p) == 5 and p[2] == ":" and p[:2].isdigit() and p[3:].isdigit() for p in parts if p)
+        ok = all(hhmm(p) for p in parts if p)
         if not ok or not parts[0] or (len(parts) > 1 and parts[1] and parts[1] <= parts[0]):
             await msg.answer("Напишите время как 14:00-18:00 или 14:00, либо «-», если пока неизвестно.", reply_markup=ui.cancel_kb())
             return

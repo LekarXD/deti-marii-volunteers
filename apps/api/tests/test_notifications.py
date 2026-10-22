@@ -216,3 +216,46 @@ async def test_topics_news_consent_quiet_deferral_and_human_directory(app):
             assert await process_internal(db,job,outbox,payload)=='delivered'
             assert outbox.defer_until is None
             await db.rollback()
+
+@pytest.mark.asyncio
+async def test_partial_first_quiet_hours_save_cannot_store_an_empty_interval(app):
+    from datetime import datetime,timezone
+    from app.modules.notifications.models import NotificationPreference
+    from app.modules.notifications.service import quiet_until
+    await fixtures()
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as candidate:
+        cs,ch=await actor(candidate,f'partial-quiet-{uuid4().hex}@example.test')
+        base={'expected_version':0,'no_contact':False,'email_enabled':False,'in_app_enabled':True,'quiet_enabled':True}
+        # The omitted bound falls back to its default (22:00-09:00), so each of these would store start==end.
+        for bound in ({'quiet_from':540},{'quiet_to':1320}):
+            ch['Idempotency-Key']=uuid4().hex
+            rejected=await candidate.put('/api/v1/me/notification-preferences',json={**base,**bound},headers=ch)
+            assert rejected.status_code==422 and rejected.json()['code']=='invalid_quiet_interval',rejected.text
+        ch['Idempotency-Key']=uuid4().hex
+        saved=await candidate.put('/api/v1/me/notification-preferences',json={**base,'quiet_from':600},headers=ch)
+        assert saved.status_code==200 and (saved.json()['quiet_from'],saved.json()['quiet_to'],saved.json()['version'])==(600,540,1),saved.text
+        async with SessionLocal() as db:
+            uid=UUID(cs['user_id']);fid=UUID(cs['foundation_id'])
+            pref=await db.scalar(select(NotificationPreference).where(NotificationPreference.user_id==uid))
+            # A row stored before the guard saw real values must not yield a wake time already in the past.
+            pref.quiet_from=pref.quiet_to=540
+            assert await quiet_until(db,fid,uid,datetime(2026,10,22,12,tzinfo=timezone.utc)) is None
+            await db.rollback()
+
+@pytest.mark.asyncio
+async def test_in_app_template_must_fit_one_message_after_substitution(app):
+    await fixtures()
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://testserver') as staff:
+        _,sh=await actor(staff,'coordinator@example.test',True)
+        async def create(channel,subject,body):
+            sh['Idempotency-Key']=uuid4().hex
+            return await staff.post('/api/v1/coord/notification-templates',json={'key':'long-'+uuid4().hex,'channel':channel,'subject':subject,'body':body},headers=sh)
+        too_long=await create('in_app','Т'*150,'Б'*7900)
+        assert too_long.status_code==422 and too_long.json()['code']=='template_too_long',too_long.text
+        assert (await create('email','Т'*150,'Б'*7900)).status_code==200
+        fits=await create('in_app','Тема','Б'*7700+'{volunteer_name}')
+        assert fits.status_code==200,fits.text
+        sh['Idempotency-Key']=uuid4().hex
+        # Each field may expand to a 200-character name, which would push the stored message past 8000.
+        grown=await staff.patch(f"/api/v1/coord/notification-templates/{fits.json()['id']}",json={'expected_version':fits.json()['version'],'subject':'Тема','body':'Б'*7700+'{volunteer_name} {foundation_name}'},headers=sh)
+        assert grown.status_code==422 and grown.json()['code']=='template_too_long',grown.text

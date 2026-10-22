@@ -47,27 +47,35 @@ async def event_reminders(bot: Bot, n: datetime) -> None:
     """Волонтёру: одно напоминание накануне в 18:00 и вопрос «Как прошло?» после события."""
     today = n.date()
     for ev, day in occurrences(db.events(), today - timedelta(days=1), today + timedelta(days=1)):
-        for r in db.team(ev["id"], day.isoformat()):
-            if r["status"] != "confirmed":
-                continue
-            uid, key = r["user_id"], f"{ev['id']}:{day}:{r['user_id']}"
-            if day == today + timedelta(days=1) and n.hour >= 18 and db.mark_sent("e1:" + key):
-                b = InlineKeyboardBuilder()
-                b.button(text="Материалы", callback_data=ui.InvCB(action="mat", eid=ev["id"], d=ui.dkey(day)))
-                b.button(text="Не смогу", callback_data=ui.InvCB(action="no", eid=ev["id"], d=ui.dkey(day)))
-                await send(bot, uid, "🔔 <b>Завтра</b>\n" + ui.event_head(ev, day), b.as_markup())
-            # после занятия: через час после окончания, либо в 20:00, а если поздно — утром следующего дня
-            end = ends_at(ev, day) or starts_at(ev, day).replace(hour=19, minute=0)
-            due = end + timedelta(hours=1)
-            if due.hour >= 22:
-                due = (due + timedelta(days=1)).replace(hour=10, minute=0)
-            if due <= n < due + timedelta(days=2) and db.mark_sent("after:" + key):
-                a = InlineKeyboardBuilder()
-                a.button(text="Всё хорошо", callback_data=ui.AfterCB(action="ok", eid=ev["id"], d=ui.dkey(day)))
-                a.button(text="Были сложности", callback_data=ui.AfterCB(action="hard", eid=ev["id"], d=ui.dkey(day)))
-                a.button(text="Не смог(ла) прийти", callback_data=ui.AfterCB(action="absent", eid=ev["id"], d=ui.dkey(day)))
-                a.adjust(2, 1)
-                await send(bot, uid, f"💭 Как прошло «{escape(ev['title'])}», {human(day, False)}?", a.as_markup())
+        try:
+            await remind_event(bot, n, ev, day)
+        except Exception:  # событие с битым временем не должно оставить без напоминаний те, что идут после него
+            log.exception("reminders for event %s on %s failed", ev["id"], day)
+
+
+async def remind_event(bot: Bot, n: datetime, ev, day) -> None:
+    today = n.date()
+    for r in db.team(ev["id"], day.isoformat()):
+        if r["status"] != "confirmed":
+            continue
+        uid, key = r["user_id"], f"{ev['id']}:{day}:{r['user_id']}"
+        if day == today + timedelta(days=1) and n.hour >= 18 and db.mark_sent("e1:" + key):
+            b = InlineKeyboardBuilder()
+            b.button(text="Материалы", callback_data=ui.InvCB(action="mat", eid=ev["id"], d=ui.dkey(day)))
+            b.button(text="Не смогу", callback_data=ui.InvCB(action="no", eid=ev["id"], d=ui.dkey(day)))
+            await send(bot, uid, "🔔 <b>Завтра</b>\n" + ui.event_head(ev, day), b.as_markup())
+        # после занятия: через час после окончания, либо в 20:00, а если поздно — утром следующего дня
+        end = ends_at(ev, day) or starts_at(ev, day).replace(hour=19, minute=0)
+        due = end + timedelta(hours=1)
+        if due.hour >= 22:
+            due = (due + timedelta(days=1)).replace(hour=10, minute=0)
+        if due <= n < due + timedelta(days=2) and db.mark_sent("after:" + key):
+            a = InlineKeyboardBuilder()
+            a.button(text="Всё хорошо", callback_data=ui.AfterCB(action="ok", eid=ev["id"], d=ui.dkey(day)))
+            a.button(text="Были сложности", callback_data=ui.AfterCB(action="hard", eid=ev["id"], d=ui.dkey(day)))
+            a.button(text="Не смог(ла) прийти", callback_data=ui.AfterCB(action="absent", eid=ev["id"], d=ui.dkey(day)))
+            a.adjust(2, 1)
+            await send(bot, uid, f"💭 Как прошло «{escape(ev['title'])}», {human(day, False)}?", a.as_markup())
 
 
 def gaps(today, days: int = 7):

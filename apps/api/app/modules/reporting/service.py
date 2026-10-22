@@ -11,7 +11,7 @@ STORIES_NOTICE='Истории участников не включены в э�
 
 async def scoped_report(db,principal,report_id,permission='reports.read',lock=False):
     query=select(ReportDraft).where(ReportDraft.id==report_id,ReportDraft.foundation_id==principal.foundation_id)
-    if lock:query=query.with_for_update()
+    if lock:query=query.with_for_update().execution_options(populate_existing=True)
     row=await db.scalar(query)
     if row is None:raise ApiError(404,'report_not_found','Отчёт не найден')
     await authorize_scope(db,principal,row.foundation_id,row.scope_type,row.scope_id)

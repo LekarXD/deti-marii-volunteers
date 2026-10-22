@@ -12,7 +12,7 @@ from app.core.errors import ApiError,install_error_handlers
 from app.core.models import Foundation,User,PermissionGrant,OutboxMessage
 from app.modules.auth.router import router as auth_router
 from app.modules.applications.router import router as applications_router
-from app.modules.applications.tests.test_applications import actor,staff,post,body
+from app.modules.applications.tests.test_applications import actor,anonymous_actor,staff,post,body
 from app.modules.crm.router import router
 from app.modules.crm.models import CrmVolunteer,FollowUpTask,FollowUpSource
 from app.modules.crm.service import schedule_follow_up,today
@@ -32,8 +32,7 @@ async def env():
         async with factory() as db:
             try:yield db
             except BaseException:await db.rollback();raise
-    app.state.test_factory=factory
-    app.dependency_overrides[get_db]=override_db
+    app.state.test_factory=factory;app.dependency_overrides[get_db]=override_db
     yield app,factory
     await engine.dispose()
 
@@ -50,7 +49,7 @@ async def count(factory,model):
 
 @pytest.mark.asyncio
 async def test_readiness_requires_reviewed_availability_and_agreement_without_delivery(env):
-    app,factory=env;coord=await coordinator(app,factory);public=await actor(app);writer=await staff(app,factory,('crm.read','crm.write'))
+    app,factory=env;coord=await coordinator(app,factory);public=await anonymous_actor(app);writer=await staff(app,factory,('crm.read','crm.write'))
     try:
         assert (await public.get('/api/v1/coord/volunteers')).status_code==403
         person=await card(factory,'Тест Анна',contacts={'email':'anna@example.test'});outbox=await count(factory,OutboxMessage)
@@ -185,3 +184,39 @@ async def test_user_follow_up_reuses_shared_store_without_application(env):
             with pytest.raises(ApiError) as error:await schedule_user_follow_up(db,uuid4(),user.id,owner,today(),'assignment',uuid4(),1,'fixture')
             assert error.value.status_code==404
     finally:await coord.aclose()
+
+def test_ten_digit_import_phone_is_stored_as_russian_number():
+    from app.modules.crm.imports import normalize
+    mapping={'name':'Имя','phone':'Телефон'}
+    for raw in ('(916) 123-45-67','8 916 123-45-67','+7 916 123 45 67'):assert normalize({'Имя':'Тест','Телефон':raw},mapping)==({'name':'Тест','phone':'+79161234567','email':'','telegram':'','no_contact':False},[])
+    assert normalize({'Имя':'Тест','Телефон':'+353 123 4567'},mapping)[0]['phone']=='+3531234567'
+
+@pytest.mark.asyncio
+async def test_ten_digit_import_phone_matches_existing_card(env):
+    app,factory=env;coord=await coordinator(app,factory)
+    try:
+        async with factory() as db:db.add(CrmVolunteer(foundation_id=get_settings().foundation_id,display_name='Анна Тестовая',contacts={'phone':'+79991234567'},context='Анкета волонтёра',relationship_state='unverified'));await db.commit()
+        preview=await prepare(coord,'Имя;Телефон\nАнна из таблицы;(999) 123-45-67\n'.encode(),{'name':'Имя','phone':'Телефон'})
+        assert preview['rows'][0]['decision']=='review' and preview['rows'][0]['normalized']['phone']=='+79991234567',preview
+    finally:await coord.aclose()
+
+@pytest.mark.asyncio
+async def test_own_no_contact_preference_blocks_staff_follow_ups(env):
+    from app.modules.notifications.models import NotificationPreference
+    app,factory=env;coord=await coordinator(app,factory);candidate=await actor(app)
+    try:
+        application=(await post(candidate,'/applications/submit',body())).json()
+        owner=UUID((await coord.get('/api/v1/auth/session')).json()['user_id']);user_id=UUID((await candidate.get('/api/v1/auth/session')).json()['user_id'])
+        async with factory() as db:
+            db.add(NotificationPreference(foundation_id=get_settings().foundation_id,user_id=user_id,no_contact=True));await db.flush()
+            assert await schedule_follow_up(db,get_settings().foundation_id,UUID(application['id']),owner,today(),'interview_result',uuid4(),1,'fixture') is None
+            # The volunteer's own help request still reaches staff.
+            assert await schedule_follow_up(db,get_settings().foundation_id,None,owner,today(),'support_signal',uuid4(),1,'fixture',user_id=user_id) is not None
+            await db.commit()
+        volunteer=(await coord.get('/api/v1/coord/volunteers')).json()['items'][0]
+        assert not volunteer['no_contact'] and not volunteer['can_invite'] and 'Человек попросил не связываться' in volunteer['blocked_reasons']
+        task=await post(coord,f"/coord/volunteers/{volunteer['id']}/follow-up-tasks",dict(expected_version=volunteer['version'],title='Позвонить',due_on=today().isoformat(),assigned_user_id=str(owner)))
+        assert task.status_code==409 and task.json()['code']=='no_contact',task.text
+        call=await post(coord,f"/coord/volunteers/{volunteer['id']}/contact-events",dict(expected_version=volunteer['version'],kind='phone',direction='outgoing',text='Звонок'))
+        assert call.status_code==409 and call.json()['code']=='no_contact',call.text
+    finally:await coord.aclose();await candidate.aclose()

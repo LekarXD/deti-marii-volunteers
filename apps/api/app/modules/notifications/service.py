@@ -35,6 +35,12 @@ def validate_template(subject,body):
         raise ApiError(422,'invalid_template_fields','Доступны только {volunteer_name} и {foundation_name}, без формул и вложенных полей')
     return sorted(fields)
 
+def check_in_app_length(channel,subject,body):
+    # In-app delivery stores subject+'\n'+body as one message (max 8000); each field may expand to a 200-char name.
+    if channel!='in_app':return
+    if sum(len(literal)+(200 if name is not None else 0) for literal,name,_spec,_conversion in string.Formatter().parse(subject+'\n'+body))>8000:
+        raise ApiError(422,'template_too_long','Тема и текст внутреннего уведомления вместе с подстановками не должны превышать 8000 символов')
+
 async def require_staff(db,principal,permission):
     await authz_guard(db,principal)
     if not principal.has_permission(permission):
@@ -59,6 +65,7 @@ async def quiet_until(db,foundation_id,user_id,now=None):
     local=now.astimezone(zone)
     minute=local.hour*60+local.minute
     start,end=pref.quiet_from,pref.quiet_to
+    if start==end:return None
     active=(start<=minute<end) if start<end else (minute>=start or minute<end)
     if not active:return None
     day=local.date()+timedelta(days=1 if start>end and minute>=start else 0)
@@ -110,7 +117,8 @@ async def save_preferences(db,principal,body,key):
     if (pref.version if pref else 0)!=body.expected_version:
         raise ApiError(409,'version_conflict','Настройки изменились',current_version=pref.version if pref else 0)
     if pref is None:
-        pref=NotificationPreference(foundation_id=principal.foundation_id,user_id=principal.user_id,version=0)
+        # Column defaults apply only at INSERT; the quiet-interval check below needs them now.
+        pref=NotificationPreference(foundation_id=principal.foundation_id,user_id=principal.user_id,version=0,topics=dict(DEFAULT_TOPICS),quiet_enabled=False,quiet_from=1320,quiet_to=540,timezone='Europe/Moscow')
         db.add(pref)
     pref.no_contact,pref.email_enabled,pref.in_app_enabled=body.no_contact,body.email_enabled,body.in_app_enabled
     for field in ('topics','quiet_enabled','quiet_from','quiet_to','timezone'):
@@ -142,7 +150,7 @@ async def create_template(db,principal,body,key):
     await require_staff(db,principal,'notifications.manage')
     replay=await begin_command(db,principal,'notifications.template.create',key,body.model_dump(mode='json'))
     if replay is not None:return replay
-    validate_template(body.subject,body.body)
+    validate_template(body.subject,body.body);check_in_app_length(body.channel,body.subject,body.body)
     if await db.scalar(select(NotificationTemplate.id).where(NotificationTemplate.foundation_id==principal.foundation_id,NotificationTemplate.key==body.key)):
         raise ApiError(409,'template_key_exists','Такой ключ шаблона уже существует')
     row=NotificationTemplate(foundation_id=principal.foundation_id,**body.model_dump())
@@ -160,11 +168,12 @@ async def mutate_template(db,principal,tid,body,key,operation):
     if row.version!=body.expected_version:
         raise ApiError(409,'version_conflict','Шаблон изменился',current_version=row.version)
     if operation=='edit':
-        validate_template(body.subject,body.body)
+        validate_template(body.subject,body.body);check_in_app_length(row.channel,body.subject,body.body)
         row.subject,row.body,row.state=body.subject,body.body,'draft'
         if body.topic is not None:row.topic=body.topic
     elif operation=='publish':
         if row.state!='draft':raise ApiError(409,'template_not_draft','Для публикации нужен черновик')
+        check_in_app_length(row.channel,row.subject,row.body)
         db.add(NotificationTemplateVersion(template_id=row.id,revision=row.version,topic=row.topic,subject=row.subject,body=row.body,fields=validate_template(row.subject,row.body),published_by=principal.user_id))
         row.state='published'
     elif operation=='archive':row.state='archived'
