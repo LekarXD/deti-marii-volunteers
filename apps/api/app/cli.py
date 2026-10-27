@@ -11,8 +11,21 @@ from app.core.crypto import seal, unseal
 from app.core.db import SessionLocal
 from app.core.model_loader import load_models
 from app.core.models import Foundation, User, ContactChannel, StaffMembership, PermissionGrant, MfaFactor, OutboxMessage
+from app.modules.auth.password import hash_password
+from app.modules.auth.password_models import PasswordCredential
+from app.modules.profile.models import VolunteerProfile
 
 PERMISSIONS = ("staff.manage", "messaging.manage", "notifications.manage", "notifications.send", "integrations.manage", "assets.manage", "candidates.read", "candidates.review", "candidates.notes", "interviews.manage", "interviews.read", "roles.manage", "opportunities.manage", "events.manage", "schedule.read", "schedule.manage", "crm.read", "crm.write", "contacts.review", "studio.manage", "recordings.manage", "recordings.review", "recordings.publish", "followups.read", "followups.manage", "knowledge.read", "knowledge.write", "knowledge.publish", "knowledge.manage", "ai.manage", "simulator.manage", "hours.review", "profile.requests.review", "recognition.manage", "assignments.manage", "participants.read", "participants.write", "participants.private_notes", "groups.read", "groups.write", "learning.manage", "learning.read", "learning.write", "learning.publish", "reports.read", "reports.write", "reports.export")
+
+DEMO_ACCOUNTS = (
+    ("Координатор Тестовый", "coordinator@example.test", "Marii-EV8UGC53XBcv", PERMISSIONS, True),
+    ("Волонтёр Анна", "volunteer1@example.test", "Marii-EuaK9kvAID6L", (), False),
+    ("Волонтёр Михаил", "volunteer2@example.test", "Marii-7t9EivoFsWZ_", (), False),
+    ("Волонтёр София", "volunteer3@example.test", "Marii-xuCYeY2h4CaB", (), False),
+    ("Кандидат Первый", "candidate-one@example.test", "Marii-candidate1", (), False),
+    ("Кандидат Второй", "candidate-two@example.test", "Marii-candidate2", (), False),
+    ("Специалист Тестовый", "specialist@example.test", "Marii-specialist1", ("followups.read", "followups.manage", "signals.restricted", "followups.private_notes", "simulator.review"), True),
+)
 
 async def fixtures():
     if get_settings().environment != "development":
@@ -25,7 +38,7 @@ async def fixtures():
             db.add(foundation)
             await db.flush()
         identities = {}
-        for name,email,permissions in (("Координатор Тестовый", "coordinator@example.test", PERMISSIONS),("Кандидат Первый", "candidate-one@example.test", ()),("Кандидат Второй", "candidate-two@example.test", ()),("Специалист Тестовый", "specialist@example.test", ("followups.read", "followups.manage", "signals.restricted", "followups.private_notes", "simulator.review"))):
+        for name, email, password, permissions, is_staff in DEMO_ACCOUNTS:
             contact = await db.scalar(select(ContactChannel).where(ContactChannel.normalized_value == email))
             if contact:
                 user = await db.get(User, contact.user_id)
@@ -34,21 +47,37 @@ async def fixtures():
                 db.add(user)
                 await db.flush()
                 db.add(ContactChannel(user_id=user.id, normalized_value=email, verified_at=utcnow()))
-            identities[email] = {"user_id": str(user.id), "email": email}
+
+            if not is_staff:
+                profile = await db.get(VolunteerProfile, user.id)
+                if not profile:
+                    db.add(VolunteerProfile(user_id=user.id, foundation_id=foundation.id, lifecycle="active"))
+
+            # Save / update password credential
+            cred = await db.scalar(select(PasswordCredential).where(PasswordCredential.user_id == user.id))
+            pwd_hash = hash_password(password)
+            if cred:
+                cred.password_hash = pwd_hash
+            else:
+                db.add(PasswordCredential(user_id=user.id, password_hash=pwd_hash, demo_created=True))
+
+            identities[email] = {"user_id": str(user.id), "email": email, "password": password}
             if permissions:
                 membership = await db.scalar(select(StaffMembership).where(StaffMembership.user_id == user.id))
                 if membership is None:
                     membership = StaffMembership(user_id=user.id, foundation_id=foundation.id)
                     db.add(membership)
                     await db.flush()
-                existing_permissions=set((await db.scalars(select(PermissionGrant.permission).where(PermissionGrant.membership_id==membership.id))).all())
-                db.add_all([PermissionGrant(membership_id=membership.id,permission=p) for p in permissions if p not in existing_permissions])
+                existing_permissions = set((await db.scalars(select(PermissionGrant.permission).where(PermissionGrant.membership_id == membership.id))).all())
+                db.add_all([PermissionGrant(membership_id=membership.id, permission=p) for p in permissions if p not in existing_permissions])
                 factor = await db.scalar(select(MfaFactor).where(MfaFactor.user_id == user.id))
                 if factor is None:
                     secret = pyotp.random_base32()
                     db.add(MfaFactor(user_id=user.id, secret_cipher=seal(secret), confirmed_at=utcnow()))
                     identities[email]["totp_secret"] = secret
                     identities[email]["secret_notice"] = "One-time fixture bootstrap secret; store locally. Never commit."
+                else:
+                    identities[email]["totp_secret"] = unseal(factor.secret_cipher)
         try:
             from app.modules.learning.seed import seed_introduction
             await seed_introduction(db, foundation.id)

@@ -1,4 +1,4 @@
-"""Explicit append-only imports of approved introduction source revisions."""
+﻿"""Explicit append-only imports of approved introduction source revisions."""
 import hashlib
 import json
 from pathlib import Path
@@ -15,7 +15,7 @@ def manifest():
 def source_content(source_version:int|None=None)->dict:
     source_version=source_version or manifest()['current']
     entry=manifest()['versions'][str(source_version)]
-    raw=(FIXTURES/entry['fixture_file']).read_bytes()
+    raw=(FIXTURES/entry['fixture_file']).read_bytes().replace(b'\r\n', b'\n')
     if hashlib.sha256(raw).hexdigest()!=entry['fixture_sha256']:
         raise RuntimeError('Immutable introduction fixture hash does not match its manifest')
     return json.loads(raw)
@@ -62,7 +62,7 @@ async def import_source_version(db,foundation_id,source_version):
     for position,question in enumerate(content['test']['questions']):
         db.add(AssessmentQuestion(id=fixture_id(foundation_id,f'question:{position}',source_version),assessment_version_id=assessment_id,position=position,prompt=question['q'],options=question['o'],correct_option=question['a'],explanation=question['e']))
     number=(await db.scalar(select(func.max(LearningRelease.number)).where(LearningRelease.track_id==track_id)) or 0)+1
-    db.add(LearningRelease(id=release_id,track_id=track_id,foundation_id=foundation_id,number=number,title=content['title'],intro=content['intro'],lesson_version_ids=versions,assessment_version_id=assessment_id,source_revision=entry['revision'],source_hash=entry['source_sha256'],change_note='Материалы знакомства обновлены. Ранее завершённое знакомство сохранено в истории.' if source_version>1 else '',reacknowledgement_required=False))
+    db.add(LearningRelease(id=release_id,track_id=track_id,foundation_id=foundation_id,number=number,title=content['title'],intro=content['intro'],lesson_version_ids=versions,assessment_version_id=assessment_id,source_revision=entry['revision'],source_hash=entry['source_sha256'],change_note='РњР°С‚РµСЂРёР°Р»С‹ Р·РЅР°РєРѕРјСЃС‚РІР° РѕР±РЅРѕРІР»РµРЅС‹. Р Р°РЅРµРµ Р·Р°РІРµСЂС€С‘РЅРЅРѕРµ Р·РЅР°РєРѕРјСЃС‚РІРѕ СЃРѕС…СЂР°РЅРµРЅРѕ РІ РёСЃС‚РѕСЂРёРё.' if source_version>1 else '',reacknowledgement_required=False))
     if promote:
         track.current_release_id=release_id
         track.version+=1
